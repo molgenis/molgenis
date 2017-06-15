@@ -27,13 +27,13 @@ import static org.molgenis.data.elasticsearch.client.FieldConstants.FIELD_NOT_AN
 import static org.molgenis.data.elasticsearch.client.SettingsContentBuilder.DEFAULT_ANALYZER;
 
 @Component
-class QueryGenerator
+public class QueryGenerator
 {
 	static final String ATTRIBUTE_SEPARATOR = ".";
 
 	private final DocumentIdGenerator documentIdGenerator;
 
-	QueryGenerator(DocumentIdGenerator documentIdGenerator)
+	public QueryGenerator(DocumentIdGenerator documentIdGenerator)
 	{
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
@@ -43,7 +43,7 @@ class QueryGenerator
 		return createQueryBuilder(query.getRules(), entityType);
 	}
 
-	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityType entityType)
+	public QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityType entityType)
 	{
 		QueryBuilder queryBuilder;
 

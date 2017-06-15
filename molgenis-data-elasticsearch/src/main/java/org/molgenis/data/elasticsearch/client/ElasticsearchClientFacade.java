@@ -1,9 +1,9 @@
 package org.molgenis.data.elasticsearch.client;
 
-import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
+import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -14,12 +14,16 @@ import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRespon
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequestBuilder;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
+import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -28,10 +32,7 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
-import org.molgenis.data.elasticsearch.generator.model.Index;
-import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
-import org.molgenis.data.elasticsearch.generator.model.Mapping;
-import org.molgenis.data.elasticsearch.generator.model.Sort;
+import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.IndexAlreadyExistsException;
 import org.molgenis.data.index.IndexException;
 import org.molgenis.data.index.UnknownIndexException;
@@ -49,6 +50,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
+import static org.elasticsearch.action.DocWriteRequest.OpType.INDEX;
 
 /**
  * Facade in front of the Elasticsearch client.
@@ -303,13 +305,13 @@ public class ElasticsearchClientFacade
 		{
 			if (sort != null)
 			{
-				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' ...", from, from + size,
-						toString(indexes), query);
+				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' sorted by '{}' ...", from,
+						from + size, toString(indexes), query, sort);
 			}
 			else
 			{
-				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' sorted by '{}' ...", from,
-						from + size, toString(indexes), query, sort);
+				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' ...", from, from + size,
+						toString(indexes), query);
 			}
 		}
 
@@ -349,14 +351,14 @@ public class ElasticsearchClientFacade
 		{
 			if (sort != null)
 			{
-				LOG.debug("Searched {} docs in indexes '{}' with query '{}' in {}ms.",
-						searchResponse.getHits().getTotalHits(), toString(indexes), query,
+				LOG.debug("Searched {} docs in indexes '{}' with query '{}' sorted by '{}' in {}ms.",
+						searchResponse.getHits().getTotalHits(), toString(indexes), query, sort,
 						searchResponse.getTookInMillis());
 			}
 			else
 			{
-				LOG.debug("Searched {} docs in indexes '{}' with query '{}' sorted by '{}' in {}ms.",
-						searchResponse.getHits().getTotalHits(), toString(indexes), query, sort,
+				LOG.debug("Searched {} docs in indexes '{}' with query '{}' in {}ms.",
+						searchResponse.getHits().getTotalHits(), toString(indexes), query,
 						searchResponse.getTookInMillis());
 			}
 		}
@@ -460,59 +462,121 @@ public class ElasticsearchClientFacade
 		return searchResponse.getAggregations();
 	}
 
-	public void deleteById(Index index, String id)
+	public void index(Index index, Document document)
 	{
-		LOG.trace("Deleting doc with id '{}' in index '{}' ...", id, toString(index));
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Indexing doc with id '{}' in index '{}' ...", document.getId(), index.getName());
+		}
+
+		String indexName = index.getName();
+		String documentId = document.getId();
+		XContentBuilder source = document.getContent();
+		IndexRequestBuilder indexRequest = client.prepareIndex().setIndex(indexName).setType(indexName)
+				.setId(documentId).setSource(source);
+
+		IndexResponse indexResponse;
+		try
+		{
+			indexResponse = indexRequest.get();
+		}
+		catch (ResourceNotFoundException e)
+		{
+			LOG.error("", e);
+			throw new UnknownIndexException(toIndexNames(index));
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.debug("", e);
+			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
+		}
+
+		if (indexResponse.getShardInfo().getSuccessful() == 0)
+		{
+			LOG.error(Arrays.stream(indexResponse.getShardInfo().getFailures())
+					.map(ReplicationResponse.ShardInfo.Failure::toString).collect(joining("\n")));
+			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
+		}
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Indexed doc with id '{}' in index '{}'.", documentId, indexName);
+		}
+	}
+
+	public void deleteById(Index index, Document document)
+	{
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Deleting doc with id '{}' in index '{}' ...", document.getId(), index.getName());
+		}
+
+		String indexName = index.getName();
+		String documentId = document.getId();
+		DeleteRequestBuilder deleteRequest = client.prepareDelete().setIndex(indexName).setId(documentId);
+
 		DeleteResponse deleteResponse;
 		try
 		{
-			deleteResponse = client.prepareDelete().setIndex(index.getName()).setId(id).get();
+			deleteResponse = deleteRequest.get();
+		}
+		catch (ResourceNotFoundException e)
+		{
+			LOG.error("", e);
+			throw new UnknownIndexException(toIndexNames(index));
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.debug("", e);
-			throw new IndexException(format("Error deleting doc with id '%s' in index '%s'.", id, toString(index)));
+			throw new IndexException(format("Error deleting doc with id '%s' in index '%s'.", documentId, indexName));
 		}
-		LOG.debug("Deleted doc with id '{}' in index '{}' and status '{}'", id, toString(index),
-				deleteResponse.getResult());
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Deleted doc with id '{}' in index '{}' and status '{}'", documentId, indexName,
+					deleteResponse.getResult());
+		}
 	}
 
-	// TODO create IndexRequests here instead of in Service, supply stream of docs
-
-	/**
-	 * Creates a {@link BulkProcessor} and adds a stream of {@link IndexRequest}s to it.
-	 * Counts how many requests of each type were added to the {@link BulkProcessor}.
-	 *
-	 * @param requests        the {@link IndexRequest}s to add
-	 * @param awaitCompletion indication if the completion of the requests should be awaited synchronously
-	 * @return AtomicLongMap containing per type how many requests of that type were added.
-	 */
-	public AtomicLongMap<String> index(Stream<IndexRequest> requests, boolean awaitCompletion)
+	public void processDocumentActions(Stream<DocumentAction> documentActions)
 	{
-		AtomicLongMap<String> nrIndexedEntitiesPerType = AtomicLongMap.create();
+		LOG.trace("Processing document actions ...");
 		BulkProcessor bulkProcessor = bulkProcessorFactory.create(client);
 		try
 		{
-			requests.forEachOrdered(request ->
+			documentActions.forEachOrdered(documentAction ->
 			{
-				LOG.trace("Indexing [{}] with id [{}] in index [{}]...", request.type(), request.id(), request.index());
-				nrIndexedEntitiesPerType.incrementAndGet(request.type());
-				bulkProcessor.add(request);
+				DocWriteRequest docWriteRequest = toDocWriteRequest(documentAction);
+				bulkProcessor.add(docWriteRequest);
 			});
-			return nrIndexedEntitiesPerType;
-		}
-		catch (ElasticsearchException e)
-		{
-			LOG.debug("", e);
-			throw new IndexException("");
 		}
 		finally
 		{
-			if (awaitCompletion)
-			{
-				waitForCompletion(bulkProcessor);
-			}
+			waitForCompletion(bulkProcessor);
+			LOG.debug("Processed document actions.");
 		}
+	}
+
+	private DocWriteRequest toDocWriteRequest(DocumentAction documentAction)
+	{
+		String indexName = documentAction.getIndex().getName();
+		String documentId = documentAction.getDocument().getId();
+
+		DocWriteRequest docWriteRequest;
+		switch (documentAction.getOperation())
+		{
+			case INDEX:
+				XContentBuilder source = documentAction.getDocument().getContent();
+				docWriteRequest = Requests.indexRequest(indexName).type(indexName).id(documentId).source(source)
+						.opType(INDEX);
+				break;
+			case DELETE:
+				docWriteRequest = Requests.deleteRequest(indexName).type(indexName).id(documentId);
+				break;
+			default:
+				throw new RuntimeException(format("Unknown document operation '%s'", documentAction.getOperation()));
+		}
+		return docWriteRequest;
 	}
 
 	private void waitForCompletion(BulkProcessor bulkProcessor)

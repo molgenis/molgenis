@@ -1,10 +1,10 @@
 package org.molgenis.data.elasticsearch.generator;
 
-import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.generator.model.Document;
 import org.molgenis.data.elasticsearch.generator.model.Index;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 import org.molgenis.data.elasticsearch.generator.model.Sort;
@@ -59,7 +59,12 @@ public class ContentGenerators
 		return queryGenerators.createAggregations(aggAttr1, aggAttr2, aggAttrDistinct);
 	}
 
-	public XContentBuilder createDocument(Entity entity)
+	public Document createDocument(Object entityId)
+	{
+		return documentGenerator.createDocument(entityId);
+	}
+
+	public Document createDocument(Entity entity)
 	{
 		return documentGenerator.createDocument(entity);
 	}

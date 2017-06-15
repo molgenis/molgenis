@@ -13,10 +13,7 @@ import org.molgenis.data.elasticsearch.client.ElasticsearchClientFacade;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.ContentGenerators;
-import org.molgenis.data.elasticsearch.generator.model.Index;
-import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
-import org.molgenis.data.elasticsearch.generator.model.Mapping;
-import org.molgenis.data.elasticsearch.generator.model.Sort;
+import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.index.SearchService;
@@ -26,11 +23,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
+
+//import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 
 /**
  * Elasticsearch implementation of the SearchService interface.
@@ -157,13 +156,30 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void index(EntityType entityType, Entity entity, IndexingMode indexingMode)
 	{
-		throw new UnsupportedOperationException(); // FIXME
+		Index index = contentGenerators.createIndex(entityType);
+		Document document = contentGenerators.createDocument(entity);
+		elasticsearchClientFacade.index(index, document);
 	}
 
 	@Override
 	public long index(EntityType entityType, Stream<? extends Entity> entities, IndexingMode indexingMode)
 	{
-		throw new UnsupportedOperationException(); // FIXME
+		Index index = contentGenerators.createIndex(entityType);
+		Stream<DocumentAction> documentActionStream = entities.map(entity -> this.toDocumentAction(index, entity));
+
+		AtomicLong count = new AtomicLong(0L);
+		elasticsearchClientFacade.processDocumentActions(documentActionStream.filter(documentAction ->
+		{
+			count.incrementAndGet();
+			return true;
+		}));
+		return count.get();
+	}
+
+	private DocumentAction toDocumentAction(Index index, Entity entity)
+	{
+		Document document = contentGenerators.createDocument(entity);
+		return DocumentAction.create(index, document, DocumentAction.Operation.INDEX);
 	}
 
 	@Override
@@ -176,7 +192,8 @@ public class ElasticsearchService implements SearchService
 	public void deleteById(EntityType entityType, Object entityId)
 	{
 		Index index = contentGenerators.createIndex(entityType);
-		elasticsearchClientFacade.deleteById(index, toElasticsearchId(entityId));
+		Document document = contentGenerators.createDocument(entityId);
+		elasticsearchClientFacade.deleteById(index, document);
 	}
 
 	@Override

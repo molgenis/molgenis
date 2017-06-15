@@ -5,6 +5,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentGenerator;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.generator.model.Document;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.elasticsearch.common.xcontent.XContentType.JSON;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 
 /**
  * Creates entities from Elasticsearch document sources and vice versa.
@@ -32,28 +34,35 @@ class DocumentContentBuilder
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
+	Document createDocument(Object entityId)
+	{
+		String documentId = toElasticsearchId(entityId);
+		return Document.builder().setId(documentId).build();
+	}
+
 	/**
 	 * Create Elasticsearch document source content from entity
 	 *
 	 * @param entity the entity to convert to document source content
 	 * @return Elasticsearch document source content
 	 */
-	XContentBuilder createDocument(Entity entity)
+	Document createDocument(Entity entity)
 	{
+		String documentId = toElasticsearchId(entity.getIdValue());
+		XContentBuilder contentBuilder;
 		try
 		{
-			XContentBuilder contentBuilder = XContentFactory.contentBuilder(JSON);
+			contentBuilder = XContentFactory.contentBuilder(JSON);
 			XContentGenerator generator = contentBuilder.generator();
 			generator.writeStartObject();
 			createRec(entity, generator, 0, MAX_INDEXING_DEPTH);
 			generator.writeEndObject();
-
-			return contentBuilder;
 		}
 		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
+		return Document.create(documentId, contentBuilder);
 	}
 
 	private void createRec(Entity entity, XContentGenerator generator, int depth, int maxDepth) throws IOException
