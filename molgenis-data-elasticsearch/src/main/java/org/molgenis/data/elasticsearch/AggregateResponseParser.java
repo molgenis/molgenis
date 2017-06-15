@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.response;
+package org.molgenis.data.elasticsearch;
 
 import com.google.common.collect.Iterables;
 import org.elasticsearch.search.aggregations.Aggregation;

@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.util;
+package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

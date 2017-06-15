@@ -14,7 +14,6 @@ import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.ContentGenerators;
 import org.molgenis.data.elasticsearch.generator.model.*;
-import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.EntityType;
@@ -28,8 +27,6 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
-
-//import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 
 /**
  * Elasticsearch implementation of the SearchService interface.

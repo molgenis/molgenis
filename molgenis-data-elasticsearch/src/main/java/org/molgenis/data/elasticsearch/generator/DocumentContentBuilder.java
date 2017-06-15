@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.elasticsearch.common.xcontent.XContentType.JSON;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
+import static org.molgenis.data.elasticsearch.ElasticsearchEntityUtils.toElasticsearchId;
 
 /**
  * Creates entities from Elasticsearch document sources and vice versa.

@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.config;
+package org.molgenis.data.elasticsearch.client;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;

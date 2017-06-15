@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.util;
+package org.molgenis.data.elasticsearch;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;

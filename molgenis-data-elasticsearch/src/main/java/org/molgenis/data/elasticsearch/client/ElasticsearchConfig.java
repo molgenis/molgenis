@@ -1,6 +1,5 @@
-package org.molgenis.data.elasticsearch.config;
+package org.molgenis.data.elasticsearch.client;
 
-import org.molgenis.data.elasticsearch.client.ElasticsearchClientFacade;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
