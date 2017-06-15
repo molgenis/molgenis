@@ -107,4 +107,26 @@ describe('getters', () => {
       expect(actual).to.deep.equal(expected)
     })
   })
+
+  describe('getIndexOfSelectedAttribute', () => {
+    it('Should return the index of the selected attribute', () => {
+      const state = {
+        selectedAttributeID: '1',
+        editorEntityType: {
+          attributes: [
+            {id: '5', name: 'attribute5'},
+            {id: '3', name: 'attribute3'},
+            {id: '2', name: 'attribute2'},
+            {id: '1', name: 'attribute1'},
+            {id: '4', name: 'attribute4'}
+          ]
+        }
+      }
+
+      const actual = getters.getIndexOfSelectedAttribute(state)
+      const expected = 3
+
+      expect(actual).to.deep.equal(expected)
+    })
+  })
 })
