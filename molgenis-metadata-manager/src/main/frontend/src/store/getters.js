@@ -25,9 +25,5 @@ export default {
    * Returns attribute based on selected attribute in tree
    * Returns null if no attribute is selected
    */
-  getSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.find(attribute => state.selectedAttributeID && state.selectedAttributeID === attribute.id),
-  /**
-   * Return the index of the selected attribute in the array of the editorEntityType attributes
-   */
-  getIndexOfSelectedAttribute: state => state.selectedAttributeID && state.editorEntityType && state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeID)
+  getSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.find(attribute => state.selectedAttributeID && state.selectedAttributeID === attribute.id)
 }

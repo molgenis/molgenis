@@ -131,7 +131,7 @@
 <script>
   import AttributeTree from './generic-components/AttributeTree'
   import { mapState, mapGetters } from 'vuex'
-  import { SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
+  import { SET_SELECTED_ATTRIBUTE_ID, UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE } from '../store/mutations'
 
   import Multiselect from 'vue-multiselect'
 
@@ -158,43 +158,43 @@
           this.selectedAttribute.type === 'CATEGORICAL_MREF'
       },
       editorEntityTypeAttributes: {
-        get () { return this }
+        get () { return this.$store.editorEntityType.attributes }
       },
       label: {
         get () { return this.selectedAttribute.label },
-        set (value) { this.selectedAttribute.label = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'label', value: value}) }
       },
       description: {
         get () { return this.selectedAttribute.description },
-        set (value) { this.selectedAttribute.description = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'description', value: value}) }
       },
       type: {
         get () { return this.selectedAttribute.type },
-        set (value) { this.selectedAttribute.type = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'type', value: value}) }
       },
       nullable: {
         get () { return this.selectedAttribute.nullable },
-        set (value) { this.selectedAttribute.nullable = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'nullable', value: value}) }
       },
       auto: {
         get () { return this.selectedAttribute.auto },
-        set (value) { this.selectedAttribute.auto = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'auto', value: value}) }
       },
       visible: {
         get () { return this.selectedAttribute.visible },
-        set (value) { this.selectedAttribute.visible = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'visible', value: value}) }
       },
       unique: {
         get () { return this.selectedAttribute.unique },
-        set (value) { this.selectedAttribute.unique = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'unique', value: value}) }
       },
       readonly: {
         get () { return this.selectedAttribute.readonly },
-        set (value) { this.selectedAttribute.readonly = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'readonly', value: value}) }
       },
       aggregatable: {
         get () { return this.selectedAttribute.aggregatable },
-        set (value) { this.selectedAttribute.aggregatable = value }
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'aggregatable', value: value}) }
       }
     },
     components: {

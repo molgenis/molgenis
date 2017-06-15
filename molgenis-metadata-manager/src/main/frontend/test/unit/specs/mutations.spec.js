@@ -258,11 +258,36 @@ describe('mutations', () => {
     })
   })
 
+  describe('Testing mutation UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE', () => {
+    it('Updates the selected attribute IN the editorEntityType attribute list', () => {
+      const state = {
+        selectedAttributeID: '2',
+        editorEntityType: {
+          attributes: [
+            {id: '1', name: 'attribute1'},
+            {id: '2', name: 'attribute2'},
+            {id: '3', name: 'attribute3'}
+          ]
+        }
+      }
+
+      const expected = [
+        {id: '1', name: 'attribute1'},
+        {id: '2', name: 'updated name'},
+        {id: '3', name: 'attribute3'}
+      ]
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__(state, {key: 'name', value: 'updated name'})
+      expect(state.editorEntityType.attributes).to.deep.equal(expected)
+    })
+  })
+
   describe('Testing mutation SET_SELECTED_ATTRIBUTE_ID', () => {
     it('Updates the selected attribute ID', () => {
       const state = {
         selectedAttributeID: null
       }
+
       const id = 'newAttributeId'
       mutations.__SET_SELECTED_ATTRIBUTE_ID__(state, id)
       expect(state.selectedAttributeID).to.equal('newAttributeId')
