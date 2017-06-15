@@ -2,6 +2,7 @@ package org.molgenis.apps.model;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -117,10 +118,10 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	private void addApp(App app)
 	{
 		validateResourceZip(app);
-
+		boolean useFreemarkerTemplate = app.getUseFreemarkerTemplate();
 		if (app.isActive())
 		{
-			activateApp(app);
+			activateApp(app, useFreemarkerTemplate);
 		}
 	}
 
@@ -128,6 +129,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	{
 		FileMeta appSourceFiles = app.getSourceFiles();
 		FileMeta existingAppSourceFiles = existingApp.getSourceFiles();
+		boolean useFreemarkerTemplate = app.getUseFreemarkerTemplate();
 
 		if (appSourceFiles != null)
 		{
@@ -142,14 +144,14 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 					}
 					if (app.isActive())
 					{
-						activateApp(app);
+						activateApp(app, useFreemarkerTemplate);
 					}
 				}
 				else
 				{
 					if (app.isActive() && !existingApp.isActive())
 					{
-						activateApp(app);
+						activateApp(app, useFreemarkerTemplate);
 					}
 					else if (!app.isActive() && existingApp.isActive())
 					{
@@ -162,7 +164,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 				validateResourceZip(app);
 				if (app.isActive())
 				{
-					activateApp(app);
+					activateApp(app, useFreemarkerTemplate);
 				}
 			}
 		}
@@ -187,7 +189,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 		}
 	}
 
-	private void activateApp(App app)
+	private void activateApp(App app, boolean useFreemarkerTemplate)
 	{
 		FileMeta appSourceArchive = app.getSourceFiles();
 		if (appSourceArchive != null)
@@ -203,6 +205,19 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 			try
 			{
 				ZipFile zipFile = new ZipFile(fileStoreFile);
+				if (!useFreemarkerTemplate)
+				{
+					FileHeader fileHeader = zipFile.getFileHeader("index.html");
+					if (fileHeader == null)
+					{
+						LOG.error(
+								"Missing index.html in {} while option Use freemarker template as index.html was set 'No'",
+								app.getName());
+						throw new RuntimeException(
+								format("Missing index.html in %s while option 'Use freemarker template as index.html' was set 'No'",
+										app.getName()));
+					}
+				}
 				//noinspection StringConcatenationMissingWhitespace
 				zipFile.extractAll(
 						fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar + app
