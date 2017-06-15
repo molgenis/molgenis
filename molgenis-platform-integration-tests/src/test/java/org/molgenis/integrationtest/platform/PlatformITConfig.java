@@ -1,8 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import com.google.common.io.Files;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.apache.commons.io.FileUtils;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
@@ -53,18 +50,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.SocketUtils;
 
-import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Properties;
 
 import static org.mockito.Mockito.mock;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
-import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCreateDatabase;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
@@ -94,14 +84,6 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		OntologyConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
-	private static final String INTEGRATION_TEST_DATABASE_NAME;
-
-	static
-	{
-		INTEGRATION_TEST_DATABASE_NAME = "molgenis_test_" + System.nanoTime();
-		dropAndCreateDatabase(INTEGRATION_TEST_DATABASE_NAME);
-	}
-
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
 
 	@Autowired
@@ -122,30 +104,13 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
-		String dbUriAdmin;
-		try
-		{
-			dbUriAdmin = PostgreSqlDatabase.getPostgreSqlDatabaseUri();
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-		Properties overwriteProperties = new Properties();
-		overwriteProperties.setProperty("db_uri",
-				dbUriAdmin + INTEGRATION_TEST_DATABASE_NAME + "?reWriteBatchedInserts=true&autosave=CONSERVATIVE");
-		overwriteProperties.setProperty("elasticsearch.transport.tcp.port",
-				String.valueOf(SocketUtils.findAvailableTcpPort(9301, 9400)));
-
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		Resource[] resources = new Resource[] { new ClassPathResource("/postgresql/molgenis.properties") };
+		Resource[] resources = new Resource[] { new ClassPathResource("/conf/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
 		pspc.setIgnoreResourceNotFound(true);
 		pspc.setNullValue("@null");
-		pspc.setProperties(overwriteProperties);
-
 		return pspc;
 	}
 
@@ -153,28 +118,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	public MailSender mailSender()
 	{
 		return mock(MailSender.class);
-	}
-
-	@PreDestroy
-	public void cleanup() throws IOException, SQLException
-	{
-		((ComboPooledDataSource) dataSource).close();
-		PostgreSqlDatabase.dropDatabase(INTEGRATION_TEST_DATABASE_NAME);
-
-		try
-		{
-			// Delete molgenis home folder
-			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
-		}
-		catch (IOException e)
-		{
-			LOG.error("Error removing molgenis home directory", e);
-		}
-	}
-
-	public PlatformITConfig()
-	{
-		System.setProperty("molgenis.home", Files.createTempDir().getAbsolutePath());
 	}
 
 	@Bean

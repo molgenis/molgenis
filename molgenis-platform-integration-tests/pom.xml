@@ -9,12 +9,29 @@
     <artifactId>molgenis-platform-integration-tests</artifactId>
 
     <name>platform-integration-tests</name>
-
+    <properties>
+        <it_db_name>molgenis_test</it_db_name>
+        <it_db_user>molgenis</it_db_user>
+        <it_db_password>molgenis</it_db_password>
+        <elasticsearch.tcp.host>localhost</elasticsearch.tcp.host>
+        <elasticsearch.tcp.port>9300</elasticsearch.tcp.port>
+        <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
+    </properties>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables combine.children="append">
+                        <elasticsearch.transport.addresses>${elasticsearch.tcp.host}:${elasticsearch.tcp.port}
+                        </elasticsearch.transport.addresses>
+                        <elasticsearch.cluster.name>${elasticsearch.cluster.name}</elasticsearch.cluster.name>
+                        <db_uri>jdbc:postgresql://localhost/${it_db_name}?reWriteBatchedInserts=true&amp;autosave=CONSERVATIVE</db_uri>
+                        <db_user>${it_db_user}</db_user>
+                        <db_password>${it_db_password}</db_password>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>
