@@ -11,6 +11,11 @@ var versionRequirements = [
     name: 'node',
     currentVersion: semver.clean(process.version),
     versionRequirement: packageConfig.engines.node
+  },
+  {
+    name: 'yarn',
+    currentVersion: exec('yarn --version'),
+    versionRequirement: packageConfig.engines.yarn
   }
 ]
 
