@@ -1,11 +1,15 @@
 package org.molgenis.data.jobs;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.model.JobExecutionLogAppender;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -143,6 +147,18 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 	@Import(JobTestConfig.class)
 	public static class Config
 	{
+		public Config()
+		{
+			ch.qos.logback.classic.Logger jobExecutionLog = (ch.qos.logback.classic.Logger) LoggerFactory
+					.getLogger(JobExecution.class);
+
+			jobExecutionLog.setLevel(Level.ALL);
+			JobExecutionLogAppender appender = new JobExecutionLogAppender();
+			LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+			appender.setContext(lc);
+			appender.start();
+			jobExecutionLog.addAppender(appender);
+		}
 
 	}
 }
