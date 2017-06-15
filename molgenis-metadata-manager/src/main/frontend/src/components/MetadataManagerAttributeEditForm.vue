@@ -9,10 +9,112 @@
       <attribute-tree :selectedAttribute="selectedAttribute" :attributes="attributeTree"
                       :onAttributeSelect="onAttributeSelect"></attribute-tree>
 
-      <!--<p v-if="editorEntityType.parent !== undefined">-->
-      <!--Parent attributes from <strong>{{editorEntityType.parent.label}}:</strong><br>-->
-      <!--<span v-for="attribute in editorEntityType.parent.attributes">{{attribute.label}}</span>-->
-      <!--</p>-->
+
+      <p v-if="editorEntityType.parent !== undefined">
+        Parent attributes from <strong>{{editorEntityType.parent.label}}:</strong><br>
+        <span v-for="attribute in editorEntityType.parent.attributes">{{attribute.label}}</span>
+      </p>
+    </div>
+
+    <div v-if="selectedAttribute" class="col-md-9">
+      <div class="row">
+        <div class="col">
+          <strong>Attribute:</strong> {{selectedAttribute.label}}
+          <hr>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group row">
+            <label class="col-3 col-form-label">Label</label>
+            <div class="col">
+              <input v-model="label" class="form-control" type="text">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-3 col-form-label">Description</label>
+            <div class="col">
+              <input v-model="description" class="form-control" type="text">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-3 col-form-label">Type</label>
+            <div class="col">
+              <multiselect v-model="type" :options="attributeTypes"
+                           selectLabel="" deselectLabel="" placeholder="Select a type"></multiselect>
+            </div>
+          </div>
+
+          <div v-if="isReferenceType" class="form-group row">
+            <label class="col-3 col-form-label">Type</label>
+            <div class="col">
+              <multiselect v-model="refEntity" :options="entityTypes" label="label"
+                           selectLabel="" deselectLabel="" placeholder="Select a reference entity"></multiselect>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="form-group row">
+            <label class="col-6 col-form-label">Nullable</label>
+            <div class="col checkbox-column">
+              <input v-model="nullable" class="form-control" type="checkbox">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-6 col-form-label">Auto</label>
+            <div class="col checkbox-column">
+              <input v-model="auto" class="form-control" type="checkbox">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-6 col-form-label">Visible</label>
+            <div class="col checkbox-column">
+              <input v-model="visible" class="form-control" type="checkbox">
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="form-group row">
+            <label class="col-6 col-form-label">Unique</label>
+            <div class="col checkbox-column">
+              <input v-model="unique" class="form-control" type="checkbox">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-6 col-form-label">Read-only</label>
+            <div class="col checkbox-column">
+              <input v-model="readonly" class="form-control" type="checkbox">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-6 col-form-label">Aggregatable</label>
+            <div class="col checkbox-column">
+              <input v-model="aggregatable" class="form-control" type="checkbox">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          {{selectedAttribute.expression}}
+        </div>
+        <div class="col">
+          {{selectedAttribute.visibleExpression}}
+        </div>
+        <div class="col">
+          {{selectedAttribute.validationExpression}}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -31,6 +133,8 @@
   import { mapState, mapGetters } from 'vuex'
   import { SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
 
+  import Multiselect from 'vue-multiselect'
+
   export default {
     name: 'metadata-manager-attribute-edit-form',
     methods: {
@@ -41,19 +145,61 @@
       addAttribute: () => alert('Not yet implemented :)')
     },
     computed: {
-      ...mapState(['editorEntityType']),
+      ...mapState(['editorEntityType', 'attributeTypes', 'entityTypes']),
       ...mapGetters({
         selectedAttribute: 'getSelectedAttribute',
+        editorEntityTypeAttributes: 'getEditorEntityTypeAttributes',
         attributeTree: 'getAttributeTree'
-      })
-    },
-    watch: {
-      editorEntityType: function () {
-        this.selectedAttribute = null
+      }),
+      isReferenceType: function () {
+        return this.selectedAttribute.type === 'XREF' ||
+          this.selectedAttribute.type === 'MREF' ||
+          this.selectedAttribute.type === 'CATEGORICAL' ||
+          this.selectedAttribute.type === 'CATEGORICAL_MREF'
+      },
+      editorEntityTypeAttributes: {
+        get () { return this }
+      },
+      label: {
+        get () { return this.selectedAttribute.label },
+        set (value) { this.selectedAttribute.label = value }
+      },
+      description: {
+        get () { return this.selectedAttribute.description },
+        set (value) { this.selectedAttribute.description = value }
+      },
+      type: {
+        get () { return this.selectedAttribute.type },
+        set (value) { this.selectedAttribute.type = value }
+      },
+      nullable: {
+        get () { return this.selectedAttribute.nullable },
+        set (value) { this.selectedAttribute.nullable = value }
+      },
+      auto: {
+        get () { return this.selectedAttribute.auto },
+        set (value) { this.selectedAttribute.auto = value }
+      },
+      visible: {
+        get () { return this.selectedAttribute.visible },
+        set (value) { this.selectedAttribute.visible = value }
+      },
+      unique: {
+        get () { return this.selectedAttribute.unique },
+        set (value) { this.selectedAttribute.unique = value }
+      },
+      readonly: {
+        get () { return this.selectedAttribute.readonly },
+        set (value) { this.selectedAttribute.readonly = value }
+      },
+      aggregatable: {
+        get () { return this.selectedAttribute.aggregatable },
+        set (value) { this.selectedAttribute.aggregatable = value }
       }
     },
     components: {
-      AttributeTree
+      AttributeTree,
+      Multiselect
     }
   }
 </script>

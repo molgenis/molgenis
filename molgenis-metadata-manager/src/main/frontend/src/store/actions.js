@@ -1,6 +1,6 @@
 // $FlowFixMe
 import { get, post } from 'molgenis-api-client'
-import { CREATE_ALERT, SET_EDITOR_ENTITY_TYPE, SET_ENTITY_TYPES, SET_PACKAGES, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID } from './mutations'
+import { CREATE_ALERT, SET_EDITOR_ENTITY_TYPE, SET_ENTITY_TYPES, SET_PACKAGES, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID, SET_ATTRIBUTE_TYPES } from './mutations'
 
 export const GET_PACKAGES = '__GET_PACKAGES__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
@@ -59,7 +59,7 @@ export default {
   [GET_ATTRIBUTE_TYPES] ({commit}) {
     get({apiUrl: '/api'}, '/v2/sys_md_Attribute/meta/type')
       .then(response => {
-        response.enumOptions
+        commit(SET_ATTRIBUTE_TYPES, response.enumOptions)
       }, error => {
         commit(CREATE_ALERT, {
           type: 'danger',
