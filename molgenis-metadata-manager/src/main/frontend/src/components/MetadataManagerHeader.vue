@@ -5,7 +5,8 @@
         <h2>Metadata manager</h2>
       </div>
       <div class="col-md-4 col-sm-12 col-xs-12">
-        <entity-select-box :value="selectedEntityType" :options="entityTypes" :onChange="onChange"></entity-select-box>
+        <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
+                     selectLabel="" deselectLabel="" placeholder="Select an Entity..."></multiselect>
       </div>
       <div class="col-md-4 col-sm-12 col-xs-12">
         <b-button @click="createNewEntity" variant="primary">New</b-button>
@@ -15,36 +16,32 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapState } from 'vuex'
+  import { CREATE_ENTITY_TYPE } from '../store/actions'
+  import { SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
 
-  import EntitySelectBox from './generic-components/EntitySelectBox'
-  import { GET_ENTITY_TYPE_BY_ID, CREATE_ENTITY_TYPE } from '../store/actions'
-  import { CLEAR_EDITOR_ENTITY_TYPE } from '../store/mutations'
+  import Multiselect from 'vue-multiselect'
 
   export default {
     name: 'metadata-manager-header',
-    computed: {
-      ...mapGetters({
-        selectedEntityType: 'getSelectedEntityType',
-        entityTypes: 'getEntityTypes'
-      })
-    },
     methods: {
-      onChange: function (selectedEntity) {
-        if (selectedEntity !== null) {
-          this.$router.push('/' + selectedEntity.id)
-          this.$store.dispatch(GET_ENTITY_TYPE_BY_ID, selectedEntity.id)
-        } else {
-          this.$router.push('/')
-          this.$store.commit(CLEAR_EDITOR_ENTITY_TYPE)
-        }
-      },
       createNewEntity: function () {
         this.$store.dispatch(CREATE_ENTITY_TYPE)
       }
     },
+    computed: {
+      ...mapState(['entityTypes']),
+      selectedEntityType: {
+        get () { return this.$store.state.selectedEntityType },
+        set (value) {
+          this.$store.commit(SET_SELECTED_ENTITY_TYPE, value)
+          this.$router.push({path: '/' + value.id})
+        }
+      }
+    },
     components: {
-      EntitySelectBox
+      Multiselect
     }
   }
 </script>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

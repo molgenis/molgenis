@@ -285,11 +285,11 @@ describe('mutations', () => {
   describe('Testing mutation SET_SELECTED_ATTRIBUTE_ID', () => {
     it('Updates the selected attribute ID', () => {
       const state = {
-        selectedAttributeId: null
+        selectedAttributeID: null
       }
       const id = 'newAttributeId'
       mutations.__SET_SELECTED_ATTRIBUTE_ID__(state, id)
-      expect(state.selectedAttributeId).to.equal('newAttributeId')
+      expect(state.selectedAttributeID).to.equal('newAttributeId')
     })
   })
 })

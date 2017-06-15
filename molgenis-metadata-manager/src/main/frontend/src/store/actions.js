@@ -1,10 +1,10 @@
 // $FlowFixMe
 import { get, post } from 'molgenis-api-client'
-import { CREATE_ALERT, SET_EDITOR_ENTITY_TYPE, SET_ENTITY_TYPES, SET_PACKAGES } from './mutations'
+import { CREATE_ALERT, SET_EDITOR_ENTITY_TYPE, SET_ENTITY_TYPES, SET_PACKAGES, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID } from './mutations'
 
 export const GET_PACKAGES = '__GET_PACKAGES__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
-export const GET_ENTITY_TYPE_BY_ID = '__GET_ENTITY_TYPE_BY_ID__'
+export const GET_EDITOR_ENTITY_TYPE = '__GET_EDITOR_ENTITY_TYPE__'
 export const CREATE_ENTITY_TYPE = '__CREATE_ENTITY_TYPE__'
 export const SAVE_EDITOR_ENTITY_TYPE = '__SAVE_EDITOR_ENTITY_TYPE__'
 export const GET_ATTRIBUTE_TYPES = '__GET_ATTRIBUTE_TYPES__'
@@ -28,11 +28,24 @@ export default {
   /**
    * Retrieve all EntityTypes and filter on non-system EntityTypes
    */
-  [GET_ENTITY_TYPES] ({commit}) {
+  [GET_ENTITY_TYPES] ({commit, dispatch, state}) {
     // TODO can we filter system entities with REST call??
     get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')
       .then(response => {
         commit(SET_ENTITY_TYPES, response.items)
+
+        const entityTypeID = state.route.params.entityTypeID
+        if (entityTypeID !== undefined) {
+          dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
+
+          const selectedEntityType = response.items.find(entityType => entityType.id === entityTypeID)
+          commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType)
+
+          const attributeID = state.route.params.attributeID
+          if (attributeID !== undefined) {
+            commit(SET_SELECTED_ATTRIBUTE_ID, attributeID)
+          }
+        }
       }, error => {
         commit(CREATE_ALERT, {
           type: 'danger',
@@ -59,7 +72,7 @@ export default {
    *
    * @param entityTypeID The selected EntityType identifier
    */
-  [GET_ENTITY_TYPE_BY_ID] ({commit}, entityTypeID) {
+  [GET_EDITOR_ENTITY_TYPE] ({commit}, entityTypeID) {
     get({apiUrl: '/metadata-manager-service'}, '/entityType/' + entityTypeID)
       .then(response => {
         commit(SET_EDITOR_ENTITY_TYPE, response.entityType)
@@ -96,12 +109,12 @@ export default {
    * Persist metadata changes to the database
    * @param updatedEditorEntityType the updated EditorEntityType
    */
-  [SAVE_EDITOR_ENTITY_TYPE] ({commit, dispatch}, updatedEditorEntityType) {
-    post({apiUrl: '/metadata-manager-service'}, '/entityType', updatedEditorEntityType)
+  [SAVE_EDITOR_ENTITY_TYPE] ({commit, dispatch, state}) {
+    post({apiUrl: '/metadata-manager-service'}, '/entityType', state.editorEntityType)
       .then(response => {
         commit(CREATE_ALERT, {
           type: 'success',
-          message: 'Successfully updated metadata for EntityType: ' + updatedEditorEntityType.label
+          message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
         })
         dispatch(GET_ENTITY_TYPES)
       }, error => {

@@ -1,5 +1,6 @@
 export const SET_PACKAGES = '__SET_PACKAGES__'
 export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
+export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
 export const SET_ATTRIBUTE_TYPES = '__SET_ATTRIBUTE_TYPES__'
 export const SET_EDITOR_ENTITY_TYPE = '__SET_EDITOR_ENTITY_TYPE__'
 export const CLEAR_EDITOR_ENTITY_TYPE = '__CLEAR_EDITOR_ENTITY_TYPE__'
@@ -16,6 +17,9 @@ export default {
   [SET_ENTITY_TYPES] (state, entityTypes) {
     state.entityTypes = entityTypes
   },
+  [SET_SELECTED_ENTITY_TYPE] (state, selectedEntityType) {
+    state.selectedEntityType = selectedEntityType
+  },
   [SET_ATTRIBUTE_TYPES] (state, attributeTypes) {
     state.attributeTypes = attributeTypes
   },
@@ -28,8 +32,8 @@ export default {
   [UPDATE_EDITOR_ENTITY_TYPE] (state, update) {
     state.editorEntityType[update.key] = update.value
   },
-  [SET_SELECTED_ATTRIBUTE_ID] (state, selectedAttributeId) {
-    state.selectedAttributeId = selectedAttributeId
+  [SET_SELECTED_ATTRIBUTE_ID] (state, selectedAttributeID) {
+    state.selectedAttributeID = selectedAttributeID
   },
   /**
    * Alert mutations

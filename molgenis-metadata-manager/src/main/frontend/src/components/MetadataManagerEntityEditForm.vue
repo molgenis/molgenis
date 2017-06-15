@@ -13,16 +13,15 @@
       <div class="form-group row">
         <label class="col-4 col-form-label">Extends</label>
         <div class="col">
-          <entity-select-box id="parent-entity-select" :value="editorEntityType.parent"
-                             :options="abstractEntities"
-                             :onChange="updateParentEntity"></entity-select-box>
+          <multiselect v-model="parent" :options="abstractEntities" label="label"
+                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
         </div>
       </div>
 
       <div class="form-group row">
         <label class="col-4 col-form-label">Abstract</label>
         <div class="col checkbox-column">
-            <input :checked="editorEntityType.abstract0" @click="updateIsAbstract" class="form-control" type="checkbox">
+          <input v-model="isAbstract" class="form-control" type="checkbox">
         </div>
       </div>
     </div>
@@ -30,25 +29,24 @@
     <!-- Column containing: Label, Description and Package -->
     <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
       <div class="form-group row">
-        <label for="editor-entity-type-label" class="col-4 col-form-label">Label</label>
+        <label class="col-4 col-form-label">Label</label>
         <div class="col">
-          <input :value="editorEntityType.label" @input="updateLabel" class="form-control" type="text" id="editor-entity-type-label">
+          <input v-model="label" class="form-control" type="text">
         </div>
       </div>
 
       <div class="form-group row">
-        <label for="editor-entity-type-description" class="col-4 col-form-label">Description</label>
+        <label class="col-4 col-form-label">Description</label>
         <div class="col">
-          <input :value="editorEntityType.description" @input="updateDescription" class="form-control" type="text"
-                 id="editor-entity-type-description">
+          <input v-model="description" class="form-control" type="text">
         </div>
       </div>
 
       <div class="form-group row">
         <label class="col-4 col-form-label">Package</label>
         <div class="col">
-          <entity-select-box id="package-select" :value="editorEntityType.package0" :options="packages"
-                             :onChange="updatePackage"></entity-select-box>
+          <multiselect v-model="package0" :options="packages" label="label"
+                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
         </div>
       </div>
     </div>
@@ -58,27 +56,24 @@
       <div class="form-group row">
         <label class="col-4 col-form-label">ID attribute</label>
         <div class="col">
-          <entity-select-box id="id-attribute-select" :value="editorEntityType.idAttribute"
-                             :options="editorEntityType.attributes"
-                             :onChange="updateIdAttribute"></entity-select-box>
+          <multiselect v-model="idAttribute" :options="attributes" label="label"
+                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
         </div>
       </div>
 
       <div class="form-group row">
         <label class="col-4 col-form-label">Label attribute</label>
         <div class="col">
-          <entity-select-box id="label-attribute-select" :value="editorEntityType.labelAttribute"
-                             :options="editorEntityType.attributes"
-                             :onChange="updateLabelAttribute"></entity-select-box>
+          <multiselect v-model="labelAttribute" :options="attributes" label="label"
+                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
         </div>
       </div>
 
       <div class="form-group row">
         <label class="col-4 col-form-label">Lookup attributes</label>
         <div class="col">
-          <entity-select-box id="lookup-attribute-select" :value="editorEntityType.lookupAttributes"
-                             :options="editorEntityType.attributes"
-                             :onChange="updateLookupAttributes" multiple></entity-select-box>
+          <multiselect v-model="lookupAttributes" :options="attributes" label="label"
+                       selectLabel="" deselectLabel="" placeholder="Select attributes" multiple></multiselect>
         </div>
       </div>
     </div>
@@ -102,57 +97,68 @@
   /*screen-md border on inner column when columns aligned next to each other*/
   @media (min-width: 768px) {
     .col-md-3.inner-column,
-    .col-md-4.inner-column{border-right: solid black thin;}
+    .col-md-4.inner-column {
+      border-right: solid black thin;
+    }
   }
 </style>
 
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapState, mapGetters } from 'vuex'
   import { SAVE_EDITOR_ENTITY_TYPE } from '../store/actions'
   import { UPDATE_EDITOR_ENTITY_TYPE } from '../store/mutations'
 
-  import EntitySelectBox from './generic-components/EntitySelectBox'
+  import Multiselect from 'vue-multiselect'
 
   export default {
     name: 'metadata-manager-entity-edit-form',
     methods: {
       save: function () {
-        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.editorEntityType)
-      },
-      updateParentEntity: function (value) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'parent', value: value})
-      },
-      updateIsAbstract: function (event) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'abstract0', value: event.target.checked})
-      },
-      updateLabel: function (event) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'label', value: event.target.value})
-      },
-      updateDescription: function (event) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'description', value: event.target.value})
-      },
-      updatePackage: function (value) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'package0', value: value})
-      },
-      updateIdAttribute: function (value) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'idAttribute', value: value})
-      },
-      updateLabelAttribute: function (value) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: value})
-      },
-      updateLookupAttributes: function (value) {
-        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'lookupAttributes', value: value})
+        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$store.state.editorEntityType)
       }
     },
     computed: {
+      ...mapState(['editorEntityType', 'packages']),
       ...mapGetters({
-        packages: 'getPackages',
         abstractEntities: 'getAbstractEntities',
-        editorEntityType: 'getEditorEntityType'
-      })
+        attributes: 'getEditorEntityTypeAttributes'
+      }),
+      parent: {
+        get () { return this.$store.state.editorEntityType.parent },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'parent', value: value}) }
+      },
+      isAbstract: {
+        get () { return this.$store.state.editorEntityType.isAbstract },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'abstract0', value: value}) }
+      },
+      label: {
+        get () { return this.$store.state.editorEntityType.label },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'label', value: value}) }
+      },
+      description: {
+        get () { return this.$store.state.editorEntityType.description },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'description', value: value}) }
+      },
+      package0: {
+        get () { return this.$store.state.editorEntityType.package0 },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'package0', value: value}) }
+      },
+      idAttribute: {
+        get () { return this.$store.state.editorEntityType.idAttribute },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'idAttribute', value: value}) }
+      },
+      labelAttribute: {
+        get () { return this.$store.state.editorEntityType.labelAttribute },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: value}) }
+      },
+      lookupAttributes: {
+        get () { return this.$store.state.editorEntityType.lookupAttributes },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'lookupAttributes', value: value}) }
+      }
     },
     components: {
-      EntitySelectBox
+      Multiselect
     }
   }
 </script>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

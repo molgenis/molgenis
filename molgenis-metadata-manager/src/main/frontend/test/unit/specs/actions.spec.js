@@ -7,9 +7,11 @@ import * as api from 'molgenis-api-client'
 import { CREATE_ALERT, SET_EDITOR_ENTITY_TYPE, SET_ENTITY_TYPES, SET_PACKAGES } from 'store/mutations'
 
 import actions from 'store/actions'
+
 describe('actions', () => {
   describe('GET_PACKAGES', () => {
     afterEach(() => td.reset())
+
     const state = {
       alert: {
         message: null,
@@ -19,21 +21,25 @@ describe('actions', () => {
       entityTypes: [],
       editorEntityType: {}
     }
+
     it('Should retrieve all Packages and filter on non-system Packages', done => {
       const mockedResponse = [{id: 'base', label: 'Default'}, {id: 'root', label: 'root'}, {
         id: 'root_hospital',
         label: 'root_hospital'
       }]
+
       const get = td.function('api.get')
-      td.when(get({apiUrl: '/metadata-manager-service'}, '/editorPackages'))
-        .thenResolve(mockedResponse)
+      td.when(get({apiUrl: '/metadata-manager-service'}, '/editorPackages')).thenResolve(mockedResponse)
       td.replace(api, 'get', get)
+
       const payload = [{id: 'base', label: 'Default'}, {id: 'root', label: 'root'}, {
         id: 'root_hospital',
         label: 'root_hospital'
       }]
+
       testAction(actions.__GET_PACKAGES__, null, state, [{type: SET_PACKAGES, payload: payload}], [], done)
     })
+
     it('Should create alert when failing', done => {
       const mockedResponse = {
         errors: [{
@@ -41,21 +47,22 @@ describe('actions', () => {
           message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
         }]
       }
-      const get = td.function('api.get')
-      td.when(get({apiUrl: '/metadata-manager-service'}, '/editorPackages'))
-        .thenReject(mockedResponse)
 
+      const get = td.function('api.get')
+      td.when(get({apiUrl: '/metadata-manager-service'}, '/editorPackages')).thenReject(mockedResponse)
       td.replace(api, 'get', get)
+
       const payload = {
         type: 'danger',
         message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
       }
+
       testAction(actions.__GET_PACKAGES__, null, state, [{type: CREATE_ALERT, payload: payload}], [], done)
     })
   })
   describe('GET_ENTITY_TYPES', () => {
     afterEach(() => td.reset())
-    const state = {}
+
     it('Should retrieve all EntityTypes and filter on non-system EntityTypes', done => {
       const mockedResponse = {
         href: '/api/v2/sys_md_EntityType',
@@ -139,12 +146,14 @@ describe('actions', () => {
           _href: '/api/v2/demo_borrel'
         }]
       }
+
       const get = td.function('api.get')
-      td.when(get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000'))
-        .thenResolve(mockedResponse)
+      td.when(get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')).thenResolve(mockedResponse)
       td.replace(api, 'get', get)
-      testAction(actions.__GET_ENTITY_TYPES__, null, state, [{type: SET_ENTITY_TYPES, payload: mockedResponse.items}], [], done)
+
+      testAction(actions.__GET_ENTITY_TYPES__, null, {}, [{type: SET_ENTITY_TYPES, payload: mockedResponse.items}], [], done)
     })
+
     it('Should create alert when failing', done => {
       const mockedResponse = {
         errors: [{
@@ -152,20 +161,23 @@ describe('actions', () => {
           message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
         }]
       }
-      const get = td.function('api.get')
-      td.when(get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000'))
-        .thenReject(mockedResponse)
 
+      const get = td.function('api.get')
+      td.when(get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')).thenReject(mockedResponse)
       td.replace(api, 'get', get)
+
       const payload = {
         type: 'danger',
         message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
       }
-      testAction(actions.__GET_ENTITY_TYPES__, null, state, [{type: CREATE_ALERT, payload: payload}], [], done)
+
+      testAction(actions.__GET_ENTITY_TYPES__, null, {}, [{type: CREATE_ALERT, payload: payload}], [], done)
     })
   })
-  describe('GET_ENTITY_TYPE_BY_ID', () => {
+
+  describe('GET_EDITOR_ENTITY_TYPE', () => {
     afterEach(() => td.reset())
+
     const state = {
       alert: {
         message: null,
@@ -175,6 +187,7 @@ describe('actions', () => {
       entityTypes: [],
       editorEntityType: {}
     }
+
     it('Should retrieve EditorEntityType based on EntityType ID', done => {
       const mockedResponse = {
         entityType: {
@@ -227,11 +240,11 @@ describe('actions', () => {
         },
         languageCodes: ['en', 'nl', 'de', 'es', 'it', 'pt', 'fr', 'xx']
       }
-      const entityTypeID = 'root_gender'
+
       const get = td.function('api.get')
-      td.when(get({apiUrl: '/metadata-manager-service'}, '/entityType/' + entityTypeID))
-        .thenResolve(mockedResponse)
+      td.when(get({apiUrl: '/metadata-manager-service'}, '/entityType/root_gender')).thenResolve(mockedResponse)
       td.replace(api, 'get', get)
+
       const payload = {
         id: 'root_gender',
         labelI18n: {},
@@ -280,11 +293,13 @@ describe('actions', () => {
         package0: {id: 'root', label: 'root'},
         tags: []
       }
-      testAction(actions.__GET_ENTITY_TYPE_BY_ID__, 'root_gender', state, [{
+
+      testAction(actions.__GET_EDITOR_ENTITY_TYPE__, 'root_gender', state, [{
         type: SET_EDITOR_ENTITY_TYPE,
         payload: payload
       }], [], done)
     })
+
     it('Should create alert when failing', done => {
       const mockedResponse = {
         errors: [{
@@ -292,23 +307,26 @@ describe('actions', () => {
           message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
         }]
       }
-      const entityTypeID = 'root_gender'
+
       const get = td.function('api.get')
-      td.when(get({apiUrl: '/metadata-manager-service'}, '/entityType/' + entityTypeID))
-        .thenReject(mockedResponse)
+      td.when(get({apiUrl: '/metadata-manager-service'}, '/entityType/root_gender')).thenReject(mockedResponse)
       td.replace(api, 'get', get)
+
       const payload = {
         type: 'danger',
         message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
       }
-      testAction(actions.__GET_ENTITY_TYPE_BY_ID__, entityTypeID, state, [{
+
+      testAction(actions.__GET_EDITOR_ENTITY_TYPE__, 'root_gender', state, [{
         type: CREATE_ALERT,
         payload: payload
       }], [], done)
     })
   })
+
   describe('CREATE_ENTITY_TYPE', () => {
     afterEach(() => td.reset())
+
     const state = {
       alert: {
         message: null,
@@ -318,6 +336,7 @@ describe('actions', () => {
       entityTypes: [],
       editorEntityType: {}
     }
+
     it('Should create an entity type', done => {
       const mockedResponse = {
         entityType: {
@@ -332,10 +351,11 @@ describe('actions', () => {
         },
         languageCodes: ['en', 'nl', 'de', 'es', 'it', 'pt', 'fr', 'xx']
       }
+
       const get = td.function('api.get')
-      td.when(get({apiUrl: '/metadata-manager-service'}, '/create/entityType'))
-        .thenResolve(mockedResponse)
+      td.when(get({apiUrl: '/metadata-manager-service'}, '/create/entityType')).thenResolve(mockedResponse)
       td.replace(api, 'get', get)
+
       const payload = {
         id: 'aaaacxego5gxpkrvac3owhyaae',
         labelI18n: {},
@@ -346,26 +366,32 @@ describe('actions', () => {
         lookupAttributes: [],
         tags: []
       }
+
       testAction(actions.__CREATE_ENTITY_TYPE__, null, state, [{
         type: SET_EDITOR_ENTITY_TYPE,
         payload: payload
       }], [], done)
     })
+
     it('Should create alert when failing', done => {
       const mockedResponse = 'SyntaxError: Unexpected token < in JSON at position 0'
       const get = td.function('api.get')
-      td.when(td.when(get({apiUrl: '/metadata-manager-service'}, '/create/entityType')))
-        .thenReject(mockedResponse)
+
+      td.when(td.when(get({apiUrl: '/metadata-manager-service'}, '/create/entityType'))).thenReject(mockedResponse)
       td.replace(api, 'get', get)
+
       const payload = {
         type: 'danger',
         message: 'Something went wrong, make sure you have permissions for creating entities.'
       }
+
       testAction(actions.__CREATE_ENTITY_TYPE__, null, state, [{type: CREATE_ALERT, payload: payload}], [], done)
     })
   })
+
   describe('SAVE_EDITOR_ENTITY_TYPE', () => {
     afterEach(() => td.reset())
+
     it('Should persist metadata changes to the database', done => {
       const state = {
         alert: {
@@ -423,6 +449,7 @@ describe('actions', () => {
           tags: []
         }
       }
+
       const mockedResponse = {
         entityType: {
           id: 'aaaacxego5gxpkrvac3owhyaae',
@@ -436,67 +463,22 @@ describe('actions', () => {
         },
         languageCodes: ['en', 'nl', 'de', 'es', 'it', 'pt', 'fr', 'xx']
       }
-      const updatedEditorEntityType = {
-        id: 'root_gender',
-        labelI18n: {},
-        description: 'Gender of the patient',
-        abstract0: false,
-        attributes: [
-          {
-            aggregatable: false,
-            auto: false,
-            descriptionI18n: {},
-            enumOptions: [],
-            id: 'aaaacxdcqjnofkrvac3owhyabe',
-            labelI18n: {},
-            name: 'id',
-            nullable: false,
-            readonly: true,
-            tags: [],
-            type: 'STRING',
-            unique: true,
-            visible: true
-          },
-          {
-            aggregatable: false,
-            auto: false,
-            descriptionI18n: {},
-            enumOptions: [],
-            id: 'aaaacxdcqjnofkrvac3owhyabi',
-            labelI18n: {},
-            name: 'label',
-            nullable: false,
-            readonly: true,
-            tags: [],
-            type: 'STRING',
-            unique: true,
-            visible: true
-          }
-        ],
-        backend: 'postgreSQL',
-        idAttribute: {id: 'aaaacxdcqjnofkrvac3owhyabe', label: 'id'},
-        label: 'Gender',
-        labelAttribute: {id: 'aaaacxdcqjnofkrvac3owhyabi', label: 'label'},
-        lookupAttributes: [
-          {id: 'aaaacxdcqjnofkrvac3owhyabe', label: 'id'},
-          {id: 'aaaacxdcqjnofkrvac3owhyabi', label: 'label'}
-        ],
-        package0: {id: 'root', label: 'root'},
-        tags: []
-      }
+
       const post = td.function('api.post')
-      td.when(post({apiUrl: '/metadata-manager-service'}, '/entityType', updatedEditorEntityType))
-        .thenResolve(mockedResponse)
+      td.when(post({apiUrl: '/metadata-manager-service'}, '/entityType', state.editorEntityType)).thenResolve(mockedResponse)
       td.replace(api, 'post', post)
+
       const payload = {
         type: 'success',
-        message: 'Successfully updated metadata for EntityType: ' + updatedEditorEntityType.label
+        message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
       }
-      testAction(actions.__SAVE_EDITOR_ENTITY_TYPE__, updatedEditorEntityType, state, [{
+
+      testAction(actions.__SAVE_EDITOR_ENTITY_TYPE__, null, state, [{
         type: CREATE_ALERT,
         payload: payload
       }], [{type: 'GET_ENTITY_TYPES'}], done)
     })
+
     it('Should create alert when failing', done => {
       const state = {
         alert: {
@@ -516,31 +498,24 @@ describe('actions', () => {
           tags: []
         }
       }
+
       const mockedResponse = {
         errors: [{
           type: 'danger',
           message: 'Entity [aaaacxehgxmy3krvac3owhyaae] does not contain any attributes. Did you use the correct package+entity name combination in both the entities as well as the attributes sheet?'
         }]
       }
-      const updatedEditorEntityType = {
-        id: 'aaaacxego5gxpkrvac3owhyaae',
-        labelI18n: {},
-        description: 'New description',
-        abstract0: false,
-        attributes: [],
-        backend: 'postgreSQL',
-        lookupAttributes: [],
-        tags: []
-      }
+
       const post = td.function('api.post')
-      td.when(post({apiUrl: '/metadata-manager-service'}, '/entityType', updatedEditorEntityType))
-        .thenReject(mockedResponse)
+      td.when(post({apiUrl: '/metadata-manager-service'}, '/entityType', state.editorEntityType)).thenReject(mockedResponse)
       td.replace(api, 'post', post)
+
       const payload = {
         type: 'danger',
         message: 'Entity [aaaacxehgxmy3krvac3owhyaae] does not contain any attributes. Did you use the correct package+entity name combination in both the entities as well as the attributes sheet?'
       }
-      testAction(actions.__SAVE_EDITOR_ENTITY_TYPE__, updatedEditorEntityType, state, [{
+
+      testAction(actions.__SAVE_EDITOR_ENTITY_TYPE__, null, state, [{
         type: CREATE_ALERT,
         payload: payload
       }], [], done)

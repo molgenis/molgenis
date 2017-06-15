@@ -7,10 +7,10 @@
 
       <alert v-if="alert.message !== null" :onDismiss="onDismiss" :alert="alert"></alert>
 
-      <metadata-manager-entity-edit-form v-if="editorEntityType.attributes !== undefined"></metadata-manager-entity-edit-form>
+      <metadata-manager-entity-edit-form v-if="editorEntityType !== null"></metadata-manager-entity-edit-form>
 
       <div slot="footer">
-        <metadata-manager-attribute-edit-form v-if="editorEntityType.attributes !== undefined"></metadata-manager-attribute-edit-form>
+        <metadata-manager-attribute-edit-form v-if="editorEntityType !== null"></metadata-manager-attribute-edit-form>
       </div>
     </b-card>
   </div>
@@ -22,17 +22,14 @@
   import MetadataManagerEntityEditForm from './MetadataManagerEntityEditForm'
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
 
-  import { GET_ENTITY_TYPES, GET_ENTITY_TYPE_BY_ID, GET_PACKAGES, GET_ATTRIBUTE_TYPES } from '../store/actions'
-  import { REMOVE_ALERT, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
-  import { mapGetters } from 'vuex'
+  import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
+  import { REMOVE_ALERT, SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
+  import { mapState } from 'vuex'
 
   export default {
     name: 'metadata-manager',
     computed: {
-      ...mapGetters({
-        editorEntityType: 'getEditorEntityType',
-        alert: 'getAlert'
-      })
+      ...mapState(['alert', 'editorEntityType'])
     },
     methods: {
       onDismiss: function () {
@@ -54,17 +51,14 @@
 
       // Retrieve attribute types for Type selection
       this.$store.dispatch(GET_ATTRIBUTE_TYPES)
+    },
+    watch: {
+      '$route' (to, from) {
+        const entityTypeID = to.params.entityTypeID
+        const selectedEntityType = this.$store.state.entityTypes.find(entityType => entityType.id === entityTypeID)
 
-      // Retrieve editorEntityType for entityType ID in URL
-      const entityTypeID = this.$route.params.entityTypeID
-      if (entityTypeID !== undefined) {
-        this.$store.dispatch(GET_ENTITY_TYPE_BY_ID, entityTypeID)
-
-        // Retrieve attribute for attribute ID in URL
-        const attributeID = this.$route.params.attributeID
-        if (attributeID !== undefined) {
-          this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, attributeID)
-        }
+        this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType)
+        this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
       }
     }
   }
