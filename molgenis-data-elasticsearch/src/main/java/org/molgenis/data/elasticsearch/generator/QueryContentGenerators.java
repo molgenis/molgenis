@@ -2,10 +2,9 @@ package org.molgenis.data.elasticsearch.generator;
 
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.Sort;
+import org.molgenis.data.elasticsearch.generator.model.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
@@ -34,9 +33,9 @@ class QueryContentGenerators
 		return queryGenerator.createQueryBuilder(query, entityType);
 	}
 
-	public List<SortBuilder> createSorts(Sort sort, EntityType entityType)
+	public Sort createSorts(org.molgenis.data.Sort sort, EntityType entityType)
 	{
-		return sortGenerator.generate(sort, entityType);
+		return sortGenerator.generateSort(sort, entityType);
 	}
 
 	public List<AggregationBuilder> createAggregations(Attribute aggAttr1, Attribute aggAttr2,

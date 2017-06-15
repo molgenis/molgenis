@@ -1,17 +1,18 @@
 package org.molgenis.data.elasticsearch.generator;
 
-import org.elasticsearch.search.sort.*;
-import org.molgenis.data.Sort;
-import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.elasticsearch.generator.model.Sort;
+import org.molgenis.data.elasticsearch.generator.model.SortDirection;
+import org.molgenis.data.elasticsearch.generator.model.SortOrder;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -27,30 +28,28 @@ class SortGenerator
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
-	public List<SortBuilder> generate(Sort sort, EntityType entityType)
+	Sort generateSort(org.molgenis.data.Sort sort, EntityType entityType)
 	{
-		if (sort == null)
-		{
-			return emptyList();
-		}
-		return stream(sort.spliterator(), false).map(order -> this.toSortBuilder(order, entityType)).collect(toList());
+		Stream<org.molgenis.data.Sort.Order> orderStream = stream(sort.spliterator(), false);
+		List<SortOrder> sortOrders = orderStream.map(order -> this.toSortOrder(order, entityType)).collect(toList());
+		return Sort.create(sortOrders);
 	}
 
-	private SortBuilder toSortBuilder(Sort.Order order, EntityType entityType)
+	private SortOrder toSortOrder(org.molgenis.data.Sort.Order order, EntityType entityType)
 	{
-		String sortAttrName = order.getAttr();
-		if (sortAttrName == null) throw new IllegalArgumentException("Sort property is null");
-
-		Direction sortDirection = order.getDirection();
-		if (sortDirection == null) throw new IllegalArgumentException("Missing sort direction");
-
-		Attribute sortAttr = entityType.getAttribute(sortAttrName);
-		if (sortAttr == null) throw new UnknownAttributeException(sortAttrName);
-
-		String sortField = getSortField(sortAttr);
-		SortOrder sortOrder = sortDirection == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
-		FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder).sortMode(SortMode.MIN);
-		return sortBuilder;
+		String attributeName = order.getAttr();
+		if (attributeName == null)
+		{
+			throw new IllegalArgumentException("Sort property is null");
+		}
+		Attribute sortAttribute = entityType.getAttribute(attributeName);
+		if (sortAttribute == null)
+		{
+			throw new UnknownAttributeException(attributeName);
+		}
+		String sortField = getSortField(sortAttribute);
+		SortDirection sortDirection = getSortDirection(order.getDirection());
+		return SortOrder.create(sortField, sortDirection);
 	}
 
 	private String getSortField(Attribute attr)
@@ -95,5 +94,18 @@ class SortGenerator
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
 		return sortField;
+	}
+
+	private SortDirection getSortDirection(org.molgenis.data.Sort.Direction direction)
+	{
+		switch (direction)
+		{
+			case ASC:
+				return SortDirection.ASC;
+			case DESC:
+				return SortDirection.DESC;
+			default:
+				throw new RuntimeException(format("Unknown sort direction '%s'", direction));
+		}
 	}
 }

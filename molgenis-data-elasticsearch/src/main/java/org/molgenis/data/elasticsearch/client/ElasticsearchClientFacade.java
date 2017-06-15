@@ -30,6 +30,7 @@ import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.model.Index;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
+import org.molgenis.data.elasticsearch.generator.model.Sort;
 import org.molgenis.data.elasticsearch.settings.IndexSettings;
 import org.molgenis.data.index.IndexAlreadyExistsException;
 import org.molgenis.data.index.IndexException;
@@ -46,7 +47,6 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 
@@ -60,6 +60,7 @@ public class ElasticsearchClientFacade
 	private final Client client;
 	private final SettingsContentBuilder settingsBuilder;
 	private final MappingContentBuilder mappingSourceBuilder;
+	private final SortContentBuilder sortContentBuilder;
 	private final BulkProcessorFactory bulkProcessorFactory;
 
 	public ElasticsearchClientFacade(Client client)
@@ -67,6 +68,7 @@ public class ElasticsearchClientFacade
 		this.client = requireNonNull(client);
 		this.settingsBuilder = new SettingsContentBuilder();
 		this.mappingSourceBuilder = new MappingContentBuilder();
+		this.sortContentBuilder = new SortContentBuilder();
 		this.bulkProcessorFactory = new BulkProcessorFactory();
 	}
 
@@ -291,15 +293,15 @@ public class ElasticsearchClientFacade
 
 	public SearchHits search(QueryBuilder query, int from, int size, Index... indexes)
 	{
-		return search(query, from, size, emptyList(), indexes);
+		return search(query, from, size, null, indexes);
 	}
 
 	// TODO replace List<SortBuilder> sorts with Sort (not data.Sort)
-	public SearchHits search(QueryBuilder query, int from, int size, List<SortBuilder> sorts, Index... indexes)
+	public SearchHits search(QueryBuilder query, int from, int size, Sort sort, Index... indexes)
 	{
 		if (LOG.isTraceEnabled())
 		{
-			if (sorts.isEmpty())
+			if (sort != null)
 			{
 				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' ...", from, from + size,
 						toString(indexes), query);
@@ -307,11 +309,11 @@ public class ElasticsearchClientFacade
 			else
 			{
 				LOG.trace("Searching docs [{}-{}] in indexes '{}' with query '{}' sorted by '{}' ...", from,
-						from + size, toString(indexes), query, sorts);
+						from + size, toString(indexes), query, sort);
 			}
 		}
 
-		SearchRequestBuilder searchRequest = createSearchRequest(query, from, size, sorts, null, indexes);
+		SearchRequestBuilder searchRequest = createSearchRequest(query, from, size, sort, null, indexes);
 
 		SearchResponse searchResponse;
 		try
@@ -345,7 +347,7 @@ public class ElasticsearchClientFacade
 
 		if (LOG.isDebugEnabled())
 		{
-			if (sorts.isEmpty())
+			if (sort != null)
 			{
 				LOG.debug("Searched {} docs in indexes '{}' with query '{}' in {}ms.",
 						searchResponse.getHits().getTotalHits(), toString(indexes), query,
@@ -354,15 +356,15 @@ public class ElasticsearchClientFacade
 			else
 			{
 				LOG.debug("Searched {} docs in indexes '{}' with query '{}' sorted by '{}' in {}ms.",
-						searchResponse.getHits().getTotalHits(), toString(indexes), query, sorts,
+						searchResponse.getHits().getTotalHits(), toString(indexes), query, sort,
 						searchResponse.getTookInMillis());
 			}
 		}
 		return createSearchResponse(searchResponse);
 	}
 
-	private SearchRequestBuilder createSearchRequest(QueryBuilder query, Integer from, Integer size,
-			List<SortBuilder> sorts, List<AggregationBuilder> aggregations, Index... indexes)
+	private SearchRequestBuilder createSearchRequest(QueryBuilder query, Integer from, Integer size, Sort sort,
+			List<AggregationBuilder> aggregations, Index... indexes)
 	{
 		String[] indexNames = toIndexNames(indexes);
 		SearchRequestBuilder searchRequest = client.prepareSearch(indexNames);
@@ -378,8 +380,9 @@ public class ElasticsearchClientFacade
 		{
 			searchRequest.setSize(size);
 		}
-		if (sorts != null)
+		if (sort != null)
 		{
+			List<SortBuilder> sorts = sortContentBuilder.createSorts(sort);
 			sorts.forEach(searchRequest::addSort);
 		}
 		if (aggregations != null)
@@ -475,6 +478,7 @@ public class ElasticsearchClientFacade
 	}
 
 	// TODO create IndexRequests here instead of in Service, supply stream of docs
+
 	/**
 	 * Creates a {@link BulkProcessor} and adds a stream of {@link IndexRequest}s to it.
 	 * Counts how many requests of each type were added to the {@link BulkProcessor}.

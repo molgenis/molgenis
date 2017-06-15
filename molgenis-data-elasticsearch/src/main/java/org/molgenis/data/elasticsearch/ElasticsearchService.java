@@ -4,7 +4,6 @@ import com.google.common.collect.Iterators;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -16,6 +15,7 @@ import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.ContentGenerators;
 import org.molgenis.data.elasticsearch.generator.model.Index;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
+import org.molgenis.data.elasticsearch.generator.model.Sort;
 import org.molgenis.data.elasticsearch.settings.IndexSettings;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.index.IndexingMode;
@@ -125,10 +125,9 @@ public class ElasticsearchService implements SearchService
 	private Stream<Object> search(EntityType entityType, Query<Entity> q, int from, int size)
 	{
 		QueryBuilder query = contentGenerators.createQuery(q, entityType);
-		List<SortBuilder> sortList =
-				q.getSort() != null ? contentGenerators.createSorts(q.getSort(), entityType) : null;
+		Sort sort = q.getSort() != null ? contentGenerators.createSorts(q.getSort(), entityType) : null;
 		Index index = contentGenerators.createIndex(entityType);
-		SearchHits searchHits = elasticsearchClientFacade.search(query, from, size, sortList, index);
+		SearchHits searchHits = elasticsearchClientFacade.search(query, from, size, sort, index);
 		return ElasticsearchEntityUtils.toEntityIds(searchHits.getHits().stream().map(SearchHit::getId));
 	}
 
