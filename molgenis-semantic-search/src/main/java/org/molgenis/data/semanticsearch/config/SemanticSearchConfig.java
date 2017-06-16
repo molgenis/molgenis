@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.client.ElasticsearchClientFacade;
+import org.molgenis.data.elasticsearch.client.ClientFacade;
 import org.molgenis.data.elasticsearch.generator.DocumentIdGenerator;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.TagFactory;
@@ -53,7 +53,7 @@ public class SemanticSearchConfig
 	DocumentIdGenerator documentIdGenerator;
 
 	@Autowired
-	ElasticsearchClientFacade elasticsearchClientFacade;
+	ClientFacade elasticsearchClientFacade;
 
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()

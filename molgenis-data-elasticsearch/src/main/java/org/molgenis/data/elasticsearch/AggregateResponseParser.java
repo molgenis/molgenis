@@ -11,16 +11,13 @@ import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.elasticsearch.generator.AggregationGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.molgenis.data.elasticsearch.generator.AggregationGenerator.*;
-
-public class AggregateResponseParser
+class AggregateResponseParser
 {
 	@SuppressWarnings("unchecked")
 	AggregateResult parseAggregateResponse(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct,
@@ -94,11 +91,11 @@ public class AggregateResponseParser
 			}
 		}
 
-		if (AggregationGenerator.isNestedType(aggAttr1))
+		if (ElasticsearchEntityUtils.isNestedType(aggAttr1))
 		{
 			convertIdtoLabelLabels(xLabels, aggAttr1.getRefEntity(), dataService);
 		}
-		if (aggAttr2 != null && AggregationGenerator.isNestedType(aggAttr2))
+		if (aggAttr2 != null && ElasticsearchEntityUtils.isNestedType(aggAttr2))
 		{
 			convertIdtoLabelLabels(yLabels, aggAttr2.getRefEntity(), dataService);
 		}
@@ -111,7 +108,7 @@ public class AggregateResponseParser
 	{
 		Map<Object, Object> counts = new HashMap<>();
 
-		boolean isAttr1Nested = AggregationGenerator.isNestedType(aggAttr1);
+		boolean isAttr1Nested = ElasticsearchEntityUtils.isNestedType(aggAttr1);
 		boolean isAttr1Nillable = aggAttr1.isNillable();
 
 		if (isAttr1Nested) aggs = removeNesting(aggs);
@@ -125,7 +122,7 @@ public class AggregateResponseParser
 			{
 				Map<Object, Long> subCounts = new HashMap<>();
 
-				boolean isAttr2Nested = AggregationGenerator.isNestedType(aggAttr2);
+				boolean isAttr2Nested = ElasticsearchEntityUtils.isNestedType(aggAttr2);
 				boolean isAttr2Nillable = aggAttr2.isNillable();
 
 				Aggregations subAggs = bucket.getAggregations();
@@ -140,7 +137,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = ElasticsearchEntityUtils.isNestedType(aggAttrDistinct);
 
 						Aggregations distinctAggs = subBucket.getAggregations();
 						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
@@ -164,7 +161,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = ElasticsearchEntityUtils.isNestedType(aggAttrDistinct);
 
 						Aggregations subDistinctAggs = subMissing.getAggregations();
 						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
@@ -184,7 +181,7 @@ public class AggregateResponseParser
 			{
 				if (aggAttrDistinct != null)
 				{
-					boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
+					boolean isAttrDistinctNested = ElasticsearchEntityUtils.isNestedType(aggAttrDistinct);
 
 					Aggregations distinctAggs = bucket.getAggregations();
 					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
@@ -209,7 +206,7 @@ public class AggregateResponseParser
 			{
 				Map<Object, Long> subCounts = new HashMap<>();
 
-				boolean isAttr2Nested = AggregationGenerator.isNestedType(aggAttr2);
+				boolean isAttr2Nested = ElasticsearchEntityUtils.isNestedType(aggAttr2);
 				boolean isAttr2Nillable = aggAttr2.isNillable();
 
 				Aggregations subAggs = missing.getAggregations();
@@ -224,7 +221,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = ElasticsearchEntityUtils.isNestedType(aggAttrDistinct);
 
 						Aggregations distinctAggs = subBucket.getAggregations();
 						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
@@ -248,7 +245,7 @@ public class AggregateResponseParser
 
 					if (aggAttrDistinct != null)
 					{
-						boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
+						boolean isAttrDistinctNested = ElasticsearchEntityUtils.isNestedType(aggAttrDistinct);
 
 						Aggregations subDistinctAggs = subMissing.getAggregations();
 						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
@@ -268,7 +265,7 @@ public class AggregateResponseParser
 			{
 				if (aggAttrDistinct != null)
 				{
-					boolean isAttrDistinctNested = AggregationGenerator.isNestedType(aggAttrDistinct);
+					boolean isAttrDistinctNested = ElasticsearchEntityUtils.isNestedType(aggAttrDistinct);
 
 					Aggregations distinctAggs = missing.getAggregations();
 					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
@@ -316,7 +313,7 @@ public class AggregateResponseParser
 
 	private Terms getTermsAggregation(Aggregations aggs, Attribute attr)
 	{
-		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_TERMS_POSTFIX);
+		Aggregation agg = aggs.get(attr.getName() + FieldConstants.AGGREGATION_TERMS_POSTFIX);
 		if (agg == null)
 		{
 			throw new RuntimeException("Missing terms aggregation");
@@ -330,7 +327,7 @@ public class AggregateResponseParser
 
 	private Missing getMissingAggregation(Aggregations aggs, Attribute attr)
 	{
-		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_MISSING_POSTFIX);
+		Aggregation agg = aggs.get(attr.getName() + FieldConstants.AGGREGATION_MISSING_POSTFIX);
 		if (agg == null)
 		{
 			throw new RuntimeException("Missing missing aggregation");
@@ -344,7 +341,7 @@ public class AggregateResponseParser
 
 	private Cardinality getDistinctAggregation(Aggregations aggs, Attribute attr)
 	{
-		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_DISTINCT_POSTFIX);
+		Aggregation agg = aggs.get(attr.getName() + FieldConstants.AGGREGATION_DISTINCT_POSTFIX);
 		if (agg == null)
 		{
 			throw new RuntimeException("Missing cardinality aggregation");

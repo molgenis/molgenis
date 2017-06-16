@@ -42,6 +42,8 @@ import org.molgenis.data.index.UnknownIndexException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,9 +61,9 @@ import static org.elasticsearch.action.DocWriteRequest.OpType.INDEX;
 /**
  * Facade in front of the Elasticsearch client.
  */
-public class ElasticsearchClientFacade
+public class ClientFacade implements Closeable
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchClientFacade.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ClientFacade.class);
 
 	private final Client client;
 	private final SettingsContentBuilder settingsBuilder;
@@ -69,7 +71,7 @@ public class ElasticsearchClientFacade
 	private final SortContentBuilder sortContentBuilder;
 	private final BulkProcessorFactory bulkProcessorFactory;
 
-	public ElasticsearchClientFacade(Client client)
+	public ClientFacade(Client client)
 	{
 		this.client = requireNonNull(client);
 		this.settingsBuilder = new SettingsContentBuilder();
@@ -504,8 +506,7 @@ public class ElasticsearchClientFacade
 		}
 
 		String indexName = searchHit.getIndex();
-		String type = indexName;
-		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, type, searchHit.getId());
+		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, indexName, searchHit.getId());
 		ExplainResponse explainResponse;
 		try
 		{
@@ -632,6 +633,10 @@ public class ElasticsearchClientFacade
 		{
 			case INDEX:
 				XContentBuilder source = documentAction.getDocument().getContent();
+				if (source == null)
+				{
+					throw new IndexException(format("Document action is missing document source '%s'", documentAction));
+				}
 				docWriteRequest = Requests.indexRequest(indexName).type(indexName).id(documentId).source(source)
 						.opType(INDEX);
 				break;
@@ -674,5 +679,18 @@ public class ElasticsearchClientFacade
 	private String toString(List<Index> indexes)
 	{
 		return indexes.stream().map(Index::getName).collect(joining(", "));
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		try
+		{
+			client.close();
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.error("Error closing Elasticsearch client", e);
+		}
 	}
 }

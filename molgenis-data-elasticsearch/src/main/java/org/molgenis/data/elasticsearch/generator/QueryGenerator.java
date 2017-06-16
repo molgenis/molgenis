@@ -22,9 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
-import static org.molgenis.data.elasticsearch.client.FieldConstants.FIELD_NGRAM_ANALYZED;
-import static org.molgenis.data.elasticsearch.client.FieldConstants.FIELD_NOT_ANALYZED;
-import static org.molgenis.data.elasticsearch.client.SettingsContentBuilder.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.FieldConstants.*;
 
 @Component
 public class QueryGenerator

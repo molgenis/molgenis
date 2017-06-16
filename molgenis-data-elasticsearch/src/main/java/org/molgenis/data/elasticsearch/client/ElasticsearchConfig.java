@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch.client;
 
+import org.elasticsearch.client.Client;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,31 +26,26 @@ import static java.util.stream.Collectors.toList;
 public class ElasticsearchConfig
 {
 	@Value("${elasticsearch.cluster.name:molgenis}")
-	private String elasticsearchClusterName;
+	private String clusterName;
 
 	@Value("${elasticsearch.transport.addresses:127.0.0.1:9300}")
-	private List<String> elasticsearchTransportAddresses;
+	private List<String> transportAddresses;
 
 	@Bean(destroyMethod = "close")
-	public ClientFactory elasticsearchServiceFactory()
+	public ClientFacade elasticsearchClientFacade()
 	{
-		if (elasticsearchClusterName == null)
+		if (clusterName == null)
 		{
 			throw new IllegalArgumentException("Property 'elasticsearch.cluster.name' cannot be null");
 		}
-		if (elasticsearchTransportAddresses == null || elasticsearchTransportAddresses.isEmpty())
+		if (transportAddresses == null || transportAddresses.isEmpty())
 		{
 			throw new IllegalArgumentException("Property 'elasticsearch.transport.addresses' cannot be null or empty");
 		}
 
-		List<InetSocketAddress> ipSocketAddresses = toIpSocketAddresses(elasticsearchTransportAddresses);
-		return new ClientFactory(elasticsearchClusterName, ipSocketAddresses);
-	}
-
-	@Bean
-	public ElasticsearchClientFacade elasticsearchClientFacade()
-	{
-		return new ElasticsearchClientFacade(elasticsearchServiceFactory().getClient());
+		List<InetSocketAddress> ipSocketAddresses = toIpSocketAddresses(transportAddresses);
+		Client client = ClientFactory.createClient(clusterName, ipSocketAddresses);
+		return new ClientFacade(client);
 	}
 
 	private List<InetSocketAddress> toIpSocketAddresses(List<String> elasticsearchTransportAddresses)

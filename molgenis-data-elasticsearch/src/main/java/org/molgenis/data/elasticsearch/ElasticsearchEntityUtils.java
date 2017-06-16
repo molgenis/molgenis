@@ -1,12 +1,14 @@
 package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 public class ElasticsearchEntityUtils
 {
@@ -19,7 +21,7 @@ public class ElasticsearchEntityUtils
 		return entityId.toString();
 	}
 
-	public static Stream<String> toElasticsearchIds(Stream<Object> entityIds)
+	static Stream<String> toElasticsearchIds(Stream<Object> entityIds)
 	{
 		return entityIds.map(ElasticsearchEntityUtils::toElasticsearchId);
 	}
@@ -30,7 +32,7 @@ public class ElasticsearchEntityUtils
 		return elasticsearchId;
 	}
 
-	public static Stream<Object> toEntityIds(Stream<String> documentIdStream)
+	static Stream<Object> toEntityIds(Stream<String> documentIdStream)
 	{
 		return documentIdStream.map(ElasticsearchEntityUtils::toEntityId);
 	}
@@ -46,5 +48,10 @@ public class ElasticsearchEntityUtils
 		String idAttributeName = entityType.getIdAttribute().getName();
 		Object entityId = entity.get(idAttributeName);
 		return toElasticsearchId(entityId);
+	}
+
+	public static boolean isNestedType(Attribute attr)
+	{
+		return isReferenceType(attr);
 	}
 }

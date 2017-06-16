@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 
@@ -12,8 +13,8 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.elasticsearch.client.FieldConstants.FIELD_NGRAM_ANALYZED;
-import static org.molgenis.data.elasticsearch.client.FieldConstants.FIELD_NOT_ANALYZED;
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NGRAM_ANALYZED;
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
 class MappingContentBuilder
 {
@@ -144,7 +145,7 @@ class MappingContentBuilder
 		{
 			// add ngram analyzer (not applied to nested documents)
 			fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "text")
-					.field("analyzer", SettingsContentBuilder.NGRAM_ANALYZER).endObject();
+					.field("analyzer", FieldConstants.NGRAM_ANALYZER).endObject();
 		}
 		fieldsObject.endObject();
 	}

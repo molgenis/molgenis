@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
 
 import java.io.IOException;
@@ -10,13 +11,11 @@ import java.io.UncheckedIOException;
 
 import static java.util.Objects.requireNonNull;
 
-public class SettingsContentBuilder
+class SettingsContentBuilder
 {
-	public static final String DEFAULT_ANALYZER = "default";
-	public static final String NGRAM_ANALYZER = "ngram_analyzer";
-	public static final String NGRAM_TOKENIZER = "ngram_tokenizer";
-	public static final String DEFAULT_TOKENIZER = "default_tokenizer";
-	public static final String DEFAULT_STEMMER = "default_stemmer";
+	private static final String NGRAM_TOKENIZER = "ngram_tokenizer";
+	private static final String DEFAULT_TOKENIZER = "default_tokenizer";
+	private static final String DEFAULT_STEMMER = "default_stemmer";
 
 	private final XContentType xContentType;
 
@@ -25,7 +24,7 @@ public class SettingsContentBuilder
 		this(XContentType.JSON);
 	}
 
-	SettingsContentBuilder(XContentType xContentType)
+	private SettingsContentBuilder(XContentType xContentType)
 	{
 		this.xContentType = requireNonNull(xContentType);
 	}
@@ -112,7 +111,7 @@ public class SettingsContentBuilder
 
 	private void createDefaultAnalyzerSettings(XContentBuilder contentBuilder) throws IOException
 	{
-		contentBuilder.startObject(DEFAULT_ANALYZER);
+		contentBuilder.startObject(FieldConstants.DEFAULT_ANALYZER);
 		contentBuilder.field("type", "custom");
 		contentBuilder.array("filter", "lowercase", DEFAULT_STEMMER);
 		contentBuilder.field("tokenizer", DEFAULT_TOKENIZER);
@@ -122,7 +121,7 @@ public class SettingsContentBuilder
 
 	private void createNGramAnalyzerSettings(XContentBuilder contentBuilder) throws IOException
 	{
-		contentBuilder.startObject(NGRAM_ANALYZER);
+		contentBuilder.startObject(FieldConstants.NGRAM_ANALYZER);
 		contentBuilder.field("type", "custom");
 		contentBuilder.array("filter", "lowercase");
 		contentBuilder.field("tokenizer", NGRAM_TOKENIZER);

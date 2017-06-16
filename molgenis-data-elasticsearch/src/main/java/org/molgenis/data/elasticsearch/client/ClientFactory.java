@@ -5,11 +5,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
@@ -17,47 +13,22 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-public class ClientFactory implements Closeable
+class ClientFactory
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ClientFactory.class);
-
-	private final Client client;
-
-	public ClientFactory(String clusterName, List<InetSocketAddress> socketAddresses)
+	private ClientFactory()
 	{
-		this(clusterName, socketAddresses, null);
 	}
 
-	public ClientFactory(String clusterName, List<InetSocketAddress> socketAddresses,
-			Map<String, String> settings)
+	static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses)
 	{
-		this.client = createElasticsearchClient(clusterName, socketAddresses, settings);
-		LOG.info("Connected to Elasticsearch cluster '{}' on {}", clusterName, socketAddresses.toString());
+		return createClient(clusterName, inetAddresses, null);
 	}
 
-	public Client getClient()
-	{
-		return client;
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		try
-		{
-			client.close();
-		}
-		catch (RuntimeException e)
-		{
-			LOG.error("Error closing Elasticsearch client", e);
-		}
-	}
-
-	private Client createElasticsearchClient(String clusterName, List<InetSocketAddress> socketAddresses,
-			Map<String, String> settings)
+	private static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses,
+			@SuppressWarnings("SameParameterValue") Map<String, String> settings)
 	{
 		Settings clientSettings = createSettings(clusterName, settings);
-		InetSocketTransportAddress[] socketTransportAddresses = createInetSocketTransportAddresses(socketAddresses);
+		InetSocketTransportAddress[] socketTransportAddresses = createInetTransportAddresses(inetAddresses);
 
 		TransportClient transportClient = new PreBuiltTransportClient(clientSettings)
 				.addTransportAddresses(socketTransportAddresses);
@@ -71,7 +42,7 @@ public class ClientFactory implements Closeable
 		return transportClient;
 	}
 
-	private Settings createSettings(String clusterName, Map<String, String> settings)
+	private static Settings createSettings(String clusterName, Map<String, String> settings)
 	{
 		if (clusterName == null)
 		{
@@ -87,16 +58,16 @@ public class ClientFactory implements Closeable
 		return builder.build();
 	}
 
-	private InetSocketTransportAddress[] createInetSocketTransportAddresses(List<InetSocketAddress> socketAddresses)
+	private static InetSocketTransportAddress[] createInetTransportAddresses(List<InetSocketAddress> inetAddresses)
 	{
-		if (socketAddresses == null)
+		if (inetAddresses == null)
 		{
-			throw new NullPointerException("socketAddresses cannot be null");
+			throw new NullPointerException("inetAddresses cannot be null");
 		}
-		if (socketAddresses.isEmpty())
+		if (inetAddresses.isEmpty())
 		{
-			throw new IllegalArgumentException("socketAddresses cannot be empty");
+			throw new IllegalArgumentException("inetAddresses cannot be empty");
 		}
-		return socketAddresses.stream().map(InetSocketTransportAddress::new).toArray(InetSocketTransportAddress[]::new);
+		return inetAddresses.stream().map(InetSocketTransportAddress::new).toArray(InetSocketTransportAddress[]::new);
 	}
 }

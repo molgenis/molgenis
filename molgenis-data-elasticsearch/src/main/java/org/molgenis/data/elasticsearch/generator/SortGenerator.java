@@ -16,7 +16,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.elasticsearch.client.FieldConstants.FIELD_NOT_ANALYZED;
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
 @Component
 class SortGenerator

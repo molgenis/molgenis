@@ -10,7 +10,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.elasticsearch.client.ElasticsearchClientFacade;
+import org.molgenis.data.elasticsearch.client.ClientFacade;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.ContentGenerators;
@@ -37,11 +37,11 @@ public class ElasticsearchService implements SearchService
 {
 	private static final int BATCH_SIZE = 1000;
 
-	private final ElasticsearchClientFacade elasticsearchClientFacade;
+	private final ClientFacade elasticsearchClientFacade;
 	private final ContentGenerators contentGenerators;
 	private final DataService dataService;
 
-	public ElasticsearchService(ElasticsearchClientFacade elasticsearchClientFacade,
+	public ElasticsearchService(ClientFacade elasticsearchClientFacade,
 			ContentGenerators contentGenerators, DataService dataService)
 	{
 		this.elasticsearchClientFacade = requireNonNull(elasticsearchClientFacade);

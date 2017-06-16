@@ -4,7 +4,7 @@ import org.apache.lucene.search.Explanation;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.client.ElasticsearchClientFacade;
+import org.molgenis.data.elasticsearch.client.ClientFacade;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.generator.DocumentIdGenerator;
 import org.molgenis.data.elasticsearch.generator.QueryGenerator;
@@ -26,13 +26,13 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchExplainServiceImpl.class);
 
-	private final ElasticsearchClientFacade clientFacade;
+	private final ClientFacade clientFacade;
 	private final ExplainServiceHelper explainServiceHelper;
 	private final DocumentIdGenerator documentIdGenerator;
 	private final QueryGenerator queryGenerator;
 
 	@Autowired
-	public ElasticSearchExplainServiceImpl(ElasticsearchClientFacade clientFacade,
+	public ElasticSearchExplainServiceImpl(ClientFacade clientFacade,
 			ExplainServiceHelper explainServiceHelper, DocumentIdGenerator documentIdGenerator)
 	{
 		this.explainServiceHelper = explainServiceHelper;

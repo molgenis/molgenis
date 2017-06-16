@@ -7,7 +7,8 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.molgenis.data.elasticsearch.client.FieldConstants;
+import org.molgenis.data.elasticsearch.ElasticsearchEntityUtils;
+import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.springframework.stereotype.Component;
@@ -22,13 +23,10 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 @Component
-public class AggregationGenerator
+class AggregationGenerator
 {
-	public static final String AGGREGATION_MISSING_POSTFIX = "_missing";
 	private static final String AGGREGATION_REVERSE_POSTFIX = "_reverse";
 	private static final String AGGREGATION_NESTED_POSTFIX = "_nested";
-	public static final String AGGREGATION_DISTINCT_POSTFIX = "_distinct";
-	public static final String AGGREGATION_TERMS_POSTFIX = "_terms";
 
 	private final DocumentIdGenerator documentIdGenerator;
 
@@ -105,7 +103,7 @@ public class AggregationGenerator
 		List<AggregationBuilder> aggs = new ArrayList<>();
 
 		// term aggregation
-		String termsAggName = attr.getName() + AGGREGATION_TERMS_POSTFIX;
+		String termsAggName = attr.getName() + FieldConstants.AGGREGATION_TERMS_POSTFIX;
 		String termsAggFieldName = getAggregateFieldName(attr);
 		AggregationBuilder termsAgg = AggregationBuilders.terms(termsAggName).size(MAX_VALUE).field(termsAggFieldName);
 		aggs.add(termsAgg);
@@ -113,7 +111,7 @@ public class AggregationGenerator
 		// missing term aggregation
 		if (attr.isNillable())
 		{
-			String missingAggName = attr.getName() + AGGREGATION_MISSING_POSTFIX;
+			String missingAggName = attr.getName() + FieldConstants.AGGREGATION_MISSING_POSTFIX;
 			String missingAggFieldName = getAggregateFieldName(attr);
 			AggregationBuilder missingTermsAgg = AggregationBuilders.missing(missingAggName).field(missingAggFieldName);
 			aggs.add(missingTermsAgg);
@@ -127,21 +125,21 @@ public class AggregationGenerator
 			// which counts are expected to be close to accurate. Above this value, counts might become a bit more
 			// fuzzy. The maximum supported value is 40000, thresholds above this number will have the same effect as a
 			// threshold of 40000.
-			String cardinalityAggName = distinctAttr.getName() + AGGREGATION_DISTINCT_POSTFIX;
+			String cardinalityAggName = distinctAttr.getName() + FieldConstants.AGGREGATION_DISTINCT_POSTFIX;
 			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
 			CardinalityAggregationBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
 					.field(cardinalityAggFieldName).precisionThreshold(40000L);
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;
-			if (isNestedType(distinctAttr))
+			if (ElasticsearchEntityUtils.isNestedType(distinctAttr))
 			{
 				String nestedAggName = distinctAttr.getName() + AGGREGATION_NESTED_POSTFIX;
 				String nestedAggFieldName = getAggregatePathName(distinctAttr);
 				NestedAggregationBuilder nestedBuilder = AggregationBuilders.nested(nestedAggName, nestedAggFieldName);
 				nestedBuilder.subAggregation(distinctAgg);
 
-				if (isNestedType(attr))
+				if (ElasticsearchEntityUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
 					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders
@@ -156,7 +154,7 @@ public class AggregationGenerator
 			}
 			else
 			{
-				if (isNestedType(attr))
+				if (ElasticsearchEntityUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
 					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders
@@ -191,7 +189,7 @@ public class AggregationGenerator
 		}
 
 		// wrap in nested aggregation is this aggregation is nested
-		if (isNestedType(attr))
+		if (ElasticsearchEntityUtils.isNestedType(attr))
 		{
 			String nestedAggName = attr.getName() + AGGREGATION_NESTED_POSTFIX;
 			String nestedAggFieldName = getAggregatePathName(attr);
@@ -204,7 +202,7 @@ public class AggregationGenerator
 		}
 
 		// wrap in reverse nested aggregation if parent aggregation is nested
-		if (parentAttr != null && isNestedType(parentAttr))
+		if (parentAttr != null && ElasticsearchEntityUtils.isNestedType(parentAttr))
 		{
 			String reverseAggName = parentAttr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
 			ReverseNestedAggregationBuilder reverseNestedAgg = AggregationBuilders.reverseNested(reverseAggName);
@@ -216,11 +214,6 @@ public class AggregationGenerator
 		}
 
 		return aggs;
-	}
-
-	public static boolean isNestedType(Attribute attr)
-	{
-		return isReferenceType(attr);
 	}
 
 	private String getAggregatePathName(Attribute attr)
