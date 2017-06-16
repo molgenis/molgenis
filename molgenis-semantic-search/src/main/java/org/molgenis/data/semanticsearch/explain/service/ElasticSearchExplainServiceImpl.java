@@ -1,12 +1,11 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
 import org.apache.lucene.search.Explanation;
-import org.elasticsearch.action.explain.ExplainRequestBuilder;
-import org.elasticsearch.action.explain.ExplainResponse;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.client.ElasticsearchClientFacade;
+import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.generator.DocumentIdGenerator;
 import org.molgenis.data.elasticsearch.generator.QueryGenerator;
 import org.molgenis.data.meta.model.EntityType;
@@ -27,17 +26,17 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchExplainServiceImpl.class);
 
-	private final Client client;
+	private final ElasticsearchClientFacade clientFacade;
 	private final ExplainServiceHelper explainServiceHelper;
 	private final DocumentIdGenerator documentIdGenerator;
 	private final QueryGenerator queryGenerator;
 
 	@Autowired
-	public ElasticSearchExplainServiceImpl(Client client, ExplainServiceHelper explainServiceHelper,
-			DocumentIdGenerator documentIdGenerator)
+	public ElasticSearchExplainServiceImpl(ElasticsearchClientFacade clientFacade,
+			ExplainServiceHelper explainServiceHelper, DocumentIdGenerator documentIdGenerator)
 	{
 		this.explainServiceHelper = explainServiceHelper;
-		this.client = client;
+		this.clientFacade = clientFacade;
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 		this.queryGenerator = new QueryGenerator(documentIdGenerator);
 	}
@@ -45,18 +44,16 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 	public Explanation explain(Query<Entity> q, EntityType entityType, String documentId)
 	{
 		String indexName = documentIdGenerator.generateId(entityType);
-		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, indexName, documentId);
 		QueryBuilder queryBuilder = queryGenerator.createQueryBuilder(q.getRules(), entityType);
-		explainRequestBuilder.setQuery(queryBuilder);
-		ExplainResponse explainResponse = explainRequestBuilder.get();
-		if (explainResponse.hasExplanation())
+		Explanation explanation = clientFacade.explain(SearchHit.create(documentId, indexName), queryBuilder);
+		if (explanation != null)
 		{
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug(explainResponse.getExplanation().toString());
+				LOG.debug(explanation.toString());
 			}
 
-			return explainResponse.getExplanation();
+			return explanation;
 		}
 		return null;
 	}

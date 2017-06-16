@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch.client;
 
+import org.apache.lucene.search.Explanation;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
@@ -16,6 +17,8 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.explain.ExplainRequestBuilder;
+import org.elasticsearch.action.explain.ExplainResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -490,6 +493,38 @@ public class ElasticsearchClientFacade
 			}
 		}
 		return searchResponse.getAggregations();
+	}
+
+	public Explanation explain(SearchHit searchHit, QueryBuilder query)
+	{
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Explaining doc with id '{}' in index '{}' for query '{}' ...", searchHit.getId(),
+					searchHit.getIndex(), query);
+		}
+
+		String indexName = searchHit.getIndex();
+		String type = indexName;
+		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, type, searchHit.getId());
+		ExplainResponse explainResponse;
+		try
+		{
+			explainResponse = explainRequestBuilder.get();
+		}
+		catch (ElasticsearchException e)
+		{
+			LOG.error("", e);
+			throw new IndexException(
+					format("Error explaining doc with id '%s' in index '%s' for query '%s'.", searchHit.getId(),
+							searchHit.getIndex(), query));
+		}
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.trace("Explained doc with id '{}' in index '{}' for query.", searchHit.getId(), searchHit.getIndex(),
+					query);
+		}
+		return explainResponse.getExplanation();
 	}
 
 	public void index(Index index, Document document)
