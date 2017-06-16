@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
 import com.google.common.collect.Iterators;
+import org.apache.lucene.search.Explanation;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -41,8 +42,8 @@ public class ElasticsearchService implements SearchService
 	private final ContentGenerators contentGenerators;
 	private final DataService dataService;
 
-	public ElasticsearchService(ClientFacade elasticsearchClientFacade,
-			ContentGenerators contentGenerators, DataService dataService)
+	public ElasticsearchService(ClientFacade elasticsearchClientFacade, ContentGenerators contentGenerators,
+			DataService dataService)
 	{
 		this.elasticsearchClientFacade = requireNonNull(elasticsearchClientFacade);
 		this.contentGenerators = requireNonNull(contentGenerators);
@@ -111,7 +112,9 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public Stream<Object> search(EntityType entityType, Query<Entity> q)
 	{
-		return search(entityType, q, q.getOffset(), q.getPageSize());
+		int from = q.getOffset();
+		int size = q.getPageSize() > 0 ? q.getPageSize() : 10000;
+		return search(entityType, q, from, size);
 	}
 
 	private Stream<Object> search(EntityType entityType, Query<Entity> q, int from, int size)
@@ -141,6 +144,14 @@ public class ElasticsearchService implements SearchService
 		return new AggregateResponseParser()
 				.parseAggregateResponse(aggregateQuery.getAttributeX(), aggregateQuery.getAttributeY(),
 						aggregateQuery.getAttributeDistinct(), aggregations, dataService);
+	}
+
+	public Explanation explain(EntityType entityType, Object entityId, Query<Entity> q)
+	{
+		Index index = contentGenerators.createIndex(entityType);
+		Document document = contentGenerators.createDocument(entityId);
+		QueryBuilder query = contentGenerators.createQuery(q, entityType);
+		return elasticsearchClientFacade.explain(SearchHit.create(document.getId(), index.getName()), query);
 	}
 
 	@Override

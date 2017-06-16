@@ -1,8 +1,7 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
 import org.apache.lucene.search.Explanation;
-import org.molgenis.data.elasticsearch.client.ClientFacade;
-import org.molgenis.data.elasticsearch.generator.DocumentIdGenerator;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,10 +24,8 @@ public class ElasticSearchExplainServiceImplTest
 	public void setup()
 	{
 		explainServiceHelper = new ExplainServiceHelper();
-		ClientFacade client = mock(ClientFacade.class);
-		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
-		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(client, explainServiceHelper,
-				documentIdGenerator);
+		ElasticsearchService elasticsearchService = mock(ElasticsearchService.class);
+		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(elasticsearchService, explainServiceHelper);
 	}
 
 	@Test

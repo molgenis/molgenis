@@ -1,11 +1,9 @@
 package org.molgenis.data.index;
 
-import org.molgenis.data.MolgenisDataException;
-
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
-public class UnknownIndexException extends MolgenisDataException
+public class UnknownIndexException extends IndexException
 {
 	private static final long serialVersionUID = 1L;
 

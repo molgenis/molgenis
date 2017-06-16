@@ -506,7 +506,8 @@ public class ClientFacade implements Closeable
 		}
 
 		String indexName = searchHit.getIndex();
-		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, indexName, searchHit.getId());
+		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, indexName, searchHit.getId())
+				.setQuery(query);
 		ExplainResponse explainResponse;
 		try
 		{
@@ -579,7 +580,8 @@ public class ClientFacade implements Closeable
 
 		String indexName = index.getName();
 		String documentId = document.getId();
-		DeleteRequestBuilder deleteRequest = client.prepareDelete().setIndex(indexName).setId(documentId);
+		DeleteRequestBuilder deleteRequest = client.prepareDelete().setIndex(indexName).setType(indexName)
+				.setId(documentId);
 
 		DeleteResponse deleteResponse;
 		try
