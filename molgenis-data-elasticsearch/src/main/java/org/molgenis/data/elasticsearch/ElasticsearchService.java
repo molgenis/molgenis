@@ -4,6 +4,7 @@ import com.google.common.collect.Iterators;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -17,8 +18,6 @@ import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.EntityType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,18 +35,18 @@ import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing
 @Component
 public class ElasticsearchService implements SearchService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
-
 	private static final int BATCH_SIZE = 1000;
 
 	private final ElasticsearchClientFacade elasticsearchClientFacade;
 	private final ContentGenerators contentGenerators;
+	private final DataService dataService;
 
 	public ElasticsearchService(ElasticsearchClientFacade elasticsearchClientFacade,
-			ContentGenerators contentGenerators)
+			ContentGenerators contentGenerators, DataService dataService)
 	{
 		this.elasticsearchClientFacade = requireNonNull(elasticsearchClientFacade);
 		this.contentGenerators = requireNonNull(contentGenerators);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -78,17 +77,14 @@ public class ElasticsearchService implements SearchService
 	{
 		EntityType entityType = repository.getEntityType();
 
-		if (hasIndex(entityType)) // TODO just perform delete, index should exist
+		if (hasIndex(entityType))
 		{
-			LOG.debug("Delete index for repository {}...", repository.getName());
 			deleteIndex(entityType);
 		}
 
 		createIndex(entityType);
-		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityType),
 				entities -> index(entityType, entities.stream(), IndexingMode.ADD), BATCH_SIZE);
-		LOG.debug("Create index for repository {}...", repository.getName());
 	}
 
 	@Override
@@ -142,11 +138,9 @@ public class ElasticsearchService implements SearchService
 		QueryBuilder query = contentGenerators.createQuery(aggregateQuery.getQuery(), entityType);
 		Index index = contentGenerators.createIndex(entityType);
 		Aggregations aggregations = elasticsearchClientFacade.aggregate(aggregationList, query, index);
-
-		//		return aggregateResponseParser
-		//				.parseAggregateResponse(request.getAggregateAttribute1(), request.getAggregateAttribute2(),
-		//						request.getAggregateAttributeDistinct(), aggregations, dataService);
-		throw new UnsupportedOperationException("FIXME"); // FIXME create response
+		return new AggregateResponseParser()
+				.parseAggregateResponse(aggregateQuery.getAttributeX(), aggregateQuery.getAttributeY(),
+						aggregateQuery.getAttributeDistinct(), aggregations, dataService);
 	}
 
 	@Override
