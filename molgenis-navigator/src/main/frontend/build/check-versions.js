@@ -13,9 +13,9 @@ var versionRequirements = [
     versionRequirement: packageConfig.engines.node
   },
   {
-    name: 'npm',
-    currentVersion: exec('npm --version'),
-    versionRequirement: packageConfig.engines.npm
+    name: 'yarn',
+    currentVersion: exec('yarn --version'),
+    versionRequirement: packageConfig.engines.yarn
   }
 ]
 
