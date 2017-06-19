@@ -20,7 +20,7 @@ export const GET_ATTRIBUTE_TYPES = '__GET_ATTRIBUTE_TYPES__'
 export const toEntityType = (editorEntityType) => {
   return {
     'id': editorEntityType.id,
-    'label': editorEntityType.label,
+    'label': editorEntityType.label ? editorEntityType.label : 'New EntityType',
     'i18nLabel': editorEntityType.i18nLabel,
     'description': editorEntityType.description,
     'i18nDescription': editorEntityType.i18nDescription,
@@ -39,7 +39,7 @@ export const toEntityType = (editorEntityType) => {
 export const toAttribute = (attribute) => {
   return {
     'id': attribute.id,
-    'name': attribute.name,
+    'name': attribute.name ? attribute.name : 'EntityType unique attribute identifier',
     'type': attribute.type,
     'parent': attribute.parent,
     'refEntityType': attribute.refEntityType,
@@ -49,7 +49,7 @@ export const toAttribute = (attribute) => {
     'nullable': attribute.nullable,
     'auto': attribute.auto,
     'visible': attribute.visible,
-    'label': attribute.label,
+    'label': attribute.label ? attribute.label : 'New Attribute',
     'i18nLabel': attribute.i18nLabel,
     'description': attribute.description,
     'i18nDescription': attribute.i18nDescription,
@@ -143,11 +143,15 @@ export default {
   /**
    * Create a new EntityType
    * Response returns a blank EditorEntityType
+   * EditorEntityType is added to the list of entityTypes in the state
    */
-  [CREATE_ENTITY_TYPE] ({commit}) {
+  [CREATE_ENTITY_TYPE] ({commit, state}) {
     get({apiUrl: '/metadata-manager-service'}, '/create/entityType')
       .then(response => {
-        commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
+        const editorEntityType = toEntityType(response.entityType)
+        commit(SET_EDITOR_ENTITY_TYPE, editorEntityType)
+        commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
+        commit(SET_SELECTED_ENTITY_TYPE, editorEntityType)
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
