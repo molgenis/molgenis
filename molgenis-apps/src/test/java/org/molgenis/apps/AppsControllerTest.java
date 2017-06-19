@@ -130,6 +130,18 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	}
 
 	@Test
+	public void testViewAppWithIndexInAppResultsInRedirect() throws Exception
+	{
+		App app = mock(App.class);
+		when(app.getUseFreemarkerTemplate()).thenReturn(false);
+		when(app.getId()).thenReturn("id");
+		when(app.getName()).thenReturn("name");
+		when(app.isActive()).thenReturn(true);
+		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
+		mockMvc.perform(get(AppsController.URI + "/id")).andExpect(status().is3xxRedirection());
+	}
+
+	@Test
 	public void testViewAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
