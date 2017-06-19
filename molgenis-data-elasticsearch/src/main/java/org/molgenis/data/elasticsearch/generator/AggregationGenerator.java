@@ -7,7 +7,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.molgenis.data.elasticsearch.ElasticsearchEntityUtils;
+import org.molgenis.data.elasticsearch.AggregateUtils;
 import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -132,14 +132,14 @@ class AggregationGenerator
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;
-			if (ElasticsearchEntityUtils.isNestedType(distinctAttr))
+			if (AggregateUtils.isNestedType(distinctAttr))
 			{
 				String nestedAggName = distinctAttr.getName() + AGGREGATION_NESTED_POSTFIX;
 				String nestedAggFieldName = getAggregatePathName(distinctAttr);
 				NestedAggregationBuilder nestedBuilder = AggregationBuilders.nested(nestedAggName, nestedAggFieldName);
 				nestedBuilder.subAggregation(distinctAgg);
 
-				if (ElasticsearchEntityUtils.isNestedType(attr))
+				if (AggregateUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
 					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
@@ -153,7 +153,7 @@ class AggregationGenerator
 			}
 			else
 			{
-				if (ElasticsearchEntityUtils.isNestedType(attr))
+				if (AggregateUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
 					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
@@ -187,7 +187,7 @@ class AggregationGenerator
 		}
 
 		// wrap in nested aggregation is this aggregation is nested
-		if (ElasticsearchEntityUtils.isNestedType(attr))
+		if (AggregateUtils.isNestedType(attr))
 		{
 			String nestedAggName = attr.getName() + AGGREGATION_NESTED_POSTFIX;
 			String nestedAggFieldName = getAggregatePathName(attr);
@@ -200,7 +200,7 @@ class AggregationGenerator
 		}
 
 		// wrap in reverse nested aggregation if parent aggregation is nested
-		if (parentAttr != null && ElasticsearchEntityUtils.isNestedType(parentAttr))
+		if (parentAttr != null && AggregateUtils.isNestedType(parentAttr))
 		{
 			String reverseAggName = parentAttr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
 			ReverseNestedAggregationBuilder reverseNestedAgg = AggregationBuilders.reverseNested(reverseAggName);

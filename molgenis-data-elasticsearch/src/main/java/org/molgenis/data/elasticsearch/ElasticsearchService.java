@@ -18,6 +18,7 @@ import org.molgenis.data.elasticsearch.generator.ContentGenerators;
 import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.IndexingMode;
 import org.molgenis.data.index.SearchService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
 
@@ -40,8 +42,7 @@ public class ElasticsearchService implements SearchService
 	private final ContentGenerators contentGenerators;
 	private final DataService dataService;
 
-	public ElasticsearchService(ClientFacade clientFacade, ContentGenerators contentGenerators,
-			DataService dataService)
+	public ElasticsearchService(ClientFacade clientFacade, ContentGenerators contentGenerators, DataService dataService)
 	{
 		this.clientFacade = requireNonNull(clientFacade);
 		this.contentGenerators = requireNonNull(contentGenerators);
@@ -121,7 +122,30 @@ public class ElasticsearchService implements SearchService
 		Sort sort = q.getSort() != null ? contentGenerators.createSorts(q.getSort(), entityType) : null;
 		Index index = contentGenerators.createIndex(entityType);
 		SearchHits searchHits = clientFacade.search(query, from, size, sort, index);
-		return ElasticsearchEntityUtils.toEntityIds(searchHits.getHits().stream().map(SearchHit::getId));
+		return toEntityIds(entityType, searchHits.getHits().stream().map(SearchHit::getId));
+	}
+
+	private static Stream<Object> toEntityIds(EntityType entityType, Stream<String> documentIdStream)
+	{
+		return documentIdStream.map(documentId -> ElasticsearchService.toEntityId(entityType, documentId));
+	}
+
+	private static Object toEntityId(EntityType entityType, String documentId)
+	{
+		AttributeType attributeType = entityType.getIdAttribute().getDataType();
+		switch (attributeType)
+		{
+			case EMAIL:
+			case HYPERLINK:
+			case STRING:
+				return documentId;
+			case INT:
+				return Integer.parseInt(documentId);
+			case LONG:
+				return Long.parseLong(documentId);
+			default:
+				throw new RuntimeException(format("Invalid id attribute type '%s'", attributeType));
+		}
 	}
 
 	@Override
