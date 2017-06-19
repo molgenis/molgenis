@@ -50,7 +50,8 @@ class MappingGenerator
 		MappingType mappingType = toMappingType(attribute, depth, maxDepth);
 		boolean analyzeNGrams = isAnalyzeNGrams(attribute);
 		List<FieldMapping> nestedFieldMappings =
-				mappingType == MappingType.NESTED ? createFieldMappings(attribute.getRefEntity(), depth + 1, maxDepth) : null;
+				mappingType == MappingType.NESTED ? createFieldMappings(attribute.getRefEntity(), depth + 1,
+						maxDepth) : null;
 		return FieldMapping.create(fieldName, mappingType, analyzeNGrams, nestedFieldMappings);
 	}
 
@@ -101,15 +102,7 @@ class MappingGenerator
 			case MREF:
 			case ONE_TO_MANY:
 			case XREF:
-				if (depth < maxDepth)
-				{
-					return MappingType.NESTED;
-				}
-				else
-				{
-					Attribute refLabelAttribute = attribute.getRefEntity().getLabelAttribute();
-					return toMappingType(refLabelAttribute, depth + 1, maxDepth);
-				}
+				return toMappingTypeReferenceAttribute(attribute, depth, maxDepth);
 			case DATE:
 				return MappingType.DATE;
 			case DATE_TIME:
@@ -132,6 +125,19 @@ class MappingGenerator
 				throw new RuntimeException(format("Illegal attribute type '%s'", attributeType));
 			default:
 				throw new RuntimeException(format("Unknown attribute type '%s'", attributeType));
+		}
+	}
+
+	private MappingType toMappingTypeReferenceAttribute(Attribute referenceAttribute, int depth, int maxDepth)
+	{
+		if (depth < maxDepth)
+		{
+			return MappingType.NESTED;
+		}
+		else
+		{
+			Attribute refLabelAttribute = referenceAttribute.getRefEntity().getLabelAttribute();
+			return toMappingType(refLabelAttribute, depth + 1, maxDepth);
 		}
 	}
 }
