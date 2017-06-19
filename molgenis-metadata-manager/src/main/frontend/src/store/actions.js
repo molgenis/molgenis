@@ -1,11 +1,19 @@
 // $FlowFixMe
 import { get, post } from 'molgenis-api-client'
-import { CREATE_ALERT, SET_EDITOR_ENTITY_TYPE, SET_ENTITY_TYPES, SET_PACKAGES, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID, SET_ATTRIBUTE_TYPES } from './mutations'
+import {
+  UPDATE_EDITOR_ENTITY_TYPE,
+  CREATE_ALERT, SET_EDITOR_ENTITY_TYPE,
+  SET_ENTITY_TYPES, SET_PACKAGES,
+  SET_SELECTED_ENTITY_TYPE,
+  SET_SELECTED_ATTRIBUTE_ID,
+  SET_ATTRIBUTE_TYPES
+} from './mutations'
 
 export const GET_PACKAGES = '__GET_PACKAGES__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_EDITOR_ENTITY_TYPE = '__GET_EDITOR_ENTITY_TYPE__'
 export const CREATE_ENTITY_TYPE = '__CREATE_ENTITY_TYPE__'
+export const CREATE_ATTRIBUTE = '__CREATE_ATTRIBUTE__'
 export const SAVE_EDITOR_ENTITY_TYPE = '__SAVE_EDITOR_ENTITY_TYPE__'
 export const GET_ATTRIBUTE_TYPES = '__GET_ATTRIBUTE_TYPES__'
 
@@ -59,7 +67,7 @@ export default {
   [GET_ATTRIBUTE_TYPES] ({commit}) {
     get({apiUrl: '/api'}, '/v2/sys_md_Attribute/meta/type')
       .then(response => {
-        commit(SET_ATTRIBUTE_TYPES, response.enumOptions)
+        commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map((type) => type.toUpperCase()))
       }, error => {
         commit(CREATE_ALERT, {
           type: 'danger',
@@ -85,12 +93,39 @@ export default {
   },
   /**
    * Create a new EntityType
-   * Response returns an blank EditorEntityType
+   * Response returns a blank EditorEntityType
    */
   [CREATE_ENTITY_TYPE] ({commit}) {
     get({apiUrl: '/metadata-manager-service'}, '/create/entityType')
       .then(response => {
         commit(SET_EDITOR_ENTITY_TYPE, response.entityType)
+      }, error => {
+        if (error.errors) {
+          commit(CREATE_ALERT, {
+            type: 'danger',
+            message: error.errors[0].message
+          })
+        } else {
+          commit(CREATE_ALERT, {
+            type: 'danger',
+            message: 'Something went wrong, make sure you have permissions for creating entities.'
+          })
+        }
+      })
+  },
+  /**
+   * Create a new Attribute
+   * Response returns a blank Attribute
+   * Attribute is added to the list of attributes in the existing editorEntityType
+   */
+  [CREATE_ATTRIBUTE] ({commit, state}) {
+    get({apiUrl: '/metadata-manager-service'}, '/create/attribute')
+      .then(response => {
+        const attribute = response.attribute
+        commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
+
+        // Call an update on the attribute key with the existing attribute list + the new empty attribute
+        commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
