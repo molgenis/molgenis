@@ -57,11 +57,59 @@
             </div>
           </div>
 
+          <div class="form-group row">
+            <label class="col-3 col-form-label">Parent</label>
+            <div class="col">
+              <multiselect v-model="parent" :options="compoundAttributes" label="label"
+                           selectLabel="" deselectLabel="" placeholder="Select a parent attribute"></multiselect>
+            </div>
+          </div>
+
           <div v-if="isReferenceType" class="form-group row">
             <label class="col-3 col-form-label">Type</label>
             <div class="col">
               <multiselect v-model="refEntityType" :options="entityTypes" label="label"
                            selectLabel="" deselectLabel="" placeholder="Select a reference entity"></multiselect>
+            </div>
+          </div>
+
+          <div v-else-if="isNumericType">
+            <div class="form-group row">
+              <label class="col-3 col-form-label">Minimum range</label>
+              <div class="col">
+                <input v-model.number="rangeMin" class="form-control" type="number">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-3 col-form-label">Maximum range</label>
+              <div class="col">
+                <input v-model.number="rangeMax" class="form-control" type="number">
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="isEnumType" class="form-group row">
+            <label class="col-3 col-form-label">Enum Types</label>
+            <div class="col">
+              <input v-model.lazy="enumOptions" class="form-control" type="text">
+            </div>
+          </div>
+
+          <div v-else-if="isOneToManyType">
+            <div class="form-group row">
+              <label class="col-3 col-form-label">Mapped by</label>
+              <div class="col">
+                <multiselect v-model="mappedByEntityType" :options="entityTypes" label="label"
+                             selectLabel="" deselectLabel="" placeholder="Select a reference entity"></multiselect>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-3 col-form-label">Order by</label>
+              <div class="col">
+                <input v-model="orderBy" class="form-control" type="text">
+              </div>
             </div>
           </div>
         </div>
@@ -168,16 +216,20 @@
       ...mapGetters({
         selectedAttribute: 'getSelectedAttribute',
         editorEntityTypeAttributes: 'getEditorEntityTypeAttributes',
-        attributeTree: 'getAttributeTree'
+        attributeTree: 'getAttributeTree',
+        compoundAttributes: 'getCompoundAttributes'
       }),
       isReferenceType: function () {
-        return this.selectedAttribute.type === 'XREF' ||
-          this.selectedAttribute.type === 'MREF' ||
-          this.selectedAttribute.type === 'CATEGORICAL' ||
-          this.selectedAttribute.type === 'CATEGORICAL_MREF'
+        return ['XREF', 'MREF', 'CATEGORICAL', 'CATEGORICAL_MREF'].includes(this.selectedAttribute.type)
       },
-      editorEntityTypeAttributes: {
-        get () { return this.$store.editorEntityType.attributes }
+      isNumericType: function () {
+        return ['INT', 'LONG'].includes(this.selectedAttribute.type)
+      },
+      isEnumType: function () {
+        return this.selectedAttribute.type === 'ENUM'
+      },
+      isOneToManyType: function () {
+        return this.selectedAttribute.type === 'ONETOMANY'
       },
       name: {
         get () { return this.selectedAttribute.name },
@@ -191,9 +243,12 @@
         get () { return this.selectedAttribute.description },
         set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'description', value: value}) }
       },
+      parent: {
+        get () { return this.selectedAttribute.parent },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'parent', value: value}) }
+      },
       type: {
         get () { return this.selectedAttribute.type },
-        // FIXME when type is set, all other input fields become empty...
         set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'type', value: value}) }
       },
       refEntityType: {
@@ -235,6 +290,26 @@
       validationExpression: {
         get () { return this.selectedAttribute.validationExpression },
         set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'validationExpression', value: value}) }
+      },
+      enumOptions: {
+        get () { return this.selectedAttribute.enumOptions.join(',') },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'enumOptions', value: value.split(',')}) }
+      },
+      mappedByEntityType: {
+        get () { return this.selectedAttribute.mappedByEntityType },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'mappedByEntityType', value: value}) }
+      },
+      orderBy: {
+        get () { return this.selectedAttribute.orderBy },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'orderBy', value: value}) }
+      },
+      rangeMin: {
+        get () { return this.selectedAttribute.rangeMin },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'rangeMin', value: value}) }
+      },
+      rangeMax: {
+        get () { return this.selectedAttribute.rangeMax },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'rangeMax', value: value}) }
       }
     },
     components: {
