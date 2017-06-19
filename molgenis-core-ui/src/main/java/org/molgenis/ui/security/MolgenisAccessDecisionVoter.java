@@ -41,8 +41,8 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		if (pluginMatcher.matches())
 		{
 			String pluginId = pluginMatcher.group(1);
-			return getMolgenisPermissionService()
-					.hasPermissionOnPlugin(pluginId, Permission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
+			return getMolgenisPermissionService().hasPermissionOnPlugin(pluginId,
+					Permission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
 		}
 
 		Matcher menuMatcher = PATTERN_MENUID.matcher(requestUrl);

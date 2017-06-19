@@ -56,17 +56,22 @@ public class QueryValidatorTest
 					value -> queries.add(new Object[] { boolEntityType, new QueryImpl<>().eq("attr", value) }));
 
 			// CATEGORICAL, XREF, CATEGORICAL_MREF, MREF, ONE_TO_MANY
-			EnumSet.of(STRING, INT, LONG, EMAIL, HYPERLINK).forEach(
-					refIdAttrType -> EnumSet.of(CATEGORICAL, XREF, CATEGORICAL_MREF, MREF, ONE_TO_MANY)
-							.forEach(refAttrType ->
-							{
-								Entity refEntityType = createEntityType(refAttrType, refIdAttrType);
-								asList("1", 1, 1L, null).forEach(idValue -> queries
-										.add(new Object[] { refEntityType, new QueryImpl<>().eq("attr", idValue) }));
+			EnumSet.of(STRING, INT, LONG, EMAIL, HYPERLINK)
+				   .forEach(refIdAttrType -> EnumSet.of(CATEGORICAL, XREF, CATEGORICAL_MREF, MREF, ONE_TO_MANY)
+													.forEach(refAttrType ->
+													{
+														Entity refEntityType = createEntityType(refAttrType,
+																refIdAttrType);
+														asList("1", 1, 1L, null).forEach(idValue -> queries.add(
+																new Object[] { refEntityType,
+																		new QueryImpl<>().eq("attr", idValue) }));
 
-								Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("1").getMock();
-								queries.add(new Object[] { refEntityType, new QueryImpl<>().eq("attr", refEntity) });
-							}));
+														Entity refEntity = when(
+																mock(Entity.class).getIdValue()).thenReturn("1")
+																								.getMock();
+														queries.add(new Object[] { refEntityType,
+																new QueryImpl<>().eq("attr", refEntity) });
+													}));
 
 			// DATE
 			Entity dateEntityType = createEntityType(DATE);
@@ -183,11 +188,12 @@ public class QueryValidatorTest
 	public static Iterator<Object[]> validateInvalidProvider()
 	{
 		List<Object[]> queries = new ArrayList<>(6);
-		EnumSet.of(BOOL, DECIMAL, INT, LONG, DATE, DATE_TIME, ENUM).forEach(attrType -> queries
-				.add(new Object[] { new QueryImpl().eq("attr", "invalid"), createEntityType(attrType) }));
-		EnumSet.of(BOOL, DECIMAL, INT, LONG, DATE, DATE_TIME, ENUM, XREF, MREF, CATEGORICAL, CATEGORICAL_MREF).forEach(
-				attrType -> queries
-						.add(new Object[] { new QueryImpl().eq("attr", new Object()), createEntityType(attrType) }));
+		EnumSet.of(BOOL, DECIMAL, INT, LONG, DATE, DATE_TIME, ENUM)
+			   .forEach(attrType -> queries.add(
+					   new Object[] { new QueryImpl().eq("attr", "invalid"), createEntityType(attrType) }));
+		EnumSet.of(BOOL, DECIMAL, INT, LONG, DATE, DATE_TIME, ENUM, XREF, MREF, CATEGORICAL, CATEGORICAL_MREF)
+			   .forEach(attrType -> queries.add(
+					   new Object[] { new QueryImpl().eq("attr", new Object()), createEntityType(attrType) }));
 		queries.add(new Object[] { new QueryImpl().eq("unknownAttr", "str"), createEntityType(STRING) });
 		queries.add(new Object[] { new QueryImpl().eq("attr", "str"), createEntityType(COMPOUND) });
 		return queries.iterator();

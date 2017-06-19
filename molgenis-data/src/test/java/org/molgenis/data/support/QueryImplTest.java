@@ -54,8 +54,17 @@ public class QueryImplTest
 	public void nestDeep()
 	{
 		// A OR (B AND (C OR D))
-		Query<Entity> q = new QueryImpl<>().eq("field1", "value1").or().nest().eq("field2", "value2").and().nest()
-				.eq("field3", "value3").or().eq("field4", "value4").unnest().unnest();
+		Query<Entity> q = new QueryImpl<>().eq("field1", "value1")
+										   .or()
+										   .nest()
+										   .eq("field2", "value2")
+										   .and()
+										   .nest()
+										   .eq("field3", "value3")
+										   .or()
+										   .eq("field4", "value4")
+										   .unnest()
+										   .unnest();
 		QueryRule expectedRule1 = new QueryRule("field1", Operator.EQUALS, "value1");
 		QueryRule expectedRule1a = new QueryRule("field2", Operator.EQUALS, "value2");
 		QueryRule expectedRule1b1 = new QueryRule("field3", Operator.EQUALS, "value3");

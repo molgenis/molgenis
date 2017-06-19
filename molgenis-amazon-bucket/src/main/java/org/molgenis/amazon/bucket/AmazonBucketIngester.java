@@ -66,10 +66,10 @@ public class AmazonBucketIngester
 			}
 			progress.progress(2, "Importing...");
 			ImportService importService = importServiceFactory.getImportService(file.getName());
-			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(file);
-			EntityImportReport report = importService
-					.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING, "base");
+			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+					file);
+			EntityImportReport report = importService.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING,
+					"base");
 			progress.status("Download and import from Amazon Bucket done.");
 			progress.progress(3,
 					"Successfully imported " + report.getNrImportedEntitiesMap().keySet().toString() + " entities.");

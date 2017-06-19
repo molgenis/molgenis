@@ -40,7 +40,8 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
 		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext.getBeansOfType(SystemEntityType.class);
 		new GenericDependencyResolver().resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
-				.stream().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+									   .stream()
+									   .forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 	}
 
 	// long method name, because if a method annotated with @BeforeMethod and the same method name exists in a subclass then this method is ignored.

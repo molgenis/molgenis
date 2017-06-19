@@ -135,8 +135,19 @@ public class MolgenisRSQLTest extends AbstractMockitoTest
 	public void testComplexQuery() throws RSQLParserException
 	{
 		Query<Entity> q = molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", entityType);
-		assertEquals(q, new QueryImpl<>().nest().nest().eq("name", "piet").and().eq("age", 87).unnest().or().nest()
-				.eq("name", "klaas").and().gt("age", 100).unnest().unnest());
+		assertEquals(q, new QueryImpl<>().nest()
+										 .nest()
+										 .eq("name", "piet")
+										 .and()
+										 .eq("age", 87)
+										 .unnest()
+										 .or()
+										 .nest()
+										 .eq("name", "klaas")
+										 .and()
+										 .gt("age", 100)
+										 .unnest()
+										 .unnest());
 	}
 
 	@Test

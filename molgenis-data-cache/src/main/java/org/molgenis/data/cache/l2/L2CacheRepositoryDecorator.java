@@ -68,8 +68,8 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public Entity findOneById(Object id)
 	{
-		if (cacheable && !transactionInformation.isEntireRepositoryDirty(getEntityType()) && !transactionInformation
-				.isEntityDirty(EntityKey.create(getEntityType(), id)))
+		if (cacheable && !transactionInformation.isEntireRepositoryDirty(getEntityType())
+				&& !transactionInformation.isEntityDirty(EntityKey.create(getEntityType(), id)))
 		{
 			return l2Cache.get(delegate(), id);
 		}
@@ -124,8 +124,8 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	private List<Entity> findAllBatch(List<Object> ids)
 	{
 		String entityTypeId = getEntityType().getId();
-		Multimap<Boolean, Object> partitionedIds = Multimaps
-				.index(ids, id -> transactionInformation.isEntityDirty(EntityKey.create(entityTypeId, id)));
+		Multimap<Boolean, Object> partitionedIds = Multimaps.index(ids,
+				id -> transactionInformation.isEntityDirty(EntityKey.create(entityTypeId, id)));
 		Collection<Object> cleanIds = partitionedIds.get(false);
 		Collection<Object> dirtyIds = partitionedIds.get(true);
 

@@ -186,14 +186,16 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
-				.setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter()).build();
+								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
+								 .build();
 	}
 
 	@Test
 	public void create() throws Exception
 	{
 		mockMvc.perform(post(HREF_ENTITY).content("{id:'p1', name:'Piet'}").contentType(APPLICATION_JSON))
-				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
+			   .andExpect(status().isCreated())
+			   .andExpect(header().string("Location", HREF_ENTITY_ID));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
@@ -203,7 +205,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(
 				post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("id", "p1").param("name", "Piet"))
-				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
+			   .andExpect(status().isCreated())
+			   .andExpect(header().string("Location", HREF_ENTITY_ID));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
@@ -253,33 +256,37 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityType() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(ENTITY_META_RESPONSE_STRING));
+		mockMvc.perform(get(HREF_ENTITY_META))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(ENTITY_META_RESPONSE_STRING));
 	}
 
 	@Test
 	public void retrieveEntityTypeWritable() throws Exception
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
-		when(dataService.getCapabilities(ENTITY_NAME))
-				.thenReturn(new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
-		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-						+ ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
-						+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":true}"));
+		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
+				new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
+		mockMvc.perform(get(HREF_ENTITY_META))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(
+					   "{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+							   + ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
+							   + "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":true}"));
 	}
 
 	@Test
 	public void retrieveEntityTypeNotWritable() throws Exception
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
-		when(dataService.getCapabilities(ENTITY_NAME))
-				.thenReturn(new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
-		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(ENTITY_META_RESPONSE_STRING));
+		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
+				new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
+		mockMvc.perform(get(HREF_ENTITY_META))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(ENTITY_META_RESPONSE_STRING));
 	}
 
 	@Test
@@ -287,26 +294,32 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		String json = "{\"attributes\":[\"name\"]}";
 		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-						+ ENTITY_NAME + "\",\"writable\":false}"));
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(
+					   "{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+							   + ENTITY_NAME + "\",\"writable\":false}"));
 	}
 
 	@Test
 	public void retrieveEntityTypeSelectAttributes() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_META).param("attributes", "name")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-						+ ENTITY_NAME + "\",\"writable\":false}"));
+		mockMvc.perform(get(HREF_ENTITY_META).param("attributes", "name"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(
+					   "{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+							   + ENTITY_NAME + "\",\"writable\":false}"));
 	}
 
 	@Test
 	public void retrieveEntityTypeExpandAttributes() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string("{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"isAggregatable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"int\":{\"href\":\"/api/v1/Person/meta/int\",\"fieldType\":\"INT\",\"name\":\"int\",\"label\":\"int\",\"attributes\":[],\"enumOptions\":[],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
+		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(
+					   "{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"isAggregatable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"int\":{\"href\":\"/api/v1/Person/meta/int\",\"fieldType\":\"INT\",\"name\":\"int\",\"label\":\"int\",\"attributes\":[],\"enumOptions\":[],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
 	@Test
@@ -314,29 +327,35 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		restController.retrieveEntity(ENTITY_NAME, ENTITY_UNTYPED_ID, new String[] {}, new String[] {});
 
-		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string("{\"href\":\"" + HREF_ENTITY_ID
-						+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\",\"int\":1}"));
+		mockMvc.perform(get(HREF_ENTITY_ID))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID
+					   + "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\",\"int\":1}"));
 
 	}
 
 	@Test
 	public void retrieveSelectAttributes() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", "notname")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "\"}"));
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", "notname"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "\"}"));
 
 	}
 
 	@Test
 	public void retrieveEntityCollection() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY).param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
-				.param("q[0].field", "name").param("q[0].value", "Piet")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(ENTITY_COLLECTION_RESPONSE_STRING));
+		mockMvc.perform(get(HREF_ENTITY).param("start", "5")
+										.param("num", "10")
+										.param("q[0].operator", "EQUALS")
+										.param("q[0].field", "name")
+										.param("q[0].value", "Piet"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(ENTITY_COLLECTION_RESPONSE_STRING));
 
 	}
 
@@ -346,16 +365,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		String json = "{start:5, num:10, q:[{operator:EQUALS,field:name,value:Piet}]}";
 
 		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(ENTITY_COLLECTION_RESPONSE_STRING));
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(ENTITY_COLLECTION_RESPONSE_STRING));
 	}
 
 	@Test
 	public void retrieveEntityAttribute() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
+		mockMvc.perform(get(HREF_ENTITY_ID + "/name"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
 
 	@Test
@@ -370,8 +391,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		String json = "{\"attributes\":[\"name\"]}";
 		mockMvc.perform(
 				post(HREF_ENTITY_ID + "/name").param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
 
 	@Test
@@ -468,19 +490,22 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById("refEntity", ENTITY_UNTYPED_ID)).thenReturn(entityXref);
 		when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
 		when(dataService.getEntityType("refEntity")).thenReturn(refEntityType);
-		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(gsonHttpMessageConverter)
-				.build();
+		mockMvc = MockMvcBuilders.standaloneSetup(restController)
+								 .setMessageConverters(gsonHttpMessageConverter)
+								 .build();
 
-		mockMvc.perform(get(HREF_ENTITY_ID + "/xrefValue")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(
-				content().string("{\"href\":\"/api/v1/Person/p1/xrefValue\",\"id\":\"p1\",\"name\":\"Piet\"}"));
+		mockMvc.perform(get(HREF_ENTITY_ID + "/xrefValue"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(
+					   content().string("{\"href\":\"/api/v1/Person/p1/xrefValue\",\"id\":\"p1\",\"name\":\"Piet\"}"));
 	}
 
 	@Test
 	public void update() throws Exception
 	{
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
-				.andExpect(status().isOk());
+			   .andExpect(status().isOk());
 
 		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
@@ -493,7 +518,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		doThrow(new MolgenisDataException()).when(dataService).update(anyString(), any(Entity.class));
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+			   .andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -507,7 +532,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getEntityType()).thenReturn(entityType);
 		when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
-				.andExpect(status().isInternalServerError());
+			   .andExpect(status().isInternalServerError());
 	}
 
 	@Test
@@ -516,7 +541,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_UNTYPED_ID), any(Fetch.class))).thenReturn(null);
 
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
-				.andExpect(status().isNotFound());
+			   .andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -524,7 +549,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(
 				post(HREF_ENTITY_ID + "/name").param("_method", "PUT").content("Klaas").contentType(APPLICATION_JSON))
-				.andExpect(status().isOk());
+			   .andExpect(status().isOk());
 		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
 
@@ -532,28 +557,36 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void updateAttribute_unknownEntity() throws Exception
 	{
 		mockMvc.perform(post(BASE_URI + "/unknownentity/" + ENTITY_UNTYPED_ID + "/name").param("_method", "PUT")
-				.content("Klaas").contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
+																						.content("Klaas")
+																						.contentType(APPLICATION_JSON))
+			   .andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void updateAttribute_unknownEntityId() throws Exception
 	{
-		mockMvc.perform(post(HREF_ENTITY + "/666" + "/name").param("_method", "PUT").content("Klaas")
-				.contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
+		mockMvc.perform(post(HREF_ENTITY + "/666" + "/name").param("_method", "PUT")
+															.content("Klaas")
+															.contentType(APPLICATION_JSON))
+			   .andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void updateAttribute_unknownAttribute() throws Exception
 	{
-		mockMvc.perform(post(HREF_ENTITY_ID + "/unknownattribute").param("_method", "PUT").content("Klaas")
-				.contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
+		mockMvc.perform(post(HREF_ENTITY_ID + "/unknownattribute").param("_method", "PUT")
+																  .content("Klaas")
+																  .contentType(APPLICATION_JSON))
+			   .andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void updateFromFormPost() throws Exception
 	{
-		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "PUT").param("name", "Klaas")
-				.contentType(APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
+		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "PUT")
+											.param("name", "Klaas")
+											.contentType(APPLICATION_FORM_URLENCODED))
+			   .andExpect(status().isNoContent());
 
 		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
@@ -563,7 +596,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(
 				post(HREF_ENTITY_ID).param("_method", "PUT").content("{name:Klaas}").contentType(APPLICATION_JSON))
-				.andExpect(status().isOk());
+			   .andExpect(status().isOk());
 
 		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
@@ -585,16 +618,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityCollectionCsv() throws Exception
 	{
 		mockMvc.perform(get(BASE_URI + "/csv/Person").param("start", "5").param("num", "10").param("q", "name==Piet"))
-				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
-				.andExpect(content().string(CSV_HEADER + "\"Piet\",\"p1\",\"enum1\",\"1\"\n"));
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType("text/csv"))
+			   .andExpect(content().string(CSV_HEADER + "\"Piet\",\"p1\",\"enum1\",\"1\"\n"));
 	}
 
 	@Test
 	public void retrieveSortedEntityCollectionCsv() throws Exception
 	{
 		mockMvc.perform(get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
-				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
-				.andExpect(content().string(CSV_HEADER + "\"Klaas\",\"p2\",,\"2\"\n\"Piet\",\"p1\",\"enum1\",\"1\"\n"));
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType("text/csv"))
+			   .andExpect(content().string(CSV_HEADER + "\"Klaas\",\"p2\",,\"2\"\n\"Piet\",\"p1\",\"enum1\",\"1\"\n"));
 	}
 
 	@Configuration

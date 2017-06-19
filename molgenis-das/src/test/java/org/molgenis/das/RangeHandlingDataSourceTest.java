@@ -56,10 +56,9 @@ public class RangeHandlingDataSourceTest
 	@Test()
 	public void createDasFeature() throws UnimplementedFeatureException, DataSourceException, MalformedURLException
 	{
-		DasFeature dasFeatureUnderTest = source
-				.createDasFeature(0, 1000, "vatiant_identifier", "name", "variant_description",
-						"http://www.molgenis.org/", new DasType("0", "", "", "type"),
-						new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), "", "", new ArrayList<String>());
+		DasFeature dasFeatureUnderTest = source.createDasFeature(0, 1000, "vatiant_identifier", "name",
+				"variant_description", "http://www.molgenis.org/", new DasType("0", "", "", "type"),
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), "", "", new ArrayList<String>());
 		assertEquals(dasFeature, dasFeatureUnderTest);
 	}
 

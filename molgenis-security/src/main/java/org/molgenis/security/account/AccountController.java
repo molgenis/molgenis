@@ -141,8 +141,10 @@ public class AccountController
 			String activationUri = null;
 			if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
 			{
-				activationUri = ServletUriComponentsBuilder.fromCurrentRequest().replacePath(URI + "/activate").build()
-						.toUriString();
+				activationUri = ServletUriComponentsBuilder.fromCurrentRequest()
+														   .replacePath(URI + "/activate")
+														   .build()
+														   .toUriString();
 			}
 			else
 			{
@@ -152,8 +154,7 @@ public class AccountController
 			}
 			accountService.createUser(user, activationUri);
 
-			String successMessage = appSettings
-					.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
+			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
 			captchaService.removeCaptcha();
 			return Collections.singletonMap("message", successMessage);
 		}

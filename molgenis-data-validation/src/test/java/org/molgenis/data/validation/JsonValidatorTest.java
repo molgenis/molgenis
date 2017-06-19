@@ -30,8 +30,9 @@ public class JsonValidatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testLoadAndValidate() throws Exception
 	{
-		String schemaJson = gson.toJson(of("title", "Hello World Job", "type", "object", "properties",
-				of("delay", of("type", "integer")), "required", singletonList("delay")));
+		String schemaJson = gson.toJson(
+				of("title", "Hello World Job", "type", "object", "properties", of("delay", of("type", "integer")),
+						"required", singletonList("delay")));
 		Schema schema = jsonValidator.loadSchema(schemaJson);
 		jsonValidator.validate("{\"delay\":10}", schema);
 	}

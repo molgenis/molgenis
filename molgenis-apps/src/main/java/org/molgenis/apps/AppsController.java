@@ -159,8 +159,13 @@ public class AppsController extends MolgenisPluginController
 			iconHref = null;
 		}
 
-		return AppInfoDto.builder().setId(app.getId()).setName(app.getName()).setDescription(app.getDescription())
-				.setActive(app.isActive()).setIconHref(iconHref).build();
+		return AppInfoDto.builder()
+						 .setId(app.getId())
+						 .setName(app.getName())
+						 .setDescription(app.getDescription())
+						 .setActive(app.isActive())
+						 .setIconHref(iconHref)
+						 .build();
 	}
 
 	@ExceptionHandler(AppsException.class)

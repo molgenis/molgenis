@@ -83,26 +83,44 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 			setLabel("Genomic data settings");
 			setDescription("Settings for genomic data sets.");
 
-			addAttribute(ATTRS_POS).setNillable(false).setDefaultValue(DEFAULT_ATTRS_POS).setLabel("Start nucleotide")
-					.setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_CHROM).setNillable(false).setDefaultValue(DEFAULT_ATTRS_CHROM).setLabel("Chromosome")
-					.setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_REF).setNillable(false).setDefaultValue(DEFAULT_ATTRS_REF).setLabel("Reference base(s)")
-					.setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_ALT).setNillable(false).setDefaultValue(DEFAULT_ATTRS_ALT).setLabel("Alternate base(s)")
-					.setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_IDENTIFIER).setNillable(false).setDefaultValue(DEFAULT_ATTRS_ID).setLabel("Identifier")
-					.setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_STOP).setNillable(false).setDefaultValue(DEFAULT_ATTRS_STOP).setLabel("End nucleotide")
-					.setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_DESCRIPTION).setNillable(false).setDefaultValue(DEFAULT_ATTRS_DESCRIPTION)
-					.setLabel("Description").setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_PATIENT_ID).setNillable(false).setDefaultValue(DEFAULT_ATTRS_PATIENT_ID)
-					.setLabel("Patient identifier").setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_NAME).setNillable(true).setLabel("Name")
-					.setDescription("Comma-separated attribute names");
-			addAttribute(ATTRS_LINKOUT).setNillable(true).setLabel("Link out")
-					.setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_POS).setNillable(false)
+								   .setDefaultValue(DEFAULT_ATTRS_POS)
+								   .setLabel("Start nucleotide")
+								   .setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_CHROM).setNillable(false)
+									 .setDefaultValue(DEFAULT_ATTRS_CHROM)
+									 .setLabel("Chromosome")
+									 .setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_REF).setNillable(false)
+								   .setDefaultValue(DEFAULT_ATTRS_REF)
+								   .setLabel("Reference base(s)")
+								   .setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_ALT).setNillable(false)
+								   .setDefaultValue(DEFAULT_ATTRS_ALT)
+								   .setLabel("Alternate base(s)")
+								   .setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_IDENTIFIER).setNillable(false)
+										  .setDefaultValue(DEFAULT_ATTRS_ID)
+										  .setLabel("Identifier")
+										  .setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_STOP).setNillable(false)
+									.setDefaultValue(DEFAULT_ATTRS_STOP)
+									.setLabel("End nucleotide")
+									.setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_DESCRIPTION).setNillable(false)
+										   .setDefaultValue(DEFAULT_ATTRS_DESCRIPTION)
+										   .setLabel("Description")
+										   .setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_PATIENT_ID).setNillable(false)
+										  .setDefaultValue(DEFAULT_ATTRS_PATIENT_ID)
+										  .setLabel("Patient identifier")
+										  .setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_NAME).setNillable(true)
+									.setLabel("Name")
+									.setDescription("Comma-separated attribute names");
+			addAttribute(ATTRS_LINKOUT).setNillable(true)
+									   .setLabel("Link out")
+									   .setDescription("Comma-separated attribute names");
 		}
 	}
 

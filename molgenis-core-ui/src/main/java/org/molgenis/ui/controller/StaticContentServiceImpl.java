@@ -70,8 +70,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public String getContent(String key)
 	{
-		StaticContent staticContent = RunAsSystemProxy
-				.runAsSystem(() -> dataService.findOneById(STATIC_CONTENT, key, StaticContent.class));
+		StaticContent staticContent = RunAsSystemProxy.runAsSystem(
+				() -> dataService.findOneById(STATIC_CONTENT, key, StaticContent.class));
 		return staticContent != null ? staticContent.getContent() : null;
 	}
 }

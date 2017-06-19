@@ -75,18 +75,17 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = createThousandGenomesOutputAttributes();
 
-		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
-				.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE, NAME,
-						"The 1000 Genomes Project is an international collaboration to produce an "
-								+ "extensive public catalog of human genetic variation, including SNPs and structural variants, "
-								+ "and their haplotype contexts. This resource will support genome-wide association studies and other "
-								+ "medical research studies. "
-								+ "The genomes of about 2500 unidentified people from about 25 populations around the world will be"
-								+ "sequenced using next-generation sequencing technologies. "
-								+ "The results of the study will be freely and publicly accessible to researchers worldwide. "
-								+ "Further information about the project is available in the About tab. Information about downloading, "
-								+ "browsing or using the 1000 Genomes data is available at: http://www.1000genomes.org/ ",
-						attributes);
+		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE,
+				NAME, "The 1000 Genomes Project is an international collaboration to produce an "
+						+ "extensive public catalog of human genetic variation, including SNPs and structural variants, "
+						+ "and their haplotype contexts. This resource will support genome-wide association studies and other "
+						+ "medical research studies. "
+						+ "The genomes of about 2500 unidentified people from about 25 populations around the world will be"
+						+ "sequenced using next-generation sequencing technologies. "
+						+ "The results of the study will be freely and publicly accessible to researchers worldwide. "
+						+ "Further information about the project is available in the About tab. Information about downloading, "
+						+ "browsing or using the 1000 Genomes data is available at: http://www.1000genomes.org/ ",
+				attributes);
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 
@@ -98,10 +97,10 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) ->
 		{
 			thousendGenomesAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
-			thousendGenomesAnnotatorSettings
-					.set(FILEPATTERN, "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
-			thousendGenomesAnnotatorSettings
-					.set(CHROMOSOMES, "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
+			thousendGenomesAnnotatorSettings.set(FILEPATTERN,
+					"ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
+			thousendGenomesAnnotatorSettings.set(CHROMOSOMES,
+					"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
 		})
 		{
 			@Override
@@ -113,8 +112,8 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 			@Override
 			protected Object getResourceAttributeValue(Attribute attr, Entity entityType)
 			{
-				String attrName = THOUSAND_GENOME_AF
-						.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
+				String attrName = THOUSAND_GENOME_AF.equals(
+						attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
 				return entityType.get(attrName);
 			}
 		};
@@ -124,9 +123,12 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 
 	private List<Attribute> createThousandGenomesOutputAttributes()
 	{
-		return singletonList(attributeFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING).setDescription(
-				"The allele frequency for variants seen in the population used for the thousand genomes project")
-				.setLabel(THOUSAND_GENOME_AF_LABEL));
+		return singletonList(attributeFactory.create()
+											 .setName(THOUSAND_GENOME_AF)
+											 .setDataType(STRING)
+											 .setDescription(
+													 "The allele frequency for variants seen in the population used for the thousand genomes project")
+											 .setLabel(THOUSAND_GENOME_AF_LABEL));
 	}
 
 	@Bean

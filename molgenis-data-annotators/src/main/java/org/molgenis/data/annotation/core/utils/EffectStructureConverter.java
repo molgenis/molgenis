@@ -123,7 +123,8 @@ public class EffectStructureConverter
 				{
 					//was an empty effect entity created? this entity can be recoginized by the fact that it only has a filled Id attribute and Variant xref
 					if (effectAttribute.getName().equals(effectEntityType.getIdAttribute().getName()) || effectAttribute
-							.getName().equals(VARIANT))
+							.getName()
+							.equals(VARIANT))
 					{
 					}
 					else if (effectEntity.get(effectAttribute.getName()) != null)
@@ -155,9 +156,9 @@ public class EffectStructureConverter
 		EntityType effectsEntityType = createEffectsEntityType(effectFieldAttributeList, effectEntityName,
 				annotatorAttributes);
 
-		return StreamSupport.stream(vcfRepository.spliterator(), false).flatMap(
-				entity -> createVariantEffectStructureForSingleEntity(effectsAttribute, effectFieldAttributeList,
-						effectsEntityType, entity, variantEntityType));
+		return StreamSupport.stream(vcfRepository.spliterator(), false)
+							.flatMap(entity -> createVariantEffectStructureForSingleEntity(effectsAttribute,
+									effectFieldAttributeList, effectsEntityType, entity, variantEntityType));
 	}
 
 	private EntityType removeAttributeAndCreateEntityTypeCopy(Attribute attributeToParse, EntityType inputEntityType)
@@ -196,9 +197,8 @@ public class EffectStructureConverter
 		String description = effectAttributeToParse.getDescription();
 		if (description.indexOf(':') == -1)
 		{
-			throw new RuntimeException(
-					"Unable to create entitystructure, missing semicolon in description of [" + effectAttributeToParse
-							.getName() + "]");
+			throw new RuntimeException("Unable to create entitystructure, missing semicolon in description of ["
+					+ effectAttributeToParse.getName() + "]");
 		}
 		return description;
 	}
@@ -241,9 +241,11 @@ public class EffectStructureConverter
 		for (String attribute : attributeStrings)
 		{
 			AttributeType type = annotatorAttributeMap.containsKey(attribute) ? annotatorAttributeMap.get(attribute)
-					.getDataType() : STRING;
-			Attribute attr = attributeFactory.create().setName(StringUtils.deleteWhitespace(attribute))
-					.setDataType(type).setLabel(attribute);
+																									 .getDataType() : STRING;
+			Attribute attr = attributeFactory.create()
+											 .setName(StringUtils.deleteWhitespace(attribute))
+											 .setDataType(type)
+											 .setLabel(attribute);
 			attributeList.add(attr);
 		}
 		return attributeList;

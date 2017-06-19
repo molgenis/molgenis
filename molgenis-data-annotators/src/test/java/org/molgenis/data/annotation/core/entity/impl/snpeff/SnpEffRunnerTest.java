@@ -117,9 +117,11 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		effectsEMD.addAttribute(effectsMetaData.getProteinPositionAttr());
 		effectsEMD.addAttribute(effectsMetaData.getDistanceToFeatureAttr());
 		effectsEMD.addAttribute(effectsMetaData.getErrorsAttr());
-		effectsEMD.addAttribute(
-				attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
-						.setRefEntity(metaDataCanAnnotate));
+		effectsEMD.addAttribute(attributeFactory.create()
+												.setName(EffectsMetaData.VARIANT)
+												.setNillable(false)
+												.setDataType(XREF)
+												.setRefEntity(metaDataCanAnnotate));
 
 		Entity singleAlleleEntity1 = new DynamicEntity(metaDataCanAnnotate);
 		singleAlleleEntity1.set(vcfAttributes.CHROM, "1");
@@ -169,8 +171,8 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		singleAlleleEntity8.set(vcfAttributes.REF, "G");
 		singleAlleleEntity8.set(vcfAttributes.ALT, "A");
 
-		singleAlleleEntities
-				.addAll(newArrayList(singleAlleleEntity1, singleAlleleEntity2, singleAlleleEntity3, singleAlleleEntity4,
+		singleAlleleEntities.addAll(
+				newArrayList(singleAlleleEntity1, singleAlleleEntity2, singleAlleleEntity3, singleAlleleEntity4,
 						singleAlleleEntity5, singleAlleleEntity6, singleAlleleEntity7, singleAlleleEntity8));
 
 		Entity multiAlleleEntity1 = new DynamicEntity(metaDataCanAnnotate);
@@ -197,8 +199,8 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		multiAlleleEntity4.set(vcfAttributes.REF, "T");
 		multiAlleleEntity4.set(vcfAttributes.ALT, "TG, A, G");
 
-		multiAlleleEntities
-				.addAll(newArrayList(multiAlleleEntity1, multiAlleleEntity2, multiAlleleEntity3, multiAlleleEntity4));
+		multiAlleleEntities.addAll(
+				newArrayList(multiAlleleEntity1, multiAlleleEntity2, multiAlleleEntity3, multiAlleleEntity4));
 
 		Entity multiGeneEntity1 = new DynamicEntity(metaDataCanAnnotate);
 		multiGeneEntity1.set(vcfAttributes.CHROM, "2");
@@ -381,10 +383,9 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		expectedSingleAllele8.set(DISTANCE_TO_FEATURE, "");
 		expectedSingleAllele8.set(ERRORS, "");
 
-		expectedSingleAlleleEffectEntities
-				.addAll(newArrayList(expectedSingleAllele1, expectedSingleAllele2, expectedSingleAllele3,
-						expectedSingleAllele4, expectedSingleAllele5, expectedSingleAllele6, expectedSingleAllele7,
-						expectedSingleAllele8));
+		expectedSingleAlleleEffectEntities.addAll(
+				newArrayList(expectedSingleAllele1, expectedSingleAllele2, expectedSingleAllele3, expectedSingleAllele4,
+						expectedSingleAllele5, expectedSingleAllele6, expectedSingleAllele7, expectedSingleAllele8));
 
 		Entity expectedMultiAllele1 = new DynamicEntity(effectsEMD);
 		expectedMultiAllele1.set(EffectsMetaData.ID, null);
@@ -638,11 +639,10 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		expectedMultiAllele12.set(DISTANCE_TO_FEATURE, "");
 		expectedMultiAllele12.set(ERRORS, "");
 
-		expectedMultiAlleleEffectEntities
-				.addAll(newArrayList(expectedMultiAllele1, expectedMultiAllele2, expectedMultiAllele3,
-						expectedMultiAllele4, expectedMultiAllele5, expectedMultiAllele6, expectedMultiAllele7,
-						expectedMultiAllele8, expectedMultiAllele9, expectedMultiAllele10, expectedMultiAllele11,
-						expectedMultiAllele12));
+		expectedMultiAlleleEffectEntities.addAll(
+				newArrayList(expectedMultiAllele1, expectedMultiAllele2, expectedMultiAllele3, expectedMultiAllele4,
+						expectedMultiAllele5, expectedMultiAllele6, expectedMultiAllele7, expectedMultiAllele8,
+						expectedMultiAllele9, expectedMultiAllele10, expectedMultiAllele11, expectedMultiAllele12));
 
 		Entity expectedMultiGene1 = new DynamicEntity(effectsEMD);
 		expectedMultiGene1.set(EffectsMetaData.ID, null);
@@ -729,8 +729,8 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		expectedMultiGene4.set(ERRORS, "");
 
 		multiGeneEntities.addAll(newArrayList(multiGeneEntity1, multiGeneEntity2));
-		expectedMultiGeneEffectEntities
-				.addAll(newArrayList(expectedMultiGene1, expectedMultiGene2, expectedMultiGene3, expectedMultiGene4));
+		expectedMultiGeneEffectEntities.addAll(
+				newArrayList(expectedMultiGene1, expectedMultiGene2, expectedMultiGene3, expectedMultiGene4));
 	}
 
 	@BeforeMethod
@@ -749,12 +749,11 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	{
 		try
 		{
-			List<String> params = Arrays
-					.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
-							"-spliceSiteSize", "5");
-			when(jarRunner
-					.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile(getClass(), "/test-edgecases.vcf")))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/snpEffOutputCount.vcf"));
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
+					"0", "-spliceSiteSize", "5");
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+					ResourceUtils.getFile(getClass(), "/test-edgecases.vcf"))).thenReturn(
+					ResourceUtils.getFile(getClass(), "/snpEffOutputCount.vcf"));
 		}
 		catch (Exception e)
 		{
@@ -823,19 +822,19 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	{
 		try
 		{
-			List<String> params = Arrays
-					.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
-							"-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/snpeff-single-allele-output.vcf"));
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
+					"0", "-spliceSiteSize", "5");
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+					ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
+					ResourceUtils.getFile(getClass(), "/snpeff-single-allele-output.vcf"));
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		List<Entity> results = newArrayList(snpEffRunner
-				.getSnpEffects(singleAlleleEntities.iterator(), ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
+		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(singleAlleleEntities.iterator(),
+				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
 
 		// Set id to null to prevent matching auto generated identifiers
 		for (Entity resultEntity : results)
@@ -850,19 +849,19 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	{
 		try
 		{
-			List<String> params = Arrays
-					.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
-							"-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/snpeff-multi-allele-output.vcf"));
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
+					"0", "-spliceSiteSize", "5");
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+					ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
+					ResourceUtils.getFile(getClass(), "/snpeff-multi-allele-output.vcf"));
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		List<Entity> results = newArrayList(snpEffRunner
-				.getSnpEffects(multiAlleleEntities.iterator(), ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
+		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(multiAlleleEntities.iterator(),
+				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
 
 		// Set id to null to prevent matching auto generated identifiers
 		for (Entity resultEntity : results)
@@ -877,19 +876,19 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	{
 		try
 		{
-			List<String> params = Arrays
-					.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
-							"-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/snpeff-multi-gene-output.vcf"));
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
+					"0", "-spliceSiteSize", "5");
+			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+					ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
+					ResourceUtils.getFile(getClass(), "/snpeff-multi-gene-output.vcf"));
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		List<Entity> results = newArrayList(snpEffRunner
-				.getSnpEffects(multiGeneEntities.iterator(), ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
+		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(multiGeneEntities.iterator(),
+				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
 
 		// Set id to null to prevent matching auto generated identifiers
 		for (Entity resultEntity : results)

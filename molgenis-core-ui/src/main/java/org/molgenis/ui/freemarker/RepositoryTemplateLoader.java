@@ -36,9 +36,8 @@ public class RepositoryTemplateLoader implements TemplateLoader
 	@Override
 	public Object findTemplateSource(String name) throws IOException
 	{
-		FreemarkerTemplate template = dataService
-				.findOne(FREEMARKER_TEMPLATE, new QueryImpl<FreemarkerTemplate>().eq("Name", name),
-						FreemarkerTemplate.class);
+		FreemarkerTemplate template = dataService.findOne(FREEMARKER_TEMPLATE,
+				new QueryImpl<FreemarkerTemplate>().eq("Name", name), FreemarkerTemplate.class);
 
 		if (template == null)
 		{

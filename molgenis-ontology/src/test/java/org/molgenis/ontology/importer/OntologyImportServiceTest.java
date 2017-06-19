@@ -55,8 +55,8 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 		when(dataService.getRepository(entityTypeId0)).thenReturn(targetRepository0);
 		when(dataService.getRepository(entityTypeId1)).thenReturn(targetRepository1);
 
-		EntityImportReport entityImportReport = ontologyImportService
-				.doImport(repositoryCollection, DatabaseAction.ADD, null);
+		EntityImportReport entityImportReport = ontologyImportService.doImport(repositoryCollection, DatabaseAction.ADD,
+				null);
 
 		assertEquals(entityImportReport.getNewEntities(), emptyList());
 		assertEquals(entityImportReport.getNrImportedEntitiesMap(), of(entityTypeId0, 1, entityTypeId1, 1));

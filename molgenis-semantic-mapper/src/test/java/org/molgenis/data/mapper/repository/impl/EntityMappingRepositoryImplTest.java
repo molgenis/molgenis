@@ -99,10 +99,10 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 
 		entityMappingEntities.add(entityMappingEntity);
 
-		when(dataService.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE)))
-				.thenReturn(targetEntityType);
-		when(dataService.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE)))
-				.thenReturn(sourceEntityType);
+		when(dataService.getEntityType(
+				entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE))).thenReturn(targetEntityType);
+		when(dataService.getEntityType(
+				entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE))).thenReturn(sourceEntityType);
 
 		assertEquals(entityMappingRepository.toEntityMappings(entityMappingEntities), entityMappings);
 	}
@@ -117,8 +117,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		targetEntityType.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
-		attributeMappings
-				.add(new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes, CURATED.toString()));
+		attributeMappings.add(
+				new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes, CURATED.toString()));
 
 		Collection<EntityMapping> entityMappings = singletonList(
 				new EntityMapping(AUTO_ID, sourceEntityType, targetEntityType, attributeMappings));
@@ -141,8 +141,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		entityMappingEntities.add(entityMappingEntity);
 
-		assertTrue(EntityUtils
-				.equals(entityMappingRepository.upsert(entityMappings).get(0), entityMappingEntities.get(0)));
+		assertTrue(EntityUtils.equals(entityMappingRepository.upsert(entityMappings).get(0),
+				entityMappingEntities.get(0)));
 	}
 
 	@Configuration

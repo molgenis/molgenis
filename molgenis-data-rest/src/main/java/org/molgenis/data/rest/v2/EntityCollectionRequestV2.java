@@ -86,9 +86,19 @@ class EntityCollectionRequestV2
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append("EntityCollectionRequestV2 [q=").append(q).append(", aggs=").append(aggs).append(", sort=")
-				.append(sort).append(", attrs=").append(attrs).append(", start=").append(start).append(", num=")
-				.append(num).append("]");
+		builder.append("EntityCollectionRequestV2 [q=")
+			   .append(q)
+			   .append(", aggs=")
+			   .append(aggs)
+			   .append(", sort=")
+			   .append(sort)
+			   .append(", attrs=")
+			   .append(attrs)
+			   .append(", start=")
+			   .append(start)
+			   .append(", num=")
+			   .append(num)
+			   .append("]");
 		return builder.toString();
 	}
 }

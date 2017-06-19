@@ -71,15 +71,22 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 		emdIn.addAttribute(attributeFactory.create().setName(GENE.getAttributeName()));
 		emdIn.addAttribute(attributeFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
 		emdIn.addAttribute(attributeFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
-		emdIn.addAttribute(attributeFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
-				.setLabel(CONDITION_LABEL));
-		emdIn.addAttribute(attributeFactory.create().setName(INHERITANCE.getAttributeName()).setDataType(TEXT)
-				.setLabel(INHERITANCE_LABEL));
-		emdIn.addAttribute(
-				attributeFactory.create().setName(GENERALIZED_INHERITANCE.getAttributeName()).setDataType(TEXT)
-						.setLabel(GENERALIZED_INHERITANCE_LABEL));
-		emdIn.addAttribute(attributeFactory.create().setName(AGE_GROUP.getAttributeName()).setDataType(TEXT)
-				.setLabel(AGE_GROUP_LABEL));
+		emdIn.addAttribute(attributeFactory.create()
+										   .setName(CONDITION.getAttributeName())
+										   .setDataType(TEXT)
+										   .setLabel(CONDITION_LABEL));
+		emdIn.addAttribute(attributeFactory.create()
+										   .setName(INHERITANCE.getAttributeName())
+										   .setDataType(TEXT)
+										   .setLabel(INHERITANCE_LABEL));
+		emdIn.addAttribute(attributeFactory.create()
+										   .setName(GENERALIZED_INHERITANCE.getAttributeName())
+										   .setDataType(TEXT)
+										   .setLabel(GENERALIZED_INHERITANCE_LABEL));
+		emdIn.addAttribute(attributeFactory.create()
+										   .setName(AGE_GROUP.getAttributeName())
+										   .setDataType(TEXT)
+										   .setLabel(AGE_GROUP_LABEL));
 		emdIn.addAttribute(attributeFactory.create().setName(ALLELIC_CONDITIONS.getAttributeName()).setDataType(TEXT));
 		emdIn.addAttribute(
 				attributeFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName()).setDataType(TEXT));
@@ -154,8 +161,8 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity CGDAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(CGDAnnotatorSettings.Meta.CGD_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
+			when(settings.getString(CGDAnnotatorSettings.Meta.CGD_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 			return settings;
 		}
 

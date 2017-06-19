@@ -176,22 +176,22 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOneById(GROUP, "ID", Group.class)).thenReturn(group1);
-		when(dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
-						GroupAuthority.class))
-				.thenAnswer(invocation -> Stream.of(authority1, authority2, authority3, authority4));
+		when(dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
+				GroupAuthority.class)).thenAnswer(
+				invocation -> Stream.of(authority1, authority2, authority3, authority4));
 
 		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
-				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class)))
-				.thenAnswer(invocation -> Stream.of(entityType, entityType));
+				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)),
+				eq(EntityType.class))).thenAnswer(invocation -> Stream.of(entityType, entityType));
 
-		when(dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
-						GroupAuthority.class))
-				.thenAnswer(invocation -> Stream.of(authority1, authority2, authority3, authority4));
+		when(dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
+				GroupAuthority.class)).thenAnswer(
+				invocation -> Stream.of(authority1, authority2, authority3, authority4));
 
-		when(dataService.getEntityTypeIds())
-				.thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
+		when(dataService.getEntityTypeIds()).thenReturn(
+				Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		Authentication authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -202,11 +202,11 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		UserDetails userDetails = mock(UserDetails.class);
 		when(userDetails.getUsername()).thenReturn("username");
 		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities())
-				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
+		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
+				asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities())
-				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
+				asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 
 		date = Instant.parse("2016-01-01T12:34:28.123Z");
 

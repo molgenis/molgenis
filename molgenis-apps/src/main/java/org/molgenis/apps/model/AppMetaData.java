@@ -44,15 +44,24 @@ public class AppMetaData extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Id");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(DESCRIPTION, ROLE_LOOKUP).setDataType(TEXT).setNillable(true).setLabel("Description");
-		addAttribute(ICON_HREF).setDataType(HYPERLINK).setNillable(true).setLabel("Icon URL")
-				.setDescription("Absolute or relative URL of the app icon");
-		addAttribute(RESOURCE_ZIP).setDataType(FILE).setRefEntity(fileMetaMetaData).setNillable(true)
-				.setLabel("Resource ZIP file")
-				.setDescription("ZIP file with JavaScript, CSS and image files required by the app");
-		addAttribute(IS_ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false).setVisible(false)
-				.setDefaultValue(Boolean.FALSE.toString());
-		addAttribute(LANDING_PAGE_HTML_TEMPLATE).setDataType(XREF).setRefEntity(freemarkerTemplateMetaData)
-				.setNillable(false).setLabel("Landing page HTML template")
-				.setDescription("Landing page HTML FreeMarker template");
+		addAttribute(ICON_HREF).setDataType(HYPERLINK)
+							   .setNillable(true)
+							   .setLabel("Icon URL")
+							   .setDescription("Absolute or relative URL of the app icon");
+		addAttribute(RESOURCE_ZIP).setDataType(FILE)
+								  .setRefEntity(fileMetaMetaData)
+								  .setNillable(true)
+								  .setLabel("Resource ZIP file")
+								  .setDescription("ZIP file with JavaScript, CSS and image files required by the app");
+		addAttribute(IS_ACTIVE).setDataType(BOOL)
+							   .setLabel("Active")
+							   .setNillable(false)
+							   .setVisible(false)
+							   .setDefaultValue(Boolean.FALSE.toString());
+		addAttribute(LANDING_PAGE_HTML_TEMPLATE).setDataType(XREF)
+												.setRefEntity(freemarkerTemplateMetaData)
+												.setNillable(false)
+												.setLabel("Landing page HTML template")
+												.setDescription("Landing page HTML FreeMarker template");
 	}
 }

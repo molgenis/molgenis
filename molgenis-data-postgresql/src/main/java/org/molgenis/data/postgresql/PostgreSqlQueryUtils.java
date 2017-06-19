@@ -28,7 +28,7 @@ class PostgreSqlQueryUtils
 	static Stream<Attribute> getPersistedAttributes(EntityType entityType)
 	{
 		return StreamSupport.stream(entityType.getAtomicAttributes().spliterator(), false)
-				.filter(atomicAttr -> atomicAttr.getExpression() == null);
+							.filter(atomicAttr -> atomicAttr.getExpression() == null);
 	}
 
 	/**
@@ -41,9 +41,8 @@ class PostgreSqlQueryUtils
 	{
 		// return all attributes referencing multiple entities except for one-to-many attributes that are mapped by
 		// another attribute
-		return getPersistedAttributes(entityType)
-				.filter(attr -> isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr
-						.isMappedBy()));
+		return getPersistedAttributes(entityType).filter(
+				attr -> isMultipleReferenceType(attr) && !(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()));
 	}
 
 	/**

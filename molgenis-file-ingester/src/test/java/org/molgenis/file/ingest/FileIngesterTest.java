@@ -71,11 +71,11 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 	public void ingest()
 	{
 		when(fileStoreDownloadMock.downloadFile(url, identifier, entityTypeId + ".csv")).thenReturn(f);
-		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f))
-				.thenReturn(fileRepositoryCollectionMock);
+		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(
+				fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService(f, fileRepositoryCollectionMock)).thenReturn(importServiceMock);
-		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT))
-				.thenReturn(report);
+		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT)).thenReturn(
+				report);
 		when(progress.getJobExecution()).thenReturn(mock(FileIngestJobExecution.class));
 
 		FileMeta fileMeta = fileIngester.ingest(entityTypeId, url, "CSV", identifier, progress);

@@ -58,15 +58,28 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package");
 		Attribute refAttr = attributeMetadata.getAttribute(AttributeMetadata.ENTITY);
-		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY).setRefEntity(attributeMetadata).setMappedBy(refAttr)
-				.setOrderBy(new Sort(SEQUENCE_NR)).setNillable(true).setLabel("Attributes");
-		addAttribute(IS_ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
-				.setReadOnly(true).setDefaultValue(FALSE.toString());
+		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY)
+								.setRefEntity(attributeMetadata)
+								.setMappedBy(refAttr)
+								.setOrderBy(new Sort(SEQUENCE_NR))
+								.setNillable(true)
+								.setLabel("Attributes");
+		addAttribute(IS_ABSTRACT).setDataType(BOOL)
+								 .setNillable(false)
+								 .setReadOnly(true)
+								 .setLabel("Abstract")
+								 .setReadOnly(true)
+								 .setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
-		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
-				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
+		addAttribute(BACKEND).setDataType(ENUM)
+							 .setEnumOptions(backendEnumOptions)
+							 .setNillable(false)
+							 .setReadOnly(true)
+							 .setDefaultValue(defaultBackend)
+							 .setLabel("Backend")
+							 .setDescription("Backend data store");
 	}
 
 	/**

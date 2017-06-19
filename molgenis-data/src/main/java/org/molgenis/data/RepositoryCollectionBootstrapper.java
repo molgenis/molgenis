@@ -38,15 +38,20 @@ public class RepositoryCollectionBootstrapper
 		repoCollectionMap.values().forEach(this::register);
 
 		// set EntityTypeMetadata backend enum options
-		List<String> repoNames = repoCollectionMap.values().stream().map(RepositoryCollection::getName)
-				.collect(toList());
+		List<String> repoNames = repoCollectionMap.values()
+												  .stream()
+												  .map(RepositoryCollection::getName)
+												  .collect(toList());
 		repoNames.sort(naturalOrder());
 		entityTypeMetadata.setBackendEnumOptions(repoNames);
 
 		// set default repository collection
-		RepositoryCollection defaultRepoCollection = repoCollectionMap.values().stream()
-				.filter(repoCollection -> repoCollection.getName().equals(defaultRepoCollectionName)).findFirst()
-				.orElse(null);
+		RepositoryCollection defaultRepoCollection = repoCollectionMap.values()
+																	  .stream()
+																	  .filter(repoCollection -> repoCollection.getName()
+																											  .equals(defaultRepoCollectionName))
+																	  .findFirst()
+																	  .orElse(null);
 		if (defaultRepoCollection == null)
 		{
 			throw new UnknownRepositoryCollectionException(defaultRepoCollectionName);

@@ -50,8 +50,8 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 		Resource resource = new ClassPathResource("roc-curve.R");
 		if (resource.exists())
 		{
-			long count = dataService
-					.count(SCRIPT, new QueryImpl<Entity>().eq(ScriptMetaData.NAME, ROC_CURVE_SCRIPT_NAME));
+			long count = dataService.count(SCRIPT,
+					new QueryImpl<Entity>().eq(ScriptMetaData.NAME, ROC_CURVE_SCRIPT_NAME));
 			if (count == 0)
 			{
 				Entity scriptType = dataService.findOne(ScriptTypeMetaData.SCRIPT_TYPE,
@@ -62,8 +62,8 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 				String scriptContent;
 				try
 				{
-					scriptContent = FileCopyUtils
-							.copyToString(new InputStreamReader(resource.getInputStream(), "UTF-8"));
+					scriptContent = FileCopyUtils.copyToString(
+							new InputStreamReader(resource.getInputStream(), "UTF-8"));
 
 				}
 				catch (IOException e)
@@ -74,8 +74,8 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 				if (dataService.count(SCRIPT_PARAMETER,
 						new QueryImpl<Entity>().eq(ScriptParameterMetaData.NAME, ROC_CURVE_SCRIPT_PARAMETER)) == 0)
 				{
-					dataService
-							.add(SCRIPT_PARAMETER, scriptParameterFactory.create().setName(ROC_CURVE_SCRIPT_PARAMETER));
+					dataService.add(SCRIPT_PARAMETER,
+							scriptParameterFactory.create().setName(ROC_CURVE_SCRIPT_PARAMETER));
 				}
 
 				Entity scriptParameterEntity = dataService.findOne(SCRIPT_PARAMETER,

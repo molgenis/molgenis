@@ -135,7 +135,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	public void addWithKnownBackend()
 	{
 		SecurityContextHolder.getContext()
-				.setAuthentication(new TestingAuthenticationToken("anonymous", null, "ROLE_SU"));
+							 .setAuthentication(new TestingAuthenticationToken("anonymous", null, "ROLE_SU"));
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getAttributes()).thenReturn(emptyList());
 		String backendName = "knownBackend";

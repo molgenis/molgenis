@@ -104,8 +104,8 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 
 	private void updateSecurityContext(SecurityContext context, Collection<? extends GrantedAuthority> authorities)
 	{
-		Collection<? extends GrantedAuthority> reachableAuthorities = roleHierarchy
-				.getReachableGrantedAuthorities(authorities);
+		Collection<? extends GrantedAuthority> reachableAuthorities = roleHierarchy.getReachableGrantedAuthorities(
+				authorities);
 
 		List<GrantedAuthority> newGrantedAuthorities = Lists.newArrayList(context.getAuthentication().getAuthorities());
 		newGrantedAuthorities.addAll(reachableAuthorities);

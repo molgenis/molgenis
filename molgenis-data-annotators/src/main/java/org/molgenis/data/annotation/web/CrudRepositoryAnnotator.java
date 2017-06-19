@@ -91,7 +91,9 @@ public class CrudRepositoryAnnotator
 			else
 			{
 				runAsSystem(() -> dataService.getMeta()
-						.updateEntityType(addAnnotatorMetaDataToRepositories(entityType, attributeFactory, annotator)));
+											 .updateEntityType(
+													 addAnnotatorMetaDataToRepositories(entityType, attributeFactory,
+															 annotator)));
 
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
@@ -140,7 +142,7 @@ public class CrudRepositoryAnnotator
 		if (annotator instanceof EffectCreatingAnnotator)
 		{
 			entityTypeId = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType())
-					.getId();
+																.getId();
 		}
 		else
 		{

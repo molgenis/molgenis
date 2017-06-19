@@ -90,11 +90,11 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	{
 		// mock entity manager
 		EntityManager entityManager = when(
-				mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE))
-				.thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityType))).getMock();
+				mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE)).thenReturn(
+				new EntityWithComputedAttributes(new DynamicEntity(entityType))).getMock();
 		when(entityManager.getReference(entityTypeArgumentCaptor.capture(), eq("0"))).thenReturn(refEntities.get(0));
-		when(entityManager.getReferences(entityTypeArgumentCaptor.capture(), eq(newArrayList("0"))))
-				.thenReturn(refEntities);
+		when(entityManager.getReferences(entityTypeArgumentCaptor.capture(), eq(newArrayList("0")))).thenReturn(
+				refEntities);
 		entityHydration = new EntityHydration(entityManager);
 	}
 
@@ -104,8 +104,9 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityType);
 		assertTrue(EntityUtils.equals(actualHydratedEntity, hydratedEntity));
 		// check that it has retrieved references of type TypeTestRef
-		assertTrue(entityTypeArgumentCaptor.getAllValues().stream()
-				.allMatch(emd -> emd.getId().equals("TypeTestRefDynamic")));
+		assertTrue(entityTypeArgumentCaptor.getAllValues()
+										   .stream()
+										   .allMatch(emd -> emd.getId().equals("TypeTestRefDynamic")));
 	}
 
 	@Test

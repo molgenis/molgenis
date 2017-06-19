@@ -91,11 +91,15 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 		authorMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		authorMetaData.addAttribute(attributeFactory.create().setName("name"));
-		Attribute authorAttribute = attributeFactory.create().setName("author").setDataType(XREF)
-				.setRefEntity(authorMetaData);
-		authorMetaData.addAttribute(
-				attributeFactory.create().setName("books").setDataType(ONE_TO_MANY).setMappedBy(authorAttribute)
-						.setRefEntity(bookMetaData));
+		Attribute authorAttribute = attributeFactory.create()
+													.setName("author")
+													.setDataType(XREF)
+													.setRefEntity(authorMetaData);
+		authorMetaData.addAttribute(attributeFactory.create()
+													.setName("books")
+													.setDataType(ONE_TO_MANY)
+													.setMappedBy(authorAttribute)
+													.setRefEntity(bookMetaData));
 		bookMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		bookMetaData.addAttribute(attributeFactory.create().setName("title"));
 		bookMetaData.addAttribute(authorAttribute);
@@ -252,7 +256,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		when(authorRepository.findAll(entityIdsCaptor.capture())).thenReturn(Stream.of(author, author2));
 
 		List<Entity> actual = l1CacheRepositoryDecorator.findAll(Stream.of(authorID, authorID2))
-				.collect(Collectors.toList());
+														.collect(Collectors.toList());
 		assertEquals(asList(author, author2), actual);
 
 		List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
@@ -267,7 +271,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		when(authorRepository.findAll(entityIdsCaptor.capture())).thenReturn(Stream.of(author2));
 
 		List<Entity> actual = l1CacheRepositoryDecorator.findAll(Stream.of(authorID, authorID2))
-				.collect(Collectors.toList());
+														.collect(Collectors.toList());
 		assertEquals(asList(author, author2), actual);
 
 		List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
