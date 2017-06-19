@@ -24,6 +24,9 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.elasticsearch.FieldConstants.*;
 
+/**
+ * Generates Elasticsearch queries from MOLGENIS queries.
+ */
 @Component
 public class QueryGenerator
 {
@@ -231,8 +234,7 @@ public class QueryGenerator
 				{
 					indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
 				}
-				return QueryBuilders
-						.nestedQuery(fieldName, QueryBuilders.termQuery(indexFieldName, queryValue), ScoreMode.Avg);
+				return QueryBuilders.nestedQuery(fieldName, QueryBuilders.termQuery(indexFieldName, queryValue), ScoreMode.Avg);
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
@@ -278,8 +280,7 @@ public class QueryGenerator
 				List<Attribute> refAttributePath = concat(attributePath.stream(), of(refIdAttr)).collect(toList());
 				String indexFieldName = getQueryFieldName(refAttributePath);
 
-				return QueryBuilders.boolQuery().mustNot(
-						QueryBuilders.nestedQuery(fieldName, QueryBuilders.existsQuery(indexFieldName), ScoreMode.Avg));
+				return QueryBuilders.boolQuery().mustNot(QueryBuilders.nestedQuery(fieldName, QueryBuilders.existsQuery(indexFieldName), ScoreMode.Avg));
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
@@ -327,16 +328,13 @@ public class QueryGenerator
 				case CATEGORICAL_MREF:
 				case ONE_TO_MANY:
 				case FILE:
-					queryField =
-							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute());
-					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
-							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
+					queryField = getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute());
+					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr), QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
 					break;
 				case BOOL:
 				case COMPOUND:
 					throw new MolgenisQueryException(
-							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.FUZZY_MATCH
-									+ "]");
+							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.FUZZY_MATCH + "]");
 				default:
 					throw new RuntimeException("Unknown data type [" + dataType + "]");
 			}
@@ -382,10 +380,8 @@ public class QueryGenerator
 				case MREF:
 				case XREF:
 					queryField =
-							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute())
-									+ ".ngram";
-					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr),
-							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
+							getQueryFieldName(attr) + "." + getQueryFieldName(attr.getRefEntity().getLabelAttribute()) + ".ngram";
+					queryBuilder = QueryBuilders.nestedQuery(getQueryFieldName(attr), QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
 					break;
 				default:
 					throw new RuntimeException("Unknown data type [" + dataType + "]");
@@ -409,8 +405,7 @@ public class QueryGenerator
 			throw new MolgenisQueryException(
 					"Query value must be a Iterable instead of [" + queryRuleValue.getClass().getSimpleName() + "]");
 		}
-		Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
-				.map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
+		Object[] queryValues = StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false).map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue)).toArray();
 
 		QueryBuilder queryBuilder;
 		String fieldName = getQueryFieldName(attr);
@@ -483,8 +478,7 @@ public class QueryGenerator
 			case HYPERLINK:
 			case STRING:
 				return nestedQueryBuilder(attributePath,
-						QueryBuilders.matchQuery(fieldName + '.' + FIELD_NGRAM_ANALYZED, queryValue)
-								.analyzer(DEFAULT_ANALYZER));
+						QueryBuilders.matchQuery(fieldName + '.' + FIELD_NGRAM_ANALYZED, queryValue).analyzer(DEFAULT_ANALYZER));
 			case BOOL:
 			case COMPOUND:
 			case DATE:
@@ -502,8 +496,7 @@ public class QueryGenerator
 			case SCRIPT: // due to size would result in large amount of ngrams
 			case TEXT: // due to size would result in large amount of ngrams
 			case XREF:
-				throw new UnsupportedOperationException(
-						format("Unsupported data type [%s] for operator [%s]", attrType, LIKE));
+				throw new UnsupportedOperationException(format("Unsupported data type [%s] for operator [%s]", attrType, LIKE));
 			default:
 				throw new RuntimeException("Unknown data type [" + attrType + "]");
 		}
@@ -533,8 +526,7 @@ public class QueryGenerator
 		}
 		if (!(queryValue instanceof Iterable<?>))
 		{
-			throw new MolgenisQueryException(
-					format("Query value must be a Iterable instead of [%s]", queryValue.getClass().getSimpleName()));
+			throw new MolgenisQueryException(format("Query value must be a Iterable instead of [%s]", queryValue.getClass().getSimpleName()));
 		}
 		Iterator<?> queryValuesIterator = ((Iterable<?>) queryValue).iterator();
 		Object queryValueFrom = getQueryValue(attr, queryValuesIterator.next());
@@ -758,9 +750,8 @@ public class QueryGenerator
 				entityTypeAtCurrentDepth = attribute.getRefEntity();
 				if (entityTypeAtCurrentDepth == null)
 				{
-					throw new MolgenisQueryException(
-							format("Invalid query field [%s]: attribute [%s] does not refer to another entity",
-									queryRuleField, attribute.getName()));
+					throw new MolgenisQueryException(format("Invalid query field [%s]: attribute [%s] does not refer to another entity",
+							queryRuleField, attribute.getName()));
 				}
 			}
 		}

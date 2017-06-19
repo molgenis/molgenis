@@ -7,6 +7,9 @@ import org.elasticsearch.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Creates Elasticsearch bulk processors that log bulk updates.
+ */
 class BulkProcessorFactory
 {
 	private static final Logger LOG = LoggerFactory.getLogger(BulkProcessorFactory.class);

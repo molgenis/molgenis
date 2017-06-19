@@ -20,7 +20,7 @@ import static org.elasticsearch.common.xcontent.XContentType.JSON;
 import static org.molgenis.data.elasticsearch.ElasticsearchEntityUtils.toElasticsearchId;
 
 /**
- * Creates entities from Elasticsearch document sources and vice versa.
+ * Generates Elasticsearch document sources from entities.
  */
 @Component
 class DocumentContentBuilder

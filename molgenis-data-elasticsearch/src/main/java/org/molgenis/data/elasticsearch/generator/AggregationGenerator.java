@@ -22,6 +22,9 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
+/**
+ * Generates Elasticsearch aggregation queries from MOLGENIS aggregation queries.
+ */
 @Component
 class AggregationGenerator
 {
@@ -35,8 +38,7 @@ class AggregationGenerator
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
-	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2,
-			Attribute aggAttrDistinct)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct)
 	{
 		List<AggregationBuilder> aggregationBuilders = createAggregations(aggAttr1, aggAttr2, aggAttrDistinct);
 
@@ -95,8 +97,7 @@ class AggregationGenerator
 		return createAggregations(aggAttrs, null, aggAttrDistinct);
 	}
 
-	private List<AggregationBuilder> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr,
-			Attribute distinctAttr)
+	private List<AggregationBuilder> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr, Attribute distinctAttr)
 	{
 		Attribute attr = attrs.pop();
 
@@ -127,8 +128,7 @@ class AggregationGenerator
 			// threshold of 40000.
 			String cardinalityAggName = distinctAttr.getName() + FieldConstants.AGGREGATION_DISTINCT_POSTFIX;
 			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
-			CardinalityAggregationBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
-					.field(cardinalityAggFieldName).precisionThreshold(40000L);
+			CardinalityAggregationBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName).field(cardinalityAggFieldName).precisionThreshold(40000L);
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;
@@ -142,8 +142,7 @@ class AggregationGenerator
 				if (ElasticsearchEntityUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders
-							.reverseNested(reverseAggName);
+					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
 					reverseNestedBuilder.subAggregation(nestedBuilder);
 					wrappedDistinctAgg = reverseNestedBuilder;
 				}
@@ -157,8 +156,7 @@ class AggregationGenerator
 				if (ElasticsearchEntityUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders
-							.reverseNested(reverseAggName);
+					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
 					reverseNestedBuilder.subAggregation(distinctAgg);
 					wrappedDistinctAgg = reverseNestedBuilder;
 				}

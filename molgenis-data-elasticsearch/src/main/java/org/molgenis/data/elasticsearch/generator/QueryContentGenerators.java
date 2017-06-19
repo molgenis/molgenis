@@ -13,6 +13,9 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Generates Elasticsearch (aggregation) queries and sorts from MOLGENIS (aggregation) queries.
+ */
 @Component
 class QueryContentGenerators
 {
@@ -20,8 +23,7 @@ class QueryContentGenerators
 	private final SortGenerator sortGenerator;
 	private final AggregationGenerator aggregationGenerator;
 
-	public QueryContentGenerators(QueryGenerator queryGenerator, SortGenerator sortGenerator,
-			AggregationGenerator aggregationGenerator)
+	public QueryContentGenerators(QueryGenerator queryGenerator, SortGenerator sortGenerator, AggregationGenerator aggregationGenerator)
 	{
 		this.queryGenerator = requireNonNull(queryGenerator);
 		this.sortGenerator = requireNonNull(sortGenerator);
@@ -38,8 +40,7 @@ class QueryContentGenerators
 		return sortGenerator.generateSort(sort, entityType);
 	}
 
-	public List<AggregationBuilder> createAggregations(Attribute aggAttr1, Attribute aggAttr2,
-			Attribute aggAttrDistinct)
+	public List<AggregationBuilder> createAggregations(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct)
 	{
 		return aggregationGenerator.createAggregations(aggAttr1, aggAttr2, aggAttrDistinct);
 	}

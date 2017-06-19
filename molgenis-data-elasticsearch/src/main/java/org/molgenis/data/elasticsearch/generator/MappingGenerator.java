@@ -16,6 +16,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
+/**
+ * Generates Elasticsearch mappings from entity types.
+ */
 @Component
 class MappingGenerator
 {
@@ -47,8 +50,7 @@ class MappingGenerator
 		MappingType mappingType = toMappingType(attribute, depth, maxDepth);
 		boolean analyzeNGrams = isAnalyzeNGrams(attribute);
 		List<FieldMapping> nestedFieldMappings =
-				mappingType == MappingType.NESTED ? createFieldMappings(attribute.getRefEntity(), depth + 1,
-						maxDepth) : null;
+				mappingType == MappingType.NESTED ? createFieldMappings(attribute.getRefEntity(), depth + 1, maxDepth) : null;
 		return FieldMapping.create(fieldName, mappingType, analyzeNGrams, nestedFieldMappings);
 	}
 

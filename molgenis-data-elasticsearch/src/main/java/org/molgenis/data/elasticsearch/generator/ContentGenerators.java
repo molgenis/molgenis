@@ -16,6 +16,9 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Content generators that transforms objects from entity space to Elasticsearch space.
+ */
 @Component
 public class ContentGenerators
 {
@@ -24,8 +27,7 @@ public class ContentGenerators
 	private final QueryContentGenerators queryGenerators;
 	private final DocumentContentBuilder documentGenerator;
 
-	public ContentGenerators(IndexGenerator indexGenerator, MappingGenerator mappingGenerator,
-			QueryContentGenerators queryGenerators, DocumentContentBuilder documentGenerator)
+	public ContentGenerators(IndexGenerator indexGenerator, MappingGenerator mappingGenerator, QueryContentGenerators queryGenerators, DocumentContentBuilder documentGenerator)
 	{
 		this.indexGenerator = requireNonNull(indexGenerator);
 		this.mappingGenerator = requireNonNull(mappingGenerator);
@@ -53,8 +55,7 @@ public class ContentGenerators
 		return queryGenerators.createSorts(sort, entityType);
 	}
 
-	public List<AggregationBuilder> createAggregations(Attribute aggAttr1, Attribute aggAttr2,
-			Attribute aggAttrDistinct)
+	public List<AggregationBuilder> createAggregations(Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct)
 	{
 		return queryGenerators.createAggregations(aggAttr1, aggAttr2, aggAttrDistinct);
 	}

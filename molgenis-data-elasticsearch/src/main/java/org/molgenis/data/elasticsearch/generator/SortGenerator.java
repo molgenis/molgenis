@@ -18,6 +18,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
+/**
+ * Generates Elasticsearch sorts from MOLGENIS sorts.
+ */
 @Component
 class SortGenerator
 {
