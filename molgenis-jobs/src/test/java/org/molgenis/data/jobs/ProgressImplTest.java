@@ -9,6 +9,7 @@ import org.molgenis.data.jobs.config.JobTestConfig;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.JobExecutionLogAppender;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -149,9 +150,12 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 	{
 		public Config()
 		{
-			ch.qos.logback.classic.Logger jobExecutionLog = (ch.qos.logback.classic.Logger) LoggerFactory
-					.getLogger(JobExecution.class);
-
+			Logger logger = LoggerFactory.getLogger(JobExecution.class);
+			if (!(logger instanceof ch.qos.logback.classic.Logger))
+			{
+				throw new RuntimeException("Expected logback als SLF4J implementation");
+			}
+			ch.qos.logback.classic.Logger jobExecutionLog = (ch.qos.logback.classic.Logger) logger;
 			jobExecutionLog.setLevel(Level.ALL);
 			JobExecutionLogAppender appender = new JobExecutionLogAppender();
 			LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
