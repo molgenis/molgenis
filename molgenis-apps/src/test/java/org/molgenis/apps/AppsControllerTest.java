@@ -113,10 +113,11 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	}
 
 	@Test
-	public void testViewApp() throws Exception
+	public void testViewAppWithFreeMarkerTemplate() throws Exception
 	{
 		App app = mock(App.class);
 		when(app.getId()).thenReturn("id");
+		when(app.getUseFreemarkerTemplate()).thenReturn(true);
 		when(app.getName()).thenReturn("name");
 		when(app.isActive()).thenReturn(true);
 		FreemarkerTemplate htmlTemplate = mock(FreemarkerTemplate.class);
