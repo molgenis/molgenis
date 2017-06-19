@@ -6,7 +6,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisPluginController;
@@ -23,14 +22,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
-import static java.io.File.separatorChar;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static org.molgenis.apps.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
-import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -91,7 +88,6 @@ public class AppsController extends MolgenisPluginController
 			response.setStatus(SC_BAD_REQUEST);
 			return "forward:" + URI;
 		}
-		Boolean useFreemarkerTemplate = app.getUseFreemarkerTemplate();
 		if (!app.isActive())
 		{
 			model.addAttribute("errorMessage", format("App '%s' is deactivated", app.getName()));
@@ -100,7 +96,7 @@ public class AppsController extends MolgenisPluginController
 		}
 
 		model.addAttribute("app", toAppInfoDto(app));
-		if (useFreemarkerTemplate)
+		if (app.getUseFreemarkerTemplate())
 		{
 			//TODO: fix relative paths in ftl file (redirect to /apps/)
 			FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
