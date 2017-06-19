@@ -25,5 +25,9 @@ export default {
    * Returns attribute based on selected attribute in tree
    * Returns null if no attribute is selected
    */
-  getSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.find(attribute => state.selectedAttributeID && state.selectedAttributeID === attribute.id)
+  getSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.find(attribute => state.selectedAttributeID && state.selectedAttributeID === attribute.id),
+  /**
+   * Return a list of compound attributes present in the currently selected editorEntityType
+   */
+  getCompoundAttributes: state => state.editorEntityType && state.editorEntityType.attributes.filter(attribute => attribute.type === 'COMPOUND')
 }
