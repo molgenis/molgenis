@@ -29,23 +29,21 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
 
 /**
- * Elasticsearch implementation of the SearchService interface.
- *
- * @author erwin
+ * Elasticsearch search service that executes all requests using the elasticsearch client facade.
  */
 @Component
 public class ElasticsearchService implements SearchService
 {
 	private static final int BATCH_SIZE = 1000;
 
-	private final ClientFacade elasticsearchClientFacade;
+	private final ClientFacade clientFacade;
 	private final ContentGenerators contentGenerators;
 	private final DataService dataService;
 
-	public ElasticsearchService(ClientFacade elasticsearchClientFacade, ContentGenerators contentGenerators,
+	public ElasticsearchService(ClientFacade clientFacade, ContentGenerators contentGenerators,
 			DataService dataService)
 	{
-		this.elasticsearchClientFacade = requireNonNull(elasticsearchClientFacade);
+		this.clientFacade = requireNonNull(clientFacade);
 		this.contentGenerators = requireNonNull(contentGenerators);
 		this.dataService = requireNonNull(dataService);
 	}
@@ -56,21 +54,21 @@ public class ElasticsearchService implements SearchService
 		Index index = contentGenerators.createIndex(entityType);
 		IndexSettings indexSettings = IndexSettings.create();
 		Mapping mapping = contentGenerators.createMapping(entityType);
-		elasticsearchClientFacade.createIndex(index, indexSettings, Stream.of(mapping));
+		clientFacade.createIndex(index, indexSettings, Stream.of(mapping));
 	}
 
 	@Override
 	public boolean hasIndex(EntityType entityType)
 	{
 		Index index = contentGenerators.createIndex(entityType);
-		return elasticsearchClientFacade.indexesExist(index);
+		return clientFacade.indexesExist(index);
 	}
 
 	@Override
 	public void deleteIndex(EntityType entityType)
 	{
 		Index index = contentGenerators.createIndex(entityType);
-		elasticsearchClientFacade.deleteIndex(index);
+		clientFacade.deleteIndex(index);
 	}
 
 	@Override
@@ -91,14 +89,14 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void refreshIndex()
 	{
-		elasticsearchClientFacade.refreshIndexes();
+		clientFacade.refreshIndexes();
 	}
 
 	@Override
 	public long count(EntityType entityType)
 	{
 		Index index = contentGenerators.createIndex(entityType);
-		return elasticsearchClientFacade.getCount(index);
+		return clientFacade.getCount(index);
 	}
 
 	@Override
@@ -106,7 +104,7 @@ public class ElasticsearchService implements SearchService
 	{
 		Index index = contentGenerators.createIndex(entityType);
 		QueryBuilder queryBuilder = contentGenerators.createQuery(q, entityType);
-		return elasticsearchClientFacade.getCount(queryBuilder, index);
+		return clientFacade.getCount(queryBuilder, index);
 	}
 
 	@Override
@@ -122,7 +120,7 @@ public class ElasticsearchService implements SearchService
 		QueryBuilder query = contentGenerators.createQuery(q, entityType);
 		Sort sort = q.getSort() != null ? contentGenerators.createSorts(q.getSort(), entityType) : null;
 		Index index = contentGenerators.createIndex(entityType);
-		SearchHits searchHits = elasticsearchClientFacade.search(query, from, size, sort, index);
+		SearchHits searchHits = clientFacade.search(query, from, size, sort, index);
 		return ElasticsearchEntityUtils.toEntityIds(searchHits.getHits().stream().map(SearchHit::getId));
 	}
 
@@ -140,7 +138,7 @@ public class ElasticsearchService implements SearchService
 						aggregateQuery.getAttributeDistinct());
 		QueryBuilder query = contentGenerators.createQuery(aggregateQuery.getQuery(), entityType);
 		Index index = contentGenerators.createIndex(entityType);
-		Aggregations aggregations = elasticsearchClientFacade.aggregate(aggregationList, query, index);
+		Aggregations aggregations = clientFacade.aggregate(aggregationList, query, index);
 		return new AggregateResponseParser()
 				.parseAggregateResponse(aggregateQuery.getAttributeX(), aggregateQuery.getAttributeY(),
 						aggregateQuery.getAttributeDistinct(), aggregations, dataService);
@@ -151,7 +149,7 @@ public class ElasticsearchService implements SearchService
 		Index index = contentGenerators.createIndex(entityType);
 		Document document = contentGenerators.createDocument(entityId);
 		QueryBuilder query = contentGenerators.createQuery(q, entityType);
-		return elasticsearchClientFacade.explain(SearchHit.create(document.getId(), index.getName()), query);
+		return clientFacade.explain(SearchHit.create(document.getId(), index.getName()), query);
 	}
 
 	@Override
@@ -159,7 +157,7 @@ public class ElasticsearchService implements SearchService
 	{
 		Index index = contentGenerators.createIndex(entityType);
 		Document document = contentGenerators.createDocument(entity);
-		elasticsearchClientFacade.index(index, document);
+		clientFacade.index(index, document);
 	}
 
 	@Override
@@ -169,7 +167,7 @@ public class ElasticsearchService implements SearchService
 		Stream<DocumentAction> documentActionStream = entities.map(entity -> this.toDocumentAction(index, entity));
 
 		AtomicLong count = new AtomicLong(0L);
-		elasticsearchClientFacade.processDocumentActions(documentActionStream.filter(documentAction ->
+		clientFacade.processDocumentActions(documentActionStream.filter(documentAction ->
 		{
 			count.incrementAndGet();
 			return true;
@@ -194,7 +192,7 @@ public class ElasticsearchService implements SearchService
 	{
 		Index index = contentGenerators.createIndex(entityType);
 		Document document = contentGenerators.createDocument(entityId);
-		elasticsearchClientFacade.deleteById(index, document);
+		clientFacade.deleteById(index, document);
 	}
 
 	@Override
