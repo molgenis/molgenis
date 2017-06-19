@@ -35,8 +35,7 @@ public class UserServiceImpl implements UserService
 	public List<String> getSuEmailAddresses()
 	{
 		Stream<User> superUsers = dataService
-				.findAll(USER, new QueryImpl<User>().eq(UserMetaData.SUPERUSER, true),
-						User.class);
+				.findAll(USER, new QueryImpl<User>().eq(UserMetaData.SUPERUSER, true), User.class);
 		return superUsers.map(User::getEmail).collect(toList());
 	}
 
@@ -44,9 +43,7 @@ public class UserServiceImpl implements UserService
 	@RunAsSystem
 	public User getUser(String username)
 	{
-		return dataService
-				.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
-						User.class);
+		return dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username), User.class);
 	}
 
 	@Override
@@ -54,10 +51,8 @@ public class UserServiceImpl implements UserService
 	public Iterable<Group> getUserGroups(String username)
 	{
 		Fetch fetch = new Fetch().field(GroupMemberMetaData.GROUP,
-				new Fetch().field(GroupMetaData.ID).field(GroupMetaData.NAME)
-						.field(GroupMetaData.ACTIVE));
-		Stream<GroupMember> molgenisGroupMembers = dataService
-				.query(GROUP_MEMBER, GroupMember.class).fetch(fetch)
+				new Fetch().field(GroupMetaData.ID).field(GroupMetaData.NAME).field(GroupMetaData.ACTIVE));
+		Stream<GroupMember> molgenisGroupMembers = dataService.query(GROUP_MEMBER, GroupMember.class).fetch(fetch)
 				.eq(GroupMemberMetaData.USER, getUser(username)).findAll();
 		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
 		return molgenisGroupMembers.map(GroupMember::getGroup).collect(toList());
@@ -74,7 +69,6 @@ public class UserServiceImpl implements UserService
 	@RunAsSystem
 	public User getUserByEmail(String email)
 	{
-		return dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.EMAIL, email),
-				User.class);
+		return dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.EMAIL, email), User.class);
 	}
 }

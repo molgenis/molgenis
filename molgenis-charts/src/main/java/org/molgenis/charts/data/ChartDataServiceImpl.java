@@ -138,7 +138,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		else if (o instanceof List)
 		{
-			@SuppressWarnings("unchecked") Iterable<Object> refObjects = (Iterable<Object>) o;
+			@SuppressWarnings("unchecked")
+			Iterable<Object> refObjects = (Iterable<Object>) o;
 			StringBuilder strBuilder = new StringBuilder();
 			for (Object ob : refObjects)
 			{
@@ -301,9 +302,9 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * get a Iterable holding entitys
 	 *
 	 * @param entityTypeId (String) the name of the entity to be used
-	 * @param repo       (Repository<? extends Entity>) the repository where the data exists
-	 * @param queryRules (List<QueryRule>) the query rules to be used getting the data from the repo
-	 * @param sort       (Sort)
+	 * @param repo         (Repository<? extends Entity>) the repository where the data exists
+	 * @param queryRules   (List<QueryRule>) the query rules to be used getting the data from the repo
+	 * @param sort         (Sort)
 	 * @return
 	 */
 

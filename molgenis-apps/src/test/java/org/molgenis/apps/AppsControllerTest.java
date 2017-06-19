@@ -95,8 +95,8 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		when(query.findAll()).thenReturn(Stream.of(app0, app1));
 		when(permissionService.hasPermissionOnEntity(APP, Permission.WRITE)).thenReturn(hasWriteAppPermission);
 
-		AppInfoDto appInfoDto0 = AppInfoDto.builder().setId("id0").setName("name0").setDescription("description0").setActive(true)
-				.setIconHref(new URI("/icon0.png")).build();
+		AppInfoDto appInfoDto0 = AppInfoDto.builder().setId("id0").setName("name0").setDescription("description0")
+				.setActive(true).setIconHref(new URI("/icon0.png")).build();
 		AppInfoDto appInfoDto1 = AppInfoDto.builder().setId("id1").setName("name1").setActive(false).build();
 
 		ResultActions resultActions = mockMvc.perform(get(AppsController.URI)).andExpect(status().isOk())
@@ -124,7 +124,8 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		when(app.getHtmlTemplate()).thenReturn(htmlTemplate);
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
 		AppInfoDto expectedAppInfo = AppInfoDto.builder().setId("id").setName("name").setActive(true).build();
-		mockMvc.perform(get(AppsController.URI + "/id")).andExpect(status().isOk()).andExpect(view().name("html")).andExpect(model().attribute("app", expectedAppInfo));
+		mockMvc.perform(get(AppsController.URI + "/id")).andExpect(status().isOk()).andExpect(view().name("html"))
+				.andExpect(model().attribute("app", expectedAppInfo));
 	}
 
 	@Test

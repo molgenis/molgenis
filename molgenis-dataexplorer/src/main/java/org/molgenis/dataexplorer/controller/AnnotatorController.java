@@ -50,9 +50,9 @@ public class AnnotatorController
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
-			MolgenisPermissionService molgenisPermissionService,
-			UserAccountService userAccountService, AnnotationJobFactory annotationJobFactory,
-			ExecutorService taskExecutor, AnnotationJobExecutionFactory annotationJobExecutionFactory)
+			MolgenisPermissionService molgenisPermissionService, UserAccountService userAccountService,
+			AnnotationJobFactory annotationJobFactory, ExecutorService taskExecutor,
+			AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;

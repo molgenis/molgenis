@@ -37,8 +37,7 @@ public class PersonMetaData2 extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setLabel("Label");
-		Attribute parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this)
-				.setNillable(false);
+		Attribute parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this).setNillable(false);
 		addAttribute(ATTR_CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr);
 	}
 }

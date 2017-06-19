@@ -89,8 +89,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			}
 			IndexAction indexAction = indexActionFactory.create()
 					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityTypeId(entityType.getId())
-					.setEntityId(entityId).setIndexStatus(PENDING);
+					.setEntityTypeId(entityType.getId()).setEntityId(entityId).setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
 		else
@@ -206,7 +205,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean isEntireRepositoryDirty(EntityType entityType)
 	{
 		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() == null && indexAction.getEntityTypeId().equals(entityType.getId()));
+				indexAction -> indexAction.getEntityId() == null && indexAction.getEntityTypeId()
+						.equals(entityType.getId()));
 	}
 
 	@Override
@@ -244,8 +244,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private EntityKey createEntityKey(IndexAction indexAction)
 	{
-		return EntityKey.create(indexAction.getEntityTypeId(),
-				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
+		return EntityKey.create(indexAction.getEntityTypeId(), indexAction.getEntityId() != null ? EntityUtils
+				.getTypedValue(indexAction.getEntityId(),
 						dataService.getEntityType(indexAction.getEntityTypeId()).getIdAttribute()) : null);
 	}
 

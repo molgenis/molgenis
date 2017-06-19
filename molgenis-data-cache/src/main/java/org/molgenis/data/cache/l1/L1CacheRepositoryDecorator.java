@@ -198,10 +198,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private void evictBiDiReferencedEntityTypes()
 	{
-		getEntityType().getMappedByAttributes().map(Attribute::getRefEntity)
-				.forEach(l1Cache::evictAll);
-		getEntityType().getInversedByAttributes().map(Attribute::getRefEntity)
-				.forEach(l1Cache::evictAll);
+		getEntityType().getMappedByAttributes().map(Attribute::getRefEntity).forEach(l1Cache::evictAll);
+		getEntityType().getInversedByAttributes().map(Attribute::getRefEntity).forEach(l1Cache::evictAll);
 	}
 
 	/**

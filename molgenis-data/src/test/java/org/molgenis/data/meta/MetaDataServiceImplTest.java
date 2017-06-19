@@ -679,8 +679,7 @@ public class MetaDataServiceImplTest
 		String attrDeletedIdentifier = "identifier";
 		when(attrDeleted.getIdentifier()).thenReturn(attrDeletedIdentifier);
 
-		EntityType existingEntityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId)
-				.getMock();
+		EntityType existingEntityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 		when(existingEntityType.getId()).thenReturn(entityTypeId);
 		when(existingEntityType.getLabel()).thenReturn("label");
 		when(existingEntityType.getOwnAllAttributes()).thenReturn(newArrayList(attrShared0, attrShared1, attrDeleted));

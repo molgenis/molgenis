@@ -435,7 +435,7 @@ public class VcfToEntity
 	/**
 	 * Returns a mapping of VCF info field keys to MOLGENIS attribute names
 	 *
-	 * @param vcfMeta    VCF metadata
+	 * @param vcfMeta      VCF metadata
 	 * @param entityTypeId entity name (that could be used to create a MOLGENIS attribute name)
 	 * @return map of VCF info field keys to MOLGENIS attribute names
 	 */

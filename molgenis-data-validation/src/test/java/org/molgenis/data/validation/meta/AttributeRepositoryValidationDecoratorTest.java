@@ -25,7 +25,8 @@ public class AttributeRepositoryValidationDecoratorTest
 	{
 		decoratedRepo = mock(Repository.class);
 		attributeValidator = mock(AttributeValidator.class);
-		attributeRepoValidationDecorator = new AttributeRepositoryValidationDecorator(decoratedRepo, attributeValidator);
+		attributeRepoValidationDecorator = new AttributeRepositoryValidationDecorator(decoratedRepo,
+				attributeValidator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)

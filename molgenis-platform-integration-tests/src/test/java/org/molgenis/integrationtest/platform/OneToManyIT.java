@@ -324,9 +324,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, Stream.of(book2, book1));
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_1, BOOK_2, BOOK_3));
+		assertEquals(StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_2, BOOK_3));
 
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
@@ -349,9 +348,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, Stream.of(book2, book3));
 
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_3, BOOK_2, BOOK_1));
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_3, BOOK_2, BOOK_1));
 
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
@@ -374,9 +372,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(personName, Stream.of(person2, person1, person3));
 
 		Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
-		assertEquals(
-				StreamSupport.stream(updatedPerson3.getEntities(ATTR_CHILDREN).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(PERSON_1, PERSON_2, PERSON_3));
+		assertEquals(StreamSupport.stream(updatedPerson3.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(PERSON_1, PERSON_2, PERSON_3));
 
 		Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
 		Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
@@ -399,9 +396,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(personName, Stream.of(person2, person1, person3));
 
 		Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
-		assertEquals(
-				StreamSupport.stream(updatedPerson1.getEntities(ATTR_CHILDREN).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(PERSON_3, PERSON_2, PERSON_1));
+		assertEquals(StreamSupport.stream(updatedPerson1.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(PERSON_3, PERSON_2, PERSON_1));
 
 		Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
 		Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);

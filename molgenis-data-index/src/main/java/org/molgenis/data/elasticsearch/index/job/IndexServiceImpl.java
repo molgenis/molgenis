@@ -101,23 +101,23 @@ public class IndexServiceImpl implements IndexService
 	@Scheduled(initialDelay = 1 * 60 * 1000, fixedRate = 5 * 60 * 1000)
 	public void cleanupJobExecutions()
 	{
-			runAsSystem(() ->
+		runAsSystem(() ->
+		{
+			LOG.trace("Clean up Index job executions...");
+			Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
+			boolean indexJobExecutionExists = dataService.hasRepository(INDEX_JOB_EXECUTION);
+			if (indexJobExecutionExists)
 			{
-				LOG.trace("Clean up Index job executions...");
-				Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
-				boolean indexJobExecutionExists = dataService.hasRepository(INDEX_JOB_EXECUTION);
-				if (indexJobExecutionExists)
-				{
-					Stream<Entity> executions = dataService.getRepository(INDEX_JOB_EXECUTION).query()
-							.lt(END_DATE, fiveMinutesAgo).and().eq(STATUS, SUCCESS.toString()).findAll();
-					dataService.delete(INDEX_JOB_EXECUTION, executions);
-					LOG.debug("Cleaned up Index job executions.");
-				}
-				else
-				{
-					LOG.warn(INDEX_JOB_EXECUTION + " does not exist");
-				}
-			});
+				Stream<Entity> executions = dataService.getRepository(INDEX_JOB_EXECUTION).query()
+						.lt(END_DATE, fiveMinutesAgo).and().eq(STATUS, SUCCESS.toString()).findAll();
+				dataService.delete(INDEX_JOB_EXECUTION, executions);
+				LOG.debug("Cleaned up Index job executions.");
+			}
+			else
+			{
+				LOG.warn(INDEX_JOB_EXECUTION + " does not exist");
+			}
+		});
 	}
 
 }

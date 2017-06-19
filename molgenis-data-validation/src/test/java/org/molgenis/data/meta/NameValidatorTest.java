@@ -23,7 +23,6 @@ public class NameValidatorTest
 		NameValidator.validateEntityName("base");
 	}
 
-
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testI18nNameMilti()
 	{

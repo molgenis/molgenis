@@ -93,7 +93,7 @@ public class MolgenisClient
 	 * Retrieves an entity's metadata
 	 *
 	 * @param entityTypeId fully qualified name of the entity
-	 * @param token      molgenis session token
+	 * @param token        molgenis session token
 	 * @return {@link ResponseEntity} with the {@link MetaDataResponse}
 	 */
 	public ResponseEntity<MetaDataResponse> getMeta(String token, String entityTypeId)
@@ -105,7 +105,7 @@ public class MolgenisClient
 	/**
 	 * Queries an attribute for entities which have one specific attribute set to a specific value.
 	 *
-	 * @param entityTypeId    name of the entity
+	 * @param entityTypeId  name of the entity
 	 * @param attributeName name of the attribute
 	 * @param value         value of the attribute
 	 * @param token         molgenis session token
@@ -125,10 +125,10 @@ public class MolgenisClient
 	/**
 	 * Updates an entity.
 	 *
-	 * @param token      molgenis session token
+	 * @param token        molgenis session token
 	 * @param entityTypeId name of the entity
-	 * @param id         id of the entity
-	 * @param newEntity  new values for the entity
+	 * @param id           id of the entity
+	 * @param newEntity    new values for the entity
 	 */
 	public void update(String token, String entityTypeId, String id, ImmutableMap<String, Object> newEntity)
 	{
@@ -140,7 +140,7 @@ public class MolgenisClient
 	 * Updates an entity's attribute value.
 	 *
 	 * @param token         molgenis session token
-	 * @param entityTypeId    name of the entity
+	 * @param entityTypeId  name of the entity
 	 * @param id            id of the entity
 	 * @param attributeName name of the attribute to update
 	 * @param value         new value for the attribute
@@ -156,8 +156,7 @@ public class MolgenisClient
 	{
 		ResponseEntity<Map> responseEntity = template
 				.exchange("{apiHref}/{entityTypeId}/{id}", GET, createHttpEntity(token), Map.class, apiHref,
-						entityTypeId,
-						id);
+						entityTypeId, id);
 		return responseEntity.getBody();
 	}
 

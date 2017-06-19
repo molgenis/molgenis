@@ -431,7 +431,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		typeTestFirstRow.put("xcompound_string", "compound strings are here");
 		typeTestFirstRow.put("xcategorical_value", "ref1");
 		typeTestFirstRow.put("xcategoricalnillable_value", "ref1");
-		typeTestFirstRow.put("xcategoricalmref_value", newHashSet( "ref1"));
+		typeTestFirstRow.put("xcategoricalmref_value", newHashSet("ref1"));
 		typeTestFirstRow.put("xcatmrefnillable_value", newHashSet("ref1"));
 		typeTestFirstRow.put("xdate", LocalDate.of(1985, 8, 1));
 		typeTestFirstRow.put("xdatenillable", LocalDate.of(1985, 8, 1));

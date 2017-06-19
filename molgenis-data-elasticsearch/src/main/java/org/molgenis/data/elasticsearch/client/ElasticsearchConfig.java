@@ -66,7 +66,7 @@ public class ElasticsearchConfig
 		int port;
 		try
 		{
-			port = Integer.valueOf(elasticsearchTransportAddress.substring(idx + 1));
+			port = Integer.parseInt(elasticsearchTransportAddress.substring(idx + 1));
 		}
 		catch (NumberFormatException e)
 		{

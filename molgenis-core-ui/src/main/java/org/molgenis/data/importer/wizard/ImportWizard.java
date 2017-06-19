@@ -208,8 +208,9 @@ public class ImportWizard extends Wizard
 
 	public boolean getAllowPermissions()
 	{
-		allowPermissions = SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP)
-				&& SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP_AUTHORITY);
+		allowPermissions =
+				SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP) && SecurityUtils
+						.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP_AUTHORITY);
 		return allowPermissions || SecurityUtils.currentUserIsSu();
 	}
 }

@@ -50,29 +50,28 @@ public class CombinedEntityCache
 	 */
 	public void evictAll(EntityType entityType)
 	{
-		cache.asMap().keySet().stream().filter(e -> e.getEntityTypeId().equals(entityType.getId())).forEach(cache::invalidate);
+		cache.asMap().keySet().stream().filter(e -> e.getEntityTypeId().equals(entityType.getId()))
+				.forEach(cache::invalidate);
 	}
 
 	/**
 	 * Retrieves an entity from the cache if present.
 	 *
 	 * @param entityType EntityType of the entity to retrieve
-	 * @param id             id value of the entity to retrieve
+	 * @param id         id value of the entity to retrieve
 	 * @return Optional {@link Entity} with the result from the cache,
 	 * or null if no record of the entity is present in the cache
 	 */
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
 	public Optional<Entity> getIfPresent(EntityType entityType, Object id)
 	{
-		Optional<Map<String, Object>> optionalDehydratedEntity = cache
-				.getIfPresent(EntityKey.create(entityType, id));
+		Optional<Map<String, Object>> optionalDehydratedEntity = cache.getIfPresent(EntityKey.create(entityType, id));
 		if (optionalDehydratedEntity == null)
 		{
 			// no information present in cache
 			return null;
 		}
-		return optionalDehydratedEntity
-				.map(dehydratedEntity -> entityHydration.hydrate(dehydratedEntity, entityType));
+		return optionalDehydratedEntity.map(dehydratedEntity -> entityHydration.hydrate(dehydratedEntity, entityType));
 	}
 
 	/**
