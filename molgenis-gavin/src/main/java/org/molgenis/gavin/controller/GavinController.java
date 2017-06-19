@@ -105,7 +105,7 @@ public class GavinController extends AbstractStaticContentController
 	/**
 	 * Starts a job to annotate a VCF file
 	 *
-	 * @param inputFile  the uploaded input file
+	 * @param inputFile    the uploaded input file
 	 * @param entityTypeId the name of the file
 	 * @return the ID of the created {@link GavinJobExecution}
 	 * @throws IOException if interaction with the file store fails
@@ -149,8 +149,7 @@ public class GavinController extends AbstractStaticContentController
 	 * @return GavinJobExecution, or null if no GavinJobExecution exists with this ID.
 	 */
 	@RequestMapping(value = "/job/{jobIdentifier}", method = GET, produces = APPLICATION_JSON_VALUE)
-	public
-	@ResponseBody
+	public @ResponseBody
 	GavinJobExecution getGavinJobExecution(@PathVariable(value = "jobIdentifier") String jobIdentifier)
 			throws JobNotFoundException
 	{

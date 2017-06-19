@@ -153,7 +153,8 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 
 		@Bean
 		@Override
-		public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean() throws Exception
+		public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean()
+				throws Exception
 		{
 			return userDetailsService();
 		}

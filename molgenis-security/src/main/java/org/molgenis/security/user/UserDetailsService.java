@@ -22,8 +22,8 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.auth.UserMetaData.USER;
 
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
 {
@@ -46,13 +46,13 @@ public class UserDetailsService implements org.springframework.security.core.use
 		try
 		{
 			User user = dataService
-					.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
-							User.class);
+					.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username), User.class);
 
 			if (user == null) throw new UsernameNotFoundException("unknown user '" + username + "'");
 
 			Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
-			return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), user.isActive(), true, true, true, authorities);
+			return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+					user.isActive(), true, true, true, authorities);
 		}
 		catch (Throwable e)
 		{
@@ -99,32 +99,30 @@ public class UserDetailsService implements org.springframework.security.core.use
 
 	private List<UserAuthority> getUserAuthorities(User user)
 	{
-		return dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
+		return dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
 				UserAuthority.class).collect(toList());
 	}
 
 	private List<GroupAuthority> getGroupAuthorities(User user)
 	{
-		List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-				GroupMember.class).collect(toList());
+		List<GroupMember> groupMembers = dataService
+				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
+						GroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
-			List<Group> groups = Lists
-					.transform(groupMembers, new Function<GroupMember, Group>()
-					{
-						@Override
-						public Group apply(GroupMember groupMember)
-						{
-							return groupMember.getGroup();
-						}
-					});
+			List<Group> groups = Lists.transform(groupMembers, new Function<GroupMember, Group>()
+			{
+				@Override
+				public Group apply(GroupMember groupMember)
+				{
+					return groupMember.getGroup();
+				}
+			});
 
-			return dataService.findAll(GROUP_AUTHORITY,
-					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
-					GroupAuthority.class).collect(toList());
+			return dataService
+					.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
+							GroupAuthority.class).collect(toList());
 		}
 		return null;
 	}

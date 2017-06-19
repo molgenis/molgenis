@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GroupMemberFactory
-		extends AbstractSystemEntityFactory<GroupMember, GroupMemberMetaData, String>
+public class GroupMemberFactory extends AbstractSystemEntityFactory<GroupMember, GroupMemberMetaData, String>
 {
 	@Autowired
 	GroupMemberFactory(GroupMemberMetaData groupMemberMetaData, EntityPopulator entityPopulator)

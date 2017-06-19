@@ -16,8 +16,7 @@ import javax.annotation.PostConstruct;
 
 @Configuration
 @Import({ DataServiceImpl.class, MetaDataServiceImpl.class, EntityManagerImpl.class,
-		SystemRepositoryDecoratorRegistryImpl.class,
-		EntityFactoryRegistry.class, EntityListenersService.class })
+		SystemRepositoryDecoratorRegistryImpl.class, EntityFactoryRegistry.class, EntityListenersService.class })
 public class PlatformConfig
 {
 	@Autowired

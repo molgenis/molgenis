@@ -12,12 +12,15 @@ public interface EntityManager
 	/**
 	 * Creation mode that defines whether or not to populate entities with auto generated ando/or default values.
 	 */
-	enum CreationMode { POPULATE, NO_POPULATE }
+	enum CreationMode
+	{
+		POPULATE, NO_POPULATE
+	}
 
 	/**
 	 * Creates an entity.
 	 *
-	 * @param entityType entity meta data
+	 * @param entityType   entity meta data
 	 * @param creationMode entity creation mode that defines initial population mode
 	 * @return new entity
 	 */

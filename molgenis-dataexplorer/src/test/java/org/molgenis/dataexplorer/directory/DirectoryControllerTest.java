@@ -71,7 +71,7 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 	public void testShowButtonNoPermissionsOnPlugin()
 	{
 		when(permissions.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
-		
+
 		assertFalse(controller.showDirectoryButton("blah"));
 	}
 

@@ -17,10 +17,9 @@ import java.time.LocalDate;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.elasticsearch.common.xcontent.XContentType.JSON;
-import static org.molgenis.data.elasticsearch.ElasticsearchEntityUtils.toElasticsearchId;
 
 /**
- * Creates entities from Elasticsearch document sources and vice versa.
+ * Generates Elasticsearch document sources from entities.
  */
 @Component
 class DocumentContentBuilder
@@ -225,5 +224,10 @@ class DocumentContentBuilder
 			default:
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
+	}
+
+	private static String toElasticsearchId(Object entityId)
+	{
+		return entityId.toString();
 	}
 }

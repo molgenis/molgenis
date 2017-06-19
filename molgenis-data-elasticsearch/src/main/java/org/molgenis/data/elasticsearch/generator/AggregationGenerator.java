@@ -7,7 +7,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
-import org.molgenis.data.elasticsearch.ElasticsearchEntityUtils;
+import org.molgenis.data.elasticsearch.AggregateUtils;
 import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -22,6 +22,9 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
+/**
+ * Generates Elasticsearch aggregation queries from MOLGENIS aggregation queries.
+ */
 @Component
 class AggregationGenerator
 {
@@ -30,13 +33,21 @@ class AggregationGenerator
 
 	private final DocumentIdGenerator documentIdGenerator;
 
+	/**
+	 * http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
+	 * The precision_threshold options allows to trade memory for accuracy, and defines a unique count below
+	 * which counts are expected to be close to accurate. Above this value, counts might become a bit more
+	 * fuzzy. The maximum supported value is 40000, thresholds above this number will have the same effect as a
+	 * threshold of 40000.
+	 */
+	private static final long PRECISION_THRESHOLD = 40000L;
+
 	AggregationGenerator(DocumentIdGenerator documentIdGenerator)
 	{
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
-	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2,
-			Attribute aggAttrDistinct)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct)
 	{
 		List<AggregationBuilder> aggregationBuilders = createAggregations(aggAttr1, aggAttr2, aggAttrDistinct);
 
@@ -82,7 +93,8 @@ class AggregationGenerator
 			AttributeType dataType2 = aggAttr2.getDataType();
 			if (aggAttr2.isNillable() && isReferenceType(aggAttr2))
 			{
-				throw new IllegalArgumentException("Aggregatable attribute of type [" + dataType2 + "] cannot be nillable");
+				throw new IllegalArgumentException(
+						"Aggregatable attribute of type [" + dataType2 + "] cannot be nillable");
 			}
 		}
 
@@ -95,8 +107,7 @@ class AggregationGenerator
 		return createAggregations(aggAttrs, null, aggAttrDistinct);
 	}
 
-	private List<AggregationBuilder> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr,
-			Attribute distinctAttr)
+	private List<AggregationBuilder> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr, Attribute distinctAttr)
 	{
 		Attribute attr = attrs.pop();
 
@@ -120,30 +131,24 @@ class AggregationGenerator
 		// add distinct term aggregations
 		if (attrs.isEmpty() && distinctAttr != null)
 		{
-			// http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
-			// The precision_threshold options allows to trade memory for accuracy, and defines a unique count below
-			// which counts are expected to be close to accurate. Above this value, counts might become a bit more
-			// fuzzy. The maximum supported value is 40000, thresholds above this number will have the same effect as a
-			// threshold of 40000.
 			String cardinalityAggName = distinctAttr.getName() + FieldConstants.AGGREGATION_DISTINCT_POSTFIX;
 			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
 			CardinalityAggregationBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
-					.field(cardinalityAggFieldName).precisionThreshold(40000L);
+					.field(cardinalityAggFieldName).precisionThreshold(PRECISION_THRESHOLD);
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;
-			if (ElasticsearchEntityUtils.isNestedType(distinctAttr))
+			if (AggregateUtils.isNestedType(distinctAttr))
 			{
 				String nestedAggName = distinctAttr.getName() + AGGREGATION_NESTED_POSTFIX;
 				String nestedAggFieldName = getAggregatePathName(distinctAttr);
 				NestedAggregationBuilder nestedBuilder = AggregationBuilders.nested(nestedAggName, nestedAggFieldName);
 				nestedBuilder.subAggregation(distinctAgg);
 
-				if (ElasticsearchEntityUtils.isNestedType(attr))
+				if (AggregateUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders
-							.reverseNested(reverseAggName);
+					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
 					reverseNestedBuilder.subAggregation(nestedBuilder);
 					wrappedDistinctAgg = reverseNestedBuilder;
 				}
@@ -154,11 +159,10 @@ class AggregationGenerator
 			}
 			else
 			{
-				if (ElasticsearchEntityUtils.isNestedType(attr))
+				if (AggregateUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders
-							.reverseNested(reverseAggName);
+					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
 					reverseNestedBuilder.subAggregation(distinctAgg);
 					wrappedDistinctAgg = reverseNestedBuilder;
 				}
@@ -189,7 +193,7 @@ class AggregationGenerator
 		}
 
 		// wrap in nested aggregation is this aggregation is nested
-		if (ElasticsearchEntityUtils.isNestedType(attr))
+		if (AggregateUtils.isNestedType(attr))
 		{
 			String nestedAggName = attr.getName() + AGGREGATION_NESTED_POSTFIX;
 			String nestedAggFieldName = getAggregatePathName(attr);
@@ -202,7 +206,7 @@ class AggregationGenerator
 		}
 
 		// wrap in reverse nested aggregation if parent aggregation is nested
-		if (parentAttr != null && ElasticsearchEntityUtils.isNestedType(parentAttr))
+		if (parentAttr != null && AggregateUtils.isNestedType(parentAttr))
 		{
 			String reverseAggName = parentAttr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
 			ReverseNestedAggregationBuilder reverseNestedAgg = AggregationBuilders.reverseNested(reverseAggName);

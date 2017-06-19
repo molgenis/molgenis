@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Generates Elasticsearch index metadata from entity types.
+ */
 @Component
 class IndexGenerator
 {

@@ -34,8 +34,7 @@ public class ResourcesImpl implements Resources
 	{
 		getResources();
 		return dataService.hasRepository(entityTypeId) || (resources.containsKey(entityTypeId) && resources
-				.get(entityTypeId)
-				.isAvailable());
+				.get(entityTypeId).isAvailable());
 	}
 
 	@Override

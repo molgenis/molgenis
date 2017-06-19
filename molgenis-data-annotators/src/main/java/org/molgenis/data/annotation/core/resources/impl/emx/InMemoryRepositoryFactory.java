@@ -32,8 +32,8 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 	private ExcelRepositoryCollection repositoryCollection = null;
 	private final MetaDataParser parser;
 
-	public InMemoryRepositoryFactory(String entityId,String name, MetaDataParser parser, EntityTypeFactory entityTypeFactory,
-			AttributeFactory attributeFactory)
+	public InMemoryRepositoryFactory(String entityId, String name, MetaDataParser parser,
+			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory)
 	{
 		this.id = entityId;
 		this.name = name;

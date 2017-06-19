@@ -259,8 +259,8 @@ public class OneToManyTestHarness
 		private final EntityType bookMetaData;
 		private final EntityType authorMetaData;
 
-		AuthorsAndBooks(@NonNull List<Entity> authors, @NonNull List<Entity> books,
-				@NonNull EntityType authorMetaData, @NonNull EntityType bookMetaData)
+		AuthorsAndBooks(@NonNull List<Entity> authors, @NonNull List<Entity> books, @NonNull EntityType authorMetaData,
+				@NonNull EntityType bookMetaData)
 		{
 			this.authors = requireNonNull(authors);
 			this.books = requireNonNull(books);

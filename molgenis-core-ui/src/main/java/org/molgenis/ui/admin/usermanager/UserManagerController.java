@@ -49,8 +49,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/activation", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public
-	@ResponseBody
+	public @ResponseBody
 	ActivationResponse activation(@RequestBody Activation activation)
 	{
 		ActivationResponse activationResponse = new ActivationResponse();
@@ -174,8 +173,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/changeGroupMembership", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public
-	@ResponseBody
+	public @ResponseBody
 	GroupMembershipResponse changeGroupMembership(@RequestBody GroupMembership groupMembership)
 	{
 		GroupMembershipResponse groupMembershipResponse = new GroupMembershipResponse();

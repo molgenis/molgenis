@@ -11,6 +11,9 @@ import java.io.UncheckedIOException;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Creates Elasticsearch transport client content for settings.
+ */
 class SettingsContentBuilder
 {
 	private static final String NGRAM_TOKENIZER = "ngram_tokenizer";

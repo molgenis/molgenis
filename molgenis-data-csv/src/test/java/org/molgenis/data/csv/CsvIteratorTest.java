@@ -74,10 +74,9 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		assertEquals(Iterators.size(it), 5);
 	}
 
-
 	private File createTmpFileForResource(String fileName) throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/"+fileName);
+		InputStream in = getClass().getResourceAsStream("/" + fileName);
 		File csvFile = new File(FileUtils.getTempDirectory(), fileName);
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 		return csvFile;

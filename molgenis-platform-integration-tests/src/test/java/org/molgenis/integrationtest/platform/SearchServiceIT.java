@@ -515,6 +515,40 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true)
+	public void testSearchRanking()
+	{
+		List<Entity> entities = createDynamic(5).collect(toList());
+		entities.get(0).set(ATTR_STRING, "ligament carcinoma");
+		entities.get(1).set(ATTR_STRING, "cars in omaha");
+		entities.get(2).set(ATTR_STRING, "multiple carcinomas");
+		entities.get(3).set(ATTR_STRING, "and now for something completely different");
+		searchService.index(entityTypeDynamic, entities.stream(), ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "carcinoma");
+		List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
+
+		assertEquals(foundIds, asList("0", "2"));
+	}
+
+	@Test(singleThreaded = true)
+	public void testSearchRankingMultipleWords()
+	{
+		List<Entity> entities = createDynamic(50).collect(toList());
+		entities.get(0).set(ATTR_STRING, "ligament carcinoma");
+		entities.get(1).set(ATTR_STRING, "cars in omaha");
+		entities.get(2).set(ATTR_STRING, "multiple carcinomas");
+		entities.get(3).set(ATTR_STRING, "and now for something completely different");
+		searchService.index(entityTypeDynamic, entities.stream(), ADD);
+		searchService.refreshIndex();
+
+		Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "car carcinoma");
+		List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
+
+		assertEquals(foundIds, asList("0", "2", "1"));
+	}
+
+	@Test(singleThreaded = true)
 	public void testSearchQueryLimit2_Offset2_sortOnInt()
 	{
 		List<Entity> testEntities = createAndIndexEntities(10);
@@ -544,7 +578,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 
 		Object entityId = searchService
 				.searchOne(entityTypeDynamic, new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
-		assertNotNull(entity);
+		assertNotNull(entityId);
 	}
 
 	private List<Entity> createAndIndexEntities(int count)

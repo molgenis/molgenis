@@ -482,8 +482,7 @@ class PostgreSqlRepository extends AbstractRepository
 				{
 					throw new MolgenisValidationException(new ConstraintViolation(
 							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
-									attr.getName(), attr.getEntity().getId(),
-									entity.getIdValue().toString())));
+									attr.getName(), attr.getEntity().getId(), entity.getIdValue().toString())));
 				}
 
 				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
@@ -565,8 +564,7 @@ class PostgreSqlRepository extends AbstractRepository
 		if (!attr.isNillable() && mrefs.isEmpty())
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] attribute [%s] value cannot be null", entityType.getId(),
-							attr.getName())));
+					format("Entity [%s] attribute [%s] value cannot be null", entityType.getId(), attr.getName())));
 		}
 
 		final Attribute idAttr = entityType.getIdAttribute();

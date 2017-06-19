@@ -173,7 +173,7 @@ public class EntityTypeDependencyResolver
 	private static class EntityTypeNode
 	{
 		private final EntityType entityType;
-		private final Set<EntityTypeNode> stack ;
+		private final Set<EntityTypeNode> stack;
 		private boolean skip = false;
 
 		private EntityTypeNode(EntityType entityType)

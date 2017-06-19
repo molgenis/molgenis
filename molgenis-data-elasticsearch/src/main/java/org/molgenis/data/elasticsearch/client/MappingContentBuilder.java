@@ -16,6 +16,9 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NGRAM_ANALYZED;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
+/**
+ * Creates Elasticsearch transport client content for mappings.
+ */
 class MappingContentBuilder
 {
 	private final XContentType xContentType;
@@ -51,8 +54,7 @@ class MappingContentBuilder
 		contentBuilder.endObject();
 	}
 
-	private void createFieldMappings(List<FieldMapping> fieldMappings, XContentBuilder contentBuilder)
-			throws IOException
+	private void createFieldMappings(List<FieldMapping> fieldMappings, XContentBuilder contentBuilder) throws IOException
 	{
 		contentBuilder.startObject("properties");
 		fieldMappings.forEach(fieldMapping ->
@@ -114,8 +116,7 @@ class MappingContentBuilder
 		contentBuilder.field("type", "date").field("format", dateFormat);
 		// not-analyzed field for aggregation
 		// note: the norms settings defaults to false for not_analyzed fields
-		contentBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
-				.field("index", true).endObject().endObject();
+		contentBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword").field("index", true).endObject().endObject();
 	}
 
 	private void createFieldMappingInteger(XContentBuilder contentBuilder) throws IOException
@@ -125,8 +126,7 @@ class MappingContentBuilder
 		contentBuilder.field("doc_values", true);
 	}
 
-	private void createFieldMappingNested(List<FieldMapping> nestedFieldMappings, XContentBuilder contentBuilder)
-			throws IOException
+	private void createFieldMappingNested(List<FieldMapping> nestedFieldMappings, XContentBuilder contentBuilder) throws IOException
 	{
 		contentBuilder.field("type", "nested");
 		createFieldMappings(nestedFieldMappings, contentBuilder);
@@ -139,13 +139,11 @@ class MappingContentBuilder
 		contentBuilder.field("norms", true);
 		// not-analyzed field for sorting and wildcard queries
 		// note: the norms settings defaults to false for not_analyzed fields
-		XContentBuilder fieldsObject = contentBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED)
-				.field("type", "keyword").field("index", true).endObject();
+		XContentBuilder fieldsObject = contentBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword").field("index", true).endObject();
 		if (analyzeNGrams)
 		{
 			// add ngram analyzer (not applied to nested documents)
-			fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "text")
-					.field("analyzer", FieldConstants.NGRAM_ANALYZER).endObject();
+			fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "text").field("analyzer", FieldConstants.NGRAM_ANALYZER).endObject();
 		}
 		fieldsObject.endObject();
 	}

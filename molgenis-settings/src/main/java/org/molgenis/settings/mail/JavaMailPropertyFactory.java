@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JavaMailPropertyFactory
-		extends AbstractSystemEntityFactory<JavaMailProperty, JavaMailPropertyType, String>
+public class JavaMailPropertyFactory extends AbstractSystemEntityFactory<JavaMailProperty, JavaMailPropertyType, String>
 {
 	@Autowired
 	JavaMailPropertyFactory(JavaMailPropertyType mailSenderPropertyType, EntityPopulator entityPopulator)

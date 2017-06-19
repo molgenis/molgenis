@@ -63,7 +63,8 @@ public class SVGEditor
 			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(PATH))
 			{
 				// make a new start element with the same attributes plus the extra annotations
-				@SuppressWarnings("unchecked") Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+				@SuppressWarnings("unchecked")
+				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
 
 				StartElement newSe = eventFactory.createStartElement(new QName(PATH), attributes, null);
 				writer.add(newSe);
@@ -159,7 +160,8 @@ public class SVGEditor
 			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G))
 			{
 
-				@SuppressWarnings("unchecked") Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+				@SuppressWarnings("unchecked")
+				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
 
 				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
 				writer.add(newSe);
@@ -183,7 +185,8 @@ public class SVGEditor
 			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G))
 			{
 
-				@SuppressWarnings("unchecked") Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+				@SuppressWarnings("unchecked")
+				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
 
 				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
 				writer.add(newSe);

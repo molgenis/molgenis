@@ -303,8 +303,8 @@ class RestControllerV2
 	 * Try to create multiple entities in one transaction. If one fails all fails.
 	 *
 	 * @param entityTypeId name of the entity where the entities are going to be added.
-	 * @param request    EntityCollectionCreateRequestV2
-	 * @param response   HttpServletResponse
+	 * @param request      EntityCollectionCreateRequestV2
+	 * @param response     HttpServletResponse
 	 * @return EntityCollectionCreateResponseBodyV2
 	 * @throws Exception
 	 */
@@ -365,8 +365,8 @@ class RestControllerV2
 	 * Copy an entity.
 	 *
 	 * @param entityTypeId name of the entity that will be copied.
-	 * @param request    CopyEntityRequestV2
-	 * @param response   HttpServletResponse
+	 * @param request      CopyEntityRequestV2
+	 * @param response     HttpServletResponse
 	 * @return String name of the new entity
 	 * @throws Exception
 	 */
@@ -422,8 +422,8 @@ class RestControllerV2
 	 * Try to update multiple entities in one transaction. If one fails all fails.
 	 *
 	 * @param entityTypeId name of the entity where the entities are going to be added.
-	 * @param request    EntityCollectionCreateRequestV2
-	 * @param response   HttpServletResponse
+	 * @param request      EntityCollectionCreateRequestV2
+	 * @param response     HttpServletResponse
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = PUT)
@@ -455,7 +455,7 @@ class RestControllerV2
 	}
 
 	/**
-	 * @param entityTypeId    The name of the entity to update
+	 * @param entityTypeId  The name of the entity to update
 	 * @param attributeName The name of the attribute to update
 	 * @param request       EntityCollectionBatchRequestV2
 	 * @param response      HttpServletResponse

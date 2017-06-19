@@ -52,6 +52,7 @@ public class GavinJobExecution extends JobExecution
 	{
 		set(INPUT_FILE_EXTENSION, extension);
 	}
+
 	public void setLineTypes(Multiset<LineType> lineTypes)
 	{
 		set(COMMENTS, lineTypes.count(COMMENT));

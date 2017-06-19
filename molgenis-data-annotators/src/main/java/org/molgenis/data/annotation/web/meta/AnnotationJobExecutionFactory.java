@@ -10,7 +10,8 @@ public class AnnotationJobExecutionFactory
 		extends AbstractSystemEntityFactory<AnnotationJobExecution, AnnotationJobExecutionMetaData, String>
 {
 	@Autowired
-	AnnotationJobExecutionFactory(AnnotationJobExecutionMetaData annotationJobExecutionMetaData, EntityPopulator entityPopulator)
+	AnnotationJobExecutionFactory(AnnotationJobExecutionMetaData annotationJobExecutionMetaData,
+			EntityPopulator entityPopulator)
 	{
 		super(AnnotationJobExecution.class, annotationJobExecutionMetaData, entityPopulator);
 	}
