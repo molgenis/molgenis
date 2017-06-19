@@ -3,7 +3,6 @@ export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
 export const SET_ATTRIBUTE_TYPES = '__SET_ATTRIBUTE_TYPES__'
 export const SET_EDITOR_ENTITY_TYPE = '__SET_EDITOR_ENTITY_TYPE__'
-export const CLEAR_EDITOR_ENTITY_TYPE = '__CLEAR_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__'
 export const SET_SELECTED_ATTRIBUTE_ID = '__SET_SELECTED_ATTRIBUTE_ID__'
@@ -26,16 +25,13 @@ export default {
   [SET_EDITOR_ENTITY_TYPE] (state, editorEntityType) {
     state.editorEntityType = editorEntityType
   },
-  [CLEAR_EDITOR_ENTITY_TYPE] (state) {
-    state.editorEntityType = {}
-  },
   [UPDATE_EDITOR_ENTITY_TYPE] (state, update) {
     state.editorEntityType[update.key] = update.value
   },
   /**
    * Update the editorEntityType attribute list in place
    * Performs a key value update for the selected attribute
-   * Updates a editorEntityType attribute via index
+   * Updates an editorEntityType attribute via index
    */
   [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE] (state, update) {
     // Return the index of the selected attribute in the array of the editorEntityType attributes
