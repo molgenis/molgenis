@@ -33,6 +33,15 @@ class AggregationGenerator
 
 	private final DocumentIdGenerator documentIdGenerator;
 
+	/**
+	 * http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
+	 * The precision_threshold options allows to trade memory for accuracy, and defines a unique count below
+	 * which counts are expected to be close to accurate. Above this value, counts might become a bit more
+	 * fuzzy. The maximum supported value is 40000, thresholds above this number will have the same effect as a
+	 * threshold of 40000.
+	 */
+	private static final long PRECISION_THRESHOLD = 40000L;
+
 	AggregationGenerator(DocumentIdGenerator documentIdGenerator)
 	{
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
@@ -84,7 +93,8 @@ class AggregationGenerator
 			AttributeType dataType2 = aggAttr2.getDataType();
 			if (aggAttr2.isNillable() && isReferenceType(aggAttr2))
 			{
-				throw new IllegalArgumentException("Aggregatable attribute of type [" + dataType2 + "] cannot be nillable");
+				throw new IllegalArgumentException(
+						"Aggregatable attribute of type [" + dataType2 + "] cannot be nillable");
 			}
 		}
 
@@ -121,14 +131,10 @@ class AggregationGenerator
 		// add distinct term aggregations
 		if (attrs.isEmpty() && distinctAttr != null)
 		{
-			// http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
-			// The precision_threshold options allows to trade memory for accuracy, and defines a unique count below
-			// which counts are expected to be close to accurate. Above this value, counts might become a bit more
-			// fuzzy. The maximum supported value is 40000, thresholds above this number will have the same effect as a
-			// threshold of 40000.
 			String cardinalityAggName = distinctAttr.getName() + FieldConstants.AGGREGATION_DISTINCT_POSTFIX;
 			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
-			CardinalityAggregationBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName).field(cardinalityAggFieldName).precisionThreshold(40000L);
+			CardinalityAggregationBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
+					.field(cardinalityAggFieldName).precisionThreshold(PRECISION_THRESHOLD);
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;
