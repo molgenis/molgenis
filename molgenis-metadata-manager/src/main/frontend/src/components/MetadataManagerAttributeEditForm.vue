@@ -29,6 +29,13 @@
       <div class="row">
         <div class="col-md-6">
           <div class="form-group row">
+            <label class="col-3 col-form-label">Name</label>
+            <div class="col">
+              <input v-model="name" class="form-control" type="text">
+            </div>
+          </div>
+
+          <div class="form-group row">
             <label class="col-3 col-form-label">Label</label>
             <div class="col">
               <input v-model="label" class="form-control" type="text">
@@ -171,6 +178,10 @@
       },
       editorEntityTypeAttributes: {
         get () { return this.$store.editorEntityType.attributes }
+      },
+      name: {
+        get () { return this.selectedAttribute.name },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'name', value: value}) }
       },
       label: {
         get () { return this.selectedAttribute.label },
