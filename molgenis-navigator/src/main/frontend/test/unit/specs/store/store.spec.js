@@ -1,5 +1,5 @@
-import * as api from 'molgenis-api-client'
-import store from 'src/store'
+import * as api from "molgenis-api-client";
+import store from "src/store";
 
 describe('store', function () {
   describe('initial state', function () {

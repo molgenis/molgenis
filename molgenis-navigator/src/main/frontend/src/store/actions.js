@@ -1,8 +1,7 @@
 // @flow
-import type {Package} from './state'
 // $FlowFixMe
-import {get} from 'molgenis-api-client'
-import {SET_PACKAGES, SET_ENTITIES, SET_PATH, RESET_PATH, SET_ERROR} from './mutations'
+import {get} from "molgenis-api-client";
+import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH} from "./mutations";
 
 export const QUERY_PACKAGES = 'QUERY_PACKAGES'
 export const QUERY_ENTITIES = 'QUERY_ENTITIES'
@@ -16,7 +15,7 @@ export const GET_ENTITIES_IN_PACKAGE = 'GET_ENTITIES_IN_PACKAGE'
  * @param commit, reference to mutation function
  * @param packages, the complete list of packages
  */
-function resetToHome (commit: Function, packages: Array<Package>) {
+function resetToHome(commit: Function, packages: Array<Package>) {
   const homePackages = packages.filter(function (packageItem) {
     return !packageItem.hasOwnProperty('parent')
   })
@@ -32,7 +31,7 @@ function resetToHome (commit: Function, packages: Array<Package>) {
  * @param path the path where building
  * @returns path, in order array of packages (grandparent, parent, child, ....)
  */
-function buildPath (packages, currentPackage: Package, path: Array<Package>) {
+function buildPath(packages, currentPackage: Package, path: Array<Package>) {
   if (currentPackage.parent) {
     const currentParent = currentPackage.parent
     const parentPackage = packages.find(function (packageItem) {
@@ -49,7 +48,7 @@ function buildPath (packages, currentPackage: Package, path: Array<Package>) {
  * @param item result row form query to backend
  * @returns {{id: *, type: string, label: *, description: *}}
  */
-function toEntity (item:any) {
+function toEntity(item: any) {
   return {
     'id': item.id,
     'type': 'entity',
@@ -62,7 +61,7 @@ function toEntity (item:any) {
  * Get all ( first 1000 ) packages from the server
  * @returns {Promise}, on success resolves to list of 'all' packages, on failure resolves to error message
  */
-function getAllPackages () {
+function getAllPackages() {
   return new Promise((resolve, reject) => {
     const uri = '/sys_md_Package?sort=label&num=1000'
     get({apiUrl: '/api/v2'}, uri).then((response) => {
@@ -78,7 +77,7 @@ function getAllPackages () {
  * Packages are returned if query matches id, description or label
  * @returns {Promise}, on success resolves to list of matching packages, on failure resolves to error message
  */
-function queryPackages (query: string) {
+function queryPackages(query: string) {
   return new Promise((resolve, reject) => {
     const uri = '/sys_md_Package?sort=label&num=1000&q=id=q=' + query + ',description=q=' + query + ',label=q=' + query
     get({apiUrl: '/api/v2'}, uri).then((response) => {
