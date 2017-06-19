@@ -1,5 +1,6 @@
 <template>
   <div class="row">
+    <!-- Attribute tree -->
     <div class="col-md-3 attribute-tree">
       <strong>Attributes</strong>
       <button @click="addAttribute" class="btn btn-primary btn-sm float-right">Add attribute</button>
@@ -16,6 +17,7 @@
       </p>
     </div>
 
+    <!-- Attribute form inputs -->
     <div v-if="selectedAttribute" class="col-md-9">
       <div class="row">
         <div class="col">
@@ -51,7 +53,7 @@
           <div v-if="isReferenceType" class="form-group row">
             <label class="col-3 col-form-label">Type</label>
             <div class="col">
-              <multiselect v-model="refEntity" :options="entityTypes" label="label"
+              <multiselect v-model="refEntityType" :options="entityTypes" label="label"
                            selectLabel="" deselectLabel="" placeholder="Select a reference entity"></multiselect>
             </div>
           </div>
@@ -106,13 +108,22 @@
 
       <div class="row">
         <div class="col">
-          {{selectedAttribute.expression}}
+          <div class="form-group">
+            <label>Computed value expression</label>
+            <textarea v-model="expression" class="form-control" rows="3"></textarea>
+          </div>
         </div>
         <div class="col">
-          {{selectedAttribute.visibleExpression}}
+          <div class="form-group">
+            <label>Visible expression</label>
+            <textarea v-model="visibleExpression" class="form-control" rows="3"></textarea>
+          </div>
         </div>
         <div class="col">
-          {{selectedAttribute.validationExpression}}
+          <div class="form-group">
+            <label>Validation expression</label>
+            <textarea v-model="validationExpression" class="form-control" rows="3"></textarea>
+          </div>
         </div>
       </div>
     </div>
@@ -132,6 +143,7 @@
   import AttributeTree from './generic-components/AttributeTree'
   import { mapState, mapGetters } from 'vuex'
   import { SET_SELECTED_ATTRIBUTE_ID, UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE } from '../store/mutations'
+  import { CREATE_ATTRIBUTE } from '../store/actions'
 
   import Multiselect from 'vue-multiselect'
 
@@ -142,7 +154,7 @@
         this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, value.id)
         this.$router.push({path: '/' + this.$route.params.entityTypeID + '/' + value.id})
       },
-      addAttribute: () => alert('Not yet implemented :)')
+      addAttribute () { this.$store.dispatch(CREATE_ATTRIBUTE) }
     },
     computed: {
       ...mapState(['editorEntityType', 'attributeTypes', 'entityTypes']),
@@ -170,7 +182,12 @@
       },
       type: {
         get () { return this.selectedAttribute.type },
+        // FIXME when type is set, all other input fields become empty...
         set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'type', value: value}) }
+      },
+      refEntityType: {
+        get () { return this.selectedAttribute.refEntityType },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'refEntityType', value: value}) }
       },
       nullable: {
         get () { return this.selectedAttribute.nullable },
@@ -195,6 +212,18 @@
       aggregatable: {
         get () { return this.selectedAttribute.aggregatable },
         set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'aggregatable', value: value}) }
+      },
+      expression: {
+        get () { return this.selectedAttribute.expression },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'expression', value: value}) }
+      },
+      visibleExpression: {
+        get () { return this.selectedAttribute.visibleExpression },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'visibleExpression', value: value}) }
+      },
+      validationExpression: {
+        get () { return this.selectedAttribute.validationExpression },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'validationExpression', value: value}) }
       }
     },
     components: {
