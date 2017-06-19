@@ -85,13 +85,13 @@ public class AppsController extends MolgenisPluginController
 	public String viewApp(@PathVariable("appId") String appId, Model model, HttpServletResponse response)
 	{
 		App app = dataService.findOneById(APP, appId, App.class);
-		Boolean useFreemarkerTemplate = app.getUseFreemarkerTemplate();
 		if (app == null)
 		{
 			model.addAttribute("errorMessage", format("Unknown app '%s'", appId));
 			response.setStatus(SC_BAD_REQUEST);
 			return "forward:" + URI;
 		}
+		Boolean useFreemarkerTemplate = app.getUseFreemarkerTemplate();
 		if (!app.isActive())
 		{
 			model.addAttribute("errorMessage", format("App '%s' is deactivated", app.getName()));
