@@ -54,6 +54,9 @@
     },
     watch: {
       '$route' (to, from) {
+        // Always clear alert on an entityType or attribute switch
+        this.$store.commit(CREATE_ALERT, {type: null, message: null})
+
         // When switching attributes in the same entity,
         // do not trigger reloads
         if (from.params.entityTypeID !== to.params.entityTypeID) {
