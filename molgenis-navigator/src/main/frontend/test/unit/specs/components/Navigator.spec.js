@@ -1,4 +1,4 @@
-import Navigator from 'components/Navigator.vue'
+import Navigator from "components/Navigator.vue";
 
 describe('Navigator', () => {
   describe('when created', () => {

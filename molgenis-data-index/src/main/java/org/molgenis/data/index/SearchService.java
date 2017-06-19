@@ -11,76 +11,35 @@ import java.util.stream.Stream;
 
 public interface SearchService
 {
-	boolean hasMapping(EntityType entityType);
+	void createIndex(EntityType entityType);
 
-	void createMappings(EntityType entityType);
+	boolean hasIndex(EntityType entityType);
 
-	long count(EntityType entityType);
-
-	long count(Query<Entity> q, EntityType entityType);
-
-	void index(Entity entity, EntityType entityType, IndexingMode indexingMode);
-
-	/**
-	 * Adds or updated the given entities in the index
-	 *
-	 * @param entities
-	 * @param entityType
-	 * @param indexingMode
-	 * @return number of indexed entities, which equals the size of the input entities iterable
-	 */
-	long index(Iterable<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode);
-
-	/**
-	 * Adds or updated the given entities in the index
-	 *
-	 * @param entities
-	 * @param entityType
-	 * @param indexingMode
-	 * @return number of indexed entities
-	 */
-	long index(Stream<? extends Entity> entities, EntityType entityType, IndexingMode indexingMode);
-
-	void delete(Entity entity, EntityType entityType);
-
-	void deleteById(String id, EntityType entityType);
-
-	void deleteById(Stream<String> ids, EntityType entityType);
-
-	void delete(Iterable<? extends Entity> entities, EntityType entityType);
-
-	/**
-	 * Deletes entities from index
-	 *
-	 * @param entities   entity stream
-	 * @param entityType
-	 */
-	void delete(Stream<? extends Entity> entities, EntityType entityType);
-
-	/**
-	 * Deletes data and meta data
-	 *
-	 * @param entityType entity type
-	 */
-	void delete(EntityType entityType);
-
-	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
-	Iterable<Entity> search(Query<Entity> q, EntityType entityType);
-
-	/**
-	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
-	 *
-	 * @param q
-	 * @param entityType
-	 * @return
-	 */
-	Stream<Entity> searchAsStream(Query<Entity> q, EntityType entityType);
-
-	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityType entityType);
+	void deleteIndex(EntityType entityType);
 
 	void rebuildIndex(Repository<? extends Entity> repository);
 
 	void refreshIndex();
 
-	Entity findOne(Query<Entity> q, EntityType entityType);
+	long count(EntityType entityType);
+
+	long count(EntityType entityType, Query<Entity> q);
+
+	Object searchOne(EntityType entityType, Query<Entity> q);
+
+	Stream<Object> search(EntityType entityType, Query<Entity> q);
+
+	AggregateResult aggregate(EntityType entityType, AggregateQuery aggregateQuery);
+
+	void index(EntityType entityType, Entity entity, IndexingMode indexingMode);
+
+	long index(EntityType entityType, Stream<? extends Entity> entities, IndexingMode indexingMode);
+
+	void delete(EntityType entityType, Entity entity);
+
+	void delete(EntityType entityType, Stream<? extends Entity> entities);
+
+	void deleteById(EntityType entityType, Object entityId);
+
+	void deleteAll(EntityType entityType, Stream<Object> entityIds);
 }

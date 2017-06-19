@@ -238,7 +238,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 		Explanation explanation = elasticSearchExplainService
 				.explain(new QueryImpl<Entity>(finalQueryRules), dataService.getEntityType(ATTRIBUTE_META_DATA),
-						attributeId);
+						attributeEntity);
 
 		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService
 				.findQueriesFromExplanation(collectExpanedQueryMap, explanation);

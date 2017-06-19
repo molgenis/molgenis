@@ -244,8 +244,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private EntityKey createEntityKey(IndexAction indexAction)
 	{
-		return EntityKey.create(indexAction.getEntityTypeId(), indexAction.getEntityId() != null ? EntityUtils
-				.getTypedValue(indexAction.getEntityId(),
+		return EntityKey.create(indexAction.getEntityTypeId(),
+				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
 						dataService.getEntityType(indexAction.getEntityTypeId()).getIdAttribute()) : null);
 	}
 

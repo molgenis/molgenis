@@ -994,10 +994,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		q.eq(ATTR_STRING, "qwerty");
 		entity.set(ATTR_STRING, "qwerty");
 
-		assertEquals(searchService.count(q, entityTypeDynamic), 0);
+		assertEquals(searchService.count(entityTypeDynamic, q), 0);
 		dataService.update(entityTypeDynamic.getId(), entity);
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		assertEquals(searchService.count(q, entityTypeDynamic), 1);
+		assertEquals(searchService.count(entityTypeDynamic, q), 1);
 
 		assertPresent(entityTypeDynamic, entity);
 
@@ -1015,12 +1015,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		Query<Entity> q = new QueryImpl<>().search("refstring4");
 
-		assertEquals(searchService.count(q, entityTypeDynamic), 5);
+		assertEquals(searchService.count(entityTypeDynamic, q), 5);
 		refEntity4.set(ATTR_REF_STRING, "qwerty");
 		runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity4));
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		assertEquals(searchService.count(q, entityTypeDynamic), 0);
-		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityTypeDynamic), 5);
+		assertEquals(searchService.count(entityTypeDynamic, q), 0);
+		assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 5);
 	}
 
 	@Test(singleThreaded = true, enabled = false) //FIXME: sys_md_attributes spam
@@ -1030,7 +1030,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		Query<Entity> q = new QueryImpl<>().search("refstring4").or().search("refstring5");
 
-		assertEquals(searchService.count(q, entityTypeDynamic), 3333);
+		assertEquals(searchService.count(entityTypeDynamic, q), 3333);
 		Entity refEntity4 = dataService.findOneById(refEntityTypeDynamic.getId(), "4");
 		refEntity4.set(ATTR_REF_STRING, "qwerty");
 		runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity4));
@@ -1040,9 +1040,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity5));
 
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-		assertEquals(searchService.count(q, entityTypeDynamic), 0);
+		assertEquals(searchService.count(entityTypeDynamic, q), 0);
 
-		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityTypeDynamic), 3333);
+		assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 3333);
 	}
 
 	@Test(singleThreaded = true)
@@ -1060,12 +1060,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(ATTR_STRING, "qwerty");
 
-		assertEquals(searchService.count(q, entityTypeDynamic), 0);
+		assertEquals(searchService.count(entityTypeDynamic, q), 0);
 
 		dataService.update(entityTypeDynamic.getId(), of(entity));
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 
-		assertEquals(searchService.count(q, entityTypeDynamic), 1);
+		assertEquals(searchService.count(entityTypeDynamic, q), 1);
 
 		assertPresent(entityTypeDynamic, entity);
 		entity = dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue());
@@ -1116,7 +1116,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Found in index Elasticsearch
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(emd.getIdAttribute().getName(), entity.getIdValue());
-		assertEquals(searchService.count(q, emd), 1);
+		assertEquals(searchService.count(emd, q), 1);
 	}
 
 	private void assertNotPresent(Entity entity)
@@ -1127,7 +1127,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Not found in index Elasticsearch
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(entityTypeDynamic.getIdAttribute().getName(), entity.getIdValue());
-		assertEquals(searchService.count(q, entityTypeDynamic), 0);
+		assertEquals(searchService.count(entityTypeDynamic, q), 0);
 	}
 
 	@Test(singleThreaded = true)
@@ -1149,8 +1149,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		entity.set(ATTR_STRING, "attr_string_new");
 
 		// Verify value in elasticsearch before update
-		assertEquals(searchService.count(q1, selfXrefEntityType), 1);
-		assertEquals(searchService.count(q2, selfXrefEntityType), 0);
+		assertEquals(searchService.count(selfXrefEntityType, q1), 1);
+		assertEquals(searchService.count(selfXrefEntityType, q2), 0);
 
 		// Update
 		dataService.update(selfXrefEntityType.getId(), entity);
@@ -1158,8 +1158,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertPresent(selfXrefEntityType, entity);
 
 		// Verify value in elasticsearch after update
-		assertEquals(searchService.count(q2, selfXrefEntityType), 1);
-		assertEquals(searchService.count(q1, selfXrefEntityType), 0);
+		assertEquals(searchService.count(selfXrefEntityType, q2), 1);
+		assertEquals(searchService.count(selfXrefEntityType, q1), 0);
 
 		// Verify value in PostgreSQL after update
 		entity = dataService.findOneById(selfXrefEntityType.getId(), entity.getIdValue());
@@ -1256,20 +1256,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// test string1 from entity
 		Query<Entity> q0 = new QueryImpl<>();
 		q0.search("string1");
-		Stream<Entity> result0 = searchService.searchAsStream(q0, entityTypeDynamic);
-		assertEquals(result0.count(), 2);
+		long count0 = searchService.count(entityTypeDynamic, q0);
+		assertEquals(count0, 2L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q1 = new QueryImpl<>();
 		q1.search("refstring0");
-		Stream<Entity> result1 = searchService.searchAsStream(q1, entityTypeDynamic);
-		assertEquals(result1.count(), 1);
+		long count1 = searchService.count(entityTypeDynamic, q1);
+		assertEquals(count1, 1L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q2 = new QueryImpl<>();
 		q2.search("refstring1");
-		Stream<Entity> result2 = searchService.searchAsStream(q2, entityTypeDynamic);
-		assertEquals(result2.count(), 1);
+		long count2 = searchService.count(entityTypeDynamic, q2);
+		assertEquals(count2, 1L);
 
 		refEntities.get(0).set(ATTR_REF_STRING, "searchTestBatchUpdate");
 		runAsSystem(() ->
@@ -1279,26 +1279,26 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		});
 
 		// test string1 from entity
-		Stream<Entity> result3 = searchService.searchAsStream(q0, entityTypeDynamic);
-		assertEquals(result3.count(), 2);
+		long count3 = searchService.count(entityTypeDynamic, q0);
+		assertEquals(count3, 2L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q4 = new QueryImpl<>();
 		q4.search("refstring0");
-		Stream<Entity> result4 = searchService.searchAsStream(q4, entityTypeDynamic);
-		assertEquals(result4.count(), 0);
+		long count4 = searchService.count(entityTypeDynamic, q4);
+		assertEquals(count4, 0L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q5 = new QueryImpl<>();
 		q5.search("refstring1");
-		Stream<Entity> result5 = searchService.searchAsStream(q5, entityTypeDynamic);
-		assertEquals(result5.count(), 1);
+		long count5 = searchService.count(entityTypeDynamic, q5);
+		assertEquals(count5, 1L);
 
 		// test refstring1 from ref entity
 		Query<Entity> q6 = new QueryImpl<>();
 		q6.search("searchTestBatchUpdate");
-		Stream<Entity> result6 = searchService.searchAsStream(q6, entityTypeDynamic);
-		assertEquals(result6.count(), 1);
+		long count6 = searchService.count(entityTypeDynamic, q6);
+		assertEquals(count6, 1L);
 	}
 
 	/**

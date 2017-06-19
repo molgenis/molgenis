@@ -11,7 +11,7 @@ import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
-import org.molgenis.data.elasticsearch.config.ElasticsearchConfig;
+import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.jobs.JobConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;

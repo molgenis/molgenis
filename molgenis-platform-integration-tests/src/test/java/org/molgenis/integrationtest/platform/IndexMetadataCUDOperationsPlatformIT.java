@@ -31,13 +31,13 @@ public class IndexMetadataCUDOperationsPlatformIT
 		Query<Entity> q1 = new QueryImpl<>();
 		q1.eq(EntityTypeMetadata.ID, entityTypeStatic.getId()).and()
 				.eq(EntityTypeMetadata.PACKAGE, entityTypeStatic.getPackage());
-		assertEquals(searchService.count(q1, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q1),
 				1);
 
 		Query<Entity> q2 = new QueryImpl<>();
 		q2.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId()).and()
 				.eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
-		assertEquals(searchService.count(q2, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q2),
 				1);
 	}
 
@@ -53,7 +53,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId()).and()
 				.eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
-		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
 				1);
 
 		// 2. delete sys_test_TypeTestDynamic metadata and wait on index
@@ -66,7 +66,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		waitForWorkToBeFinished(indexService, LOG);
 
 		// 3. verify that mapping is removed
-		assertFalse(searchService.hasMapping(entityTypeDynamic));
+		assertFalse(searchService.hasIndex(entityTypeDynamic));
 
 		// Reset context
 		RunAsSystemProxy.runAsSystem(() ->
@@ -86,7 +86,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId()).and()
 				.eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
-		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
 				1);
 
 		// 2. change dataType value of ATTR_EMAIL
@@ -100,7 +100,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 			metaDataService.updateEntityType(entityTypeDynamic);
 		});
 		waitForWorkToBeFinished(indexService, LOG);
-		assertTrue(searchService.hasMapping(entityTypeDynamic));
+		assertTrue(searchService.hasIndex(entityTypeDynamic));
 
 		// Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
@@ -108,7 +108,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		q2.eq(AttributeMetadata.ID, toUpdateAttributeId);
 		q2.and();
 		q2.eq(AttributeMetadata.TYPE, getValueString(STRING));
-		assertEquals(searchService.count(q2, emdActual), 1);
+		assertEquals(searchService.count(emdActual, q2), 1);
 
 		// Reset context
 		toUpdateAttribute.setDataType(EMAIL);
@@ -129,7 +129,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(EntityTypeMetadata.ID, emd.getId()).and().eq(EntityTypeMetadata.PACKAGE, emd.getPackage());
-		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
 				1);
 
 		// 2. remove attribute
@@ -142,13 +142,13 @@ public class IndexMetadataCUDOperationsPlatformIT
 			metaDataService.updateEntityType(emd);
 		});
 		waitForWorkToBeFinished(indexService, LOG);
-		assertTrue(searchService.hasMapping(emd));
+		assertTrue(searchService.hasIndex(emd));
 
 		// 4. Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
 		EntityType emdActual = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
 		q2.eq(AttributeMetadata.ID, toRemoveAttribute.getIdValue());
-		assertEquals(searchService.count(q2, emdActual), 0);
+		assertEquals(searchService.count(emdActual, q2), 0);
 
 		// Reset context
 		emd.addAttribute(toRemoveAttribute);

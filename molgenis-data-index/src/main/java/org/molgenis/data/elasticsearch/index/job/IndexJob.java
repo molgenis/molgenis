@@ -140,10 +140,10 @@ class IndexJob extends NontransactionalJob<Void>
 			else
 			{
 				entityType = getEntityType(indexAction);
-				if (searchService.hasMapping(entityType))
+				if (searchService.hasIndex(entityType))
 				{
 					progress.progress(progressCount, format("Dropping entityType with id: {0}", entityType.getId()));
-					searchService.delete(entityType);
+					searchService.deleteIndex(entityType);
 				}
 				else
 				{
@@ -198,32 +198,32 @@ class IndexJob extends NontransactionalJob<Void>
 			{
 				// Delete
 				LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
-				searchService.deleteById(entityId.toString(), entityType);
+				searchService.deleteById(entityType, entityId);
 				return;
 			}
 
-			boolean indexEntityExists = searchService.hasMapping(entityType);
+			boolean indexEntityExists = searchService.hasIndex(entityType);
 			if (!indexEntityExists)
 			{
 				LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityTypeId);
-				searchService.createMappings(entityType);
+				searchService.createIndex(entityType);
 			}
 
 			Query<Entity> q = new QueryImpl<>();
 			q.eq(entityType.getIdAttribute().getName(), entityId);
-			Entity indexEntity = searchService.findOne(q, entityType);
+			Object indexedEntityId = searchService.searchOne(entityType, q);
 
-			if (null != indexEntity)
+			if (null != indexedEntityId)
 			{
 				// update
 				LOG.debug("Index update [{}].[{}].", entityTypeId, entityId);
-				searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.UPDATE);
+				searchService.index(actualEntity.getEntityType(), actualEntity, IndexingMode.UPDATE);
 			}
 			else
 			{
 				// Add
 				LOG.debug("Index add [{}].[{}].", entityTypeId, entityId);
-				searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.ADD);
+				searchService.index(actualEntity.getEntityType(), actualEntity, IndexingMode.ADD);
 			}
 		}
 		else

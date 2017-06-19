@@ -22,8 +22,8 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
