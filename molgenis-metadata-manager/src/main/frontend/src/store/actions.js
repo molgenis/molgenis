@@ -17,6 +17,51 @@ export const CREATE_ATTRIBUTE = '__CREATE_ATTRIBUTE__'
 export const SAVE_EDITOR_ENTITY_TYPE = '__SAVE_EDITOR_ENTITY_TYPE__'
 export const GET_ATTRIBUTE_TYPES = '__GET_ATTRIBUTE_TYPES__'
 
+export const toEntityType = (editorEntityType) => {
+  return {
+    'id': editorEntityType.id,
+    'label': editorEntityType.label,
+    'description': editorEntityType.description,
+    'abstract_': editorEntityType.abstract_,
+    'backend': editorEntityType.backend,
+    'package_': editorEntityType.package_,
+    'entityTypeParent': editorEntityType.entityTypeParent,
+    'attributes': editorEntityType.attributes.map(attribute => toAttribute(attribute)),
+    'tags': editorEntityType.tags,
+    'idAttribute': editorEntityType.idAttribute,
+    'labelAttribute': editorEntityType.labelAttribute,
+    'lookupAttributes': editorEntityType.lookupAttributes
+  }
+}
+
+export const toAttribute = (attribute) => {
+  return {
+    'id': attribute.id,
+    'name': attribute.name,
+    'type': attribute.type,
+    'parent': attribute.parent,
+    'refEntityType': attribute.refEntityType,
+    'mappedByEntityType': attribute.mappedByEntityType,
+    'orderBy': attribute.orderBy,
+    'expression': attribute.expression,
+    'nullable': attribute.nullable,
+    'auto': attribute.auto,
+    'visible': attribute.visible,
+    'label': attribute.label,
+    'description': attribute.description,
+    'aggregatable': attribute.aggregatable,
+    'enumOptions': attribute.enumOptions,
+    'rangeMin': attribute.minRange,
+    'rangeMax': attribute.maxRange,
+    'readonly': attribute.readonly,
+    'unique': attribute.unique,
+    'tags': attribute.tags,
+    'visibleExpression': attribute.visibleExpression,
+    'validationExpression': attribute.validationExpression,
+    'defaultValue': attribute.defaultValue
+  }
+}
+
 export default {
   /**
    * Retrieve all Packages and filter on non-system Packages
@@ -83,7 +128,7 @@ export default {
   [GET_EDITOR_ENTITY_TYPE] ({commit}, entityTypeID) {
     get({apiUrl: '/metadata-manager-service'}, '/entityType/' + entityTypeID)
       .then(response => {
-        commit(SET_EDITOR_ENTITY_TYPE, response.entityType)
+        commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
       }, error => {
         commit(CREATE_ALERT, {
           type: 'danger',
@@ -98,7 +143,7 @@ export default {
   [CREATE_ENTITY_TYPE] ({commit}) {
     get({apiUrl: '/metadata-manager-service'}, '/create/entityType')
       .then(response => {
-        commit(SET_EDITOR_ENTITY_TYPE, response.entityType)
+        commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
@@ -121,7 +166,7 @@ export default {
   [CREATE_ATTRIBUTE] ({commit, state}) {
     get({apiUrl: '/metadata-manager-service'}, '/create/attribute')
       .then(response => {
-        const attribute = response.attribute
+        const attribute = toAttribute(response.attribute)
         commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
 
         // Call an update on the attribute key with the existing attribute list + the new empty attribute
