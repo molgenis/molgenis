@@ -4,7 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.index.job.IndexJobExecution;
 import org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
@@ -30,19 +30,19 @@ public class IndexBootstrapper
 	private static final Logger LOG = LoggerFactory.getLogger(IndexBootstrapper.class);
 
 	private final MetaDataService metaDataService;
-	private final SearchService searchService;
+	private final IndexService indexService;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final DataService dataService;
 	private final AttributeMetadata attrMetadata;
 	private final EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	public IndexBootstrapper(MetaDataService metaDataService, SearchService searchService,
+	public IndexBootstrapper(MetaDataService metaDataService, IndexService indexService,
 			IndexActionRegisterService indexActionRegisterService, DataService dataService,
 			AttributeMetadata attrMetadata, EntityTypeFactory entityTypeFactory)
 	{
 		this.metaDataService = metaDataService;
-		this.searchService = searchService;
+		this.indexService = indexService;
 		this.indexActionRegisterService = indexActionRegisterService;
 		this.dataService = dataService;
 		this.attrMetadata = attrMetadata;
@@ -51,7 +51,7 @@ public class IndexBootstrapper
 
 	public void bootstrap()
 	{
-		if (!searchService.hasIndex(attrMetadata))
+		if (!indexService.hasIndex(attrMetadata))
 		{
 			LOG.debug(
 					"No index for Attribute found, asuming missing index, schedule (re)index for all entities");

@@ -16,7 +16,7 @@ import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.ContentGenerators;
 import org.molgenis.data.elasticsearch.generator.model.*;
-import org.molgenis.data.index.IndexingMode;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
@@ -34,7 +34,7 @@ import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing
  * @author erwin
  */
 @Component
-public class ElasticsearchService implements SearchService
+public class ElasticsearchService implements SearchService, IndexService
 {
 	private static final int BATCH_SIZE = 1000;
 
@@ -85,7 +85,7 @@ public class ElasticsearchService implements SearchService
 
 		createIndex(entityType);
 		repository.forEachBatched(createFetchForReindexing(entityType),
-				entities -> index(entityType, entities.stream(), IndexingMode.ADD), BATCH_SIZE);
+				entities -> index(entityType, entities.stream()), BATCH_SIZE);
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void index(EntityType entityType, Entity entity, IndexingMode indexingMode)
+	public void index(EntityType entityType, Entity entity)
 	{
 		Index index = contentGenerators.createIndex(entityType);
 		Document document = contentGenerators.createDocument(entity);
@@ -163,7 +163,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public long index(EntityType entityType, Stream<? extends Entity> entities, IndexingMode indexingMode)
+	public long index(EntityType entityType, Stream<? extends Entity> entities)
 	{
 		Index index = contentGenerators.createIndex(entityType);
 		Stream<DocumentAction> documentActionStream = entities.map(entity -> this.toDocumentAction(index, entity));

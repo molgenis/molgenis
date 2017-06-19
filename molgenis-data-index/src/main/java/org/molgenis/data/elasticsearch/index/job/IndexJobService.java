@@ -1,8 +1,7 @@
 package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.*;
-import org.molgenis.data.index.IndexingMode;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
@@ -32,13 +31,13 @@ public class IndexJobService
 	private static final Logger LOG = LoggerFactory.getLogger(IndexJobService.class);
 
 	private final DataService dataService;
-	private final SearchService searchService;
+	private final IndexService indexService;
 	private final EntityTypeFactory entityTypeFactory;
 
-	public IndexJobService(DataService dataService, SearchService searchService, EntityTypeFactory entityTypeFactory)
+	public IndexJobService(DataService dataService, IndexService indexService, EntityTypeFactory entityTypeFactory)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.searchService = requireNonNull(searchService);
+		this.indexService = requireNonNull(indexService);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
@@ -95,7 +94,7 @@ public class IndexJobService
 		finally
 		{
 			progress.status("Refresh index start");
-			searchService.refreshIndex();
+			indexService.refreshIndex();
 			progress.status("Refresh index done");
 		}
 	}
@@ -128,16 +127,16 @@ public class IndexJobService
 				{
 					progress.progress(progressCount, format("Indexing {0}", entityType.getId()));
 					final Repository<Entity> repository = dataService.getRepository(entityType.getId());
-					searchService.rebuildIndex(repository);
+					indexService.rebuildIndex(repository);
 				}
 			}
 			else
 			{
 				entityType = getEntityType(indexAction);
-				if (searchService.hasIndex(entityType))
+				if (indexService.hasIndex(entityType))
 				{
 					progress.progress(progressCount, format("Dropping entityType with id: {0}", entityType.getId()));
-					searchService.deleteIndex(entityType);
+					indexService.deleteIndex(entityType);
 				}
 				else
 				{
@@ -192,33 +191,19 @@ public class IndexJobService
 			{
 				// Delete
 				LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
-				searchService.deleteById(entityType, entityId);
+				indexService.deleteById(entityType, entityId);
 				return;
 			}
 
-			boolean indexEntityExists = searchService.hasIndex(entityType);
+			boolean indexEntityExists = indexService.hasIndex(entityType);
 			if (!indexEntityExists)
 			{
 				LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityTypeId);
-				searchService.createIndex(entityType);
+				indexService.createIndex(entityType);
 			}
 
-			Query<Entity> q = new QueryImpl<>();
-			q.eq(entityType.getIdAttribute().getName(), entityId);
-			Object indexedEntityId = searchService.searchOne(entityType, q);
-
-			if (null != indexedEntityId)
-			{
-				// update
-				LOG.debug("Index update [{}].[{}].", entityTypeId, entityId);
-				searchService.index(actualEntity.getEntityType(), actualEntity, IndexingMode.UPDATE);
-			}
-			else
-			{
-				// Add
-				LOG.debug("Index add [{}].[{}].", entityTypeId, entityId);
-				searchService.index(actualEntity.getEntityType(), actualEntity, IndexingMode.ADD);
-			}
+			LOG.debug("Index [{}].[{}].", entityTypeId, entityId);
+			indexService.index(actualEntity.getEntityType(), actualEntity);
 		}
 		else
 		{

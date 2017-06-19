@@ -4,15 +4,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
-import org.molgenis.data.index.IndexingMode;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.config.IndexTestConfig;
 import org.molgenis.data.index.meta.*;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +46,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private Authentication authentication;
 	@Autowired
-	private SearchService searchService;
+	private IndexService indexService;
 	@Autowired
 	private MetaDataService mds;
 	@Autowired
@@ -74,7 +72,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 	public void beforeMethod()
 	{
 		config.resetMocks();
-		indexJobService = new IndexJobService(dataService, searchService, entityTypeFactory);
+		indexJobService = new IndexJobService(dataService, indexService, entityTypeFactory);
 		indexActionGroup = indexActionGroupFactory.create(transactionId).setCount(0);
 		when(dataService.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class))
 				.thenReturn(indexActionGroup);
@@ -96,7 +94,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		indexJobService.executeJob(progress, transactionId);
 
 		verify(progress).status("No index actions found for transaction id: [aabbcc]");
-		verify(searchService, never()).refreshIndex();
+		verify(indexService, never()).refreshIndex();
 	}
 
 	@Test
@@ -107,7 +105,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		indexJobService.executeJob(progress, transactionId);
 
 		verify(progress).status("No index actions found for transaction id: [aabbcc]");
-		verify(searchService, never()).refreshIndex();
+		verify(indexService, never()).refreshIndex();
 	}
 
 	private void mockGetAllIndexActions(Stream<IndexAction> entities)
@@ -140,7 +138,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		indexJobService.executeJob(progress, transactionId);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
-		verify(searchService).deleteById(testEntityType, "entityId");
+		verify(indexService).deleteById(testEntityType, "entityId");
 
 		// verify progress messages
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
@@ -150,29 +148,12 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		verify(progress).status("Refresh index start");
 		verify(progress).status("Refresh index done");
 		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
-		verify(searchService).refreshIndex();
+		verify(indexService).refreshIndex();
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
 	}
 
 	@Test
 	public void rebuildIndexCreateSingleEntityTest()
-	{
-		this.rebuildIndexSingleEntityTest(IndexingMode.ADD);
-	}
-
-	@Test
-	public void rebuildIndexUpdateSingleEntityTest()
-	{
-		Entity actualEntity = dataService.findOneById("TypeTestRefDynamic", "entityId");
-		EntityType emd = actualEntity.getEntityType();
-		Query<Entity> q = new QueryImpl<>();
-		q.eq(emd.getIdAttribute().getName(), "entityId");
-
-		when(searchService.searchOne(emd, q)).thenReturn("entityId");
-		this.rebuildIndexSingleEntityTest(IndexingMode.UPDATE);
-	}
-
-	private void rebuildIndexSingleEntityTest(IndexingMode indexingMode)
 	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
 				.setEntityTypeId("entityType").setEntityId("entityId").setActionOrder(0)
@@ -184,7 +165,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		indexJobService.executeJob(progress, transactionId);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
-		verify(this.searchService).index(testEntityType, toIndexEntity, indexingMode);
+		verify(this.indexService).index(testEntityType, toIndexEntity);
 
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
@@ -202,7 +183,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 	{
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 		EntityType entityType = dataService.getEntityType("TypeTestRefDynamic");
-		when(searchService.hasIndex(entityType)).thenReturn(true);
+		when(indexService.hasIndex(entityType)).thenReturn(true);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
 				.setEntityTypeId("entityType").setEntityId(null).setActionOrder(0)
@@ -212,7 +193,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 
 		indexJobService.executeJob(progress, transactionId);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
-		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
+		verify(this.indexService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Indexing TypeTestRefDynamic");
@@ -242,7 +223,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 
 		indexJobService.executeJob(progress, transactionId);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
-		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
+		verify(this.indexService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Indexing TypeTestRefDynamic");
@@ -270,21 +251,21 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		when(entityType.getId()).thenReturn(entityTypeId);
 		when(entityType.getLabel()).thenReturn(entityTypeLabel);
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityTypeId(entityTypeId)
-				.setEntityId(null).setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+				.setEntityTypeId(entityTypeId).setEntityId(null).setActionOrder(0)
+				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(false);
 		when(dataService.getEntityType("entityTypeName")).thenReturn(null);
 
-		when(searchService.hasIndex(any(EntityType.class))).thenReturn(true);
+		when(indexService.hasIndex(any(EntityType.class))).thenReturn(true);
 
 		indexJobService.executeJob(progress, transactionId);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
-		verify(this.searchService).deleteIndex(entityTypeCaptor.capture());
+		verify(this.indexService).deleteIndex(entityTypeCaptor.capture());
 		EntityType actualEntityType = entityTypeCaptor.getValue();
 		assertEquals(actualEntityType.getId(), entityTypeId);
 
@@ -300,7 +281,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void indexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
+	public void indexSingleEntityindexServiceThrowsExceptionOnSecondEntityId()
 	{
 		IndexAction indexAction1 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
 				.setEntityTypeId("entityType").setEntityId("entityId1").setActionOrder(0)
@@ -318,7 +299,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		indexActionGroup.setCount(3);
 
 		MolgenisDataException mde = new MolgenisDataException("Random unrecoverable exception");
-		doThrow(mde).when(searchService).deleteById(testEntityType, "entityId2");
+		doThrow(mde).when(indexService).deleteById(testEntityType, "entityId2");
 
 		when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
@@ -331,11 +312,11 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 			assertSame(expected, mde);
 		}
 
-		verify(searchService).deleteById(testEntityType, "entityId1");
-		verify(searchService).deleteById(testEntityType, "entityId2");
-		verify(searchService).deleteById(testEntityType, "entityId3");
+		verify(indexService).deleteById(testEntityType, "entityId1");
+		verify(indexService).deleteById(testEntityType, "entityId2");
+		verify(indexService).deleteById(testEntityType, "entityId3");
 
-		verify(searchService).refreshIndex();
+		verify(indexService).refreshIndex();
 
 		// Make sure the action status got updated and that the actionJob didn't get deleted
 		assertEquals(indexAction1.getIndexStatus(), FINISHED);
@@ -357,7 +338,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		@Mock
 		private Authentication authentication;
 		@Mock
-		private SearchService searchService;
+		private IndexService indexService;
 		@Mock
 		private MetaDataService mds;
 
@@ -379,9 +360,9 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public SearchService searchService()
+		public IndexService indexService()
 		{
-			return searchService;
+			return indexService;
 		}
 
 		@Bean
@@ -392,7 +373,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 
 		void resetMocks()
 		{
-			reset(progress, authentication, searchService, mds);
+			reset(progress, authentication, indexService, mds);
 		}
 	}
 }

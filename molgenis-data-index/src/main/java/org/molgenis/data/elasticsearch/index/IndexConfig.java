@@ -4,7 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.index.job.*;
 import org.molgenis.data.elasticsearch.transaction.IndexTransactionListener;
 import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.jobs.JobFactory;
@@ -33,7 +33,7 @@ public class IndexConfig
 	private DataService dataService;
 
 	@Autowired
-	private SearchService searchService;
+	private IndexService indexService;
 
 	@Autowired
 	private IndexJobExecutionFactory indexJobExecutionFactory;
@@ -68,7 +68,7 @@ public class IndexConfig
 	@Bean
 	public IndexJobService indexJobService()
 	{
-		return new IndexJobService(dataService, searchService, entityTypeFactory);
+		return new IndexJobService(dataService, indexService, entityTypeFactory);
 	}
 
 	@Bean
