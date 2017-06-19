@@ -59,7 +59,11 @@ import static java.util.stream.Collectors.*;
 import static org.elasticsearch.action.DocWriteRequest.OpType.INDEX;
 
 /**
- * Facade in front of the Elasticsearch client.
+ * Elasticsearch client facade:
+ * - Provides simplified interface to Elasticsearch transport client
+ * - Reduces Elasticsearch transport client dependencies
+ * - Translates Elasticsearch transport client exceptions to MOLGENIS indexing exceptions
+ * - Logs requests and responses
  */
 public class ClientFacade implements Closeable
 {
@@ -82,7 +86,10 @@ public class ClientFacade implements Closeable
 
 	public void createIndex(Index index, IndexSettings indexSettings, Stream<Mapping> mappingStream)
 	{
-		LOG.trace("Creating index '{}' ...", index.getName());
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Creating index '{}' ...", index.getName());
+		}
 
 		CreateIndexRequestBuilder createIndexRequest = createIndexRequest(index, indexSettings, mappingStream);
 
@@ -113,7 +120,10 @@ public class ClientFacade implements Closeable
 			LOG.warn("Index '{}' creation possibly failed (shards_acknowledged=false)", index.getName());
 		}
 
-		LOG.debug("Created index '{}'.", index.getName());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Created index '{}'.", index.getName());
+		}
 	}
 
 	private CreateIndexRequestBuilder createIndexRequest(Index index, IndexSettings indexSettings,
@@ -173,7 +183,10 @@ public class ClientFacade implements Closeable
 
 	private void deleteIndexes(List<Index> indexes)
 	{
-		LOG.trace("Deleting index(es) '{}' ...", toString(indexes));
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Deleting index(es) '{}' ...", toString(indexes));
+		}
 
 		String[] indexNames = toIndexNames(indexes);
 		DeleteIndexRequestBuilder deleteIndexRequest = client.admin().indices().prepareDelete(indexNames);
@@ -198,7 +211,10 @@ public class ClientFacade implements Closeable
 		{
 			throw new IndexException(format("Error deleting index(es) '%s'", toString(indexes)));
 		}
-		LOG.debug("Deleted index(es) '{}'.", toString(indexes));
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Deleted index(es) '{}'.", toString(indexes));
+		}
 	}
 
 	public void refreshIndexes()
@@ -523,7 +539,7 @@ public class ClientFacade implements Closeable
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.trace("Explained doc with id '{}' in index '{}' for query.", searchHit.getId(), searchHit.getIndex(),
+			LOG.debug("Explained doc with id '{}' in index '{}' for query.", searchHit.getId(), searchHit.getIndex(),
 					query);
 		}
 		return explainResponse.getExplanation();
@@ -653,7 +669,6 @@ public class ClientFacade implements Closeable
 
 	private void waitForCompletion(BulkProcessor bulkProcessor)
 	{
-		LOG.trace("waitForCompletion...");
 		try
 		{
 			boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
@@ -666,10 +681,6 @@ public class ClientFacade implements Closeable
 		{
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e);
-		}
-		finally
-		{
-			LOG.debug("bulkProcessor closed.");
 		}
 	}
 
