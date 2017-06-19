@@ -50,8 +50,8 @@ public class EntityTypeMapper
 		EditorPackageIdentifier package_ = packageMapper.toEditorPackage(entityType.getPackage());
 		EditorEntityTypeParent entityTypeParent = entityTypeParentMapper
 				.toEditorEntityTypeParent(entityType.getExtends());
-//		ImmutableList<EditorEntityTypeIdentifier> entityTypeChildren = entityTypeReferenceMapper
-//				.toEditorEntityTypeIdentifiers(entityType.getExtendedBy());
+		//		ImmutableList<EditorEntityTypeIdentifier> entityTypeChildren = entityTypeReferenceMapper
+		//				.toEditorEntityTypeIdentifiers(entityType.getExtendedBy());
 		ImmutableList<EditorAttribute> attributes = attributeMapper
 				.toEditorAttributes(entityType.getOwnAllAttributes());
 		ImmutableList<EditorTagIdentifier> tags = tagMapper.toEditorTags(entityType.getTags());
@@ -62,10 +62,8 @@ public class EntityTypeMapper
 		ImmutableList<EditorAttributeIdentifier> lookupAttributes = attributeReferenceMapper
 				.toEditorAttributeIdentifiers(entityType.getLookupAttributes());
 
-		return EditorEntityType
-				.create(id, label, i18nLabel, description, i18nDescription, abstract_, backend, package_,
-						entityTypeParent, attributes, tags, idAttribute, labelAttribute,
-						lookupAttributes);
+		return EditorEntityType.create(id, label, i18nLabel, description, i18nDescription, abstract_, backend, package_,
+				entityTypeParent, attributes, tags, idAttribute, labelAttribute, lookupAttributes);
 	}
 
 	public EditorEntityType createEditorEntityType()
@@ -80,11 +78,18 @@ public class EntityTypeMapper
 		entityType.setId(editorEntityType.getId());
 		entityType.setPackage(packageMapper.toPackageReference(editorEntityType.getPackage()));
 		entityType.setLabel(editorEntityType.getLabel());
-		getLanguageCodes().forEach(
-				languageCode -> entityType.setLabel(languageCode, editorEntityType.getLabelI18n().get(languageCode)));
+		if (editorEntityType.getLabelI18n() != null)
+		{
+			getLanguageCodes().forEach(languageCode -> entityType
+					.setLabel(languageCode, editorEntityType.getLabelI18n().get(languageCode)));
+		}
+
 		entityType.setDescription(editorEntityType.getDescription());
-		getLanguageCodes().forEach(languageCode -> entityType
-				.setDescription(languageCode, editorEntityType.getDescriptionI18n().get(languageCode)));
+		if (editorEntityType.getDescriptionI18n() != null)
+		{
+			getLanguageCodes().forEach(languageCode -> entityType
+					.setDescription(languageCode, editorEntityType.getDescriptionI18n().get(languageCode)));
+		}
 
 		entityType
 				.setOwnAllAttributes(attributeMapper.toAttributes(editorEntityType.getAttributes(), editorEntityType));

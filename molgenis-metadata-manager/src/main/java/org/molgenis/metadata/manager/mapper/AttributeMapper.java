@@ -138,6 +138,7 @@ public class AttributeMapper
 		{
 			attribute.setRefEntity(entityTypeReferenceMapper.toEntityTypeReference(refEntityType.getId()));
 		}
+
 		attribute.setMappedBy(attributeReferenceMapper.toAttributeReference(editorAttribute.getMappedByAttribute()));
 		attribute.setOrderBy(sortMapper.toSort(editorAttribute.getOrderBy()));
 		attribute.setExpression(editorAttribute.getExpression());
@@ -145,11 +146,19 @@ public class AttributeMapper
 		attribute.setAuto(editorAttribute.isAuto());
 		attribute.setVisible(editorAttribute.isVisible());
 		attribute.setLabel(editorAttribute.getLabel());
-		getLanguageCodes().forEach(
-				languageCode -> attribute.setLabel(languageCode, editorAttribute.getLabelI18n().get(languageCode)));
+		if (editorAttribute.getLabelI18n() != null)
+		{
+			getLanguageCodes().forEach(
+					languageCode -> attribute.setLabel(languageCode, editorAttribute.getLabelI18n().get(languageCode)));
+		}
+
 		attribute.setDescription(editorAttribute.getDescription());
-		getLanguageCodes().forEach(languageCode -> attribute
-				.setDescription(languageCode, editorAttribute.getDescriptionI18n().get(languageCode)));
+		if (editorAttribute.getDescriptionI18n() != null)
+		{
+			getLanguageCodes().forEach(languageCode -> attribute
+					.setDescription(languageCode, editorAttribute.getDescriptionI18n().get(languageCode)));
+		}
+
 		attribute.setAggregatable(editorAttribute.isAggregatable());
 		attribute.setEnumOptions(editorAttribute.getEnumOptions());
 		attribute.setRangeMin(editorAttribute.getRangeMin());
