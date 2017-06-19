@@ -4,7 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -46,7 +46,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 	 * static entity metadata cannot be deleted
 	 */
 	public static void testIndexDeleteMetaData(SearchService searchService, DataService dataService,
-			EntityType entityTypeDynamic, MetaDataService metaDataService, IndexService indexService)
+			EntityType entityTypeDynamic, MetaDataService metaDataService, IndexJobScheduler indexService)
 	{
 
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
@@ -79,7 +79,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 	 * Test metadata Updating an attribute
 	 */
 	public static void testIndexUpdateMetaDataUpdateAttribute(SearchService searchService, EntityType entityTypeDynamic,
-			MetaDataService metaDataService, IndexService indexService)
+			MetaDataService metaDataService, IndexJobScheduler indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
@@ -123,7 +123,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 	 * Test metadata removing an attribute
 	 */
 	public static void testIndexUpdateMetaDataRemoveAttribute(EntityType emd, String attributeName,
-			SearchService searchService, MetaDataService metaDataService, IndexService indexService)
+			SearchService searchService, MetaDataService metaDataService, IndexJobScheduler indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();

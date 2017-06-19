@@ -1,15 +1,13 @@
 package org.molgenis.data.elasticsearch.index;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.index.job.IndexJobExecutionFactory;
-import org.molgenis.data.elasticsearch.index.job.IndexJobFactory;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
-import org.molgenis.data.elasticsearch.index.job.IndexServiceImpl;
+import org.molgenis.data.elasticsearch.index.job.*;
 import org.molgenis.data.elasticsearch.transaction.IndexTransactionListener;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.SearchService;
-import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
+import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.JobExecutor;
+import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +16,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 
@@ -45,7 +41,8 @@ public class IndexConfig
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 
-	private ExecutorService executorService = Executors.newSingleThreadExecutor();
+	@Autowired
+	private JobExecutor jobExecutor;
 
 	@PostConstruct
 	public void register()
@@ -56,28 +53,34 @@ public class IndexConfig
 	@Bean
 	public IndexTransactionListener indexTransactionListener()
 	{
-		final IndexTransactionListener indexTransactionListener = new IndexTransactionListener(rebuildIndexService(),
+		final IndexTransactionListener indexTransactionListener = new IndexTransactionListener(indexJobScheduler(),
 				indexActionRegisterService);
 		transactionManager.addTransactionListener(indexTransactionListener);
 		return indexTransactionListener;
 	}
 
 	@Bean
-	public JobExecutionUpdater jobExecutionUpdater()
+	public IndexJobScheduler indexJobScheduler()
 	{
-		return new JobExecutionUpdaterImpl();
+		return new IndexJobSchedulerImpl(dataService, indexJobExecutionFactory, jobExecutor);
 	}
 
 	@Bean
-	public IndexJobFactory indexJobFactory()
+	public IndexJobService indexJobService()
 	{
-		return new IndexJobFactory(dataService, searchService, entityTypeFactory);
+		return new IndexJobService(dataService, searchService, entityTypeFactory);
 	}
 
 	@Bean
-	public IndexService rebuildIndexService()
+	public JobFactory<IndexJobExecution> indexJobFactory()
 	{
-		return new IndexServiceImpl(dataService, indexJobFactory(), indexJobExecutionFactory, executorService);
+		return new JobFactory<IndexJobExecution>()
+		{
+			@Override
+			public Job<Void> createJob(IndexJobExecution jobExecution)
+			{
+				return progress -> indexJobService().executeJob(progress, jobExecution.getIndexActionJobID());
+			}
+		};
 	}
-
 }

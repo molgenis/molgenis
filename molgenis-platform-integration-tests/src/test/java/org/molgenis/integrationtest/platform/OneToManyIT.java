@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
@@ -49,7 +49,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	private final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
 
 	@Autowired
-	private IndexService indexService;
+	private IndexJobScheduler indexService;
 	@Autowired
 	private OneToManyTestHarness oneToManyTestHarness;
 	@Autowired

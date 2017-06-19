@@ -7,14 +7,12 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
-import org.molgenis.data.jobs.NontransactionalJob;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -29,26 +27,22 @@ import static org.molgenis.util.EntityUtils.getTypedValue;
 /**
  * {@link org.molgenis.data.jobs.Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
  */
-class IndexJob extends NontransactionalJob<Void>
+public class IndexJobService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(IndexJob.class);
-	private final String transactionId;
+	private static final Logger LOG = LoggerFactory.getLogger(IndexJobService.class);
+
 	private final DataService dataService;
 	private final SearchService searchService;
 	private final EntityTypeFactory entityTypeFactory;
 
-	IndexJob(Progress progress, Authentication authentication, String transactionId, DataService dataService,
-			SearchService searchService, EntityTypeFactory entityTypeFactory)
+	public IndexJobService(DataService dataService, SearchService searchService, EntityTypeFactory entityTypeFactory)
 	{
-		super(progress, authentication);
-		this.transactionId = requireNonNull(transactionId);
 		this.dataService = requireNonNull(dataService);
 		this.searchService = requireNonNull(searchService);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
-	@Override
-	public Void call(Progress progress)
+	public Void executeJob(Progress progress, String transactionId)
 	{
 		requireNonNull(progress);
 		IndexActionGroup indexActionGroup = dataService
@@ -57,7 +51,7 @@ class IndexJob extends NontransactionalJob<Void>
 		{
 			progress.setProgressMax(indexActionGroup.getCount());
 			progress.status(format("Start indexing for transaction id: [{0}]", transactionId));
-			performIndexActions(progress);
+			performIndexActions(progress, transactionId);
 			progress.status(format("Finished indexing for transaction id: [{0}]", transactionId));
 		}
 		else
@@ -72,7 +66,7 @@ class IndexJob extends NontransactionalJob<Void>
 	 *
 	 * @param progress {@link Progress} instance to log progress information to
 	 */
-	private void performIndexActions(Progress progress)
+	private void performIndexActions(Progress progress, String transactionId)
 	{
 		List<IndexAction> indexActions = dataService
 				.findAll(INDEX_ACTION, createQueryGetAllIndexActions(transactionId), IndexAction.class)

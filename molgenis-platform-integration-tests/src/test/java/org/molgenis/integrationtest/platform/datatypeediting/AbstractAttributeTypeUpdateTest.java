@@ -4,7 +4,7 @@ import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -40,7 +40,7 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	private static final String MAIN_ENTITY_ID_VALUE = "1";
 
 	@Autowired
-	IndexService indexService;
+	IndexJobScheduler indexService;
 
 	@Autowired
 	AttributeFactory attributeFactory;

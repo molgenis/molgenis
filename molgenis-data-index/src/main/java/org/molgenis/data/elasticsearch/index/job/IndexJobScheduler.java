@@ -3,9 +3,9 @@ package org.molgenis.data.elasticsearch.index.job;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Schedules {@link IndexJob}s.
+ * Schedules {@link IndexJobService}s.
  */
-public interface IndexService
+public interface IndexJobScheduler
 {
 	/**
 	 * Schedules a job to rebuild the index for all changes made in the context of a specific transaction.
@@ -13,7 +13,7 @@ public interface IndexService
 	 *
 	 * @param transactionId the ID of the transaction.
 	 */
-	void rebuildIndex(String transactionId);
+	void scheduleIndexJob(String transactionId);
 
 	void waitForAllIndicesStable() throws InterruptedException;
 
