@@ -74,7 +74,8 @@ describe('form model objects', () => {
       'tags': undefined,
       'visibleExpression': undefined,
       'validationExpression': undefined,
-      'defaultValue': undefined
+      'defaultValue': undefined,
+      'sequenceNumber': undefined
     }
 
     expect(expected).to.deep.equal(actual)

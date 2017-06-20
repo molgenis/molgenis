@@ -63,7 +63,8 @@ export const toAttribute = (attribute) => {
     'tags': attribute.tags,
     'visibleExpression': attribute.visibleExpression,
     'validationExpression': attribute.validationExpression,
-    'defaultValue': attribute.defaultValue
+    'defaultValue': attribute.defaultValue,
+    'sequenceNumber': attribute.sequenceNumber
   }
 }
 
