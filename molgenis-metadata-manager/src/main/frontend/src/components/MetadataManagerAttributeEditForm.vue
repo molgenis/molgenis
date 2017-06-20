@@ -11,9 +11,9 @@
                       :onAttributeSelect="onAttributeSelect"></attribute-tree>
 
 
-      <p v-if="editorEntityType.parent !== undefined">
-        Parent attributes from <strong>{{editorEntityType.parent.label}}:</strong><br>
-        <span v-for="attribute in editorEntityType.parent.attributes">{{attribute.label}}</span>
+      <p v-if="editorEntityType.entityTypeParent !== undefined">
+        Parent attributes from <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
+        <span v-for="attribute in editorEntityType.entityTypeParent.attributes">- {{attribute.label}} <br></span>
       </p>
     </div>
 
