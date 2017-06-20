@@ -127,28 +127,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 		return mock(UserDetailsService.class);
 	}
 
-	@PreDestroy
-	public void cleanup() throws IOException, SQLException
-	{
-		((ComboPooledDataSource) dataSource).close();
-		PostgreSqlDatabase.dropDatabase(INTEGRATION_TEST_DATABASE_NAME);
-
-		try
-		{
-			// Delete molgenis home folder
-			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
-		}
-		catch (IOException e)
-		{
-			LOG.error("Error removing molgenis home directory", e);
-		}
-	}
-
-	public PlatformITConfig()
-	{
-		System.setProperty("molgenis.home", Files.createTempDir().getAbsolutePath());
-	}
-
 	@Bean
 	public AppSettings appSettings()
 	{
