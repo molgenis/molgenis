@@ -9,12 +9,161 @@
     <artifactId>molgenis-platform-integration-tests</artifactId>
 
     <name>platform-integration-tests</name>
-
+    <properties>
+        <!-- if profiles are inactive, set these props to use local infrastructure -->
+        <it_db_name>molgenis_test</it_db_name>
+        <it_db_user>molgenis</it_db_user>
+        <it_db_password>molgenis</it_db_password>
+        <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
+        <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
+    </properties>
+    <profiles>
+        <!-- Profile create-it-db creates postgres database and drops it after the test -->
+        <profile>
+            <id>create-it-db</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <maven.build.timestamp.format>yyMMddHHmmssSSS</maven.build.timestamp.format>
+                <it_db_name>molgenis_test_${maven.build.timestamp}</it_db_name>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>sql-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgres.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <driver>org.postgresql.Driver</driver>
+                            <url>jdbc:postgresql://localhost/</url>
+                            <username>${it_db_user}</username>
+                            <password>${it_db_password}</password>
+                            <forceMojoExecution>true</forceMojoExecution>
+                            <onError>continue</onError>
+                            <autocommit>true</autocommit>
+                            <skip>${skipTests}</skip>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>create postgres integration database</id>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <sqlCommand>create database ${it_db_name};</sqlCommand>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>drop postgres integration database</id>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <phase>post-integration-test</phase>
+                                <configuration>
+                                    <sqlCommand>drop database ${it_db_name};</sqlCommand>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- Profile create-it-es creates new elasticsearch instance and drops it after the test -->
+        <profile>
+            <id>create-it-es</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <maven.build.timestamp.format>yyMMddHHmmssSSS</maven.build.timestamp.format>
+                <elasticsearch.cluster.name>molgenis${maven.build.timestamp}</elasticsearch.cluster.name>
+                <elasticsearch.transport.addresses>localhost:${elasticsearch.tcp.port}
+                </elasticsearch.transport.addresses>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- Reserve tcp and http ports for elasticsearch -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>reserve-network-port</id>
+                                <goals>
+                                    <goal>reserve-network-port</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <portNames>
+                                        <portName>elasticsearch.tcp.port</portName>
+                                        <portName>elasticsearch.http.port</portName>
+                                    </portNames>
+                                    <randomPort>true</randomPort>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- start and stop elasticsearch instance -->
+                    <plugin>
+                        <groupId>com.github.alexcojocaru</groupId>
+                        <artifactId>elasticsearch-maven-plugin</artifactId>
+                        <version>5.7</version>
+                        <configuration>
+                            <version>${elasticsearch.version}</version>
+                            <clusterName>${elasticsearch.cluster.name}</clusterName>
+                            <pathConf>${project.build.directory}/test-classes/conf/elasticsearch</pathConf>
+                            <transportPort>${elasticsearch.tcp.port}</transportPort>
+                            <httpPort>${elasticsearch.http.port}</httpPort>
+                            <!-- on build server, concurrent launches are slow to start -->
+                            <timeout>120</timeout>
+                            <skip>${skipTests}</skip>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-elasticsearch</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>runforked</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-elasticsearch</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables combine.children="append">
+                        <!-- These override molgenis-server.properties for the integration test -->
+                        <elasticsearch.transport.addresses>${elasticsearch.transport.addresses}
+                        </elasticsearch.transport.addresses>
+                        <elasticsearch.cluster.name>${elasticsearch.cluster.name}</elasticsearch.cluster.name>
+                        <db_uri>jdbc:postgresql://localhost/${it_db_name}?reWriteBatchedInserts=true&amp;autosave=CONSERVATIVE</db_uri>
+                        <db_user>${it_db_user}</db_user>
+                        <db_password>${it_db_password}</db_password>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

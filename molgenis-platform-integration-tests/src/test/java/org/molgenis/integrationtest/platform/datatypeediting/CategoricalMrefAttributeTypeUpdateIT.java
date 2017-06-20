@@ -15,18 +15,18 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class MrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
+public class CategoricalMrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
 	@BeforeClass
 	public void setup()
 	{
-		super.setup(MREF, INT);
+		super.setup(CATEGORICAL_MREF, INT);
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
-		super.afterMethod(MREF);
+		super.afterMethod(CATEGORICAL_MREF);
 	}
 
 	@AfterClass
@@ -39,13 +39,12 @@ public class MrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	public Object[][] validConversionData()
 	{
 		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
-		return new Object[][] {
-				{ entities, CATEGORICAL_MREF, newArrayList("label1", "email label", "hyperlink label") } };
+		return new Object[][] { { entities, MREF, newArrayList("label1", "email label", "hyperlink label") } };
 	}
 
 	/**
-	 * Valid conversion cases for MREF to:
-	 * CATEGORICAL_MREF
+	 * Valid conversion cases for CATEGORICAL_MREF to:
+	 * MREF
 	 *
 	 * @param valueToConvert  The value that will be converted
 	 * @param typeToConvertTo The type to convert to
@@ -71,45 +70,45 @@ public class MrefAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
 	{
 		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
 		return new Object[][] { { entities, BOOL, MolgenisValidationException.class,
-				"Attribute data type update from [MREF] to [BOOL] not allowed, allowed types are [CATEGORICAL_MREF]" },
+				"Attribute data type update from [CATEGORICAL_MREF] to [BOOL] not allowed, allowed types are [MREF]" },
 				{ entities, STRING, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [STRING] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [STRING] not allowed, allowed types are [MREF]" },
 				{ entities, TEXT, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [TEXT] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [TEXT] not allowed, allowed types are [MREF]" },
 				{ entities, SCRIPT, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [SCRIPT] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [SCRIPT] not allowed, allowed types are [MREF]" },
 				{ entities, INT, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [INT] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [INT] not allowed, allowed types are [MREF]" },
 				{ entities, LONG, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [LONG] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [LONG] not allowed, allowed types are [MREF]" },
 				{ entities, DECIMAL, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [DECIMAL] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [DECIMAL] not allowed, allowed types are [MREF]" },
 				{ entities, XREF, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [XREF] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [XREF] not allowed, allowed types are [MREF]" },
 				{ entities, CATEGORICAL, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [CATEGORICAL] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [CATEGORICAL] not allowed, allowed types are [MREF]" },
 				{ entities, EMAIL, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [EMAIL] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [EMAIL] not allowed, allowed types are [MREF]" },
 				{ entities, HYPERLINK, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [HYPERLINK] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [HYPERLINK] not allowed, allowed types are [MREF]" },
 				{ entities, HTML, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [HTML] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [HTML] not allowed, allowed types are [MREF]" },
 				{ entities, ENUM, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [ENUM] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [ENUM] not allowed, allowed types are [MREF]" },
 				{ entities, DATE, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [DATE] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [DATE] not allowed, allowed types are [MREF]" },
 				{ entities, DATE_TIME, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [DATE_TIME] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [DATE_TIME] not allowed, allowed types are [MREF]" },
 				{ entities, FILE, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [FILE] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [FILE] not allowed, allowed types are [MREF]" },
 				{ entities, COMPOUND, MolgenisValidationException.class,
-						"Attribute data type update from [MREF] to [COMPOUND] not allowed, allowed types are [CATEGORICAL_MREF]" },
+						"Attribute data type update from [CATEGORICAL_MREF] to [COMPOUND] not allowed, allowed types are [MREF]" },
 				{ entities, ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
 	}
 
 	/**
-	 * Invalid conversion cases for MREF to:
+	 * Invalid conversion cases for CATEGORICAL_MREF to:
 	 * BOOL, STRING, TEXT, SCRIPT INT, LONG, DECIMAL, XREF, CATEGORICAL, EMAIL, HYPERLINK, HTML, ENUM, DATE, DATE_TIME, FILE, COMPOUND, ONE_TO_MANY
 	 *
 	 * @param valueToConvert   The value that will be converted

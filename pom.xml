@@ -27,6 +27,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
         <logback.version>1.2.2</logback.version>
         <spring.version>4.3.7.RELEASE</spring.version>
@@ -44,6 +45,8 @@
         <jsr305.version>3.0.1</jsr305.version>
         <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
+        <elasticsearch.version>5.4.1</elasticsearch.version>
+        <postgres.version>9.4.1211</postgres.version>
     </properties>
 
     <distributionManagement>
@@ -189,18 +192,18 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>2.4</version>
-
                     <configuration>
                         <archive>
                             <manifest>
-                                <mainClass>test.App</mainClass>
                                 <addDefaultImplementationEntries>
                                     true
                                 </addDefaultImplementationEntries>
                             </manifest>
                         </archive>
+                        <excludes>
+                            <exclude>**/logback-test.xml</exclude>
+                        </excludes>
                     </configuration>
-
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
@@ -316,7 +319,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.8</version>
+                    <version>3.0.0</version>
                     <executions>
                         <execution>
                             <id>reserve-network-port</id>
@@ -778,6 +781,16 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>findbugs-annotations</artifactId>
                 <version>${findbugs.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>transport</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgres.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
