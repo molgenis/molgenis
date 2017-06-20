@@ -15,6 +15,10 @@
     list-style-type: none;
   }
 
+  li:hover {
+    cursor: pointer;
+  }
+
   .selected-attribute-node {
     background-color: #c4e3f3;
   }
