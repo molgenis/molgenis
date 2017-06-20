@@ -184,6 +184,7 @@ public class EntityTypeTest
 	{
 		EntityType entityTypeMeta = mock(EntityType.class);
 		Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
 		Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
 		Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
@@ -196,6 +197,7 @@ public class EntityTypeTest
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.EXTENDS)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.TAGS)).thenReturn(mrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.INDEXING_DEPTH)).thenReturn(intAttr);
 		return entityTypeMeta;
 	}
 }

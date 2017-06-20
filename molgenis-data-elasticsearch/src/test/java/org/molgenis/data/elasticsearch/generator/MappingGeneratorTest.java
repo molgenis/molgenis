@@ -127,20 +127,44 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 		assertEquals(mapping, expectedMapping);
 	}
 
-	@Test
-	public void testCreateMappingProviderNestedNested()
+	@DataProvider(name = "createMappingProviderDepth")
+	public static Iterator<Object[]> createMappingProviderDepth()
 	{
-		EntityType refRefEntityType = createEntityType("refRefAttr", AttributeType.LONG);
+		String refRefAttrIdentifier = "refRefAttr";
+		EntityType refRefEntityType = createEntityType(refRefAttrIdentifier, AttributeType.LONG);
 		String refAttrIdentifier = "refAttr";
 		EntityType refEntityType = createEntityType(refAttrIdentifier, AttributeType.XREF, refRefEntityType);
 		String attrIdentifier = "attr";
-		EntityType entityType = createEntityType(attrIdentifier, AttributeType.MREF, refEntityType);
 
-		Mapping mapping = mappingGenerator.createMapping(entityType);
+		EntityType entityTypeDepth0 = createEntityType(attrIdentifier, AttributeType.MREF, refEntityType, 0);
+		when(entityTypeDepth0.toString()).thenReturn("entityTypeDepth0");
+		FieldMapping fieldMapping0 = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.LONG).build();
 
-		FieldMapping fieldMapping = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.NESTED)
+		EntityType entityTypeDepth1 = createEntityType(attrIdentifier, AttributeType.MREF, refEntityType, 1);
+		when(entityTypeDepth1.toString()).thenReturn("entityTypeDepth1");
+		FieldMapping fieldMapping1 = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.NESTED).setNestedFieldMappings(singletonList(
+				FieldMapping.builder().setName(refAttrIdentifier).setType(MappingType.LONG).build())).build();
+
+		EntityType entityTypeDepth2 = createEntityType(attrIdentifier, AttributeType.MREF, refEntityType, 2);
+		when(entityTypeDepth2.toString()).thenReturn("entityTypeDepth2");
+		FieldMapping fieldMapping2 = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.NESTED)
 				.setNestedFieldMappings(singletonList(
-						FieldMapping.builder().setName(refAttrIdentifier).setType(MappingType.LONG).build())).build();
+						FieldMapping.builder().setName(refAttrIdentifier).setType(MappingType.NESTED)
+								.setNestedFieldMappings(singletonList(
+										FieldMapping.builder().setName(refRefAttrIdentifier).setType(MappingType.LONG)
+												.build())).build())).build();
+
+		List<Object[]> dataItems = new ArrayList<>();
+		dataItems.add(new Object[] { entityTypeDepth0, fieldMapping0 });
+		dataItems.add(new Object[] { entityTypeDepth1, fieldMapping1 });
+		dataItems.add(new Object[] { entityTypeDepth2, fieldMapping2 });
+		return dataItems.iterator();
+	}
+
+	@Test(dataProvider = "createMappingProviderDepth")
+	public void testCreateMappingProviderDepth(EntityType entityType, FieldMapping fieldMapping)
+	{
+		Mapping mapping = mappingGenerator.createMapping(entityType);
 		Mapping expectedMapping = createMapping(fieldMapping);
 		assertEquals(mapping, expectedMapping);
 	}
@@ -152,6 +176,12 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 
 	private static EntityType createEntityType(String attrIdentifier, AttributeType type, EntityType refEntityType)
 	{
+		return createEntityType(attrIdentifier, type, refEntityType, 1);
+	}
+
+	private static EntityType createEntityType(String attrIdentifier, AttributeType type, EntityType refEntityType,
+			int indexingDepth)
+	{
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getIdentifier()).thenReturn(attrIdentifier);
 		when(attribute.getDataType()).thenReturn(type);
@@ -161,6 +191,7 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 		when(entityType.getId()).thenReturn("id");
 		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attribute));
 		when(entityType.getLabelAttribute()).thenReturn(attribute);
+		when(entityType.getIndexingDepth()).thenReturn(indexingDepth);
 		return entityType;
 	}
 
