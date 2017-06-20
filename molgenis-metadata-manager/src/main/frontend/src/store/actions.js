@@ -25,7 +25,7 @@ export const toEntityType = (editorEntityType) => {
     'i18nLabel': editorEntityType.i18nLabel,
     'description': editorEntityType.description,
     'i18nDescription': editorEntityType.i18nDescription,
-    'abstract_': editorEntityType.abstract_,
+    'abstract0': editorEntityType.abstract0,
     'backend': editorEntityType.backend,
     'package_': editorEntityType.package_,
     'entityTypeParent': editorEntityType.entityTypeParent,
