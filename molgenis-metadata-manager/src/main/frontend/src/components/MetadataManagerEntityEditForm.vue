@@ -1,7 +1,6 @@
 <template>
   <div class="row">
     <!-- Column containing  Entity ID, Extends, Extended by, Abstract-->
-    <!-- TODO: delete button-->
     <div class="col-md-3 col-sm-12 col-xs-12 inner-column">
       <div class="form-group row">
         <label class="col-4 col-form-label">Entity</label>
@@ -21,7 +20,7 @@
       <div class="form-group row">
         <label class="col-4 col-form-label">Abstract</label>
         <div class="col checkbox-column">
-          <input v-model="isAbstract" class="form-control" type="checkbox">
+          <input v-model="abstract0" class="form-control" type="checkbox">
         </div>
       </div>
     </div>
@@ -55,10 +54,16 @@
     <div class="col-md-4 col-sm-12 col-xs-12 outer-column">
       <div class="form-group row">
         <label class="col-4 col-form-label">ID attribute</label>
-        <div class="col">
+        <div v-if="entityTypeParent === undefined" class="col">
           <multiselect v-model="idAttribute" :options="attributes" label="label"
                        selectLabel="" deselectLabel="" placeholder="Select an attribute"></multiselect>
         </div>
+
+        <div v-else class="col">
+          <multiselect v-model="idAttribute" :options="attributes" label="label"
+                       selectLabel="" deselectLabel="" placeholder="Select an attribute" disabled></multiselect>
+        </div>
+
       </div>
 
       <div class="form-group row">
@@ -114,11 +119,7 @@
     name: 'metadata-manager-entity-edit-form',
     methods: {
       save () {
-        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$store.state.editorEntityType)
-          .then(response => {
-            // After save, route to path
-            this.$router.push({path: '/' + this.$store.state.selectedEntityType.id})
-          })
+        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE)
       }
     },
     computed: {
@@ -131,8 +132,8 @@
         get () { return this.$store.state.editorEntityType.entityTypeParent },
         set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'entityTypeParent', value: value}) }
       },
-      isAbstract: {
-        get () { return this.$store.state.editorEntityType.isAbstract },
+      abstract0: {
+        get () { return this.$store.state.editorEntityType.abstract0 },
         set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'abstract0', value: value}) }
       },
       label: {
