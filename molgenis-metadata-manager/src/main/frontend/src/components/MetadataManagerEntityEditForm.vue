@@ -13,8 +13,8 @@
       <div class="form-group row">
         <label class="col-4 col-form-label">Extends</label>
         <div class="col">
-          <multiselect v-model="parent" :options="abstractEntities" label="label"
-                       selectLabel="" deselectLabel="" placeholder="Select a parent entity"></multiselect>
+          <multiselect v-model="entityTypeParent" :options="abstractEntities" label="label"
+                       selectLabel="" deselectLabel="" placeholder="Select an abstract EntityType"></multiselect>
         </div>
       </div>
 
@@ -114,8 +114,11 @@
     name: 'metadata-manager-entity-edit-form',
     methods: {
       save () {
-        this.$router.push({path: '/' + this.$store.state.selectedEntityType.id})
         this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$store.state.editorEntityType)
+          .then(response => {
+            // After save, route to path
+            this.$router.push({path: '/' + this.$store.state.selectedEntityType.id})
+          })
       }
     },
     computed: {
@@ -124,9 +127,9 @@
         abstractEntities: 'getAbstractEntities',
         attributes: 'getEditorEntityTypeAttributes'
       }),
-      parent: {
-        get () { return this.$store.state.editorEntityType.parent },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'parent', value: value}) }
+      entityTypeParent: {
+        get () { return this.$store.state.editorEntityType.entityTypeParent },
+        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'entityTypeParent', value: value}) }
       },
       isAbstract: {
         get () { return this.$store.state.editorEntityType.isAbstract },

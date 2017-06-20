@@ -170,13 +170,33 @@ export default {
   /**
    * Deletes an EntityType and reloads the EntityTypes present in the state
    */
-  [DELETE_ENTITY_TYPE] ({commit, dispatch, state}) {
-    callApi({apiUrl: '/api'}, '/v1/' + state.selectedEntityType.id + '/meta', 'delete')
+  [DELETE_ENTITY_TYPE] ({commit, state}) {
+    const identifier = state.selectedEntityType.id
+    callApi({apiUrl: '/api'}, '/v1/' + identifier + '/meta', 'delete')
       .then(response => {
         // Never reached due to https://github.com/molgenis/molgenis-api-client/issues/1
       }, error => {
-        // response has error due to bug, callback handling is done in MetadataManagerHeader.vue
-        console.log('not an error, see https://github.com/molgenis/molgenis-api-client/issues/1', error)
+        if (error.errors !== undefined) {
+          commit(CREATE_ALERT, {
+            type: 'danger',
+            message: error.errors[0].message
+          })
+        } else {
+          // response has error due to bug, callback handling is done in MetadataManagerHeader.vue
+          console.log('not an error, see https://github.com/molgenis/molgenis-api-client/issues/1')
+
+          // Clear selected editorEntityType
+          commit(SET_EDITOR_ENTITY_TYPE, null)
+
+          // Remove EntityType that was just deleted from list of EntityTypes
+          commit(SET_ENTITY_TYPES, state.entityTypes.filter(entityType => entityType.id !== identifier))
+
+          // Clear selected entity type in dropdown
+          commit(SET_SELECTED_ENTITY_TYPE, null)
+
+          // Clear selected attribute
+          commit(SET_SELECTED_ATTRIBUTE_ID, null)
+        }
       })
   },
   /**
