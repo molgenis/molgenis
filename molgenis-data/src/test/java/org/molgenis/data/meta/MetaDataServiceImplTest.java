@@ -411,6 +411,7 @@ public class MetaDataServiceImplTest
 		Package package0 = mock(Package.class);
 		Package package1 = mock(Package.class);
 		metaDataServiceImpl.upsertPackages(Stream.of(package0, package1));
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(packagePersister).upsertPackages(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(package0, package1));
