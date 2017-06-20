@@ -86,10 +86,11 @@ public class AttributeMapper
 		String visibleExpression = attribute.getVisibleExpression();
 		String validationExpression = attribute.getValidationExpression();
 		String defaultValue = attribute.getDefaultValue();
+		Integer sequenceNumber = attribute.getSequenceNumber();
 		return EditorAttribute
 				.create(id, name, type, parent, refEntityType, mappedByEntityType, orderBy, expression, nullable, auto,
 						visible, label, i18nLabel, description, i18nDescription, aggregatable, enumOptions, rangeMin,
-						rangeMax, readonly, unique, tags, visibleExpression, validationExpression, defaultValue);
+						rangeMax, readonly, unique, tags, visibleExpression, validationExpression, defaultValue, sequenceNumber);
 	}
 
 	private ImmutableMap<String, String> toI18nLabel(Attribute attribute)

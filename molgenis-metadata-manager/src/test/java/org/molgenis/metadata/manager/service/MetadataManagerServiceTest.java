@@ -159,12 +159,12 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		return EditorAttribute
 				.create("1", null, null, null, null, null, null, null, false, false, false, null, ImmutableMap.of(),
 						null, ImmutableMap.of(), false, ImmutableList.of(), null, null, false, false,
-						ImmutableList.of(), null, null, null);
+						ImmutableList.of(), null, null, null, 1);
 	}
 
 	private String getEditorAttributeResponse()
 	{
-		return "{\"attribute\":{\"id\":\"1\",\"nullable\":false,\"auto\":false,\"visible\":false,\"labelI18n\":{},\"descriptionI18n\":{},\"aggregatable\":false,\"enumOptions\":[],\"readonly\":false,\"unique\":false,\"tags\":[]},\"languageCodes\":[\"en\",\"nl\",\"de\",\"es\",\"it\",\"pt\",\"fr\",\"xx\"]}";
+		return "{\"attribute\":{\"id\":\"1\",\"nullable\":false,\"auto\":false,\"visible\":false,\"labelI18n\":{},\"descriptionI18n\":{},\"aggregatable\":false,\"enumOptions\":[],\"readonly\":false,\"unique\":false,\"tags\":[],\"sequenceNumber\":1},\"languageCodes\":[\"en\",\"nl\",\"de\",\"es\",\"it\",\"pt\",\"fr\",\"xx\"]}";
 	}
 
 	private EditorEntityType getEditorEntityType()

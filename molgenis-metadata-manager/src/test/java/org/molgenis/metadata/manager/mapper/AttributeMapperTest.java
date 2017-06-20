@@ -57,6 +57,7 @@ public class AttributeMapperTest
 	public void testCreateEditorAttribute()
 	{
 		String id = "id";
+		Integer sequenceNumber = 0;
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getIdentifier()).thenReturn(id);
 		when(attribute.getRangeMin()).thenReturn(null);
@@ -73,7 +74,7 @@ public class AttributeMapperTest
 		EditorAttribute editorAttribute = attributeMapper.createEditorAttribute();
 		assertEquals(editorAttribute, EditorAttribute
 				.create(id, null, null, null, null, null, null, null, false, false, false, null, ImmutableMap.of(),
-						null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags, null, null, null));
+						null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags, null, null, null, sequenceNumber));
 	}
 
 	@Test
@@ -109,6 +110,7 @@ public class AttributeMapperTest
 		String visibleExpression = "visibleExpression";
 		String validationExpression = "validationExpression";
 		String defaultValue = "defaultValue";
+		Integer sequenceNumber = 1;
 
 		Attribute parentAttribute = mock(Attribute.class);
 		when(attributeReferenceMapper.toAttributeReference(editorParentAttribute)).thenReturn(parentAttribute);
@@ -136,7 +138,7 @@ public class AttributeMapperTest
 				.create(id, name, type, editorParentAttribute, editorRefEntityType, editorMappedByAttribute, editorSort,
 						expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription,
 						aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTagIdentifiers,
-						visibleExpression, validationExpression, defaultValue);
+						visibleExpression, validationExpression, defaultValue, sequenceNumber);
 		ImmutableList<Attribute> attributes = copyOf(
 				attributeMapper.toAttributes(of(editorAttribute), editorEntityType));
 		assertEquals(attributes.size(), 1);
@@ -214,6 +216,7 @@ public class AttributeMapperTest
 		String visibleExpression = "visibleExpression";
 		String validationExpression = "validationExpression";
 		String defaultValue = "defaultValue";
+		Integer sequenceNumber = 1;
 
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getIdentifier()).thenReturn(id);
@@ -249,7 +252,7 @@ public class AttributeMapperTest
 		when(attribute.getVisibleExpression()).thenReturn(visibleExpression);
 		when(attribute.getValidationExpression()).thenReturn(validationExpression);
 		when(attribute.getDefaultValue()).thenReturn(defaultValue);
-		when(attribute.getSequenceNumber()).thenReturn(5);
+		when(attribute.getSequenceNumber()).thenReturn(1);
 
 		EditorAttributeIdentifier editorParentAttribute = mock(EditorAttributeIdentifier.class);
 		when(attributeReferenceMapper.toEditorAttributeIdentifier(parentAttr)).thenReturn(editorParentAttribute);
@@ -269,7 +272,7 @@ public class AttributeMapperTest
 				.create(id, name, type, editorParentAttribute, editorRefEntityType, editorMappedByAttribute, editorSort,
 						expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription,
 						aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTags,
-						visibleExpression, validationExpression, defaultValue);
+						visibleExpression, validationExpression, defaultValue, sequenceNumber);
 		assertEquals(editorAttributes, of(expectedEditorAttribute));
 
 	}
