@@ -1,5 +1,5 @@
 // $FlowFixMe
-import { get, post } from 'molgenis-api-client'
+import { get, post, callApi } from 'molgenis-api-client'
 import {
   UPDATE_EDITOR_ENTITY_TYPE,
   CREATE_ALERT, SET_EDITOR_ENTITY_TYPE,
@@ -13,6 +13,7 @@ export const GET_PACKAGES = '__GET_PACKAGES__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_EDITOR_ENTITY_TYPE = '__GET_EDITOR_ENTITY_TYPE__'
 export const CREATE_ENTITY_TYPE = '__CREATE_ENTITY_TYPE__'
+export const DELETE_ENTITY_TYPE = '__DELETE_ENTITY_TYPE__'
 export const CREATE_ATTRIBUTE = '__CREATE_ATTRIBUTE__'
 export const SAVE_EDITOR_ENTITY_TYPE = '__SAVE_EDITOR_ENTITY_TYPE__'
 export const GET_ATTRIBUTE_TYPES = '__GET_ATTRIBUTE_TYPES__'
@@ -164,6 +165,18 @@ export default {
             message: 'Something went wrong, make sure you have permissions for creating entities.'
           })
         }
+      })
+  },
+  /**
+   * Deletes an EntityType and reloads the EntityTypes present in the state
+   */
+  [DELETE_ENTITY_TYPE] ({commit, dispatch, state}) {
+    callApi({apiUrl: '/api'}, '/v1/' + state.selectedEntityType.id + '/meta', 'delete')
+      .then(response => {
+        // Never reached due to https://github.com/molgenis/molgenis-api-client/issues/1
+      }, error => {
+        console.log(error)
+        // response has error due to bug, callback handling is done in MetadataManagerHeader.vue
       })
   },
   /**

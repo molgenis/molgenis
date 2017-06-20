@@ -203,6 +203,10 @@ async@^2.1.2:
   dependencies:
     lodash "^4.14.0"
 
+async@~0.2.6:
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
+
 async@~0.9.0:
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/async/-/async-0.9.2.tgz#aea74d5e61c1f899613bf64bda66d4c78f2fd17d"
@@ -904,6 +908,15 @@ bootstrap-vue@^0.11.1:
     tether latest
     vue "^2.2.6"
 
+bootstrap-vue@^0.15.0:
+  version "0.15.8"
+  resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-0.15.8.tgz#82003f86bcb62a4ee8eb4c7a11fe7b8acd36d09b"
+  dependencies:
+    bootstrap "^4.0.0-alpha.6"
+    tether latest
+    uglify-js-harmony "^2.7.5"
+    vue "^2.2.6"
+
 bootstrap@^4.0.0-alpha.6:
   version "4.0.0-alpha.6"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-4.0.0-alpha.6.tgz#4f54dd33ac0deac3b28407bc2df7ec608869c9c8"
@@ -1168,6 +1181,13 @@ cli-spinners@^1.0.0:
 cli-width@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.1.0.tgz#b234ca209b29ef66fc518d9b98d5847b00edf00a"
+
+click-confirm@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/click-confirm/-/click-confirm-1.0.4.tgz#105126c8dfc132e7b65f140bbc81a510691caaa0"
+  dependencies:
+    bootstrap-vue "^0.15.0"
+    vue "^2.2.0"
 
 cliui@^2.1.0:
   version "2.1.0"
@@ -3747,9 +3767,9 @@ mocha@^3.4.2:
     mkdirp "0.5.1"
     supports-color "3.1.2"
 
-molgenis-api-client@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/molgenis-api-client/-/molgenis-api-client-1.1.0.tgz#0271900f6b44a8fdd5c9209352441b13a0ca064d"
+molgenis-api-client@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/molgenis-api-client/-/molgenis-api-client-1.2.0.tgz#af41a0f2e0de5ce40d9de88277d5c395e2592bdb"
   dependencies:
     isomorphic-fetch "^2.2.1"
 
@@ -5485,6 +5505,15 @@ typedarray@^0.0.6, typedarray@~0.0.5:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
+uglify-js-harmony@^2.7.5:
+  version "2.7.7"
+  resolved "https://registry.yarnpkg.com/uglify-js-harmony/-/uglify-js-harmony-2.7.7.tgz#6a43993211fa5da2f1e58416d61f329327eef335"
+  dependencies:
+    async "~0.2.6"
+    source-map "~0.5.1"
+    uglify-to-browserify "~1.0.0"
+    yargs "~3.10.0"
+
 uglify-js@3.0.x:
   version "3.0.13"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.0.13.tgz#1871d736aa1e550c728d7e5a6556579e70925d68"
@@ -5669,7 +5698,7 @@ vue-template-es2015-compiler@^1.2.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.5.2.tgz#a0a6c50c941d2a4abda963f2f42c337ac450ee95"
 
-vue@^2.2.6:
+vue@^2.2.0, vue@^2.2.6:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.3.3.tgz#d1eaa8fde5240735a4563e74f2c7fead9cbb064c"
 

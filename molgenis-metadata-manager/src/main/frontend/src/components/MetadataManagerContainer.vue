@@ -65,7 +65,10 @@
 
           this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType)
           this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, null)
-          this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
+
+          if (entityTypeID !== undefined) {
+            this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
+          }
         }
       }
     }
