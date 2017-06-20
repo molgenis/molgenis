@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorFactory1;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
@@ -29,6 +28,7 @@ import org.molgenis.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
@@ -259,8 +259,8 @@ public class OneToManyTestHarness
 		private final EntityType bookMetaData;
 		private final EntityType authorMetaData;
 
-		AuthorsAndBooks(@NonNull List<Entity> authors, @NonNull List<Entity> books, @NonNull EntityType authorMetaData,
-				@NonNull EntityType bookMetaData)
+		AuthorsAndBooks(@Nonnull List<Entity> authors, @Nonnull List<Entity> books, @Nonnull EntityType authorMetaData,
+				@Nonnull EntityType bookMetaData)
 		{
 			this.authors = requireNonNull(authors);
 			this.books = requireNonNull(books);

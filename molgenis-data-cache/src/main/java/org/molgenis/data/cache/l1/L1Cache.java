@@ -3,6 +3,7 @@ package org.molgenis.data.cache.l1;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.Cache;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
@@ -104,7 +105,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 * @return the retrieved {@link Entity} or Optional.empty() if deletion of this entity is stored in the cache or
 	 * null if no information available about this entity in the cache
 	 */
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
+	@SuppressFBWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
 	public Optional<Entity> get(String entityTypeId, Object id, EntityType entityType)
 	{
 		CombinedEntityCache cache = caches.get();

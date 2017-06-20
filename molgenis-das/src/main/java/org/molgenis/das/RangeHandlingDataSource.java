@@ -1,5 +1,6 @@
 package org.molgenis.das;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.das.impl.MolgenisDasTarget;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
@@ -13,7 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DMI_COLLECTION_OF_URLS", justification = "Third party class requires a map of URLs")
+@SuppressFBWarnings(value = "DMI_COLLECTION_OF_URLS", justification = "Third party class requires a map of URLs")
 public abstract class RangeHandlingDataSource implements RangeHandlingAnnotationDataSource
 {
 	protected DasFeature createDasFeature(Integer start, Integer stop, String identifier, String name,

@@ -1,6 +1,7 @@
 package org.molgenis.data.cache.utils;
 
 import com.google.common.cache.Cache;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityType;
@@ -62,7 +63,7 @@ public class CombinedEntityCache
 	 * @return Optional {@link Entity} with the result from the cache,
 	 * or null if no record of the entity is present in the cache
 	 */
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
+	@SuppressFBWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
 	public Optional<Entity> getIfPresent(EntityType entityType, Object id)
 	{
 		Optional<Map<String, Object>> optionalDehydratedEntity = cache.getIfPresent(EntityKey.create(entityType, id));
