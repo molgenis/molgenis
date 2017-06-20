@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 
 @Configuration
-@ComponentScan(basePackages = { "org.molgenis.data.elasticsearch.index.job, org.molgenis.data.jobs.model" })
+@ComponentScan(basePackages = { "org.molgenis.data.elasticsearch.index.job, org.molgenis.data.jobs" })
 public class IndexConfig
 {
 	@Autowired

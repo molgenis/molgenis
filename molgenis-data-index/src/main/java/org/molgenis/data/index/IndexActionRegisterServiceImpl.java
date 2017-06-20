@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.GenericDependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
@@ -51,17 +54,20 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	private final Multimap<String, IndexAction> indexActionsPerTransaction = synchronizedListMultimap(
 			ArrayListMultimap.create());
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+	private final IndexActionFactory indexActionFactory;
+	private final IndexActionGroupFactory indexActionGroupFactory;
+	private final GenericDependencyResolver genericDependencyResolver;
 
 	@Autowired
-	private IndexActionFactory indexActionFactory;
-
-	@Autowired
-	private IndexActionGroupFactory indexActionGroupFactory;
-
-	IndexActionRegisterServiceImpl()
+	IndexActionRegisterServiceImpl(DataService dataService, IndexActionFactory indexActionFactory,
+			IndexActionGroupFactory indexActionGroupFactory, GenericDependencyResolver genericDependencyResolver)
 	{
+		this.dataService = requireNonNull(dataService);
+		this.indexActionFactory = requireNonNull(indexActionFactory);
+		this.indexActionGroupFactory = requireNonNull(indexActionGroupFactory);
+		this.genericDependencyResolver = requireNonNull(genericDependencyResolver);
+
 		addExcludedEntity(INDEX_ACTION_GROUP);
 		addExcludedEntity(INDEX_ACTION);
 	}
@@ -152,11 +158,6 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction)
 	{
-		if (indexAction.getEntityId() != null)
-		{
-			return Stream.of(indexAction);
-		}
-
 		EntityType entityType = dataService.getEntityType(indexAction.getEntityTypeId());
 		if (entityType == null) // When entity is deleted the entityType cannot be retrieved
 		{
@@ -164,16 +165,27 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		}
 
 		// get referencing entity names
-		Map<String, EntityType> referencingEntityMap = dataService.query(ATTRIBUTE_META_DATA, Attribute.class)
-				.eq(REF_ENTITY_TYPE, entityType).fetch(new Fetch().field(ID)).findAll().map(Attribute::getEntity)
-				.collect(toMap(anEntityType -> anEntityType.getIdValue().toString(), Function.identity(), (u, v) -> u));
+		Set<String> referencingEntityTypes = genericDependencyResolver
+				.getAllDependants(indexAction.getEntityTypeId(), 1, this::getDepth, this::getReferencingEntityTypes);
 
 		// convert referencing entity names to index actions
-		Stream<IndexAction> referencingEntityIndexActions = referencingEntityMap.values().stream()
-				.map(referencingEntity -> indexActionFactory.create().setEntityTypeId(referencingEntity.getId())
+		Stream<IndexAction> referencingEntityIndexActions = referencingEntityTypes.stream()
+				.map(referencingEntity -> indexActionFactory.create().setEntityTypeId(referencingEntity)
 						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
 
 		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);
+	}
+
+	private int getDepth(String entityTypeId)
+	{
+		return 1;
+	}
+
+	private Set<String> getReferencingEntityTypes(String entityTypeId)
+	{
+		return dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(REF_ENTITY_TYPE, entityTypeId)
+				.fetch(new Fetch().field(ID)).findAll().map(Attribute::getEntity).map(EntityType::getId).
+						collect(toSet());
 	}
 
 	@Override
@@ -244,8 +256,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private EntityKey createEntityKey(IndexAction indexAction)
 	{
-		return EntityKey.create(indexAction.getEntityTypeId(),
-				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
+		return EntityKey.create(indexAction.getEntityTypeId(), indexAction.getEntityId() != null ? EntityUtils
+				.getTypedValue(indexAction.getEntityId(),
 						dataService.getEntityType(indexAction.getEntityTypeId()).getIdAttribute()) : null);
 	}
 

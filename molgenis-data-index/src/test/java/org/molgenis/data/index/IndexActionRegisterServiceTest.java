@@ -3,7 +3,6 @@ package org.molgenis.data.index;
 import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
@@ -17,6 +16,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -35,8 +35,7 @@ import static org.testng.Assert.*;
 
 public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 {
-	@InjectMocks
-	private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl();
+	private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl;
 	@Mock
 	private IndexActionGroupFactory indexActionGroupFactory;
 	@Mock
@@ -47,6 +46,8 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	private IndexAction indexAction;
 	@Mock
 	private DataService dataService;
+	@Mock
+	private GenericDependencyResolver genericDependencyResolver;
 	@Captor
 	private ArgumentCaptor<Stream<IndexAction>> indexActionStreamCaptor;
 
@@ -54,6 +55,8 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	public void beforeMethod()
 	{
 		TransactionSynchronizationManager.bindResource(TransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
+		indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl(dataService, indexActionFactory,
+				indexActionGroupFactory, genericDependencyResolver);
 	}
 
 	@AfterMethod

@@ -33,6 +33,7 @@ import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
+import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +154,12 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	public MailSender mailSender()
 	{
 		return mock(MailSender.class);
+	}
+
+	@Bean
+	public UserDetailsService userDetailsService()
+	{
+		return mock(UserDetailsService.class);
 	}
 
 	@PreDestroy

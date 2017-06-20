@@ -3,11 +3,11 @@ package org.molgenis.integrationtest.platform;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.*;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-import org.molgenis.data.index.SearchService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.listeners.EntityListener;
@@ -86,7 +86,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DataService dataService;
 	@Autowired
-	private SearchService searchService;
+	private ElasticsearchService searchService;
 	@Autowired
 	private MetaDataServiceImpl metaDataService;
 	@Autowired

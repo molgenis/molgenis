@@ -2,7 +2,7 @@ package org.molgenis.integrationtest.platform;
 
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.*;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.index.UnknownIndexException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -28,7 +28,6 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.QueryRule.Operator.*;
-import static org.molgenis.data.index.IndexingMode.ADD;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
@@ -42,7 +41,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityTestHarness testHarness;
 	@Autowired
-	private SearchService searchService;
+	private ElasticsearchService searchService;
 	@Autowired
 	private ElasticSearchExplainService explainService;
 
@@ -97,7 +96,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		}
 		ontologyTerms.get(5).set(ATTR_CATEGORICAL, ontology2);
 
-		searchService.index(entityTypeDynamic, ontologyTerms.stream(), ADD);
+		searchService.index(entityTypeDynamic, ontologyTerms.stream());
 		searchService.refreshIndex();
 
 		Query<Entity> query = new QueryImpl<>(new QueryRule(ATTR_XREF, FUZZY_MATCH, "\"0[0].1[1]\"")).and()
@@ -126,7 +125,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		}
 		attributes.get(5).set(ATTR_CATEGORICAL, ontology2);
 
-		searchService.index(entityTypeDynamic, attributes.stream(), ADD);
+		searchService.index(entityTypeDynamic, attributes.stream());
 		searchService.refreshIndex();
 
 		List<String> queryTerms = asList("hypertension", "disorder vascular hypertensive", "increased pressure blood",
@@ -522,7 +521,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		entities.get(1).set(ATTR_STRING, "cars in omaha");
 		entities.get(2).set(ATTR_STRING, "multiple carcinomas");
 		entities.get(3).set(ATTR_STRING, "and now for something completely different");
-		searchService.index(entityTypeDynamic, entities.stream(), ADD);
+		searchService.index(entityTypeDynamic, entities.stream());
 		searchService.refreshIndex();
 
 		Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "carcinoma");
@@ -539,7 +538,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		entities.get(1).set(ATTR_STRING, "cars in omaha");
 		entities.get(2).set(ATTR_STRING, "multiple carcinomas");
 		entities.get(3).set(ATTR_STRING, "and now for something completely different");
-		searchService.index(entityTypeDynamic, entities.stream(), ADD);
+		searchService.index(entityTypeDynamic, entities.stream());
 		searchService.refreshIndex();
 
 		Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "car carcinoma");
@@ -584,7 +583,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	private List<Entity> createAndIndexEntities(int count)
 	{
 		List<Entity> entities = createDynamic(count).collect(toList());
-		searchService.index(entityTypeDynamic, entities.stream(), ADD);
+		searchService.index(entityTypeDynamic, entities.stream());
 		searchService.refreshIndex();
 		return entities;
 	}
@@ -592,7 +591,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	private Stream<Entity> createDynamic(int count)
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
-		searchService.index(refEntityTypeDynamic, refEntities.stream(), ADD);
+		searchService.index(refEntityTypeDynamic, refEntities.stream());
 		return testHarness.createTestEntities(entityTypeDynamic, count, refEntities);
 	}
 }
