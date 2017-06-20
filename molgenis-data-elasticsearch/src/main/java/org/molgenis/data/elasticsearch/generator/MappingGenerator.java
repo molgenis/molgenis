@@ -22,8 +22,6 @@ import static java.util.stream.StreamSupport.stream;
 @Component
 class MappingGenerator
 {
-	private static final int MAX_INDEXING_DEPTH = 2;
-
 	private final DocumentIdGenerator documentIdGenerator;
 
 	MappingGenerator(DocumentIdGenerator documentIdGenerator)
@@ -34,7 +32,8 @@ class MappingGenerator
 	Mapping createMapping(EntityType entityType)
 	{
 		String type = documentIdGenerator.generateId(entityType);
-		List<FieldMapping> fieldMappings = createFieldMappings(entityType, 1, MAX_INDEXING_DEPTH);
+		int maxIndexingDepth = entityType.getIndexingDepth();
+		List<FieldMapping> fieldMappings = createFieldMappings(entityType, 0, maxIndexingDepth);
 		return Mapping.create(type, fieldMappings);
 	}
 

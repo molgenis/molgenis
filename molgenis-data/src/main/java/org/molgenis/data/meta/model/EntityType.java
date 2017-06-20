@@ -689,6 +689,17 @@ public class EntityType extends StaticEntity
 		set(TAGS, tag);
 	}
 
+	public EntityType setIndexingDepth(int indexingDepth)
+	{
+		set(INDEXING_DEPTH, indexingDepth);
+		return this;
+	}
+
+	public int getIndexingDepth()
+	{
+		return getInt(INDEXING_DEPTH);
+	}
+
 	/**
 	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
 	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
@@ -750,6 +761,7 @@ public class EntityType extends StaticEntity
 	protected void setDefaultValues()
 	{
 		setAbstract(false);
+		setIndexingDepth(1);
 	}
 
 	private Map<String, Attribute> getCachedOwnAttrs()

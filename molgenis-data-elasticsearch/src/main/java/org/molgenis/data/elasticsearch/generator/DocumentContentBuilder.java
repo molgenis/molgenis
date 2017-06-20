@@ -24,8 +24,6 @@ import static org.elasticsearch.common.xcontent.XContentType.JSON;
 @Component
 class DocumentContentBuilder
 {
-	private static final int MAX_INDEXING_DEPTH = 1;
-
 	private final DocumentIdGenerator documentIdGenerator;
 
 	DocumentContentBuilder(DocumentIdGenerator documentIdGenerator)
@@ -47,20 +45,21 @@ class DocumentContentBuilder
 	 */
 	Document createDocument(Entity entity)
 	{
-		String documentId = toElasticsearchId(entity.getIdValue());
+		int maxIndexingDepth = entity.getEntityType().getIndexingDepth();
 		XContentBuilder contentBuilder;
 		try
 		{
 			contentBuilder = XContentFactory.contentBuilder(JSON);
 			XContentGenerator generator = contentBuilder.generator();
 			generator.writeStartObject();
-			createRec(entity, generator, 0, MAX_INDEXING_DEPTH);
+			createRec(entity, generator, 0, maxIndexingDepth);
 			generator.writeEndObject();
 		}
 		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
+		String documentId = toElasticsearchId(entity.getIdValue());
 		return Document.create(documentId, contentBuilder);
 	}
 
@@ -171,17 +170,7 @@ class DocumentContentBuilder
 				Entity xrefEntity = entity.getEntity(attrName);
 				if (xrefEntity != null)
 				{
-					if (depth < maxDepth)
-					{
-						generator.writeStartObject();
-						createRec(xrefEntity, generator, depth + 1, maxDepth);
-						generator.writeEndObject();
-					}
-					else
-					{
-						Attribute xrefIdAttr = xrefEntity.getEntityType().getIdAttribute();
-						createRec(xrefEntity, xrefIdAttr, generator, depth + 1, maxDepth);
-					}
+					createRecReferenceAttribute(generator, depth, maxDepth, xrefEntity);
 				}
 				else
 				{
@@ -199,17 +188,7 @@ class DocumentContentBuilder
 					generator.writeStartArray();
 					for (Entity mrefEntity : mrefEntities)
 					{
-						if (depth < maxDepth)
-						{
-							generator.writeStartObject();
-							createRec(mrefEntity, generator, depth + 1, maxDepth);
-							generator.writeEndObject();
-						}
-						else
-						{
-							Attribute mrefIdAttr = mrefEntity.getEntityType().getIdAttribute();
-							createRec(mrefEntity, mrefIdAttr, generator, depth + 1, maxDepth);
-						}
+						createRecReferenceAttribute(generator, depth, maxDepth, mrefEntity);
 					}
 					generator.writeEndArray();
 				}
@@ -223,6 +202,22 @@ class DocumentContentBuilder
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+		}
+	}
+
+	private void createRecReferenceAttribute(XContentGenerator generator, int depth, int maxDepth, Entity xrefEntity)
+			throws IOException
+	{
+		if (depth < maxDepth)
+		{
+			generator.writeStartObject();
+			createRec(xrefEntity, generator, depth + 1, maxDepth);
+			generator.writeEndObject();
+		}
+		else
+		{
+			Attribute xrefIdAttr = xrefEntity.getEntityType().getLabelAttribute();
+			createRec(xrefEntity, xrefIdAttr, generator, depth + 1, maxDepth);
 		}
 	}
 
