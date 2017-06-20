@@ -31,7 +31,7 @@ public abstract class EditorEntityType
 	public abstract EditorPackageIdentifier getPackage();
 
 	@Nullable
-	public abstract EditorEntityTypeParent getParent();
+	public abstract EditorEntityTypeParent getEntityTypeParent();
 
 	public abstract List<EditorAttribute> getAttributes();
 

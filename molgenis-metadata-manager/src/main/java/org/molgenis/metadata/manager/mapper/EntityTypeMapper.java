@@ -94,7 +94,7 @@ public class EntityTypeMapper
 		entityType
 				.setOwnAllAttributes(attributeMapper.toAttributes(editorEntityType.getAttributes(), editorEntityType));
 		entityType.setAbstract(editorEntityType.isAbstract());
-		entityType.setExtends(entityTypeParentMapper.toEntityTypeReference(editorEntityType.getParent()));
+		entityType.setExtends(entityTypeParentMapper.toEntityTypeReference(editorEntityType.getEntityTypeParent()));
 		entityType.setTags(tagMapper.toTagReferences(editorEntityType.getTags()));
 		entityType.setBackend(editorEntityType.getBackend());
 		return entityType;
