@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.StreamSupport.stream;
 
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
+@SuppressFBWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
 {
 	private static ConversionService conversionService;
