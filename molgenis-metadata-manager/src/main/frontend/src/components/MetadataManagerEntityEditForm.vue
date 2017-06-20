@@ -14,7 +14,7 @@
         <label class="col-4 col-form-label">Extends</label>
         <div class="col">
           <multiselect v-model="parent" :options="abstractEntities" label="label"
-                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
+                       selectLabel="" deselectLabel="" placeholder="Select a parent entity"></multiselect>
         </div>
       </div>
 
@@ -46,7 +46,7 @@
         <label class="col-4 col-form-label">Package</label>
         <div class="col">
           <multiselect v-model="package0" :options="packages" label="label"
-                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
+                       selectLabel="" deselectLabel="" placeholder="Select a package"></multiselect>
         </div>
       </div>
     </div>
@@ -57,7 +57,7 @@
         <label class="col-4 col-form-label">ID attribute</label>
         <div class="col">
           <multiselect v-model="idAttribute" :options="attributes" label="label"
-                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
+                       selectLabel="" deselectLabel="" placeholder="Select an attribute"></multiselect>
         </div>
       </div>
 
@@ -65,7 +65,7 @@
         <label class="col-4 col-form-label">Label attribute</label>
         <div class="col">
           <multiselect v-model="labelAttribute" :options="attributes" label="label"
-                       selectLabel="" deselectLabel="" placeholder="Select an entity"></multiselect>
+                       selectLabel="" deselectLabel="" placeholder="Select an attribute"></multiselect>
         </div>
       </div>
 
@@ -113,7 +113,8 @@
   export default {
     name: 'metadata-manager-entity-edit-form',
     methods: {
-      save: function () {
+      save () {
+        this.$router.push({path: '/' + this.$store.state.selectedEntityType.id})
         this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$store.state.editorEntityType)
       }
     },
