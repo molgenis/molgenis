@@ -3,10 +3,10 @@ package org.molgenis.data.elasticsearch.index.job;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionListener;
@@ -129,6 +129,9 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		@Mock
 		private TransactionManager transactionManager;
 
+		@Mock
+		private IndexService indexService;
+
 		public Config()
 		{
 			initMocks(this);
@@ -136,13 +139,19 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 
 		private void resetMocks()
 		{
-			Mockito.reset(jobExecutor, mailSender);
+			reset(jobExecutor, mailSender, transactionManager, indexService);
 		}
 
 		@Bean
 		public JobExecutor jobExecutor()
 		{
 			return jobExecutor;
+		}
+
+		@Bean
+		public IndexService indexService()
+		{
+			return indexService;
 		}
 
 		@Bean

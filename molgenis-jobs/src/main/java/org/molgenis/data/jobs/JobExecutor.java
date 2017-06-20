@@ -97,6 +97,19 @@ public class JobExecutor
 	@RunAsSystem
 	public CompletableFuture<Void> submit(JobExecution jobExecution)
 	{
+		return submit(jobExecution, executorService);
+	}
+
+	/**
+	 * Saves execution in the current thread, then creates a Job and submits that for asynchronous execution to a
+	 * specific ExecutorService.
+	 *
+	 * @param jobExecution    the {@link JobExecution} to save and submit.
+	 * @param executorService the ExecutorService to run the submitted job on
+	 */
+	@RunAsSystem
+	public CompletableFuture<Void> submit(JobExecution jobExecution, ExecutorService executorService)
+	{
 		Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
 		return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
 	}
