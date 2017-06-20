@@ -176,7 +176,7 @@ export default {
       .then(response => {
         // Never reached due to https://github.com/molgenis/molgenis-api-client/issues/1
       }, error => {
-        if (error.errors !== undefined) {
+        if (error.errors) {
           commit(CREATE_ALERT, {
             type: 'danger',
             message: error.errors[0].message
