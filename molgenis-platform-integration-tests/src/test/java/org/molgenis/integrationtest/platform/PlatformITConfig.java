@@ -10,6 +10,7 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.jobs.JobConfig;
+import org.molgenis.data.jobs.JobExecutionConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -82,7 +83,7 @@ import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGR
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class,
 		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class,
-		OntologyConfig.class })
+		OntologyConfig.class, JobExecutionConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);

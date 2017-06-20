@@ -6,6 +6,7 @@ import org.molgenis.data.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Import(JobFactoryRegistry.class)
 @Configuration
 public class JobExecutionConfig
 {
