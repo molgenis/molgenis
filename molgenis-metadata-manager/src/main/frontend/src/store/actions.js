@@ -175,8 +175,8 @@ export default {
       .then(response => {
         // Never reached due to https://github.com/molgenis/molgenis-api-client/issues/1
       }, error => {
-        console.log(error)
         // response has error due to bug, callback handling is done in MetadataManagerHeader.vue
+        console.log('not an error, see https://github.com/molgenis/molgenis-api-client/issues/1', error)
       })
   },
   /**
