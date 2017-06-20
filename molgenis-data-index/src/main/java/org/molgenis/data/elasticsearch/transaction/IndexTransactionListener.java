@@ -1,6 +1,6 @@
 package org.molgenis.data.elasticsearch.transaction;
 
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.slf4j.Logger;
@@ -12,13 +12,13 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexTransactionListener.class);
 
-	private IndexService rebuildIndexService;
+	private IndexJobScheduler indexJobScheduler;
 	private IndexActionRegisterService indexActionRegisterService;
 
-	public IndexTransactionListener(IndexService rebuildIndexService,
+	public IndexTransactionListener(IndexJobScheduler indexJobScheduler,
 			IndexActionRegisterService indexActionRegisterService)
 	{
-		this.rebuildIndexService = requireNonNull(rebuildIndexService);
+		this.indexJobScheduler = requireNonNull(indexJobScheduler);
 		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
 	}
 
@@ -55,7 +55,7 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 		{
 			if (indexActionRegisterService.forgetIndexActions(transactionId))
 			{
-				rebuildIndexService.rebuildIndex(transactionId);
+				indexJobScheduler.scheduleIndexJob(transactionId);
 			}
 		}
 		catch (Exception ex)

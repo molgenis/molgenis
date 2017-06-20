@@ -11,7 +11,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class CategoricalAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
+public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
 	@BeforeClass
 	public void setup()

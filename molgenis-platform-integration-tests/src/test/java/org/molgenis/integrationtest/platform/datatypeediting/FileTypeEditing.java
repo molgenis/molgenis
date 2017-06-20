@@ -3,7 +3,7 @@ package org.molgenis.integrationtest.platform.datatypeediting;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -28,7 +28,7 @@ public class FileTypeEditing extends AbstractTestNGSpringContextTests
 	private final Logger LOG = getLogger(FileTypeEditing.class);
 
 	@Autowired
-	IndexService indexService;
+	IndexJobScheduler indexService;
 
 	@Autowired
 	AttributeFactory attributeFactory;

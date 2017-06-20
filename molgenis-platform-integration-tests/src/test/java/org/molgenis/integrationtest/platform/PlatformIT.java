@@ -3,11 +3,11 @@ package org.molgenis.integrationtest.platform;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.*;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-import org.molgenis.data.index.SearchService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.listeners.EntityListener;
@@ -78,7 +78,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private static EntityType selfXrefEntityType;
 
 	@Autowired
-	private IndexService indexService;
+	private IndexJobScheduler indexService;
 	@Autowired
 	private EntityTestHarness testHarness;
 	@Autowired
@@ -86,7 +86,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DataService dataService;
 	@Autowired
-	private SearchService searchService;
+	private ElasticsearchService searchService;
 	@Autowired
 	private MetaDataServiceImpl metaDataService;
 	@Autowired
@@ -115,7 +115,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
 	 */
-	public static void waitForWorkToBeFinished(IndexService indexService, Logger log)
+	public static void waitForWorkToBeFinished(IndexJobScheduler indexService, Logger log)
 	{
 		try
 		{
@@ -135,7 +135,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	 *
 	 * @param entityType name of the entity whose index needs to be stable
 	 */
-	public static void waitForIndexToBeStable(EntityType entityType, IndexService indexService, Logger log)
+	public static void waitForIndexToBeStable(EntityType entityType, IndexJobScheduler indexService, Logger log)
 	{
 		try
 		{

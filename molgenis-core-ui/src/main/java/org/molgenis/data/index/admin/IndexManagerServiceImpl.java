@@ -1,7 +1,7 @@
 package org.molgenis.data.index.admin;
 
 import org.molgenis.data.*;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,14 +20,14 @@ import static java.util.Objects.requireNonNull;
 public class IndexManagerServiceImpl implements IndexManagerService
 {
 	private final DataService dataService;
-	private final SearchService searchService;
+	private final IndexService indexService;
 
 	@Autowired
 	public IndexManagerServiceImpl(DataService dataService,
-			@SuppressWarnings("SpringJavaAutowiringInspection") SearchService searchService)
+			@SuppressWarnings("SpringJavaAutowiringInspection") IndexService indexService)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.searchService = requireNonNull(searchService);
+		this.indexService = requireNonNull(indexService);
 	}
 
 	@Override
@@ -59,6 +59,6 @@ public class IndexManagerServiceImpl implements IndexManagerService
 		{
 			throw new MolgenisDataAccessException("Repository [" + entityTypeId + "] is not an indexed repository");
 		}
-		searchService.rebuildIndex(repository);
+		indexService.rebuildIndex(repository);
 	}
 }

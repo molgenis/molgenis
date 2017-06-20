@@ -10,7 +10,7 @@ import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
 import org.molgenis.data.elasticsearch.index.job.IndexJobExecution;
 import org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
@@ -43,7 +43,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private MetaDataService metaDataService;
 	@Autowired
-	private SearchService searchService;
+	private IndexService indexService;
 	@Autowired
 	private IndexActionRegisterService indexActionRegisterService;
 	@Autowired
@@ -60,7 +60,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	{
 		config.resetMocks();
 
-		indexBootstrapper = new IndexBootstrapper(metaDataService, searchService, indexActionRegisterService,
+		indexBootstrapper = new IndexBootstrapper(metaDataService, indexService, indexActionRegisterService,
 				dataService, attributeMetadata, entityTypeFactory);
 	}
 
@@ -82,7 +82,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 
 		List<Repository<Entity>> repos = Arrays.asList(repo1, repo2, repo3);
 
-		when(searchService.hasIndex(attributeMetadata)).thenReturn(false);
+		when(indexService.hasIndex(attributeMetadata)).thenReturn(false);
 		when(metaDataService.getRepositories()).thenReturn(repos.stream());
 		indexBootstrapper.bootstrap();
 
@@ -95,7 +95,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStartupFailedIndexJobs()
 	{
-		when(searchService.hasIndex(attributeMetadata)).thenReturn(true);
+		when(indexService.hasIndex(attributeMetadata)).thenReturn(true);
 		IndexJobExecution indexJobExecution = mock(IndexJobExecution.class);
 		when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
 		IndexAction action = mock(IndexAction.class);
@@ -122,7 +122,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStartupAllIsFine()
 	{
-		when(searchService.hasIndex(attributeMetadata)).thenReturn(true);
+		when(indexService.hasIndex(attributeMetadata)).thenReturn(true);
 
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class))
@@ -137,7 +137,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	public static class Config
 	{
 		@Mock
-		SearchService searchService;
+		IndexService indexService;
 
 		@Mock
 		IndexActionRegisterService indexActionRegisterService;
@@ -157,9 +157,9 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public SearchService searchService()
+		public IndexService indexService()
 		{
-			return searchService;
+			return indexService;
 		}
 
 		@Bean
@@ -182,7 +182,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 
 		void resetMocks()
 		{
-			reset(searchService, indexActionRegisterService, metaDataService, attributeMetadata, entityTypeFactory);
+			reset(indexService, indexActionRegisterService, metaDataService, attributeMetadata, entityTypeFactory);
 		}
 	}
 }

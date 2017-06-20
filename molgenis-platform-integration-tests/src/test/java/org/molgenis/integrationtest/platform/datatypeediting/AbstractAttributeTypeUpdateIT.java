@@ -4,7 +4,7 @@ import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -28,9 +28,9 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
-public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpringContextTests
+public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpringContextTests
 {
-	private final Logger LOG = getLogger(AbstractAttributeTypeUpdateTest.class);
+	private final Logger LOG = getLogger(AbstractAttributeTypeUpdateIT.class);
 
 	private static final List<AttributeType> referencingTypes = newArrayList(MREF, XREF, CATEGORICAL, CATEGORICAL_MREF,
 			FILE);
@@ -40,7 +40,7 @@ public abstract class AbstractAttributeTypeUpdateTest extends AbstractTestNGSpri
 	private static final String MAIN_ENTITY_ID_VALUE = "1";
 
 	@Autowired
-	IndexService indexService;
+	IndexJobScheduler indexService;
 
 	@Autowired
 	AttributeFactory attributeFactory;

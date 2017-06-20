@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.Objects.requireNonNull;
@@ -94,10 +95,10 @@ public class JobExecutor
 	 * @param jobExecution the {@link JobExecution} to save and submit.
 	 */
 	@RunAsSystem
-	public void submit(JobExecution jobExecution)
+	public CompletableFuture<Void> submit(JobExecution jobExecution)
 	{
 		Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
-		executorService.submit(() -> runJob(jobExecution, molgenisJob));
+		return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
 	}
 
 	private Job saveExecutionAndCreateJob(JobExecution jobExecution)

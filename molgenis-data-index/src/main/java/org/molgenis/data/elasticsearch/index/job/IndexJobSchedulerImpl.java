@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.index.job;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.index.meta.IndexActionGroup;
+import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -13,8 +14,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -28,32 +27,26 @@ import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
-public class IndexServiceImpl implements IndexService
+public class IndexJobSchedulerImpl implements IndexJobScheduler
 {
-	private static final Logger LOG = LoggerFactory.getLogger(IndexServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IndexJobSchedulerImpl.class);
 
 	private final DataService dataService;
-	private final IndexJobFactory indexJobFactory;
 	private final IndexJobExecutionFactory indexJobExecutionFactory;
-
-	/**
-	 * The {@link IndexJob}s are executed on this thread.
-	 */
-	private final ExecutorService executorService;
+	private final JobExecutor jobExecutor;
 	private final IndexStatus indexStatus = new IndexStatus();
 
-	public IndexServiceImpl(DataService dataService, IndexJobFactory indexJobFactory,
-			IndexJobExecutionFactory indexJobExecutionFactory, ExecutorService executorService)
+	public IndexJobSchedulerImpl(DataService dataService, IndexJobExecutionFactory indexJobExecutionFactory,
+			JobExecutor jobExecutor)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.indexJobFactory = requireNonNull(indexJobFactory);
 		this.indexJobExecutionFactory = requireNonNull(indexJobExecutionFactory);
-		this.executorService = requireNonNull(executorService);
+		this.jobExecutor = requireNonNull(jobExecutor);
 	}
 
 	@Override
 	@RunAsSystem
-	public void rebuildIndex(String transactionId)
+	public void scheduleIndexJob(String transactionId)
 	{
 		LOG.trace("Index transaction with id {}...", transactionId);
 		IndexActionGroup indexActionGroup = dataService
@@ -70,8 +63,7 @@ public class IndexServiceImpl implements IndexService
 			IndexJobExecution indexJobExecution = indexJobExecutionFactory.create();
 			indexJobExecution.setUser("admin");
 			indexJobExecution.setIndexActionJobID(transactionId);
-			IndexJob job = indexJobFactory.createJob(indexJobExecution);
-			CompletableFuture.runAsync(job::call, executorService)
+			jobExecutor.submit(indexJobExecution)
 					.whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
 		}
 		else
