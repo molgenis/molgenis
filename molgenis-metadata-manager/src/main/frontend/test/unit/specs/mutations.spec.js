@@ -82,6 +82,19 @@ describe('mutations', () => {
     })
   })
 
+  describe('Testing mutation SET_ATTRIBUTE_TYPES', () => {
+    it('should set a list of attribute types', () => {
+      const state = {
+        attributeTypes: []
+      }
+
+      const attributeTypes = ['STRING', 'INT', 'XREF']
+
+      mutations.__SET_ATTRIBUTE_TYPES__(state, attributeTypes)
+      expect(state.attributeTypes).to.deep.equal(attributeTypes)
+    })
+  })
+
   describe('Testing mutation SET_EDITOR_ENTITY_TYPE', () => {
     it('Sets selected entity type to edit', () => {
       const state = {
@@ -137,63 +150,6 @@ describe('mutations', () => {
       }
       mutations.__SET_EDITOR_ENTITY_TYPE__(state, editorEntityType)
       expect(state.editorEntityType).to.equal(editorEntityType)
-    })
-  })
-
-  describe('Testing mutation CLEAR_EDITOR_ENTITY_TYPE', () => {
-    it('Clears the selected entity type', () => {
-      const state = {
-        editorEntityType: {
-          id: 'root_gender',
-          labelI18n: {},
-          description: 'Gender options',
-          abstract0: false,
-          attributes: [
-            {
-              aggregatable: false,
-              auto: false,
-              descriptionI18n: {},
-              enumOptions: [],
-              id: 'bla',
-              labelI18n: {},
-              name: 'id',
-              nullable: false,
-              readonly: true,
-              tags: [],
-              type: 'STRING',
-              unique: true,
-              visible: true
-            },
-            {
-              aggregatable: false,
-              auto: false,
-              descriptionI18n: {},
-              enumOptions: [],
-              id: 'bladibla',
-              labelI18n: {},
-              name: 'label',
-              nullable: false,
-              readonly: true,
-              tags: [],
-              type: 'STRING',
-              unique: true,
-              visible: true
-            }
-          ],
-          backend: 'postgreSQL',
-          idAttribute: {id: 'bla', label: 'id'},
-          label: 'Gender',
-          labelAttribute: {id: 'bladibla', label: 'label'},
-          lookupAttributes: [
-            {id: 'bla', label: 'id'},
-            {id: 'bladibla', label: 'label'}
-          ],
-          package0: {id: 'root', label: 'root'},
-          tags: []
-        }
-      }
-      mutations.__CLEAR_EDITOR_ENTITY_TYPE__(state)
-      expect(state.editorEntityType).to.deep.equal({})
     })
   })
 
@@ -291,6 +247,29 @@ describe('mutations', () => {
       const id = 'newAttributeId'
       mutations.__SET_SELECTED_ATTRIBUTE_ID__(state, id)
       expect(state.selectedAttributeID).to.equal('newAttributeId')
+    })
+  })
+
+  describe('Testing mutation DELETE_SELECTED_ATTRIBUTE', () => {
+    it('should remove an attribute from the list of editorEntityType attributes based on the selected attribute id', () => {
+      const state = {
+        selectedAttributeID: '1',
+        editorEntityType: {
+          attributes: [
+            {id: '1', name: 'attribute1'},
+            {id: '2', name: 'attribute2'},
+            {id: '3', name: 'attribute3'}
+          ]
+        }
+      }
+
+      const expected = [
+        {id: '2', name: 'attribute2'},
+        {id: '3', name: 'attribute3'}
+      ]
+
+      mutations.__DELETE_SELECTED_ATTRIBUTE__(state)
+      expect(state.editorEntityType.attributes).to.deep.equal(expected)
     })
   })
 })
