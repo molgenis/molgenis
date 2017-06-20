@@ -19,7 +19,7 @@ class PostgreSqlDatabase
 	public static String getPostgreSqlDatabaseUri() throws IOException
 	{
 		Properties properties = new Properties();
-		File file = ResourceUtils.getFile(PostgreSqlDatabase.class, "/postgresql/molgenis.properties");
+		File file = ResourceUtils.getFile(PostgreSqlDatabase.class, "/conf/elasticsearch/molgenis.properties");
 		properties.load(new FileInputStream(file));
 		return properties.getProperty("db_uri_admin");
 	}
@@ -27,7 +27,7 @@ class PostgreSqlDatabase
 	private static Connection getConnection() throws IOException, SQLException
 	{
 		Properties properties = new Properties();
-		File file = ResourceUtils.getFile(PostgreSqlDatabase.class, "/postgresql/molgenis.properties");
+		File file = ResourceUtils.getFile(PostgreSqlDatabase.class, "/conf/elasticsearch/molgenis.properties");
 		properties.load(new FileInputStream(file));
 
 		String dbUriAdmin = getPostgreSqlDatabaseUri();
