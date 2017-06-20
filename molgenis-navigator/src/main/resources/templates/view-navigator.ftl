@@ -11,16 +11,16 @@
     <link href="<@resource_href "/css/navigator/app.css" />" rel="stylesheet">
 </head>
 <body>
-<div id="app"></div>
+    <div id="app"></div>
 
-<script type="text/javascript">
-    window.__INITIAL_STATE__ = {
-        baseUrl: '${baseUrl}'
-    }
-</script>
+    <script type="text/javascript">
+        window.__INITIAL_STATE__ = {
+            baseUrl: '${baseUrl}'
+        }
+    </script>
 
-<script type=text/javascript src="<@resource_href "/js/navigator/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/navigator/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/navigator/app.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/js/navigator/manifest.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/js/navigator/vendor.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/js/navigator/app.js"/>"></script>
 </body>
 </html>

@@ -1,40 +1,32 @@
 // @flow
 export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 
-export
-type
-Parent = {
+export type Parent = {
   id: string,
 }
 
-export
-type
-Package = {
+export type Package = {
   id: string,
   label: string,
-  description: ? string,
-  parent: ? Parent
+  description: ?string,
+  parent: ?Parent
 }
 
-export
-type
-Entity = {
+export type Entity = {
   id: string,
   type: string,
   label: string,
-  description: ? string,
+  description: ?string,
   abstract: boolean
 }
 
-export
-type
-State = {
-  error: ? string,
-  token: ? string,
-  query: ? string,
-  packages: Array < Package >,
-  entities: Array < Entity >,
-  path: Array < Package >
+export type State = {
+  error: ?string,
+  token: ?string,
+  query: ?string,
+  packages: Array<Package>,
+  entities: Array<Entity>,
+  path: Array<Package>
 }
 
 const state: State = {
