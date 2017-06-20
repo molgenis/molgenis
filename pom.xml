@@ -240,7 +240,7 @@
                                 <goal>copy-resources</goal>
                             </goals>
                             <configuration>
-                                <outputDirectory>target/${artifactId}-${project.version}</outputDirectory>
+                                <outputDirectory>target/${project.artifactId}-${project.version}</outputDirectory>
                                 <resources>
                                     <resource>
                                         <directory>src/main/resources/</directory>
