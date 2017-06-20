@@ -20,8 +20,9 @@
     <!-- Attribute form inputs -->
     <div v-if="selectedAttribute" class="col-md-9">
       <div class="row">
-        <div class="col">
+        <div class="col attribute-form-header">
           <strong>Attribute:</strong> {{selectedAttribute.label}}
+          <button @click="deleteAttribute" class="btn btn-danger float-right btn-sm"><i class="fa fa-trash-o"></i> Delete attribute</button>
           <hr>
         </div>
       </div>
@@ -197,7 +198,7 @@
 <script>
   import AttributeTree from './generic-components/AttributeTree'
   import { mapState, mapGetters } from 'vuex'
-  import { SET_SELECTED_ATTRIBUTE_ID, UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE } from '../store/mutations'
+  import { SET_SELECTED_ATTRIBUTE_ID, UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, DELETE_SELECTED_ATTRIBUTE } from '../store/mutations'
   import { CREATE_ATTRIBUTE } from '../store/actions'
 
   import Multiselect from 'vue-multiselect'
@@ -205,6 +206,9 @@
   export default {
     name: 'metadata-manager-attribute-edit-form',
     methods: {
+      deleteAttribute () {
+        this.$store.commit(DELETE_SELECTED_ATTRIBUTE)
+      },
       onAttributeSelect (value) {
         this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, value.id)
         this.$router.push({path: '/' + this.$route.params.entityTypeID + '/' + value.id})

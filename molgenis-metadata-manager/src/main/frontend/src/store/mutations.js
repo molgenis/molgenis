@@ -6,6 +6,7 @@ export const SET_EDITOR_ENTITY_TYPE = '__SET_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__'
 export const SET_SELECTED_ATTRIBUTE_ID = '__SET_SELECTED_ATTRIBUTE_ID__'
+export const DELETE_SELECTED_ATTRIBUTE = '__DELETE_SELECTED_ATTRIBUTE__'
 
 export const CREATE_ALERT = '__CREATE_ALERT__'
 
@@ -42,6 +43,12 @@ export default {
   },
   [SET_SELECTED_ATTRIBUTE_ID] (state, selectedAttributeID) {
     state.selectedAttributeID = selectedAttributeID
+  },
+  /**
+   * Deletes the selected attribute using the ID of the selected attribute found in the state
+   */
+  [DELETE_SELECTED_ATTRIBUTE] (state) {
+    state.editorEntityType.attributes = state.editorEntityType.attributes.filter(attribute => attribute.id !== state.selectedAttributeID)
   },
   /**
    * Alert mutations

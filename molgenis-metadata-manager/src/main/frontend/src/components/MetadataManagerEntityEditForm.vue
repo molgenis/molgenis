@@ -85,16 +85,12 @@
 
     <!-- Column containing Save button -->
     <div class="col-md-1 col-sm-12 col-xs-12">
-      <b-button @click="save" variant="success" class="entity-save-btn">Save</b-button>
+      <b-button @click="save" variant="success" class="float-right">Save</b-button>
     </div>
   </div>
 </template>
 
 <style>
-  .entity-save-btn {
-    float: right
-  }
-
   .checkbox-column {
     padding-top: 11px
   }
