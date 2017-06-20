@@ -39,6 +39,9 @@
                         <goals>
                             <goal>yarn</goal>
                         </goals>
+                        <configuration>
+                            <failOnError>true</failOnError>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>yarn build</id>
@@ -48,6 +51,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <arguments>run build</arguments>
+                            <failOnError>true</failOnError>
                         </configuration>
                     </execution>
                     <execution>
