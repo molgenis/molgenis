@@ -54,7 +54,7 @@
     <div class="col-md-4 col-sm-12 col-xs-12 outer-column">
       <div class="form-group row">
         <label class="col-4 col-form-label">ID attribute</label>
-        <div v-if="entityTypeParent === undefined" class="col">
+        <div v-if="entityTypeParent === null || entityTypeParent === undefined" class="col">
           <multiselect v-model="idAttribute" :options="attributes" label="label"
                        selectLabel="" deselectLabel="" placeholder="Select an attribute"></multiselect>
         </div>
