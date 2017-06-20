@@ -876,6 +876,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"0\",\"1\"]}"))
 				.andExpect(status().isNoContent());
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
