@@ -4,7 +4,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
-import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
@@ -12,6 +11,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -24,8 +24,9 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.*;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
 /**
- * {@link org.molgenis.data.jobs.Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
+ * Executes the {@link IndexAction}s stored in an {@link IndexActionGroup}.
  */
+@Service
 public class IndexJobService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexJobService.class);
