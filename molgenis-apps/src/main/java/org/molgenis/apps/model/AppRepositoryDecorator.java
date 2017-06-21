@@ -118,10 +118,9 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	private void addApp(App app)
 	{
 		validateResourceZip(app);
-		boolean useFreemarkerTemplate = app.getUseFreemarkerTemplate();
 		if (app.isActive())
 		{
-			activateApp(app, useFreemarkerTemplate);
+			activateApp(app);
 		}
 	}
 
@@ -129,7 +128,6 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	{
 		FileMeta appSourceFiles = app.getSourceFiles();
 		FileMeta existingAppSourceFiles = existingApp.getSourceFiles();
-		boolean useFreemarkerTemplate = app.getUseFreemarkerTemplate();
 
 		if (appSourceFiles != null)
 		{
@@ -144,14 +142,14 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 					}
 					if (app.isActive())
 					{
-						activateApp(app, useFreemarkerTemplate);
+						activateApp(app);
 					}
 				}
 				else
 				{
 					if (app.isActive() && !existingApp.isActive())
 					{
-						activateApp(app, useFreemarkerTemplate);
+						activateApp(app);
 					}
 					else if (!app.isActive() && existingApp.isActive())
 					{
@@ -164,7 +162,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 				validateResourceZip(app);
 				if (app.isActive())
 				{
-					activateApp(app, useFreemarkerTemplate);
+					activateApp(app);
 				}
 			}
 		}
@@ -189,7 +187,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 		}
 	}
 
-	private void activateApp(App app, boolean useFreemarkerTemplate)
+	private void activateApp(App app)
 	{
 		FileMeta appSourceArchive = app.getSourceFiles();
 		if (appSourceArchive != null)
@@ -205,7 +203,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 			try
 			{
 				ZipFile zipFile = new ZipFile(fileStoreFile);
-				if (!useFreemarkerTemplate)
+				if (!app.getUseFreemarkerTemplate())
 				{
 					FileHeader fileHeader = zipFile.getFileHeader("index.html");
 					if (fileHeader == null)
