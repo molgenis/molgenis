@@ -1,4 +1,4 @@
-package org.molgenis.security.config;
+package org.molgenis.security.acl;
 
 import org.molgenis.DatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import static java.util.Objects.requireNonNull;
 @Import(DatabaseConfig.class)
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-public class ACLConfig extends GlobalMethodSecurityConfiguration
+public class AclConfig extends GlobalMethodSecurityConfiguration
 {
 
 	private static final String SQL_CREATE_TABLE_ACL_SID =
@@ -45,9 +45,11 @@ public class ACLConfig extends GlobalMethodSecurityConfiguration
 	private static final String SQL_CREATE_TABLE_ACL_CLASS =
 			"create table if not exists acl_class(\n" + "id bigserial not null primary key,\n"
 					+ "class varchar(100) not null,\n" + "constraint unique_uk_2 unique(class)\n" + ");";
+
+	// acl_object_identity.object_id_identity
 	private static final String SQL_CREATE_TABLE_ACL_OBJECT_IDENTITY =
 			"create table if not exists acl_object_identity(\n" + "id bigserial primary key,\n"
-					+ "object_id_class bigint not null,\n" + "object_id_identity bigint not null,\n"
+					+ "object_id_class bigint not null,\n" + "object_id_identity varchar not null,\n"
 					+ "parent_object bigint,\n" + "owner_sid bigint,\n" + "entries_inheriting boolean not null,\n"
 					+ "constraint unique_uk_3 unique(object_id_class,object_id_identity),\n"
 					+ "constraint foreign_fk_1 foreign key(parent_object)references acl_object_identity(id),\n"
@@ -103,7 +105,7 @@ public class ACLConfig extends GlobalMethodSecurityConfiguration
 
 	private LookupStrategy lookupStrategy()
 	{
-		return new BasicLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
+		return new AclLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
 	}
 
 	@Bean

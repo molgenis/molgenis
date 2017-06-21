@@ -251,7 +251,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 
 	private ObjectIdentity createObjectIdentity(Entity entity)
 	{
-		return new ObjectIdentityImpl(getEntityType().getId(), (Long) entity.getIdValue());
+		return new ObjectIdentityImpl(getEntityType().getId(), entity.getIdValue().toString());
 	}
 
 	private List<Sid> createCurrentUserSids()
