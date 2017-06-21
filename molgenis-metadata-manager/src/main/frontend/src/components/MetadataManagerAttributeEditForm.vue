@@ -22,7 +22,9 @@
       <div class="row">
         <div class="col attribute-form-header">
           <strong>Attribute:</strong> {{selectedAttribute.label}}
-          <button @click="deleteAttribute" class="btn btn-danger float-right btn-sm"><i class="fa fa-trash-o"></i> Delete attribute</button>
+          <button @click="deleteAttribute" class="btn btn-danger float-right btn-sm"><i class="fa fa-trash-o"></i>
+            Delete attribute
+          </button>
           <hr>
         </div>
       </div>
@@ -198,7 +200,11 @@
 <script>
   import AttributeTree from './generic-components/AttributeTree'
   import { mapState, mapGetters } from 'vuex'
-  import { SET_SELECTED_ATTRIBUTE_ID, UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, DELETE_SELECTED_ATTRIBUTE } from '../store/mutations'
+  import {
+    SET_SELECTED_ATTRIBUTE_ID,
+    UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+    DELETE_SELECTED_ATTRIBUTE
+  } from '../store/mutations'
   import { CREATE_ATTRIBUTE } from '../store/actions'
 
   import Multiselect from 'vue-multiselect'
@@ -207,13 +213,20 @@
     name: 'metadata-manager-attribute-edit-form',
     methods: {
       deleteAttribute () {
+        this.$notice('Successfully deleted attribute ' + this.selectedAttribute.label, {
+          duration: 2000,
+          style: 'success'
+        })
+
         this.$store.commit(DELETE_SELECTED_ATTRIBUTE)
       },
       onAttributeSelect (value) {
         this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, value.id)
-        this.$router.push({path: '/' + this.$route.params.entityTypeID + '/' + value.id})
+        this.$router.push({ path: '/' + this.$route.params.entityTypeID + '/' + value.id })
       },
-      addAttribute () { this.$store.dispatch(CREATE_ATTRIBUTE) }
+      addAttribute () {
+        this.$store.dispatch(CREATE_ATTRIBUTE)
+      }
     },
     computed: {
       ...mapState(['editorEntityType', 'attributeTypes', 'entityTypes']),
@@ -236,84 +249,164 @@
         return this.selectedAttribute.type === 'ONETOMANY'
       },
       name: {
-        get () { return this.selectedAttribute.name },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'name', value: value}) }
+        get () {
+          return this.selectedAttribute.name
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'name', value: value })
+        }
       },
       label: {
-        get () { return this.selectedAttribute.label },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'label', value: value}) }
+        get () {
+          return this.selectedAttribute.label
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'label', value: value })
+        }
       },
       description: {
-        get () { return this.selectedAttribute.description },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'description', value: value}) }
+        get () {
+          return this.selectedAttribute.description
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'description', value: value })
+        }
       },
       parent: {
-        get () { return this.selectedAttribute.parent },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'parent', value: value}) }
+        get () {
+          return this.selectedAttribute.parent
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'parent', value: value })
+        }
       },
       type: {
-        get () { return this.selectedAttribute.type },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'type', value: value}) }
+        get () {
+          return this.selectedAttribute.type
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'type', value: value })
+        }
       },
       refEntityType: {
-        get () { return this.selectedAttribute.refEntityType },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'refEntityType', value: value}) }
+        get () {
+          return this.selectedAttribute.refEntityType
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'refEntityType', value: value })
+        }
       },
       nullable: {
-        get () { return this.selectedAttribute.nullable },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'nullable', value: value}) }
+        get () {
+          return this.selectedAttribute.nullable
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'nullable', value: value })
+        }
       },
       auto: {
-        get () { return this.selectedAttribute.auto },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'auto', value: value}) }
+        get () {
+          return this.selectedAttribute.auto
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'auto', value: value })
+        }
       },
       visible: {
-        get () { return this.selectedAttribute.visible },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'visible', value: value}) }
+        get () {
+          return this.selectedAttribute.visible
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'visible', value: value })
+        }
       },
       unique: {
-        get () { return this.selectedAttribute.unique },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'unique', value: value}) }
+        get () {
+          return this.selectedAttribute.unique
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'unique', value: value })
+        }
       },
       readonly: {
-        get () { return this.selectedAttribute.readonly },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'readonly', value: value}) }
+        get () {
+          return this.selectedAttribute.readonly
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'readonly', value: value })
+        }
       },
       aggregatable: {
-        get () { return this.selectedAttribute.aggregatable },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'aggregatable', value: value}) }
+        get () {
+          return this.selectedAttribute.aggregatable
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'aggregatable', value: value })
+        }
       },
       expression: {
-        get () { return this.selectedAttribute.expression },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'expression', value: value}) }
+        get () {
+          return this.selectedAttribute.expression
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'expression', value: value })
+        }
       },
       visibleExpression: {
-        get () { return this.selectedAttribute.visibleExpression },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'visibleExpression', value: value}) }
+        get () {
+          return this.selectedAttribute.visibleExpression
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'visibleExpression', value: value })
+        }
       },
       validationExpression: {
-        get () { return this.selectedAttribute.validationExpression },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'validationExpression', value: value}) }
+        get () {
+          return this.selectedAttribute.validationExpression
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'validationExpression', value: value })
+        }
       },
       enumOptions: {
-        get () { return this.selectedAttribute.enumOptions.join(',') },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'enumOptions', value: value.split(',')}) }
+        get () {
+          return this.selectedAttribute.enumOptions.join(',')
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'enumOptions', value: value.split(',') })
+        }
       },
       mappedByEntityType: {
-        get () { return this.selectedAttribute.mappedByEntityType },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'mappedByEntityType', value: value}) }
+        get () {
+          return this.selectedAttribute.mappedByEntityType
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'mappedByEntityType', value: value })
+        }
       },
       orderBy: {
-        get () { return this.selectedAttribute.orderBy },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'orderBy', value: value}) }
+        get () {
+          return this.selectedAttribute.orderBy
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'orderBy', value: value })
+        }
       },
       rangeMin: {
-        get () { return this.selectedAttribute.rangeMin },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'rangeMin', value: value}) }
+        get () {
+          return this.selectedAttribute.rangeMin
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'rangeMin', value: value })
+        }
       },
       rangeMax: {
-        get () { return this.selectedAttribute.rangeMax },
-        set (value) { this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'rangeMax', value: value}) }
+        get () {
+          return this.selectedAttribute.rangeMax
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'rangeMax', value: value })
+        }
       }
     },
     components: {
