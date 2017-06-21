@@ -27,6 +27,8 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +38,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -47,13 +46,14 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
@@ -62,6 +62,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
@@ -111,6 +112,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private L10nStringFactory l10nStringFactory;
 	@Autowired
 	private PackageFactory packageFactory;
+	@Autowired
+	private UserDetailsService userDetailsService;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
