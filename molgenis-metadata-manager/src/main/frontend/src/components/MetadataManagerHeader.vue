@@ -40,10 +40,12 @@
         this.$store.dispatch(CREATE_ENTITY_TYPE)
       },
       deleteEntity () {
+        const selectedEntityTypeID = this.$store.state.selectedEntityType.id
         this.$store.dispatch(DELETE_ENTITY_TYPE)
           .then(response => {
             // After delete, route to path
             this.$router.push({path: '/'})
+            this.$notice('Successfully deleted ' + selectedEntityTypeID, {duration: 3000, style: 'success'})
           })
       }
     },
