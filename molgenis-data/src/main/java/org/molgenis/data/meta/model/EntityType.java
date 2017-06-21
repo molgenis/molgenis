@@ -36,7 +36,7 @@ import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 public class EntityType extends StaticEntity
 {
 	private transient Map<String, Attribute> cachedOwnAttrs;
-	private transient Boolean cachedHasAttrWithExpession;
+	private transient Boolean cachedHasAttrWithExpression;
 
 	public EntityType(Entity entity)
 	{
@@ -630,12 +630,12 @@ public class EntityType extends StaticEntity
 
 	private boolean getCachedHasAttrWithExpession()
 	{
-		if (cachedHasAttrWithExpession == null)
+		if (cachedHasAttrWithExpression == null)
 		{
-			cachedHasAttrWithExpession = stream(getAtomicAttributes().spliterator(), false)
+			cachedHasAttrWithExpression = stream(getAtomicAttributes().spliterator(), false)
 					.anyMatch(attr -> attr.getExpression() != null);
 		}
-		return cachedHasAttrWithExpession;
+		return cachedHasAttrWithExpression;
 	}
 
 	public void removeAttribute(Attribute attr)
