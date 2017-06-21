@@ -7,17 +7,16 @@ import { sync } from 'vuex-router-sync'
 import store from './store'
 import router from './router'
 import BootstrapVue from 'bootstrap-vue/dist/bootstrap-vue.esm'
-// Or use manual bootstrap 4 from @https://v4-alpha.getbootstrap.com/getting-started/introduction/
+import VueNotice from 'vue-notice'
+
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
 import 'font-awesome/css/font-awesome.min.css'
-// You can use both the components found @https://bootstrap-vue.github.io/
 
-// Keeps the router and the store in sync @https://github.com/vuejs/vuex-router-sync
 sync(store, router)
 
 Vue.use(BootstrapVue)
+Vue.use(VueNotice)
 
 /* eslint-disable no-new */
 new Vue({

@@ -20,6 +20,7 @@
     "molgenis-api-client": "^1.2.0",
     "vue": "^2.2.6",
     "vue-multiselect": "next",
+    "vue-notice": "^0.2.3",
     "vue-router": "^2.3.1",
     "vuex": "^2.2.1",
     "vuex-router-sync": "4.1.2"
