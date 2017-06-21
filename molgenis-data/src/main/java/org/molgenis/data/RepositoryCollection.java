@@ -75,6 +75,8 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	 */
 	void deleteRepository(EntityType entityType);
 
+	void updateRepository(EntityType entityType, EntityType updatedEntityType);
+
 	/**
 	 * Adds an Attribute to an entityType
 	 *

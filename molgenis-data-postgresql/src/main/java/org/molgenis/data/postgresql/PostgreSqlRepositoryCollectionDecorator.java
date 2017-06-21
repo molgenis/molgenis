@@ -53,6 +53,13 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	}
 
 	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		repoCollection.updateRepository(entityType, updatedEntityType);
+		entityTypeRegistry.registerEntityType(updatedEntityType);
+	}
+
+	@Override
 	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
 		EntityType updatedEntityType = entityTypeCopier.copy(entityType);

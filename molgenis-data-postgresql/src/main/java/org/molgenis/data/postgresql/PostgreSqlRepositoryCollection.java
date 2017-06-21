@@ -126,6 +126,12 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		dropTables(entityType);
 	}
 
+	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		//  no actions needed
+	}
+
 	private void dropTables(EntityType entityType)
 	{
 		getJunctionTableAttributes(entityType).forEach(mrefAttr -> dropJunctionTable(entityType, mrefAttr));

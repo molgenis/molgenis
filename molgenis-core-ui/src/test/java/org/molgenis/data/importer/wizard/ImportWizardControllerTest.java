@@ -350,7 +350,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
 		// the actual test
-		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, null, "update", null);
+		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, null, "addRemoveAttributeAbstractEntityType", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		assertEquals(response.getHeaders().getContentType(), TEXT_PLAIN);
 
