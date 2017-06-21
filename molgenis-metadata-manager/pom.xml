@@ -30,7 +30,7 @@
                         <phase>initialize</phase>
                         <configuration>
                             <nodeVersion>v7.6.0</nodeVersion>
-                            <yarnVersion>v0.23.0</yarnVersion>
+                            <yarnVersion>v0.24.5</yarnVersion>
                         </configuration>
                     </execution>
                     <execution>
