@@ -64,7 +64,7 @@ public class IndexBootstrapper
 			List<IndexJobExecution> failedIndexJobs = dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED), IndexJobExecution.class)
 					.collect(Collectors.toList());
-			failedIndexJobs.forEach(job -> registerNewIndexActionForDirtyJobs(job));
+			failedIndexJobs.forEach(this::registerNewIndexActionForDirtyJobs);
 		}
 	}
 
