@@ -38,8 +38,6 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String BACKEND = "backend";
 	public static final String INDEXING_DEPTH = "indexingDepth";
 
-	private static final long MAX_INDEXING_DEPTH = 20L;
-
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
 
@@ -72,7 +70,7 @@ public class EntityTypeMetadata extends SystemEntityType
 				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
 		addAttribute(INDEXING_DEPTH).setDataType(INT).setLabel("Indexing depth").setDescription(
 				"1 = index attributes and referenced entities (default) 2 = index attributes, referenced entities and entities referenced by referenced entities")
-				.setNillable(false).setDefaultValue(String.valueOf(1)).setRangeMin(1L).setRangeMax(MAX_INDEXING_DEPTH);
+				.setNillable(false).setDefaultValue(String.valueOf(1)).setRangeMin(1L);
 	}
 
 	/**
