@@ -45,7 +45,9 @@ public class RepositoryCopierTest extends AbstractMockitoTest
 	public void testCopyRepository()
 	{
 		Repository<Entity> repository = getMockRepository();
+		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
+		@SuppressWarnings("unchecked")
 		Stream<Entity> entitiesStream = mock(Stream.class);
 		when(query.findAll()).thenReturn(entitiesStream);
 		when(repository.query()).thenReturn(query);
@@ -54,6 +56,7 @@ public class RepositoryCopierTest extends AbstractMockitoTest
 		when(package_.toString()).thenReturn("Package");
 		String entityTypeLabel = "copiedEntityTypeLabel";
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> copiedRepository = mock(Repository.class);
 		when(metaDataService.createRepository(any(EntityType.class))).thenReturn(copiedRepository);
 
@@ -78,6 +81,7 @@ public class RepositoryCopierTest extends AbstractMockitoTest
 		when(entityType.getOwnAllAttributes()).thenReturn(emptyList());
 		when(entityType.getTags()).thenReturn(emptyList());
 
+		@SuppressWarnings("unchecked")
 		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("Repository");
 		when(repository.getEntityType()).thenReturn(entityType);

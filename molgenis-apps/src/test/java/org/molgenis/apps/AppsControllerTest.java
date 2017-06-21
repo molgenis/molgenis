@@ -88,6 +88,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		when(app1.getName()).thenReturn("name1");
 		when(app1.isActive()).thenReturn(false);
 
+		@SuppressWarnings("unchecked")
 		Query<App> query = mock(Query.class);
 		when(dataService.query(APP, App.class)).thenReturn(query);
 		Sort sort = mock(Sort.class);

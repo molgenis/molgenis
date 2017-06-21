@@ -10,7 +10,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class ScriptAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
+public class ScriptAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
 	@BeforeClass
 	public void setup()

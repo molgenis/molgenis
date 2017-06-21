@@ -126,6 +126,7 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 		verify(scheduledJob).setUser("other_user");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test(enabled = false) //FIXME
 	public void testDeleteStreamFails()
 	{
