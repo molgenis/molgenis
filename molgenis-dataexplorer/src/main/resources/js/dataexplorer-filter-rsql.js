@@ -225,7 +225,7 @@
      * Fetches metadata for an attribute from the V1 RestClient
      */
     function getAttribute(entityTypeId, attributeName, restApi) {
-        return restApi.getAsync('/api/v1/' + entityTypeId + '/meta/' + attributeName + '?expand=refEntity')
+        return restApi.getAsync('/api/v1/' + encodeURIComponent(entityTypeId) + '/meta/' + encodeURIComponent(attributeName) + '?expand=refEntity')
     }
 
     /**
