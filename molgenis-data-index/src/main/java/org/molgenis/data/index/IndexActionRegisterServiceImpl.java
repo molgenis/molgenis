@@ -166,7 +166,9 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 		// get referencing entity names
 		Set<String> referencingEntityTypes = genericDependencyResolver
-				.getAllDependants(indexAction.getEntityTypeId(), 1, this::getDepth, this::getReferencingEntityTypes);
+				.getAllDependants(indexAction.getEntityTypeId(), this::getDepth, this::getReferencingEntityTypes);
+
+		LOG.debug("Referencing entities for entity type {}: {}", indexAction.getEntityTypeId(), referencingEntityTypes);
 
 		// convert referencing entity names to index actions
 		Stream<IndexAction> referencingEntityIndexActions = referencingEntityTypes.stream()
@@ -178,7 +180,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 	private int getDepth(String entityTypeId)
 	{
-		return 1;
+		return dataService.getMeta().getEntityType(entityTypeId).getIndexingDepth();
 	}
 
 	private Set<String> getReferencingEntityTypes(String entityTypeId)
