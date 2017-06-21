@@ -61,7 +61,7 @@ public class GenericDependencyResolverTest
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testCyclicDepencencies()
+	public void testCyclicDependencies()
 	{
 		DependentOn d1 = new DependentOn("1");
 		DependentOn d2 = new DependentOn("2");
@@ -91,8 +91,6 @@ public class GenericDependencyResolverTest
 	@Test
 	public void testGetAllDependants()
 	{
-		int maxDepth = 3;
-
 		when(getDepth.apply(1)).thenReturn(1);
 		when(getDepth.apply(2)).thenReturn(1);
 		when(getDepth.apply(3)).thenReturn(3);
@@ -101,22 +99,28 @@ public class GenericDependencyResolverTest
 		when(getDependants.apply(0)).thenReturn(ImmutableSet.of(1, 4));
 		when(getDependants.apply(1)).thenReturn(ImmutableSet.of(2));
 		when(getDependants.apply(2)).thenReturn(ImmutableSet.of(3));
+		when(getDependants.apply(3)).thenReturn(ImmutableSet.of(2));
 		when(getDependants.apply(4)).thenReturn(emptySet());
 
-		assertEquals(genericDependencyResolver.getAllDependants(0, maxDepth, getDepth, getDependants),
-				ImmutableSet.of(1, 4, 3));
-		verify(getDependants, never()).apply(3);
+		assertEquals(genericDependencyResolver.getAllDependants(0, getDepth, getDependants), ImmutableSet.of(1, 4, 3));
 		verify(getDepth, never()).apply(0);
 	}
 
 	@Test
 	public void testGetAllDependantsCircular()
 	{
-		int maxDepth = 1;
 		when(getDepth.apply(0)).thenReturn(1);
 		when(getDependants.apply(0)).thenReturn(ImmutableSet.of(0));
 
-		assertEquals(genericDependencyResolver.getAllDependants(0, maxDepth, getDepth, getDependants),
-				ImmutableSet.of(0));
+		assertEquals(genericDependencyResolver.getAllDependants(0, getDepth, getDependants), ImmutableSet.of(0));
+	}
+
+	@Test
+	public void testGetAllDependantsCircularZeroDepth()
+	{
+		when(getDepth.apply(0)).thenReturn(0);
+		when(getDependants.apply(0)).thenReturn(ImmutableSet.of(0));
+
+		assertEquals(genericDependencyResolver.getAllDependants(0, getDepth, getDependants), emptySet());
 	}
 }
