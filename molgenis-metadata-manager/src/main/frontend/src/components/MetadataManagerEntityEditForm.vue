@@ -82,11 +82,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Column containing Save button -->
-    <div class="col-md-1 col-sm-12 col-xs-12">
-      <b-button @click="save" variant="success" class="float-right">Save</b-button>
-    </div>
   </div>
 </template>
 
@@ -106,18 +101,12 @@
 
 <script>
   import { mapState, mapGetters } from 'vuex'
-  import { SAVE_EDITOR_ENTITY_TYPE } from '../store/actions'
   import { UPDATE_EDITOR_ENTITY_TYPE } from '../store/mutations'
 
   import Multiselect from 'vue-multiselect'
 
   export default {
     name: 'metadata-manager-entity-edit-form',
-    methods: {
-      save () {
-        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE)
-      }
-    },
     computed: {
       ...mapState(['editorEntityType', 'packages']),
       ...mapGetters({

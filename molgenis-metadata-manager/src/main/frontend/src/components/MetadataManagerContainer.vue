@@ -1,18 +1,25 @@
 <template>
   <div>
-    <b-card show-header show-footer>
-      <div slot="header">
+    <div class="row">
+      <div class="col">
+        <alert v-if="alert.message !== null" :onDismiss="onDismiss" :alert="alert"></alert>
         <metadata-manager-header></metadata-manager-header>
+        <hr>
       </div>
+    </div>
 
-      <alert v-if="alert.message !== null" :onDismiss="onDismiss" :alert="alert"></alert>
+    <div class="row">
+      <div class="col">
+        <metadata-manager-entity-edit-form v-if="editorEntityType !== null"></metadata-manager-entity-edit-form>
+        <hr>
+      </div>
+    </div>
 
-      <metadata-manager-entity-edit-form v-if="editorEntityType !== null"></metadata-manager-entity-edit-form>
-
-      <div slot="footer">
+    <div class="row">
+      <div class="col">
         <metadata-manager-attribute-edit-form v-if="editorEntityType !== null"></metadata-manager-attribute-edit-form>
       </div>
-    </b-card>
+    </div>
   </div>
 </template>
 
@@ -33,7 +40,7 @@
     },
     methods: {
       onDismiss: function () {
-        this.$store.commit(CREATE_ALERT, {type: null, message: null})
+        this.$store.commit(CREATE_ALERT, { type: null, message: null })
       }
     },
     components: {
@@ -58,7 +65,7 @@
         const entityTypeID = to.params.entityTypeID
         if (entityTypeID && from.params.entityTypeID !== entityTypeID) {
           // Always clear alert on an entityType switch
-          this.$store.commit(CREATE_ALERT, {type: null, message: null})
+          this.$store.commit(CREATE_ALERT, { type: null, message: null })
 
           const selectedEntityType = this.$store.state.entityTypes.find(entityType => entityType.id === entityTypeID)
 
