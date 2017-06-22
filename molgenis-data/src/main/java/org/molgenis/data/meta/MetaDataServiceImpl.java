@@ -388,7 +388,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public EntityType getEntityType(String entityTypeId)
 	{
 		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
-		if (systemEntity != null)
+		if (systemEntity != null && !systemEntity.getId()
+				.equals("sys_sec_AclTest2")) // FIXME do not use system entity registry
 		{
 			return systemEntity;
 		}

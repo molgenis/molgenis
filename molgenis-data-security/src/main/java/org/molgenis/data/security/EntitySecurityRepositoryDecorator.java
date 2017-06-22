@@ -5,7 +5,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.meta.AttributeRepositorySecurityDecorator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserService;
@@ -31,7 +30,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.util.EntityUtils.asStream;
 
@@ -177,6 +175,28 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		if (currentUserIsSuOrSystem())
+		{
+			return decoratedRepository.findAll(ids);
+		}
+
+		return decoratedRepository.findAll(ids).filter(this::currentUserCanReadEntity);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		if (currentUserIsSuOrSystem())
+		{
+			return decoratedRepository.findAll(ids, fetch);
+		}
+
+		return decoratedRepository.findAll(ids, fetch).filter(this::currentUserCanReadEntity);
+	}
+
+	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		if (currentUserIsSuOrSystem())
@@ -186,8 +206,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 
 		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(q);
 		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset)
-				.filter(this::currentUserCanReadEntity);
+		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset).filter(this::currentUserCanReadEntity);
 		if (q.getOffset() > 0)
 		{
 			entityStream = entityStream.skip(q.getOffset());

@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
@@ -35,6 +36,7 @@ import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 @Service
 public class PermissionManagerServiceImpl implements PermissionManagerService
@@ -84,8 +86,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<Object> getEntityClassIds()
 	{
-		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue())
-				.collect(toList());
+		return dataService.findAll(ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue()).collect(toList());
 	}
 
 	@Override
@@ -219,6 +220,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		RunAsSystemProxy.runAsSystem(() ->
 		{
 			User user = dataService.findOneById(USER, userId, User.class);
+			Sid sid = new PrincipalSid(user.getUsername());
+
 			pluginAuthorities.forEach(userAuthority ->
 			{
 				String role = userAuthority.getRole();
@@ -240,8 +243,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 					default:
 						throw new UnsupportedOperationException("FIXME unsupported permission " + permissionStr);
 				}
-				ObjectIdentity objectIdentity = new ObjectIdentityImpl(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-						entityTypeIdStr);
+				ObjectIdentity objectIdentity = new ObjectIdentityImpl(ENTITY_TYPE_META_DATA, entityTypeIdStr);
 				Acl acl = mutableAclService.readAclById(objectIdentity);
 				if (!(acl instanceof MutableAcl))
 				{
@@ -249,7 +251,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				}
 				MutableAcl mutableAcl = (MutableAcl) acl;
 				List<AccessControlEntry> accessControlEntries = mutableAcl.getEntries();
-				Sid sid = new PrincipalSid(user.getUsername());
+
 				for (int i = 0; i < accessControlEntries.size(); ++i)
 				{
 					AccessControlEntry accessControlEntry = accessControlEntries.get(i);
@@ -261,6 +263,32 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 				mutableAcl.insertAce(acl.getEntries().size(), basePermission, sid, true);
 				mutableAclService.updateAcl(mutableAcl);
+
+				EntityType entityType = dataService
+						.findOneById(ENTITY_TYPE_META_DATA, entityTypeIdStr, EntityType.class);
+				entityType.getOwnAllAttributes().forEach(attr ->
+				{
+					ObjectIdentity attrObjectIdentity = new ObjectIdentityImpl(AttributeMetadata.ATTRIBUTE_META_DATA,
+							attr.getIdentifier());
+					Acl attrAcl = mutableAclService.readAclById(attrObjectIdentity);
+					if (!(attrAcl instanceof MutableAcl))
+					{
+						throw new RuntimeException("ACL is not a MutableAcl");
+					}
+					MutableAcl mutableAttrAcl = (MutableAcl) attrAcl;
+					List<AccessControlEntry> attrAccessControlEntries = mutableAttrAcl.getEntries();
+					for (int i = 0; i < attrAccessControlEntries.size(); ++i)
+					{
+						AccessControlEntry attrAccessControlEntry = attrAccessControlEntries.get(i);
+						if (attrAccessControlEntry.getSid().equals(sid))
+						{
+							mutableAttrAcl.deleteAce(i);
+						}
+					}
+
+					mutableAttrAcl.insertAce(attrAcl.getEntries().size(), basePermission, sid, true);
+					mutableAclService.updateAcl(mutableAttrAcl);
+				});
 			});
 		});
 	}
@@ -347,10 +375,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
 		{
 			List<Object> entityClassIds = this.getEntityClassIds();
-			List<EntityType> entityTypes = dataService
-					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityClassIds.stream(),
-							new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE),
-							EntityType.class).collect(Collectors.toList());
+			List<EntityType> entityTypes = dataService.findAll(ENTITY_TYPE_META_DATA, entityClassIds.stream(),
+					new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
+					.collect(Collectors.toList());
 			if (entityClassIds != null)
 			{
 				Map<String, String> entityClassMap = new TreeMap<String, String>();

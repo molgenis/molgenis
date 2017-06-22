@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
-import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.auth.TokenMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -39,5 +40,6 @@ public class AclTestMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setAggregatable(true);
+		addAttribute(DESCRIPTION).setDataType(TEXT).setNillable(true);
 	}
 }
