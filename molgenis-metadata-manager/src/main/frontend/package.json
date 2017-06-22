@@ -18,6 +18,8 @@
     "click-confirm": "^1.0.4",
     "font-awesome": "^4.7.0",
     "molgenis-api-client": "^1.2.0",
+    "node-sass": "^4.5.3",
+    "sass-loader": "^6.0.6",
     "vue": "^2.2.6",
     "vue-multiselect": "next",
     "vue-notice": "^0.2.3",

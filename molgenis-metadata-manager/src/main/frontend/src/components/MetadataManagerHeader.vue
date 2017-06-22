@@ -22,7 +22,7 @@
             </button>
           </click-confirm>
 
-          <b-button @click="saveEntityType" variant="success" class="float-right">Save everything!</b-button>
+          <save-button :onClick="saveEntityType">Save everything!</save-button>
         </div>
       </div>
     </div>
@@ -36,6 +36,7 @@
 
   import Multiselect from 'vue-multiselect'
   import ClickConfirm from 'click-confirm/src/ClickConfirm'
+  import SaveButton from './generic-components/SaveButton'
 
   export default {
     name: 'metadata-manager-header',
@@ -70,7 +71,8 @@
     },
     components: {
       Multiselect,
-      ClickConfirm
+      ClickConfirm,
+      SaveButton
     }
   }
 </script>

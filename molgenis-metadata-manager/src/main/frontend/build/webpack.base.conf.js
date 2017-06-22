@@ -53,6 +53,10 @@ module.exports = {
         include: [resolve('src'), resolve('test')]
       },
       {
+        test: /\.s[a|c]ss$/,
+        loader: 'style!css!sass'
+      },
+      {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'url-loader',
         query: {
