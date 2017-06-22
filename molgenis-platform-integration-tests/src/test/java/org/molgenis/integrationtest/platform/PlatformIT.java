@@ -27,15 +27,11 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.text.ParseException;
 import java.util.*;
@@ -46,14 +42,13 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
@@ -62,7 +57,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
@@ -175,6 +169,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
+	@AfterClass
+	public void tearDown()
+	{
+		runAsSystem(() -> metaDataService
+				.deleteEntityType(asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType)));
+	}
+
 	static List<GrantedAuthority> makeAuthorities(String entityTypeId, boolean write, boolean read, boolean count)
 	{
 		List<GrantedAuthority> authorities = newArrayList();
@@ -235,21 +236,24 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private void addDefaultLanguages()
 	{
-		dataService.add(LANGUAGE, languageFactory
-				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
-		dataService
-				.add(LANGUAGE, languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("pt", new Locale("pt").getDisplayName(new Locale("pt")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("es", new Locale("es").getDisplayName(new Locale("es")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("de", new Locale("de").getDisplayName(new Locale("de")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("it", new Locale("it").getDisplayName(new Locale("it")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
-		dataService.add(LANGUAGE, languageFactory.create("xx", "My language", false));
+		if (dataService.count(LANGUAGE) == 0)
+		{
+			dataService.add(LANGUAGE, languageFactory
+					.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
+			dataService.add(LANGUAGE,
+					languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
+			dataService.add(LANGUAGE,
+					languageFactory.create("pt", new Locale("pt").getDisplayName(new Locale("pt")), false));
+			dataService.add(LANGUAGE,
+					languageFactory.create("es", new Locale("es").getDisplayName(new Locale("es")), false));
+			dataService.add(LANGUAGE,
+					languageFactory.create("de", new Locale("de").getDisplayName(new Locale("de")), false));
+			dataService.add(LANGUAGE,
+					languageFactory.create("it", new Locale("it").getDisplayName(new Locale("it")), false));
+			dataService.add(LANGUAGE,
+					languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
+			dataService.add(LANGUAGE, languageFactory.create("xx", "My language", false));
+		}
 	}
 
 	@Test(singleThreaded = true)
@@ -1342,7 +1346,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		{
 			List expected = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue)
 					.collect(toList());
-			assertEquals(expected, Arrays.asList("0", "1"));
+			assertEquals(expected, asList("0", "1"));
 
 			// Remove added attribute
 			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
