@@ -26,6 +26,7 @@ export default {
   },
   [SET_EDITOR_ENTITY_TYPE] (state, editorEntityType) {
     state.editorEntityType = editorEntityType
+    state.initialEditorEntityType = JSON.parse(JSON.stringify(editorEntityType))
   },
   [UPDATE_EDITOR_ENTITY_TYPE] (state, update) {
     state.editorEntityType[update.key] = update.value
@@ -57,8 +58,5 @@ export default {
    */
   [CREATE_ALERT] (state, alert) {
     state.alert = alert
-  },
-  [ADD_CHANGE] (state) {
-    state.numberOfChanges++
   }
 }

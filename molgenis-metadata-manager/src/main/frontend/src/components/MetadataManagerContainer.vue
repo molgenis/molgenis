@@ -28,7 +28,7 @@
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
 
   import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
-  import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID, ADD_CHANGE } from '../store/mutations'
+  import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
   import { mapState } from 'vuex'
 
   export default {
@@ -77,13 +77,6 @@
         }
 
         this.$notie.alert(alertTypeMap[alert.type], alert.message, 3)
-      },
-      editorEntityType: {
-        handler (value) {
-          // Watch for changes
-          this.$store.commit(ADD_CHANGE)
-        },
-        deep: true
       }
     }
   }
