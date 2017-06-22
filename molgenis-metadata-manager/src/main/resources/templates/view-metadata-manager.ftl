@@ -15,7 +15,9 @@
 
     <script type="text/javascript">
         window.__INITIAL_STATE__ = {
-            baseUrl: '${baseUrl}'
+            baseUrl: '${baseUrl}',
+            lng: '${lng}',
+            fallbackLng: '${fallbackLng}'
         }
     </script>
 

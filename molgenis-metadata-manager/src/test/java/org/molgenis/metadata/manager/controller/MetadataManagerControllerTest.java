@@ -1,6 +1,8 @@
 package org.molgenis.metadata.manager.controller;
 
 import org.mockito.Mock;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonConfig;
@@ -34,6 +36,12 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	@Mock
 	private MenuReaderService menuReaderService;
 
+	@Mock
+	private LanguageService languageService;
+
+	@Mock
+	private AppSettings appSettings;
+
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -46,7 +54,11 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		when(menu.findMenuItemPath(MetadataManagerController.METADATA_MANAGER)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 
-		MetadataManagerController metadataEditorController = new MetadataManagerController(menuReaderService);
+		when(languageService.getCurrentUserLanguageCode()).thenReturn("en");
+		when(appSettings.getLanguageCode()).thenReturn("nl");
+
+		MetadataManagerController metadataEditorController = new MetadataManagerController(menuReaderService,
+				languageService, appSettings);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(metadataEditorController)
 				.setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter).build();
@@ -56,6 +68,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	public void testInit() throws Exception
 	{
 		this.mockMvc.perform(get("/plugin/metadata-manager")).andExpect(status().isOk())
-				.andExpect(view().name("view-metadata-manager")).andExpect(model().attribute("baseUrl", "/test/path"));
+				.andExpect(view().name("view-metadata-manager")).andExpect(model().attribute("baseUrl", "/test/path"))
+				.andExpect(model().attribute("lng", "en")).andExpect(model().attribute("fallbackLng", "nl"));
 	}
 }
