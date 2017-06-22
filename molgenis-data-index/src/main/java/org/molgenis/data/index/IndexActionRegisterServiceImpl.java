@@ -186,8 +186,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	private Set<String> getReferencingEntityTypes(String entityTypeId)
 	{
 		return dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(REF_ENTITY_TYPE, entityTypeId)
-				.fetch(new Fetch().field(ID)).findAll().map(Attribute::getEntity).map(EntityType::getId).
-						collect(toSet());
+				.fetch(new Fetch().field(ID)).pageSize(10000).findAll().map(Attribute::getEntity).map(EntityType::getId)
+				.collect(toSet());
 	}
 
 	@Override
