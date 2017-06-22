@@ -7,6 +7,7 @@ export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__'
 export const SET_SELECTED_ATTRIBUTE_ID = '__SET_SELECTED_ATTRIBUTE_ID__'
 export const DELETE_SELECTED_ATTRIBUTE = '__DELETE_SELECTED_ATTRIBUTE__'
+export const ADD_CHANGE = '__ADD_CHANGE__'
 
 export const CREATE_ALERT = '__CREATE_ALERT__'
 
@@ -56,5 +57,8 @@ export default {
    */
   [CREATE_ALERT] (state, alert) {
     state.alert = alert
+  },
+  [ADD_CHANGE] (state) {
+    state.numberOfChanges++
   }
 }

@@ -10,7 +10,8 @@ const state = {
   selectedEntityType: null,
   attributeTypes: [],
   editorEntityType: null,
-  selectedAttributeID: null
+  selectedAttributeID: null,
+  numberOfChanges: 0
 }
 
 export default state
