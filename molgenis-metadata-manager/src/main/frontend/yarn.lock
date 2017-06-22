@@ -920,14 +920,6 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
-bootstrap-vue@^0.11.1:
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-0.11.1.tgz#19038ce6e0048b93dab874992fdc9e2cad4ebb0b"
-  dependencies:
-    bootstrap "^4.0.0-alpha.6"
-    tether latest
-    vue "^2.2.6"
-
 bootstrap-vue@^0.15.0:
   version "0.15.8"
   resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-0.15.8.tgz#82003f86bcb62a4ee8eb4c7a11fe7b8acd36d09b"
@@ -5935,10 +5927,6 @@ vue-loader@^10.3.0:
 vue-multiselect@next:
   version "2.0.0-beta.15"
   resolved "https://registry.yarnpkg.com/vue-multiselect/-/vue-multiselect-2.0.0-beta.15.tgz#fc29af67d9bdfb682311bdf8cd2ed89d588d73e1"
-
-vue-notice@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/vue-notice/-/vue-notice-0.2.3.tgz#b93ffa2b301c151550ca7e606af7737a4ee03c87"
 
 vue-notie@^1.0.0:
   version "1.0.0"

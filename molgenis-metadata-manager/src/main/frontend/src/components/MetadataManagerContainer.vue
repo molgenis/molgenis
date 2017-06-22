@@ -69,7 +69,6 @@
       },
       alert (alert) {
         this.$notie.alert(1, 'It worked!', 3)
-//        this.$notice(ale rt.message, { duration: 3000, style: alert.type })
       }
     }
   }
