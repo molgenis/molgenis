@@ -7,7 +7,6 @@ export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__'
 export const SET_SELECTED_ATTRIBUTE_ID = '__SET_SELECTED_ATTRIBUTE_ID__'
 export const DELETE_SELECTED_ATTRIBUTE = '__DELETE_SELECTED_ATTRIBUTE__'
-export const ADD_CHANGE = '__ADD_CHANGE__'
 
 export const CREATE_ALERT = '__CREATE_ALERT__'
 
@@ -24,6 +23,12 @@ export default {
   [SET_ATTRIBUTE_TYPES] (state, attributeTypes) {
     state.attributeTypes = attributeTypes
   },
+  /**
+   * Set the editorEntityType in the state
+   * Create a deep copy of the editorEntityType and store it in the state
+   *
+   * The deep copy is used to keep track of changes
+   */
   [SET_EDITOR_ENTITY_TYPE] (state, editorEntityType) {
     state.editorEntityType = editorEntityType
     state.initialEditorEntityType = JSON.parse(JSON.stringify(editorEntityType))
