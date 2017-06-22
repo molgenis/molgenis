@@ -5,6 +5,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.security.meta.AttributeRepositorySecurityDecorator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserService;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,6 +31,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.util.EntityUtils.asStream;
 
@@ -58,6 +61,13 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	protected Repository<Entity> delegate()
 	{
 		return decoratedRepository;
+	}
+
+	@Override
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
+	{
+		FilteredConsumer filteredConsumer = new FilteredConsumer(consumer, this);
+		decoratedRepository.forEachBatched(fetch, filteredConsumer::filter, batchSize);
 	}
 
 	@Override
@@ -393,6 +403,24 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 			String entityTypeIdStr = getEntityType().getIdValue().toString();
 			throw new MolgenisDataAccessException(
 					format("Updating entity [%s] of type [%s] is not allowed", entityIdStr, entityTypeIdStr));
+		}
+	}
+
+	private class FilteredConsumer
+	{
+		private final Consumer<List<Entity>> consumer;
+		private final EntitySecurityRepositoryDecorator entitySecurityRepositoryDecorator;
+
+		FilteredConsumer(Consumer<List<Entity>> consumer, EntitySecurityRepositoryDecorator entitySecurityRepositoryDecorator)
+		{
+			this.consumer = requireNonNull(consumer);
+			this.entitySecurityRepositoryDecorator = requireNonNull(entitySecurityRepositoryDecorator);
+		}
+
+		public void filter(List<Entity> entities)
+		{
+			Stream<Entity> filteredEntities = entities.stream().filter(entitySecurityRepositoryDecorator::currentUserCanReadEntity);
+			consumer.accept(filteredEntities.collect(toList()));
 		}
 	}
 }

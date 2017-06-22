@@ -46,7 +46,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
 			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(),
-					grantedAuthoritiesMapper());
+					grantedAuthoritiesMapper(), null); // FIXME replace null
 		}
 
 		@Bean
@@ -180,7 +180,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void PluginPermissionManagerServiceImpl()
 	{
-		new PermissionManagerServiceImpl(null, null, null);
+		new PermissionManagerServiceImpl(null, null, null, null);
 	}
 
 	@Test

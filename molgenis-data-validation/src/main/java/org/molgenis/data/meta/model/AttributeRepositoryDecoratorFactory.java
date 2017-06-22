@@ -41,6 +41,6 @@ public class AttributeRepositoryDecoratorFactory
 	{
 		repository = new AttributeRepositoryDecorator(repository, dataService);
 		repository = new AttributeRepositoryValidationDecorator(repository, attributeValidator);
-		return new AttributeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService);
+		return repository; //new AttributeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService);
 	}
 }
