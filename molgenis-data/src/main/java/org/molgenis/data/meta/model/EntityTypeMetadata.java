@@ -36,6 +36,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String EXTENDS = "extends";
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
+	public static final String IS_ENTITY_LEVEL_SECURITY = "isEntityLevelSecurity";
 
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
@@ -67,6 +68,7 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
 				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
+		addAttribute(IS_ENTITY_LEVEL_SECURITY).setDataType(BOOL).setNillable(false).setLabel("Entity-level security").setDefaultValue(FALSE.toString());
 	}
 
 	/**

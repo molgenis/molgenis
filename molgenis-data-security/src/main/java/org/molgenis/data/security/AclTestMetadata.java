@@ -35,6 +35,7 @@ public class AclTestMetadata extends SystemEntityType
 	{
 		setLabel("ACL test");
 		setPackage(securityPackage);
+		setEntityLevelSecurity(true);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setAggregatable(true);

@@ -689,6 +689,18 @@ public class EntityType extends StaticEntity
 		set(TAGS, tag);
 	}
 
+	public EntityType setEntityLevelSecurity(boolean entityLevelSecurity)
+	{
+		set(IS_ENTITY_LEVEL_SECURITY, entityLevelSecurity);
+		return this;
+	}
+
+	public boolean isEntityLevelSecurity()
+	{
+		Boolean entityLevelSecurity = getBoolean(IS_ENTITY_LEVEL_SECURITY);
+		return entityLevelSecurity != null ? entityLevelSecurity : false;
+	}
+
 	/**
 	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
 	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
@@ -750,6 +762,7 @@ public class EntityType extends StaticEntity
 	protected void setDefaultValues()
 	{
 		setAbstract(false);
+		setEntityLevelSecurity(false);
 	}
 
 	private Map<String, Attribute> getCachedOwnAttrs()

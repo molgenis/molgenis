@@ -15,7 +15,6 @@ import org.molgenis.data.index.IndexedRepositoryDecorator;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.security.AclTestMetadata;
 import org.molgenis.data.security.EntitySecurityRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -136,11 +135,12 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository);
 
 		// 1.5
-		if (repository.getEntityType().getId().equals(AclTestMetadata.ACL_TEST)) // FIXME base on entity type metadata
+		if (repository.getEntityType().isEntityLevelSecurity())
 		{
 			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, mutableAclService,
 					userService);
 		}
+
 		// 1. transaction decorator
 		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);
 
