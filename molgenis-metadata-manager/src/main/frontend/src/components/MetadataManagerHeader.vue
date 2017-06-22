@@ -13,11 +13,11 @@
           <button @click="createNewEntityType" class="btn btn-primary">New</button>
 
           <click-confirm placement="bottom" :messages="{title:'Do you really want to delete this entity?'}">
-            <button @click="deleteEntityType" class="btn btn-danger" v-if="selectedEntityType"><i
+            <button @click="deleteEntityType(selectedEntityType.id)" class="btn btn-danger" v-if="selectedEntityType"><i
               class="fa fa-trash-o"></i>
               Delete
             </button>
-            <button @click="deleteEntityType" class="btn btn-danger" v-else disabled><i class="fa fa-trash-o"></i>
+            <button @click="deleteEntityType(selectedEntityType.id)" class="btn btn-danger" v-else disabled><i class="fa fa-trash-o"></i>
               Delete
             </button>
           </click-confirm>
@@ -44,12 +44,9 @@
       createNewEntityType: function () {
         this.$store.dispatch(CREATE_ENTITY_TYPE)
       },
-      deleteEntityType () {
-        this.$store.dispatch(DELETE_ENTITY_TYPE)
-          .then(response => {
-            // After delete, route to path
-            this.$router.push({ path: '/' })
-          })
+      deleteEntityType (selectedEntityTypeId) {
+        this.$router.push({ path: '/' })
+        this.$store.dispatch(DELETE_ENTITY_TYPE, selectedEntityTypeId)
       },
       saveEntityType () {
         this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE)

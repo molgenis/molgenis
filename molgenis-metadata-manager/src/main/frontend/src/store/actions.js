@@ -169,10 +169,11 @@ export default {
   },
   /**
    * Deletes an EntityType and reloads the EntityTypes present in the state
+   *
+   * @param selectedEntityTypeId the ID of the EntityType to be deleted
    */
-  [DELETE_ENTITY_TYPE] ({commit, state}) {
-    const identifier = state.selectedEntityType.id
-    callApi({apiUrl: '/api'}, '/v1/' + identifier + '/meta', 'delete')
+  [DELETE_ENTITY_TYPE] ({commit, state}, selectedEntityTypeId) {
+    callApi({apiUrl: '/api'}, '/v1/' + selectedEntityTypeId + '/meta', 'delete')
       .then(response => {
         // Never reached due to https://github.com/molgenis/molgenis-api-client/issues/1
       }, error => {
@@ -189,7 +190,7 @@ export default {
           commit(SET_EDITOR_ENTITY_TYPE, null)
 
           // Remove EntityType that was just deleted from list of EntityTypes
-          commit(SET_ENTITY_TYPES, state.entityTypes.filter(entityType => entityType.id !== identifier))
+          commit(SET_ENTITY_TYPES, state.entityTypes.filter(entityType => entityType.id !== selectedEntityTypeId))
 
           // Clear selected entity type in dropdown
           commit(SET_SELECTED_ENTITY_TYPE, null)
