@@ -79,7 +79,7 @@ export default {
         commit(SET_PACKAGES, response)
       }, error => {
         commit(CREATE_ALERT, {
-          type: 'danger',
+          type: 'error',
           message: error.errors[0].message
         })
       })
@@ -92,7 +92,6 @@ export default {
     get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')
       .then(response => {
         commit(SET_ENTITY_TYPES, response.items)
-
         const entityTypeID = state.route.params.entityTypeID
         if (entityTypeID !== undefined) {
           dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
@@ -107,7 +106,7 @@ export default {
         }
       }, error => {
         commit(CREATE_ALERT, {
-          type: 'danger',
+          type: 'error',
           message: error.errors[0].message
         })
       })
@@ -121,7 +120,7 @@ export default {
         commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map((type) => type.toUpperCase()))
       }, error => {
         commit(CREATE_ALERT, {
-          type: 'danger',
+          type: 'error',
           message: error.errors[0].message
         })
       })
@@ -137,7 +136,7 @@ export default {
         commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
       }, error => {
         commit(CREATE_ALERT, {
-          type: 'danger',
+          type: 'error',
           message: error.errors[0].message
         })
       })
@@ -157,12 +156,12 @@ export default {
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
-            type: 'danger',
+            type: 'error',
             message: error.errors[0].message
           })
         } else {
           commit(CREATE_ALERT, {
-            type: 'danger',
+            type: 'error',
             message: 'Something went wrong, make sure you have permissions for creating entities.'
           })
         }
@@ -179,7 +178,7 @@ export default {
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
-            type: 'danger',
+            type: 'error',
             message: error.errors[0].message
           })
         } else {
@@ -216,12 +215,12 @@ export default {
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
-            type: 'danger',
+            type: 'error',
             message: error.errors[0].message
           })
         } else {
           commit(CREATE_ALERT, {
-            type: 'danger',
+            type: 'error',
             message: 'Something went wrong, make sure you have permissions for creating entities.'
           })
         }
@@ -241,7 +240,7 @@ export default {
         dispatch(GET_ENTITY_TYPES)
       }, error => {
         commit(CREATE_ALERT, {
-          type: 'danger',
+          type: 'error',
           message: error.errors[0].message
         })
       })

@@ -21,6 +21,7 @@
     "vue": "^2.2.6",
     "vue-multiselect": "next",
     "vue-notice": "^0.2.3",
+    "vue-notie": "^1.0.0",
     "vue-router": "^2.3.1",
     "vuex": "^2.2.1",
     "vuex-router-sync": "4.1.2"

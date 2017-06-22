@@ -2,7 +2,6 @@
   <div>
     <div class="row">
       <div class="col">
-        <alert v-if="alert.message !== null" :onDismiss="onDismiss" :alert="alert"></alert>
         <metadata-manager-header></metadata-manager-header>
         <hr>
       </div>
@@ -24,7 +23,6 @@
 </template>
 
 <script>
-  import Alert from './generic-components/Alert'
   import MetadataManagerHeader from './MetadataManagerHeader'
   import MetadataManagerEntityEditForm from './MetadataManagerEntityEditForm'
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
@@ -38,13 +36,7 @@
     computed: {
       ...mapState(['alert', 'editorEntityType'])
     },
-    methods: {
-      onDismiss: function () {
-        this.$store.commit(CREATE_ALERT, { type: null, message: null })
-      }
-    },
     components: {
-      Alert,
       MetadataManagerHeader,
       MetadataManagerEntityEditForm,
       MetadataManagerAttributeEditForm
@@ -74,7 +66,25 @@
 
           this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
         }
+      },
+      alert (alert) {
+        this.$notie.alert(1, 'It worked!', 3)
+//        this.$notice(ale rt.message, { duration: 3000, style: alert.type })
       }
     }
   }
 </script>
+
+<style lang="scss">
+  /*Before notie is imported:
+  $notie-color-success: #57BF57;
+  $notie-color-warning: #D6A14D;
+  $notie-color-error: #E1715B;
+  $notie-color-info: #4D82D6;
+  $notie-color-neutral: #A0A0A0;
+
+  See https://github.com/jaredreich/notie for more options
+
+  */
+  @import 'node_modules/notie/src/notie.scss';
+</style>
