@@ -1,3 +1,31 @@
+/**
+ * Returns a property object used for creating a sweetalert2 modal when trying to delete an EntityType
+ */
+export const getConfirmBeforeDeletingProperties = (identifier) => {
+  return {
+    title: 'You are about to delete ' + identifier,
+    text: 'Are you sure you want to continue?',
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+    cancelButtonText: 'Cancel'
+  }
+}
+
+/**
+ * Returns a property object used for creating a sweetalert2 modal when leaving a view with unsaved changes
+ */
+export const getConfirmBeforeLeavingProperties = () => {
+  return {
+    title: 'There are unsaved changes',
+    text: 'All unsaved changes will be lost, are you sure you want to continue?',
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No, stay'
+  }
+}
+
 export default {
   /**
    * Return the editorEntityType attributes from the state
@@ -6,7 +34,9 @@ export default {
   /**
    * Return the entityTypes from the state that are abstract
    */
-  getAbstractEntities: state => state.entityTypes && state.entityTypes.filter(function (entityType) { return entityType.isAbstract }),
+  getAbstractEntities: state => state.entityTypes && state.entityTypes.filter(function (entityType) {
+    return entityType.isAbstract
+  }),
   /**
    * Return a tree which is constructed using the attributes found in the editorEntityType
    */

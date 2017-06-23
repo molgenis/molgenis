@@ -29,7 +29,7 @@
 
   import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
   import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
-  import { getConfirmBeforeLeavingProperties } from '../store/state'
+  import { getConfirmBeforeLeavingProperties } from '../store/getters'
   import { mapState, mapGetters } from 'vuex'
 
   export default {

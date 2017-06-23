@@ -38,7 +38,7 @@
   import { mapState } from 'vuex'
   import { CREATE_ENTITY_TYPE, DELETE_ENTITY_TYPE, SAVE_EDITOR_ENTITY_TYPE } from '../store/actions'
   import { SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
-  import { getConfirmBeforeLeavingProperties, getConfirmBeforeDeletingProperties } from '../store/state'
+  import { getConfirmBeforeLeavingProperties, getConfirmBeforeDeletingProperties } from '../store/getters'
 
   import Multiselect from 'vue-multiselect'
   import SaveButton from './generic-components/SaveButton'
