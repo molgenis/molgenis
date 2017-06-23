@@ -213,11 +213,6 @@
     name: 'metadata-manager-attribute-edit-form',
     methods: {
       deleteAttribute () {
-        this.$notice('Successfully deleted attribute ' + this.selectedAttribute.label, {
-          duration: 2000,
-          style: 'success'
-        })
-
         this.$store.commit(DELETE_SELECTED_ATTRIBUTE)
       },
       onAttributeSelect (value) {

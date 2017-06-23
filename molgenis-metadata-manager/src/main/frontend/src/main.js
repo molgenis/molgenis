@@ -22,7 +22,7 @@ Vue.use(VueNotie)
 Vue.use(i18n, {
   lng: INITIAL_STATE.lng,
   fallbackLng: INITIAL_STATE.fallbackLng,
-  namespace: 'molgenis-metadata-manager',
+  namespace: 'metadata-manager',
   callback () {
     /* eslint-disable no-new */
     new Vue({
