@@ -52,7 +52,7 @@ public class RestServiceTest
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(MREF);
-		assertEquals(restService.toEntityValue(attr, null), emptyList());
+		assertEquals(restService.toEntityValue(attr, null, "test"), emptyList());
 	}
 
 	// https://github.com/molgenis/molgenis/issues/4725
@@ -78,7 +78,7 @@ public class RestServiceTest
 		when(attr.getRefEntity()).thenReturn(refEntityType);
 		when(entityManager.getReference(refEntityType, 0)).thenReturn(entity0);
 		when(entityManager.getReference(refEntityType, 1)).thenReturn(entity1);
-		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
+		Object entityValue = restService.toEntityValue(attr, "0,1", "test"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}
 
@@ -98,7 +98,7 @@ public class RestServiceTest
 		when(attr.getRefEntity()).thenReturn(refEntityType);
 		when(entityManager.getReference(refEntityType, "0")).thenReturn(entity0);
 		when(entityManager.getReference(refEntityType, "1")).thenReturn(entity1);
-		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
+		Object entityValue = restService.toEntityValue(attr, "0,1", "test"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}
 
@@ -116,7 +116,7 @@ public class RestServiceTest
 		when(attr.getDataType()).thenReturn(XREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
-		assertEquals(restService.toEntityValue(attr, "0"), entity0);
+		assertEquals(restService.toEntityValue(attr, "0", "test"), entity0);
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class RestServiceTest
 	{
 		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
 		when(dateAttr.getDataType()).thenReturn(DATE);
-		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31"), LocalDate.parse("2000-12-31"));
+		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31", "test"), LocalDate.parse("2000-12-31"));
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class RestServiceTest
 		when(dateAttr.getDataType()).thenReturn(DATE_TIME);
 
 		Instant expected = Instant.parse("2000-12-31T10:34:56.789Z");
-		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31T10:34:56.789Z"), expected);
+		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31T10:34:56.789Z", "test"), expected);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to parse attribute \\[dateAttr\\] value \\[invalidDate\\] as date. Valid date format is \\[YYYY-MM-DD\\].")
@@ -142,7 +142,7 @@ public class RestServiceTest
 	{
 		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
 		when(dateAttr.getDataType()).thenReturn(DATE);
-		restService.toEntityValue(dateAttr, "invalidDate");
+		restService.toEntityValue(dateAttr, "invalidDate", "test");
 	}
 
 	@Test
