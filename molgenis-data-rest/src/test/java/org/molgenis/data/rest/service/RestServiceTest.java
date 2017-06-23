@@ -149,23 +149,26 @@ public class RestServiceTest
 	@Test
 	public void toEntityFileValueValid() throws ParseException
 	{
+		String generatedId = "id";
+		String downloadUriAsString = "http://somedownloaduri";
+		ServletUriComponentsBuilder mockBuilder = mock(ServletUriComponentsBuilder.class);
+		UriComponents downloadUri = mock(UriComponents.class);
+		FileMeta fileMeta = mock(FileMeta.class);
+
 		Attribute fileAttr = when(mock(Attribute.class).getName()).thenReturn("fileAttr").getMock();
 		when(fileAttr.getDataType()).thenReturn(FILE);
-		String generatedId = "id";
 		when(idGenerator.generateId()).thenReturn(generatedId);
-		FileMeta fileMeta = mock(FileMeta.class);
 		when(fileMetaFactory.create(generatedId)).thenReturn(fileMeta);
-		ServletUriComponentsBuilder mockBuilder = mock(ServletUriComponentsBuilder.class);
 		when(mockBuilder.replacePath(anyString())).thenReturn(mockBuilder);
 		when(mockBuilder.replaceQuery(null)).thenReturn(mockBuilder);
-		UriComponents downloadUri = mock(UriComponents.class);
-		String downloadUriAsString = "http://somedownloaduri";
 		when(downloadUri.toUriString()).thenReturn(downloadUriAsString);
 		when(mockBuilder.build()).thenReturn(downloadUri);
 		when(servletUriComponentsBuilderFactory.fromCurrentRequest()).thenReturn(mockBuilder);
 
+
 		byte [] content = {'a', 'b'};
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("name", "fileName", "contentType", content);
+
 		assertEquals(restService.toEntityValue(fileAttr, mockMultipartFile), fileMeta);
 	}
 
