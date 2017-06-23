@@ -10,7 +10,6 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.*;
-import org.springframework.security.acls.jdbc.BasicLookupStrategy;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.AclCache;
@@ -24,8 +23,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * TODO Replace AclCache.NoOpCache with another cache implementation
@@ -128,7 +125,7 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 	@Bean
 	JdbcMutableAclService aclService()
 	{
-		JdbcMutableAclService service = new JdbcMutableAclService(dataSource, lookupStrategy(), aclCache());
+		JdbcMutableAclService service = new AclService(dataSource, lookupStrategy(), aclCache());
 		service.setClassIdentityQuery("select currval(pg_get_serial_sequence('acl_class', 'id'))");
 		service.setSidIdentityQuery("select currval(pg_get_serial_sequence('acl_sid', 'id'))");
 		return service;
