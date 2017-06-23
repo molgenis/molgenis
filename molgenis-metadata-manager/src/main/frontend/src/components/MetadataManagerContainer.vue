@@ -62,12 +62,8 @@
         }
       },
       alert (alert) {
-        const alertTypeMap = {
-          'success': 1,
-          'warning': 2,
-          'error': 3,
-          'info': 4,
-          'neutral': 5
+        if (alert.message !== null) {
+          this.$toaster.add(alert.message, { theme: 'v-toast-' + alert.type })
         }
       }
     },

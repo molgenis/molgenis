@@ -18,6 +18,7 @@
     "click-confirm": "^1.0.4",
     "font-awesome": "^4.7.0",
     "molgenis-api-client": "^1.2.0",
+    "v-toaster": "^1.0.2",
     "vue": "^2.2.6",
     "vue-multiselect": "next",
     "vue-notie": "^1.0.0",
