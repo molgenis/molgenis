@@ -183,9 +183,6 @@ export default {
             message: error.errors[0].message
           })
         } else {
-          // response has error due to bug, callback handling is done in MetadataManagerHeader.vue
-          console.log('not an error, see https://github.com/molgenis/molgenis-api-client/issues/1')
-
           // Clear selected editorEntityType
           commit(SET_EDITOR_ENTITY_TYPE, null)
 

@@ -85,13 +85,13 @@ describe('form model objects', () => {
 describe('actions', () => {
   const rejection = {
     errors: [{
-      type: 'danger',
+      type: 'error',
       message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
     }]
   }
 
   const alertPayload = {
-    type: 'danger',
+    type: 'error',
     message: 'No [COUNT] permission on entity type [EntityType] with id [sys_md_EntityType]'
   }
 
@@ -282,10 +282,7 @@ describe('actions', () => {
       entityTypes: [
         {id: '1'},
         {id: '2'}
-      ],
-      selectedEntityType: {
-        id: '1'
-      }
+      ]
     }
 
     it('should successfully delete an entity type', done => {
@@ -293,7 +290,7 @@ describe('actions', () => {
       td.when(callApi({apiUrl: '/api'}, '/v1/1/meta', 'delete')).thenReject('rejection')
       td.replace(api, 'callApi', callApi)
 
-      testAction(actions.__DELETE_ENTITY_TYPE__, null, state, [
+      testAction(actions.__DELETE_ENTITY_TYPE__, '1', state, [
         {type: SET_EDITOR_ENTITY_TYPE, payload: null},
         {type: SET_ENTITY_TYPES, payload: [{id: '2'}]},
         {type: SET_SELECTED_ENTITY_TYPE, payload: null},
@@ -306,7 +303,7 @@ describe('actions', () => {
       td.when(callApi({apiUrl: '/api'}, '/v1/1/meta', 'delete')).thenReject(rejection)
       td.replace(api, 'callApi', callApi)
 
-      testAction(actions.__DELETE_ENTITY_TYPE__, null, state, [{type: CREATE_ALERT, payload: alertPayload}], [], done)
+      testAction(actions.__DELETE_ENTITY_TYPE__, '1', state, [{type: CREATE_ALERT, payload: alertPayload}], [], done)
     })
   })
 

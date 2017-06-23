@@ -1,7 +1,39 @@
 import { expect } from 'chai'
-import getters from 'src/store/getters'
+import getters, { getConfirmBeforeDeletingProperties, getConfirmBeforeLeavingProperties} from 'src/store/getters'
 
 describe('getters', () => {
+  describe('getConfirmBeforeDeletingProperties', () => {
+    it('should return a property object usable by sweetalert2 that asks before delete', () => {
+      const actual = getConfirmBeforeDeletingProperties('1')
+      const expected = {
+        title: 'You are about to delete 1',
+        text: 'Are you sure you want to continue?',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete',
+        cancelButtonText: 'Cancel'
+      }
+
+      expect(actual).to.deep.equal(expected)
+    })
+  })
+
+  describe('getConfirmBeforeLeavingProperties', () => {
+    it('should return a property object usable by sweetalert2 that asks before leaving screen', () => {
+      const actual = getConfirmBeforeLeavingProperties()
+      const expected = {
+        title: 'There are unsaved changes',
+        text: 'All unsaved changes will be lost, are you sure you want to continue?',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No, stay'
+      }
+
+      expect(actual).to.deep.equal(expected)
+    })
+  })
+
   describe('getEditorEntityTypeAttributes', () => {
     it('Should return the attributes for the editorEntityType present in the state', () => {
       const state = {
