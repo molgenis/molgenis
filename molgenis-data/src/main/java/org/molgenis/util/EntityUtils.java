@@ -295,6 +295,8 @@ public class EntityUtils
 			if (!tags.get(i).getId().equals(otherTags.get(i).getId())) return false;
 		}
 		return true;
+
+		// FIXME add RLS attribute checks
 	}
 
 	/**

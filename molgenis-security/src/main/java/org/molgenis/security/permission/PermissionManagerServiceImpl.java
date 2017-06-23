@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
@@ -263,32 +262,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 				mutableAcl.insertAce(acl.getEntries().size(), basePermission, sid, true);
 				mutableAclService.updateAcl(mutableAcl);
-
-				EntityType entityType = dataService
-						.findOneById(ENTITY_TYPE_META_DATA, entityTypeIdStr, EntityType.class);
-				entityType.getOwnAllAttributes().forEach(attr ->
-				{
-					ObjectIdentity attrObjectIdentity = new ObjectIdentityImpl(AttributeMetadata.ATTRIBUTE_META_DATA,
-							attr.getIdentifier());
-					Acl attrAcl = mutableAclService.readAclById(attrObjectIdentity);
-					if (!(attrAcl instanceof MutableAcl))
-					{
-						throw new RuntimeException("ACL is not a MutableAcl");
-					}
-					MutableAcl mutableAttrAcl = (MutableAcl) attrAcl;
-					List<AccessControlEntry> attrAccessControlEntries = mutableAttrAcl.getEntries();
-					for (int i = 0; i < attrAccessControlEntries.size(); ++i)
-					{
-						AccessControlEntry attrAccessControlEntry = attrAccessControlEntries.get(i);
-						if (attrAccessControlEntry.getSid().equals(sid))
-						{
-							mutableAttrAcl.deleteAce(i);
-						}
-					}
-
-					mutableAttrAcl.insertAce(attrAcl.getEntries().size(), basePermission, sid, true);
-					mutableAclService.updateAcl(mutableAttrAcl);
-				});
 			});
 		});
 	}

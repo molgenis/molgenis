@@ -37,6 +37,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
 	public static final String IS_ENTITY_LEVEL_SECURITY = "isEntityLevelSecurity";
+	public static final String ENTITY_LEVEL_SECURITY_INHERITANCE = "entityLevelSecurityInheritance";
 
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
@@ -53,12 +54,12 @@ public class EntityTypeMetadata extends SystemEntityType
 		setId(ENTITY_TYPE_META_DATA);
 		setLabel("Entity type");
 		setDescription("Meta data for entity classes");
-		setEntityLevelSecurity(true);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata).setLabel("Package");
+		Attribute packageAttr = addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata)
+				.setLabel("Package");
 		Attribute refAttr = attributeMetadata.getAttribute(AttributeMetadata.ENTITY);
 		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY).setRefEntity(attributeMetadata).setMappedBy(refAttr)
 				.setOrderBy(new Sort(SEQUENCE_NR)).setNillable(true).setLabel("Attributes");
@@ -71,6 +72,11 @@ public class EntityTypeMetadata extends SystemEntityType
 				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
 		addAttribute(IS_ENTITY_LEVEL_SECURITY).setDataType(BOOL).setNillable(false).setLabel("Entity-level security")
 				.setDefaultValue(FALSE.toString());
+		addAttribute(ENTITY_LEVEL_SECURITY_INHERITANCE).setDataType(STRING)
+				.setLabel("Entity-level security inheritance"); // FIXME how to make this into a XREF?
+
+		setEntityLevelSecurity(true);
+		setEntityLevelSecurityInheritance(packageAttr);
 	}
 
 	/**

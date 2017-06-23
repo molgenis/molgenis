@@ -206,7 +206,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 
 		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(q);
 		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset).filter(this::currentUserCanReadEntity);
+		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset)
+				.filter(this::currentUserCanReadEntity);
 		if (q.getOffset() > 0)
 		{
 			entityStream = entityStream.skip(q.getOffset());
@@ -280,7 +281,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 
 	private ObjectIdentity createObjectIdentity(Entity entity)
 	{
-		return new ObjectIdentityImpl(getEntityType().getId(), entity.getIdValue().toString());
+		return new ObjectIdentityImpl(entity.getEntityType().getId(), entity.getIdValue().toString());
 	}
 
 	private List<Sid> createCurrentUserSids()
@@ -309,6 +310,12 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	private void createAcl(Entity entity)
 	{
 		MutableAcl acl = mutableAclService.createAcl(createObjectIdentity(entity));
+		Attribute attribute = entity.getEntityType().getEntityLevelSecurityInheritance();
+		Entity inheritedEntity = attribute != null ? entity.getEntity(attribute.getName()) : null;
+		Acl parentAcl = inheritedEntity != null ? getAcl(inheritedEntity) : null;
+		acl.setParent(parentAcl);
+		mutableAclService.updateAcl(acl);
+
 		if (!currentUserIsSuOrSystem())
 		{
 			try
@@ -408,7 +415,9 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		else if (permission == BasePermission.ADMINISTRATION)
 		{
 			return singletonList(BasePermission.ADMINISTRATION);
-		} else {
+		}
+		else
+		{
 			throw new RuntimeException();
 		}
 	}
@@ -430,7 +439,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		private final Consumer<List<Entity>> consumer;
 		private final EntitySecurityRepositoryDecorator entitySecurityRepositoryDecorator;
 
-		FilteredConsumer(Consumer<List<Entity>> consumer, EntitySecurityRepositoryDecorator entitySecurityRepositoryDecorator)
+		FilteredConsumer(Consumer<List<Entity>> consumer,
+				EntitySecurityRepositoryDecorator entitySecurityRepositoryDecorator)
 		{
 			this.consumer = requireNonNull(consumer);
 			this.entitySecurityRepositoryDecorator = requireNonNull(entitySecurityRepositoryDecorator);
@@ -438,7 +448,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 
 		public void filter(List<Entity> entities)
 		{
-			Stream<Entity> filteredEntities = entities.stream().filter(entitySecurityRepositoryDecorator::currentUserCanReadEntity);
+			Stream<Entity> filteredEntities = entities.stream()
+					.filter(entitySecurityRepositoryDecorator::currentUserCanReadEntity);
 			consumer.accept(filteredEntities.collect(toList()));
 		}
 	}

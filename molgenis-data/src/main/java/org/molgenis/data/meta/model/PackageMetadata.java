@@ -54,6 +54,8 @@ public class PackageMetadata extends SystemEntityType
 				.setOrderBy(new Sort(EntityTypeMetadata.LABEL)).setOrderBy(new Sort(LABEL))
 				.setRefEntity(entityTypeMetadata).setLabel("Entity types");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
+
+		setEntityLevelSecurity(true);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

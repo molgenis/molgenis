@@ -701,6 +701,18 @@ public class EntityType extends StaticEntity
 		return entityLevelSecurity != null ? entityLevelSecurity : false;
 	}
 
+	public EntityType setEntityLevelSecurityInheritance(Attribute attribute)
+	{
+		set(ENTITY_LEVEL_SECURITY_INHERITANCE, attribute != null ? attribute.getName() : null);
+		return this;
+	}
+
+	public Attribute getEntityLevelSecurityInheritance()
+	{
+		String attributeName = getString(ENTITY_LEVEL_SECURITY_INHERITANCE);
+		return attributeName != null ? getAttribute(attributeName) : null;
+	}
+
 	/**
 	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
 	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
