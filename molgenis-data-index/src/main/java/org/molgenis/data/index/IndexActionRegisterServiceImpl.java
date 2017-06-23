@@ -1,20 +1,16 @@
 package org.molgenis.data.index;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
-import org.molgenis.data.Fetch;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
+import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.EntityUtils;
-import org.molgenis.util.GenericDependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,21 +18,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.*;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
+import static com.google.common.collect.Sets.union;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
-import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 /**
@@ -57,16 +50,14 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	private final DataService dataService;
 	private final IndexActionFactory indexActionFactory;
 	private final IndexActionGroupFactory indexActionGroupFactory;
-	private final GenericDependencyResolver genericDependencyResolver;
 
 	@Autowired
 	IndexActionRegisterServiceImpl(DataService dataService, IndexActionFactory indexActionFactory,
-			IndexActionGroupFactory indexActionGroupFactory, GenericDependencyResolver genericDependencyResolver)
+			IndexActionGroupFactory indexActionGroupFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.indexActionFactory = requireNonNull(indexActionFactory);
 		this.indexActionGroupFactory = requireNonNull(indexActionGroupFactory);
-		this.genericDependencyResolver = requireNonNull(genericDependencyResolver);
 
 		addExcludedEntity(INDEX_ACTION_GROUP);
 		addExcludedEntity(INDEX_ACTION);
@@ -109,85 +100,87 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
-		Set<IndexAction> indexActionSet = filterUnnecessaryIndexActions();
-		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
-		for (int i = 0; i < indexActions1.size(); i++)
+		List<IndexAction> indexActions = determineNecessaryActions();
+		for (int i = 0; i < indexActions.size(); i++)
 		{
-			indexActions1.get(i).setActionOrder(i);
+			indexActions.get(i).setActionOrder(i);
 		}
-		if (indexActions1.isEmpty())
+		if (indexActions.isEmpty())
 		{
 			return;
 		}
 		LOG.debug("Store index actions for transaction {}", transactionId);
 		dataService
-				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
-		dataService.add(INDEX_ACTION, indexActions1.stream());
+				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
+		dataService.add(INDEX_ACTION, indexActions.stream());
 	}
 
 	/**
-	 * Filter all unnecessary index actions
+	 * Determines which IndexActions are necessary to bring the index up to date with the current transaction.
 	 *
-	 * @return Set<IndexAction>
+	 * @return List<IndexAction> List of IndexActions that are necessary
 	 */
-	private Set<IndexAction> filterUnnecessaryIndexActions()
+	private List<IndexAction> determineNecessaryActions()
 	{
-		// 1. add all referencing entities
-		Set<IndexAction> allIndexAction = getIndexActionsForCurrentTransaction().stream()
-				.flatMap(this::addReferencingEntities).collect(toSet());
-
-		// 2. Filter excluded entities
-		Set<IndexAction> indexActionWithoutExcluded = allIndexAction.stream()
-				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityTypeId())).collect(toSet());
-
-		// 3. Find all entities names of actions where no row is specified
-		Set<String> entityFullIds = indexActionWithoutExcluded.stream()
-				.filter(indexAction -> indexAction.getEntityId() == null).map(IndexAction::getEntityTypeId)
-				.collect(toSet());
-
-		// 4. Filter all row index actions from list
-		return indexActionWithoutExcluded.stream()
-				.filter(indexAction -> (indexAction.getEntityId() == null) || !entityFullIds
-						.contains(indexAction.getEntityTypeId())).collect(toSet());
-	}
-
-	/**
-	 * Add for all referencing entities an index action
-	 *
-	 * @return Stream<IndexAction>
-	 */
-	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction)
-	{
-		EntityType entityType = dataService.getEntityType(indexAction.getEntityTypeId());
-		if (entityType == null) // When entity is deleted the entityType cannot be retrieved
+		ImmutableSet<IndexAction> indexActions = copyOf(getIndexActionsForCurrentTransaction());
+		if (indexActions.isEmpty())
 		{
-			return Stream.of(indexAction);
+			return Collections.emptyList();
 		}
-
-		// get referencing entity names
-		Set<String> referencingEntityTypes = genericDependencyResolver
-				.getAllDependants(indexAction.getEntityTypeId(), this::getDepth, this::getReferencingEntityTypes);
-
-		LOG.debug("Referencing entities for entity type {}: {}", indexAction.getEntityTypeId(), referencingEntityTypes);
-
-		// convert referencing entity names to index actions
-		Stream<IndexAction> referencingEntityIndexActions = referencingEntityTypes.stream()
-				.map(referencingEntity -> indexActionFactory.create().setEntityTypeId(referencingEntity)
-						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
-
-		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);
+		return determineNecessaryActionsInternal(indexActions, indexActions.iterator().next().getIndexActionGroup(),
+				new IndexDependencyModel(dataService.getMeta().getEntityTypes().collect(toList())));
 	}
 
-	private int getDepth(String entityTypeId)
+	/**
+	 * Determines the necessary index actions.
+	 *
+	 * @param indexActions     The index actions stored for the current transaction, deduplicated
+	 * @param indexActionGroup The IndexActionGroup that the created IndexActions will belong to
+	 * @param dependencies     {@link IndexDependencyModel} to determine which entities depend on which entities
+	 * @return List of {@link IndexAction}s
+	 */
+	private List<IndexAction> determineNecessaryActionsInternal(ImmutableSet<IndexAction> indexActions,
+			IndexActionGroup indexActionGroup, IndexDependencyModel dependencies)
 	{
-		return dataService.getMeta().getEntityType(entityTypeId).getIndexingDepth();
+		Map<Boolean, List<IndexAction>> split = indexActions.stream()
+				.filter(action -> !excludedEntities.contains(action.getEntityTypeId()))
+				.collect(partitioningBy(IndexAction::isWholeRepository));
+		ImmutableSet<String> allEntityTypeIds = indexActions.stream().map(IndexAction::getEntityTypeId)
+				.collect(toImmutableSet());
+		Set<String> dependentEntities = Sets.difference(
+				allEntityTypeIds.stream().flatMap(dependencies::getEntityTypesDependentOn).collect(toImmutableSet()),
+				excludedEntities);
+
+		return collectResult(indexActionGroup, split.get(false), split.get(true), dependentEntities);
 	}
 
-	private Set<String> getReferencingEntityTypes(String entityTypeId)
+	/**
+	 * Collects the results into a List.
+	 *
+	 * @param indexActionGroup    the IndexGroup that all of these IndexActions will belong to
+	 * @param singleEntityActions IndexActions for specific Entity instances. These will only be indexed if their repo will not be reindexed fully
+	 * @param wholeRepoActions    IndexActions for the whole Repo
+	 * @param dependentEntityIds  Set containing IDs of dependent EntityTypes, we will add IndexActions for the whole of these EntityTypes
+	 * @return ImmutableList with the {@link IndexAction}s
+	 */
+	private List<IndexAction> collectResult(IndexActionGroup indexActionGroup, List<IndexAction> singleEntityActions,
+			List<IndexAction> wholeRepoActions, Set<String> dependentEntityIds)
 	{
-		return dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(REF_ENTITY_TYPE, entityTypeId)
-				.fetch(new Fetch().field(ID)).findAll().map(Attribute::getEntity).map(EntityType::getId).
-						collect(toSet());
+		Set<String> wholeRepoIds = union(
+				wholeRepoActions.stream().map(IndexAction::getEntityTypeId).collect(toImmutableSet()),
+				dependentEntityIds);
+
+		ImmutableList.Builder<IndexAction> result = ImmutableList.builder();
+		result.addAll(wholeRepoActions);
+		dependentEntityIds.stream().map(id -> createIndexAction(id, indexActionGroup)).forEach(result::add);
+		singleEntityActions.stream().filter(action -> !wholeRepoIds.contains(action.getEntityTypeId()))
+				.forEach(result::add);
+		return result.build();
+	}
+
+	private IndexAction createIndexAction(String referencingEntity, IndexActionGroup indexActionGroup)
+	{
+		return indexActionFactory.create().setEntityTypeId(referencingEntity).setIndexActionGroup(indexActionGroup).setIndexStatus(PENDING);
 	}
 
 	@Override
