@@ -74,6 +74,7 @@
           next()
         }).catch(this.$swal.noop)
       }
+      next()
     },
     created: function () {
       // Retrieve entities for dropdown
