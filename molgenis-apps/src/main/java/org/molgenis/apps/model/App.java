@@ -107,11 +107,6 @@ public class App extends StaticEntity
 		{
 			set(LANDING_PAGE_HTML_TEMPLATE, htmlTemplate);
 		}
-		else
-		{
-			//TODO: implement gethtml?
-		}
-
 	}
 }
 

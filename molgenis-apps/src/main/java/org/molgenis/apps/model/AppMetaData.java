@@ -54,7 +54,6 @@ public class AppMetaData extends SystemEntityType
 				.setDefaultValue(Boolean.FALSE.toString());
 		addAttribute(USE_FREEMARKER_TEMPLATE).setDataType(BOOL).setLabel("Use freemarker template as index.html")
 				.setNillable(false).setDefaultValue(Boolean.TRUE.toString());
-		//TODO: fix error message when saving "No" in useFreemarkerTemplate, and changing it to "Yes"
 		addAttribute(LANDING_PAGE_HTML_TEMPLATE).setDataType(XREF).setRefEntity(freemarkerTemplateMetaData)
 				.setNillable(true).setLabel("Landing page HTML template")
 				.setVisibleExpression("$('" + USE_FREEMARKER_TEMPLATE + "').eq(true).value()")
