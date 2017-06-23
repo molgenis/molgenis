@@ -3,10 +3,10 @@ package org.molgenis.data.elasticsearch.index.job;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionListener;
@@ -36,8 +36,8 @@ import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { IndexServiceImplTest.Config.class })
-public class IndexServiceImplTest extends AbstractMolgenisSpringTest
+@ContextConfiguration(classes = { IndexJobSchedulerTest.Config.class })
+public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
 	private DataService dataService;
@@ -55,7 +55,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	private Repository<Entity> repository;
 
 	@Autowired
-	private IndexJobScheduler indexService;
+	private IndexJobScheduler indexJobScheduler;
 
 	@Mock
 	private Stream<Entity> jobExecutions;
@@ -90,7 +90,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		when(dataService.findOneById(INDEX_ACTION_GROUP, "abcde")).thenReturn(null);
 
-		indexService.scheduleIndexJob("abcde");
+		indexJobScheduler.scheduleIndexJob("abcde");
 
 		verify(jobExecutor, never()).submit(any());
 	}
@@ -103,7 +103,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
 		when(dataService.hasRepository(INDEX_JOB_EXECUTION)).thenReturn(true);
 
-		indexService.cleanupJobExecutions();
+		indexJobScheduler.cleanupJobExecutions();
 
 		verify(dataService).delete(INDEX_JOB_EXECUTION, jobExecutions);
 
@@ -129,6 +129,9 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 		@Mock
 		private TransactionManager transactionManager;
 
+		@Mock
+		private IndexService indexService;
+
 		public Config()
 		{
 			initMocks(this);
@@ -136,13 +139,19 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 
 		private void resetMocks()
 		{
-			Mockito.reset(jobExecutor, mailSender);
+			reset(jobExecutor, mailSender, transactionManager, indexService);
 		}
 
 		@Bean
 		public JobExecutor jobExecutor()
 		{
 			return jobExecutor;
+		}
+
+		@Bean
+		public IndexService indexService()
+		{
+			return indexService;
 		}
 
 		@Bean

@@ -10,6 +10,7 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.jobs.JobConfig;
+import org.molgenis.data.jobs.JobExecutionConfig;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -47,6 +48,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -54,8 +57,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
+import java.util.Collection;
+
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
+import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
@@ -82,7 +90,7 @@ import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGR
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class,
 		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class,
-		OntologyConfig.class })
+		OntologyConfig.class, JobExecutionConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
@@ -124,7 +132,12 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public UserDetailsService userDetailsService()
 	{
-		return mock(UserDetailsService.class);
+		UserDetailsService userDetailsService = mock(UserDetailsService.class);
+		UserDetails adminUserDetails = mock(UserDetails.class);
+		Collection authorities = singleton(new SimpleGrantedAuthority(ROLE_SYSTEM));
+		when(adminUserDetails.getAuthorities()).thenReturn(authorities);
+		when(userDetailsService.loadUserByUsername("admin")).thenReturn(adminUserDetails);
+		return userDetailsService;
 	}
 
 	@Bean
