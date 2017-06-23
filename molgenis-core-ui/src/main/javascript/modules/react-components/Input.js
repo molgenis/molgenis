@@ -83,44 +83,70 @@ var Input = React.createClass({
             }
         } else {
             if (this._isFile()) {
-                // see http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
-                return (
-                    div({className: 'input-group'},
-                        span({className: 'input-group-btn'},
-                            span({
-                                    className: 'btn btn-primary',
-                                    style: {position: 'relative', overflow: 'hidden'}
-                                }, 'Browse...',
-                                input(_.extend(inputProps, {
-                                    onChange: this._handleFileBrowseClick,
-                                    style: {
-                                        position: 'absolute',
-                                        top: 0,
-                                        right: 0,
-                                        minWidth: '100%',
-                                        minHeight: '100%',
-                                        fontSize: 100,
-                                        textAlign: 'right',
-                                        opacity: 0,
-                                        outline: 'none',
-                                        background: 'white',
-                                        cursor: 'inherit',
-                                        display: 'block'
+                if (inputProps.value && !this.state.setByUser) {
+                    return (
+                        div({className: 'input-group'},
+                            span({className: 'input-group-btn'},
+                                span({
+                                        onClick: this._handleClearButtonClick,
+                                        className: 'btn btn-primary',
+                                        style: {position: 'relative', overflow: 'hidden'}
                                     }
-                                }))
-                            )
-                        ),
-                        input({
-                            type: 'text',
-                            className: 'form-control',
-                            readOnly: true,
-                            style: {backgroundColor: 'white !important', cursor: 'text !important'},
-                            value: this.state.value ? this.state.value.filename : null,
-                            ref: 'fileTextInput'
-                        })
-                    )
-                );
-            } else {
+                                    , 'Change'
+                                )
+                            ),
+                            input(_.extend(inputProps, {
+                                type: 'text',
+                                className: 'form-control',
+                                readOnly: true,
+                                style: {backgroundColor: 'white !important', cursor: 'text !important'},
+                                value: this.state.value ? this.state.value : null,
+                                ref: 'fileTextInput'
+                            }))
+                        )
+                    );
+                }
+                else {
+                    // see http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
+                    return (
+                        div({className: 'input-group'},
+                            span({className: 'input-group-btn'},
+                                span({
+                                        className: 'btn btn-primary',
+                                        style: {position: 'relative', overflow: 'hidden'}
+                                    }, 'Browse...',
+                                    input(_.extend(inputProps, {
+                                        onChange: this._handleFileBrowseClick,
+                                        style: {
+                                            position: 'absolute',
+                                            top: 0,
+                                            right: 0,
+                                            minWidth: '100%',
+                                            minHeight: '100%',
+                                            fontSize: 100,
+                                            textAlign: 'right',
+                                            opacity: 0,
+                                            outline: 'none',
+                                            background: 'white',
+                                            cursor: 'inherit',
+                                            display: 'block'
+                                        }
+                                    }))
+                                )
+                            ),
+                            input({
+                                type: 'text',
+                                className: 'form-control',
+                                readOnly: true,
+                                style: {backgroundColor: 'white !important', cursor: 'text !important'},
+                                value: this.state.value ? this.state.value.filename : null,
+                                ref: 'fileTextInput'
+                            })
+                        )
+                    );
+                }
+            }
+            else {
                 return input(inputProps);
             }
         }
@@ -172,8 +198,13 @@ var Input = React.createClass({
             label = this._toFileLabel(value);
         $(this.refs.fileTextInput.getDOMNode()).val(label);
 
-        this.setState({value: value});
+        this.setState({value: value, setByUser: true});
         this._handleChangeOrBlur(value, undefined, this.props.onValueChange);
+    },
+    _handleClearButtonClick: function () {
+        this.state.value = null;
+        this.state.setByUser = false;
+        this._handleChangeOrBlur(undefined, undefined, this.props.onValueChange);
     },
     _toFileLabel: function (value) {
         return value.replace(/\\/g, '/').replace(/.*\//, '');

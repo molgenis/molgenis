@@ -86,6 +86,16 @@ public class App extends StaticEntity
 		set(ICON_HREF, iconHref);
 	}
 
+	public Boolean getUseFreemarkerTemplate()
+	{
+		return getBoolean(USE_FREEMARKER_TEMPLATE);
+	}
+
+	public void setUseFreemarkerTemplate(boolean useFreemarkerTemplate)
+	{
+		set(USE_FREEMARKER_TEMPLATE, useFreemarkerTemplate);
+	}
+
 	public FreemarkerTemplate getHtmlTemplate()
 	{
 		return getEntity(LANDING_PAGE_HTML_TEMPLATE, FreemarkerTemplate.class);
@@ -93,7 +103,15 @@ public class App extends StaticEntity
 
 	public void setHtmlTemplate(FreemarkerTemplate htmlTemplate)
 	{
-		set(LANDING_PAGE_HTML_TEMPLATE, htmlTemplate);
+		if (this.getUseFreemarkerTemplate())
+		{
+			set(LANDING_PAGE_HTML_TEMPLATE, htmlTemplate);
+		}
+		else
+		{
+			//TODO: implement gethtml?
+		}
+
 	}
 }
 

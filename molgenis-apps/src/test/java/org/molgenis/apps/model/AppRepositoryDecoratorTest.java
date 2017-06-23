@@ -224,6 +224,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 		when(app.getId()).thenReturn(id);
 		when(app.getName()).thenReturn(APP_NAME);
 		when(app.isActive()).thenReturn(isActive);
+		when(app.getUseFreemarkerTemplate()).thenReturn(true);
 		if (resourceFilename != null)
 		{
 			FileMeta fileMeta = mock(FileMeta.class);

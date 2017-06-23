@@ -96,9 +96,16 @@ public class AppsController extends MolgenisPluginController
 		}
 
 		model.addAttribute("app", toAppInfoDto(app));
-
-		FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
-		return htmlTemplate.getNameWithoutExtension();
+		if (app.getUseFreemarkerTemplate())
+		{
+			//TODO: fix relative paths in ftl file (redirect to /apps/)
+			FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
+			return htmlTemplate.getNameWithoutExtension();
+		}
+		else
+		{
+			return "redirect:/apps/"+app.getId()+"/index.html";
+		}
 	}
 
 	@Transactional
