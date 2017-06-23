@@ -14,6 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -33,6 +35,8 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler
 
 	private final DataService dataService;
 	private final IndexJobExecutionFactory indexJobExecutionFactory;
+	// the executor for the index jobs.
+	private ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private final JobExecutor jobExecutor;
 	private final IndexStatus indexStatus = new IndexStatus();
 
@@ -63,7 +67,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler
 			IndexJobExecution indexJobExecution = indexJobExecutionFactory.create();
 			indexJobExecution.setUser("admin");
 			indexJobExecution.setIndexActionJobID(transactionId);
-			jobExecutor.submit(indexJobExecution)
+			jobExecutor.submit(indexJobExecution, executorService)
 					.whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
 		}
 		else
