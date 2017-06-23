@@ -28,6 +28,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static org.molgenis.apps.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
+import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -91,7 +92,7 @@ public class AppsController extends MolgenisPluginController {
             FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
             return htmlTemplate.getNameWithoutExtension();
         } else {
-            return "redirect:/apps/" + APP + "/index.html";
+            return "redirect:/" + FILE_STORE_PLUGIN_APPS_PATH + "/" + app.getId() + "/index.html";
         }
     }
 
