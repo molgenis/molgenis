@@ -27,29 +27,23 @@
   import MetadataManagerEntityEditForm from './MetadataManagerEntityEditForm'
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
 
-  import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
   import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
-  import { mapState } from 'vuex'
+  import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
+  import { getConfirmBeforeLeavingProperties } from '../store/state'
+  import { mapState, mapGetters } from 'vuex'
 
   export default {
     name: 'metadata-manager',
     computed: {
-      ...mapState(['alert', 'editorEntityType'])
+      ...mapState(['alert', 'editorEntityType']),
+      ...mapGetters({
+        entityEdited: 'getEditorEntityTypeHasBeenEdited'
+      })
     },
     components: {
       MetadataManagerHeader,
       MetadataManagerEntityEditForm,
       MetadataManagerAttributeEditForm
-    },
-    created: function () {
-      // Retrieve entities for dropdown
-      this.$store.dispatch(GET_ENTITY_TYPES)
-
-      // Retrieve packages for package select
-      this.$store.dispatch(GET_PACKAGES)
-
-      // Retrieve attribute types for Type selection
-      this.$store.dispatch(GET_ATTRIBUTE_TYPES)
     },
     watch: {
       '$route' (to, from) {
@@ -75,9 +69,25 @@
           'info': 4,
           'neutral': 5
         }
-
-        this.$notie.alert(alertTypeMap[alert.type], alert.message, 3)
       }
+    },
+    beforeRouteUpdate (to, from, next) {
+      // Listens to route changes and prompts alert when editorEntityType has been edited
+      if (this.entityEdited) {
+        this.$swal(getConfirmBeforeLeavingProperties()).then(() => {
+          next()
+        }).catch(this.$swal.noop)
+      }
+    },
+    created: function () {
+      // Retrieve entities for dropdown
+      this.$store.dispatch(GET_ENTITY_TYPES)
+
+      // Retrieve packages for package select
+      this.$store.dispatch(GET_PACKAGES)
+
+      // Retrieve attribute types for Type selection
+      this.$store.dispatch(GET_ATTRIBUTE_TYPES)
     }
   }
 </script>

@@ -789,7 +789,7 @@ babel-register@^6.22.0, babel-register@^6.24.1:
     mkdirp "^0.5.1"
     source-map-support "^0.4.2"
 
-babel-runtime@^6.18.0, babel-runtime@^6.22.0:
+babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0:
   version "6.23.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.23.0.tgz#0a9489f144de70efb3ce4300accdb329e2fc543b"
   dependencies:
@@ -5590,6 +5590,10 @@ svgo@^0.7.0:
     sax "~1.2.1"
     whet.extend "~0.9.9"
 
+sweetalert2@^6.4.2:
+  version "6.6.5"
+  resolved "https://registry.yarnpkg.com/sweetalert2/-/sweetalert2-6.6.5.tgz#ffffc1064711ff7870bc8aefe1678f95ecc290db"
+
 table@^3.7.8:
   version "3.8.3"
   resolved "https://registry.yarnpkg.com/table/-/table-3.8.3.tgz#2bbc542f0fda9861a755d3947fefd8b3f513855f"
@@ -5946,6 +5950,14 @@ vue-style-loader@^2.0.0:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
+vue-sweetalert@^0.1.17:
+  version "0.1.17"
+  resolved "https://registry.yarnpkg.com/vue-sweetalert/-/vue-sweetalert-0.1.17.tgz#99e60ee08d7277660b444358eabf185001b7521e"
+  dependencies:
+    babel-runtime "^6.23.0"
+    sweetalert2 "^6.4.2"
+    vue "^2.2.1"
+
 vue-template-compiler@^2.1.10:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.3.3.tgz#b5bab9ec57309c906b82a78c81a02179dbc2f470"
@@ -5963,7 +5975,7 @@ vue@^1.0.21:
   dependencies:
     envify "^3.4.0"
 
-vue@^2.2.0, vue@^2.2.6:
+vue@^2.2.0, vue@^2.2.1, vue@^2.2.6:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.3.3.tgz#d1eaa8fde5240735a4563e74f2c7fead9cbb064c"
 

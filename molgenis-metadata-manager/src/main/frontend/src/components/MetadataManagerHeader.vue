@@ -38,6 +38,7 @@
   import { mapState } from 'vuex'
   import { CREATE_ENTITY_TYPE, DELETE_ENTITY_TYPE, SAVE_EDITOR_ENTITY_TYPE } from '../store/actions'
   import { SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
+  import { getConfirmBeforeLeavingProperties, getConfirmBeforeDeletingProperties } from '../store/state'
 
   import Multiselect from 'vue-multiselect'
   import SaveButton from './generic-components/SaveButton'
@@ -46,11 +47,19 @@
     name: 'metadata-manager-header',
     methods: {
       createNewEntityType: function () {
-        this.$store.dispatch(CREATE_ENTITY_TYPE)
+        if (this.entityEdited) {
+          this.$swal(getConfirmBeforeLeavingProperties()).then(() => {
+            this.$store.dispatch(CREATE_ENTITY_TYPE)
+          }).catch(this.$swal.noop)
+        } else {
+          this.$store.dispatch(CREATE_ENTITY_TYPE)
+        }
       },
       deleteEntityType (selectedEntityTypeId) {
-        this.$router.push({ path: '/' })
-        this.$store.dispatch(DELETE_ENTITY_TYPE, selectedEntityTypeId)
+        this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId)).then(() => {
+          this.$router.push({ path: '/' })
+          this.$store.dispatch(DELETE_ENTITY_TYPE, selectedEntityTypeId)
+        }).catch(this.$swal.noop)
       },
       saveEntityType () {
         this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE)

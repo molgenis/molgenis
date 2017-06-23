@@ -6,7 +6,7 @@ import store from './store'
 import router from './router'
 
 import App from './App'
-import VueNotie from 'vue-notie'
+import VueSweetAlert from 'vue-sweetalert'
 
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 import { sync } from 'vuex-router-sync'
@@ -17,7 +17,7 @@ import 'font-awesome/css/font-awesome.min.css'
 
 sync(store, router)
 
-Vue.use(VueNotie)
+Vue.use(VueSweetAlert)
 
 Vue.use(i18n, {
   lng: INITIAL_STATE.lng,
