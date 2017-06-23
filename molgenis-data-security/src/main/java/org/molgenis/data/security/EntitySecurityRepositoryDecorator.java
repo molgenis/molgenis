@@ -34,9 +34,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
 import static org.molgenis.util.EntityUtils.asStream;
 
 /**
- * TODO Support all identifier types accepted by MOLGENIS (many parts of the ACL module rely on Long identifiers)
  * TODO Deleting entity type should delete ACLs (RepositoryCollectionDecorator?)
- * TODO Guarantee that ACL mutations take place in same transaction as entity updates
  * TODO decide on behavior of deleteAll: delete all entities that this user can retrieve via findAll or try to delete all entities of this entity type
  * TODO decide on behavior of update with regard to ref entities
  * TODO createCurrentUserSids is expensive, is this a performance bottleneck?
