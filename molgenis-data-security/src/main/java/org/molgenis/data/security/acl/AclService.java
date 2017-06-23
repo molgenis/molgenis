@@ -1,4 +1,4 @@
-package org.molgenis.security.acl;
+package org.molgenis.data.security.acl;
 
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;

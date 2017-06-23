@@ -368,7 +368,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		{
 			String entityIdStr = entityId.toString();
 			String entityTypeIdStr = getEntityType().getIdValue().toString();
-			throw new UnknownEntityException(format("Unknown entity [%s] of type [%s]", entityId, entityTypeIdStr));
+			throw new UnknownEntityException(format("Unknown entity [%s] of type [%s]", entityIdStr, entityTypeIdStr));
 		}
 
 		validateCurrentUserCanAccessEntity(entity, BasePermission.WRITE);

@@ -1,6 +1,7 @@
 package org.molgenis.security.acl;
 
 import org.molgenis.DatabaseConfig;
+import org.molgenis.data.security.acl.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.support.NoOpCache;
 import org.springframework.context.annotation.Bean;
