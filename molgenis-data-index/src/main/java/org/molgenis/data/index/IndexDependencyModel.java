@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Maps.uniqueIndex;
+import static java.util.Collections.emptySet;
 import static java.util.stream.StreamSupport.stream;
 
 /**
@@ -36,6 +37,10 @@ public class IndexDependencyModel
 	{
 		ImmutableSet.Builder<String> result = ImmutableSet.builder();
 		EntityType entityType = entityTypes.get(entityTypeId);
+		if (entityType == null)
+		{
+			return emptySet();
+		}
 		Iterable<Attribute> attributes = entityType.getOwnAtomicAttributes();
 		stream(attributes.spliterator(), false).map(Attribute::getRefEntity).filter(Objects::nonNull)
 				.map(EntityType::getId).forEach(result::add);
