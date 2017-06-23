@@ -164,7 +164,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return Stream.of(indexAction);
 		}
 
-		// get referencing entity names
+		// get concrete referencing entity names
 		Set<String> referencingEntityTypes = genericDependencyResolver
 				.getAllDependants(indexAction.getEntityTypeId(), this::getDepth, this::getReferencingEntityTypes);
 

@@ -34,7 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.*;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -112,7 +115,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
 	 */
-	public static void waitForWorkToBeFinished(IndexJobScheduler indexService, Logger log)
+	static void waitForWorkToBeFinished(IndexJobScheduler indexService, Logger log)
 	{
 		try
 		{
@@ -132,7 +135,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	 *
 	 * @param entityType name of the entity whose index needs to be stable
 	 */
-	public static void waitForIndexToBeStable(EntityType entityType, IndexJobScheduler indexService, Logger log)
+	static void waitForIndexToBeStable(EntityType entityType, IndexJobScheduler indexService, Logger log)
 	{
 		try
 		{
@@ -177,16 +180,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	static List<GrantedAuthority> makeAuthorities(String entityTypeId, boolean write, boolean read, boolean count)
-	{
-		List<GrantedAuthority> authorities = newArrayList();
-		String entityId = entityTypeId;
-		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityId));
-		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityId));
-		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityId));
-		return authorities;
-	}
-
-	static List<GrantedAuthority> makeSystemAuthorities(String entityTypeId, boolean write, boolean read, boolean count)
 	{
 		List<GrantedAuthority> authorities = newArrayList();
 		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityTypeId));
@@ -270,7 +263,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(), "label");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
-		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(),
+		assertEqualsNoOrder(LanguageService.getLanguageCodes().toArray(),
 				new String[] { "en", "nl", "de", "es", "it", "pt", "fr", "xx" });
 
 		// NL
@@ -640,8 +633,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorRange")
 	private static Object[][] findQueryOperatorRange()
 	{
-		return new Object[][] { { 0, 9, emptyList() }, { 0, 10, asList(0) }, { 10, 10, asList(0) },
-				{ 10, 11, asList(0, 1) }, { 10, 12, asList(0, 1, 2) }, { 12, 20, asList(2) } };
+		return new Object[][] { { 0, 9, emptyList() }, { 0, 10, singletonList(0) }, { 10, 10, singletonList(0) },
+				{ 10, 11, asList(0, 1) }, { 10, 12, asList(0, 1, 2) }, { 12, 20, singletonList(2) } };
 	}
 
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorRange")
@@ -705,7 +698,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true, enabled = false)
 	public void cachePerformanceTest()
 	{
-		List<Entity> entities = createDynamicAndAdd(10000);
+		createDynamicAndAdd(10000);
 
 		Query<Entity> q1 = new QueryImpl<>().eq(EntityTestHarness.ATTR_STRING, "string1");
 		q1.pageSize(1000);
@@ -729,7 +722,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorAnd")
 	private static Object[][] findQueryOperatorAnd()
 	{
-		return new Object[][] { { "string1", 10, asList(0) }, { "unknownString", 10, emptyList() },
+		return new Object[][] { { "string1", 10, singletonList(0) }, { "unknownString", 10, emptyList() },
 				{ "string1", -1, emptyList() }, { "unknownString", -1, emptyList() } };
 	}
 
@@ -750,7 +743,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorOr")
 	private static Object[][] findQueryOperatorOr()
 	{
-		return new Object[][] { { "string1", 10, asList(0, 1, 2) }, { "unknownString", 10, asList(0) },
+		return new Object[][] { { "string1", 10, asList(0, 1, 2) }, { "unknownString", 10, singletonList(0) },
 				{ "string1", -1, asList(0, 1, 2) }, { "unknownString", -1, emptyList() } };
 	}
 
@@ -771,10 +764,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorNested")
 	private static Object[][] findQueryOperatorNested()
 	{
-		return new Object[][] { { true, "string1", 10, asList(0, 2) }, { true, "unknownString", 10, asList(0) },
+		return new Object[][] { { true, "string1", 10, asList(0, 2) }, { true, "unknownString", 10, singletonList(0) },
 				{ true, "string1", -1, asList(0, 2) }, { true, "unknownString", -1, emptyList() },
 				{ false, "string1", 10, singletonList(1) }, { false, "unknownString", 10, emptyList() },
-				{ false, "string1", -1, asList(1) }, { false, "unknownString", -1, emptyList() } };
+				{ false, "string1", -1, singletonList(1) }, { false, "unknownString", -1, emptyList() } };
 	}
 
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNested")
@@ -795,7 +788,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorSearch")
 	private static Object[][] findQueryOperatorSearch()
 	{
-		return new Object[][] { { "body", asList(1) }, { "head", asList(1) }, { "unknownString", emptyList() } };
+		return new Object[][] { { "body", singletonList(1) }, { "head", singletonList(1) },
+				{ "unknownString", emptyList() } };
 	}
 
 	@Test(singleThreaded = true, dataProvider = "findQueryOperatorSearch")
@@ -1391,7 +1385,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
 			List actual = dataService.findAll(entityTypeDynamic.getId(), q0).map(Entity::getIdValue).collect(toList());
-			assertEquals(actual, Arrays.asList());
+			assertEquals(actual, emptyList());
 
 			// Remove added attribute
 			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
@@ -1554,10 +1548,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			q.eq(IndexActionMetaData.ENTITY_TYPE_ID, "sys_test_TypeTestDynamic");
 			Stream<org.molgenis.data.index.meta.IndexAction> all = dataService
 					.findAll(IndexActionMetaData.INDEX_ACTION, q, IndexAction.class);
-			all.forEach(e ->
-			{
-				LOG.info(e.getEntityTypeId() + "." + e.getEntityId());
-			});
+			all.forEach(e -> LOG.info(e.getEntityTypeId() + "." + e.getEntityId()));
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 		});
 	}
