@@ -70,4 +70,32 @@ public class ExcelUtilsTest
 		File file = ResourceUtils.getFile(getClass(), "/test.xls");
 		assertEquals(ExcelUtils.getNumberOfSheets(file), 3);
 	}
+
+	@Test
+	public void getNumberOfSheetsTestCSV()
+	{
+		File file = ResourceUtils.getFile(getClass(), "/test.csv");
+		assertEquals(ExcelUtils.getNumberOfSheets(file), -1);
+	}
+
+	@Test
+	public void testIsExcelFileTrueXLSX()
+	{
+		File file = ResourceUtils.getFile(getClass(), "/test.xlsx");
+		assertEquals(ExcelUtils.isExcelFile(file), true);
+	}
+
+	@Test
+	public void testIsExcelFileTrueXLS()
+	{
+		File file = ResourceUtils.getFile(getClass(), "/test.xls");
+		assertEquals(ExcelUtils.isExcelFile(file), true);
+	}
+
+	@Test
+	public void testIsExcelFileFalse()
+	{
+		File file = ResourceUtils.getFile(getClass(), "/test.csv");
+		assertEquals(ExcelUtils.isExcelFile(file), false);
+	}
 }

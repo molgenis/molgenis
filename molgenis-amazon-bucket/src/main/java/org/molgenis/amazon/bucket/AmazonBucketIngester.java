@@ -6,6 +6,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.csv.CsvFileExtensions;
 import org.molgenis.data.excel.ExcelUtils;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -54,14 +55,21 @@ public class AmazonBucketIngester
 
 			if (targetEntityTypeName != null)
 			{
-				if (ExcelUtils.getNumberOfSheets(file) == 1)
+				//Not excel? assume CSV
+				if (!ExcelUtils.isExcelFile(file))
+				{
+					File newFile = new File(targetEntityTypeName + CsvFileExtensions.getCSV());
+					file.renameTo(newFile);
+					file = newFile;
+				}
+				else if (ExcelUtils.getNumberOfSheets(file) == 1)
 				{
 					ExcelUtils.renameSheet(targetEntityTypeName, file, 0);
 				}
 				else
 				{
 					throw new MolgenisDataException(
-							"Amazon Bucket imports to a specified entityType are only possible with one sheet");
+							"Amazon Bucket imports to a specified entityType are only possible with CSV files or Excel files with one sheet");
 				}
 			}
 			progress.progress(2, "Importing...");
