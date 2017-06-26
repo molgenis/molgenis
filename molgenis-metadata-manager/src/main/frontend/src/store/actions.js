@@ -88,7 +88,9 @@ export default {
   [CREATE_ENTITY_TYPE] ({commit}) {
     get({apiUrl: '/metadata-manager-service'}, '/create/entityType')
       .then(response => {
-        commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
+        const newEditorEntityType = toEntityType(response.entityType)
+        newEditorEntityType.isNew = true
+        commit(SET_EDITOR_ENTITY_TYPE, newEditorEntityType)
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
@@ -142,7 +144,7 @@ export default {
     get({apiUrl: '/metadata-manager-service'}, '/create/attribute')
       .then(response => {
         const attribute = toAttribute(response.attribute)
-
+        attribute.isNew = true
         // Call an update on the attribute key with the existing attribute list + the new empty attribute
         commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
         commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
@@ -171,6 +173,15 @@ export default {
           type: 'success',
           message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
         })
+
+        // After saving, newly created or edited entityTypes are not new and the attributes are not new
+        const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
+        editorEntityType.isNew = false
+        editorEntityType.attributes.forEach(attribute => {
+          attribute.isNew = false
+        })
+
+        commit(SET_EDITOR_ENTITY_TYPE, editorEntityType)
       }, error => {
         commit(CREATE_ALERT, {
           type: 'error',

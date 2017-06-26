@@ -43,7 +43,7 @@ export default {
    */
   [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE] (state, update) {
     // Return the index of the selected attribute in the array of the editorEntityType attributes
-    const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeID)
+    const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
     state.editorEntityType.attributes[index][key] = update.value

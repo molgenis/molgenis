@@ -47,10 +47,14 @@
         }
       },
       selectedEntityType (selectedEntityType) {
-        if (selectedEntityType) this.$router.push('/' + selectedEntityType.id)
+        if (selectedEntityType) {
+          if (!selectedEntityType.isNew) this.$router.push('/' + selectedEntityType.id)
+        }
       },
       selectedAttribute (selectedAttribute) {
-        if (selectedAttribute) this.$router.push('/' + this.$store.state.selectedEntityTypeId + '/' + selectedAttribute.id)
+        if (selectedAttribute && this.$store.state.selectedEntityTypeId) {
+          if (!selectedAttribute.isNew) this.$router.push('/' + this.$store.state.selectedEntityTypeId + '/' + selectedAttribute.id)
+        }
       },
       '$route' (to, from) {
         const fromEntityTypeId = from.params.entityTypeId
