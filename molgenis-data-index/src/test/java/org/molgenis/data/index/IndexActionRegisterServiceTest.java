@@ -12,16 +12,17 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.test.AbstractMockitoTest;
-import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +48,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	@Mock
 	private DataService dataService;
 	@Mock
-	private GenericDependencyResolver genericDependencyResolver;
+	private MetaDataService metadataService;
 	@Captor
 	private ArgumentCaptor<Stream<IndexAction>> indexActionStreamCaptor;
 
@@ -56,7 +57,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	{
 		TransactionSynchronizationManager.bindResource(TransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
 		indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl(dataService, indexActionFactory,
-				indexActionGroupFactory, genericDependencyResolver);
+				indexActionGroupFactory);
 	}
 
 	@AfterMethod
@@ -66,7 +67,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testRegisterCreateSingleEntity()
+	public void testRegisterCreateSingleEntityNoReferences()
 	{
 		when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
 		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
@@ -76,7 +77,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexAction.setEntityTypeId("entityTypeId")).thenReturn(indexAction);
 		when(indexAction.getEntityTypeId()).thenReturn("entityTypeId");
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
-		when(indexAction.getEntityTypeId()).thenReturn("123");
+		when(indexAction.getEntityId()).thenReturn("123");
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 		EntityType entityType = mock(EntityType.class);
@@ -92,6 +93,10 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		indexActionRegisterServiceImpl.register(entityType, "123");
 
 		verifyZeroInteractions(dataService);
+
+		when(dataService.getMeta()).thenReturn(metadataService);
+		when(entityType.getOwnAtomicAttributes()).thenReturn(Collections.emptyList());
+		when(metadataService.getEntityTypes()).thenReturn(Stream.of(entityType));
 
 		indexActionRegisterServiceImpl.storeIndexActions("1");
 
