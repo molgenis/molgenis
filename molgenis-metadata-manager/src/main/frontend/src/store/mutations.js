@@ -34,6 +34,15 @@ export default {
     state.initialEditorEntityType = JSON.parse(JSON.stringify(editorEntityType))
   },
   [UPDATE_EDITOR_ENTITY_TYPE] (state, update) {
+    // Add some extra changes to the attribute used as an idAttribute
+    if (update.key === 'idAttribute') {
+      update.value.readonly = true
+      update.value.unique = true
+      update.value.nullable = false
+
+      const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === update.value.id)
+      state.editorEntityType.attributes[index] = update.value
+    }
     state.editorEntityType[update.key] = update.value
   },
   /**
