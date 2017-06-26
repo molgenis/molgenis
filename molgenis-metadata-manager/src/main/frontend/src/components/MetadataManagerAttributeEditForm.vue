@@ -3,7 +3,7 @@
     <!-- Attribute tree -->
     <div class="col-md-3 attribute-tree">
       <strong>Attributes</strong>
-      <button @click="addAttribute" class="btn btn-primary btn-sm float-right">Add attribute</button>
+      <button @click="addAttribute" class="btn btn-primary btn-sm float-right"><i class="fa fa-plus"></i></button>
 
       <hr>
 

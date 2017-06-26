@@ -99,16 +99,24 @@
   </div>
 </template>
 
-<style>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style lang="scss">
+  @import "~variables";
+  @import "~mixins";
+
   .checkbox-column {
     padding-top: 11px
   }
 
   /*screen-md border on inner column when columns aligned next to each other*/
-  @media (min-width: 768px) {
+  @include media-breakpoint-up(md) {
     .col-md-4.inner-column {
       border-right: solid black thin;
     }
+  }
+
+  .multiselect__tag {
+    background-color: darken($red, 20%);
   }
 </style>
 
@@ -212,5 +220,3 @@
     }
   }
 </script>
-
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
