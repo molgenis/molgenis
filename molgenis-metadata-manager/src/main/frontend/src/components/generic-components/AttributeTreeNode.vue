@@ -3,6 +3,10 @@
   <li>
     <span v-bind:class="{ 'selected-attribute-node': attribute.selected }" @click="onAttributeSelect(attribute)">
       <i v-bind:class="['fa', isFolder ? 'fa-folder-o' : 'fa-columns']"></i> {{attribute.label}}
+      <div v-if="attribute.selected" class="btn-group float-right" role="group" aria-label="Basic example">
+        <button @click="" class="btn btn-secondary btn-sm"><i class="fa fa-chevron-up"></i></button>
+        <button class="btn btn-secondary btn-sm"><i class="fa fa-chevron-down"></i></button>
+      </div>
     </span>
     <ul v-if="isFolder">
       <attribute-tree-node v-for="child in attribute.children" :attribute="child" :onAttributeSelect="onAttributeSelect"></attribute-tree-node>
@@ -10,7 +14,10 @@
   </li>
 </template>
 
-<style scoped>
+<style lang="scss">
+  @import "~variables";
+  @import "~mixins";
+
   li {
     list-style-type: none;
   }
@@ -20,7 +27,7 @@
   }
 
   .selected-attribute-node {
-    background-color: #c4e3f3;
+    background-color: lighten($teal, 20%);
   }
 </style>
 
