@@ -3,11 +3,15 @@ package org.molgenis.data.index;
 import com.google.common.collect.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.EntityUtils;
@@ -28,8 +32,10 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetaData.ID;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 /**
@@ -128,7 +134,27 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return Collections.emptyList();
 		}
 		return determineNecessaryActionsInternal(indexActions, indexActions.iterator().next().getIndexActionGroup(),
-				new IndexDependencyModel(dataService.getMeta().getEntityTypes().collect(toList())));
+				new IndexDependencyModel(getEntityTypes()));
+	}
+
+	private List<EntityType> getEntityTypes()
+	{
+		Fetch fetch = new Fetch();
+		fetch.field(ID);
+
+		Fetch extendsFetch = new Fetch();
+		extendsFetch.field(ID);
+		fetch.field(EXTENDS, extendsFetch);
+
+		Fetch attributesFetch = new Fetch();
+		Fetch refEntityFetch = new Fetch();
+		refEntityFetch.field(ID);
+		attributesFetch.field(AttributeMetadata.REF_ENTITY_TYPE, refEntityFetch);
+		fetch.field(ATTRIBUTES, attributesFetch);
+
+		Query<EntityType> query = new QueryImpl<>();
+		query.setFetch(fetch);
+		return dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).collect(toList());
 	}
 
 	/**
