@@ -74,7 +74,8 @@ public class AttributeMapperTest
 		EditorAttribute editorAttribute = attributeMapper.createEditorAttribute();
 		assertEquals(editorAttribute, EditorAttribute
 				.create(id, null, null, null, null, null, null, null, false, false, false, null, ImmutableMap.of(),
-						null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags, null, null, null, sequenceNumber));
+						null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags, null, null, null,
+						sequenceNumber));
 	}
 
 	@Test
@@ -83,10 +84,12 @@ public class AttributeMapperTest
 		String id = "id";
 		String name = "name";
 		String type = "STRING";
-		EditorAttributeIdentifier editorParentAttribute = mock(EditorAttributeIdentifier.class);
+		String parentId = "parentId";
+		EditorAttributeIdentifier editorParentAttributeIdentifier = EditorAttributeIdentifier.create(parentId, "label");
 		String refEntityTypeId = "refId";
 		EditorEntityTypeIdentifier editorRefEntityType = EditorEntityTypeIdentifier.create(refEntityTypeId, "label");
-		EditorAttributeIdentifier editorMappedByAttribute = mock(EditorAttributeIdentifier.class);
+		EditorAttributeIdentifier editorMappedByAttribute = EditorAttributeIdentifier
+				.create("mappedBy", "mappedByLabel");
 		EditorSort editorSort = mock(EditorSort.class);
 		String expression = "expression";
 		boolean nullable = false;
@@ -113,7 +116,8 @@ public class AttributeMapperTest
 		Integer sequenceNumber = 1;
 
 		Attribute parentAttribute = mock(Attribute.class);
-		when(attributeReferenceMapper.toAttributeReference(editorParentAttribute)).thenReturn(parentAttribute);
+		when(attributeReferenceMapper.toAttributeReference(editorParentAttributeIdentifier))
+				.thenReturn(parentAttribute);
 		EntityType refEntityType = mock(EntityType.class);
 		when(entityTypeReferenceMapper.toEntityTypeReference(refEntityTypeId)).thenReturn(refEntityType);
 		Attribute mappedByAttribute = mock(Attribute.class);
@@ -126,7 +130,9 @@ public class AttributeMapperTest
 		String entityId = "entityId";
 		EntityType entityType = mock(EntityType.class);
 		when(entityTypeReferenceMapper.toEntityTypeReference(entityId)).thenReturn(entityType);
-		when(attributeFactory.create()).thenReturn(mock(Attribute.class));
+		Attribute attr = when(mock(Attribute.class).getIdentifier()).thenReturn(id).getMock();
+		Attribute parentAttr = when(mock(Attribute.class).getIdentifier()).thenReturn(parentId).getMock();
+		when(attributeFactory.create()).thenReturn(attr, parentAttr);
 
 		EditorEntityType editorEntityType = when(mock(EditorEntityType.class).getId()).thenReturn(entityId).getMock();
 		EditorAttributeIdentifier editorIdAttributeIdentifier = EditorAttributeIdentifier.create(id, label);
@@ -135,18 +141,22 @@ public class AttributeMapperTest
 		when(editorEntityType.getLookupAttributes()).thenReturn(singletonList(editorIdAttributeIdentifier));
 
 		EditorAttribute editorAttribute = EditorAttribute
-				.create(id, name, type, editorParentAttribute, editorRefEntityType, editorMappedByAttribute, editorSort,
+				.create(id, name, type, editorParentAttributeIdentifier, editorRefEntityType, editorMappedByAttribute,
+						editorSort, expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription,
+						aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTagIdentifiers,
+						visibleExpression, validationExpression, defaultValue, sequenceNumber);
+		EditorAttribute editorParentAttribute = EditorAttribute
+				.create(parentId, name, type, null, editorRefEntityType, editorMappedByAttribute, editorSort,
 						expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription,
 						aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTagIdentifiers,
 						visibleExpression, validationExpression, defaultValue, sequenceNumber);
 		ImmutableList<Attribute> attributes = copyOf(
-				attributeMapper.toAttributes(of(editorAttribute), editorEntityType));
-		assertEquals(attributes.size(), 1);
+				attributeMapper.toAttributes(of(editorAttribute, editorParentAttribute), editorEntityType));
+		assertEquals(attributes.size(), 2);
 		Attribute attribute = attributes.get(0);
 		verify(attribute).setIdentifier(id);
 		verify(attribute).setName(name);
 		verify(attribute).setEntity(entityType);
-		verify(attribute).setParent(parentAttribute);
 		verify(attribute).setSequenceNumber(0);
 		verify(attribute).setDataType(STRING);
 		verify(attribute).setIdAttribute(true);
@@ -187,6 +197,10 @@ public class AttributeMapperTest
 		verify(attribute).setVisibleExpression(visibleExpression);
 		verify(attribute).setValidationExpression(validationExpression);
 		verify(attribute).setDefaultValue(defaultValue);
+		verify(attribute).getIdentifier();
+		verify(attribute).setParent(parentAttr);
+		verify(attributes.get(1)).setIdentifier(parentId);
+
 		verifyNoMoreInteractions(attribute);
 	}
 

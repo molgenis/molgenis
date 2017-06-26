@@ -10,11 +10,14 @@ import org.molgenis.metadata.manager.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
@@ -48,8 +51,31 @@ public class AttributeMapper
 
 	Iterable<Attribute> toAttributes(List<EditorAttribute> editorAttributes, EditorEntityType editorEntityType)
 	{
-		return IntStream.range(0, editorAttributes.size())
-				.mapToObj(i -> toAttribute(i, editorAttributes.get(i), editorEntityType)).collect(toList());
+		Map<String, Attribute> attributeMap = IntStream.range(0, editorAttributes.size())
+				.mapToObj(i -> toAttribute(i, editorAttributes.get(i), editorEntityType))
+				.collect(toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
+				{
+					throw new IllegalStateException(String.format("Duplicate key %s", u));
+				}, LinkedHashMap::new));
+		return injectAttributeParents(attributeMap, editorAttributes);
+	}
+
+	private Iterable<Attribute> injectAttributeParents(Map<String, Attribute> attributeMap,
+			List<EditorAttribute> editorAttributes)
+	{
+		editorAttributes.forEach(editorAttribute ->
+		{
+			EditorAttributeIdentifier editorAttributeParent = editorAttribute.getParent();
+			if (editorAttributeParent != null)
+			{
+				String attributeId = editorAttribute.getId();
+				String attributeParentId = editorAttributeParent.getId();
+				Attribute attribute = attributeMap.get(attributeId);
+				Attribute parentAttribute = attributeMap.get(attributeParentId);
+				attribute.setParent(parentAttribute);
+			}
+		});
+		return attributeMap.values();
 	}
 
 	ImmutableList<EditorAttribute> toEditorAttributes(Iterable<Attribute> attributes)
@@ -90,7 +116,8 @@ public class AttributeMapper
 		return EditorAttribute
 				.create(id, name, type, parent, refEntityType, mappedByEntityType, orderBy, expression, nullable, auto,
 						visible, label, i18nLabel, description, i18nDescription, aggregatable, enumOptions, rangeMin,
-						rangeMax, readonly, unique, tags, visibleExpression, validationExpression, defaultValue, sequenceNumber);
+						rangeMax, readonly, unique, tags, visibleExpression, validationExpression, defaultValue,
+						sequenceNumber);
 	}
 
 	private ImmutableMap<String, String> toI18nLabel(Attribute attribute)
@@ -170,7 +197,6 @@ public class AttributeMapper
 		attribute.setVisibleExpression(editorAttribute.getVisibleExpression());
 		attribute.setValidationExpression(editorAttribute.getValidationExpression());
 		attribute.setDefaultValue(editorAttribute.getDefaultValue());
-		attribute.setParent(attributeReferenceMapper.toAttributeReference(editorAttribute.getParent()));
 		return attribute;
 	}
 
