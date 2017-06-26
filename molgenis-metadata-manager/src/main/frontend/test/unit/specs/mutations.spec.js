@@ -98,7 +98,8 @@ describe('mutations', () => {
   describe('Testing mutation SET_EDITOR_ENTITY_TYPE', () => {
     it('Sets selected entity type to edit', () => {
       const state = {
-        editorEntityType: {}
+        editorEntityType: {},
+        initialEditorEntityType: {}
       }
       const editorEntityType = {
         id: 'root_gender',
@@ -149,7 +150,8 @@ describe('mutations', () => {
         tags: []
       }
       mutations.__SET_EDITOR_ENTITY_TYPE__(state, editorEntityType)
-      expect(state.editorEntityType).to.equal(editorEntityType)
+      expect(state.editorEntityType).to.deep.equal(editorEntityType)
+      expect(state.initialEditorEntityType).to.deep.equal(JSON.parse(JSON.stringify(editorEntityType)))
     })
   })
 
@@ -241,19 +243,19 @@ describe('mutations', () => {
   describe('Testing mutation SET_SELECTED_ATTRIBUTE_ID', () => {
     it('Updates the selected attribute ID', () => {
       const state = {
-        selectedAttributeID: null
+        selectedAttributeId: null
       }
 
       const id = 'newAttributeId'
       mutations.__SET_SELECTED_ATTRIBUTE_ID__(state, id)
-      expect(state.selectedAttributeID).to.equal('newAttributeId')
+      expect(state.selectedAttributeId).to.equal('newAttributeId')
     })
   })
 
   describe('Testing mutation DELETE_SELECTED_ATTRIBUTE', () => {
     it('should remove an attribute from the list of editorEntityType attributes based on the selected attribute id', () => {
       const state = {
-        selectedAttributeID: '1',
+        selectedAttributeId: '1',
         editorEntityType: {
           attributes: [
             {id: '1', name: 'attribute1'},
@@ -268,7 +270,7 @@ describe('mutations', () => {
         {id: '3', name: 'attribute3'}
       ]
 
-      mutations.__DELETE_SELECTED_ATTRIBUTE__(state)
+      mutations.__DELETE_SELECTED_ATTRIBUTE__(state, '1')
       expect(state.editorEntityType.attributes).to.deep.equal(expected)
     })
   })

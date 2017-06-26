@@ -27,9 +27,8 @@
   import MetadataManagerEntityEditForm from './MetadataManagerEntityEditForm'
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
 
-  import { CREATE_ALERT, SET_SELECTED_ENTITY_TYPE, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
+  import { SET_SELECTED_ENTITY_TYPE_ID, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
   import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
-  import { getConfirmBeforeLeavingProperties } from '../store/getters'
   import { mapState, mapGetters } from 'vuex'
 
   export default {
@@ -37,54 +36,51 @@
     computed: {
       ...mapState(['alert', 'editorEntityType']),
       ...mapGetters({
-        entityEdited: 'getEditorEntityTypeHasBeenEdited'
+        selectedEntityType: 'getSelectedEntityType',
+        selectedAttribute: 'getSelectedAttribute'
       })
+    },
+    watch: {
+      alert (alert) {
+        if (alert.message !== null) {
+          this.$toaster.add(alert.message, { theme: 'v-toast-' + alert.type })
+        }
+      },
+      selectedEntityType (selectedEntityType) {
+        if (selectedEntityType) this.$router.push('/' + selectedEntityType.id)
+      },
+      selectedAttribute (selectedAttribute) {
+        if (selectedAttribute) this.$router.push('/' + this.$store.state.selectedEntityTypeId + '/' + selectedAttribute.id)
+      },
+      '$route' (to, from) {
+        const fromEntityTypeId = from.params.entityTypeId
+        const toEntityTypeId = to.params.entityTypeId
+
+        // The route change changed the EntityType we are looking at
+        if (fromEntityTypeId !== toEntityTypeId) {
+          this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, null)
+          this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, toEntityTypeId)
+        }
+      }
+    },
+    created: function () {
+      const entityTypeId = this.$route.params.entityTypeId
+      const attributeId = this.$route.params.attributeId
+
+      if (entityTypeId) {
+        this.$store.commit(SET_SELECTED_ENTITY_TYPE_ID, entityTypeId)
+        this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeId)
+      }
+      if (attributeId) this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, attributeId)
+
+      this.$store.dispatch(GET_ENTITY_TYPES)
+      this.$store.dispatch(GET_PACKAGES)
+      this.$store.dispatch(GET_ATTRIBUTE_TYPES)
     },
     components: {
       MetadataManagerHeader,
       MetadataManagerEntityEditForm,
       MetadataManagerAttributeEditForm
-    },
-    watch: {
-      '$route' (to, from) {
-        // When switching attributes in the same entity do not trigger reloads
-        const entityTypeID = to.params.entityTypeID
-        if (entityTypeID && from.params.entityTypeID !== entityTypeID) {
-          // Always clear alert on an entityType switch
-          this.$store.commit(CREATE_ALERT, { type: null, message: null })
-
-          const selectedEntityType = this.$store.state.entityTypes.find(entityType => entityType.id === entityTypeID)
-
-          this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType)
-          this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, null)
-
-          this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, entityTypeID)
-        }
-      },
-      alert (alert) {
-        if (alert.message !== null) {
-          this.$toaster.add(alert.message, { theme: 'v-toast-' + alert.type })
-        }
-      }
-    },
-    beforeRouteUpdate (to, from, next) {
-      // Listens to route changes and prompts alert when editorEntityType has been edited
-      if (this.entityEdited) {
-        this.$swal(getConfirmBeforeLeavingProperties()).then(() => {
-          next()
-        }).catch(this.$swal.noop)
-      }
-      next()
-    },
-    created: function () {
-      // Retrieve entities for dropdown
-      this.$store.dispatch(GET_ENTITY_TYPES)
-
-      // Retrieve packages for package select
-      this.$store.dispatch(GET_PACKAGES)
-
-      // Retrieve attribute types for Type selection
-      this.$store.dispatch(GET_ATTRIBUTE_TYPES)
     }
   }
 </script>

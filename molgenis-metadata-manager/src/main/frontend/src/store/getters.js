@@ -28,6 +28,14 @@ export const getConfirmBeforeLeavingProperties = () => {
 
 export default {
   /**
+   * Returns the EntityType object based on the ID of the selected EntityType
+   */
+  getSelectedEntityType: state => state.entityTypes.find(entityType => entityType.id === state.selectedEntityTypeId),
+  /**
+   * Returns the Attribute object based on the ID of the selected Attribute
+   */
+  getSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.find(attribute => attribute.id === state.selectedAttributeId),
+  /**
    * Return the editorEntityType attributes from the state
    */
   getEditorEntityTypeAttributes: state => state.editorEntityType && state.editorEntityType.attributes,
@@ -51,11 +59,6 @@ export default {
     }
     return rootAttributes.map(addChildren)
   },
-  /**
-   * Returns attribute based on selected attribute in tree
-   * Returns null if no attribute is selected
-   */
-  getSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.find(attribute => state.selectedAttributeID && state.selectedAttributeID === attribute.id),
   /**
    * Return a list of compound attributes present in the currently selected editorEntityType
    */

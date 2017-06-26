@@ -1,6 +1,6 @@
 export const SET_PACKAGES = '__SET_PACKAGES__'
 export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
-export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
+export const SET_SELECTED_ENTITY_TYPE_ID = '__SET_SELECTED_ENTITY_TYPE_ID__'
 export const SET_ATTRIBUTE_TYPES = '__SET_ATTRIBUTE_TYPES__'
 export const SET_EDITOR_ENTITY_TYPE = '__SET_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
@@ -17,8 +17,8 @@ export default {
   [SET_ENTITY_TYPES] (state, entityTypes) {
     state.entityTypes = entityTypes
   },
-  [SET_SELECTED_ENTITY_TYPE] (state, selectedEntityType) {
-    state.selectedEntityType = selectedEntityType
+  [SET_SELECTED_ENTITY_TYPE_ID] (state, entityTypeId) {
+    state.selectedEntityTypeId = entityTypeId
   },
   [SET_ATTRIBUTE_TYPES] (state, attributeTypes) {
     state.attributeTypes = attributeTypes
@@ -48,14 +48,14 @@ export default {
 
     state.editorEntityType.attributes[index][key] = update.value
   },
-  [SET_SELECTED_ATTRIBUTE_ID] (state, selectedAttributeID) {
-    state.selectedAttributeID = selectedAttributeID
+  [SET_SELECTED_ATTRIBUTE_ID] (state, selectedAttributeId) {
+    state.selectedAttributeId = selectedAttributeId
   },
   /**
    * Deletes the selected attribute using the ID of the selected attribute found in the state
    */
-  [DELETE_SELECTED_ATTRIBUTE] (state) {
-    state.editorEntityType.attributes = state.editorEntityType.attributes.filter(attribute => attribute.id !== state.selectedAttributeID)
+  [DELETE_SELECTED_ATTRIBUTE] (state, selectedAttributeId) {
+    state.editorEntityType.attributes = state.editorEntityType.attributes.filter(attribute => attribute.id !== selectedAttributeId)
   },
   /**
    * Alert mutations

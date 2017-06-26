@@ -15,11 +15,11 @@ export default new Router({
       component: MetadataManagerContainer
     },
     {
-      path: '/:entityTypeID',
+      path: '/:entityTypeId',
       component: MetadataManagerContainer
     },
     {
-      path: '/:entityTypeID/:attributeID',
+      path: '/:entityTypeId/:attributeId',
       component: MetadataManagerContainer
     }
   ]
