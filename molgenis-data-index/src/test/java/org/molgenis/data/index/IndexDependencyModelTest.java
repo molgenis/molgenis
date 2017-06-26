@@ -51,11 +51,11 @@ public class IndexDependencyModelTest
 
 		List<EntityType> entityTypes = ImmutableList.of(entity0, entity1, entity2, entity3, entity4);
 
-		addReferences(entity0, ImmutableList.of(entity1, entity4));
-		addReferences(entity1, ImmutableList.of(entity2));
-		addReferences(entity2, ImmutableList.of(entity3));
-		addReferences(entity3, ImmutableList.of(entity1, entity4));
-		addReferences(entity4, ImmutableList.of());
+		addReferences(entity1, ImmutableList.of(entity0, entity3));
+		addReferences(entity2, ImmutableList.of(entity1));
+		addReferences(entity3, ImmutableList.of(entity2));
+		addReferences(entity4, ImmutableList.of(entity0, entity3));
+		addReferences(entity0, ImmutableList.of());
 
 		IndexDependencyModel indexDependencyModel = new IndexDependencyModel(entityTypes);
 		Set<String> dependencies = indexDependencyModel.getEntityTypesDependentOn("0").collect(toSet());
