@@ -7,12 +7,14 @@ import org.mockito.Mockito;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
@@ -34,6 +36,12 @@ public class IndexDependencyModelTest
 	public void beforeClass()
 	{
 		initMocks(this);
+	}
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		reset(entity0, entity1, entity2, entity3, entity4);
 		when(entity0.getId()).thenReturn("0");
 		when(entity1.getId()).thenReturn("1");
 		when(entity2.getId()).thenReturn("2");
