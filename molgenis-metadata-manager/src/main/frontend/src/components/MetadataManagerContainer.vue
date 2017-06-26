@@ -88,17 +88,3 @@
     }
   }
 </script>
-
-<style lang="scss">
-  /*Before notie is imported:
-  $notie-color-success: #57BF57;
-  $notie-color-warning: #D6A14D;
-  $notie-color-error: #E1715B;
-  $notie-color-info: #4D82D6;
-  $notie-color-neutral: #A0A0A0;
-
-  See https://github.com/jaredreich/notie for more options
-
-  */
-  @import 'node_modules/notie/src/notie.scss';
-</style>
