@@ -18,6 +18,8 @@
   </div>
 </template>
 
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
 <script>
   import { mapState, mapGetters } from 'vuex'
   import { CREATE_ENTITY_TYPE } from '../store/actions'
@@ -65,5 +67,3 @@
     }
   }
 </script>
-
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
