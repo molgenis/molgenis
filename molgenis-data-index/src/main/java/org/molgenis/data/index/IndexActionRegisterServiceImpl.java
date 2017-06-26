@@ -1,10 +1,10 @@
 package org.molgenis.data.index;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
@@ -26,11 +26,13 @@ import java.util.*;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static com.google.common.collect.Sets.union;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.ID;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
@@ -47,6 +49,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexActionRegisterServiceImpl.class);
 	private static final int LOG_EVERY = 1000;
+	private static final int ENTITY_FETCH_PAGE_SIZE = 1000;
 
 	private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
 
@@ -56,6 +59,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	private final DataService dataService;
 	private final IndexActionFactory indexActionFactory;
 	private final IndexActionGroupFactory indexActionGroupFactory;
+
 
 	@Autowired
 	IndexActionRegisterServiceImpl(DataService dataService, IndexActionFactory indexActionFactory,
@@ -133,14 +137,26 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		{
 			return Collections.emptyList();
 		}
-		return determineNecessaryActionsInternal(indexActions, indexActions.iterator().next().getIndexActionGroup(),
-				new IndexDependencyModel(getEntityTypes()));
+		Stopwatch sw = Stopwatch.createStarted();
+		List<IndexAction> result = determineNecessaryActionsInternal(indexActions,
+				indexActions.iterator().next().getIndexActionGroup(), new IndexDependencyModel(getEntityTypes()));
+		LOG.debug("Determined necessary actions in {}", sw);
+		return result;
 	}
 
+	/**
+	 * Retrieves all {@link EntityType}s.
+	 * Queryies in pages of size ENTITY_FETCH_PAGE_SIZE so that results can be cached.
+	 * Uses a {@link Fetch} that specifies all fields needed to determine the necessary index actions.
+	 *
+	 * @return List containing all {@link EntityType}s.
+	 */
 	private List<EntityType> getEntityTypes()
 	{
 		Fetch fetch = new Fetch();
 		fetch.field(ID);
+		fetch.field(IS_ABSTRACT);
+		fetch.field(INDEXING_DEPTH);
 
 		Fetch extendsFetch = new Fetch();
 		extendsFetch.field(ID);
@@ -152,9 +168,17 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		attributesFetch.field(AttributeMetadata.REF_ENTITY_TYPE, refEntityFetch);
 		fetch.field(ATTRIBUTES, attributesFetch);
 
-		Query<EntityType> query = new QueryImpl<>();
+		QueryImpl<EntityType> query = new QueryImpl<>();
+		query.setPageSize(ENTITY_FETCH_PAGE_SIZE);
 		query.setFetch(fetch);
-		return dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).collect(toList());
+
+		List<EntityType> result = newArrayList();
+		for (int pageNum = 0; result.size() == pageNum * ENTITY_FETCH_PAGE_SIZE; pageNum++)
+		{
+			query.offset(pageNum * ENTITY_FETCH_PAGE_SIZE);
+			dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).forEach(result::add);
+		}
+		return result;
 	}
 
 	/**

@@ -32,6 +32,7 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.*;
 
 public class IndexActionRegisterServiceTest extends AbstractMockitoTest
@@ -96,7 +97,9 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 
 		when(dataService.getMeta()).thenReturn(metadataService);
 		when(entityType.getOwnAtomicAttributes()).thenReturn(Collections.emptyList());
-		when(metadataService.getEntityTypes()).thenReturn(Stream.of(entityType));
+
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), any(Query.class), eq(EntityType.class)))
+				.thenReturn(Stream.of(entityType));
 
 		indexActionRegisterServiceImpl.storeIndexActions("1");
 
