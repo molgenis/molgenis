@@ -7,7 +7,7 @@
 
       <hr>
 
-      <attribute-tree :selectedAttribute="selectedAttribute" :attributes="attributeTree"
+      <attribute-tree :selectedAttribute="selectedAttribute" :attributeTree="attributeTree"
                       :onAttributeSelect="onAttributeSelect"></attribute-tree>
 
 
@@ -22,8 +22,8 @@
       <div class="row">
         <div class="col attribute-form-header">
           <strong>Attribute:</strong> {{selectedAttribute.label}}
-          <button @click="deleteAttribute" class="btn btn-danger float-right btn-sm"><i class="fa fa-trash-o"></i>
-            Delete attribute
+          <button @click="deleteAttribute(selectedAttribute)" class="btn btn-danger float-right btn-sm"><i class="fa fa-trash-o"></i>
+            {{ 'delete-attribute-button' | i18n }}
           </button>
           <hr>
         </div>
@@ -205,19 +205,22 @@
     UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
     DELETE_SELECTED_ATTRIBUTE
   } from '../store/mutations'
+
   import { CREATE_ATTRIBUTE } from '../store/actions'
+  import { getConfirmBeforeDeletingProperties } from '../store/getters'
 
   import Multiselect from 'vue-multiselect'
 
   export default {
     name: 'metadata-manager-attribute-edit-form',
     methods: {
-      deleteAttribute () {
-        this.$store.commit(DELETE_SELECTED_ATTRIBUTE)
+      deleteAttribute (selectedAttribute) {
+        this.$swal(getConfirmBeforeDeletingProperties(selectedAttribute.label)).then(() => {
+          this.$store.commit(DELETE_SELECTED_ATTRIBUTE, selectedAttribute.id)
+        }).catch(this.$swal.noop)
       },
-      onAttributeSelect (value) {
-        this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, value.id)
-        this.$router.push({ path: '/' + this.$route.params.entityTypeID + '/' + value.id })
+      onAttributeSelect (selectedAttribute) {
+        this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, selectedAttribute.id)
       },
       addAttribute () {
         this.$store.dispatch(CREATE_ATTRIBUTE)
