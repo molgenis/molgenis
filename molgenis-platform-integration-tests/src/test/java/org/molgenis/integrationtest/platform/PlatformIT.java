@@ -451,12 +451,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 					.collect(toList());
 			entities.get(0).set(ATTR_XREF, entities.get(1));
 			entities.get(1).set(ATTR_XREF, entities.get(2));
-			entities.get(2).set(ATTR_STRING, "entity2");
+			entities.get(2).set(ATTR_INT, 1337);
 
 			dataService.add(entityType.getId(), entities.stream());
 			waitForIndexToBeStable(entityType, indexService, LOG);
 
-			Query<Entity> query = new QueryImpl<>().search("entity2");
+			Query<Entity> query = new QueryImpl<>().search("1337");
 			Set<Object> resultIds = searchService.search(entityType, query).collect(toSet());
 			assertEquals(resultIds.size(), 2);
 			assertEquals(resultIds, newHashSet("1", "2"));
@@ -466,7 +466,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityType, indexService, LOG);
 
 			Set<Object> newResultIds = searchService.search(entityType, query).collect(toSet());
-			assertEquals(newResultIds.size(), 2);
+			assertEquals(newResultIds.size(), 3);
 			assertEquals(newResultIds, newHashSet("0", "1", "2"));
 		});
 	}
