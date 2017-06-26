@@ -65,4 +65,13 @@ describe('utilities', () => {
 
     expect(expected).to.deep.equal(actual)
   })
+
+  it('should swap the location of two objects in an array', () => {
+    const array = [1, 2, 3, 4, 5]
+
+    const actual = utils.swapArrayElements(array, 2, 3)
+    const expected = [1, 2, 4, 3, 5]
+
+    expect(expected).to.deep.equal(actual)
+  })
 })

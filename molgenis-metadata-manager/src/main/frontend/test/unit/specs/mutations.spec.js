@@ -6,9 +6,9 @@ describe('mutations', () => {
       const state = {
         packages: []
       }
-      const packages = [{id: 'sys_idx', label: 'Index'},
-        {id: 'sys_sec', label: 'Security'}, {id: 'sys', label: 'System'},
-        {id: 'sys_md', label: 'Meta'}, {id: 'base', label: 'Default'}]
+      const packages = [{ id: 'sys_idx', label: 'Index' },
+        { id: 'sys_sec', label: 'Security' }, { id: 'sys', label: 'System' },
+        { id: 'sys_md', label: 'Meta' }, { id: 'base', label: 'Default' }]
       mutations.__SET_PACKAGES__(state, packages)
       expect(state.packages).to.equal(packages)
     })
@@ -53,7 +53,7 @@ describe('mutations', () => {
         }
       }
       const entityTypes = [{
-        attributes: [{id: '1', name: 'id', _href: '/api/v2/sys_md_Attribute/1'}, {
+        attributes: [{ id: '1', name: 'id', _href: '/api/v2/sys_md_Attribute/1' }, {
           id: '2',
           name: 'label',
           _href: '/api/v2/sys_md_Attribute/2'
@@ -61,11 +61,11 @@ describe('mutations', () => {
         backend: 'PostgreSQL',
         description: 'test entity',
         id: 'test',
-        package: {id: 'base', label: 'Default', _href: '/api/v2/sys_md_Package/base'},
+        package: { id: 'base', label: 'Default', _href: '/api/v2/sys_md_Package/base' },
         tags: [],
         _href: '/api/v2/base_test'
       }, {
-        attributes: [{id: '1a', name: 'id', _href: '/api/v2/sys_md_Attribute/1a'}, {
+        attributes: [{ id: '1a', name: 'id', _href: '/api/v2/sys_md_Attribute/1a' }, {
           id: '2a',
           name: 'label',
           _href: '/api/v2/sys_md_Attribute/2a'
@@ -73,7 +73,7 @@ describe('mutations', () => {
         backend: 'PostgreSQL',
         description: 'test1 entity',
         id: 'test1',
-        package: {id: 'base', label: 'Default', _href: '/api/v2/sys_md_Package/base'},
+        package: { id: 'base', label: 'Default', _href: '/api/v2/sys_md_Package/base' },
         tags: [],
         _href: '/api/v2/base_test1'
       }]
@@ -139,14 +139,14 @@ describe('mutations', () => {
           }
         ],
         backend: 'postgreSQL',
-        idAttribute: {id: 'bla', label: 'id'},
+        idAttribute: { id: 'bla', label: 'id' },
         label: 'Gender',
-        labelAttribute: {id: 'bladibla', label: 'label'},
+        labelAttribute: { id: 'bladibla', label: 'label' },
         lookupAttributes: [
-          {id: 'bla', label: 'id'},
-          {id: 'bladibla', label: 'label'}
+          { id: 'bla', label: 'id' },
+          { id: 'bladibla', label: 'label' }
         ],
-        package0: {id: 'root', label: 'root'},
+        package0: { id: 'root', label: 'root' },
         tags: []
       }
       mutations.__SET_EDITOR_ENTITY_TYPE__(state, editorEntityType)
@@ -196,14 +196,14 @@ describe('mutations', () => {
             }
           ],
           backend: 'postgreSQL',
-          idAttribute: {id: 'bla', label: 'id'},
+          idAttribute: { id: 'bla', label: 'id' },
           label: 'Gender',
-          labelAttribute: {id: 'bladibla', label: 'label'},
+          labelAttribute: { id: 'bladibla', label: 'label' },
           lookupAttributes: [
-            {id: 'bla', label: 'id'},
-            {id: 'bladibla', label: 'label'}
+            { id: 'bla', label: 'id' },
+            { id: 'bladibla', label: 'label' }
           ],
-          package0: {id: 'root', label: 'root'},
+          package0: { id: 'root', label: 'root' },
           tags: []
         }
       }
@@ -219,23 +219,23 @@ describe('mutations', () => {
   describe('Testing mutation UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE', () => {
     it('Updates the selected attribute IN the editorEntityType attribute list', () => {
       const state = {
-        selectedAttributeID: '2',
+        selectedAttributeId: '2',
         editorEntityType: {
           attributes: [
-            {id: '1', name: 'attribute1'},
-            {id: '2', name: 'attribute2'},
-            {id: '3', name: 'attribute3'}
+            { id: '1', name: 'attribute1' },
+            { id: '2', name: 'attribute2' },
+            { id: '3', name: 'attribute3' }
           ]
         }
       }
 
       const expected = [
-        {id: '1', name: 'attribute1'},
-        {id: '2', name: 'updated name'},
-        {id: '3', name: 'attribute3'}
+        { id: '1', name: 'attribute1' },
+        { id: '2', name: 'updated name' },
+        { id: '3', name: 'attribute3' }
       ]
 
-      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__(state, {key: 'name', value: 'updated name'})
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__(state, { key: 'name', value: 'updated name' })
       expect(state.editorEntityType.attributes).to.deep.equal(expected)
     })
   })
@@ -258,19 +258,63 @@ describe('mutations', () => {
         selectedAttributeId: '1',
         editorEntityType: {
           attributes: [
-            {id: '1', name: 'attribute1'},
-            {id: '2', name: 'attribute2'},
-            {id: '3', name: 'attribute3'}
+            { id: '1', name: 'attribute1' },
+            { id: '2', name: 'attribute2' },
+            { id: '3', name: 'attribute3' }
           ]
         }
       }
 
       const expected = [
-        {id: '2', name: 'attribute2'},
-        {id: '3', name: 'attribute3'}
+        { id: '2', name: 'attribute2' },
+        { id: '3', name: 'attribute3' }
       ]
 
       mutations.__DELETE_SELECTED_ATTRIBUTE__(state, '1')
+      expect(state.editorEntityType.attributes).to.deep.equal(expected)
+    })
+  })
+
+  describe('Testing mutation UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER', () => {
+    it('should move the index of the selected attribute from 2 to 1', () => {
+      const state = {
+        editorEntityType: {
+          attributes: [
+            { id: '1', name: 'attribute1' },
+            { id: '2', name: 'attribute2' },
+            { id: '3', name: 'attribute3' }
+          ]
+        }
+      }
+
+      const expected = [
+        { id: '1', name: 'attribute1' },
+        { id: '3', name: 'attribute3' },
+        { id: '2', name: 'attribute2' }
+      ]
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER__(state, { moveOrder: 'up', selectedAttributeIndex: 2 })
+      expect(state.editorEntityType.attributes).to.deep.equal(expected)
+    })
+
+    it('should move the index of the selected attribute from 0 to 1', () => {
+      const state = {
+        editorEntityType: {
+          attributes: [
+            { id: '1', name: 'attribute1' },
+            { id: '2', name: 'attribute2' },
+            { id: '3', name: 'attribute3' }
+          ]
+        }
+      }
+
+      const expected = [
+        { id: '2', name: 'attribute2' },
+        { id: '1', name: 'attribute1' },
+        { id: '3', name: 'attribute3' }
+      ]
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER__(state, { moveOrder: 'down', selectedAttributeIndex: 0 })
       expect(state.editorEntityType.attributes).to.deep.equal(expected)
     })
   })

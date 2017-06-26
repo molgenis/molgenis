@@ -2,14 +2,43 @@
   <div class="row">
     <!-- Attribute tree -->
     <div class="col-md-3 attribute-tree">
-      <strong>Attributes</strong>
-      <button @click="addAttribute" class="btn btn-primary btn-sm float-right"><i class="fa fa-plus"></i></button>
+      <div class="row">
+        <div class="col">
+          <strong>Attributes</strong>
+          <button @click="addAttribute" class="btn btn-primary btn-sm float-right"><i class="fa fa-plus"></i></button>
+        </div>
+      </div>
 
       <hr>
 
+      <div class="row">
+        <div class="col">
+          <div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group mr-2" role="group">
+              <button @click="moveAttribute('up')" class="btn btn-secondary btn-sm"
+                      :disabled="!selectedAttribute || selectedAttributeIndex === 0">
+
+                <i class="fa fa-chevron-up"></i>
+              </button>
+              <button @click="moveAttribute('down')" class="btn btn-secondary btn-sm"
+                      :disabled="!selectedAttribute || selectedAttributeIndex === editorEntityType.attributes.length - 1">
+
+                <i class="fa fa-chevron-down"></i>
+              </button>
+            </div>
+            <div class="btn-group" role="group">
+              <button @click="deleteAttribute(selectedAttribute)" class="btn btn-danger float-right btn-sm"
+                      :disabled="!selectedAttribute">
+
+                <i class="fa fa-trash-o"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <attribute-tree :selectedAttribute="selectedAttribute" :attributeTree="attributeTree"
                       :onAttributeSelect="onAttributeSelect"></attribute-tree>
-
 
       <p v-if="editorEntityType.entityTypeParent !== undefined">
         Parent attributes from <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
@@ -22,9 +51,6 @@
       <div class="row">
         <div class="col attribute-form-header">
           <strong>Attribute:</strong> {{selectedAttribute.label}}
-          <button @click="deleteAttribute(selectedAttribute)" class="btn btn-danger float-right btn-sm"><i class="fa fa-trash-o"></i>
-            {{ 'delete-attribute-button' | i18n }}
-          </button>
           <hr>
         </div>
       </div>
@@ -203,7 +229,8 @@
   import {
     SET_SELECTED_ATTRIBUTE_ID,
     UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
-    DELETE_SELECTED_ATTRIBUTE
+    DELETE_SELECTED_ATTRIBUTE,
+    UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER
   } from '../store/mutations'
 
   import { CREATE_ATTRIBUTE } from '../store/actions'
@@ -224,11 +251,18 @@
       },
       addAttribute () {
         this.$store.dispatch(CREATE_ATTRIBUTE)
+      },
+      moveAttribute (moveOrder) {
+        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER, {
+          moveOrder: moveOrder,
+          selectedAttributeIndex: this.selectedAttributeIndex
+        })
       }
     },
     computed: {
       ...mapState(['editorEntityType', 'attributeTypes', 'entityTypes']),
       ...mapGetters({
+        selectedAttributeIndex: 'getIndexOfSelectedAttribute',
         selectedAttribute: 'getSelectedAttribute',
         editorEntityTypeAttributes: 'getEditorEntityTypeAttributes',
         attributeTree: 'getAttributeTree',

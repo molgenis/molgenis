@@ -164,7 +164,7 @@ describe('actions', () => {
       td.when(get({ apiUrl: '/metadata-manager-service' }, '/create/entityType')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      const payload = toEntityType(response.entityType)
+      const payload = {...toEntityType(response.entityType), isNew: true}
 
       testAction(actions.__CREATE_ENTITY_TYPE__, null, {}, [
         { type: SET_EDITOR_ENTITY_TYPE, payload: payload }
@@ -231,7 +231,7 @@ describe('actions', () => {
       td.when(get({ apiUrl: '/metadata-manager-service' }, '/create/attribute')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      const attribute = toAttribute(response.attribute)
+      const attribute = {...toAttribute(response.attribute), isNew: true}
 
       testAction(actions.__CREATE_ATTRIBUTE__, null, state, [
         {

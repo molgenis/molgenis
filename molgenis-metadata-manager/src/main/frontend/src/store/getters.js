@@ -36,6 +36,10 @@ export default {
    */
   getSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.find(attribute => attribute.id === state.selectedAttributeId),
   /**
+   * Returns the index of the currently selected attribute
+   */
+  getIndexOfSelectedAttribute: state => state.editorEntityType && state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId),
+  /**
    * Return the editorEntityType attributes from the state
    */
   getEditorEntityTypeAttributes: state => state.editorEntityType && state.editorEntityType.attributes,

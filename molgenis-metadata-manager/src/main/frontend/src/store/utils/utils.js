@@ -47,3 +47,17 @@ export const toAttribute = (attribute) => {
     'sequenceNumber': attribute.sequenceNumber
   }
 }
+
+/**
+ * Swap the elements in an array at indexes originalIndex and targetIndex.
+ *
+ * @param (array) The array.
+ * @param (originalIndex) The index of the first element to swap.
+ * @param (targetIndex) The index of the second element to swap.
+ * @return {Array} A new array with the elements swapped.
+ */
+export const swapArrayElements = (array, originalIndex, targetIndex) => {
+  if (array.length === 1) return array
+  array.splice(targetIndex, 1, array.splice(originalIndex, 1, array[targetIndex])[0])
+  return array
+}

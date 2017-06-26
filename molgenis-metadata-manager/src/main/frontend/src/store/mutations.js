@@ -5,10 +5,13 @@ export const SET_ATTRIBUTE_TYPES = '__SET_ATTRIBUTE_TYPES__'
 export const SET_EDITOR_ENTITY_TYPE = '__SET_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
 export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__'
+export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER__'
 export const SET_SELECTED_ATTRIBUTE_ID = '__SET_SELECTED_ATTRIBUTE_ID__'
 export const DELETE_SELECTED_ATTRIBUTE = '__DELETE_SELECTED_ATTRIBUTE__'
 
 export const CREATE_ALERT = '__CREATE_ALERT__'
+
+import { swapArrayElements } from './utils/utils'
 
 export default {
   [SET_PACKAGES] (state, packages) {
@@ -59,6 +62,18 @@ export default {
   },
   [SET_SELECTED_ATTRIBUTE_ID] (state, selectedAttributeId) {
     state.selectedAttributeId = selectedAttributeId
+  },
+  /**
+   * Move the selectedAttribute up or down based on the moveOrder
+   */
+  [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER] (state, update) {
+    const moveOrder = update.moveOrder
+    const attributes = state.editorEntityType.attributes
+
+    const originalIndex = update.selectedAttributeIndex
+    const targetIndex = moveOrder === 'up' ? originalIndex - 1 : originalIndex + 1
+
+    state.editorEntityType.attributes = swapArrayElements(attributes, originalIndex, targetIndex)
   },
   /**
    * Deletes the selected attribute using the ID of the selected attribute found in the state
