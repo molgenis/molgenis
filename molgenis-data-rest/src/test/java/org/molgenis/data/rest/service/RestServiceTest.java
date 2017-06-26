@@ -10,7 +10,11 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -35,16 +39,21 @@ public class RestServiceTest
 	private RestService restService;
 	private EntityManager entityManager;
 	private DataService dataService;
+	private FileMetaFactory fileMetaFactory;
+	private IdGenerator idGenerator;
+	private ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		dataService = mock(DataService.class);
-		IdGenerator idGenerator = mock(IdGenerator.class);
+		idGenerator = mock(IdGenerator.class);
 		FileStore fileStore = mock(FileStore.class);
-		FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
+		fileMetaFactory = mock(FileMetaFactory.class);
 		entityManager = mock(EntityManager.class);
-		this.restService = new RestService(dataService, idGenerator, fileStore, fileMetaFactory, entityManager);
+		servletUriComponentsBuilderFactory = mock(ServletUriComponentsBuilderFactory.class);
+		this.restService = new RestService(dataService, idGenerator, fileStore, fileMetaFactory, entityManager,
+				servletUriComponentsBuilderFactory);
 	}
 
 	@Test
@@ -135,6 +144,32 @@ public class RestServiceTest
 
 		Instant expected = Instant.parse("2000-12-31T10:34:56.789Z");
 		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31T10:34:56.789Z"), expected);
+	}
+
+	@Test
+	public void toEntityFileValueValid() throws ParseException
+	{
+		String generatedId = "id";
+		String downloadUriAsString = "http://somedownloaduri";
+		ServletUriComponentsBuilder mockBuilder = mock(ServletUriComponentsBuilder.class);
+		UriComponents downloadUri = mock(UriComponents.class);
+		FileMeta fileMeta = mock(FileMeta.class);
+
+		Attribute fileAttr = when(mock(Attribute.class).getName()).thenReturn("fileAttr").getMock();
+		when(fileAttr.getDataType()).thenReturn(FILE);
+		when(idGenerator.generateId()).thenReturn(generatedId);
+		when(fileMetaFactory.create(generatedId)).thenReturn(fileMeta);
+		when(mockBuilder.replacePath(anyString())).thenReturn(mockBuilder);
+		when(mockBuilder.replaceQuery(null)).thenReturn(mockBuilder);
+		when(downloadUri.toUriString()).thenReturn(downloadUriAsString);
+		when(mockBuilder.build()).thenReturn(downloadUri);
+		when(servletUriComponentsBuilderFactory.fromCurrentRequest()).thenReturn(mockBuilder);
+
+
+		byte [] content = {'a', 'b'};
+		MockMultipartFile mockMultipartFile = new MockMultipartFile("name", "fileName", "contentType", content);
+
+		assertEquals(restService.toEntityValue(fileAttr, mockMultipartFile), fileMeta);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to parse attribute \\[dateAttr\\] value \\[invalidDate\\] as date. Valid date format is \\[YYYY-MM-DD\\].")
