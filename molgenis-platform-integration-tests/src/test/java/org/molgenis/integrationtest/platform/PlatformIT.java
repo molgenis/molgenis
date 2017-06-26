@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -111,6 +112,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private PackageFactory packageFactory;
 	@Autowired
 	private UserDetailsService userDetailsService;
+	@Autowired
+	private EntityTypeFactory entityTypeFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -433,6 +436,38 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			assertNull(metadataService.getPackage("parent_sub"));
 			entities.forEach(this::assertNotPresent);
 			refEntities.forEach(this::assertNotPresent);
+		});
+	}
+
+	@Test(singleThreaded = true)
+	public void testReindexOnEntityTypeUpdate()
+	{
+		runAsSystem(() ->
+		{
+			EntityType entityType = testHarness.createDynamicSelfReferencingTestEntityType();
+			dataService.getMeta().addEntityType(entityType);
+
+			List<Entity> entities = testHarness.createSelfRefEntitiesWithEmptyReferences(entityType, 3)
+					.collect(toList());
+			entities.get(0).set(ATTR_XREF, entities.get(1));
+			entities.get(1).set(ATTR_XREF, entities.get(2));
+			entities.get(2).set(ATTR_STRING, "entity2");
+
+			dataService.add(entityType.getId(), entities.stream());
+			waitForIndexToBeStable(entityType, indexService, LOG);
+
+			Query<Entity> query = new QueryImpl<>().search("entity2");
+			Set<Object> resultIds = searchService.search(entityType, query).collect(toSet());
+			assertEquals(resultIds.size(), 2);
+			assertEquals(resultIds, newHashSet("1", "2"));
+
+			entityType.setIndexingDepth(2);
+			dataService.getMeta().updateEntityType(entityType);
+			waitForIndexToBeStable(entityType, indexService, LOG);
+
+			Set<Object> newResultIds = searchService.search(entityType, query).collect(toSet());
+			assertEquals(newResultIds.size(), 2);
+			assertEquals(newResultIds, newHashSet("0", "1", "2"));
 		});
 	}
 
