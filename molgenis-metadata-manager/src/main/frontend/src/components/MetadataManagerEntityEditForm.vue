@@ -16,7 +16,7 @@
         <div class="form-group row">
           <label class="col-4 col-form-label">{{ 'delete-entity-button' | i18n }}</label>
           <div class="col">
-            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger left">
+            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left">
               <i class="fa fa-trash-o"></i>
             </button>
           </div>

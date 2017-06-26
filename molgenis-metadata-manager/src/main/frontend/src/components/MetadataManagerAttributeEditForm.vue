@@ -47,7 +47,14 @@
     </div>
 
     <!-- Attribute form inputs -->
-    <div v-if="selectedAttribute" class="col-md-9">
+    <div v-if="!selectedAttribute" class="col-md-9">
+      <div class="row">
+        <div class="col">
+          <h4 class="text-muted text-center">Select an attribute to edit</h4>
+        </div>
+      </div>
+    </div>
+    <div v-else class="col-md-9">
       <div class="row">
         <div class="col attribute-form-header">
           <strong>Attribute:</strong> {{selectedAttribute.label}}
