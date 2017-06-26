@@ -34,7 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.*;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -1278,11 +1281,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		long count2 = searchService.count(entityTypeDynamic, q2);
 		assertEquals(count2, 1L);
 
-		refEntities.get(0).set(ATTR_REF_STRING, "searchTestBatchUpdate");
+		Entity updatedRefEntity = refEntities.get(0);
+		assertEquals(updatedRefEntity.getString(ATTR_REF_STRING), "refstring0");
+		updatedRefEntity.set(ATTR_REF_STRING, "searchTestBatchUpdate");
 		runAsSystem(() ->
 		{
+			LOG.info("UPDATE!");
 			dataService.update(refEntityTypeDynamic.getId(), refEntities.stream());
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
+			LOG.info("Stable!");
 		});
 
 		// test string1 from entity
