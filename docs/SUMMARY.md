@@ -38,3 +38,4 @@
     - [Annotators](developer_documentation/annotators.md)
     - [Services](developer_documentation/service.md)
     - [Jobs](developer_documentation/jobs.md)
+    - [Running the integration tests](developer_documentation/integration-tests.md)
