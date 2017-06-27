@@ -156,63 +156,48 @@ describe('mutations', () => {
   })
 
   describe('Testing mutation UPDATE_EDITOR_ENTITY_TYPE', () => {
-    it('Updates an altered value of the selected entity type', () => {
+    it('should update the description of the EditorEntityType', () => {
       const state = {
         editorEntityType: {
-          id: 'root_gender',
-          labelI18n: {},
-          description: 'Gender options',
-          abstract0: false,
-          attributes: [
-            {
-              aggregatable: false,
-              auto: false,
-              descriptionI18n: {},
-              enumOptions: [],
-              id: 'bla',
-              labelI18n: {},
-              name: 'id',
-              nullable: false,
-              readonly: true,
-              tags: [],
-              type: 'STRING',
-              unique: true,
-              visible: true
-            },
-            {
-              aggregatable: false,
-              auto: false,
-              descriptionI18n: {},
-              enumOptions: [],
-              id: 'bladibla',
-              labelI18n: {},
-              name: 'label',
-              nullable: false,
-              readonly: true,
-              tags: [],
-              type: 'STRING',
-              unique: true,
-              visible: true
-            }
-          ],
-          backend: 'postgreSQL',
-          idAttribute: { id: 'bla', label: 'id' },
-          label: 'Gender',
-          labelAttribute: { id: 'bladibla', label: 'label' },
-          lookupAttributes: [
-            { id: 'bla', label: 'id' },
-            { id: 'bladibla', label: 'label' }
-          ],
-          package0: { id: 'root', label: 'root' },
-          tags: []
+          description: 'description'
         }
       }
+
       const update = {
         key: 'description',
         value: 'Option-selection-list for gender'
       }
+
       mutations.__UPDATE_EDITOR_ENTITY_TYPE__(state, update)
       expect(state.editorEntityType.description).to.equal('Option-selection-list for gender')
+    })
+
+    it('should update the idAttribute of the EditorEntityType', () => {
+      const state = {
+        editorEntityType: {
+          idAttribute: null,
+          attributes: [
+            { id: '1' }
+          ]
+        }
+      }
+
+      const update = {
+        key: 'idAttribute',
+        value: { id: '1', label: 'idAttribute' }
+      }
+
+      const expected = {
+        editorEntityType: {
+          idAttribute: { id: '1', label: 'idAttribute', readonly: true, unique: true, nullable: false },
+          attributes: [
+            { id: '1', label: 'idAttribute', readonly: true, unique: true, nullable: false }
+          ]
+        }
+      }
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE__(state, update)
+      expect(state).to.deep.equal(expected)
     })
   })
 
