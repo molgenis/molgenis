@@ -25,6 +25,7 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 	public static final String SECRET_KEY = "secretKey";
 	public static final String TARGET_ENTITY_ID = "targetEntityId";
 	public static final String REGION = "region";
+	public static final String EXTENSION = "extension";
 
 	private final FileMetaMetaData fileMetaMetaData;
 	private final JobExecutionMetaData jobExecutionMetaData;
@@ -54,11 +55,16 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 		addAttribute(EXPRESSION).setDataType(BOOL).setLabel("Is key expression")
 				.setDescription("Is the key an expression or an exact match").setNillable(false)
 				.setDefaultValue(Boolean.FALSE.toString());
-		addAttribute(ACCESS_KEY).setLabel("the access key to be used to login to the amazon bucket").setNillable(false);
-		addAttribute(SECRET_KEY).setLabel("the secret key to be used to login to the amazon bucket").setNillable(false);
+		addAttribute(ACCESS_KEY).setLabel("the access key to be used to login to the amazon bucket").setNillable(false)
+				.setVisible(false);
+		addAttribute(SECRET_KEY).setLabel("the secret key to be used to login to the amazon bucket").setNillable(false)
+				.setVisible(false);
 		addAttribute(REGION).setLabel("Region").setDescription("The region of the amazon bucket.").setNillable(false);
 		addAttribute(TARGET_ENTITY_ID).setLabel("Target EntityType ID").setNillable(true);
 		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)
 				.setRefEntity(fileMetaMetaData).setNillable(true);
+		addAttribute(EXTENSION).setLabel("Extension")
+				.setDescription("Optional extension of the file, is not part of the key in the bucket")
+				.setNillable(true);
 	}
 }

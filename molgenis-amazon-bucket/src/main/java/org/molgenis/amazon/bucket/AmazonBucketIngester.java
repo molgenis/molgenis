@@ -6,7 +6,6 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.csv.CsvFileExtensions;
 import org.molgenis.data.excel.ExcelUtils;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -18,6 +17,8 @@ import org.molgenis.file.model.FileMetaFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import static java.util.Objects.requireNonNull;
 
@@ -42,6 +43,7 @@ public class AmazonBucketIngester
 	}
 
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
+			String extension,
 			String accessKey, String secretKey, String region, boolean isExpression, Progress progress)
 	{
 		FileMeta fileMeta;
@@ -51,18 +53,12 @@ public class AmazonBucketIngester
 			progress.progress(0, "Connection to Amazon Bucket with accessKey '" + accessKey + "'");
 			AmazonS3 client = amazonBucketClient.getClient(accessKey, secretKey, region);
 			progress.progress(1, "downloading...");
-			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, isExpression);
-
-			if (targetEntityTypeName != null)
+			File file = amazonBucketClient
+					.downloadFile(client, fileStore, jobExecutionID, bucket, key, extension, isExpression,
+							targetEntityTypeName);
+			if (targetEntityTypeName != null && ExcelUtils.isExcelFile(file.getName()))
 			{
-				//Not excel? assume CSV
-				if (!ExcelUtils.isExcelFile(file))
-				{
-					File newFile = new File(targetEntityTypeName + CsvFileExtensions.getCSV());
-					file.renameTo(newFile);
-					file = newFile;
-				}
-				else if (ExcelUtils.getNumberOfSheets(file) == 1)
+				if (ExcelUtils.getNumberOfSheets(file) == 1)
 				{
 					ExcelUtils.renameSheet(targetEntityTypeName, file, 0);
 				}
@@ -74,8 +70,11 @@ public class AmazonBucketIngester
 			}
 			progress.progress(2, "Importing...");
 			ImportService importService = importServiceFactory.getImportService(file.getName());
+			File renamed = new File(
+					String.format("%s%s%s.%s", file.getParent(), File.separatorChar, targetEntityTypeName, extension));
+			Files.copy(file.toPath(), renamed.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(file);
+					.createFileRepositoryCollection(renamed);
 			EntityImportReport report = importService
 					.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING, "base");
 			progress.status("Download and import from Amazon Bucket done.");

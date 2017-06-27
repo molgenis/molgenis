@@ -81,21 +81,18 @@ public class ExcelUtilsTest
 	@Test
 	public void testIsExcelFileTrueXLSX()
 	{
-		File file = ResourceUtils.getFile(getClass(), "/test.xlsx");
-		assertEquals(ExcelUtils.isExcelFile(file), true);
+		assertEquals(ExcelUtils.isExcelFile("test.xlsx"), true);
 	}
 
 	@Test
 	public void testIsExcelFileTrueXLS()
 	{
-		File file = ResourceUtils.getFile(getClass(), "/test.xls");
-		assertEquals(ExcelUtils.isExcelFile(file), true);
+		assertEquals(ExcelUtils.isExcelFile("test.xls"), true);
 	}
 
 	@Test
 	public void testIsExcelFileFalse()
 	{
-		File file = ResourceUtils.getFile(getClass(), "/test.csv");
-		assertEquals(ExcelUtils.isExcelFile(file), false);
+		assertEquals(ExcelUtils.isExcelFile("test.csv"), true);
 	}
 }
