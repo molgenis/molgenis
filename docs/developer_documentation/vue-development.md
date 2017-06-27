@@ -61,6 +61,9 @@ using yarn.
 Yarn produces a `yarn.lock` file. 
 Commit this file to your Git repository as it ensures future builds to use the versions that were used to create the client code.
 
+When running your client code in development on port 3000, it will help to run the MOLGENIS locally on port 8080. 
+The molgenis-vue-template comes with a proxy table that will redirect any REST calls to localhost:8080
+
 ## Some guidelines
 Below you can find some guidelines + code examples for stuff that we view is standard when creating a MOLGENIS plugin.
 
