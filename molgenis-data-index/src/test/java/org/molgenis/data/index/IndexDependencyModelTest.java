@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.data.index;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -6,7 +6,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.DependencyModel;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
-public class DependencyModelTest
+public class IndexDependencyModelTest
 {
 	@Mock
 	private EntityType entity0;
@@ -66,7 +65,7 @@ public class DependencyModelTest
 		addReferences(entity4, ImmutableList.of(entity0, entity3));
 		addReferences(entity0, ImmutableList.of());
 
-		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
 		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of("1", "3", "4"));
 	}
@@ -93,7 +92,7 @@ public class DependencyModelTest
 		when(entity1.getExtends()).thenReturn(entity2);
 		when(entity2.isAbstract()).thenReturn(true);
 
-		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
 		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("3").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of("0", "4"));
 	}
@@ -107,7 +106,7 @@ public class DependencyModelTest
 
 		addReferences(entity0, ImmutableList.of(entity0));
 
-		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
 		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of("0"));
 	}
@@ -121,7 +120,7 @@ public class DependencyModelTest
 
 		addReferences(entity0, ImmutableList.of(entity0));
 
-		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
 		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of());
 	}
