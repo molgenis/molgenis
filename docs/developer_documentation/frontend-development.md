@@ -1,4 +1,4 @@
-# Guide to developing MOLGENIS plugins with Vue
+# Guide to developing MOLGENIS Frontend
 
 ## Tools and compiling
 When developing client code, you will need to following tools:

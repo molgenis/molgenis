@@ -27,6 +27,7 @@
         - [REST api V2](developer_documentation/ref-rest2.md)
         - [Swagger specification](developer_documentation/ref-swagger.md)
     - [FAIR](developer_documentation/guide-fair.md)
+    - [Frontend development](developer_documentation/frontend-development.md)
     - [R api](developer_documentation/ref-R.md)
     - [Start](developer_documentation/start.md)
     - [IntelliJ](developer_documentation/intellij.md)
