@@ -30,6 +30,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static com.google.common.collect.Sets.union;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toSet;
@@ -110,7 +111,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
-		List<IndexAction> indexActions = determineNecessaryActions();
+		List<IndexAction> indexActions = ImmutableList.copyOf(determineNecessaryActions());
 		for (int i = 0; i < indexActions.size(); i++)
 		{
 			indexActions.get(i).setActionOrder(i);
@@ -130,17 +131,21 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 *
 	 * @return List<IndexAction> List of IndexActions that are necessary
 	 */
-	private List<IndexAction> determineNecessaryActions()
+	private Set<IndexAction> determineNecessaryActions()
 	{
 		ImmutableSet<IndexAction> indexActions = copyOf(getIndexActionsForCurrentTransaction());
 		if (indexActions.isEmpty())
 		{
-			return Collections.emptyList();
+			return emptySet();
 		}
 		Stopwatch sw = Stopwatch.createStarted();
-		List<IndexAction> result = determineNecessaryActionsInternal(indexActions,
-				indexActions.iterator().next().getIndexActionGroup(), new IndexDependencyModel(getEntityTypes()));
-		LOG.debug("Determined necessary actions in {}", sw);
+		IndexActionGroup indexActionGroup = indexActions.iterator().next().getIndexActionGroup();
+		Set<IndexAction> result = determineNecessaryActionsInternal(indexActions, indexActionGroup,
+				new DependencyModel(getEntityTypes()));
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Determined {} necessary actions in {}", result.size(), sw);
+		}
 		return result;
 	}
 
@@ -186,11 +191,11 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 *
 	 * @param indexActions     The index actions stored for the current transaction, deduplicated
 	 * @param indexActionGroup The IndexActionGroup that the created IndexActions will belong to
-	 * @param dependencies     {@link IndexDependencyModel} to determine which entities depend on which entities
+	 * @param dependencies     {@link DependencyModel} to determine which entities depend on which entities
 	 * @return List of {@link IndexAction}s
 	 */
-	private List<IndexAction> determineNecessaryActionsInternal(ImmutableSet<IndexAction> indexActions,
-			IndexActionGroup indexActionGroup, IndexDependencyModel dependencies)
+	private Set<IndexAction> determineNecessaryActionsInternal(ImmutableSet<IndexAction> indexActions,
+			IndexActionGroup indexActionGroup, DependencyModel dependencies)
 	{
 		Map<Boolean, List<IndexAction>> split = indexActions.stream()
 				.filter(action -> !excludedEntities.contains(action.getEntityTypeId()))
@@ -213,14 +218,14 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 * @param dependentEntityIds  Set containing IDs of dependent EntityTypes, we will add IndexActions for the whole of these EntityTypes
 	 * @return ImmutableList with the {@link IndexAction}s
 	 */
-	private List<IndexAction> collectResult(IndexActionGroup indexActionGroup, List<IndexAction> singleEntityActions,
+	private Set<IndexAction> collectResult(IndexActionGroup indexActionGroup, List<IndexAction> singleEntityActions,
 			List<IndexAction> wholeRepoActions, Set<String> dependentEntityIds)
 	{
 		Set<String> wholeRepoIds = union(
 				wholeRepoActions.stream().map(IndexAction::getEntityTypeId).collect(toImmutableSet()),
 				dependentEntityIds);
 
-		ImmutableList.Builder<IndexAction> result = ImmutableList.builder();
+		ImmutableSet.Builder<IndexAction> result = ImmutableSet.builder();
 		result.addAll(wholeRepoActions);
 		dependentEntityIds.stream().map(id -> createIndexAction(id, indexActionGroup)).forEach(result::add);
 		singleEntityActions.stream().filter(action -> !wholeRepoIds.contains(action.getEntityTypeId()))

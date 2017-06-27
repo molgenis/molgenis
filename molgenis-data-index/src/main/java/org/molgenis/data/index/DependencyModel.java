@@ -18,7 +18,7 @@ import static java.util.stream.StreamSupport.stream;
 /**
  * Models the dependencies between Entities.
  */
-public class IndexDependencyModel
+public class DependencyModel
 {
 	private final Map<String, EntityType> entityTypes;
 	private final GenericDependencyResolver genericDependencyResolver = new GenericDependencyResolver();
@@ -28,7 +28,7 @@ public class IndexDependencyModel
 	 *
 	 * @param entityTypes the EntityTypes for which the IndexDependencyModel is created
 	 */
-	public IndexDependencyModel(List<EntityType> entityTypes)
+	public DependencyModel(List<EntityType> entityTypes)
 	{
 		this.entityTypes = uniqueIndex(entityTypes, EntityType::getId);
 	}

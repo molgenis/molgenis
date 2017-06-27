@@ -65,7 +65,7 @@ public class IndexDependencyModelTest
 		addReferences(entity4, ImmutableList.of(entity0, entity3));
 		addReferences(entity0, ImmutableList.of());
 
-		IndexDependencyModel indexDependencyModel = new IndexDependencyModel(entityTypes);
+		DependencyModel indexDependencyModel = new DependencyModel(entityTypes);
 		Set<String> dependencies = indexDependencyModel.getEntityTypesDependentOn("0").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of("1", "3", "4"));
 	}
@@ -92,8 +92,8 @@ public class IndexDependencyModelTest
 		when(entity1.getExtends()).thenReturn(entity2);
 		when(entity2.isAbstract()).thenReturn(true);
 
-		IndexDependencyModel indexDependencyModel = new IndexDependencyModel(entityTypes);
-		Set<String> dependencies = indexDependencyModel.getEntityTypesDependentOn("3").collect(toSet());
+		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("3").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of("0", "4"));
 	}
 
@@ -106,8 +106,8 @@ public class IndexDependencyModelTest
 
 		addReferences(entity0, ImmutableList.of(entity0));
 
-		IndexDependencyModel indexDependencyModel = new IndexDependencyModel(entityTypes);
-		Set<String> dependencies = indexDependencyModel.getEntityTypesDependentOn("0").collect(toSet());
+		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of("0"));
 	}
 
@@ -120,8 +120,8 @@ public class IndexDependencyModelTest
 
 		addReferences(entity0, ImmutableList.of(entity0));
 
-		IndexDependencyModel indexDependencyModel = new IndexDependencyModel(entityTypes);
-		Set<String> dependencies = indexDependencyModel.getEntityTypesDependentOn("0").collect(toSet());
+		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of());
 	}
 
