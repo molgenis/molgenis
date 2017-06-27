@@ -104,6 +104,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 		App app4 = getMockApp("id4", false);
 		appRepositoryDecorator.add(Stream.of(app0, app1, app2, app3, app4));
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(appRepository).add(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(app0, app1, app2, app3, app4));
@@ -162,6 +163,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 		App app = getMockApp("id", true, "app-valid-update.zip");
 		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(Stream.of(app));
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(appRepository).update(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(app));
@@ -194,6 +196,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 		App app2 = getMockApp("id2", true, "app-valid-update.zip");
 		appRepositoryDecorator.delete(Stream.of(app0, app1, app2));
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(appRepository).delete(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(app0, app1, app2));

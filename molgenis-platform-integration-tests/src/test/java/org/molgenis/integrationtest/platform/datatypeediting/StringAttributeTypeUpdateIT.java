@@ -14,7 +14,7 @@ import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class StringAttributeTypeUpdateTest extends AbstractAttributeTypeUpdateTest
+public class StringAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
 	@BeforeClass
 	public void setUp()

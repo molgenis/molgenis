@@ -66,6 +66,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 		annotatorConfig.init();
 	}
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{

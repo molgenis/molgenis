@@ -58,6 +58,7 @@ public class PackagePersisterTest extends AbstractMockitoTest
 		Package existingUpdatedPackage = mock(Package.class);
 		when(existingUpdatedPackage.getId()).thenReturn("updatedPackageId");
 
+		@SuppressWarnings("unchecked")
 		Query<Package> query = mock(Query.class);
 		when(dataService.query(PACKAGE, Package.class)).thenReturn(query);
 		when(query.in(eq(PackageMetadata.ID), any(Set.class))).thenReturn(query);
@@ -65,10 +66,12 @@ public class PackagePersisterTest extends AbstractMockitoTest
 
 		packagePersister.upsertPackages(Stream.of(newPackage, unchangedPackage, updatedPackage));
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> addCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(PACKAGE), addCaptor.capture());
 		assertEquals(addCaptor.getValue().collect(toList()), singletonList(newPackage));
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> updateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).update(eq(PACKAGE), updateCaptor.capture());
 		assertEquals(updateCaptor.getValue().collect(toList()), singletonList(updatedPackage));

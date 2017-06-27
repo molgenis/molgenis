@@ -1,0 +1,4 @@
+# ====== MOLGENIS Elasticsearch Configuration ======
+node.name: MOLGENIS Integration Test
+indices.query.bool.max_clause_count: 131072
+bootstrap.system_call_filter: false

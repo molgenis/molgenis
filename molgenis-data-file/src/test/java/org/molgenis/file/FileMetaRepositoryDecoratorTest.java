@@ -64,6 +64,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		FileMeta fileMeta0 = getMockFileMeta("id0");
 		FileMeta fileMeta1 = getMockFileMeta("id1");
 		fileMetaRepositoryDecorator.delete(Stream.of(fileMeta0, fileMeta1));
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<FileMeta>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(fileMetaRepository).delete(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(fileMeta0, fileMeta1));
@@ -89,12 +90,12 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		fileMetaRepositoryDecorator.deleteById("id");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testDeleteAll() throws Exception
 	{
 		FileMeta fileMeta0 = getMockFileMeta("id0");
 		FileMeta fileMeta1 = getMockFileMeta("id1");
-		Query<FileMeta> query = mock(Query.class);
 		when(fileMetaRepository.findAll(any(Query.class))).thenReturn(Stream.of(fileMeta0, fileMeta1));
 		fileMetaRepositoryDecorator.deleteAll();
 		verify(fileMetaRepository).deleteAll();
@@ -110,6 +111,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		when(fileMetaRepository.findOneById("id0")).thenReturn(fileMeta0);
 		when(fileMetaRepository.findOneById("id1")).thenReturn(fileMeta1);
 		fileMetaRepositoryDecorator.deleteAll(Stream.of("id0", "id1"));
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(fileMetaRepository).deleteAll(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList("id0", "id1"));

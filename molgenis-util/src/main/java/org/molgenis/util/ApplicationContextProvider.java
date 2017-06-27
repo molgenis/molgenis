@@ -1,5 +1,6 @@
 package org.molgenis.util;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -9,7 +10,7 @@ import org.springframework.context.ApplicationContextAware;
  *
  * @author erwin
  */
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", justification = "Intented static write from instance")
+@SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", justification = "Intented static write from instance")
 public class ApplicationContextProvider implements ApplicationContextAware
 {
 	private static ApplicationContext ctx = null;

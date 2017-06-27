@@ -15,6 +15,7 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -44,6 +45,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -876,6 +878,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"0\",\"1\"]}"))
 				.andExpect(status().isNoContent());
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
@@ -1133,11 +1136,18 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory()
+		{
+			return mock(ServletUriComponentsBuilderFactory.class);
+		}
+
+		@Bean
 		public RestControllerV2 restController()
 		{
 			return new RestControllerV2(dataService(), molgenisPermissionService(),
-					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager()),
-					languageService(), permissionSystemService(), repositoryCopier(), localizationService());
+					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
+							servletUriComponentsBuilderFactory()), languageService(), permissionSystemService(),
+					repositoryCopier(), localizationService());
 		}
 
 	}
