@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.util.DependencyModel;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

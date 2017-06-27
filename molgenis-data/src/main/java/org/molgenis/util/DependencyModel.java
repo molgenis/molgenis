@@ -1,4 +1,4 @@
-package org.molgenis.data.index;
+package org.molgenis.util;
 
 import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.meta.model.Attribute;

@@ -1,4 +1,4 @@
-package org.molgenis.data.index;
+package org.molgenis.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.DependencyModel;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
-public class IndexDependencyModelTest
+public class DependencyModelTest
 {
 	@Mock
 	private EntityType entity0;
@@ -65,8 +66,8 @@ public class IndexDependencyModelTest
 		addReferences(entity4, ImmutableList.of(entity0, entity3));
 		addReferences(entity0, ImmutableList.of());
 
-		DependencyModel indexDependencyModel = new DependencyModel(entityTypes);
-		Set<String> dependencies = indexDependencyModel.getEntityTypesDependentOn("0").collect(toSet());
+		DependencyModel dependencyModel = new DependencyModel(entityTypes);
+		Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
 		assertEquals(dependencies, ImmutableSet.of("1", "3", "4"));
 	}
 
