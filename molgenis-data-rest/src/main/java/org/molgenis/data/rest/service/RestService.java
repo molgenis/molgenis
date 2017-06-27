@@ -39,6 +39,7 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.file.model.FileMetaMetaData.FILENAME;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.util.MolgenisDateFormat.*;
 
@@ -85,7 +86,9 @@ public class RestService
 				if (request.containsKey(paramName))
 				{
 					final Object paramValue = request.get(paramName);
-					final Object value = this.toEntityValue(attr, paramValue);
+					Attribute idAttribute = meta.getIdAttribute();
+					Object idValue = request.get(idAttribute.getName());
+					final Object value = this.toEntityValue(attr, paramValue, idValue);
 					entity.set(attr.getName(), value);
 				}
 			}
@@ -102,7 +105,7 @@ public class RestService
 	 * @param paramValue HTTP parameter value
 	 * @return Object
 	 */
-	public Object toEntityValue(Attribute attr, Object paramValue)
+	public Object toEntityValue(Attribute attr, Object paramValue, Object id)
 	{
 		// Treat empty strings as null
 		if (paramValue != null && (paramValue instanceof String) && ((String) paramValue).isEmpty())
@@ -145,7 +148,7 @@ public class RestService
 				value = convertDecimal(attr, paramValue);
 				break;
 			case FILE:
-				value = convertFile(attr, paramValue);
+				value = convertFile(attr, paramValue, id);
 				break;
 			case INT:
 				value = convertInt(attr, paramValue);
@@ -219,41 +222,68 @@ public class RestService
 		return value;
 	}
 
-	private FileMeta convertFile(Attribute attr, Object paramValue)
+	private FileMeta convertFile(Attribute attr, Object paramValue, Object entityId)
 	{
 		FileMeta value;
 		if (paramValue != null)
 		{
+			/*
+			 * If an entity is updated and no new file is passed, use the old file value
+			 */
 			if (!(paramValue instanceof MultipartFile))
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), MultipartFile.class.getSimpleName()));
-			}
-			MultipartFile multipartFile = (MultipartFile) paramValue;
 
-			String id = idGenerator.generateId();
-			try
+				EntityType entityType = attr.getEntity();
+				Attribute idAttribute = entityType.getIdAttribute();
+				Object idValue = this.toEntityValue(idAttribute, entityId, null);
+				Entity oldEntity = dataService.findOneById(entityType.getId(), idValue);
+
+				if (paramValue instanceof String)
+				{
+					FileMeta entity = (FileMeta) oldEntity.getEntity(attr.getName());
+					if (entity.get(FILENAME).equals(paramValue))
+					{
+						value = entity;
+					}
+					else
+					{
+						throw new MolgenisDataException("Cannot update entity with file attribute without passing file,"
+								+ " while changing the name of the existing file attribute");
+					}
+				}
+				else
+				{
+					throw new MolgenisDataException(
+							format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
+									paramValue.getClass().getSimpleName(), MultipartFile.class.getSimpleName()));
+				}
+			}
+			else
 			{
-				fileStore.store(multipartFile.getInputStream(), id);
-			}
-			catch (IOException e)
-			{
-				throw new MolgenisDataException(e);
-			}
+				MultipartFile multipartFile = (MultipartFile) paramValue;
 
-			FileMeta fileEntity = fileMetaFactory.create(id);
-			fileEntity.setFilename(multipartFile.getOriginalFilename());
-			fileEntity.setContentType(multipartFile.getContentType());
-			fileEntity.setSize(multipartFile.getSize());
-			ServletUriComponentsBuilder currentRequest = servletUriComponentsBuilderFactory
-					.fromCurrentRequest();
-			UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + id)
-					.replaceQuery(null).build();
-			fileEntity.setUrl(downloadUri.toUriString());
-			dataService.add(FILE_META, fileEntity);
+				String id = idGenerator.generateId();
+				try
+				{
+					fileStore.store(multipartFile.getInputStream(), id);
+				}
+				catch (IOException e)
+				{
+					throw new MolgenisDataException(e);
+				}
 
-			value = fileEntity;
+				FileMeta fileEntity = fileMetaFactory.create(id);
+				fileEntity.setFilename(multipartFile.getOriginalFilename());
+				fileEntity.setContentType(multipartFile.getContentType());
+				fileEntity.setSize(multipartFile.getSize());
+				ServletUriComponentsBuilder currentRequest = servletUriComponentsBuilderFactory.fromCurrentRequest();
+				UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + id)
+						.replaceQuery(null).build();
+				fileEntity.setUrl(downloadUri.toUriString());
+				dataService.add(FILE_META, fileEntity);
+
+				value = fileEntity;
+			}
 		}
 		else
 		{
@@ -389,7 +419,8 @@ public class RestService
 
 			EntityType mrefEntity = attr.getRefEntity();
 			Attribute mrefEntityIdAttr = mrefEntity.getIdAttribute();
-			value = mrefParamValues.stream().map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue))
+			value = mrefParamValues.stream()
+					.map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue, null))
 					.map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue)).collect(toList());
 		}
 		else
@@ -404,7 +435,7 @@ public class RestService
 		Object value;
 		if (paramValue != null)
 		{
-			Object idValue = toEntityValue(attr.getRefEntity().getIdAttribute(), paramValue);
+			Object idValue = toEntityValue(attr.getRefEntity().getIdAttribute(), paramValue, null);
 			value = entityManager.getReference(attr.getRefEntity(), idValue);
 		}
 		else
