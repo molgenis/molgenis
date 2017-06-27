@@ -131,7 +131,7 @@ describe('swapArrayElements', () => {
 ```
 
 **When using Vuex for your state, use Flow to add typing your state parameters[<sup>1</sup>](#guidelines-1)**
-```flow js
+```js
 
 // state.js
 
