@@ -2,53 +2,42 @@ package org.molgenis.data.index;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableSet;
-import org.molgenis.data.index.meta.IndexAction;
-import org.molgenis.data.index.meta.IndexActionFactory;
-import org.molgenis.data.index.meta.IndexActionGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Sets.union;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.partitioningBy;
-import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
 
 /**
- * Determines which IndexActions need to be taken to bring the indices up to date.
+ * Determines the impact of changes.
  */
 @Component
 public class IndexingStrategy
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexingStrategy.class);
-	private final IndexActionFactory indexActionFactory;
-
-	IndexingStrategy(IndexActionFactory indexActionFactory)
-	{
-		this.indexActionFactory = Objects.requireNonNull(indexActionFactory);
-	}
 
 	/**
-	 * Determines which IndexActions are necessary to bring the index up to date with the current transaction.
+	 * Determines which {@link Impact}s follow from a set of changes.
 	 *
-	 * @param registeredIndexActions The IndexActions that were registered during a transaction.
-	 * @return List<IndexAction> List of IndexActions that are necessary
+	 * @param changes            The {@link Impact}s of which the impact needs to be determined
+	 * @param dependencyModel     {@link IndexDependencyModel} to determine which entities depend on which entities
+	 * @return Set<Impact> containing the impact of the changes
 	 */
-	Set<IndexAction> determineNecessaryActions(Collection<IndexAction> registeredIndexActions,
+	Set<Impact> determineImpact(Set<Impact> changes,
 			IndexDependencyModel dependencyModel)
 	{
-		ImmutableSet<IndexAction> indexActions = copyOf(registeredIndexActions);
-		if (indexActions.isEmpty())
-		{
-			return emptySet();
-		}
 		Stopwatch sw = Stopwatch.createStarted();
-		IndexActionGroup indexActionGroup = indexActions.iterator().next().getIndexActionGroup();
-		Set<IndexAction> result = determineNecessaryActionsInternal(indexActions, indexActionGroup, dependencyModel);
+		Map<Boolean, List<Impact>> split = changes.stream().collect(partitioningBy(Impact::isWholeRepository));
+		ImmutableSet<String> allEntityTypeIds = changes.stream().map(Impact::getEntityTypeId).collect(toImmutableSet());
+		Set<String> dependentEntities = allEntityTypeIds.stream().flatMap(dependencyModel::getEntityTypesDependentOn)
+				.collect(toImmutableSet());
+		Set<Impact> result = collectResult(split.get(false), split.get(true), dependentEntities);
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Determined {} necessary actions in {}", result.size(), sw);
@@ -57,52 +46,25 @@ public class IndexingStrategy
 	}
 
 	/**
-	 * Determines the necessary index actions.
+	 * Combines the results.
 	 *
-	 * @param indexActions     The index actions stored for the current transaction, deduplicated
-	 * @param indexActionGroup The IndexActionGroup that the created IndexActions will belong to
-	 * @param dependencies     {@link IndexDependencyModel} to determine which entities depend on which entities
-	 * @return List of {@link IndexAction}s
+	 * @param singleEntityChanges {@link Impact}s for changes made to specific Entity instances
+	 * @param wholeRepoActions    {@link Impact}s for changes made to entire repositories
+	 * @param dependentEntityIds  {@link Impact}s for entitytypes that are dependent on one or more of the changes
+	 * @return Set with the {@link Impact}s
 	 */
-	private Set<IndexAction> determineNecessaryActionsInternal(ImmutableSet<IndexAction> indexActions,
-			IndexActionGroup indexActionGroup, IndexDependencyModel dependencies)
-	{
-		Map<Boolean, List<IndexAction>> split = indexActions.stream()
-				.collect(partitioningBy(IndexAction::isWholeRepository));
-		ImmutableSet<String> allEntityTypeIds = indexActions.stream().map(IndexAction::getEntityTypeId)
-				.collect(toImmutableSet());
-		Set<String> dependentEntities = allEntityTypeIds.stream().flatMap(dependencies::getEntityTypesDependentOn)
-				.collect(toImmutableSet());
-		return collectResult(indexActionGroup, split.get(false), split.get(true), dependentEntities);
-	}
-
-	/**
-	 * Collects the results into a List.
-	 *
-	 * @param indexActionGroup    the IndexGroup that all of these IndexActions will belong to
-	 * @param singleEntityActions IndexActions for specific Entity instances. These will only be indexed if their repo will not be reindexed fully
-	 * @param wholeRepoActions    IndexActions for the whole Repo
-	 * @param dependentEntityIds  Set containing IDs of dependent EntityTypes, we will add IndexActions for the whole of these EntityTypes
-	 * @return ImmutableList with the {@link IndexAction}s
-	 */
-	private Set<IndexAction> collectResult(IndexActionGroup indexActionGroup, List<IndexAction> singleEntityActions,
-			List<IndexAction> wholeRepoActions, Set<String> dependentEntityIds)
+	private Set<Impact> collectResult(List<Impact> singleEntityChanges, List<Impact> wholeRepoActions,
+			Set<String> dependentEntityIds)
 	{
 		Set<String> wholeRepoIds = union(
-				wholeRepoActions.stream().map(IndexAction::getEntityTypeId).collect(toImmutableSet()),
+				wholeRepoActions.stream().map(Impact::getEntityTypeId).collect(toImmutableSet()),
 				dependentEntityIds);
 
-		ImmutableSet.Builder<IndexAction> result = ImmutableSet.builder();
+		ImmutableSet.Builder<Impact> result = ImmutableSet.builder();
 		result.addAll(wholeRepoActions);
-		dependentEntityIds.stream().map(id -> createIndexAction(id, indexActionGroup)).forEach(result::add);
-		singleEntityActions.stream().filter(action -> !wholeRepoIds.contains(action.getEntityTypeId()))
+		dependentEntityIds.stream().map(Impact::createWholeRepositoryImpact).forEach(result::add);
+		singleEntityChanges.stream().filter(action -> !wholeRepoIds.contains(action.getEntityTypeId()))
 				.forEach(result::add);
 		return result.build();
-	}
-
-	private IndexAction createIndexAction(String referencingEntity, IndexActionGroup indexActionGroup)
-	{
-		return indexActionFactory.create().setEntityTypeId(referencingEntity).setIndexActionGroup(indexActionGroup)
-				.setIndexStatus(PENDING);
 	}
 }

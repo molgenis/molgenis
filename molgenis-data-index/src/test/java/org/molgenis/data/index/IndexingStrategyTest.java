@@ -1,35 +1,28 @@
 package org.molgenis.data.index;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mock;
-import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.index.config.IndexTestConfig;
-import org.molgenis.data.index.meta.IndexAction;
-import org.molgenis.data.index.meta.IndexActionFactory;
-import org.molgenis.data.index.meta.IndexActionMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.index.Impact.createSingleEntityImpact;
+import static org.molgenis.data.index.Impact.createWholeRepositoryImpact;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { IndexTestConfig.class })
-public class IndexingStrategyTest extends AbstractMolgenisSpringTest
+public class IndexingStrategyTest
 {
-	@Autowired
-	private IndexActionFactory indexActionFactory;
-
 	@Mock
 	private IndexDependencyModel dependencyModel;
 
@@ -38,7 +31,8 @@ public class IndexingStrategyTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	private void beforeClass()
 	{
-		indexingStrategy = new IndexingStrategy(indexActionFactory);
+		initMocks(this);
+		indexingStrategy = new IndexingStrategy();
 	}
 
 	@BeforeMethod
@@ -50,59 +44,42 @@ public class IndexingStrategyTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testDetermineNecessaryActionsEmptySet()
 	{
-		assertEquals(indexingStrategy.determineNecessaryActions(emptyList(), dependencyModel), emptySet());
+		assertEquals(indexingStrategy.determineImpact(emptySet(), dependencyModel), emptySet());
 	}
 
 	@Test
-	public void testDetermineNecessaryActions()
+	public void testDetermineImpact()
 	{
-		IndexAction indexAction = createSingleEntityIndexAction("A", "id");
-		Collection<IndexAction> registeredIndexActions = ImmutableList.of(indexAction);
+		Impact indexAction = createSingleEntityImpact("A", "id");
+		Set<Impact> registeredIndexActions = singleton(indexAction);
+		when(dependencyModel.getEntityTypesDependentOn("A")).thenReturn(Stream.of("A", "B", "C"));
+		Set<Impact> actual = indexingStrategy.determineImpact(registeredIndexActions, dependencyModel);
+		assertEquals(actual, ImmutableSet.of(createWholeRepositoryImpact("A"), createWholeRepositoryImpact("B"),
+				createWholeRepositoryImpact("C")));
+	}
+
+	@Test
+	public void testDetermineImpact2()
+	{
+		Impact change = createSingleEntityImpact("A", null);
+		Set<Impact> registeredIndexActions = ImmutableSet.of(change);
 
 		when(dependencyModel.getEntityTypesDependentOn("A")).thenReturn(Stream.of("A", "B", "C"));
 
-		Set<IndexAction> actual = indexingStrategy.determineNecessaryActions(registeredIndexActions, dependencyModel);
-		assertEquals(actual, ImmutableSet.of(createCompleteEntityIndexAction("A"), createCompleteEntityIndexAction("B"),
-				createCompleteEntityIndexAction("C")));
+		Set<Impact> actual = indexingStrategy.determineImpact(registeredIndexActions, dependencyModel);
+		assertEquals(actual, ImmutableSet.of(createWholeRepositoryImpact("A"), createWholeRepositoryImpact("B"),
+				createWholeRepositoryImpact("C")));
 	}
 
 	@Test
-	public void testDetermineNecessaryActions2()
+	public void testDetermineImpactNoDependencies()
 	{
-		IndexAction indexAction = createCompleteEntityIndexAction("A");
-		Collection<IndexAction> registeredIndexActions = ImmutableList.of(indexAction);
-
-		when(dependencyModel.getEntityTypesDependentOn("A")).thenReturn(Stream.of("A", "B", "C"));
-
-		Set<IndexAction> actual = indexingStrategy.determineNecessaryActions(registeredIndexActions, dependencyModel);
-		assertEquals(actual, ImmutableSet.of(createCompleteEntityIndexAction("A"), createCompleteEntityIndexAction("B"),
-				createCompleteEntityIndexAction("C")));
-	}
-
-	@Test
-	public void testDetermineNecessaryActionsNoDependencies()
-	{
-		IndexAction indexAction = createCompleteEntityIndexAction("A");
-		Collection<IndexAction> registeredIndexActions = ImmutableList.of(indexAction);
+		Impact change = createSingleEntityImpact("A", "6");
+		Set<Impact> registeredIndexActions = ImmutableSet.of(change);
 
 		when(dependencyModel.getEntityTypesDependentOn("A")).thenReturn(Stream.empty());
 
-		Set<IndexAction> actual = indexingStrategy.determineNecessaryActions(registeredIndexActions, dependencyModel);
-		assertEquals(actual, ImmutableSet.of(createCompleteEntityIndexAction("A")));
-	}
-
-	private IndexAction createCompleteEntityIndexAction(String entityTypeId)
-	{
-		IndexAction indexAction = indexActionFactory.create();
-		indexAction.setEntityTypeId(entityTypeId);
-		indexAction.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
-		return indexAction;
-	}
-
-	private IndexAction createSingleEntityIndexAction(String entityTypeId, String entityId)
-	{
-		IndexAction indexAction = createCompleteEntityIndexAction(entityTypeId);
-		indexAction.setEntityId(entityId);
-		return indexAction;
+		Set<Impact> actual = indexingStrategy.determineImpact(registeredIndexActions, dependencyModel);
+		assertEquals(actual, ImmutableSet.of(createSingleEntityImpact("A", "6")));
 	}
 }

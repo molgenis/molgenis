@@ -8,6 +8,7 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
+import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -115,10 +116,13 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		{
 			return;
 		}
+		IndexActionGroup indexActionGroup = indexActionsForCurrentTransaction.iterator().next().getIndexActionGroup();
+		Set<Impact> changes = indexActionsForCurrentTransaction.stream().map(indexAction -> Impact
+				.createSingleEntityImpact(indexAction.getEntityTypeId(), indexAction.getEntityId())).collect(toSet());
 		IndexDependencyModel dependencyModel = new IndexDependencyModel(getEntityTypes());
-		List<IndexAction> indexActions = indexingStrategy
-				.determineNecessaryActions(indexActionsForCurrentTransaction, dependencyModel).stream()
-				.filter(action -> !excludedEntities.contains(action.getEntityTypeId())).collect(toList());
+		List<IndexAction> indexActions = indexingStrategy.determineImpact(changes, dependencyModel).stream()
+				.filter(key -> !excludedEntities.contains(key.getEntityTypeId()))
+				.map(key -> createIndexAction(indexActionGroup, key)).collect(toList());
 		if (indexActions.isEmpty())
 		{
 			return;
@@ -132,6 +136,16 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		dataService
 				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
 		dataService.add(INDEX_ACTION, indexActions.stream());
+	}
+
+	private IndexAction createIndexAction(IndexActionGroup indexActionGroup, Impact key)
+	{
+		IndexAction indexAction = indexActionFactory.create();
+		indexAction.setIndexStatus(PENDING);
+		indexAction.setEntityId((String) key.getId());
+		indexAction.setEntityTypeId(key.getEntityTypeId());
+		indexAction.setIndexActionGroup(indexActionGroup);
+		return indexAction;
 	}
 
 	/**
