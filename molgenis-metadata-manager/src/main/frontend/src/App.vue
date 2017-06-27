@@ -16,13 +16,16 @@
   </div>
 </template>
 
-<style>
+<style lang="scss">
+  @import "~variables";
+  @import "~mixins";
+
   .temp-header {
-    background-color: #0c0d0e;
+    background-color: $black;
   }
 
   .temp-header a {
-    color: white;
+    color: $white;
   }
 
 </style>
