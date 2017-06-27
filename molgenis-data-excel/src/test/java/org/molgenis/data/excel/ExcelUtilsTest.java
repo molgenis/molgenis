@@ -93,6 +93,6 @@ public class ExcelUtilsTest
 	@Test
 	public void testIsExcelFileFalse()
 	{
-		assertEquals(ExcelUtils.isExcelFile("test.csv"), true);
+		assertEquals(ExcelUtils.isExcelFile("test.csv"), false);
 	}
 }
