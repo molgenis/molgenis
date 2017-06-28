@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>molgenis-navigator</artifactId>
-    <name>navigator</name>
 
     <build>
         <plugins>
@@ -39,9 +38,6 @@
                         <goals>
                             <goal>yarn</goal>
                         </goals>
-                        <configuration>
-                            <failOnError>true</failOnError>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>yarn build</id>
@@ -51,7 +47,6 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <arguments>run build</arguments>
-                            <failOnError>true</failOnError>
                         </configuration>
                     </execution>
                     <execution>
@@ -70,6 +65,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
                 <executions>
                     <!-- This is a hack to get Jenkins to publish Karma test results when running a
                     Maven project: we run 0 surefire tests, so Jenkins publishes the report of the Karma tests. -->
