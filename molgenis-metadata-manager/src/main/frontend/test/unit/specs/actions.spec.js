@@ -13,8 +13,7 @@ import {
   SET_SELECTED_ENTITY_TYPE_ID,
   UPDATE_EDITOR_ENTITY_TYPE
 } from 'store/mutations'
-import actions from 'store/actions'
-import { toAttribute, toEntityType } from 'store/utils/utils'
+import actions, { toAttribute, toEntityType } from 'store/actions'
 
 describe('actions', () => {
   const rejection = {

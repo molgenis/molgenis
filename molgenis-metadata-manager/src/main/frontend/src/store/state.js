@@ -1,7 +1,7 @@
 // @flow
 export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 
-import type { Alert, Package, EditorEntityType } from './utils/flow.types'
+import type { Alert, Package, EditorEntityType } from '../flow.types'
 
 export type State = {
   alert: Alert,
