@@ -4,9 +4,9 @@ import type { EditorEntityType, EditorAttribute } from './flow.types'
 export const toEntityType = (editorEntityType: Object): EditorEntityType => {
   return {
     'id': editorEntityType.id,
-    'label': editorEntityType.label ? editorEntityType.label : 'add_a_label',
+    'label': editorEntityType.label,
     'i18nLabel': editorEntityType.i18nLabel,
-    'description': editorEntityType.description ? editorEntityType.description : 'add_a_description',
+    'description': editorEntityType.description,
     'i18nDescription': editorEntityType.i18nDescription,
     'abstract0': editorEntityType.abstract0,
     'backend': editorEntityType.backend,
@@ -24,7 +24,7 @@ export const toEntityType = (editorEntityType: Object): EditorEntityType => {
 export const toAttribute = (attribute: Object): EditorAttribute => {
   return {
     'id': attribute.id,
-    'name': attribute.name ? attribute.name : 'add_a_unique_name',
+    'name': attribute.name,
     'type': attribute.type,
     'parent': attribute.parent,
     'refEntityType': attribute.refEntityType,
@@ -34,9 +34,9 @@ export const toAttribute = (attribute: Object): EditorAttribute => {
     'nullable': attribute.nullable,
     'auto': attribute.auto,
     'visible': attribute.visible,
-    'label': attribute.label ? attribute.label : 'add_a_label',
+    'label': attribute.label,
     'i18nLabel': attribute.i18nLabel,
-    'description': attribute.description ? attribute.description : 'add_a_description',
+    'description': attribute.description,
     'i18nDescription': attribute.i18nDescription,
     'aggregatable': attribute.aggregatable,
     'enumOptions': attribute.enumOptions,

@@ -7,7 +7,7 @@
           <label class="col-4 col-form-label">Extends</label>
           <div class="col">
             <multiselect v-model="entityTypeParent" :options="abstractEntities" label="label"
-                         selectLabel="" deselectLabel="" placeholder="Select an abstract EntityType"></multiselect>
+                         selectLabel="" deselectLabel="" placeholder="Select an EntityType"></multiselect>
           </div>
         </div>
 
@@ -37,14 +37,14 @@
         <div class="form-group row">
           <label class="col-4 col-form-label">Label</label>
           <div class="col">
-            <input v-model="label" class="form-control" type="text">
+            <input v-model="label" class="form-control" type="text" placeholder="add a label...">
           </div>
         </div>
 
         <div class="form-group row">
           <label class="col-4 col-form-label">Description</label>
           <div class="col">
-            <input v-model="description" class="form-control" type="text">
+            <input v-model="description" class="form-control" type="text" placeholder="add a description...">
           </div>
         </div>
 

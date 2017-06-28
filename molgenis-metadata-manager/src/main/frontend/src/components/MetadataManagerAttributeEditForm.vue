@@ -67,21 +67,21 @@
           <div class="form-group row">
             <label class="col-3 col-form-label">Name</label>
             <div class="col">
-              <input v-model="name" class="form-control" type="text">
+              <input v-model="name" class="form-control" type="text" placeholder="add a name...">
             </div>
           </div>
 
           <div class="form-group row">
             <label class="col-3 col-form-label">Label</label>
             <div class="col">
-              <input v-model="label" class="form-control" type="text">
+              <input v-model="label" class="form-control" type="text" placeholder="add a label...">
             </div>
           </div>
 
           <div class="form-group row">
             <label class="col-3 col-form-label">Description</label>
             <div class="col">
-              <input v-model="description" class="form-control" type="text">
+              <input v-model="description" class="form-control" type="text" placeholder="add a description">
             </div>
           </div>
 

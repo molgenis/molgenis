@@ -11,9 +11,9 @@ describe('utilities', () => {
       const actual = utils.toEntityType(editorEntityType)
       const expected = {
         'id': '1',
-        'label': 'add_a_label',
+        'label': undefined,
         'i18nLabel': undefined,
-        'description': 'add_a_description',
+        'description': undefined,
         'i18nDescription': undefined,
         'abstract0': undefined,
         'backend': undefined,
@@ -40,7 +40,7 @@ describe('utilities', () => {
       const actual = utils.toAttribute(attribute)
       const expected = {
         'id': '1',
-        'name': 'add_a_unique_name',
+        'name': undefined,
         'type': undefined,
         'parent': undefined,
         'refEntityType': undefined,
@@ -50,9 +50,9 @@ describe('utilities', () => {
         'nullable': undefined,
         'auto': undefined,
         'visible': undefined,
-        'label': 'add_a_label',
+        'label': undefined,
         'i18nLabel': undefined,
-        'description': 'add_a_description',
+        'description': undefined,
         'i18nDescription': undefined,
         'aggregatable': undefined,
         'enumOptions': undefined,
