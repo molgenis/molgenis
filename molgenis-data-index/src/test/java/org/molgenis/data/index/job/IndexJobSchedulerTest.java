@@ -1,11 +1,11 @@
-package org.molgenis.data.elasticsearch.index.job;
+package org.molgenis.data.index.job;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
+import org.molgenis.data.index.IndexConfig;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.config.IndexTestConfig;
 import org.molgenis.data.jobs.JobExecutor;
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.testng.Assert.assertEquals;

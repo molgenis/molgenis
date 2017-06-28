@@ -1,7 +1,7 @@
-package org.molgenis.data.elasticsearch.transaction;
+package org.molgenis.data.index.transaction;
 
-import org.molgenis.data.elasticsearch.index.job.IndexJobScheduler;
 import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

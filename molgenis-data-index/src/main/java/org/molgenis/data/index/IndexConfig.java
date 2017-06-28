@@ -1,13 +1,9 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.index;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.index.job.*;
-import org.molgenis.data.elasticsearch.transaction.IndexTransactionListener;
-import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-import org.molgenis.data.index.IndexService;
-import org.molgenis.data.index.IndexingStrategy;
+import org.molgenis.data.index.job.*;
 import org.molgenis.data.index.meta.*;
+import org.molgenis.data.index.transaction.IndexTransactionListener;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.jobs.JobFactory;
@@ -22,7 +18,7 @@ import org.springframework.context.annotation.Import;
 
 import javax.annotation.PostConstruct;
 
-import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 
 //TODO: These imported classes should be in separate config and this is the IndexJobConfig
 @Import({ IndexActionFactory.class, IndexActionGroupFactory.class, IndexActionMetaData.class,
