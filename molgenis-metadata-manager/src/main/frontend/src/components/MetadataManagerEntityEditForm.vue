@@ -25,7 +25,7 @@
             </save-button>
           </div>
           <div class="btn-group" role="group">
-            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left">
+            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left" :disabled="editorEntityType.isNew">
               Delete EntityType
             </button>
           </div>
