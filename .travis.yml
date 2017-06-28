@@ -24,7 +24,7 @@ before_install:
   # Use wrapper script to install fixed maven version
   - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
 install:
-  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -e
 before_script:
   - sudo sysctl -w vm.max_map_count=262144
 script:
