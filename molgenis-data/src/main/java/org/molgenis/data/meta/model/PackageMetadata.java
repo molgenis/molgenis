@@ -43,6 +43,8 @@ public class PackageMetadata extends SystemEntityType
 		setLabel("Package");
 		setDescription("Grouping of related entities");
 
+		setIndexingDepth(2);
+
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");

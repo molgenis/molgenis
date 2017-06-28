@@ -124,4 +124,9 @@ public class IndexAction extends StaticEntity
 		result = 31 * result + (getEntityTypeId() != null ? getEntityTypeId().hashCode() : 0);
 		return result;
 	}
+
+	public boolean isWholeRepository()
+	{
+		return getEntityId() == null;
+	}
 }

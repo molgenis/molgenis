@@ -149,13 +149,8 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void update()
+	public void addRemoveAttributeAbstractEntityType()
 	{
-		when(entityType1.getIdValue()).thenReturn(entityTypeId1);
-		when(entityType2.getIdValue()).thenReturn(entityTypeId2);
-		when(entityType3.getIdValue()).thenReturn(entityTypeId3);
-		when(entityType4.getIdValue()).thenReturn(entityTypeId4);
-
 		EntityType currentEntityType = mock(EntityType.class);
 		EntityType currentEntityType2 = mock(EntityType.class);
 		EntityType currentEntityType3 = mock(EntityType.class);
@@ -171,6 +166,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		Attribute attributeAdded = mock(Attribute.class);
 		when(attributeAdded.getName()).thenReturn("attributeAdded");
 
+		when(currentEntityType.isAbstract()).thenReturn(true);
 		when(currentEntityType.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attributeStays, attributeRemoved));
 		when(entityType1.getOwnAllAttributes()).thenReturn(Lists.newArrayList(attributeStays, attributeAdded));
 		when(metaDataService.getConcreteChildren(entityType1)).thenReturn(Stream.of(entityType2, entityType3));
@@ -179,6 +175,8 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(metaDataService.getBackend(entityType2)).thenReturn(backend2);
 		when(metaDataService.getBackend(entityType3)).thenReturn(backend3);
 
+		when(dataService.getEntityType(entityTypeId1)).thenReturn(currentEntityType);
+
 		repo.update(entityType1);
 
 		// verify that attributes got added and deleted in concrete extending entities
@@ -186,5 +184,26 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(backend2).deleteAttribute(currentEntityType2, attributeRemoved);
 		verify(backend3).addAttribute(currentEntityType3, attributeAdded);
 		verify(backend3).deleteAttribute(currentEntityType3, attributeRemoved);
+		verify(backend2, never()).updateRepository(any(), any());
+		verify(backend3, never()).updateRepository(any(), any());
+	}
+
+	@Test
+	public void updateConcreteEntityType()
+	{
+		RepositoryCollection backend = mock(RepositoryCollection.class);
+		when(entityType1.isAbstract()).thenReturn(false);
+		when(metaDataService.getBackend(entityType1)).thenReturn(backend);
+		when(decoratedRepo.findOneById(entityTypeId1)).thenReturn(entityType1);
+		when(entityType1.getOwnAllAttributes()).thenReturn(emptyList());
+
+		EntityType updatedEntityType1 = mock(EntityType.class);
+		when(updatedEntityType1.getId()).thenReturn(entityTypeId1);
+		when(updatedEntityType1.getOwnAllAttributes()).thenReturn(emptyList());
+		when(metaDataService.getConcreteChildren(updatedEntityType1)).thenReturn(Stream.empty());
+
+		repo.update(updatedEntityType1);
+
+		verify(backend).updateRepository(entityType1, updatedEntityType1);
 	}
 }
