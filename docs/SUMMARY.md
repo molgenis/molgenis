@@ -2,7 +2,7 @@
 
 - [Release Notes](https://github.com/molgenis/molgenis/releases)
 - [Quick start](quickstart/guide-quickstart.md)
-    - [Maven cargo project](quickstart/guide-cargo.md)
+    - [Run Docker container](quickstart/guide-docker.md)
     - [Run in Tomcat](quickstart/guide-tomcat.md)
     - [Compile code](quickstart/guide-local-compile.md)
 - User Documentation
