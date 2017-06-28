@@ -17,6 +17,8 @@ import org.molgenis.file.model.FileMetaFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import static java.util.Objects.requireNonNull;
 
@@ -41,6 +43,7 @@ public class AmazonBucketIngester
 	}
 
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
+			String extension,
 			String accessKey, String secretKey, String region, boolean isExpression, Progress progress)
 	{
 		FileMeta fileMeta;
@@ -50,9 +53,10 @@ public class AmazonBucketIngester
 			progress.progress(0, "Connection to Amazon Bucket with accessKey '" + accessKey + "'");
 			AmazonS3 client = amazonBucketClient.getClient(accessKey, secretKey, region);
 			progress.progress(1, "downloading...");
-			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, isExpression);
-
-			if (targetEntityTypeName != null)
+			File file = amazonBucketClient
+					.downloadFile(client, fileStore, jobExecutionID, bucket, key, extension, isExpression,
+							targetEntityTypeName);
+			if (targetEntityTypeName != null && ExcelUtils.isExcelFile(file.getName()))
 			{
 				if (ExcelUtils.getNumberOfSheets(file) == 1)
 				{
@@ -61,13 +65,16 @@ public class AmazonBucketIngester
 				else
 				{
 					throw new MolgenisDataException(
-							"Amazon Bucket imports to a specified entityType are only possible with one sheet");
+							"Amazon Bucket imports to a specified entityType are only possible with CSV files or Excel files with one sheet");
 				}
 			}
 			progress.progress(2, "Importing...");
 			ImportService importService = importServiceFactory.getImportService(file.getName());
+			File renamed = new File(
+					String.format("%s%s%s.%s", file.getParent(), File.separatorChar, targetEntityTypeName, extension));
+			Files.copy(file.toPath(), renamed.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(file);
+					.createFileRepositoryCollection(renamed);
 			EntityImportReport report = importService
 					.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING, "base");
 			progress.status("Download and import from Amazon Bucket done.");
