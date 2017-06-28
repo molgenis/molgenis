@@ -8,8 +8,7 @@
       </div>
     </div>
     <div class="row">
-      <div id="app" class="col">
-        <hr>
+      <div id="app" class="col app-container">
         <router-view></router-view>
       </div>
     </div>
@@ -26,6 +25,10 @@
 
   .temp-header a {
     color: $white;
+  }
+
+  .app-container {
+    padding-top: 40px
   }
 
 </style>
