@@ -1,4 +1,4 @@
-package org.molgenis.data.index;
+package org.molgenis.data.index.exception;
 
 import org.molgenis.data.MolgenisDataException;
 

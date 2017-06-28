@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.index.bootstrap;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -6,11 +6,10 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
-import org.molgenis.data.elasticsearch.index.job.IndexJobExecution;
-import org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexService;
+import org.molgenis.data.index.job.IndexJobExecution;
+import org.molgenis.data.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;

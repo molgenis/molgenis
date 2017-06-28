@@ -36,9 +36,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.model.*;
-import org.molgenis.data.index.IndexAlreadyExistsException;
-import org.molgenis.data.index.IndexException;
-import org.molgenis.data.index.UnknownIndexException;
+import org.molgenis.data.index.exception.IndexAlreadyExistsException;
+import org.molgenis.data.index.exception.IndexException;
+import org.molgenis.data.index.exception.UnknownIndexException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

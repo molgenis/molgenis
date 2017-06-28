@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index.job;
+package org.molgenis.data.index.job;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
-import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.*;
 import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
@@ -101,17 +100,17 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler
 		{
 			LOG.trace("Clean up Index job executions...");
 			Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
-			boolean indexJobExecutionExists = dataService.hasRepository(INDEX_JOB_EXECUTION);
+			boolean indexJobExecutionExists = dataService.hasRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION);
 			if (indexJobExecutionExists)
 			{
-				Stream<Entity> executions = dataService.getRepository(INDEX_JOB_EXECUTION).query()
+				Stream<Entity> executions = dataService.getRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION).query()
 						.lt(END_DATE, fiveMinutesAgo).and().eq(STATUS, SUCCESS.toString()).findAll();
-				dataService.delete(INDEX_JOB_EXECUTION, executions);
+				dataService.delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, executions);
 				LOG.debug("Cleaned up Index job executions.");
 			}
 			else
 			{
-				LOG.warn(INDEX_JOB_EXECUTION + " does not exist");
+				LOG.warn(IndexJobExecutionMeta.INDEX_JOB_EXECUTION + " does not exist");
 			}
 		});
 	}

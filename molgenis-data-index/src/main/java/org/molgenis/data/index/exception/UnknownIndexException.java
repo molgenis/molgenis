@@ -1,4 +1,6 @@
-package org.molgenis.data.index;
+package org.molgenis.data.index.exception;
+
+import org.molgenis.data.index.exception.IndexException;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;

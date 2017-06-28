@@ -1,4 +1,4 @@
-package org.molgenis.data.index;
+package org.molgenis.data.index.exception;
 
 public class IndexAlreadyExistsException extends IndexException
 {

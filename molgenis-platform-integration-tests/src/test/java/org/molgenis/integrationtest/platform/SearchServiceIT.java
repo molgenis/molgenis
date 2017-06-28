@@ -3,7 +3,7 @@ package org.molgenis.integrationtest.platform;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.index.UnknownIndexException;
+import org.molgenis.data.index.exception.UnknownIndexException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
