@@ -39,7 +39,7 @@ export default {
    * Retrieve all EntityTypes and filter on non-system EntityTypes
    */
   [GET_ENTITY_TYPES] ({commit}) {
-    // TODO can we filter system entities with REST call??
+    // TODO can we filter system entities with REST call?
     get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')
       .then(response => {
         commit(SET_ENTITY_TYPES, response.items)
@@ -91,6 +91,7 @@ export default {
         const newEditorEntityType = toEntityType(response.entityType)
         newEditorEntityType.isNew = true
         commit(SET_EDITOR_ENTITY_TYPE, newEditorEntityType)
+        commit(SET_SELECTED_ENTITY_TYPE_ID, newEditorEntityType.id)
       }, error => {
         if (error.errors) {
           commit(CREATE_ALERT, {
