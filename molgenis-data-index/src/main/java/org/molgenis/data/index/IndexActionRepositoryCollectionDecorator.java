@@ -47,6 +47,13 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		this.indexActionRegisterService.register(entityType, null);
+		this.decorated.updateRepository(entityType, updatedEntityType);
+	}
+
+	@Override
 	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
 		this.indexActionRegisterService.register(entityType, null);
