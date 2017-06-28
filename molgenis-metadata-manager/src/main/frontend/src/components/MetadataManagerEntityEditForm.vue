@@ -4,15 +4,16 @@
       <!-- Column containing  Entity ID, Extends, Extended by, Abstract-->
       <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label">Extends</label>
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-extends-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="entityTypeParent" :options="abstractEntities" label="label"
-                         selectLabel="" deselectLabel="" placeholder="Select an EntityType"></multiselect>
+                         selectLabel="" deselectLabel=""
+                         :placeholder="$t('entity-edit-form-extends-placeholder')"></multiselect>
           </div>
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">Abstract</label>
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-abstract-label' | i18n }}</label>
           <div class="col checkbox-column">
             <input v-model="abstract0" class="form-control" type="checkbox">
           </div>
@@ -25,8 +26,9 @@
             </save-button>
           </div>
           <div class="btn-group" role="group">
-            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left" :disabled="editorEntityType.isNew">
-              Delete EntityType
+            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left"
+                    :disabled="editorEntityType.isNew">
+              {{ 'delete-entity-button' | i18n }}
             </button>
           </div>
         </div>
@@ -35,24 +37,27 @@
       <!-- Column containing: Label, Description and Package -->
       <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label">Label</label>
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-label-label' | i18n }}</label>
           <div class="col">
-            <input v-model="label" class="form-control" type="text" placeholder="add a label...">
+            <input v-model="label" class="form-control" type="text"
+                   :placeholder="$t('entity-edit-form-label-placeholder')">
           </div>
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">Description</label>
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-description-label' | i18n }}</label>
           <div class="col">
-            <input v-model="description" class="form-control" type="text" placeholder="add a description...">
+            <input v-model="description" class="form-control" type="text"
+                   :placeholder="$t('entity-edit-form-description-placeholder')">
           </div>
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">Package</label>
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-package-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="package0" :options="packages" label="label"
-                         selectLabel="" deselectLabel="" placeholder="Select a package"></multiselect>
+                         selectLabel="" deselectLabel=""
+                         :placeholder="$t('entity-edit-form-package-placeholder')"></multiselect>
           </div>
         </div>
       </div>
@@ -60,32 +65,29 @@
       <!-- Column containing ID attribute, Label attribute and LookupAttributes -->
       <div class="col-md-4 col-sm-12 col-xs-12 outer-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label">ID attribute</label>
-          <div v-if="entityTypeParent === null || entityTypeParent === undefined" class="col">
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-id-attribute-label' | i18n }}</label>
+          <div class="col">
             <multiselect v-model="idAttribute" :options="attributes" label="label"
-                         selectLabel="" deselectLabel="" placeholder="Select an attribute"></multiselect>
+                         selectLabel="" deselectLabel="" :placeholder="$t('entity-edit-form-id-attribute-placeholder')"
+                         :disabled="entityTypeParent !== undefined"></multiselect>
           </div>
-
-          <div v-else class="col">
-            <multiselect v-model="idAttribute" :options="attributes" label="label"
-                         selectLabel="" deselectLabel="" placeholder="Select an attribute" disabled></multiselect>
-          </div>
-
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">Label attribute</label>
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-label-attribute-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="labelAttribute" :options="attributes" label="label"
-                         selectLabel="" deselectLabel="" placeholder="Select an attribute"></multiselect>
+                         selectLabel="" deselectLabel=""
+                         :placeholder="$t('entity-edit-form-label-attribute-placeholder')"></multiselect>
           </div>
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">Lookup attributes</label>
+          <label class="col-4 col-form-label">{{ 'entity-edit-form-lookup-attributes-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="lookupAttributes" :options="attributes" label="label"
-                         selectLabel="" deselectLabel="" placeholder="Select attributes" multiple></multiselect>
+                         selectLabel="" deselectLabel=""
+                         :placeholder="$t('entity-edit-form-lookup-attributes-placeholder')" multiple></multiselect>
           </div>
         </div>
       </div>
