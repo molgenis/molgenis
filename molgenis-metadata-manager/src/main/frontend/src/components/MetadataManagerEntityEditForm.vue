@@ -137,7 +137,6 @@
       },
       deleteEntityType (selectedEntityTypeId) {
         this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId)).then(() => {
-          this.$router.push({ path: '/' })
           this.$store.dispatch(DELETE_ENTITY_TYPE, selectedEntityTypeId)
         }).catch(this.$swal.noop)
       }

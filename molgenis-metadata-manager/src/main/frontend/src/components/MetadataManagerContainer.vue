@@ -49,6 +49,8 @@
       selectedEntityType (selectedEntityType) {
         if (selectedEntityType) {
           if (!selectedEntityType.isNew) this.$router.push('/' + selectedEntityType.id)
+        } else {
+          this.$router.push('/')
         }
       },
       selectedAttribute (selectedAttribute) {
@@ -61,7 +63,7 @@
         const toEntityTypeId = to.params.entityTypeId
 
         // The route change changed the EntityType we are looking at
-        if (fromEntityTypeId !== toEntityTypeId) {
+        if (toEntityTypeId && fromEntityTypeId !== toEntityTypeId) {
           this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, null)
           this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, toEntityTypeId)
         }

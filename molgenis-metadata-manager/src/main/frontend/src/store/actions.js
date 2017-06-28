@@ -1,4 +1,4 @@
-import { get, post, callApi } from 'molgenis-api-client'
+import { get, post, callApi } from '@molgenis/molgenis-api-client'
 import { toEntityType, toAttribute } from './utils/utils'
 
 import {
@@ -121,17 +121,10 @@ export default {
             message: error.errors[0].message
           })
         } else {
-          // Clear selected editorEntityType
-          commit(SET_EDITOR_ENTITY_TYPE, null)
-
-          // Remove EntityType that was just deleted from list of EntityTypes
           commit(SET_ENTITY_TYPES, state.entityTypes.filter(entityType => entityType.id !== selectedEntityTypeId))
-
-          // Clear selected entity type in dropdown
           commit(SET_SELECTED_ENTITY_TYPE_ID, null)
-
-          // Clear selected attribute
           commit(SET_SELECTED_ATTRIBUTE_ID, null)
+          commit(SET_EDITOR_ENTITY_TYPE, null)
         }
       })
   },
@@ -181,7 +174,8 @@ export default {
           attribute.isNew = false
         })
 
-        commit(SET_EDITOR_ENTITY_TYPE, editorEntityType)
+        commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
+        commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
       }, error => {
         commit(CREATE_ALERT, {
           type: 'error',
