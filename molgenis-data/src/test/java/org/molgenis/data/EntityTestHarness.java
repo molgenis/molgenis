@@ -13,13 +13,14 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -121,11 +122,18 @@ public class EntityTestHarness
 		return createDynamicTestEntityType(entityType, refEntityType);
 	}
 
+	public EntityType createDynamicSelfReferencingTestEntityType()
+	{
+		EntityType entityType = entityTypeFactory.create("TypeTestDynamicSelfReference")
+				.setLabel("TypeTestDynamicSelfReference").setBackend("PostgreSQL");
+		return createDynamicTestEntityType(entityType, entityType);
+	}
+
 	private EntityType createDynamicTestEntityType(EntityType entityType, EntityType refEntityType)
 	{
 		entityType.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL)
-				.addAttribute(createAttribute(ATTR_BOOL, BOOL).setAggregatable(true).setNillable(false)
+				.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL).addAttribute(
+				createAttribute(ATTR_BOOL, BOOL).setAggregatable(true).setNillable(false)
 						.setDefaultValue(valueOf(true)))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL, CATEGORICAL).setRefEntity(refEntityType))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL_MREF, CATEGORICAL_MREF).setRefEntity(refEntityType))
@@ -165,6 +173,11 @@ public class EntityTestHarness
 				.mapToObj(i -> createEntity(entityType, i, refEntities.get(i % refEntities.size())));
 	}
 
+	public Stream<Entity> createSelfRefEntitiesWithEmptyReferences(EntityType entityType, int numberOfEntities)
+	{
+		return IntStream.range(0, numberOfEntities).mapToObj(i -> createEntity(entityType, i, null));
+	}
+
 	private Entity createRefEntity(EntityType refEntityType, int id)
 	{
 		Entity refEntity = new DynamicEntity(refEntityType);
@@ -180,7 +193,7 @@ public class EntityTestHarness
 		entity.set(ATTR_STRING, "string1");
 		entity.set(ATTR_BOOL, id % 2 == 0);
 		entity.set(ATTR_CATEGORICAL, refEntity);
-		entity.set(ATTR_CATEGORICAL_MREF, Collections.singletonList(refEntity));
+		entity.set(ATTR_CATEGORICAL_MREF, refEntity == null ? emptyList() : singletonList(refEntity));
 		entity.set(ATTR_DATE, date);
 		entity.set(ATTR_DATETIME, dateTime);
 		entity.set(ATTR_EMAIL, "this.is@mail.address");
@@ -191,17 +204,10 @@ public class EntityTestHarness
 		entity.set(ATTR_INT, 10 + id);
 		entity.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		entity.set(ATTR_XREF, refEntity);
-		entity.set(ATTR_MREF, Collections.singletonList(refEntity));
+		entity.set(ATTR_MREF, refEntity == null ? emptyList() : singletonList(refEntity));
 		entity.set(ATTR_COMPOUND_CHILD_INT, 10 + id);
 		entity.set(ATTR_ENUM, id % 2 == 0 ? "option1" : "option2");
 
 		return new EntityWithComputedAttributes(entity);
-	}
-
-	public void addSelfReference(EntityType selfXrefEntityType)
-	{
-		Attribute selfRef = createAttribute(ATTR_XREF, XREF);
-		selfRef.setRefEntity(selfXrefEntityType);
-		selfXrefEntityType.addAttribute(selfRef);
 	}
 }

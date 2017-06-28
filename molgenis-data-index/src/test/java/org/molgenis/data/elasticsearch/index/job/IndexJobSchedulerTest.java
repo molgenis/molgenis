@@ -7,6 +7,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.IndexService;
+import org.molgenis.data.index.config.IndexTestConfig;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionListener;
@@ -36,7 +37,7 @@ import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { IndexJobSchedulerTest.Config.class })
+@ContextConfiguration(classes = { IndexJobSchedulerTest.Config.class, IndexTestConfig.class })
 public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired

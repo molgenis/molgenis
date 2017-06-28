@@ -8,13 +8,13 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
+import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.EntityUtils;
-import org.molgenis.util.GenericDependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +26,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.index.IndexDependencyModel.ENTITY_TYPE_FETCH;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
-import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 /**
@@ -48,8 +49,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexActionRegisterServiceImpl.class);
 	private static final int LOG_EVERY = 1000;
-
-	private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
+	private static final int ENTITY_FETCH_PAGE_SIZE = 1000;
 
 	private final Multimap<String, IndexAction> indexActionsPerTransaction = synchronizedListMultimap(
 			ArrayListMultimap.create());
@@ -57,16 +57,18 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	private final DataService dataService;
 	private final IndexActionFactory indexActionFactory;
 	private final IndexActionGroupFactory indexActionGroupFactory;
-	private final GenericDependencyResolver genericDependencyResolver;
+	private final IndexingStrategy indexingStrategy;
+
+	private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
 
 	@Autowired
 	IndexActionRegisterServiceImpl(DataService dataService, IndexActionFactory indexActionFactory,
-			IndexActionGroupFactory indexActionGroupFactory, GenericDependencyResolver genericDependencyResolver)
+			IndexActionGroupFactory indexActionGroupFactory, IndexingStrategy indexingStrategy)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.indexActionFactory = requireNonNull(indexActionFactory);
 		this.indexActionGroupFactory = requireNonNull(indexActionGroupFactory);
-		this.genericDependencyResolver = requireNonNull(genericDependencyResolver);
+		this.indexingStrategy = requireNonNull(indexingStrategy);
 
 		addExcludedEntity(INDEX_ACTION_GROUP);
 		addExcludedEntity(INDEX_ACTION);
@@ -109,85 +111,63 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
-		Set<IndexAction> indexActionSet = filterUnnecessaryIndexActions();
-		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
-		for (int i = 0; i < indexActions1.size(); i++)
-		{
-			indexActions1.get(i).setActionOrder(i);
-		}
-		if (indexActions1.isEmpty())
+		Collection<IndexAction> indexActionsForCurrentTransaction = getIndexActionsForCurrentTransaction();
+		if (indexActionsForCurrentTransaction.isEmpty())
 		{
 			return;
 		}
-		LOG.debug("Store index actions for transaction {}", transactionId);
-		dataService
-				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
-		dataService.add(INDEX_ACTION, indexActions1.stream());
-	}
-
-	/**
-	 * Filter all unnecessary index actions
-	 *
-	 * @return Set<IndexAction>
-	 */
-	private Set<IndexAction> filterUnnecessaryIndexActions()
-	{
-		// 1. add all referencing entities
-		Set<IndexAction> allIndexAction = getIndexActionsForCurrentTransaction().stream()
-				.flatMap(this::addReferencingEntities).collect(toSet());
-
-		// 2. Filter excluded entities
-		Set<IndexAction> indexActionWithoutExcluded = allIndexAction.stream()
-				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityTypeId())).collect(toSet());
-
-		// 3. Find all entities names of actions where no row is specified
-		Set<String> entityFullIds = indexActionWithoutExcluded.stream()
-				.filter(indexAction -> indexAction.getEntityId() == null).map(IndexAction::getEntityTypeId)
-				.collect(toSet());
-
-		// 4. Filter all row index actions from list
-		return indexActionWithoutExcluded.stream()
-				.filter(indexAction -> (indexAction.getEntityId() == null) || !entityFullIds
-						.contains(indexAction.getEntityTypeId())).collect(toSet());
-	}
-
-	/**
-	 * Add for all referencing entities an index action
-	 *
-	 * @return Stream<IndexAction>
-	 */
-	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction)
-	{
-		EntityType entityType = dataService.getEntityType(indexAction.getEntityTypeId());
-		if (entityType == null) // When entity is deleted the entityType cannot be retrieved
+		IndexActionGroup indexActionGroup = indexActionsForCurrentTransaction.iterator().next().getIndexActionGroup();
+		Set<Impact> changes = indexActionsForCurrentTransaction.stream().map(indexAction -> Impact
+				.createSingleEntityImpact(indexAction.getEntityTypeId(), indexAction.getEntityId())).collect(toSet());
+		IndexDependencyModel dependencyModel = new IndexDependencyModel(getEntityTypes());
+		List<IndexAction> indexActions = indexingStrategy.determineImpact(changes, dependencyModel).stream()
+				.filter(key -> !excludedEntities.contains(key.getEntityTypeId()))
+				.map(key -> createIndexAction(indexActionGroup, key)).collect(toList());
+		if (indexActions.isEmpty())
 		{
-			return Stream.of(indexAction);
+			return;
+		}
+		for (int i = 0; i < indexActions.size(); i++)
+		{
+			indexActions.get(i).setActionOrder(i);
 		}
 
-		// get referencing entity names
-		Set<String> referencingEntityTypes = genericDependencyResolver
-				.getAllDependants(indexAction.getEntityTypeId(), this::getDepth, this::getReferencingEntityTypes);
-
-		LOG.debug("Referencing entities for entity type {}: {}", indexAction.getEntityTypeId(), referencingEntityTypes);
-
-		// convert referencing entity names to index actions
-		Stream<IndexAction> referencingEntityIndexActions = referencingEntityTypes.stream()
-				.map(referencingEntity -> indexActionFactory.create().setEntityTypeId(referencingEntity)
-						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING));
-
-		return Stream.concat(Stream.of(indexAction), referencingEntityIndexActions);
+		LOG.debug("Store index actions for transaction {}", transactionId);
+		dataService
+				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
+		dataService.add(INDEX_ACTION, indexActions.stream());
 	}
 
-	private int getDepth(String entityTypeId)
+	private IndexAction createIndexAction(IndexActionGroup indexActionGroup, Impact key)
 	{
-		return dataService.getMeta().getEntityType(entityTypeId).getIndexingDepth();
+		IndexAction indexAction = indexActionFactory.create();
+		indexAction.setIndexStatus(PENDING);
+		indexAction.setEntityId((String) key.getId());
+		indexAction.setEntityTypeId(key.getEntityTypeId());
+		indexAction.setIndexActionGroup(indexActionGroup);
+		return indexAction;
 	}
 
-	private Set<String> getReferencingEntityTypes(String entityTypeId)
+	/**
+	 * Retrieves all {@link EntityType}s.
+	 * Queryies in pages of size ENTITY_FETCH_PAGE_SIZE so that results can be cached.
+	 * Uses a {@link Fetch} that specifies all fields needed to determine the necessary index actions.
+	 *
+	 * @return List containing all {@link EntityType}s.
+	 */
+	private List<EntityType> getEntityTypes()
 	{
-		return dataService.query(ATTRIBUTE_META_DATA, Attribute.class).eq(REF_ENTITY_TYPE, entityTypeId)
-				.fetch(new Fetch().field(ID)).findAll().map(Attribute::getEntity).map(EntityType::getId).
-						collect(toSet());
+		QueryImpl<EntityType> query = new QueryImpl<>();
+		query.setPageSize(ENTITY_FETCH_PAGE_SIZE);
+		query.setFetch(ENTITY_TYPE_FETCH);
+
+		List<EntityType> result = newArrayList();
+		for (int pageNum = 0; result.size() == pageNum * ENTITY_FETCH_PAGE_SIZE; pageNum++)
+		{
+			query.offset(pageNum * ENTITY_FETCH_PAGE_SIZE);
+			dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).forEach(result::add);
+		}
+		return result;
 	}
 
 	@Override
