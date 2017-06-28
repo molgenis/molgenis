@@ -1,3 +1,4 @@
+// @flow
 import { get, post, callApi } from '@molgenis/molgenis-api-client'
 import { toEntityType, toAttribute } from './utils/utils'
 
@@ -10,6 +11,8 @@ import {
   SET_ATTRIBUTE_TYPES
 } from './mutations'
 
+import type { EditorEntityType, EditorAttribute } from '../flow.types'
+
 export const GET_PACKAGES = '__GET_PACKAGES__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_EDITOR_ENTITY_TYPE = '__GET_EDITOR_ENTITY_TYPE__'
@@ -19,12 +22,63 @@ export const CREATE_ATTRIBUTE = '__CREATE_ATTRIBUTE__'
 export const SAVE_EDITOR_ENTITY_TYPE = '__SAVE_EDITOR_ENTITY_TYPE__'
 export const GET_ATTRIBUTE_TYPES = '__GET_ATTRIBUTE_TYPES__'
 
+export const toEntityType = (editorEntityType: Object): EditorEntityType => {
+  return {
+    'id': editorEntityType.id,
+    'label': editorEntityType.label,
+    'i18nLabel': editorEntityType.i18nLabel,
+    'description': editorEntityType.description,
+    'i18nDescription': editorEntityType.i18nDescription,
+    'abstract0': editorEntityType.abstract0,
+    'backend': editorEntityType.backend,
+    'package0': editorEntityType.package0,
+    'entityTypeParent': editorEntityType.entityTypeParent,
+    'attributes': editorEntityType.attributes.map(attribute => toAttribute(attribute)),
+    'tags': editorEntityType.tags,
+    'idAttribute': editorEntityType.idAttribute,
+    'labelAttribute': editorEntityType.labelAttribute,
+    'lookupAttributes': editorEntityType.lookupAttributes,
+    'isNew': false
+  }
+}
+
+export const toAttribute = (attribute: Object): EditorAttribute => {
+  return {
+    'id': attribute.id,
+    'name': attribute.name,
+    'type': attribute.type,
+    'parent': attribute.parent,
+    'refEntityType': attribute.refEntityType,
+    'mappedByEntityType': attribute.mappedByEntityType,
+    'orderBy': attribute.orderBy,
+    'expression': attribute.expression,
+    'nullable': attribute.nullable,
+    'auto': attribute.auto,
+    'visible': attribute.visible,
+    'label': attribute.label,
+    'i18nLabel': attribute.i18nLabel,
+    'description': attribute.description,
+    'i18nDescription': attribute.i18nDescription,
+    'aggregatable': attribute.aggregatable,
+    'enumOptions': attribute.enumOptions,
+    'rangeMin': attribute.minRange,
+    'rangeMax': attribute.maxRange,
+    'readonly': attribute.readonly,
+    'unique': attribute.unique,
+    'tags': attribute.tags,
+    'visibleExpression': attribute.visibleExpression,
+    'validationExpression': attribute.validationExpression,
+    'defaultValue': attribute.defaultValue,
+    'sequenceNumber': attribute.sequenceNumber,
+    'isNew': false
+  }
+}
+
 export default {
   /**
    * Retrieve all Packages and filter on non-system Packages
    */
   [GET_PACKAGES] ({commit}) {
-    // TODO filter system packages
     get({apiUrl: '/metadata-manager-service'}, '/editorPackages')
       .then(response => {
         commit(SET_PACKAGES, response)
@@ -39,7 +93,6 @@ export default {
    * Retrieve all EntityTypes and filter on non-system EntityTypes
    */
   [GET_ENTITY_TYPES] ({commit}) {
-    // TODO can we filter system entities with REST call?
     get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')
       .then(response => {
         commit(SET_ENTITY_TYPES, response.items)
@@ -139,7 +192,6 @@ export default {
       .then(response => {
         const attribute = toAttribute(response.attribute)
         attribute.isNew = true
-        // Call an update on the attribute key with the existing attribute list + the new empty attribute
         commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
         commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
       }, error => {
@@ -168,7 +220,6 @@ export default {
           message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
         })
 
-        // After saving, newly created or edited entityTypes are not new and the attributes are not new
         const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
         editorEntityType.isNew = false
         editorEntityType.attributes.forEach(attribute => {

@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Buttons for changing order -->
   <li>
     <span v-bind:class="{ 'selected-attribute-node': attribute.selected }" @click="onAttributeSelect(attribute)">
       <i v-bind:class="['fa', isFolder ? 'fa-folder-o' : 'fa-columns']"></i> {{attribute.label}}

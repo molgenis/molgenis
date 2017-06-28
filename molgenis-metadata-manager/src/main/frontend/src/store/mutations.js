@@ -1,3 +1,6 @@
+// @flow
+import type { EditorAttribute } from '../flow.types'
+
 export const SET_PACKAGES = '__SET_PACKAGES__'
 export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
 export const SET_SELECTED_ENTITY_TYPE_ID = '__SET_SELECTED_ENTITY_TYPE_ID__'
@@ -11,7 +14,19 @@ export const DELETE_SELECTED_ATTRIBUTE = '__DELETE_SELECTED_ATTRIBUTE__'
 
 export const CREATE_ALERT = '__CREATE_ALERT__'
 
-import { swapArrayElements } from './utils/utils'
+/**
+ * Swap the elements in an array at indexes originalIndex and targetIndex.
+ *
+ * @param (array) The array.
+ * @param (originalIndex) The index of the first element to swap.
+ * @param (targetIndex) The index of the second element to swap.
+ * @return {Array} A new array with the elements swapped.
+ */
+const swapArrayElements = (array: Array<EditorAttribute>, originalIndex: number, targetIndex: number) => {
+  if (array.length === 1) return array
+  array.splice(targetIndex, 1, array.splice(originalIndex, 1, array[targetIndex])[0])
+  return array
+}
 
 export default {
   [SET_PACKAGES] (state, packages) {
@@ -39,7 +54,6 @@ export default {
     state.initialEditorEntityType = JSON.parse(JSON.stringify(editorEntityType))
   },
   [UPDATE_EDITOR_ENTITY_TYPE] (state, update) {
-    // Add some extra changes to the attribute used as an idAttribute
     if (update.key === 'idAttribute') {
       update.value.readonly = true
       update.value.unique = true
@@ -56,7 +70,6 @@ export default {
    * Updates an editorEntityType attribute via index
    */
   [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE] (state, update) {
-    // Return the index of the selected attribute in the array of the editorEntityType attributes
     const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
