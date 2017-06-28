@@ -1,27 +1,8 @@
 <template>
   <div>
     <div class="row">
-      <div class="col">
-        <div class="float-right">
-          <save-button :onClick="saveEntityType" :disabled="!isEntityTypeEdited">
-            {{ 'save-changes-button' | i18n }}
-          </save-button>
-        </div>
-      </div>
-    </div>
-    <hr>
-    <div class="row">
       <!-- Column containing  Entity ID, Extends, Extended by, Abstract-->
       <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
-        <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'delete-entity-button' | i18n }}</label>
-          <div class="col">
-            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left">
-              <i class="fa fa-trash-o"></i>
-            </button>
-          </div>
-        </div>
-
         <div class="form-group row">
           <label class="col-4 col-form-label">Extends</label>
           <div class="col">
@@ -34,6 +15,19 @@
           <label class="col-4 col-form-label">Abstract</label>
           <div class="col checkbox-column">
             <input v-model="abstract0" class="form-control" type="checkbox">
+          </div>
+        </div>
+
+        <div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
+          <div class="btn-group mr-2" role="group">
+            <save-button :onClick="saveEntityType" :disabled="!isEntityTypeEdited">
+              {{ 'save-changes-button' | i18n }}
+            </save-button>
+          </div>
+          <div class="btn-group" role="group">
+            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left">
+              Delete EntityType
+            </button>
           </div>
         </div>
       </div>
@@ -108,7 +102,6 @@
     padding-top: 11px
   }
 
-  /*screen-md border on inner column when columns aligned next to each other*/
   @include media-breakpoint-up(md) {
     .col-md-4.inner-column {
       border-right: solid black thin;
@@ -116,7 +109,7 @@
   }
 
   .multiselect__tag {
-    background-color: darken($red, 20%);
+    background-color: $brand-danger;
   }
 </style>
 
