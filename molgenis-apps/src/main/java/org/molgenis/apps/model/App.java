@@ -103,10 +103,7 @@ public class App extends StaticEntity
 
 	public void setHtmlTemplate(FreemarkerTemplate htmlTemplate)
 	{
-		if (this.getUseFreemarkerTemplate())
-		{
-			set(LANDING_PAGE_HTML_TEMPLATE, htmlTemplate);
-		}
+		set(LANDING_PAGE_HTML_TEMPLATE, htmlTemplate);
 	}
 }
 
