@@ -47,6 +47,7 @@ Files stored in an [Amazon Bucket](http://docs.aws.amazon.com/AmazonS3/latest/de
 | secretKey      | the secret key from your amazon bucket account |
 | region         | the region in which the amazon bucket is located |
 | targetEntityId | the name of the entity to import to, this is an optional field used for files that have a different sheet name instead of the targeted entityType |
+| extension      | file extension, this is an optional paramater that is needed in case of a different format than excel |
 
 ### Mapping
 Runs an existing Mapping Service project.
