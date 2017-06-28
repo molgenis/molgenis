@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
+import java.util.Properties;
 
 /**
  * Database configuration
@@ -64,6 +65,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 		{
 			throw new RuntimeException(e);
 		}
+
 		dataSource.setJdbcUrl(dbJdbcUri);
 		dataSource.setUser(dbUser);
 		dataSource.setPassword(dbPassword);
@@ -72,6 +74,11 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 		dataSource.setMaxPoolSize(MAX_POOL_SIZE);
 		dataSource.setTestConnectionOnCheckin(true);
 		dataSource.setIdleConnectionTestPeriod(120);
+
+		Properties properties = dataSource.getProperties();
+		properties.setProperty("reWriteBatchedInserts", "true");
+		properties.setProperty("autosave", "CONSERVATIVE");
+		dataSource.setProperties(properties);
 
 		return dataSource;
 	}
