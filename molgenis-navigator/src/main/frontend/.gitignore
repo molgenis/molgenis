@@ -3,4 +3,3 @@ node_modules/
 dist/
 node/
 npm-debug.log
-coverage/**
