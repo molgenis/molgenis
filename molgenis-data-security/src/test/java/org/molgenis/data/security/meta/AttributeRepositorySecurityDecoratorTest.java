@@ -84,7 +84,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		when(metadataService.getBackend(concreteEntityType1)).thenReturn(backend1);
 		when(metadataService.getBackend(concreteEntityType2)).thenReturn(backend2);
 		when(attribute.getIdentifier()).thenReturn(attributeId);
-		repo = new AttributeRepositorySecurityDecorator(decoratedRepo, systemEntityTypeRegistry, permissionService);
+		repo = new AttributeRepositorySecurityDecorator(decoratedRepo, null); // FIXME replace null with dependency
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })

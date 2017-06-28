@@ -13,10 +13,8 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Decorator for the attribute repository:
- * - filters requested entities based on the entity permissions of the current user.
  * - applies attribute metadata updates to the backend
  * <p>
- * TODO replace permission based entity filtering with generic row-level security once available
  */
 public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<Attribute>
 {

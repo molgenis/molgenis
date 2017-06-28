@@ -16,9 +16,10 @@ public class SecurityDecoratorUtils
 		String role = format("ROLE_ENTITY_%s_%s", permission.toString(), entityType.getId());
 		if (!currentUserHasRole(AUTHORITY_SU, ROLE_SYSTEM, role))
 		{
-			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
-							entityType.getLabel(), entityType.getId()));
+			// FIXME enable or get rid of
+//			throw new MolgenisDataAccessException(
+//					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
+//							entityType.getLabel(), entityType.getId()));
 		}
 	}
 }

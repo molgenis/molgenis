@@ -48,7 +48,7 @@ public class MolgenisPermissionServiceImplTest
 						authority6));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		molgenisPermissionService = new MolgenisPermissionServiceImpl();
+		molgenisPermissionService = new MolgenisPermissionServiceImpl(null); // FIXME
 	}
 
 	@AfterClass

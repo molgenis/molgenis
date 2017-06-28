@@ -418,7 +418,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper(), null); // FIXME replace null
 		}
 
 		@Bean
