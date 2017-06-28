@@ -185,7 +185,7 @@ class Session():
 		response.raise_for_status();
 		return response.json();
 
-    def upload_with_meta_data(self, meta_data_zip):
+    def upload_zip(self, meta_data_zip):
 		'''Uploads a given zip with data and metadata'''
 		header = self._get_token_header()
 		files =  {'file': open(os.path.abspath(meta_data_zip), 'rb')}
