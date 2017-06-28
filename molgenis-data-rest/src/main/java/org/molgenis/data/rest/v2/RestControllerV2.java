@@ -505,7 +505,7 @@ class RestControllerV2
 					throw createUnknownEntityExceptionNotValidId(id);
 				}
 
-				Object value = this.restService.toEntityValue(attr, entity.get(attributeName));
+				Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
 				originalEntity.set(attributeName, value);
 				updatedEntities.add(originalEntity);
 				count++;

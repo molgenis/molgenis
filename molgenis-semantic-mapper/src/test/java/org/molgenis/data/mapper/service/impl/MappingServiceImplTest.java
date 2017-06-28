@@ -373,6 +373,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	/**
 	 * Applying a mapping multiple times to the same target should update the existing entities.
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testApplyMappingsUpdate()
 	{
@@ -421,7 +422,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, false, "packageId", "label", progress), 4);
 
-		//noinspection unchecked
 		verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
 
 		verify(updateEntityRepo).upsertBatch(batchCaptor.capture());

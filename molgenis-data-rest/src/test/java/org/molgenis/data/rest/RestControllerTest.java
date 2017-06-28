@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -661,11 +662,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory()
+		{
+			return mock(ServletUriComponentsBuilderFactory.class);
+		}
+
+		@Bean
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
 					molgenisPermissionService(), new MolgenisRSQL(),
-					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager()),
+					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
+							servletUriComponentsBuilderFactory()),
 					languageService());
 		}
 	}

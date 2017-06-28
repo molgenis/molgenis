@@ -104,4 +104,14 @@ public class AmazonBucketJobExecution extends JobExecution
 	{
 		return getString(AmazonBucketJobExecutionMetaData.SECRET_KEY);
 	}
+
+	public void setExtension(String extension)
+	{
+		set(AmazonBucketJobExecutionMetaData.EXTENSION, extension);
+	}
+
+	public String getExtension()
+	{
+		return getString(AmazonBucketJobExecutionMetaData.EXTENSION);
+	}
 }
