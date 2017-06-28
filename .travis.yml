@@ -22,7 +22,7 @@ addons:
 sudo: true
 before_install:
   # Use wrapper script to install fixed maven version
-  - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
+  - mvn -N io.takari:maven:wrapper -Dmaven=3.5.1
 install:
   - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 before_script:
