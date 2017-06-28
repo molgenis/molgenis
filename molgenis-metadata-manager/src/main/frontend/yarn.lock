@@ -2,6 +2,12 @@
 # yarn lockfile v1
 
 
+"@molgenis/molgenis-api-client@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-1.0.0.tgz#c6eb12d2ed54506fc0c5dd12611b371743c614b7"
+  dependencies:
+    isomorphic-fetch "^2.2.1"
+
 "@molgenis/molgenis-i18n-js@^0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@molgenis/molgenis-i18n-js/-/molgenis-i18n-js-0.0.5.tgz#addb86b5292edf68cc5d536724582f84ec4882db"
@@ -3871,12 +3877,6 @@ mocha@^3.4.2:
     lodash.create "3.1.1"
     mkdirp "0.5.1"
     supports-color "3.1.2"
-
-molgenis-api-client@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/molgenis-api-client/-/molgenis-api-client-1.2.0.tgz#af41a0f2e0de5ce40d9de88277d5c395e2592bdb"
-  dependencies:
-    isomorphic-fetch "^2.2.1"
 
 moment@^2.18.1:
   version "2.18.1"
