@@ -18,7 +18,9 @@ export default {
     state.packages = packages
   },
   [SET_ENTITY_TYPES] (state, entityTypes) {
-    state.entityTypes = entityTypes
+    state.entityTypes = entityTypes.sort((a, b) => {
+      return a.label.localeCompare(b.label)
+    })
   },
   [SET_SELECTED_ENTITY_TYPE_ID] (state, entityTypeId) {
     state.selectedEntityTypeId = entityTypeId
