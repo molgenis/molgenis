@@ -171,8 +171,6 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
-                        <!--useIncrementalCompilation a workaround for "endPosTable already set"-->
-                        <useIncrementalCompilation>false</useIncrementalCompilation>
                         <compilerArguments>
                             <Xlint/>
                         </compilerArguments>
