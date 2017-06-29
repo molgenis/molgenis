@@ -2,7 +2,7 @@
 import testAction from '../utils/action.utils'
 import td from 'testdouble'
 
-import * as api from 'molgenis-api-client'
+import * as api from '@molgenis/molgenis-api-client'
 import {
   CREATE_ALERT,
   SET_ATTRIBUTE_TYPES,
@@ -193,7 +193,6 @@ describe('actions', () => {
       td.replace(api, 'callApi', callApi)
 
       testAction(actions.__DELETE_ENTITY_TYPE__, '1', state, [
-        { type: SET_EDITOR_ENTITY_TYPE, payload: null },
         { type: SET_ENTITY_TYPES, payload: [{ id: '2' }] },
         { type: SET_SELECTED_ENTITY_TYPE_ID, payload: null },
         { type: SET_SELECTED_ATTRIBUTE_ID, payload: null }

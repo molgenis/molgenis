@@ -1,4 +1,25 @@
 // @flow
+export type Update = {
+  key: string,
+  value: any
+}
+
+export type UpdateOrder = {
+  moveOrder: string,
+  selectedAttributeIndex: number
+}
+
+export type State = {
+  alert: Alert,
+  packages: Array<EditorPackageIdentifier>,
+  entityTypes: Array<Object>,
+  attributeTypes: Array<string>,
+  selectedEntityTypeId: ?string,
+  selectedAttributeId: ?string,
+  editorEntityType: EditorEntityType,
+  initialEditorEntityType: ?EditorEntityType
+}
+
 export type Alert = {
   'message': ?string,
   'type': ?string
@@ -38,20 +59,20 @@ export type EditorEntityTypeIdentifier = {
 
 export type EditorEntityType = {
   'id': string,
-  'label': ?string,
-  'i18nLabel': ?any,
-  'description': ?string,
-  'i18nDescription': ?any,
-  'abstract0': ?boolean,
-  'backend': ?string,
-  'package0': ?EditorPackageIdentifier,
-  'entityTypeParent': ?EditorEntityTypeParent,
+  'label': string,
+  'i18nLabel'?: ?any,
+  'description'?: ?string,
+  'i18nDescription'?: ?any,
+  'abstract0'?: ?boolean,
+  'backend'?: ?string,
+  'package0'?: ?EditorPackageIdentifier,
+  'entityTypeParent'?: ?EditorEntityTypeParent,
   'attributes': Array<EditorAttribute>,
-  'tags': ?Array<Tag>,
-  'idAttribute': ?EditorAttributeIdentifier,
-  'labelAttribute': ?EditorAttributeIdentifier,
-  'idAttribute': ?Array<EditorAttributeIdentifier>,
-  'isNew': ?boolean
+  'tags'?: ?Array<Tag>,
+  'idAttribute'?: ?EditorAttributeIdentifier,
+  'labelAttribute'?: ?EditorAttributeIdentifier,
+  'idAttribute'?: ?Array<EditorAttributeIdentifier>,
+  'isNew'?: ?boolean
 }
 
 export type EditorOrder = {
@@ -94,5 +115,6 @@ export type EditorAttribute = {
   'visibleExpression': ?string,
   'validationExpression': ?string,
   'defaultValue': ?string,
-  'sequenceNumber': number
+  'sequenceNumber': number,
+  'isNew': ?boolean
 }

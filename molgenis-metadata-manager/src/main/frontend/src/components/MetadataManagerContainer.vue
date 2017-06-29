@@ -9,14 +9,14 @@
 
     <div class="row">
       <div class="col">
-        <metadata-manager-entity-edit-form v-if="editorEntityType !== null"></metadata-manager-entity-edit-form>
+        <metadata-manager-entity-edit-form v-if="editorEntityType && editorEntityType.id !== ''"></metadata-manager-entity-edit-form>
         <hr>
       </div>
     </div>
 
     <div class="row">
       <div class="col">
-        <metadata-manager-attribute-edit-form v-if="editorEntityType !== null"></metadata-manager-attribute-edit-form>
+        <metadata-manager-attribute-edit-form v-if="editorEntityType && editorEntityType.id !== ''"></metadata-manager-attribute-edit-form>
       </div>
     </div>
   </div>

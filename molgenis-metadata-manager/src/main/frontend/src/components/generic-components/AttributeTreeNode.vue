@@ -19,6 +19,7 @@
 
   li:hover {
     cursor: pointer;
+    background-color: lighten($green, 30%);
   }
 
   .selected-attribute-node {

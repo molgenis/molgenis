@@ -51,8 +51,6 @@
           return this.$store.getters.getSelectedEntityType
         },
         set (selectedEntityType) {
-          // Check if there are unsaved changes.
-          // If yes, ask for confirmation before changing the selectedEntityType
           if (!this.isEntityTypeEdited) this.$store.commit(SET_SELECTED_ENTITY_TYPE_ID, selectedEntityType.id)
           else {
             this.$swal(getConfirmBeforeLeavingProperties()).then(() => {

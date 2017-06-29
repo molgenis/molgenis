@@ -1,6 +1,5 @@
 // @flow
 import { get, post, callApi } from '@molgenis/molgenis-api-client'
-import { toEntityType, toAttribute } from './utils/utils'
 
 import {
   UPDATE_EDITOR_ENTITY_TYPE,
@@ -11,16 +10,16 @@ import {
   SET_ATTRIBUTE_TYPES
 } from './mutations'
 
-import type { EditorEntityType, EditorAttribute } from '../flow.types'
+import type { EditorEntityType, EditorAttribute, State } from '../flow.types'
 
-export const GET_PACKAGES = '__GET_PACKAGES__'
-export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
-export const GET_EDITOR_ENTITY_TYPE = '__GET_EDITOR_ENTITY_TYPE__'
-export const CREATE_ENTITY_TYPE = '__CREATE_ENTITY_TYPE__'
-export const DELETE_ENTITY_TYPE = '__DELETE_ENTITY_TYPE__'
-export const CREATE_ATTRIBUTE = '__CREATE_ATTRIBUTE__'
-export const SAVE_EDITOR_ENTITY_TYPE = '__SAVE_EDITOR_ENTITY_TYPE__'
-export const GET_ATTRIBUTE_TYPES = '__GET_ATTRIBUTE_TYPES__'
+export const GET_PACKAGES: string = '__GET_PACKAGES__'
+export const GET_ENTITY_TYPES: string = '__GET_ENTITY_TYPES__'
+export const GET_EDITOR_ENTITY_TYPE: string = '__GET_EDITOR_ENTITY_TYPE__'
+export const CREATE_ENTITY_TYPE: string = '__CREATE_ENTITY_TYPE__'
+export const DELETE_ENTITY_TYPE: string = '__DELETE_ENTITY_TYPE__'
+export const CREATE_ATTRIBUTE: string = '__CREATE_ATTRIBUTE__'
+export const SAVE_EDITOR_ENTITY_TYPE: string = '__SAVE_EDITOR_ENTITY_TYPE__'
+export const GET_ATTRIBUTE_TYPES: string = '__GET_ATTRIBUTE_TYPES__'
 
 export const toEntityType = (editorEntityType: Object): EditorEntityType => {
   return {
@@ -78,7 +77,7 @@ export default {
   /**
    * Retrieve all Packages and filter on non-system Packages
    */
-  [GET_PACKAGES] ({commit}) {
+  [GET_PACKAGES] ({commit}: { commit: Function }) {
     get({apiUrl: '/metadata-manager-service'}, '/editorPackages')
       .then(response => {
         commit(SET_PACKAGES, response)
@@ -92,7 +91,7 @@ export default {
   /**
    * Retrieve all EntityTypes and filter on non-system EntityTypes
    */
-  [GET_ENTITY_TYPES] ({commit}) {
+  [GET_ENTITY_TYPES] ({commit}: { commit: Function }) {
     get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')
       .then(response => {
         commit(SET_ENTITY_TYPES, response.items)
@@ -106,7 +105,7 @@ export default {
   /**
    * Retrieve all Attribute types
    */
-  [GET_ATTRIBUTE_TYPES] ({commit}) {
+  [GET_ATTRIBUTE_TYPES] ({commit}: { commit: Function }) {
     get({apiUrl: '/api'}, '/v2/sys_md_Attribute/meta/type')
       .then(response => {
         commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map((type) => type.toUpperCase()))
@@ -122,7 +121,7 @@ export default {
    *
    * @param entityTypeId The selected EntityType identifier
    */
-  [GET_EDITOR_ENTITY_TYPE] ({commit}, entityTypeId) {
+  [GET_EDITOR_ENTITY_TYPE] ({commit}: { commit: Function }, entityTypeId: string) {
     get({apiUrl: '/metadata-manager-service'}, '/entityType/' + entityTypeId)
       .then(response => {
         commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
@@ -138,7 +137,7 @@ export default {
    * Response returns a blank EditorEntityType
    * EditorEntityType is added to the list of entityTypes in the state
    */
-  [CREATE_ENTITY_TYPE] ({commit}) {
+  [CREATE_ENTITY_TYPE] ({commit}: { commit: Function }) {
     get({apiUrl: '/metadata-manager-service'}, '/create/entityType')
       .then(response => {
         const newEditorEntityType = toEntityType(response.entityType)
@@ -164,7 +163,7 @@ export default {
    *
    * @param selectedEntityTypeId the ID of the EntityType to be deleted
    */
-  [DELETE_ENTITY_TYPE] ({commit, state}, selectedEntityTypeId) {
+  [DELETE_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }, selectedEntityTypeId: string) {
     callApi({apiUrl: '/api'}, '/v1/' + selectedEntityTypeId + '/meta', 'delete')
       .then(response => {
         // Never reached due to https://github.com/molgenis/molgenis-api-client/issues/1
@@ -187,7 +186,7 @@ export default {
    * Response returns a blank Attribute
    * Attribute is added to the list of attributes in the existing editorEntityType
    */
-  [CREATE_ATTRIBUTE] ({commit, state}) {
+  [CREATE_ATTRIBUTE] ({commit, state}: { commit: Function, state: State }) {
     get({apiUrl: '/metadata-manager-service'}, '/create/attribute')
       .then(response => {
         const attribute = toAttribute(response.attribute)
@@ -210,9 +209,8 @@ export default {
   },
   /**
    * Persist metadata changes to the database
-   * @param updatedEditorEntityType the updated EditorEntityType
    */
-  [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}) {
+  [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
     post({apiUrl: '/metadata-manager-service'}, '/entityType', state.editorEntityType)
       .then(response => {
         commit(CREATE_ALERT, {
