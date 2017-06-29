@@ -44,7 +44,7 @@ Create the file ~/.molgenis/omx/molgenis-server.properties
 ```
 	db_user=molgenis  
 	db_password=molgenis  
-	db_uri=jdbc\:postgresql\://localhost/molgenis?reWriteBatchedInserts=true&autosave=CONSERVATIVE
+	db_uri=jdbc\:postgresql\://localhost/molgenis
 	admin.password=admin  
 	user.password=admin  
 ```

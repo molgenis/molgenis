@@ -53,11 +53,13 @@ public class AppMetaData extends SystemEntityType
 		addAttribute(IS_ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false).setVisible(false)
 				.setDefaultValue(Boolean.FALSE.toString());
 		addAttribute(USE_FREEMARKER_TEMPLATE).setDataType(BOOL).setLabel("Use freemarker template as index.html")
-				.setNillable(false).setDefaultValue(Boolean.TRUE.toString());
+				.setNillable(false).setDefaultValue(Boolean.FALSE.toString()).setDescription(
+				"When using a freemarker template, the index page of your app should be placed in "
+						+ "the FreemarkerTemplates table with a name like: view-apps-yourname.ftl. "
+						+ "When selecting no, please include an index.html in the root of your app.zip");
 		addAttribute(LANDING_PAGE_HTML_TEMPLATE).setDataType(XREF).setRefEntity(freemarkerTemplateMetaData)
 				.setNillable(true).setLabel("Landing page HTML template")
-				.setVisibleExpression("$('" + USE_FREEMARKER_TEMPLATE + "').eq(true).value()")
-				.setValidationExpression(
+				.setVisibleExpression("$('" + USE_FREEMARKER_TEMPLATE + "').eq(true).value()").setValidationExpression(
 				"$('" + LANDING_PAGE_HTML_TEMPLATE + "').value() != null || $('" + USE_FREEMARKER_TEMPLATE
 						+ "').eq(false).value()").setDescription("Landing page HTML FreeMarker template");
 	}
