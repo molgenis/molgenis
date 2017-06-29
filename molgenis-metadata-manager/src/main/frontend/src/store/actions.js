@@ -191,7 +191,7 @@ export default {
       .then(response => {
         const attribute = toAttribute(response.attribute)
         attribute.isNew = true
-        if (state.editorEntityType) commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
+        commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
         commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
       }, error => {
         if (error.errors) {
@@ -209,7 +209,6 @@ export default {
   },
   /**
    * Persist metadata changes to the database
-   * @param updatedEditorEntityType the updated EditorEntityType
    */
   [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
     post({apiUrl: '/metadata-manager-service'}, '/entityType', state.editorEntityType)

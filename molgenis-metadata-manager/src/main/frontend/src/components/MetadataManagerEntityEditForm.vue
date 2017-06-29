@@ -106,7 +106,7 @@
 
   @include media-breakpoint-up(md) {
     .col-md-4.inner-column {
-      border-right: solid black thin;
+      border-right: solid $black thin;
     }
   }
 
