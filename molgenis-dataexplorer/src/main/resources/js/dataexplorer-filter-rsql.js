@@ -115,7 +115,13 @@
 
             var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined)
             $.each(line.values, function () {
-                simpleFilter.getValues().push(this.value)
+                if (this.value.constructor === Array) {
+                    $.each(this.value, function () {
+                        simpleFilter.getValues().push(this)
+                    })
+                } else {
+                    simpleFilter.getValues().push(this.value)
+                }
                 simpleFilter.getLabels().push(this.label)
             })
             simpleFilter.operator = line.operator
