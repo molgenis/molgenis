@@ -1,6 +1,6 @@
 <template>
   <li>
-    <span v-bind:class="{ 'selected-attribute-node': attribute.selected }" @click="onAttributeSelect(attribute)">
+    <span v-bind:class="{ 'selected-attribute-node': attribute.selected, 'node-content': true }" @click="onAttributeSelect(attribute)">
       <i v-bind:class="['fa', isFolder ? 'fa-folder-o' : 'fa-columns']"></i> {{attribute.label}}
     </span>
     <ul v-if="isFolder">
@@ -17,13 +17,13 @@
     list-style-type: none;
   }
 
-  li:hover {
+  .node-content:hover {
     cursor: pointer;
-    background-color: lighten($green, 30%);
+    background-color: lighten($brand-primary, 50%);
   }
 
   .selected-attribute-node {
-    background-color: lighten($teal, 20%);
+    background-color: lighten($brand-primary, 35%);
   }
 </style>
 
