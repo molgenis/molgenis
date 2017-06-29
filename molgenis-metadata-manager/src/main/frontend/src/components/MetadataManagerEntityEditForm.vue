@@ -4,7 +4,7 @@
       <!-- Column containing  Entity ID, Extends, Extended by, Abstract-->
       <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-extends-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-extends-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="entityTypeParent" :options="abstractEntities" label="label"
                          selectLabel="" deselectLabel=""
@@ -13,7 +13,7 @@
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-abstract-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-abstract-label' | i18n }}</label>
           <div class="col checkbox-column">
             <input v-model="abstract0" class="form-control" type="checkbox">
           </div>
@@ -37,7 +37,7 @@
       <!-- Column containing: Label, Description and Package -->
       <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-label-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-label' | i18n }}</label>
           <div class="col">
             <input v-model="label" class="form-control" type="text"
                    :placeholder="$t('entity-edit-form-label-placeholder')">
@@ -45,7 +45,7 @@
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-description-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-description-label' | i18n }}</label>
           <div class="col">
             <input v-model="description" class="form-control" type="text"
                    :placeholder="$t('entity-edit-form-description-placeholder')">
@@ -53,7 +53,7 @@
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-package-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-package-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="package0" :options="packages" label="label"
                          selectLabel="" deselectLabel=""
@@ -65,7 +65,7 @@
       <!-- Column containing ID attribute, Label attribute and LookupAttributes -->
       <div class="col-md-4 col-sm-12 col-xs-12 outer-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-id-attribute-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-id-attribute-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="idAttribute" :options="attributes" label="label"
                          selectLabel="" deselectLabel="" :placeholder="$t('entity-edit-form-id-attribute-placeholder')"
@@ -74,7 +74,7 @@
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-label-attribute-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-attribute-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="labelAttribute" :options="attributes" label="label"
                          selectLabel="" deselectLabel=""
@@ -83,7 +83,7 @@
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label">{{ 'entity-edit-form-lookup-attributes-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-lookup-attributes-label' | i18n }}</label>
           <div class="col">
             <multiselect v-model="lookupAttributes" :options="attributes" label="label"
                          selectLabel="" deselectLabel=""
@@ -110,8 +110,8 @@
     }
   }
 
-  .multiselect__tag {
-    background-color: $brand-danger;
+  .multiselect__tag, .multiselect__tag-icon:hover {
+    background-color: $brand-info;
   }
 </style>
 
@@ -137,7 +137,7 @@
       }
     },
     computed: {
-      ...mapState(['editorEntityType', 'packages']),
+      ...mapState(['editorEntityType', 'packages', 'selectedEntityTypeId']),
       ...mapGetters({
         abstractEntities: 'getAbstractEntities',
         attributes: 'getEditorEntityTypeAttributes',
