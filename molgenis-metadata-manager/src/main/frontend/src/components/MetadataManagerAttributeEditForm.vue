@@ -65,28 +65,28 @@
       <div class="row">
         <div class="col-md-6">
           <div class="form-group row">
-            <label class="col-3 col-form-label">{{ 'attribute-edit-form-name-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-name-label' | i18n }}</label>
             <div class="col">
               <input v-model="name" class="form-control" type="text" :placeholder="$t('attribute-edit-form-name-placeholder')">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label">{{ 'attribute-edit-form-label-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-label-label' | i18n }}</label>
             <div class="col">
               <input v-model="label" class="form-control" type="text" :placeholder="$t('attribute-edit-form-label-placeholder')">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label">{{ 'attribute-edit-form-description-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-description-label' | i18n }}</label>
             <div class="col">
               <input v-model="description" class="form-control" type="text" :placeholder="$t('attribute-edit-form-description-placeholder')">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label">{{ 'attribute-edit-form-type-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-type-label' | i18n }}</label>
             <div class="col">
               <multiselect v-model="type" :options="attributeTypes"
                            selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-type-placeholder')"></multiselect>
@@ -94,7 +94,7 @@
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label">{{ 'attribute-edit-form-parent-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-parent-label' | i18n }}</label>
             <div class="col">
               <multiselect v-model="parent" :options="compoundAttributes" label="label"
                            selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-parent-placeholder')"></multiselect>
@@ -102,7 +102,7 @@
           </div>
 
           <div v-if="isReferenceType" class="form-group row">
-            <label class="col-3 col-form-label">{{ 'attribute-edit-form-reference-entity-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-reference-entity-label' | i18n }}</label>
             <div class="col">
               <multiselect v-model="refEntityType" :options="entityTypes" label="label"
                            selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-reference-entity-placeholder')"></multiselect>
@@ -111,14 +111,14 @@
 
           <div v-else-if="isNumericType">
             <div class="form-group row">
-              <label class="col-3 col-form-label">{{ 'attribute-edit-form-minimum-range-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-minimum-range-label' | i18n }}</label>
               <div class="col">
                 <input v-model.number="rangeMin" class="form-control" type="number" :placeholder="$t('attribute-edit-form-minimum-range-placeholder')">
               </div>
             </div>
 
             <div class="form-group row">
-              <label class="col-3 col-form-label">{{ 'attribute-edit-form-maximum-range-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-maximum-range-label' | i18n }}</label>
               <div class="col">
                 <input v-model.number="rangeMax" class="form-control" type="number" :placeholder="$t('attribute-edit-form-maximum-range-placeholder')">
               </div>
@@ -126,7 +126,7 @@
           </div>
 
           <div v-else-if="isEnumType" class="form-group row">
-            <label class="col-3 col-form-label">{{ 'attribute-edit-form-enum-options-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-enum-options-label' | i18n }}</label>
             <div class="col">
               <input v-model.lazy="enumOptions" class="form-control" type="text" :placeholder="$t('attribute-edit-form-enum-options-placeholder')">
             </div>
@@ -134,7 +134,7 @@
 
           <div v-else-if="isOneToManyType">
             <div class="form-group row">
-              <label class="col-3 col-form-label">{{ 'attribute-edit-form-mapped-by-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-mapped-by-label' | i18n }}</label>
               <div class="col">
                 <multiselect v-model="mappedByEntityType" :options="entityTypes" label="label"
                              selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-mapped-by-placeholder')"></multiselect>
@@ -142,7 +142,7 @@
             </div>
 
             <div class="form-group row">
-              <label class="col-3 col-form-label">{{ 'attribute-edit-form-order-by-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-order-by-label' | i18n }}</label>
               <div class="col">
                 <input v-model="orderBy" class="form-control" type="text" :placeholder="$t('attribute-edit-form-order-by-placeholder')">
               </div>
@@ -152,21 +152,21 @@
 
         <div class="col-md-3">
           <div class="form-group row">
-            <label class="col-6 col-form-label">{{ 'attribute-edit-form-nullable-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-nullable-label' | i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="nullable" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label">{{ 'attribute-edit-form-auto-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-auto-label' | i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="auto" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label">{{ 'attribute-edit-form-visible-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-visible-label' | i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="visible" class="form-control" type="checkbox">
             </div>
@@ -175,21 +175,21 @@
 
         <div class="col-md-3">
           <div class="form-group row">
-            <label class="col-6 col-form-label">{{ 'attribute-edit-form-unique-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-unique-label' | i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="unique" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label">{{ 'attribute-edit-form-readonly-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-readonly-label' | i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="readonly" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label">{{ 'attribute-edit-form-aggregatable-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-aggregatable-label' | i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="aggregatable" class="form-control" type="checkbox">
             </div>
@@ -200,19 +200,19 @@
       <div class="row">
         <div class="col">
           <div class="form-group">
-            <label>{{ 'attribute-edit-form-computed-expression-label' | i18n }}</label>
+            <label class="text-muted">{{ 'attribute-edit-form-computed-expression-label' | i18n }}</label>
             <textarea v-model="expression" class="form-control" rows="3" :placeholder="$t('attribute-edit-form-computed-expression-placeholder')"></textarea>
           </div>
         </div>
         <div class="col">
           <div class="form-group">
-            <label>{{ 'attribute-edit-form-visible-expression-label' | i18n }}</label>
+            <label class="text-muted">{{ 'attribute-edit-form-visible-expression-label' | i18n }}</label>
             <textarea v-model="visibleExpression" class="form-control" rows="3" :placeholder="$t('attribute-edit-form-visible-expression-placeholder')"></textarea>
           </div>
         </div>
         <div class="col">
           <div class="form-group">
-            <label>{{ 'attribute-edit-form-validation-expression-label' | i18n }}</label>
+            <label class="text-muted">{{ 'attribute-edit-form-validation-expression-label' | i18n }}</label>
             <textarea v-model="validationExpression" class="form-control" rows="3" :placeholder="$t('attribute-edit-form-validation-expression-placeholder')"></textarea>
           </div>
         </div>
