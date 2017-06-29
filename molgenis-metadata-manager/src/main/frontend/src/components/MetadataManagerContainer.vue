@@ -9,8 +9,11 @@
 
     <div class="row">
       <div class="col">
-        <metadata-manager-entity-edit-form v-if="editorEntityType && editorEntityType.id !== ''"></metadata-manager-entity-edit-form>
-        <hr>
+        <div v-if="editorEntityType && editorEntityType.id !== ''">
+          <metadata-manager-entity-edit-form ></metadata-manager-entity-edit-form>
+          <hr>
+        </div>
+        <h4 v-else class="text-muted text-center">{{ 'no-entity-type-selected-text' | i18n }}</h4>
       </div>
     </div>
 
