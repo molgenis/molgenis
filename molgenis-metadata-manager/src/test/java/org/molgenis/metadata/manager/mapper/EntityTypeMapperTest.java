@@ -106,7 +106,6 @@ public class EntityTypeMapperTest
 		Iterable<Attribute> attributes = mock(Iterable.class);
 		when(attributeMapper.toAttributes(editorAttributes, editorEntityType)).thenReturn(attributes);
 		assertEquals(entityType, entityTypeMapper.toEntityType(editorEntityType));
-		// FIXME id label lookup attribute modifications
 		verify(entityType).setId(id);
 		verify(entityType).setLabel(label);
 		verify(entityType).setLabel(i18nLabelLangEn, i18nLabelValue);
