@@ -1,18 +1,18 @@
 // @flow
-import type { EditorAttribute } from '../flow.types'
+import type { EditorAttribute, Alert, State, EditorPackageIdentifier, EditorEntityType, Update, UpdateOrder } from '../flow.types'
 
-export const SET_PACKAGES = '__SET_PACKAGES__'
-export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
-export const SET_SELECTED_ENTITY_TYPE_ID = '__SET_SELECTED_ENTITY_TYPE_ID__'
-export const SET_ATTRIBUTE_TYPES = '__SET_ATTRIBUTE_TYPES__'
-export const SET_EDITOR_ENTITY_TYPE = '__SET_EDITOR_ENTITY_TYPE__'
-export const UPDATE_EDITOR_ENTITY_TYPE = '__UPDATE_EDITOR_ENTITY_TYPE__'
-export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__'
-export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER__'
-export const SET_SELECTED_ATTRIBUTE_ID = '__SET_SELECTED_ATTRIBUTE_ID__'
-export const DELETE_SELECTED_ATTRIBUTE = '__DELETE_SELECTED_ATTRIBUTE__'
+export const SET_PACKAGES: string = '__SET_PACKAGES__'
+export const SET_ENTITY_TYPES: string = '__SET_ENTITY_TYPES__'
+export const SET_SELECTED_ENTITY_TYPE_ID: string = '__SET_SELECTED_ENTITY_TYPE_ID__'
+export const SET_ATTRIBUTE_TYPES: string = '__SET_ATTRIBUTE_TYPES__'
+export const SET_EDITOR_ENTITY_TYPE: string = '__SET_EDITOR_ENTITY_TYPE__'
+export const UPDATE_EDITOR_ENTITY_TYPE: string = '__UPDATE_EDITOR_ENTITY_TYPE__'
+export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE: string = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__'
+export const UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER: string = '__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER__'
+export const SET_SELECTED_ATTRIBUTE_ID: string = '__SET_SELECTED_ATTRIBUTE_ID__'
+export const DELETE_SELECTED_ATTRIBUTE: string = '__DELETE_SELECTED_ATTRIBUTE__'
 
-export const CREATE_ALERT = '__CREATE_ALERT__'
+export const CREATE_ALERT: string = '__CREATE_ALERT__'
 
 /**
  * Swap the elements in an array at indexes originalIndex and targetIndex.
@@ -29,18 +29,18 @@ const swapArrayElements = (array: Array<EditorAttribute>, originalIndex: number,
 }
 
 export default {
-  [SET_PACKAGES] (state, packages) {
+  [SET_PACKAGES] (state: State, packages: Array<EditorPackageIdentifier>) {
     state.packages = packages
   },
-  [SET_ENTITY_TYPES] (state, entityTypes) {
+  [SET_ENTITY_TYPES] (state: State, entityTypes: Array<Object>) {
     state.entityTypes = entityTypes.sort((a, b) => {
       return a.label.localeCompare(b.label)
     })
   },
-  [SET_SELECTED_ENTITY_TYPE_ID] (state, entityTypeId) {
+  [SET_SELECTED_ENTITY_TYPE_ID] (state: State, entityTypeId: string) {
     state.selectedEntityTypeId = entityTypeId
   },
-  [SET_ATTRIBUTE_TYPES] (state, attributeTypes) {
+  [SET_ATTRIBUTE_TYPES] (state: State, attributeTypes: Array<string>) {
     state.attributeTypes = attributeTypes
   },
   /**
@@ -49,11 +49,17 @@ export default {
    *
    * The deep copy is used to keep track of changes
    */
-  [SET_EDITOR_ENTITY_TYPE] (state, editorEntityType) {
+  [SET_EDITOR_ENTITY_TYPE] (state: State, editorEntityType: EditorEntityType) {
     state.editorEntityType = editorEntityType
     state.initialEditorEntityType = JSON.parse(JSON.stringify(editorEntityType))
   },
-  [UPDATE_EDITOR_ENTITY_TYPE] (state, update) {
+  /**
+   * Update currently selected EditorEntityType
+   * update contains the parameter to update, together with the value
+   *
+   * In case of an idAttribute update, extra parameters are set
+   */
+  [UPDATE_EDITOR_ENTITY_TYPE] (state: State, update: Update) {
     if (update.key === 'idAttribute') {
       update.value.readonly = true
       update.value.unique = true
@@ -69,19 +75,22 @@ export default {
    * Performs a key value update for the selected attribute
    * Updates an editorEntityType attribute via index
    */
-  [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE] (state, update) {
+  [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE] (state: State, update: Update) {
     const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
     state.editorEntityType.attributes[index][key] = update.value
   },
-  [SET_SELECTED_ATTRIBUTE_ID] (state, selectedAttributeId) {
+  /**
+   * Set the selected attribute ID in the state
+   */
+  [SET_SELECTED_ATTRIBUTE_ID] (state: State, selectedAttributeId: string) {
     state.selectedAttributeId = selectedAttributeId
   },
   /**
    * Move the selectedAttribute up or down based on the moveOrder
    */
-  [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER] (state, update) {
+  [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER] (state: State, update: UpdateOrder) {
     const moveOrder = update.moveOrder
     const attributes = state.editorEntityType.attributes
 
@@ -93,14 +102,14 @@ export default {
   /**
    * Deletes the selected attribute using the ID of the selected attribute found in the state
    */
-  [DELETE_SELECTED_ATTRIBUTE] (state, selectedAttributeId) {
+  [DELETE_SELECTED_ATTRIBUTE] (state: State, selectedAttributeId: string) {
     state.editorEntityType.attributes = state.editorEntityType.attributes.filter(attribute => attribute.id !== selectedAttributeId)
   },
   /**
    * Alert mutations
    * @param alert Object containing 'type' and 'message' Strings
    */
-  [CREATE_ALERT] (state, alert) {
+  [CREATE_ALERT] (state: State, alert: Alert) {
     state.alert = alert
   }
 }

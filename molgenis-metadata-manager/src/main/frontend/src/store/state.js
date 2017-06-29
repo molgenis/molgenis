@@ -1,18 +1,7 @@
 // @flow
 export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 
-import type { Alert, Package, EditorEntityType } from '../flow.types'
-
-export type State = {
-  alert: Alert,
-  packages: Array<Package>,
-  entityTypes: Array<Object>, // TODO create EntityType and Attribute type in flow.types.js
-  attributeTypes: Array<String>,
-  selectedEntityTypeId: ?string,
-  selectedAttributeId: ?string,
-  editorEntityType: ?EditorEntityType,
-  initialEditorEntityType: ?EditorEntityType
-}
+import type { State } from '../flow.types'
 
 const state: State = {
   alert: { message: null, type: null },
@@ -21,8 +10,16 @@ const state: State = {
   attributeTypes: [],
   selectedEntityTypeId: null,
   selectedAttributeId: null,
-  editorEntityType: null,
-  initialEditorEntityType: null
+  editorEntityType: {
+    'id': '',
+    'label': '',
+    'attributes': []
+  },
+  initialEditorEntityType: {
+    'id': '',
+    'label': '',
+    'attributes': []
+  }
 }
 
 export default state
