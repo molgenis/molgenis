@@ -3,7 +3,7 @@
     <div class="row temp-header">
       <div class="col">
         <a class="btn pull-left" href="/">
-          <i class="fa fa-chevron-left" aria-hidden="true"></i> {{ 'back to home' | i18n }}
+          <i class="fa fa-chevron-left" aria-hidden="true"></i> {{ 'back-to-home-button' | i18n }}
         </a>
       </div>
     </div>
