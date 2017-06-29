@@ -52,33 +52,25 @@ describe('mutations', () => {
           entityTypes: []
         }
       }
-      const entityTypes = [{
-        attributes: [{ id: '1', name: 'id', _href: '/api/v2/sys_md_Attribute/1' }, {
-          id: '2',
-          name: 'label',
-          _href: '/api/v2/sys_md_Attribute/2'
-        }],
-        backend: 'PostgreSQL',
-        description: 'test entity',
-        id: 'test',
-        package: { id: 'base', label: 'Default', _href: '/api/v2/sys_md_Package/base' },
-        tags: [],
-        _href: '/api/v2/base_test'
-      }, {
-        attributes: [{ id: '1a', name: 'id', _href: '/api/v2/sys_md_Attribute/1a' }, {
-          id: '2a',
-          name: 'label',
-          _href: '/api/v2/sys_md_Attribute/2a'
-        }],
-        backend: 'PostgreSQL',
-        description: 'test1 entity',
-        id: 'test1',
-        package: { id: 'base', label: 'Default', _href: '/api/v2/sys_md_Package/base' },
-        tags: [],
-        _href: '/api/v2/base_test1'
-      }]
-      mutations.__SET_ENTITY_TYPES__(state, entityTypes)
-      expect(state.entityTypes).to.equal(entityTypes)
+
+      const payload = [
+        { label: 'B entity' },
+        { label: 'A entity' },
+        { label: 'C entity' },
+        { label: 'E entity' },
+        { label: 'D entity' }
+      ]
+
+      const expected = [
+        { label: 'A entity' },
+        { label: 'B entity' },
+        { label: 'C entity' },
+        { label: 'D entity' },
+        { label: 'E entity' }
+      ]
+
+      mutations.__SET_ENTITY_TYPES__(state, payload)
+      expect(state.entityTypes).to.deep.equal(expected)
     })
   })
 

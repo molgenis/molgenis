@@ -33,8 +33,8 @@ export default {
     state.packages = packages
   },
   [SET_ENTITY_TYPES] (state: State, entityTypes: Array<Object>) {
-    state.entityTypes = entityTypes.sort((a, b) => {
-      return a.label.localeCompare(b.label)
+    state.entityTypes = entityTypes.sort((entityType1, entityType2) => {
+      return entityType1.label.localeCompare(entityType2.label)
     })
   },
   [SET_SELECTED_ENTITY_TYPE_ID] (state: State, entityTypeId: string) {
