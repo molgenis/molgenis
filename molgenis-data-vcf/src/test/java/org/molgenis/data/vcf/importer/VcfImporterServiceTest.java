@@ -1,12 +1,6 @@
 package org.molgenis.data.vcf.importer;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
@@ -527,25 +521,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		assertFalse(vcfImporterService.canImport(new File("file.xls"), source));
 	}
 
-	private static Matcher<EntityType> eqName(EntityType expectedEntityType)
+	private static ArgumentMatcher<EntityType> eqName(EntityType expectedEntityType)
 	{
-		return new BaseMatcher<EntityType>()
-		{
-			@Override
-			public boolean matches(Object item)
-			{
-				if (!(item instanceof EntityType))
-				{
-					return false;
-				}
-				return ((EntityType) item).getId().equals(expectedEntityType.getId());
-			}
-
-			@Override
-			public void describeTo(Description description)
-			{
-				description.appendText("is EntityType with same name");
-			}
-		};
+		return item -> item.getId().equals(expectedEntityType.getId());
 	}
 }

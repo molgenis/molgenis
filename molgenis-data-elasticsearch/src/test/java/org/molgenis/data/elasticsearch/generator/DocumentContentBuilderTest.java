@@ -40,9 +40,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		when(documentIdGenerator.generateId(any(EntityType.class)))
-				.thenAnswer(invocation -> invocation.getArgumentAt(0, EntityType.class).getId());
+				.thenAnswer(invocation -> invocation.<EntityType>getArgument(0).getId());
 		when(documentIdGenerator.generateId(any(Attribute.class)))
-				.thenAnswer(invocation -> invocation.getArgumentAt(0, Attribute.class).getIdentifier());
+				.thenAnswer(invocation -> invocation.<Attribute>getArgument(0).getIdentifier());
 		documentContentBuilder = new DocumentContentBuilder(documentIdGenerator);
 	}
 

@@ -132,7 +132,7 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 	{
 		doAnswer((InvocationOnMock invocation) ->
 		{
-			Stream<ScheduledJob> jobStream = (Stream<ScheduledJob>) invocation.getArgumentAt(0, Stream.class);
+			Stream<ScheduledJob> jobStream = invocation.getArgument(0);
 			jobStream.collect(Collectors.toList());
 			throw new MolgenisDataException("Failed");
 		}).when(decoratedRepo).delete(any(Stream.class));
