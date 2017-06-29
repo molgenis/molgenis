@@ -13,12 +13,14 @@ const state: State = {
   editorEntityType: {
     'id': '',
     'label': '',
-    'attributes': []
+    'attributes': [],
+    'lookupAttributes': []
   },
   initialEditorEntityType: {
     'id': '',
     'label': '',
-    'attributes': []
+    'attributes': [],
+    'lookupAttributes': []
   }
 }
 
