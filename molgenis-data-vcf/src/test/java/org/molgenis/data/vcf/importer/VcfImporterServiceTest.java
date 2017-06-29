@@ -523,6 +523,6 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 
 	private static ArgumentMatcher<EntityType> eqName(EntityType expectedEntityType)
 	{
-		return item -> item.getId().equals(expectedEntityType.getId());
+		return item -> item != null && item.getId().equals(expectedEntityType.getId());
 	}
 }
