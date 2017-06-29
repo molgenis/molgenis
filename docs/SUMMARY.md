@@ -28,6 +28,7 @@
         - [Swagger specification](developer_documentation/ref-swagger.md)
     - [FAIR](developer_documentation/guide-fair.md)
     - [R api](developer_documentation/ref-R.md)
+    - [Python](developer_documentation/guide-python.md)
     - [Start](developer_documentation/start.md)
     - [IntelliJ](developer_documentation/intellij.md)
     - [Security](developer_documentation/security.md)
