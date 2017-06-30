@@ -4,6 +4,7 @@ import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.importer.ImportServiceRegistrar;
+import org.molgenis.data.jobs.JobFactoryRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.script.ScriptRunnerRegistrar;
@@ -32,13 +33,15 @@ public class RegistryBootstrapper
 	private final SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
 	private final ImportServiceRegistrar importServiceRegistrar;
 	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
+	private final JobFactoryRegistrar jobFactoryRegistrar;
 
 	@Autowired
 	public RegistryBootstrapper(RepositoryCollectionBootstrapper repoCollectionBootstrapper,
 			SystemEntityTypeRegistrar systemEntityTypeRegistrar, SystemPackageRegistrar systemPackageRegistrar,
 			EntityFactoryRegistrar entityFactoryRegistrar,
 			SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar,
-			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar)
+			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar,
+			JobFactoryRegistrar jobFactoryRegistrar)
 	{
 		this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
 		this.systemEntityTypeRegistrar = requireNonNull(systemEntityTypeRegistrar);
@@ -47,6 +50,7 @@ public class RegistryBootstrapper
 		this.systemRepositoryDecoratorFactoryRegistrar = requireNonNull(systemRepositoryDecoratorFactoryRegistrar);
 		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
 		this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
+		this.jobFactoryRegistrar = requireNonNull(jobFactoryRegistrar);
 	}
 
 	public void bootstrap(ContextRefreshedEvent event)
@@ -78,5 +82,9 @@ public class RegistryBootstrapper
 		LOG.trace("Registering script runners ...");
 		scriptRunnerRegistrar.register(event);
 		LOG.trace("Registered script runners");
+
+		LOG.trace("Registering job factories ...");
+		jobFactoryRegistrar.register(event);
+		LOG.trace("Registered job factories");
 	}
 }
