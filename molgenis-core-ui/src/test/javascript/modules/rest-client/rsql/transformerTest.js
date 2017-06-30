@@ -302,7 +302,7 @@ test("Test getArguments with nested MREF constraint", assert => {
     assert.end();
 })
 
-test("Test getArguments with constraint with multiple values", assert = > {
+test("Test getArguments with constraint with multiple values", assert => {
     const actual = getArguments(parser.parse("xmref=in=(abc,def)"))
     assert.deepEqual(actual, new Set(['abc', 'def']))
 assert.end();
