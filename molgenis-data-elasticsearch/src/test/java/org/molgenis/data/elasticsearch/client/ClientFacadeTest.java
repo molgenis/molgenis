@@ -292,7 +292,7 @@ public class ClientFacadeTest
 		clientFacade.refreshIndexes();
 	}
 
-	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
+	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "One or more indexes '_all' not found\\.")
 	public void testRefreshIndicesNotFound()
 	{
 		when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
@@ -301,7 +301,7 @@ public class ClientFacadeTest
 		clientFacade.refreshIndexes();
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "One or more indexes '_all' not found.")
+	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
 	public void testRefreshIndicesFailedShards()
 	{
 		when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
