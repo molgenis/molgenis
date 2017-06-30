@@ -9,12 +9,13 @@
     <!-- Search element -->
     <div class="navigator-search row justify-content-center">
       <div class="col-lg-6 input-group">
-        <input v-model="query" v-on:keyup="submitQuery()" type="text" class="form-control" placeholder="Search packages and data ...">
+        <input v-model="query" v-on:keyup="submitQuery()" type="text" class="form-control"
+               :placeholder="$t('search-input-placeholder')">
         <span class="input-group-btn">
-          <button @click="submitQuery()"  class="btn btn-secondary" :disabled="!query" type="button">Search</button>
+          <button @click="submitQuery()"  class="btn btn-secondary" :disabled="!query" type="button">{{ 'search-button' | i18n }}</button>
         </span>
         <span class="input-group-btn">
-          <button @click="clearQuery()" class="btn btn-secondary" :disabled="!query" type="button">Clear</button>
+          <button @click="clearQuery()" class="btn btn-secondary" :disabled="!query" type="button">{{ 'clear-button' | i18n }}</button>
         </span>
       </div>
     </div>
@@ -33,7 +34,7 @@
             <router-link v-else :to="package.id">{{package.label}}</router-link>
           </li>
           <li v-show="query" class="breadcrumb-item">
-            <span>search for: <b>{{query}}</b></span>
+            <span>{{ 'search-query-label' | i18n }}: <b>{{query}}</b></span>
           </li>
         </ol>
       </div>
@@ -84,12 +85,12 @@
       return {
         fields: {
           label: {
-            label: 'Name',
+            label: this.$t('table-col-header-name'),
             sortable: true,
             'class': 'text-nowrap'
           },
           description: {
-            label: 'Description',
+            label: this.$t('table-col-header-description'),
             sortable: false,
             'class': 'hidden-sm-down'
           }
