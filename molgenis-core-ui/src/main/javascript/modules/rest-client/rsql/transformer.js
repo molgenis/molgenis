@@ -142,7 +142,7 @@ function toSimpleRef(labels, constraint) {
 export function toComplexLine(labels, group) {
     return {
         'operator': group.operator,
-        'values': (group.operands || (group.arguments.constructor === Array ? group.arguments : [group.arguments])).map(o = > {
+        'values': (group.operands || (group.arguments.constructor === Array ? group.arguments : [group.arguments])).map(o => {
             const value = o.arguments || o
             return {'label': labels[value], value}
         })
