@@ -22,6 +22,20 @@ test("Test that a single comparison get transformed back to RSQL", assert => {
     assert.end()
 })
 
+test("Test that a single 'range' comparison with multiple values get transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('xrange=rng=(2,3)')))
+    const expected = 'xrange=rng=(2,3)'
+    assert.deepEqual(actual, expected)
+assert.end()
+})
+
+test("Test that a single 'in' comparison with multiple values get transformed back to RSQL", assert => {
+    const actual = transformToRSQL(groupBySelector(parser.parse('xmref=in=(abc,def)')))
+    const expected = 'xmref=in=(abc,def)'
+    assert.deepEqual(actual, expected)
+assert.end()
+})
+
 test('Test that multiple comparisons get mapped', assert => {
     const actual = groupBySelector(parser.parse("xbool==false;(xxref==ref1,xxref==ref2)"))
     const expected = {
@@ -286,4 +300,10 @@ test("Test getArguments with nested MREF constraint", assert => {
     const actual = getArguments(parser.parse("(((xmref==ref1;xmref==ref2);(xmref==ref3,xmref==ref4)),(xmref==ref5,xmref==ref1),((xmref==ref2;xmref==ref3);(xmref==ref4,xmref==ref5)))"))
     assert.deepEqual(actual, new Set(['ref1', 'ref2', 'ref3', 'ref4', 'ref5']))
     assert.end();
+})
+
+test("Test getArguments with constraint with multiple values", assert => {
+    const actual = getArguments(parser.parse("xmref=in=(abc,def)"))
+    assert.deepEqual(actual, new Set(['abc', 'def']))
+assert.end();
 })

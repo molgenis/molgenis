@@ -10,14 +10,15 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.*;
@@ -437,7 +438,7 @@ public class PostgreSqlQueryGeneratorTest
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
 				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityTypeId#c34894ba\" AS this");
-		assertEquals(parameters, Collections.emptyList());
+		assertEquals(parameters, emptyList());
 	}
 
 	@Test
@@ -467,11 +468,24 @@ public class PostgreSqlQueryGeneratorTest
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
 				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityTypeId#c34894ba\" AS this");
-		assertEquals(parameters, Collections.emptyList());
+		assertEquals(parameters, emptyList());
 	}
 
-	@Test
-	public void getSqlSelectOneToManyMappedBy()
+	@DataProvider(name = "getSqlSelectOneToManyMappedByProvider")
+	public Iterator<Object[]> getSqlSelectOneToManyMappedByProvider()
+	{
+		List<Object[]> dataList = new ArrayList<>();
+		dataList.add(new Object[] { new QueryImpl<>(),
+				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this",
+				emptyList() });
+		dataList.add(new Object[] { new QueryImpl<>().in("attr", asList("ref0", "ref1")),
+				"SELECT DISTINCT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"attr_filter1\" ON (this.\"idAttr\" = \"attr_filter1\".\"refAttr\") WHERE \"attr_filter1\".\"refIdAttr\" IN (?,?)",
+				asList("ref0", "ref1") });
+		return dataList.iterator();
+	}
+
+	@Test(dataProvider = "getSqlSelectOneToManyMappedByProvider")
+	public void getSqlSelectOneToManyMappedBy(Query<Entity> query, String expectedSql, List<Object> expectedParameters)
 	{
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
 		when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
@@ -497,15 +511,13 @@ public class PostgreSqlQueryGeneratorTest
 
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getId()).thenReturn("entityTypeId");
+		when(entityType.getAttribute("attr")).thenReturn(attr);
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
-		@SuppressWarnings("unchecked")
-		Query<Entity> q = mock(Query.class);
-		List<Object> parameters = Lists.newArrayList();
-		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
-				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this");
-		assertEquals(parameters, Collections.emptyList());
+		List<Object> parameters = new ArrayList<>();
+		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, query, parameters, true), expectedSql);
+		assertEquals(parameters, expectedParameters);
 	}
 
 	@Test
@@ -702,8 +714,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(attrType);
 		when(attr.isNillable()).thenReturn(nillable);
 		when(attr.getRefEntity()).thenReturn(refEntityType);
-		when(attr.getEnumOptions())
-				.thenReturn(attrType == ENUM ? newArrayList("enum0, enum1") : Collections.emptyList());
+		when(attr.getEnumOptions()).thenReturn(attrType == ENUM ? newArrayList("enum0, enum1") : emptyList());
 
 		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr), sql);
 	}
