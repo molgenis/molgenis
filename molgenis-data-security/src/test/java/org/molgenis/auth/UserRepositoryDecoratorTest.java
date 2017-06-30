@@ -1,7 +1,6 @@
 package org.molgenis.auth;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -16,6 +15,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
@@ -62,7 +62,7 @@ public class UserRepositoryDecoratorTest
 		userRepositoryDecorator.add(user);
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(user);
-		verify(userAuthorityRepository, times(0)).add(Matchers.any(UserAuthority.class));
+		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -77,7 +77,7 @@ public class UserRepositoryDecoratorTest
 		when(user1.getPassword()).thenReturn(password);
 		when(user1.isSuperuser()).thenReturn(false);
 
-		when(decoratedRepository.add(Matchers.any(Stream.class))).thenAnswer(invocation ->
+		when(decoratedRepository.add(any(Stream.class))).thenAnswer(invocation ->
 		{
 			Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
 			List<Entity> entitiesList = entities.collect(toList());
@@ -85,7 +85,7 @@ public class UserRepositoryDecoratorTest
 		});
 		Assert.assertEquals(userRepositoryDecorator.add(Stream.of(user0, user1)), Integer.valueOf(2));
 		verify(passwordEncoder, times(2)).encode(password);
-		verify(userAuthorityRepository, times(0)).add(Matchers.any(UserAuthority.class));
+		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
 	}
 
 	@Test

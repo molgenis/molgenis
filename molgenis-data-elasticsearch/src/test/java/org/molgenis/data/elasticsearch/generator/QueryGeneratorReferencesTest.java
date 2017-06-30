@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.elasticsearch.FieldConstants.*;

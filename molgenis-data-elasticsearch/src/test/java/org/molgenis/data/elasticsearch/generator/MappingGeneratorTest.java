@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;

@@ -3,7 +3,6 @@ package org.molgenis.data.mapper.service.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Sets;
-import org.mockito.Matchers;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -57,6 +56,7 @@ import java.util.stream.Stream;
 import static java.time.ZoneId.systemDefault;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -98,7 +98,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(algorithmTemplateService.find(Matchers.any())).thenReturn(Stream.empty());
+		when(algorithmTemplateService.find(any())).thenReturn(Stream.empty());
 	}
 
 	@Test

@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
@@ -40,9 +39,11 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.isNull;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -199,7 +200,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(HREF_ENTITY).content("{id:'p1', name:'Piet'}").contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).add(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -209,7 +210,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("id", "p1").param("name", "Piet"))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).add(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -486,7 +487,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -529,7 +530,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(
 				post(HREF_ENTITY_ID + "/name").param("_method", "PUT").content("Klaas").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -559,7 +560,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "PUT").param("name", "Klaas")
 				.contentType(APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -569,7 +570,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				post(HREF_ENTITY_ID).param("_method", "PUT").content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
