@@ -8,7 +8,7 @@ wget https://molgenis.mydomain.example/molgenis.py
 ``` 
 Now you can create a python script. 
 To get started, you should import the python api, connect to a molgenis server and login:
-```
+```python
 import molgenis
 session = molgenis.Session.("https://molgenis.mydomain.example/api/")
 session.login("username","password")
@@ -16,7 +16,7 @@ session.login("username","password")
 Always put the import and molgenis.Session in your script to make the api work. 
 
 # Overview example
-```
+```python
 import molgenis
 session = molgenis.Session.("https://molgenis.mydomain.example/api/")
 session.login("username","password")
@@ -27,7 +27,7 @@ To get a full overview of all functions in the python api, download the followin
 [MolgenisPythonFunctions.zip](../data/MolgenisPythonFunctions.zip)
 # Methods
 ## login
-```
+```python
 session.login(username,password)
 ```
 Login to the MOLGENIS REST API<br/><br/>
@@ -38,14 +38,14 @@ Argument    | Description                                       | Required | Def
 `password`  | Password for the user                             | yes      | 
 
 ## logout
-```
+```python
 session.logout()
 ```
 Logout from the MOLGENIS REST API and destroy the session.
 
 
 ##getById
-```
+```python
 session.getById("tableId", "rowId")
 ```
 Retrieves a single entity row from an entity repository.<br/><br/>
@@ -59,7 +59,7 @@ Argument    | Description                                       | Required | Def
 
 
 ##get
-```
+```python
 session.get("package_entityName")
 ```
 
@@ -93,7 +93,7 @@ Argument can be a single value, or multiple values in parenthesis separated by c
 			
 **Examples**
 
-```
+```python
 session.get("celiacsprue")
 session.get("celiacsprue", num = 100000, start = 1000)
 session.get("celiacsprue", attributes = c("Individual", "celiac_gender"))
@@ -106,7 +106,7 @@ session.get("celiacsprue", q = "(celiac_weight>=80;celiac_height<180),(celiac_ge
 
 
 ## add
-```
+```python
 session.add('Person', firstName='Jan', lastName='Klaassen')
 ```
 
@@ -126,14 +126,14 @@ Argument    | Description                                          | Required | 
             
 **Examples**
 
-```
+```python
 session.add('Person', {'firstName': 'Jan', 'lastName':'Klaassen'})
 session.add('Plot', files={'image': ('expression.jpg', open('~/first-plot.jpg','rb')),
 		'image2': ('expression-large.jpg', open('/Users/me/second-plot.jpg', 'rb'))},
 		data={'name':'IBD-plot'})
 ```
 ## update_one
-```
+```python
 session.update_one("entityType", "id", "attribute", "newValue")
 ```
 Updates a value of a specified attribute in a specified row in a specified entityType.
@@ -146,7 +146,7 @@ Argument    | Description                                          | Required | 
 `value`     | New value of the attribute                           | yes      | 
   
 ## add_all
-```
+```python
 session.add_all(entity, entities)
 ```
 
@@ -159,7 +159,7 @@ Argument    | Description                                              | Require
 
 **Example**
 
-```
+```python
 update = [{'id': '157', 'type': 'gnome', 'year': '1998'},
           {'id': '158', 'type': 'fairy', 'year': '1998'},
           {'id': '159', 'type': 'unicorn', 'year': '1998'}]
@@ -168,7 +168,7 @@ update = [{'id': '157', 'type': 'gnome', 'year': '1998'},
 session.add_all("demo_sightings", update)
 ```
 ## delete
-```
+```python
 session.delete(entity, id)
 ```
 Deletes row based on its id. 
@@ -180,7 +180,7 @@ Argument    | Description                                              | Require
 
 
 ## delete_list
-```
+```python
 session.delete_list(entity, entities)
 ```
 Deletes a number of rows based on a list of id's. 
@@ -191,7 +191,7 @@ Argument    | Description                                              | Require
 `entities`  | List of id's of entities that should be deleted          | yes      | 
 
 ## upload_zip
-```
+```python
 session.upload_zip("pathtozipfile")
 ```
 This function uploads a zip file based on the EMX format.
@@ -205,7 +205,7 @@ Argument         | Description                                                  
 
 
 ## get_entity_meta_data
-```
+```python
 session.get_entity_meta_data(entity)
 ```
 Retrieves the metadata for an entity repository.
@@ -215,7 +215,7 @@ Argument    | Description                                              | Require
 `entity`    | Fully qualified name of the entity                       | yes      |
 
 ## get_attribute_meta_data
-```
+```python
 session.get_attribute_meta_data(entity, attribute)
 ```
 Retrieves the metadata for a single attribute of an entity repository.
