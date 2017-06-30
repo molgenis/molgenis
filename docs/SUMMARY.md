@@ -2,7 +2,7 @@
 
 - [Release Notes](https://github.com/molgenis/molgenis/releases)
 - [Quick start](quickstart/guide-quickstart.md)
-    - [Maven cargo project](quickstart/guide-cargo.md)
+    - [Run Docker container](quickstart/guide-docker.md)
     - [Run in Tomcat](quickstart/guide-tomcat.md)
     - [Compile code](quickstart/guide-local-compile.md)
 - User Documentation
@@ -21,12 +21,14 @@
     - [Python](user_documentation/guide-python.md)
     - [Biobank Directory](user_documentation/biobank-directory.md)
     - [Biobanking](user_documentation/biobanking.md)
+    - [Metadata Manager](user_documentation/guide-metadata-manager.md)
 - Developer documentation
     - [REST](developer_documentation/guide-rest.md)
         - [REST api V1](developer_documentation/ref-rest.md)
         - [REST api V2](developer_documentation/ref-rest2.md)
         - [Swagger specification](developer_documentation/ref-swagger.md)
     - [FAIR](developer_documentation/guide-fair.md)
+    - [Frontend development](developer_documentation/frontend-development.md)
     - [R api](developer_documentation/ref-R.md)
     - [Python api](developer_documentation/ref-python.md)
     - [Start](developer_documentation/start.md)

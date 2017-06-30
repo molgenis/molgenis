@@ -20,7 +20,7 @@ Put a file in there called `molgenis-server.properties` and fill it with this in
 ```
 	db_user=molgenis  
 	db_password=molgenis  
-	db_uri=jdbc\:postgresql\://localhost/molgenis?reWriteBatchedInserts=true&autosave=CONSERVATIVE
+	db_uri=jdbc\:postgresql\://localhost/molgenis
 	admin.password=admin  
 	user.password=admin  
 ```

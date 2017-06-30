@@ -163,6 +163,14 @@ class Session():
 		response.raise_for_status();
 		return response;
 
+    def delete_list(self, entity, entities):
+		'''Deletes multiple entity rows to an entity repository, given a list of id's.'''
+		response = self.session.delete(self.url + "v2/" + quote_plus(entity),
+		headers=self._get_token_header_with_content_type(),
+		data=json.dumps({"entityIds": entities}))
+		response.raise_for_status();
+		return response;
+
 	def get_entity_meta_data(self, entity):
 		'''Retrieves the metadata for an entity repository.'''
 		response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta?expand=attributes", headers =
@@ -176,6 +184,17 @@ class Session():
 		self._get_token_header())
 		response.raise_for_status();
 		return response.json();
+
+    def upload_zip(self, meta_data_zip):
+		'''Uploads a given zip with data and metadata'''
+		header = self._get_token_header()
+		files =  {'file': open(os.path.abspath(meta_data_zip), 'rb')}
+		url = self.url.strip('/api/')+'/plugin/importwizard/importFile'
+		response = requests.post(url, headers=header, files=files)
+		if response.status_code == 201:
+		return response.json();
+		response.raise_for_status();
+		return response;
 
 	def _get_token_header(self):
 		'''Creates an 'x-molgenis-token' header for the current session.'''
