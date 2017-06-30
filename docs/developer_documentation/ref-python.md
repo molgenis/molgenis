@@ -102,8 +102,6 @@ session.get("celiacsprue", q = "(celiac_weight>=80;celiac_height<180),(celiac_ge
 
 ```
 
-<br />
-
 
 ## add
 ```python
