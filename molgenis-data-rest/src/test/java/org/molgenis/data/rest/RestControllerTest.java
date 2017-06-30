@@ -108,7 +108,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(attrId.getLabel()).thenReturn("id");
-		when(attrId.getLabel(anyString())).thenReturn("id");
+		when(attrId.getLabel(isNull())).thenReturn("id");
 		when(attrId.getDataType()).thenReturn(STRING);
 		when(attrId.isReadOnly()).thenReturn(true);
 		when(attrId.isUnique()).thenReturn(true);
@@ -119,7 +119,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(attrName.getLabel()).thenReturn("name");
-		when(attrName.getLabel(anyString())).thenReturn("name");
+		when(attrName.getLabel(isNull())).thenReturn("name");
 		when(attrName.getDataType()).thenReturn(STRING);
 		when(attrName.isNillable()).thenReturn(true);
 		when(attrName.isVisible()).thenReturn(true);
@@ -128,7 +128,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrEnum = when(mock(Attribute.class).getName()).thenReturn("enum").getMock();
 		when(attrEnum.getLabel()).thenReturn("enum");
-		when(attrEnum.getLabel(anyString())).thenReturn("enum");
+		when(attrEnum.getLabel(isNull())).thenReturn("enum");
 		when(attrEnum.getDataType()).thenReturn(ENUM);
 		when(attrEnum.getEnumOptions()).thenReturn(asList("enum0, enum1"));
 		when(attrEnum.isNillable()).thenReturn(true);
@@ -137,7 +137,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrInt = when(mock(Attribute.class).getName()).thenReturn("int").getMock();
 		when(attrInt.getLabel()).thenReturn("int");
-		when(attrInt.getLabel(anyString())).thenReturn("int");
+		when(attrInt.getLabel(isNull())).thenReturn("int");
 		when(attrInt.getDataType()).thenReturn(INT);
 		when(attrInt.isNillable()).thenReturn(true);
 		when(attrInt.isVisible()).thenReturn(true);
@@ -149,9 +149,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(entityType.getAttribute("int")).thenReturn(attrInt);
 		when(entityType.getMappedByAttributes()).thenReturn(Stream.empty());
 		when(entityType.getIdAttribute()).thenReturn(attrId);
+		//TODO: This upgrades the test to mockito 2 but actually shows an error in the test
+		when(entityType.getLookupAttributes()).thenReturn(null);
 		when(entityType.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		when(entityType.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		when(entityType.getId()).thenReturn(ENTITY_NAME);
+		when(entityType.getLabel(isNull())).thenReturn(null);
 
 		when(repo.getEntityType()).thenReturn(entityType);
 		when(repo.getName()).thenReturn(ENTITY_NAME);
