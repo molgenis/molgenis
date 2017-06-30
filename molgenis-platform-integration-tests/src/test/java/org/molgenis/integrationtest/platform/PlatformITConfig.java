@@ -11,6 +11,7 @@ import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.jobs.JobConfig;
 import org.molgenis.data.jobs.JobExecutionConfig;
+import org.molgenis.data.jobs.JobFactoryRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -90,7 +91,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class,
 		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class,
-		OntologyConfig.class, JobExecutionConfig.class })
+		OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
@@ -109,6 +110,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
 	@Autowired
 	private SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
+	@Autowired
+	private JobFactoryRegistrar jobFactoryRegistrar;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
@@ -208,6 +211,10 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.trace("Bootstrapping system entity types ...");
 					systemEntityTypeBootstrapper.bootstrap(event);
 					LOG.debug("Bootstrapped system entity types");
+
+					LOG.trace("Registering job factories ...");
+					jobFactoryRegistrar.register(event);
+					LOG.trace("Registered job factories");
 
 					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
 				});
