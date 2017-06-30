@@ -30,6 +30,7 @@
     - [FAIR](developer_documentation/guide-fair.md)
     - [Frontend development](developer_documentation/frontend-development.md)
     - [R api](developer_documentation/ref-R.md)
+    - [Python api](developer_documentation/ref-python.md)
     - [Start](developer_documentation/start.md)
     - [IntelliJ](developer_documentation/intellij.md)
     - [Security](developer_documentation/security.md)
