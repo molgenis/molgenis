@@ -22,14 +22,14 @@ test("Test that a single comparison get transformed back to RSQL", assert => {
     assert.end()
 })
 
-test("Test that a single 'range' comparison with multiple values get transformed back to RSQL", assert = > {
+test("Test that a single 'range' comparison with multiple values get transformed back to RSQL", assert => {
     const actual = transformToRSQL(groupBySelector(parser.parse('xrange=rng=(2,3)')))
     const expected = 'xrange=rng=(2,3)'
     assert.deepEqual(actual, expected)
 assert.end()
 })
 
-test("Test that a single 'in' comparison with multiple values get transformed back to RSQL", assert = > {
+test("Test that a single 'in' comparison with multiple values get transformed back to RSQL", assert => {
     const actual = transformToRSQL(groupBySelector(parser.parse('xmref=in=(abc,def)')))
     const expected = 'xmref=in=(abc,def)'
     assert.deepEqual(actual, expected)
