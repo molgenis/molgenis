@@ -17,10 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.metadata.manager.service.MetadataManagerService.URI;
@@ -66,6 +66,11 @@ public class MetadataManagerService
 		EntityType entityType = metadataService
 				.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class).findOneById(entityTypeId);
 
+		if (entityType == null)
+		{
+			throw new UnknownEntityException("Unknown EntityType [" + entityTypeId + "]");
+		}
+
 		return createEntityTypeResponse(entityType);
 	}
 
@@ -97,8 +102,7 @@ public class MetadataManagerService
 	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
 	{
 		LOG.debug("", e);
-		return new ErrorMessageResponse(
-				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
 	@ExceptionHandler(RuntimeException.class)
@@ -107,8 +111,7 @@ public class MetadataManagerService
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error("", e);
-		return new ErrorMessageResponse(
-				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
 	private List<EditorPackageIdentifier> createPackageListResponse(List<Package> packages)
