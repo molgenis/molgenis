@@ -22,7 +22,8 @@
       "options": [
         {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/5.0/",
-          "text": "MOLGENIS 5.0"
+          "text": "MOLGENIS 5.0",
+          "selected": true
         }
       ]
     }
