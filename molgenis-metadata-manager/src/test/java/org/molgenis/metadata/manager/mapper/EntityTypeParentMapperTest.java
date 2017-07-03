@@ -91,13 +91,12 @@ public class EntityTypeParentMapperTest
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(attributes)).thenReturn(editorAttributes);
 		@SuppressWarnings("unchecked")
 		ImmutableList<EditorAttributeIdentifier> parentEditorAttributes = mock(ImmutableList.class);
-		when(attributeReferenceMapper.toEditorAttributeIdentifiers(parentAttributes))
-				.thenReturn(parentEditorAttributes);
+		when(attributeReferenceMapper.toEditorAttributeIdentifiers(parentAttributes)).thenReturn(
+				parentEditorAttributes);
 
 		EditorEntityTypeParent editorEntityTypeParent = entityTypeParentMapper.toEditorEntityTypeParent(entityType);
-		EditorEntityTypeParent expectedEditorEntityTypeParent = EditorEntityTypeParent
-				.create(id, label, editorAttributes,
-						EditorEntityTypeParent.create(parentId, parentLabel, parentEditorAttributes, null));
+		EditorEntityTypeParent expectedEditorEntityTypeParent = EditorEntityTypeParent.create(id, label,
+				editorAttributes, EditorEntityTypeParent.create(parentId, parentLabel, parentEditorAttributes, null));
 		assertEquals(editorEntityTypeParent, expectedEditorEntityTypeParent);
 	}
 

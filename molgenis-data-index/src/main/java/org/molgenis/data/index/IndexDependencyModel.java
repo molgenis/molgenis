@@ -30,9 +30,12 @@ class IndexDependencyModel
 	/**
 	 * The fetch to use when retrieving the {@link EntityType}s fed to this DependencyModel.
 	 */
-	static final Fetch ENTITY_TYPE_FETCH = new Fetch().field(ID).field(IS_ABSTRACT).field(INDEXING_DEPTH)
-			.field(EXTENDS, new Fetch().field(ID))
-			.field(ATTRIBUTES, new Fetch().field(REF_ENTITY_TYPE, new Fetch().field(ID)));
+	static final Fetch ENTITY_TYPE_FETCH = new Fetch().field(ID)
+													  .field(IS_ABSTRACT)
+													  .field(INDEXING_DEPTH)
+													  .field(EXTENDS, new Fetch().field(ID))
+													  .field(ATTRIBUTES, new Fetch().field(REF_ENTITY_TYPE,
+															  new Fetch().field(ID)));
 
 	/**
 	 * Creates an IndexDependencyModel for a list of EntityTypes.
@@ -93,8 +96,8 @@ class IndexDependencyModel
 
 	private boolean extendsFrom(EntityType candidateEntityType, String entityTypeId)
 	{
-		return candidateEntityType.getExtends() != null && entityTypeId
-				.equals(candidateEntityType.getExtends().getId());
+		return candidateEntityType.getExtends() != null && entityTypeId.equals(
+				candidateEntityType.getExtends().getId());
 	}
 
 	/**

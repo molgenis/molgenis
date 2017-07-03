@@ -219,9 +219,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	/**
 	 * A helper function to explain each of the matched attributes returned by the explain-API
 	 *
-	 * @param attribute The attribute found
+	 * @param attribute               The attribute found
 	 * @param collectExpandedQueryMap ?
-	 * @param query the query used to find the attribute
+	 * @param query                   the query used to find the attribute
 	 * @return Set of explained query strings
 	 */
 	public Set<ExplainedQueryString> convertAttributeToExplainedAttribute(Attribute attribute,

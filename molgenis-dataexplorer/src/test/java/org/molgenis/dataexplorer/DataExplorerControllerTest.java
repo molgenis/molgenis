@@ -138,8 +138,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void testViewEntityDetailsById() throws Exception
 	{
-		when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl"))
-				.thenReturn(mock(Template.class));
+		when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl")).thenReturn(
+				mock(Template.class));
 
 		String actual = controller.viewEntityDetailsById(entityTypeId, entityId, model);
 		String expected = "view-standalone-report";

@@ -630,7 +630,8 @@ public class Attribute extends StaticEntity
 	{
 		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
 		return stream(attrParts.spliterator(), false).filter(attrPart -> attrPart.getName().equals(attrName))
-				.findFirst().orElse(null);
+													 .findFirst()
+													 .orElse(null);
 	}
 
 	void addChild(Attribute attrPart)
@@ -643,7 +644,7 @@ public class Attribute extends StaticEntity
 	{
 		Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
 		set(CHILDREN, stream(attrParts.spliterator(), false).filter(attr -> !attr.getName().equals(attrPart.getName()))
-				.collect(toList()));
+															.collect(toList()));
 	}
 
 	/**
@@ -738,7 +739,11 @@ public class Attribute extends StaticEntity
 		if (isReferenceType(this))
 		{
 			return stream(getRefEntity().getAtomicAttributes().spliterator(), false).filter(Attribute::isMappedBy)
-					.filter(attr -> getName().equals(attr.getMappedBy().getName())).findFirst().orElse(null);
+																					.filter(attr -> getName().equals(
+																							attr.getMappedBy()
+																								.getName()))
+																					.findFirst()
+																					.orElse(null);
 		}
 		else
 		{

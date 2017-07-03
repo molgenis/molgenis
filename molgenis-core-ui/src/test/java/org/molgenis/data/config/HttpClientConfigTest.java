@@ -44,10 +44,11 @@ public class HttpClientConfigTest extends AbstractTestNGSpringContextTests
 		headers.set("Authorization", "Basic ABCDE");
 
 		HttpEntity<TestNegotiatorQuery> entity = new HttpEntity<>(testNegotiatorQuery, headers);
-		server.expect(once(), requestTo("http://directory.url/request")).andExpect(method(HttpMethod.POST))
-				.andExpect(content().string("{\"URL\":\"url\",\"nToken\":\"ntoken\"}"))
-				.andExpect(MockRestRequestMatchers.header("Authorization", "Basic ABCDE"))
-				.andRespond(withCreatedEntity(URI.create("http://directory.url/request/DEF")));
+		server.expect(once(), requestTo("http://directory.url/request"))
+			  .andExpect(method(HttpMethod.POST))
+			  .andExpect(content().string("{\"URL\":\"url\",\"nToken\":\"ntoken\"}"))
+			  .andExpect(MockRestRequestMatchers.header("Authorization", "Basic ABCDE"))
+			  .andRespond(withCreatedEntity(URI.create("http://directory.url/request/DEF")));
 
 		String redirectURL = restTemplate.postForLocation("http://directory.url/request", entity).toASCIIString();
 		assertEquals(redirectURL, "http://directory.url/request/DEF");

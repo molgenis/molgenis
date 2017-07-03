@@ -55,8 +55,8 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetOntology()
 	{
-		when(dataService.findOne(ONTOLOGY, QueryImpl.EQ(ONTOLOGY_IRI, "http://www.ontology.com/test")))
-				.thenReturn(ontologyEntity);
+		when(dataService.findOne(ONTOLOGY, QueryImpl.EQ(ONTOLOGY_IRI, "http://www.ontology.com/test"))).thenReturn(
+				ontologyEntity);
 		assertEquals(ontologyRepository.getOntology("http://www.ontology.com/test"),
 				Ontology.create("1", "http://www.ontology.com/test", "testOntology"));
 	}

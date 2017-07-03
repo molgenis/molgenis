@@ -79,8 +79,8 @@ public class JobExecutor
 
 	private JobExecution createJobExecution(ScheduledJob scheduledJob)
 	{
-		JobExecution jobExecution = (JobExecution) entityManager
-				.create(scheduledJob.getType().getJobExecutionType(), POPULATE);
+		JobExecution jobExecution = (JobExecution) entityManager.create(scheduledJob.getType().getJobExecutionType(),
+				POPULATE);
 		writePropertyValues(jobExecution, getPropertyValues(scheduledJob.getParameters()));
 		jobExecution.setFailureEmail(scheduledJob.getFailureEmail());
 		jobExecution.setSuccessEmail(scheduledJob.getSuccessEmail());

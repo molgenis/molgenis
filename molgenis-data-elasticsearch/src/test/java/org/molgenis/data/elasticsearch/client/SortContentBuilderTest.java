@@ -27,16 +27,16 @@ public class SortContentBuilderTest
 	@Test
 	public void createSortsAsc()
 	{
-		List<SortBuilder> sorts = sortContentBuilder
-				.createSorts(Sort.create(singletonList(SortOrder.create("field", ASC))));
+		List<SortBuilder> sorts = sortContentBuilder.createSorts(
+				Sort.create(singletonList(SortOrder.create("field", ASC))));
 		assertSortsEqual(sorts, singletonList(JSON_SORT_ASC));
 	}
 
 	@Test
 	public void createSortsDesc()
 	{
-		List<SortBuilder> sorts = sortContentBuilder
-				.createSorts(Sort.create(singletonList(SortOrder.create("field", DESC))));
+		List<SortBuilder> sorts = sortContentBuilder.createSorts(
+				Sort.create(singletonList(SortOrder.create("field", DESC))));
 		assertSortsEqual(sorts, singletonList(JSON_SORT_DESC));
 	}
 

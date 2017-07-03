@@ -76,9 +76,9 @@ public class EntityTypeMapperTest
 		boolean abstract_ = true;
 		String backend = "backend";
 		EditorPackageIdentifier editorPackageIdentifier = EditorPackageIdentifier.create("packageId", "package label");
-		EditorEntityTypeParent editorEntityTypeParent = EditorEntityTypeParent
-				.create("entityTypeParentId", "entity type parent label",
-						of(EditorAttributeIdentifier.create("parentAttrId0", "parent attribute #0")), null);
+		EditorEntityTypeParent editorEntityTypeParent = EditorEntityTypeParent.create("entityTypeParentId",
+				"entity type parent label",
+				of(EditorAttributeIdentifier.create("parentAttrId0", "parent attribute #0")), null);
 		List<EditorEntityTypeIdentifier> entityTypeChildren = of(
 				EditorEntityTypeIdentifier.create("entityTypeChild0", "entity type #0"));
 		List<EditorAttribute> editorAttributes = of(mock(EditorAttribute.class));
@@ -88,10 +88,9 @@ public class EntityTypeMapperTest
 		List<EditorAttributeIdentifier> lookupAttributes = of(
 				EditorAttributeIdentifier.create("attr0", "attribute #0"));
 
-		EditorEntityType editorEntityType = EditorEntityType
-				.create(id, label, i18nLabel, description, i18nDescription, abstract_, backend, editorPackageIdentifier,
-						editorEntityTypeParent, editorAttributes, editorTags, idAttribute, labelAttribute,
-						lookupAttributes);
+		EditorEntityType editorEntityType = EditorEntityType.create(id, label, i18nLabel, description, i18nDescription,
+				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes, editorTags,
+				idAttribute, labelAttribute, lookupAttributes);
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityTypeFactory.create()).thenReturn(entityType);
@@ -152,11 +151,12 @@ public class EntityTypeMapperTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(id);
 		when(entityType.getLabel()).thenReturn(label);
-		when(entityType.getString(getI18nAttributeName(EntityTypeMetadata.LABEL, i18nLabelLangEn)))
-				.thenReturn(i18nLabelValue);
+		when(entityType.getString(getI18nAttributeName(EntityTypeMetadata.LABEL, i18nLabelLangEn))).thenReturn(
+				i18nLabelValue);
 		when(entityType.getDescription()).thenReturn(description);
-		when(entityType.getString(getI18nAttributeName(EntityTypeMetadata.DESCRIPTION, i18nDescriptionLangEn)))
-				.thenReturn(i18nDescriptionValue);
+		when(entityType.getString(
+				getI18nAttributeName(EntityTypeMetadata.DESCRIPTION, i18nDescriptionLangEn))).thenReturn(
+				i18nDescriptionValue);
 		when(entityType.isAbstract()).thenReturn(true);
 		when(entityType.getBackend()).thenReturn(backend);
 		Package package_ = mock(Package.class);
@@ -183,8 +183,8 @@ public class EntityTypeMapperTest
 		when(attributeReferenceMapper.toEditorAttributeIdentifier(labelAttribute)).thenReturn(editorLabelAttribute);
 		@SuppressWarnings("unchecked")
 		ImmutableList<EditorAttributeIdentifier> editorLookupAttributes = mock(ImmutableList.class);
-		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes))
-				.thenReturn(editorLookupAttributes);
+		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes)).thenReturn(
+				editorLookupAttributes);
 		@SuppressWarnings("unchecked")
 		ImmutableList<EditorAttribute> editorAttributes = mock(ImmutableList.class);
 		when(attributeMapper.toEditorAttributes(attributes)).thenReturn(editorAttributes);
@@ -199,10 +199,9 @@ public class EntityTypeMapperTest
 		when(entityTypeFactory.create()).thenReturn(entityType);
 		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
 
-		EditorEntityType expectedEditorEntityType = EditorEntityType
-				.create(id, label, i18nLabel, description, i18nDescription, abstract_, backend, editorPackageIdentifier,
-						editorEntityTypeParent, editorAttributes, editorTags, editorIdAttribute, editorLabelAttribute,
-						editorLookupAttributes);
+		EditorEntityType expectedEditorEntityType = EditorEntityType.create(id, label, i18nLabel, description,
+				i18nDescription, abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
+				editorTags, editorIdAttribute, editorLabelAttribute, editorLookupAttributes);
 		assertEquals(editorEntityType, expectedEditorEntityType);
 	}
 
@@ -233,9 +232,9 @@ public class EntityTypeMapperTest
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes)).thenReturn(ImmutableList.of());
 		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
 
-		assertEquals(editorEntityType, EditorEntityType
-				.create(id, null, ImmutableMap.of(), null, ImmutableMap.of(), false, backend, null, null,
-						ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of()));
+		assertEquals(editorEntityType,
+				EditorEntityType.create(id, null, ImmutableMap.of(), null, ImmutableMap.of(), false, backend, null,
+						null, ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of()));
 
 	}
 }

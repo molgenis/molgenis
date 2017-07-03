@@ -36,7 +36,7 @@ public class GavinAnnotatorSettings extends DefaultSettingsEntity
 			String defaultLocation =
 					AnnotatorUtils.getAnnotatorResourceDir() + "/variant/variantinterpretation_emx.xlsx";
 			addAttribute(VARIANT_FILE_LOCATION).setLabel("Variant classification file location")
-					.setDefaultValue(defaultLocation);
+											   .setDefaultValue(defaultLocation);
 		}
 	}
 }

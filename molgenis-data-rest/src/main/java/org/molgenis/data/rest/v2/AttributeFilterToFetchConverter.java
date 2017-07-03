@@ -42,7 +42,7 @@ public class AttributeFilterToFetchConverter
 		if (attrFilter.isIncludeAllAttrs())
 		{
 			entityType.getAtomicAttributes()
-					.forEach(attr -> fetch.field(attr.getName(), createDefaultAttributeFetch(attr, languageCode)));
+					  .forEach(attr -> fetch.field(attr.getName(), createDefaultAttributeFetch(attr, languageCode)));
 		}
 
 		if (attrFilter.isIncludeIdAttr())

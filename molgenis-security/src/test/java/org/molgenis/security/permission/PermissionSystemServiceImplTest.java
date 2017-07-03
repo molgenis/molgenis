@@ -109,8 +109,12 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		verify(userAuthorities.get(1)).setUser(user);
 		verify(userAuthorities.get(1)).setRole(prefix + "_WRITEMETA_" + id1);
 
-		Set<String> newAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-				.map(GrantedAuthority::getAuthority).collect(toSet());
+		Set<String> newAuthorities = SecurityContextHolder.getContext()
+														  .getAuthentication()
+														  .getAuthorities()
+														  .stream()
+														  .map(GrantedAuthority::getAuthority)
+														  .collect(toSet());
 		assertEquals(newAuthorities, Sets.newHashSet("existingAuthority", "newAuthority0", "newAuthority1"));
 	}
 

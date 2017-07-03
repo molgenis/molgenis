@@ -32,10 +32,10 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(documentIdGenerator.generateId(any(EntityType.class)))
-				.thenAnswer(invocation -> invocation.<EntityType>getArgument(0).getId());
-		when(documentIdGenerator.generateId(any(Attribute.class)))
-				.thenAnswer(invocation -> invocation.<Attribute>getArgument(0).getIdentifier());
+		when(documentIdGenerator.generateId(any(EntityType.class))).thenAnswer(
+				invocation -> invocation.<EntityType>getArgument(0).getId());
+		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
+				invocation -> invocation.<Attribute>getArgument(0).getIdentifier());
 		mappingGenerator = new MappingGenerator(documentIdGenerator);
 	}
 
@@ -91,8 +91,11 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 		EntityType entityType = createEntityType(attrIdentifier, attributeType);
 		Mapping mapping = mappingGenerator.createMapping(entityType);
 
-		FieldMapping fieldMapping = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.TEXT)
-				.setAnalyzeNGrams(true).build();
+		FieldMapping fieldMapping = FieldMapping.builder()
+												.setName(attrIdentifier)
+												.setType(MappingType.TEXT)
+												.setAnalyzeNGrams(true)
+												.build();
 		Mapping expectedMapping = createMapping(fieldMapping);
 		assertEquals(mapping, expectedMapping);
 	}
@@ -120,9 +123,16 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 
 		Mapping mapping = mappingGenerator.createMapping(entityType);
 
-		FieldMapping fieldMapping = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.NESTED)
-				.setNestedFieldMappings(singletonList(
-						FieldMapping.builder().setName(refAttrIdentifier).setType(MappingType.LONG).build())).build();
+		FieldMapping fieldMapping = FieldMapping.builder()
+												.setName(attrIdentifier)
+												.setType(MappingType.NESTED)
+												.setNestedFieldMappings(singletonList(FieldMapping.builder()
+																								  .setName(
+																										  refAttrIdentifier)
+																								  .setType(
+																										  MappingType.LONG)
+																								  .build()))
+												.build();
 		Mapping expectedMapping = createMapping(fieldMapping);
 		assertEquals(mapping, expectedMapping);
 	}
@@ -142,17 +152,38 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 
 		EntityType entityTypeDepth1 = createEntityType(attrIdentifier, AttributeType.MREF, refEntityType, 1);
 		when(entityTypeDepth1.toString()).thenReturn("entityTypeDepth1");
-		FieldMapping fieldMapping1 = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.NESTED).setNestedFieldMappings(singletonList(
-				FieldMapping.builder().setName(refAttrIdentifier).setType(MappingType.LONG).build())).build();
+		FieldMapping fieldMapping1 = FieldMapping.builder()
+												 .setName(attrIdentifier)
+												 .setType(MappingType.NESTED)
+												 .setNestedFieldMappings(singletonList(FieldMapping.builder()
+																								   .setName(
+																										   refAttrIdentifier)
+																								   .setType(
+																										   MappingType.LONG)
+																								   .build()))
+												 .build();
 
 		EntityType entityTypeDepth2 = createEntityType(attrIdentifier, AttributeType.MREF, refEntityType, 2);
 		when(entityTypeDepth2.toString()).thenReturn("entityTypeDepth2");
-		FieldMapping fieldMapping2 = FieldMapping.builder().setName(attrIdentifier).setType(MappingType.NESTED)
-				.setNestedFieldMappings(singletonList(
-						FieldMapping.builder().setName(refAttrIdentifier).setType(MappingType.NESTED)
-								.setNestedFieldMappings(singletonList(
-										FieldMapping.builder().setName(refRefAttrIdentifier).setType(MappingType.LONG)
-												.build())).build())).build();
+		FieldMapping fieldMapping2 = FieldMapping.builder()
+												 .setName(attrIdentifier)
+												 .setType(MappingType.NESTED)
+												 .setNestedFieldMappings(singletonList(FieldMapping.builder()
+																								   .setName(
+																										   refAttrIdentifier)
+																								   .setType(
+																										   MappingType.NESTED)
+																								   .setNestedFieldMappings(
+																										   singletonList(
+																												   FieldMapping
+																														   .builder()
+																														   .setName(
+																																   refRefAttrIdentifier)
+																														   .setType(
+																																   MappingType.LONG)
+																														   .build()))
+																								   .build()))
+												 .build();
 
 		List<Object[]> dataItems = new ArrayList<>();
 		dataItems.add(new Object[] { entityTypeDepth0, fieldMapping0 });

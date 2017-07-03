@@ -110,8 +110,10 @@ public class IndexedRepositoryDecoratorTest
 
 		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
-		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
-				.query(q);
+		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr)
+																.attrY(yAttr)
+																.attrDistinct(distinctAttr)
+																.query(q);
 
 		indexedRepositoryDecorator.aggregate(aggregateQuery);
 		verify(searchService).aggregate(repositoryEntityType, aggregateQuery);

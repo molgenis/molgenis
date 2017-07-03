@@ -206,8 +206,8 @@ public class EntityManagerImpl implements EntityManager
 			// retrieve referenced entities
 			Stream<Entity> refEntities = dataService.findAll(refEntityName, entry.getValue().stream(), subFetch);
 
-			Map<Object, Entity> refEntitiesIdMap = refEntities
-					.collect(Collectors.toMap(Entity::getIdValue, Function.identity()));
+			Map<Object, Entity> refEntitiesIdMap = refEntities.collect(
+					Collectors.toMap(Entity::getIdValue, Function.identity()));
 
 			for (Attribute attr : attrs)
 			{
@@ -311,8 +311,11 @@ public class EntityManagerImpl implements EntityManager
 	private static List<Attribute> getResolvableAttrs(EntityType entityType, Fetch fetch)
 	{
 		return stream(entityType.getAtomicAttributes().spliterator(), false).filter(EntityTypeUtils::isReferenceType)
-				.filter(attr -> attr.getExpression() == null).filter(attr -> fetch.hasField(attr.getName()))
-				.collect(Collectors.toList());
+																			.filter(attr -> attr.getExpression()
+																					== null)
+																			.filter(attr -> fetch.hasField(
+																					attr.getName()))
+																			.collect(Collectors.toList());
 	}
 
 	private static class EntityIdIterable implements Iterable<Object>

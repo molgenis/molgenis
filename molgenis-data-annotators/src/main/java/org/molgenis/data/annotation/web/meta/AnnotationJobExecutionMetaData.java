@@ -37,8 +37,10 @@ public class AnnotationJobExecutionMetaData extends SystemEntityType
 		setLabel("Annotation job execution");
 		setExtends(jobExecutionMetaData);
 		setPackage(jobPackage);
-		addAttribute(TARGET_NAME).setDataType(STRING).setLabel("target name")
-				.setDescription("Fully qualified name of the entity that is being annotated.").setNillable(false);
+		addAttribute(TARGET_NAME).setDataType(STRING)
+								 .setLabel("target name")
+								 .setDescription("Fully qualified name of the entity that is being annotated.")
+								 .setNillable(false);
 		addAttribute(ANNOTATORS).setDataType(STRING).setLabel("Annotators run by this job").setNillable(false);
 	}
 }

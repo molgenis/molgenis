@@ -71,7 +71,8 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 				entityTypeMapper, attributeMapper);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(metadataManagerService)
-				.setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter).build();
+								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
+								 .build();
 	}
 
 	@Test
@@ -84,9 +85,10 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		when(metaDataService.getPackages()).thenReturn(packages);
 		when(packageMapper.toEditorPackage(package_)).thenReturn(getEditorPackage());
 
-		this.mockMvc.perform(get("/metadata-manager-service/editorPackages")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(getEditorPackageResponse()));
+		this.mockMvc.perform(get("/metadata-manager-service/editorPackages"))
+					.andExpect(status().isOk())
+					.andExpect(content().contentType(APPLICATION_JSON))
+					.andExpect(content().string(getEditorPackageResponse()));
 	}
 
 	@Test
@@ -101,28 +103,31 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 
 		when(entityTypeMapper.toEditorEntityType(entityType)).thenReturn(getEditorEntityType());
 
-		this.mockMvc.perform(get("/metadata-manager-service/entityType/1")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(getEditorEntityTypeResponseJson()));
+		this.mockMvc.perform(get("/metadata-manager-service/entityType/1"))
+					.andExpect(status().isOk())
+					.andExpect(content().contentType(APPLICATION_JSON))
+					.andExpect(content().string(getEditorEntityTypeResponseJson()));
 	}
 
 	@Test
 	public void testGetEntityTypeNotExists() throws Exception
 	{
-		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
-				.thenThrow(new UnknownEntityException("Unknown entity [unknownId]"));
-		this.mockMvc.perform(get("/metadata-manager-service/entityType/unknownId")).andExpect(status().isBadRequest())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"errors\":[{\"message\":\"Unknown entity [unknownId]\"}]}"));
+		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenThrow(
+				new UnknownEntityException("Unknown entity [unknownId]"));
+		this.mockMvc.perform(get("/metadata-manager-service/entityType/unknownId"))
+					.andExpect(status().isBadRequest())
+					.andExpect(content().contentType(APPLICATION_JSON))
+					.andExpect(content().string("{\"errors\":[{\"message\":\"Unknown entity [unknownId]\"}]}"));
 	}
 
 	@Test
 	public void testCreateEntityType() throws Exception
 	{
 		when(entityTypeMapper.createEditorEntityType()).thenReturn(getEditorEntityType());
-		this.mockMvc.perform(get("/metadata-manager-service/create/entityType")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(getEditorEntityTypeResponseJson()));
+		this.mockMvc.perform(get("/metadata-manager-service/create/entityType"))
+					.andExpect(status().isOk())
+					.andExpect(content().contentType(APPLICATION_JSON))
+					.andExpect(content().string(getEditorEntityTypeResponseJson()));
 	}
 
 	@Test
@@ -131,7 +136,8 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		EntityType entityType = mock(EntityType.class);
 		when(entityTypeMapper.toEntityType(getEditorEntityType())).thenReturn(entityType);
 		this.mockMvc.perform(post("/metadata-manager-service/entityType").contentType(APPLICATION_JSON)
-				.content(getEditorEntityTypeJson())).andExpect(status().isOk());
+																		 .content(getEditorEntityTypeJson()))
+					.andExpect(status().isOk());
 		Mockito.verify(metaDataService).upsertEntityTypes(newArrayList(entityType));
 	}
 
@@ -139,9 +145,10 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 	public void testCreateAttribute() throws Exception
 	{
 		when(attributeMapper.createEditorAttribute()).thenReturn(getEditorAttribute());
-		this.mockMvc.perform(get("/metadata-manager-service/create/attribute")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(getEditorAttributeResponse()));
+		this.mockMvc.perform(get("/metadata-manager-service/create/attribute"))
+					.andExpect(status().isOk())
+					.andExpect(content().contentType(APPLICATION_JSON))
+					.andExpect(content().string(getEditorAttributeResponse()));
 	}
 
 	private EditorPackageIdentifier getEditorPackage()
@@ -156,10 +163,9 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 
 	private EditorAttribute getEditorAttribute()
 	{
-		return EditorAttribute
-				.create("1", null, null, null, null, null, null, null, false, false, false, null, ImmutableMap.of(),
-						null, ImmutableMap.of(), false, ImmutableList.of(), null, null, false, false,
-						ImmutableList.of(), null, null, null, 1);
+		return EditorAttribute.create("1", null, null, null, null, null, null, null, false, false, false, null,
+				ImmutableMap.of(), null, ImmutableMap.of(), false, ImmutableList.of(), null, null, false, false,
+				ImmutableList.of(), null, null, null, 1);
 	}
 
 	private String getEditorAttributeResponse()
@@ -169,9 +175,8 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 
 	private EditorEntityType getEditorEntityType()
 	{
-		return EditorEntityType
-				.create("1", null, ImmutableMap.of(), null, ImmutableMap.of(), false, "backend", null, null,
-						ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of());
+		return EditorEntityType.create("1", null, ImmutableMap.of(), null, ImmutableMap.of(), false, "backend", null,
+				null, ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of());
 	}
 
 	private String getEditorEntityTypeResponseJson()

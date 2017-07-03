@@ -40,7 +40,9 @@ public class PersonMetaData4 extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setLabel("Label");
 		Attribute parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this);
-		addAttribute(ATTR_CHILDREN).setDataType(ONE_TO_MANY).setRefEntity(this).setMappedBy(parentAttr)
-				.setOrderBy(new Sort(ID, DESC));
+		addAttribute(ATTR_CHILDREN).setDataType(ONE_TO_MANY)
+								   .setRefEntity(this)
+								   .setMappedBy(parentAttr)
+								   .setOrderBy(new Sort(ID, DESC));
 	}
 }

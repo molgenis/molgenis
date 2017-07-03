@@ -44,8 +44,10 @@ public class NavigatorControllerTest
 	@Test
 	public void testInit() throws Exception
 	{
-		mockMvc.perform(get(NavigatorController.URI)).andExpect(status().isOk())
-				.andExpect(view().name("view-navigator")).andExpect(model().attribute("baseUrl", "/test/path"));
+		mockMvc.perform(get(NavigatorController.URI))
+			   .andExpect(status().isOk())
+			   .andExpect(view().name("view-navigator"))
+			   .andExpect(model().attribute("baseUrl", "/test/path"));
 	}
 
 }

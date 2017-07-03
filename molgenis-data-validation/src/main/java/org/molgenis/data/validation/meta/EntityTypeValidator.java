@@ -61,8 +61,8 @@ public class EntityTypeValidator
 		validateExtends(entityType);
 		validateOwnAttributes(entityType);
 
-		Map<String, Attribute> ownAllAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
+		Map<String, Attribute> ownAllAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
+				toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
 				{
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
 				}, LinkedHashMap::new));
@@ -211,8 +211,8 @@ public class EntityTypeValidator
 		}
 
 		// Validate that entity does not contain multiple attributes with the same name
-		Multimap<String, Attribute> attrMultiMap = asStream(entityType.getAllAttributes())
-				.collect(MultimapCollectors.toArrayListMultimap(Attribute::getName, Function.identity()));
+		Multimap<String, Attribute> attrMultiMap = asStream(entityType.getAllAttributes()).collect(
+				MultimapCollectors.toArrayListMultimap(Attribute::getName, Function.identity()));
 		attrMultiMap.keySet().forEach(attrName ->
 		{
 			if (attrMultiMap.get(attrName).size() > 1)
@@ -326,8 +326,8 @@ public class EntityTypeValidator
 		Package package_ = entityType.getPackage();
 		if (package_ != null)
 		{
-			if (MetaUtils.isSystemPackage(package_) && !systemEntityTypeRegistry
-					.hasSystemEntityType(entityType.getId()))
+			if (MetaUtils.isSystemPackage(package_) && !systemEntityTypeRegistry.hasSystemEntityType(
+					entityType.getId()))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getId(),

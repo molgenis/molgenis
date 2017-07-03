@@ -35,8 +35,9 @@ public class ResourceFingerprintRegistry
 
 	private String createFingerprint(Class<?> contextClass, String resourceName) throws IOException
 	{
-		byte[] bytes = contextClass != null ? ResourceUtils.getBytes(contextClass, resourceName) : ResourceUtils
-				.getBytes(resourceName);
+		byte[] bytes =
+				contextClass != null ? ResourceUtils.getBytes(contextClass, resourceName) : ResourceUtils.getBytes(
+						resourceName);
 		HashCode crc32 = Hashing.crc32().hashBytes(bytes);
 		return BaseEncoding.base64Url().omitPadding().encode(crc32.asBytes());
 	}

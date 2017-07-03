@@ -323,8 +323,10 @@ public class DynamicEntity implements Entity
 			else if (EntityTypeUtils.isMultipleReferenceType(attr))
 			{
 				attrStrBuilder.append('[')
-						.append(stream(getEntities(attr.getName()).spliterator(), false).map(Entity::getIdValue)
-								.map(Object::toString).collect(joining(","))).append(']');
+							  .append(stream(getEntities(attr.getName()).spliterator(), false).map(Entity::getIdValue)
+																							  .map(Object::toString)
+																							  .collect(joining(",")))
+							  .append(']');
 			}
 			else
 			{

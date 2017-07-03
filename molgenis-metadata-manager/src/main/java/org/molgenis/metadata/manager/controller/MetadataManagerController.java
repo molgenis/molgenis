@@ -23,7 +23,8 @@ public class MetadataManagerController extends MolgenisPluginController
 	private LanguageService languageService;
 	private AppSettings appSettings;
 
-	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService, AppSettings appSettings)
+	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService,
+			AppSettings appSettings)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);

@@ -255,7 +255,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 
 		List<QueryRule> disMaxQueryRules = newArrayList(
 				new QueryRule(AttributeMetadata.ID, QueryRule.Operator.IN, attributeIdentifiers),
-						new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
+				new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
 
 		Attribute attributeHeight = attrMetaDataFactory.create().setName("height_0");
 		Attribute attributeWeight = attrMetaDataFactory.create().setName("weight_0");

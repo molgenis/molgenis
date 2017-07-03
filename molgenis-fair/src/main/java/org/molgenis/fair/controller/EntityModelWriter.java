@@ -81,7 +81,7 @@ public class EntityModelWriter
 				continue;
 			}
 			for (LabeledResource tag : tagService.getTagsForAttribute(entityType, objectAttribute)
-					.get(Relation.isAssociatedWith))
+												 .get(Relation.isAssociatedWith))
 			{
 				IRI predicate = valueFactory.createIRI(tag.getIri());
 				addRelationForAttribute(model, subject, predicate, objectEntity, objectAttribute);
@@ -105,8 +105,8 @@ public class EntityModelWriter
 				model.add(subject, predicate, valueFactory.createLiteral(objectEntity.getBoolean(name)));
 				break;
 			case DATE:
-				XMLGregorianCalendar calendar = DATATYPE_FACTORY
-						.newXMLGregorianCalendar(objectEntity.getLocalDate(name).toString());
+				XMLGregorianCalendar calendar = DATATYPE_FACTORY.newXMLGregorianCalendar(
+						objectEntity.getLocalDate(name).toString());
 				model.add(subject, predicate, valueFactory.createLiteral(calendar));
 				break;
 			case DATE_TIME:
@@ -161,7 +161,8 @@ public class EntityModelWriter
 		if (predicate.stringValue().equals(KEYWORD))
 		{
 			stream(value.split(",")).map(String::trim)
-					.forEach(keyword -> model.add(subject, predicate, valueFactory.createLiteral(keyword)));
+									.forEach(keyword -> model.add(subject, predicate,
+											valueFactory.createLiteral(keyword)));
 		}
 		else
 		{

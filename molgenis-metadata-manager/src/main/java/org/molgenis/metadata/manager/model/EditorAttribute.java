@@ -79,12 +79,12 @@ public abstract class EditorAttribute
 	public abstract Integer getSequenceNumber();
 
 	public static EditorAttribute create(String id, @Nullable String name, @Nullable String type,
-			EditorAttributeIdentifier parent,
-			EditorEntityTypeIdentifier refEntityType, EditorAttributeIdentifier mappedByEntityType, EditorSort orderBy,
-			String expression, boolean nullable, boolean auto, boolean visible, @Nullable String label,
-			Map<String, String> i18nLabel, @Nullable String description, Map<String, String> i18nDescription,
-			boolean aggregatable, @Nullable List<String> enumOptions, @Nullable Long rangeMin, @Nullable Long rangeMax,
-			boolean readonly, boolean unique, List<EditorTagIdentifier> tags, @Nullable String visibleExpression,
+			EditorAttributeIdentifier parent, EditorEntityTypeIdentifier refEntityType,
+			EditorAttributeIdentifier mappedByEntityType, EditorSort orderBy, String expression, boolean nullable,
+			boolean auto, boolean visible, @Nullable String label, Map<String, String> i18nLabel,
+			@Nullable String description, Map<String, String> i18nDescription, boolean aggregatable,
+			@Nullable List<String> enumOptions, @Nullable Long rangeMin, @Nullable Long rangeMax, boolean readonly,
+			boolean unique, List<EditorTagIdentifier> tags, @Nullable String visibleExpression,
 			@Nullable String validationExpression, @Nullable String defaultValue, Integer sequenceNumber)
 	{
 		return new AutoValue_EditorAttribute(id, name, type, parent, refEntityType, mappedByEntityType, orderBy,

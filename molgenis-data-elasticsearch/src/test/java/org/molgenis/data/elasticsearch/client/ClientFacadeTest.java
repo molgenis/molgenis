@@ -134,8 +134,8 @@ public class ClientFacadeTest
 
 	private ClientFacade clientFacade;
 	private Level originalLogLevel;
-	private ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) LoggerFactory
-			.getLogger(ClientFacade.class);
+	private ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(
+			ClientFacade.class);
 	private final DefaultShardOperationFailedException[] singleShardFailure = new DefaultShardOperationFailedException[] {
 			new DefaultShardOperationFailedException("index", 0, null) };
 
@@ -195,8 +195,8 @@ public class ClientFacadeTest
 
 		when(indicesAdminClient.prepareCreate(any())).thenReturn(createIndexRequestBuilder);
 		when(createIndexRequestBuilder.setSettings(any(Settings.class))).thenReturn(createIndexRequestBuilder);
-		when(createIndexRequestBuilder.addMapping(any(), any(XContentBuilder.class)))
-				.thenReturn(createIndexRequestBuilder);
+		when(createIndexRequestBuilder.addMapping(any(), any(XContentBuilder.class))).thenReturn(
+				createIndexRequestBuilder);
 
 		when(createIndexRequestBuilder.get()).thenThrow(new ResourceAlreadyExistsException("Index already exists"));
 
@@ -214,8 +214,8 @@ public class ClientFacadeTest
 
 		when(indicesAdminClient.prepareCreate("indexname")).thenReturn(createIndexRequestBuilder);
 		when(createIndexRequestBuilder.setSettings(any(Settings.class))).thenReturn(createIndexRequestBuilder);
-		when(createIndexRequestBuilder.addMapping(eq("type"), any(Mapping.class)))
-				.thenReturn(createIndexRequestBuilder);
+		when(createIndexRequestBuilder.addMapping(eq("type"), any(Mapping.class))).thenReturn(
+				createIndexRequestBuilder);
 
 		when(createIndexRequestBuilder.get()).thenThrow(new ElasticsearchException("error creating index"));
 
@@ -233,8 +233,8 @@ public class ClientFacadeTest
 
 		when(indicesAdminClient.prepareCreate("indexname")).thenReturn(createIndexRequestBuilder);
 		when(createIndexRequestBuilder.setSettings(any(Settings.class))).thenReturn(createIndexRequestBuilder);
-		when(createIndexRequestBuilder.addMapping(eq("type"), any(Mapping.class)))
-				.thenReturn(createIndexRequestBuilder);
+		when(createIndexRequestBuilder.addMapping(eq("type"), any(Mapping.class))).thenReturn(
+				createIndexRequestBuilder);
 
 		when(createIndexRequestBuilder.get()).thenReturn(createIndexResponse);
 		when(createIndexResponse.isAcknowledged()).thenReturn(false);
@@ -244,8 +244,8 @@ public class ClientFacadeTest
 
 		verify(mockAppender).doAppend(matcher(TRACE, "Creating index 'indexname' ..."));
 		verify(mockAppender).doAppend(matcher(WARN, "Index 'indexname' creation possibly failed (acknowledged=false)"));
-		verify(mockAppender)
-				.doAppend(matcher(WARN, "Index 'indexname' creation possibly failed (shards_acknowledged=false)"));
+		verify(mockAppender).doAppend(
+				matcher(WARN, "Index 'indexname' creation possibly failed (shards_acknowledged=false)"));
 		verify(mockAppender).doAppend(matcher(DEBUG, "Created index 'indexname'."));
 	}
 

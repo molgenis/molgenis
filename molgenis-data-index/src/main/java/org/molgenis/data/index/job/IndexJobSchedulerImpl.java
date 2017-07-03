@@ -52,22 +52,22 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler
 	public void scheduleIndexJob(String transactionId)
 	{
 		LOG.trace("Index transaction with id {}...", transactionId);
-		IndexActionGroup indexActionGroup = dataService
-				.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class);
+		IndexActionGroup indexActionGroup = dataService.findOneById(INDEX_ACTION_GROUP, transactionId,
+				IndexActionGroup.class);
 
 		if (indexActionGroup != null)
 		{
-			Stream<Entity> indexActions = dataService
-					.findAll(INDEX_ACTION, new QueryImpl<>().eq(INDEX_ACTION_GROUP_ATTR, indexActionGroup));
-			Map<String, Long> numberOfActionsPerEntity = indexActions
-					.collect(groupingBy(indexAction -> indexAction.getString(ENTITY_TYPE_ID), counting()));
+			Stream<Entity> indexActions = dataService.findAll(INDEX_ACTION,
+					new QueryImpl<>().eq(INDEX_ACTION_GROUP_ATTR, indexActionGroup));
+			Map<String, Long> numberOfActionsPerEntity = indexActions.collect(
+					groupingBy(indexAction -> indexAction.getString(ENTITY_TYPE_ID), counting()));
 			indexStatus.addActionCounts(numberOfActionsPerEntity);
 
 			IndexJobExecution indexJobExecution = indexJobExecutionFactory.create();
 			indexJobExecution.setUser("admin");
 			indexJobExecution.setIndexActionJobID(transactionId);
 			jobExecutor.submit(indexJobExecution, executorService)
-					.whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
+					   .whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
 		}
 		else
 		{
@@ -103,8 +103,12 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler
 			boolean indexJobExecutionExists = dataService.hasRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION);
 			if (indexJobExecutionExists)
 			{
-				Stream<Entity> executions = dataService.getRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION).query()
-						.lt(END_DATE, fiveMinutesAgo).and().eq(STATUS, SUCCESS.toString()).findAll();
+				Stream<Entity> executions = dataService.getRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION)
+													   .query()
+													   .lt(END_DATE, fiveMinutesAgo)
+													   .and()
+													   .eq(STATUS, SUCCESS.toString())
+													   .findAll();
 				dataService.delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, executions);
 				LOG.debug("Cleaned up Index job executions.");
 			}

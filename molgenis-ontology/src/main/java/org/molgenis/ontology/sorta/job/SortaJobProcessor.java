@@ -64,8 +64,8 @@ public class SortaJobProcessor
 			progress.setProgressMax((int) maxCount);
 
 			// FIXME get rid of getApplicationContext reference
-			MatchingTaskContentMetaData matchingTaskContentMetaData = getApplicationContext()
-					.getBean(MatchingTaskContentMetaData.class);
+			MatchingTaskContentMetaData matchingTaskContentMetaData = getApplicationContext().getBean(
+					MatchingTaskContentMetaData.class);
 
 			// Match input terms with code
 			List<Entity> entitiesToAdd = newArrayList();
@@ -87,8 +87,8 @@ public class SortaJobProcessor
 				Iterable<Entity> ontologyTermEntities = sortaService.findOntologyTermEntities(ontologyIri, inputRow);
 				if (Iterables.size(ontologyTermEntities) > 0)
 				{
-					Entity firstMatchedOntologyTerm = Iterables
-							.getFirst(ontologyTermEntities, new DynamicEntity(matchingTaskContentMetaData));
+					Entity firstMatchedOntologyTerm = Iterables.getFirst(ontologyTermEntities,
+							new DynamicEntity(matchingTaskContentMetaData));
 					resultEntity.set(MatchingTaskContentMetaData.MATCHED_TERM,
 							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 					resultEntity.set(MatchingTaskContentMetaData.SCORE, firstMatchedOntologyTerm.get(SCORE));

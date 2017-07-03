@@ -130,8 +130,8 @@ public class ClientFacade implements Closeable
 			Stream<Mapping> mappingStream)
 	{
 		XContentBuilder settings = settingsBuilder.createSettings(indexSettings);
-		Map<String, XContentBuilder> mappings = mappingStream
-				.collect(toMap(Mapping::getType, mappingSourceBuilder::createMapping, (u, v) ->
+		Map<String, XContentBuilder> mappings = mappingStream.collect(
+				toMap(Mapping::getType, mappingSourceBuilder::createMapping, (u, v) ->
 				{
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
 				}, LinkedHashMap::new));
@@ -251,7 +251,7 @@ public class ClientFacade implements Closeable
 		if (refreshResponse.getFailedShards() > 0)
 		{
 			LOG.error(stream(refreshResponse.getShardFailures()).map(ShardOperationFailedException::toString)
-					.collect(joining("\n")));
+																.collect(joining("\n")));
 			throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
 		}
 
@@ -444,8 +444,8 @@ public class ClientFacade implements Closeable
 	private SearchHits createSearchResponse(SearchResponse searchResponse)
 	{
 		org.elasticsearch.search.SearchHits searchHits = searchResponse.getHits();
-		List<SearchHit> searchHitList = stream(searchHits.getHits())
-				.map(hit -> SearchHit.create(hit.getId(), hit.getIndex())).collect(toList());
+		List<SearchHit> searchHitList = stream(searchHits.getHits()).map(
+				hit -> SearchHit.create(hit.getId(), hit.getIndex())).collect(toList());
 		return SearchHits.create(searchHits.getTotalHits(), searchHitList);
 	}
 
@@ -524,7 +524,7 @@ public class ClientFacade implements Closeable
 		String indexName = searchHit.getIndex();
 		//FIXME: ClientFacade shouldn't assume that typename equals typename
 		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, indexName, searchHit.getId())
-				.setQuery(query);
+															.setQuery(query);
 		ExplainResponse explainResponse;
 		try
 		{
@@ -556,8 +556,11 @@ public class ClientFacade implements Closeable
 		String indexName = index.getName();
 		String documentId = document.getId();
 		XContentBuilder source = document.getContent();
-		IndexRequestBuilder indexRequest = client.prepareIndex().setIndex(indexName).setType(indexName)
-				.setId(documentId).setSource(source);
+		IndexRequestBuilder indexRequest = client.prepareIndex()
+												 .setIndex(indexName)
+												 .setType(indexName)
+												 .setId(documentId)
+												 .setSource(source);
 
 		IndexResponse indexResponse;
 		try
@@ -579,8 +582,8 @@ public class ClientFacade implements Closeable
 		if (indexResponse.getShardInfo().getSuccessful() == 0)
 		{
 			LOG.error(Arrays.stream(indexResponse.getShardInfo().getFailures())
-					//FIXME: logs Object.toString()
-					.map(ReplicationResponse.ShardInfo.Failure::toString).collect(joining("\n")));
+							//FIXME: logs Object.toString()
+							.map(ReplicationResponse.ShardInfo.Failure::toString).collect(joining("\n")));
 			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 
@@ -599,8 +602,10 @@ public class ClientFacade implements Closeable
 
 		String indexName = index.getName();
 		String documentId = document.getId();
-		DeleteRequestBuilder deleteRequest = client.prepareDelete().setIndex(indexName).setType(indexName)
-				.setId(documentId);
+		DeleteRequestBuilder deleteRequest = client.prepareDelete()
+												   .setIndex(indexName)
+												   .setType(indexName)
+												   .setId(documentId);
 
 		DeleteResponse deleteResponse;
 		try
@@ -660,8 +665,11 @@ public class ClientFacade implements Closeable
 				{
 					throw new IndexException(format("Document action is missing document source '%s'", documentAction));
 				}
-				docWriteRequest = Requests.indexRequest(indexName).type(indexName).id(documentId).source(source)
-						.opType(INDEX);
+				docWriteRequest = Requests.indexRequest(indexName)
+										  .type(indexName)
+										  .id(documentId)
+										  .source(source)
+										  .opType(INDEX);
 				break;
 			case DELETE:
 				docWriteRequest = Requests.deleteRequest(indexName).type(indexName).id(documentId);

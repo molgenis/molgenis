@@ -56,8 +56,8 @@ public class EntityTypeReferenceMapperTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(id);
 		when(entityType.getLabel()).thenReturn(label);
-		List<EditorEntityTypeIdentifier> editorEntityTypeIdentifiers = entityTypeReferenceMapper
-				.toEditorEntityTypeIdentifiers(of(entityType));
+		List<EditorEntityTypeIdentifier> editorEntityTypeIdentifiers = entityTypeReferenceMapper.toEditorEntityTypeIdentifiers(
+				of(entityType));
 		assertEquals(editorEntityTypeIdentifiers, of(EditorEntityTypeIdentifier.create(id, label)));
 	}
 
@@ -69,8 +69,8 @@ public class EntityTypeReferenceMapperTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(id);
 		when(entityType.getLabel()).thenReturn(label);
-		EditorEntityTypeIdentifier editorEntityTypeIdentifier = entityTypeReferenceMapper
-				.toEditorEntityTypeIdentifier(entityType);
+		EditorEntityTypeIdentifier editorEntityTypeIdentifier = entityTypeReferenceMapper.toEditorEntityTypeIdentifier(
+				entityType);
 		assertEquals(editorEntityTypeIdentifier, EditorEntityTypeIdentifier.create(id, label));
 	}
 

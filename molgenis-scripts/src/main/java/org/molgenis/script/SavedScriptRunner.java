@@ -63,8 +63,8 @@ public class SavedScriptRunner
 	 */
 	public ScriptResult runScript(String scriptName, Map<String, Object> parameters)
 	{
-		Script script = dataService
-				.findOne(SCRIPT, new QueryImpl<Script>().eq(ScriptMetaData.NAME, scriptName), Script.class);
+		Script script = dataService.findOne(SCRIPT, new QueryImpl<Script>().eq(ScriptMetaData.NAME, scriptName),
+				Script.class);
 
 		if (script == null)
 		{
@@ -84,8 +84,8 @@ public class SavedScriptRunner
 
 		if (script.isGenerateToken())
 		{
-			String token = tokenService
-					.generateAndStoreToken(SecurityUtils.getCurrentUsername(), "For script " + script.getName());
+			String token = tokenService.generateAndStoreToken(SecurityUtils.getCurrentUsername(),
+					"For script " + script.getName());
 			parameters.put("molgenisToken", token);
 		}
 

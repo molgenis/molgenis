@@ -96,8 +96,11 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 						transactionId, actionOrder);
 			}
 			IndexAction indexAction = indexActionFactory.create()
-					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityTypeId(entityType.getId()).setEntityId(entityId).setIndexStatus(PENDING);
+														.setIndexActionGroup(
+																indexActionGroupFactory.create(transactionId))
+														.setEntityTypeId(entityType.getId())
+														.setEntityId(entityId)
+														.setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
 		else
@@ -117,12 +120,18 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return;
 		}
 		IndexActionGroup indexActionGroup = indexActionsForCurrentTransaction.iterator().next().getIndexActionGroup();
-		Set<Impact> changes = indexActionsForCurrentTransaction.stream().map(indexAction -> Impact
-				.createSingleEntityImpact(indexAction.getEntityTypeId(), indexAction.getEntityId())).collect(toSet());
+		Set<Impact> changes = indexActionsForCurrentTransaction.stream()
+															   .map(indexAction -> Impact.createSingleEntityImpact(
+																	   indexAction.getEntityTypeId(),
+																	   indexAction.getEntityId()))
+															   .collect(toSet());
 		IndexDependencyModel dependencyModel = new IndexDependencyModel(getEntityTypes());
-		List<IndexAction> indexActions = indexingStrategy.determineImpact(changes, dependencyModel).stream()
-				.filter(key -> !excludedEntities.contains(key.getEntityTypeId()))
-				.map(key -> createIndexAction(indexActionGroup, key)).collect(toList());
+		List<IndexAction> indexActions = indexingStrategy.determineImpact(changes, dependencyModel)
+														 .stream()
+														 .filter(key -> !excludedEntities.contains(
+																 key.getEntityTypeId()))
+														 .map(key -> createIndexAction(indexActionGroup, key))
+														 .collect(toList());
 		if (indexActions.isEmpty())
 		{
 			return;
@@ -133,8 +142,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		}
 
 		LOG.debug("Store index actions for transaction {}", transactionId);
-		dataService
-				.add(INDEX_ACTION_GROUP, indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
+		dataService.add(INDEX_ACTION_GROUP,
+				indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
 		dataService.add(INDEX_ACTION, indexActions.stream());
 	}
 
@@ -174,8 +183,10 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean forgetIndexActions(String transactionId)
 	{
 		LOG.debug("Forget index actions for transaction {}", transactionId);
-		return indexActionsPerTransaction.removeAll(transactionId).stream()
-				.anyMatch(indexAction -> !excludedEntities.contains(indexAction.getEntityTypeId()));
+		return indexActionsPerTransaction.removeAll(transactionId)
+										 .stream()
+										 .anyMatch(indexAction -> !excludedEntities.contains(
+												 indexAction.getEntityTypeId()));
 	}
 
 	private Collection<IndexAction> getIndexActionsForCurrentTransaction()
@@ -189,39 +200,47 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@Override
 	public boolean isEntityDirty(EntityKey entityKey)
 	{
-		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() != null && indexAction.getEntityTypeId()
-						.equals(entityKey.getEntityTypeId()) && indexAction.getEntityId()
-						.equals(entityKey.getId().toString()));
+		return getIndexActionsForCurrentTransaction().stream()
+													 .anyMatch(indexAction -> indexAction.getEntityId() != null
+															 && indexAction.getEntityTypeId()
+																		   .equals(entityKey.getEntityTypeId())
+															 && indexAction.getEntityId()
+																		   .equals(entityKey.getId().toString()));
 	}
 
 	@Override
 	public boolean isEntireRepositoryDirty(EntityType entityType)
 	{
-		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() == null && indexAction.getEntityTypeId()
-						.equals(entityType.getId()));
+		return getIndexActionsForCurrentTransaction().stream()
+													 .anyMatch(indexAction -> indexAction.getEntityId() == null
+															 && indexAction.getEntityTypeId()
+																		   .equals(entityType.getId()));
 	}
 
 	@Override
 	public boolean isRepositoryCompletelyClean(EntityType entityType)
 	{
 		return getIndexActionsForCurrentTransaction().stream()
-				.noneMatch(indexAction -> indexAction.getEntityTypeId().equals(entityType.getId()));
+													 .noneMatch(indexAction -> indexAction.getEntityTypeId()
+																						  .equals(entityType.getId()));
 	}
 
 	@Override
 	public Set<EntityKey> getDirtyEntities()
 	{
-		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() != null)
-				.map(this::createEntityKey).collect(toSet());
+		return getIndexActionsForCurrentTransaction().stream()
+													 .filter(indexAction -> indexAction.getEntityId() != null)
+													 .map(this::createEntityKey)
+													 .collect(toSet());
 	}
 
 	@Override
 	public Set<String> getEntirelyDirtyRepositories()
 	{
-		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() == null)
-				.map(IndexAction::getEntityTypeId).collect(toSet());
+		return getIndexActionsForCurrentTransaction().stream()
+													 .filter(indexAction -> indexAction.getEntityId() == null)
+													 .map(IndexAction::getEntityTypeId)
+													 .collect(toSet());
 	}
 
 	@Override
@@ -238,8 +257,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private EntityKey createEntityKey(IndexAction indexAction)
 	{
-		return EntityKey.create(indexAction.getEntityTypeId(), indexAction.getEntityId() != null ? EntityUtils
-				.getTypedValue(indexAction.getEntityId(),
+		return EntityKey.create(indexAction.getEntityTypeId(),
+				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
 						dataService.getEntityType(indexAction.getEntityTypeId()).getIdAttribute()) : null);
 	}
 

@@ -166,8 +166,7 @@ public class RestServiceTest
 		when(mockBuilder.build()).thenReturn(downloadUri);
 		when(servletUriComponentsBuilderFactory.fromCurrentRequest()).thenReturn(mockBuilder);
 
-
-		byte [] content = {'a', 'b'};
+		byte[] content = { 'a', 'b' };
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("name", "fileName", "contentType", content);
 
 		assertEquals(restService.toEntityValue(fileAttr, mockMultipartFile, null), fileMeta);

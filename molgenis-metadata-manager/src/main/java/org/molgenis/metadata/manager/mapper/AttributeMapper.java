@@ -52,11 +52,14 @@ public class AttributeMapper
 	Iterable<Attribute> toAttributes(List<EditorAttribute> editorAttributes, EditorEntityType editorEntityType)
 	{
 		Map<String, Attribute> attributeMap = IntStream.range(0, editorAttributes.size())
-				.mapToObj(i -> toAttribute(i, editorAttributes.get(i), editorEntityType))
-				.collect(toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
-				{
-					throw new IllegalStateException(String.format("Duplicate key %s", u));
-				}, LinkedHashMap::new));
+													   .mapToObj(i -> toAttribute(i, editorAttributes.get(i),
+															   editorEntityType))
+													   .collect(toMap(Attribute::getIdentifier, Function.identity(),
+															   (u, v) ->
+															   {
+																   throw new IllegalStateException(
+																		   String.format("Duplicate key %s", u));
+															   }, LinkedHashMap::new));
 		return injectAttributeParents(attributeMap, editorAttributes);
 	}
 
@@ -89,10 +92,10 @@ public class AttributeMapper
 		String name = attribute.getName();
 		String type = attribute.getDataType() != null ? attribute.getDataType().toString() : null;
 		EditorAttributeIdentifier parent = attributeReferenceMapper.toEditorAttributeIdentifier(attribute.getParent());
-		EditorEntityTypeIdentifier refEntityType = entityTypeReferenceMapper
-				.toEditorEntityTypeIdentifier(attribute.getRefEntity());
-		EditorAttributeIdentifier mappedByEntityType = attributeReferenceMapper
-				.toEditorAttributeIdentifier(attribute.getMappedBy());
+		EditorEntityTypeIdentifier refEntityType = entityTypeReferenceMapper.toEditorEntityTypeIdentifier(
+				attribute.getRefEntity());
+		EditorAttributeIdentifier mappedByEntityType = attributeReferenceMapper.toEditorAttributeIdentifier(
+				attribute.getMappedBy());
 		EditorSort orderBy = sortMapper.toEditorSort(attribute.getOrderBy());
 		String expression = attribute.getExpression();
 		boolean nullable = attribute.isNillable();
@@ -113,11 +116,10 @@ public class AttributeMapper
 		String validationExpression = attribute.getValidationExpression();
 		String defaultValue = attribute.getDefaultValue();
 		Integer sequenceNumber = attribute.getSequenceNumber() != null ? attribute.getSequenceNumber() : 0;
-		return EditorAttribute
-				.create(id, name, type, parent, refEntityType, mappedByEntityType, orderBy, expression, nullable, auto,
-						visible, label, i18nLabel, description, i18nDescription, aggregatable, enumOptions, rangeMin,
-						rangeMax, readonly, unique, tags, visibleExpression, validationExpression, defaultValue,
-						sequenceNumber);
+		return EditorAttribute.create(id, name, type, parent, refEntityType, mappedByEntityType, orderBy, expression,
+				nullable, auto, visible, label, i18nLabel, description, i18nDescription, aggregatable, enumOptions,
+				rangeMin, rangeMax, readonly, unique, tags, visibleExpression, validationExpression, defaultValue,
+				sequenceNumber);
 	}
 
 	private ImmutableMap<String, String> toI18nLabel(Attribute attribute)
@@ -183,8 +185,8 @@ public class AttributeMapper
 		attribute.setDescription(editorAttribute.getDescription());
 		if (editorAttribute.getDescriptionI18n() != null)
 		{
-			getLanguageCodes().forEach(languageCode -> attribute
-					.setDescription(languageCode, editorAttribute.getDescriptionI18n().get(languageCode)));
+			getLanguageCodes().forEach(languageCode -> attribute.setDescription(languageCode,
+					editorAttribute.getDescriptionI18n().get(languageCode)));
 		}
 
 		attribute.setAggregatable(editorAttribute.isAggregatable());
@@ -202,21 +204,23 @@ public class AttributeMapper
 
 	private Integer getLookupAttributeIndex(EditorAttribute editorAttribute, EditorEntityType editorEntityType)
 	{
-		EditorAttributeIdentifier editorAttributeIdentifier = EditorAttributeIdentifier
-				.create(editorAttribute.getId(), editorAttribute.getLabel());
+		EditorAttributeIdentifier editorAttributeIdentifier = EditorAttributeIdentifier.create(editorAttribute.getId(),
+				editorAttribute.getLabel());
 		int index = editorEntityType.getLookupAttributes().indexOf(editorAttributeIdentifier);
 		return index != -1 ? index : null;
 	}
 
 	private boolean isIdAttribute(EditorAttribute editorAttribute, EditorEntityType editorEntityType)
 	{
-		return editorEntityType.getIdAttribute() != null && editorEntityType.getIdAttribute().getId()
-				.equals(editorAttribute.getId());
+		return editorEntityType.getIdAttribute() != null && editorEntityType.getIdAttribute()
+																			.getId()
+																			.equals(editorAttribute.getId());
 	}
 
 	private boolean isLabelAttribute(EditorAttribute editorAttribute, EditorEntityType editorEntityType)
 	{
-		return editorEntityType.getLabelAttribute() != null && editorEntityType.getLabelAttribute().getId()
-				.equals(editorAttribute.getId());
+		return editorEntityType.getLabelAttribute() != null && editorEntityType.getLabelAttribute()
+																			   .getId()
+																			   .equals(editorAttribute.getId());
 	}
 }

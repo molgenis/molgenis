@@ -120,9 +120,8 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 
 	private void updateSuperuserAuthority(User user)
 	{
-		UserAuthority suAuthority = dataService
-				.findOne(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(USER, user).and().eq(ROLE, AUTHORITY_SU),
-						UserAuthority.class);
+		UserAuthority suAuthority = dataService.findOne(USER_AUTHORITY,
+				new QueryImpl<UserAuthority>().eq(USER, user).and().eq(ROLE, AUTHORITY_SU), UserAuthority.class);
 
 		Boolean isSuperuser = user.isSuperuser();
 		if (isSuperuser != null && isSuperuser)
@@ -182,14 +181,12 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 
 	private void deleteUserAuthoritiesAndGroupMember(User user)
 	{
-		Stream<UserAuthority> userAuthorities = dataService
-				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-						UserAuthority.class);
+		Stream<UserAuthority> userAuthorities = dataService.findAll(USER_AUTHORITY,
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user), UserAuthority.class);
 		dataService.delete(USER_AUTHORITY, userAuthorities);
 
-		Stream<GroupMember> groupMembers = dataService
-				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-						GroupMember.class);
+		Stream<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class);
 		dataService.delete(GROUP_MEMBER, groupMembers);
 	}
 

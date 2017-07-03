@@ -63,8 +63,8 @@ public class MetadataManagerService
 	public EditorEntityTypeResponse getEntityType(@PathVariable("id") String entityTypeId)
 	{
 		// metadataService.getEntityType cannot be used due to https://github.com/molgenis/molgenis/issues/5783
-		EntityType entityType = metadataService
-				.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class).findOneById(entityTypeId);
+		EntityType entityType = metadataService.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+				EntityType.class).findOneById(entityTypeId);
 
 		return createEntityTypeResponse(entityType);
 	}

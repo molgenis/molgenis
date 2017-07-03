@@ -173,7 +173,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(dataService.getMeta()).thenReturn(metaDataService);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
-				.setMessageConverters(gsonHttpMessageConverter, new StringHttpMessageConverter()).build();
+								 .setMessageConverters(gsonHttpMessageConverter, new StringHttpMessageConverter())
+								 .build();
 	}
 
 	@Test
@@ -184,10 +185,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf").param("target", "HOP")
-				.param("source", "LifeLines").param("targetAttribute", "age").param("algorithm", "$('length').value()")
-				.param("algorithmState", "CURATED"))
-				.andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
+		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf")
+														   .param("target", "HOP")
+														   .param("source", "LifeLines")
+														   .param("targetAttribute", "age")
+														   .param("algorithm", "$('length').value()")
+														   .param("algorithmState", "CURATED"))
+			   .andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
 		MappingTarget mappingTarget = expected.addTarget(hop);
@@ -207,10 +211,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf").param("target", "HOP")
-				.param("source", "LifeLines").param("targetAttribute", "height")
-				.param("algorithm", "$('length').value()").param("algorithmState", "CURATED"))
-				.andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
+		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf")
+														   .param("target", "HOP")
+														   .param("source", "LifeLines")
+														   .param("targetAttribute", "height")
+														   .param("algorithm", "$('length').value()")
+														   .param("algorithmState", "CURATED"))
+			   .andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
@@ -233,10 +240,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf").param("target", "HOP")
-				.param("source", "LifeLines").param("targetAttribute", "age").param("algorithm", "")
-				.param("algorithmState", "CURATED"))
-				.andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
+		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf")
+														   .param("target", "HOP")
+														   .param("source", "LifeLines")
+														   .param("targetAttribute", "age")
+														   .param("algorithm", "")
+														   .param("algorithmState", "CURATED"))
+			   .andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
@@ -253,10 +263,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		MvcResult result = mockMvc.perform(
-				post(URI + "/firstattributemapping").param("mappingProjectId", "asdf").param("target", "HOP")
-						.param("source", "LifeLines").param("skipAlgorithmStates[]", "CURATED", "DISCUSS")
-						.accept(MediaType.APPLICATION_JSON)).andReturn();
+		MvcResult result = mockMvc.perform(post(URI + "/firstattributemapping").param("mappingProjectId", "asdf")
+																			   .param("target", "HOP")
+																			   .param("source", "LifeLines")
+																			   .param("skipAlgorithmStates[]",
+																					   "CURATED", "DISCUSS")
+																			   .accept(MediaType.APPLICATION_JSON))
+								  .andReturn();
 
 		String actual = result.getResponse().getContentAsString();
 
@@ -272,13 +285,18 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mappingProject.getMappingTarget("HOP").getMappingForSource("LifeLines").getAttributeMapping("age")
-				.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
+		mappingProject.getMappingTarget("HOP")
+					  .getMappingForSource("LifeLines")
+					  .getAttributeMapping("age")
+					  .setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		MvcResult result2 = mockMvc.perform(
-				post(URI + "/firstattributemapping").param("mappingProjectId", "asdf").param("target", "HOP")
-						.param("source", "LifeLines").param("skipAlgorithmStates[]", "CURATED", "DISCUSS")
-						.accept(MediaType.APPLICATION_JSON)).andReturn();
+		MvcResult result2 = mockMvc.perform(post(URI + "/firstattributemapping").param("mappingProjectId", "asdf")
+																				.param("target", "HOP")
+																				.param("source", "LifeLines")
+																				.param("skipAlgorithmStates[]",
+																						"CURATED", "DISCUSS")
+																				.accept(MediaType.APPLICATION_JSON))
+								   .andReturn();
 
 		String actual2 = result2.getResponse().getContentAsString();
 
@@ -291,7 +309,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	{
 		MockHttpServletResponse response = mockMvc.perform(
 				get(URI + "/isNewEntity").param("targetEntityTypeId", "blah").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse();
+												  .andReturn()
+												  .getResponse();
 		assertEquals(response.getContentAsString(), "true",
 				"When checking for a new entity type, the result should be the String \"true\"");
 		assertEquals(response.getContentType(), "application/json");
@@ -304,7 +323,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(dataService.getEntityType("it_emx_test_TypeTest")).thenReturn(mock(EntityType.class));
 		MockHttpServletResponse response = mockMvc.perform(
 				get(URI + "/isNewEntity").param("targetEntityTypeId", "it_emx_test_TypeTest")
-						.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+										 .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
 		assertEquals(response.getContentType(), "application/json");
 		assertEquals(response.getContentAsString(), "false",
 				"When checking for an existing entity type, the result should be the String \"false\"");
@@ -318,8 +337,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mappingProject.getMappingTarget("HOP").getMappingForSource("LifeLines").getAttributeMapping("age")
-				.setAlgorithmState(AttributeMapping.AlgorithmState.DISCUSS);
+		mappingProject.getMappingTarget("HOP")
+					  .getMappingForSource("LifeLines")
+					  .getAttributeMapping("age")
+					  .setAlgorithmState(AttributeMapping.AlgorithmState.DISCUSS);
 
 		MappingTarget mappingTarget = mappingProject.getMappingTarget("HOP");
 		EntityMapping entityMapping = mappingTarget.getMappingForSource("LifeLines");
@@ -327,10 +348,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		attributeMapping.setAlgorithm("$('dob').age()");
 		attributeMapping.setAlgorithmState(AttributeMapping.AlgorithmState.DISCUSS);
 
-		MvcResult result3 = mockMvc.perform(
-				post(URI + "/firstattributemapping").param("mappingProjectId", "asdf").param("target", "HOP")
-						.param("source", "LifeLines").param("skipAlgorithmStates[]", "CURATED", "DISCUSS")
-						.accept(MediaType.APPLICATION_JSON)).andReturn();
+		MvcResult result3 = mockMvc.perform(post(URI + "/firstattributemapping").param("mappingProjectId", "asdf")
+																				.param("target", "HOP")
+																				.param("source", "LifeLines")
+																				.param("skipAlgorithmStates[]",
+																						"CURATED", "DISCUSS")
+																				.accept(MediaType.APPLICATION_JSON))
+								   .andReturn();
 
 		String actual3 = result3.getResponse().getContentAsString();
 
@@ -341,9 +365,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	public void testScheduleMappingJobUnknownMappingProjectId() throws Exception
 	{
 		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "package")
-				.accept("text/plain")).andExpect(status().isBadRequest()).andExpect(content().contentType("text/plain"))
-				.andExpect(content().string("No mapping project found with ID mappingProjectId"));
+										  .param("targetEntityTypeId", "targetEntityTypeId")
+										  .param("label", "label")
+										  .param("package", "package")
+										  .accept("text/plain"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType("text/plain"))
+			   .andExpect(content().string("No mapping project found with ID mappingProjectId"));
 	}
 
 	@Test
@@ -352,9 +380,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
 		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "sys")
-				.accept("text/plain")).andExpect(status().isBadRequest()).andExpect(content().contentType("text/plain"))
-				.andExpect(content().string("No package found with ID sys"));
+										  .param("targetEntityTypeId", "targetEntityTypeId")
+										  .param("label", "label")
+										  .param("package", "sys")
+										  .accept("text/plain"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType("text/plain"))
+			   .andExpect(content().string("No package found with ID sys"));
 	}
 
 	@Test
@@ -366,9 +398,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(metaDataService.getPackage("sys")).thenReturn(systemPackage);
 
 		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "sys")
-				.accept("text/plain")).andExpect(status().isBadRequest()).andExpect(content().contentType("text/plain"))
-				.andExpect(content().string("Package [sys] is a system package."));
+										  .param("targetEntityTypeId", "targetEntityTypeId")
+										  .param("label", "label")
+										  .param("package", "sys")
+										  .accept("text/plain"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType("text/plain"))
+			   .andExpect(content().string("Package [sys] is a system package."));
 	}
 
 	@Test
@@ -388,9 +424,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(userAccountService.getCurrentUser()).thenReturn(me);
 
 		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "base")
-				.accept("text/plain")).andExpect(status().isCreated()).andExpect(content().contentType("text/plain"))
-				.andExpect(content().string("/api/v2/MappingJobExecution/abcde"));
+										  .param("targetEntityTypeId", "targetEntityTypeId")
+										  .param("label", "label")
+										  .param("package", "base")
+										  .accept("text/plain"))
+			   .andExpect(status().isCreated())
+			   .andExpect(content().contentType("text/plain"))
+			   .andExpect(content().string("/api/v2/MappingJobExecution/abcde"));
 
 		verify(jobExecutor).submit(mappingJobExecution);
 		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
@@ -419,13 +459,16 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(mappingJobExecutionMetadata.getId()).thenReturn("MappingJobExecution");
 
 		when(userAccountService.getCurrentUser()).thenReturn(me);
-		when(jobsController.createJobExecutionViewHref(mappingJobExecution, 1000))
-				.thenReturn("/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000");
+		when(jobsController.createJobExecutionViewHref(mappingJobExecution, 1000)).thenReturn(
+				"/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000");
 
 		mockMvc.perform(post(URI + "/createIntegratedEntity").param("mappingProjectId", "mappingProjectId")
-				.param("targetEntityTypeId", "targetEntityTypeId").param("label", "label").param("package", "base")
-				.accept("text/plain")).andExpect(status().isFound())
-				.andExpect(header().string("Location", "/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000"));
+															 .param("targetEntityTypeId", "targetEntityTypeId")
+															 .param("label", "label")
+															 .param("package", "base")
+															 .accept("text/plain"))
+			   .andExpect(status().isFound())
+			   .andExpect(header().string("Location", "/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000"));
 
 		verify(jobExecutor).submit(mappingJobExecution);
 		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
@@ -447,10 +490,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(dataService.getEntityType("HOP")).thenReturn(hop);
 		OntologyTerm ontologyTermAge = OntologyTerm.create("iri1", "label1");
 		OntologyTerm ontologyTermDateOfBirth = OntologyTerm.create("iri2", "label2");
-		when(ontologyTagService.getTagsForAttribute(hop, ageAttr))
-				.thenReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermAge));
-		when(ontologyTagService.getTagsForAttribute(hop, dobAttr))
-				.thenReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermDateOfBirth));
+		when(ontologyTagService.getTagsForAttribute(hop, ageAttr)).thenReturn(
+				ImmutableMultimap.of(isAssociatedWith, ontologyTermAge));
+		when(ontologyTagService.getTagsForAttribute(hop, dobAttr)).thenReturn(
+				ImmutableMultimap.of(isAssociatedWith, ontologyTermDateOfBirth));
 
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(metaDataService.getPackages()).thenReturn(asList(system, base));

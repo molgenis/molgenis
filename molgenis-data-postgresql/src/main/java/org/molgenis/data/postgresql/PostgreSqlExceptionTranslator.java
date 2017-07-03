@@ -133,9 +133,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 */
 	MolgenisValidationException translateReadonlyViolation(PSQLException pSqlException)
 	{
-		Matcher matcher = Pattern
-				.compile("Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
-				.matcher(pSqlException.getServerErrorMessage().getMessage());
+		Matcher matcher = Pattern.compile(
+				"Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
+								 .matcher(pSqlException.getServerErrorMessage().getMessage());
 		boolean matches = matcher.matches();
 		if (!matches)
 		{
@@ -162,7 +162,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String detail = serverErrorMessage.getDetail();
 		Matcher matcher = Pattern.compile("constraint (.+) on table \"?([^\"]+)\"? depends on table \"?([^\"]+)\"?\n?")
-				.matcher(detail);
+								 .matcher(detail);
 
 		Map<String, Set<String>> entityTypeDependencyMap = new LinkedHashMap<>();
 		while (matcher.find())
@@ -172,8 +172,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 			String entityTypeName = getEntityTypeName(tableName);
 			String dependentEntityTypeName = getEntityTypeName(dependentTableName);
-			Set<String> dependentTableNames = entityTypeDependencyMap
-					.computeIfAbsent(dependentEntityTypeName, k -> new LinkedHashSet<>());
+			Set<String> dependentTableNames = entityTypeDependencyMap.computeIfAbsent(dependentEntityTypeName,
+					k -> new LinkedHashSet<>());
 			dependentTableNames.add(entityTypeName);
 		}
 
@@ -262,7 +262,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		String tableName = serverErrorMessage.getTable();
 		String message = serverErrorMessage.getMessage();
 		Matcher matcher = Pattern.compile("null value in column \"?(.*?)\"? violates not-null constraint")
-				.matcher(message);
+								 .matcher(message);
 		boolean matches = matcher.matches();
 		if (matches)
 		{
@@ -347,7 +347,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		Matcher messageMatcher = Pattern.compile(
 				"update or delete on table \"(.*)\" violates foreign key constraint \"(.*)\" on table \"(.*)\"")
-				.matcher(serverErrorMessage.getMessage());
+										.matcher(serverErrorMessage.getMessage());
 		if (!messageMatcher.matches())
 		{
 			LOG.error("Error translating postgres exception: ", pSqlException);

@@ -38,14 +38,20 @@ public class SystemEntityTypeI18nInitializer
 
 		languageCodes.forEach(languageCode ->
 		{
-			entityTypeMeta.addAttribute(getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode)).setNillable(true)
-					.setLabel("Label (" + languageCode + ')');
+			entityTypeMeta.addAttribute(getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode))
+						  .setNillable(true)
+						  .setLabel("Label (" + languageCode + ')');
 			entityTypeMeta.addAttribute(getI18nAttributeName(EntityTypeMetadata.DESCRIPTION, languageCode))
-					.setNillable(true).setLabel("Description (" + languageCode + ')').setDataType(TEXT);
-			attrMetaMeta.addAttribute(getI18nAttributeName(AttributeMetadata.LABEL, languageCode)).setNillable(true)
-					.setLabel("Label (" + languageCode + ')');
+						  .setNillable(true)
+						  .setLabel("Description (" + languageCode + ')')
+						  .setDataType(TEXT);
+			attrMetaMeta.addAttribute(getI18nAttributeName(AttributeMetadata.LABEL, languageCode))
+						.setNillable(true)
+						.setLabel("Label (" + languageCode + ')');
 			attrMetaMeta.addAttribute(getI18nAttributeName(AttributeMetadata.DESCRIPTION, languageCode))
-					.setNillable(true).setLabel("Description (" + languageCode + ')').setDataType(TEXT);
+						.setNillable(true)
+						.setLabel("Description (" + languageCode + ')')
+						.setDataType(TEXT);
 			l10nStringMeta.addAttribute(languageCode).setNillable(true).setDataType(STRING);
 		});
 	}
