@@ -31,8 +31,8 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import static java.io.File.separator;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
 import static org.molgenis.gavin.job.input.model.LineType.*;
