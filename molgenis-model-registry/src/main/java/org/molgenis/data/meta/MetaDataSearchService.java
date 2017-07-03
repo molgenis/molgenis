@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.standardsregistry.model.PackageSearchResultItem;
+
 import java.util.List;
 
 public interface MetaDataSearchService

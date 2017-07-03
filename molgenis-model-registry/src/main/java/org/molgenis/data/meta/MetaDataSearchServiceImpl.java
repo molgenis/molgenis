@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.standardsregistry.model.PackageSearchResultItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
