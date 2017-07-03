@@ -65,40 +65,53 @@ public class OmimAnnotator implements AnnotatorConfig
 
 	public Attribute getPhenotypeAttr()
 	{
-		return attributeFactory.create().setName(OMIM_DISORDER).setDataType(TEXT).setDescription("OMIM phenotype")
-				.setLabel("OMIM_Disorders");
+		return attributeFactory.create()
+							   .setName(OMIM_DISORDER)
+							   .setDataType(TEXT)
+							   .setDescription("OMIM phenotype")
+							   .setLabel("OMIM_Disorders");
 	}
 
 	public Attribute getMimNumberAttr()
 	{
-		return attributeFactory.create().setName(OMIM_CAUSAL_IDENTIFIER).setDataType(TEXT)
-				.setDescription("Number that represents the MIM database dataType for the Locus / Gene")
-				.setLabel("OMIM_Causal_ID");
+		return attributeFactory.create()
+							   .setName(OMIM_CAUSAL_IDENTIFIER)
+							   .setDataType(TEXT)
+							   .setDescription("Number that represents the MIM database dataType for the Locus / Gene")
+							   .setLabel("OMIM_Causal_ID");
 	}
 
 	public Attribute getEntryAttr()
 	{
-		return attributeFactory.create().setName(OMIM_CYTO_LOCATIONS).setDataType(TEXT)
-				.setDescription("Cytogenic location associated with an OMIM phenotype")
-				.setLabel("OMIM_Cytogenic_Location");
+		return attributeFactory.create()
+							   .setName(OMIM_CYTO_LOCATIONS)
+							   .setDataType(TEXT)
+							   .setDescription("Cytogenic location associated with an OMIM phenotype")
+							   .setLabel("OMIM_Cytogenic_Location");
 	}
 
 	public Attribute getTypeAttr()
 	{
-		return attributeFactory.create().setName(OMIM_ENTRY).setDataType(TEXT)
-				.setDescription("Number that represents the MIM database dataType for the phenotype")
-				.setLabel("OMIM_Entry");
+		return attributeFactory.create()
+							   .setName(OMIM_ENTRY)
+							   .setDataType(TEXT)
+							   .setDescription("Number that represents the MIM database dataType for the phenotype")
+							   .setLabel("OMIM_Entry");
 	}
 
 	public Attribute getOmimLocationAttr()
 	{
-		return attributeFactory.create().setName(OMIM_TYPE).setDataType(TEXT).setDescription(
-				"Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
-						+ "association witha gene, but the underlying defect is not known. 2 - the disorder "
-						+ "has been placed on the map by linkage or other statistical method; no mutation has "
-						+ "been found. 3 - the molecular basis for the disorder is known; a mutation has been "
-						+ "found in the gene. 4 - a contiguous gene deletion or duplication syndrome, multiple "
-						+ "genes are deleted or duplicated causing the phenotype.").setLabel("OMIM_Type");
+		return attributeFactory.create()
+							   .setName(OMIM_TYPE)
+							   .setDataType(TEXT)
+							   .setDescription(
+									   "Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
+											   + "association witha gene, but the underlying defect is not known. 2 - the disorder "
+											   + "has been placed on the map by linkage or other statistical method; no mutation has "
+											   + "been found. 3 - the molecular basis for the disorder is known; a mutation has been "
+											   + "found in the gene. 4 - a contiguous gene deletion or duplication syndrome, multiple "
+											   + "genes are deleted or duplicated causing the phenotype.")
+							   .setLabel("OMIM_Type");
 	}
 
 	@Bean
@@ -113,12 +126,12 @@ public class OmimAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = createOmimOutputAttributes();
 
-		AnnotatorInfo omimInfo = AnnotatorInfo
-				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION, NAME,
-						"OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes that is "
-								+ "freely available and updated daily. The full-text, referenced overviews in OMIM contain information on all "
-								+ "known mendelian disorders and over 15,000 genes. OMIM focuses on the relationship between phenotype and genotype.",
-						attributes);
+		AnnotatorInfo omimInfo = AnnotatorInfo.create(AnnotatorInfo.Status.READY,
+				AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION, NAME,
+				"OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes that is "
+						+ "freely available and updated daily. The full-text, referenced overviews in OMIM contain information on all "
+						+ "known mendelian disorders and over 15,000 genes. OMIM focuses on the relationship between phenotype and genotype.",
+				attributes);
 
 		EntityAnnotator entityAnnotator = new AbstractAnnotator(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
 				new OmimResultFilter(entityTypeFactory, attributeFactory, this), dataService, resources,
@@ -137,8 +150,9 @@ public class OmimAnnotator implements AnnotatorConfig
 	private List<Attribute> createOmimOutputAttributes()
 	{
 		List<Attribute> outputAttributes = new ArrayList<>();
-		outputAttributes.addAll(Arrays
-				.asList(getPhenotypeAttr(), getMimNumberAttr(), getOmimLocationAttr(), getEntryAttr(), getTypeAttr()));
+		outputAttributes.addAll(
+				Arrays.asList(getPhenotypeAttr(), getMimNumberAttr(), getOmimLocationAttr(), getEntryAttr(),
+						getTypeAttr()));
 		return outputAttributes;
 	}
 

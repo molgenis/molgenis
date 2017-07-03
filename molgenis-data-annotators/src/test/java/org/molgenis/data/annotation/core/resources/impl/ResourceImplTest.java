@@ -72,8 +72,8 @@ public class ResourceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAllReturnsResultFile2()
 	{
-		File file = ResourceUtils
-				.getFile(getClass(), "/1000g/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
+		File file = ResourceUtils.getFile(getClass(),
+				"/1000g/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
 		when(config.getFile()).thenReturn(file);
 
 		Query<Entity> query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 10352);

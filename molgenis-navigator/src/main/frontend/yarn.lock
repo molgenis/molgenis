@@ -2,6 +2,14 @@
 # yarn lockfile v1
 
 
+"@molgenis/molgenis-i18n-js@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-i18n-js/-/molgenis-i18n-js-0.0.5.tgz#addb86b5292edf68cc5d536724582f84ec4882db"
+  dependencies:
+    i18next "^7.1.3"
+    i18next-xhr-backend "^1.4.1"
+    moment "^2.18.1"
+
 abbrev@1, abbrev@1.0.x:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.0.9.tgz#91b4792588a7738c25f35dd6f63752a2f8776135"
@@ -2924,6 +2932,14 @@ http-signature@~1.1.0:
 https-browserify@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-0.0.1.tgz#3f91365cabe60b77ed0ebba24b454e3e09d95a82"
+
+i18next-xhr-backend@^1.4.1:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/i18next-xhr-backend/-/i18next-xhr-backend-1.4.2.tgz#7aa766292c46ca83ff6477bb55074b363a646a62"
+
+i18next@^7.1.3:
+  version "7.2.3"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-7.2.3.tgz#a6c220ac1c8240ff1078aa9bc997fd449e052dc7"
 
 iconv-lite@0.4.15, iconv-lite@~0.4.13:
   version "0.4.15"

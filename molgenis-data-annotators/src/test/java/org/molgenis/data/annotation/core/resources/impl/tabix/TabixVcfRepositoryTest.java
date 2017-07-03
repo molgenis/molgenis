@@ -56,9 +56,8 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 		repoMetaData.addAttribute(vcfAttributes.getFilterAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getQualAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getIdAttribute());
-		repoMetaData
-				.addAttribute(attributeFactory.create().setName("INTERNAL_ID").setDataType(STRING).setVisible(false),
-						ROLE_ID);
+		repoMetaData.addAttribute(
+				attributeFactory.create().setName("INTERNAL_ID").setDataType(STRING).setVisible(false), ROLE_ID);
 		repoMetaData.addAttribute(attributeFactory.create().setName("INFO").setDataType(COMPOUND));
 
 		File file = ResourceUtils.getFile(getClass(), "/tabixtest.vcf.gz");
@@ -82,8 +81,10 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testQuery()
 	{
-		Query<Entity> query = tabixVcfRepository.query().eq(VcfAttributes.CHROM, "1").and()
-				.eq(VcfAttributes.POS, "249240543");
+		Query<Entity> query = tabixVcfRepository.query()
+												.eq(VcfAttributes.CHROM, "1")
+												.and()
+												.eq(VcfAttributes.POS, "249240543");
 
 		Iterator<Entity> iterator = tabixVcfRepository.findAll(query).iterator();
 		iterator.hasNext();

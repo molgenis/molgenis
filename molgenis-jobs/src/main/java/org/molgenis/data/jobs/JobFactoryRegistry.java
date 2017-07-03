@@ -1,14 +1,11 @@
 package org.molgenis.data.jobs;
 
 import org.molgenis.data.jobs.model.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static org.springframework.core.GenericTypeResolver.resolveTypeArgument;
 
 /**
@@ -17,14 +14,16 @@ import static org.springframework.core.GenericTypeResolver.resolveTypeArgument;
 @Component
 public class JobFactoryRegistry
 {
-	private Map<Class<?>, JobFactory> jobFactories;
+	private final Map<Class<?>, JobFactory> jobFactories;
 
-	@Autowired
-	public JobFactoryRegistry(List<JobFactory> jobFactories)
+	public JobFactoryRegistry()
 	{
-		this.jobFactories = jobFactories.stream()
-										.collect(toMap(factory -> resolveTypeArgument(factory.getClass(),
-												JobFactory.class), identity()));
+		jobFactories = new HashMap<>();
+	}
+
+	public void registerJobFactory(JobFactory jobFactory)
+	{
+		jobFactories.put(resolveTypeArgument(jobFactory.getClass(), JobFactory.class), jobFactory);
 	}
 
 	public JobFactory getJobFactory(JobExecution jobExecution)

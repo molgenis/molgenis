@@ -110,14 +110,29 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testGetEntityTypeNotExists() throws Exception
+	public void testGetEntityTypeRepositoryNotExists() throws Exception
 	{
 		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenThrow(
 				new UnknownEntityException("Unknown entity [unknownId]"));
+
 		this.mockMvc.perform(get("/metadata-manager-service/entityType/unknownId"))
 					.andExpect(status().isBadRequest())
 					.andExpect(content().contentType(APPLICATION_JSON))
 					.andExpect(content().string("{\"errors\":[{\"message\":\"Unknown entity [unknownId]\"}]}"));
+	}
+
+	@Test
+	public void testGetEntityTypeEntityDoesNotExist() throws Exception
+	{
+		Repository<EntityType> repository = mock(Repository.class);
+		when(repository.findOneById("unknownId")).thenReturn(null);
+
+		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);
+
+		mockMvc.perform(get("/metadata-manager-service/entityType/unknownId"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown EntityType [unknownId]\"}]}"));
 	}
 
 	@Test

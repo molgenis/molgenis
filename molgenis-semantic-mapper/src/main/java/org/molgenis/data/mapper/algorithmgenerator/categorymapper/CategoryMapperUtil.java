@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
 
 public class CategoryMapperUtil
 {
-	private static final List<AmountConvertor> CONVERTORS = Lists
-			.newArrayList(new DailyAmountConvertor(), new SeveralTimesConvertor(), new NumberAmountConvertor());
+	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
+			new SeveralTimesConvertor(), new NumberAmountConvertor());
 
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+\\.?\\d*");
 	private static final String NON_LETTER_REGEX = "[^a-zA-Z0-9]";
@@ -28,9 +28,8 @@ public class CategoryMapperUtil
 
 	static
 	{
-		DURATION_UNITS = Arrays
-				.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(), NonSI.DAY.inverse(),
-						NonSI.WEEK.inverse(), NonSI.MONTH.inverse(), NonSI.YEAR.inverse());
+		DURATION_UNITS = Arrays.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(),
+				NonSI.DAY.inverse(), NonSI.WEEK.inverse(), NonSI.MONTH.inverse(), NonSI.YEAR.inverse());
 	}
 
 	private static final Set<String> POSITIVE_ADJECTIVES;

@@ -74,9 +74,12 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());
 		emdIn.addAttribute(vcfAttributes.getAltAttribute());
-		emdIn.addAttribute(attributeFactory.create().setName(THOUSAND_GENOME_AF).setDataType(STRING).setDescription(
-				"The allele frequency for variants seen in the population used for the thousand genomes project")
-				.setLabel(THOUSAND_GENOME_AF_LABEL));
+		emdIn.addAttribute(attributeFactory.create()
+										   .setName(THOUSAND_GENOME_AF)
+										   .setDataType(STRING)
+										   .setDescription(
+												   "The allele frequency for variants seen in the population used for the thousand genomes project")
+										   .setLabel(THOUSAND_GENOME_AF_LABEL));
 
 		Entity inputEntity = new DynamicEntity(emdIn);
 		inputEntity.set(VcfAttributes.CHROM, "1");
@@ -134,14 +137,14 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity thousendGenomesAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY))
-					.thenReturn(ResourceUtils.getFile(getClass(), THOUSAND_GENOME_TEST_FOLDER_PROPERTY).getPath());
-			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES))
-					.thenReturn(THOUSAND_GENOME_TEST_CHROMOSOMES);
-			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN))
-					.thenReturn(THOUSAND_GENOME_TEST_PATTERN);
-			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES))
-					.thenReturn(THOUSAND_GENOME_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
+			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY)).thenReturn(
+					ResourceUtils.getFile(getClass(), THOUSAND_GENOME_TEST_FOLDER_PROPERTY).getPath());
+			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES)).thenReturn(
+					THOUSAND_GENOME_TEST_CHROMOSOMES);
+			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN)).thenReturn(
+					THOUSAND_GENOME_TEST_PATTERN);
+			when(settings.getString(ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES)).thenReturn(
+					THOUSAND_GENOME_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
 
 			return settings;
 		}

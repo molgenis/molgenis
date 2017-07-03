@@ -80,8 +80,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 		{
 			for (Attribute sourceAttribute : sourceAttributes)
 			{
-				stringBuilder.append(generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
-						sourceEntityType));
+				stringBuilder.append(
+						generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType, sourceEntityType));
 			}
 		}
 
@@ -98,26 +98,29 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 
 		if (sourceAttributes.size() > 0)
 		{
-			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(sourceAttributes).findFirst()
-					.orElse(null);
+			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(sourceAttributes)
+																		  .findFirst()
+																		  .orElse(null);
 			if (algorithmTemplate != null)
 			{
 				algorithm = algorithmTemplate.render();
-				mappedSourceAttributes = AlgorithmGeneratorHelper
-						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityType);
+				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
+						sourceEntityType);
 				algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityType,
 						mappedSourceAttributes, sourceEntityType);
 				algorithmState = GENERATED_HIGH;
 			}
 			else
 			{
-				Entry<Attribute, ExplainedAttribute> firstEntry = sourceAttributes.entrySet().stream().findFirst()
-						.get();
+				Entry<Attribute, ExplainedAttribute> firstEntry = sourceAttributes.entrySet()
+																				  .stream()
+																				  .findFirst()
+																				  .get();
 				Attribute sourceAttribute = firstEntry.getKey();
 				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
 						sourceEntityType);
-				mappedSourceAttributes = AlgorithmGeneratorHelper
-						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityType);
+				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
+						sourceEntityType);
 				algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 			}
 		}

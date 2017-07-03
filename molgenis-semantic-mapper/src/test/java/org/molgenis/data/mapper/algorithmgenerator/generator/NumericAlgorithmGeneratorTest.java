@@ -51,8 +51,8 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setup()
 	{
-		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
-				.thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
+		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl")).thenReturn(
+				Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
 
 		targetEntityType = entityTypeFactory.create("target");
 		targetAttribute = attrMetaFactory.create().setName("targetHeight");
@@ -75,13 +75,12 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generate()
 	{
-		String generate = numericAlgorithmGenerator
-				.generate(targetAttribute, asList(sourceAttribute), targetEntityType, sourceEntityType);
+		String generate = numericAlgorithmGenerator.generate(targetAttribute, asList(sourceAttribute), targetEntityType,
+				sourceEntityType);
 		assertEquals(generate, "$('sourceHeight').unit('cm').toUnit('m').value();");
 
-		String generateAverageValue = numericAlgorithmGenerator
-				.generate(targetAttribute, asList(sourceAttribute, sourceAttribute1), targetEntityType,
-						sourceEntityType);
+		String generateAverageValue = numericAlgorithmGenerator.generate(targetAttribute,
+				asList(sourceAttribute, sourceAttribute1), targetEntityType, sourceEntityType);
 		String expected = "var counter = 0;\nvar SUM=newValue(0);\nif(!$('sourceHeight').isNull().value()){\n\tSUM.plus($('sourceHeight').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(!$('sourceHeight1').isNull().value()){\n\tSUM.plus($('sourceHeight1').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\n\tSUM.value();\n}else{\n\tnull;\n}";
 
 		assertEquals(generateAverageValue, expected);
@@ -90,8 +89,8 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateUnitConversionAlgorithm()
 	{
-		String generateUnitConversionAlgorithm = numericAlgorithmGenerator
-				.generateUnitConversionAlgorithm(targetAttribute, targetEntityType, sourceAttribute, sourceEntityType);
+		String generateUnitConversionAlgorithm = numericAlgorithmGenerator.generateUnitConversionAlgorithm(
+				targetAttribute, targetEntityType, sourceAttribute, sourceEntityType);
 		assertEquals(generateUnitConversionAlgorithm, "$('sourceHeight').unit('cm').toUnit('m').value();");
 	}
 

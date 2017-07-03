@@ -758,6 +758,7 @@ class PostgreSqlQueryGenerator
 					parameters.add("%" + PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr) + '%');
 					break;
 				case IN:
+				{
 					Object inValue = r.getValue();
 					if (inValue == null)
 					{
@@ -793,12 +794,19 @@ class PostgreSqlQueryGenerator
 						result.append("this");
 					}
 
-					result.append('.')
-						  .append(getColumnName(entityType.getAttribute(r.getField())))
-						  .append(" IN (")
-						  .append(in)
-						  .append(')');
+					Attribute equalsAttr;
+					if (attr.isMappedBy())
+					{
+						equalsAttr = attr.getRefEntity().getIdAttribute();
+					}
+					else
+					{
+						equalsAttr = entityType.getAttribute(r.getField());
+					}
+					result.append('.').append(getColumnName(equalsAttr));
+					result.append(" IN (").append(in).append(')');
 					break;
+				}
 				case NOT:
 					result.append(" NOT ");
 					break;

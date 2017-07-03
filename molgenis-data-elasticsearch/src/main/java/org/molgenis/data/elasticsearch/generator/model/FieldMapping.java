@@ -20,8 +20,11 @@ public abstract class FieldMapping
 	public static FieldMapping create(String newName, MappingType newType, boolean newAnalyzeNGrams,
 			List<FieldMapping> newNestedFieldMappings)
 	{
-		return builder().setName(newName).setType(newType).setAnalyzeNGrams(newAnalyzeNGrams)
-				.setNestedFieldMappings(newNestedFieldMappings).build();
+		return builder().setName(newName)
+						.setType(newType)
+						.setAnalyzeNGrams(newAnalyzeNGrams)
+						.setNestedFieldMappings(newNestedFieldMappings)
+						.build();
 	}
 
 	public static Builder builder()

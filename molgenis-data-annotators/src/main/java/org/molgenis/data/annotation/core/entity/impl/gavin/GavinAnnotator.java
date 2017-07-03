@@ -120,8 +120,8 @@ public class GavinAnnotator implements AnnotatorConfig
 
 		AnnotatorInfo gavinInfo = AnnotatorInfo.create(READY, PATHOGENICITY_ESTIMATE, NAME, description, attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, geneNameQueryCreator, dataService,
-				resources, (annotationSourceFileName) -> gavinAnnotatorSettings
-				.set(VARIANT_FILE_LOCATION, annotationSourceFileName))
+				resources, (annotationSourceFileName) -> gavinAnnotatorSettings.set(VARIANT_FILE_LOCATION,
+				annotationSourceFileName))
 		{
 			@Override
 			public List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory)
@@ -134,19 +134,23 @@ public class GavinAnnotator implements AnnotatorConfig
 			{
 				List<Attribute> requiredAttributes = new ArrayList<>();
 				EntityType entityType = entityTypeFactory.create(VARIANT);
-				List<Attribute> refAttributesList = Arrays
-						.asList(createCaddScaledAttr(attributeFactory), getExacAFAttr(attributeFactory),
-								vcfAttributes.getAltAttribute());
+				List<Attribute> refAttributesList = Arrays.asList(createCaddScaledAttr(attributeFactory),
+						getExacAFAttr(attributeFactory), vcfAttributes.getAltAttribute());
 				entityType.addAttributes(refAttributesList);
-				Attribute refAttr = attributeFactory.create().setName(VARIANT).setDataType(XREF)
-						.setRefEntity(entityType).setDescription(
-								"This annotator needs a references to an entity containing: " + StreamSupport
-										.stream(refAttributesList.spliterator(), false).map(Attribute::getName)
-										.collect(Collectors.joining(", ")));
+				Attribute refAttr = attributeFactory.create()
+													.setName(VARIANT)
+													.setDataType(XREF)
+													.setRefEntity(entityType)
+													.setDescription(
+															"This annotator needs a references to an entity containing: "
+																	+ StreamSupport.stream(
+																	refAttributesList.spliterator(), false)
+																				   .map(Attribute::getName)
+																				   .collect(Collectors.joining(", ")));
 
-				requiredAttributes.addAll(Arrays
-						.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
-								effectsMetaData.getAltAttr()));
+				requiredAttributes.addAll(
+						Arrays.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(),
+								refAttr, effectsMetaData.getAltAttr()));
 				return requiredAttributes;
 			}
 
@@ -175,10 +179,10 @@ public class GavinAnnotator implements AnnotatorConfig
 
 				Entity variantEntity = entity.getEntity(VARIANT);
 
-				Map<String, Double> caddMap = AnnotatorUtils
-						.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(CADD_SCALED));
-				Map<String, Double> exacMap = AnnotatorUtils
-						.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(EXAC_AF));
+				Map<String, Double> caddMap = AnnotatorUtils.toAlleleMap(variantEntity.getString(ALT),
+						variantEntity.getString(CADD_SCALED));
+				Map<String, Double> exacMap = AnnotatorUtils.toAlleleMap(variantEntity.getString(ALT),
+						variantEntity.getString(EXAC_AF));
 
 				Impact impact = Impact.valueOf(entity.getString(PUTATIVE_IMPACT));
 				Double exacMAF = exacMap.get(alt);
@@ -222,12 +226,21 @@ public class GavinAnnotator implements AnnotatorConfig
 	private LinkedList<Attribute> createGavinOutputAttributes()
 	{
 		LinkedList<Attribute> attributes = new LinkedList<>();
-		Attribute classification = attributeFactory.create().setName(CLASSIFICATION).setDataType(STRING)
-				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
-		Attribute confidence = attributeFactory.create().setName(CONFIDENCE).setDataType(STRING)
-				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
-		Attribute reason = attributeFactory.create().setName(REASON).setDataType(STRING).setDescription(REASON)
-				.setLabel(REASON);
+		Attribute classification = attributeFactory.create()
+												   .setName(CLASSIFICATION)
+												   .setDataType(STRING)
+												   .setDescription(CLASSIFICATION)
+												   .setLabel(CLASSIFICATION);
+		Attribute confidence = attributeFactory.create()
+											   .setName(CONFIDENCE)
+											   .setDataType(STRING)
+											   .setDescription(CONFIDENCE)
+											   .setLabel(CONFIDENCE);
+		Attribute reason = attributeFactory.create()
+										   .setName(REASON)
+										   .setDataType(STRING)
+										   .setDescription(REASON)
+										   .setLabel(REASON);
 
 		attributes.add(classification);
 		attributes.add(confidence);
