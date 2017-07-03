@@ -46,8 +46,8 @@ public class ImportServiceFactory
 			}
 		});
 
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(file.getName(), importServicesMappedToExtensions.keySet());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				importServicesMappedToExtensions.keySet());
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
@@ -67,8 +67,8 @@ public class ImportServiceFactory
 			}
 		}
 
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(fileName, importServicesMappedToExtensions.keySet());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(fileName,
+				importServicesMappedToExtensions.keySet());
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
@@ -79,7 +79,8 @@ public class ImportServiceFactory
 
 	public Set<String> getSupportedFileExtensions()
 	{
-		return importServices.stream().flatMap(importService -> importService.getSupportedFileExtensions().stream())
-				.collect(toSet());
+		return importServices.stream()
+							 .flatMap(importService -> importService.getSupportedFileExtensions().stream())
+							 .collect(toSet());
 	}
 }

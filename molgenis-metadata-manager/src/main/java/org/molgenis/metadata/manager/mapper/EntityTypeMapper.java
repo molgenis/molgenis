@@ -48,19 +48,19 @@ public class EntityTypeMapper
 		boolean abstract_ = entityType.isAbstract();
 		String backend = entityType.getBackend();
 		EditorPackageIdentifier package_ = packageMapper.toEditorPackage(entityType.getPackage());
-		EditorEntityTypeParent entityTypeParent = entityTypeParentMapper
-				.toEditorEntityTypeParent(entityType.getExtends());
+		EditorEntityTypeParent entityTypeParent = entityTypeParentMapper.toEditorEntityTypeParent(
+				entityType.getExtends());
 		//		ImmutableList<EditorEntityTypeIdentifier> entityTypeChildren = entityTypeReferenceMapper
 		//				.toEditorEntityTypeIdentifiers(entityType.getExtendedBy());
-		ImmutableList<EditorAttribute> attributes = attributeMapper
-				.toEditorAttributes(entityType.getOwnAllAttributes());
+		ImmutableList<EditorAttribute> attributes = attributeMapper.toEditorAttributes(
+				entityType.getOwnAllAttributes());
 		ImmutableList<EditorTagIdentifier> tags = tagMapper.toEditorTags(entityType.getTags());
-		EditorAttributeIdentifier idAttribute = attributeReferenceMapper
-				.toEditorAttributeIdentifier(entityType.getIdAttribute());
-		EditorAttributeIdentifier labelAttribute = attributeReferenceMapper
-				.toEditorAttributeIdentifier(entityType.getLabelAttribute());
-		ImmutableList<EditorAttributeIdentifier> lookupAttributes = attributeReferenceMapper
-				.toEditorAttributeIdentifiers(entityType.getLookupAttributes());
+		EditorAttributeIdentifier idAttribute = attributeReferenceMapper.toEditorAttributeIdentifier(
+				entityType.getIdAttribute());
+		EditorAttributeIdentifier labelAttribute = attributeReferenceMapper.toEditorAttributeIdentifier(
+				entityType.getLabelAttribute());
+		ImmutableList<EditorAttributeIdentifier> lookupAttributes = attributeReferenceMapper.toEditorAttributeIdentifiers(
+				entityType.getLookupAttributes());
 
 		return EditorEntityType.create(id, label, i18nLabel, description, i18nDescription, abstract_, backend, package_,
 				entityTypeParent, attributes, tags, idAttribute, labelAttribute, lookupAttributes);
@@ -80,19 +80,19 @@ public class EntityTypeMapper
 		entityType.setLabel(editorEntityType.getLabel());
 		if (editorEntityType.getLabelI18n() != null)
 		{
-			getLanguageCodes().forEach(languageCode -> entityType
-					.setLabel(languageCode, editorEntityType.getLabelI18n().get(languageCode)));
+			getLanguageCodes().forEach(languageCode -> entityType.setLabel(languageCode,
+					editorEntityType.getLabelI18n().get(languageCode)));
 		}
 
 		entityType.setDescription(editorEntityType.getDescription());
 		if (editorEntityType.getDescriptionI18n() != null)
 		{
-			getLanguageCodes().forEach(languageCode -> entityType
-					.setDescription(languageCode, editorEntityType.getDescriptionI18n().get(languageCode)));
+			getLanguageCodes().forEach(languageCode -> entityType.setDescription(languageCode,
+					editorEntityType.getDescriptionI18n().get(languageCode)));
 		}
 
-		entityType
-				.setOwnAllAttributes(attributeMapper.toAttributes(editorEntityType.getAttributes(), editorEntityType));
+		entityType.setOwnAllAttributes(
+				attributeMapper.toAttributes(editorEntityType.getAttributes(), editorEntityType));
 		entityType.setAbstract(editorEntityType.isAbstract());
 		entityType.setExtends(entityTypeParentMapper.toEntityTypeReference(editorEntityType.getEntityTypeParent()));
 		entityType.setTags(tagMapper.toTagReferences(editorEntityType.getTags()));
@@ -106,8 +106,8 @@ public class EntityTypeMapper
 		getLanguageCodes().forEach(languageCode ->
 		{
 			// entityType.getDescription cannot be used, since it returns the description in the default language if not available
-			String description = entityType
-					.getString(getI18nAttributeName(EntityTypeMetadata.DESCRIPTION, languageCode));
+			String description = entityType.getString(
+					getI18nAttributeName(EntityTypeMetadata.DESCRIPTION, languageCode));
 			if (description != null)
 			{
 				mapBuilder.put(languageCode, description);

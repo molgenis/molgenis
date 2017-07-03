@@ -45,22 +45,37 @@ public class AppMetaData extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Id");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(DESCRIPTION, ROLE_LOOKUP).setDataType(TEXT).setNillable(true).setLabel("Description");
-		addAttribute(ICON_HREF).setDataType(HYPERLINK).setNillable(true).setLabel("Icon URL")
-				.setDescription("Absolute or relative URL of the app icon");
-		addAttribute(RESOURCE_ZIP).setDataType(FILE).setRefEntity(fileMetaMetaData).setNillable(true)
-				.setLabel("Resource ZIP file")
-				.setDescription("ZIP file with JavaScript, CSS and image files required by the app");
-		addAttribute(IS_ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false).setVisible(false)
-				.setDefaultValue(Boolean.FALSE.toString());
-		addAttribute(USE_FREEMARKER_TEMPLATE).setDataType(BOOL).setLabel("Use freemarker template as index.html")
-				.setNillable(false).setDefaultValue(Boolean.FALSE.toString()).setDescription(
-				"When using a freemarker template, the index page of your app should be placed in "
-						+ "the FreemarkerTemplates table with a name like: view-apps-yourname.ftl. "
-						+ "When selecting no, please include an index.html in the root of your app.zip");
-		addAttribute(LANDING_PAGE_HTML_TEMPLATE).setDataType(XREF).setRefEntity(freemarkerTemplateMetaData)
-				.setNillable(true).setLabel("Landing page HTML template")
-				.setVisibleExpression("$('" + USE_FREEMARKER_TEMPLATE + "').eq(true).value()").setValidationExpression(
-				"$('" + LANDING_PAGE_HTML_TEMPLATE + "').value() != null || $('" + USE_FREEMARKER_TEMPLATE
-						+ "').eq(false).value()").setDescription("Landing page HTML FreeMarker template");
+		addAttribute(ICON_HREF).setDataType(HYPERLINK)
+							   .setNillable(true)
+							   .setLabel("Icon URL")
+							   .setDescription("Absolute or relative URL of the app icon");
+		addAttribute(RESOURCE_ZIP).setDataType(FILE)
+								  .setRefEntity(fileMetaMetaData)
+								  .setNillable(true)
+								  .setLabel("Resource ZIP file")
+								  .setDescription("ZIP file with JavaScript, CSS and image files required by the app");
+		addAttribute(IS_ACTIVE).setDataType(BOOL)
+							   .setLabel("Active")
+							   .setNillable(false)
+							   .setVisible(false)
+							   .setDefaultValue(Boolean.FALSE.toString());
+		addAttribute(USE_FREEMARKER_TEMPLATE).setDataType(BOOL)
+											 .setLabel("Use freemarker template as index.html")
+											 .setNillable(false)
+											 .setDefaultValue(Boolean.FALSE.toString())
+											 .setDescription(
+													 "When using a freemarker template, the index page of your app should be placed in "
+															 + "the FreemarkerTemplates table with a name like: view-apps-yourname.ftl. "
+															 + "When selecting no, please include an index.html in the root of your app.zip");
+		addAttribute(LANDING_PAGE_HTML_TEMPLATE).setDataType(XREF)
+												.setRefEntity(freemarkerTemplateMetaData)
+												.setNillable(true)
+												.setLabel("Landing page HTML template")
+												.setVisibleExpression(
+														"$('" + USE_FREEMARKER_TEMPLATE + "').eq(true).value()")
+												.setValidationExpression(
+														"$('" + LANDING_PAGE_HTML_TEMPLATE + "').value() != null || $('"
+																+ USE_FREEMARKER_TEMPLATE + "').eq(false).value()")
+												.setDescription("Landing page HTML FreeMarker template");
 	}
 }

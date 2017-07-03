@@ -78,7 +78,8 @@ public class MolgenisAnonymousAuthenticationFilter extends GenericFilterBean imp
 			if (LOG.isDebugEnabled())
 			{
 				LOG.debug("Populated SecurityContextHolder with anonymous token: '" + SecurityContextHolder.getContext()
-						.getAuthentication() + "'");
+																										   .getAuthentication()
+						+ "'");
 			}
 		}
 		else

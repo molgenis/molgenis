@@ -79,8 +79,8 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		when(attribute.getEntity()).thenReturn(abstractEntityType);
 		when(attribute.getName()).thenReturn("attributeName");
 		when(dataService.getMeta()).thenReturn(metadataService);
-		when(metadataService.getConcreteChildren(abstractEntityType))
-				.thenReturn(Stream.of(concreteEntityType1, concreteEntityType2));
+		when(metadataService.getConcreteChildren(abstractEntityType)).thenReturn(
+				Stream.of(concreteEntityType1, concreteEntityType2));
 		when(metadataService.getBackend(concreteEntityType1)).thenReturn(backend1);
 		when(metadataService.getBackend(concreteEntityType2)).thenReturn(backend2);
 		when(attribute.getIdentifier()).thenReturn(attributeId);

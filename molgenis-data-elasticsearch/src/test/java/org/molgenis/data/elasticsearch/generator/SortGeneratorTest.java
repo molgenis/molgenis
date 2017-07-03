@@ -25,8 +25,8 @@ public class SortGeneratorTest
 	public void beforeMethod()
 	{
 		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
-		when(documentIdGenerator.generateId(any(Attribute.class)))
-				.thenAnswer(invocation -> ((Attribute) invocation.getArguments()[0]).getName());
+		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
+				invocation -> ((Attribute) invocation.getArguments()[0]).getName());
 
 		sortGenerator = new SortGenerator(documentIdGenerator);
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
@@ -78,11 +78,11 @@ public class SortGeneratorTest
 	@Test
 	public void testGenerateDescAscRaw()
 	{
-		org.molgenis.data.Sort sort = new org.molgenis.data.Sort("int", org.molgenis.data.Sort.Direction.DESC)
-				.on("string", org.molgenis.data.Sort.Direction.ASC);
+		org.molgenis.data.Sort sort = new org.molgenis.data.Sort("int", org.molgenis.data.Sort.Direction.DESC).on(
+				"string", org.molgenis.data.Sort.Direction.ASC);
 		Sort elasticSort = sortGenerator.generateSort(sort, entityType);
-		Sort expectedElasticSort = Sort
-				.create(asList(SortOrder.create("int", DESC), SortOrder.create("string.raw", ASC)));
+		Sort expectedElasticSort = Sort.create(
+				asList(SortOrder.create("int", DESC), SortOrder.create("string.raw", ASC)));
 		assertEquals(elasticSort, expectedElasticSort);
 	}
 }

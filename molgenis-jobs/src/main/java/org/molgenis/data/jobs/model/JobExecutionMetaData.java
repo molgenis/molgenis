@@ -56,11 +56,16 @@ public class JobExecutionMetaData extends SystemEntityType
 		setPackage(jobPackage);
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
 		addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(false);
-		addAttribute(STATUS).setDataType(ENUM).setEnumOptions(jobStatusOptions).setLabel("Job status")
-				.setNillable(false).setDefaultValue(PENDING);
+		addAttribute(STATUS).setDataType(ENUM)
+							.setEnumOptions(jobStatusOptions)
+							.setLabel("Job status")
+							.setNillable(false)
+							.setDefaultValue(PENDING);
 		addAttribute(TYPE).setDataType(STRING).setLabel("Job type").setNillable(false);
-		addAttribute(SUBMISSION_DATE).setDataType(DATE_TIME).setLabel("Job submission date").setNillable(false)
-				.setAuto(true);
+		addAttribute(SUBMISSION_DATE).setDataType(DATE_TIME)
+									 .setLabel("Job submission date")
+									 .setNillable(false)
+									 .setAuto(true);
 		addAttribute(START_DATE).setDataType(DATE_TIME).setLabel("Job start date").setNillable(true);
 		addAttribute(END_DATE).setDataType(DATE_TIME).setLabel("Job end date").setNillable(true);
 		addAttribute(PROGRESS_INT).setDataType(INT).setLabel("Progress").setNillable(true);
@@ -68,14 +73,20 @@ public class JobExecutionMetaData extends SystemEntityType
 		addAttribute(PROGRESS_MESSAGE).setDataType(STRING).setLabel("Progress message").setNillable(true);
 		addAttribute(LOG).setDataType(TEXT).setLabel("Log").setNillable(true);
 		addAttribute(RESULT_URL).setDataType(HYPERLINK).setLabel("Result URL").setNillable(true);
-		addAttribute(FAILURE_EMAIL).setDataType(STRING).setLabel("Failure email")
-				.setDescription("Comma-separated email addresses to send email to if execution fails or is canceled")
-				.setNillable(true);
-		addAttribute(SUCCESS_EMAIL).setDataType(STRING).setLabel("Success email")
-				.setDescription("Comma-separated email addresses to send email to if execution succeeds")
-				.setNillable(true);
-		addAttribute(SCHEDULED_JOB_ID).setDataType(STRING).setLabel("ScheduledJob ID")
-				.setDescription("ID of the ScheduledJob that was executed in this JobExecution, if applicable")
-				.setNillable(true);
+		addAttribute(FAILURE_EMAIL).setDataType(STRING)
+								   .setLabel("Failure email")
+								   .setDescription(
+										   "Comma-separated email addresses to send email to if execution fails or is canceled")
+								   .setNillable(true);
+		addAttribute(SUCCESS_EMAIL).setDataType(STRING)
+								   .setLabel("Success email")
+								   .setDescription(
+										   "Comma-separated email addresses to send email to if execution succeeds")
+								   .setNillable(true);
+		addAttribute(SCHEDULED_JOB_ID).setDataType(STRING)
+									  .setLabel("ScheduledJob ID")
+									  .setDescription(
+											  "ID of the ScheduledJob that was executed in this JobExecution, if applicable")
+									  .setNillable(true);
 	}
 }

@@ -168,23 +168,27 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private Map<String, Attribute> toAttributesMap(EntityType entityType)
 	{
-		return stream(entityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getName, Function.identity()));
+		return stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
+				toMap(Attribute::getName, Function.identity()));
 	}
 
 	private void deleteRemovedAttributesInBackend(Map<String, Attribute> attrsMap,
 			Map<String, Attribute> existingAttrsMap, RepositoryCollection backend,
 			EntityType concreteExistingEntityType)
 	{
-		difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(existingAttrsMap::get)
-				.forEach(removedAttribute -> backend.deleteAttribute(concreteExistingEntityType, removedAttribute));
+		difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream()
+																.map(existingAttrsMap::get)
+																.forEach(removedAttribute -> backend.deleteAttribute(
+																		concreteExistingEntityType, removedAttribute));
 	}
 
 	private void addNewAttributesInBackend(Map<String, Attribute> attrsMap, Map<String, Attribute> existingAttrsMap,
 			RepositoryCollection backend, EntityType concreteExistingEntityType)
 	{
-		difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream().map(attrsMap::get)
-				.forEach(addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
+		difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream()
+																.map(attrsMap::get)
+																.forEach(addedAttribute -> backend.addAttribute(
+																		concreteExistingEntityType, addedAttribute));
 	}
 
 	private void deleteEntityType(EntityType entityType)
@@ -205,9 +209,10 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void deleteEntityAttributes(EntityType entityType)
 	{
 		Iterable<Attribute> rootAttrs = entityType.getOwnAttributes();
-		Stream<Attribute> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
-				attrEntity -> StreamSupport
-						.stream(new AttributeTreeTraverser().preOrderTraversal(attrEntity).spliterator(), false));
+		Stream<Attribute> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false)
+												  .flatMap(attrEntity -> StreamSupport.stream(
+														  new AttributeTreeTraverser().preOrderTraversal(attrEntity)
+																					  .spliterator(), false));
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
 	}
 

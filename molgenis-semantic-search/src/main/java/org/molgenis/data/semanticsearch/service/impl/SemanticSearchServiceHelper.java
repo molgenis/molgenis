@@ -68,8 +68,10 @@ public class SemanticSearchServiceHelper
 
 		if (searchTerms != null)
 		{
-			queryTerms.addAll(searchTerms.stream().filter(StringUtils::isNotBlank).map(this::processQueryString)
-					.collect(Collectors.toList()));
+			queryTerms.addAll(searchTerms.stream()
+										 .filter(StringUtils::isNotBlank)
+										 .map(this::processQueryString)
+										 .collect(Collectors.toList()));
 		}
 
 		// Handle tags with only one ontologyterm
@@ -154,14 +156,15 @@ public class SemanticSearchServiceHelper
 	 */
 	public List<String> parseOntologyTermQueries(OntologyTerm ontologyTerm)
 	{
-		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream().map(this::processQueryString)
-				.collect(Collectors.<String>toList());
+		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream()
+																	 .map(this::processQueryString)
+																	 .collect(Collectors.<String>toList());
 
 		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
 		{
 			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, childOt));
-			getOtLabelAndSynonyms(childOt)
-					.forEach(synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
+			getOtLabelAndSynonyms(childOt).forEach(
+					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
 		}
 		return queryTerms;
 	}
@@ -183,8 +186,9 @@ public class SemanticSearchServiceHelper
 	{
 		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
 
-		queryTerms.stream().filter(StringUtils::isNotBlank)
-				.forEach(queryTerm -> expandedQueryMap.put(Stemmer.cleanStemPhrase(queryTerm), queryTerm));
+		queryTerms.stream()
+				  .filter(StringUtils::isNotBlank)
+				  .forEach(queryTerm -> expandedQueryMap.put(Stemmer.cleanStemPhrase(queryTerm), queryTerm));
 
 		for (OntologyTerm ontologyTerm : ontologyTerms)
 		{
@@ -207,13 +211,13 @@ public class SemanticSearchServiceHelper
 	{
 		if (ontologyTerm != null)
 		{
-			getOtLabelAndSynonyms(ontologyTerm)
-					.forEach(term -> expanedQueryMap.put(Stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+			getOtLabelAndSynonyms(ontologyTerm).forEach(
+					term -> expanedQueryMap.put(Stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 
 			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
 			{
-				getOtLabelAndSynonyms(childOntologyTerm)
-						.forEach(term -> expanedQueryMap.put(Stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+				getOtLabelAndSynonyms(childOntologyTerm).forEach(
+						term -> expanedQueryMap.put(Stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 			}
 		}
 	}
@@ -226,8 +230,8 @@ public class SemanticSearchServiceHelper
 	 */
 	public List<String> getAttributeIdentifiers(EntityType sourceEntityType)
 	{
-		Entity EntityTypeEntity = dataService
-				.findOne(ENTITY_TYPE_META_DATA, new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
+		Entity EntityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
+				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
 
 		if (EntityTypeEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getId());
@@ -262,8 +266,8 @@ public class SemanticSearchServiceHelper
 	{
 		Set<String> searchTerms = removeStopWords(description);
 
-		List<OntologyTerm> matchingOntologyTerms = ontologyService
-				.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
+		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms,
+				MAX_NUM_TAGS);
 
 		return matchingOntologyTerms;
 	}
@@ -275,8 +279,9 @@ public class SemanticSearchServiceHelper
 
 	public String parseBoostQueryString(String queryString, double boost)
 	{
-		return StringUtils.join(removeStopWords(queryString).stream().map(word -> word + CARET_CHARACTER + boost)
-				.collect(Collectors.toSet()), SPACE_CHAR);
+		return StringUtils.join(removeStopWords(queryString).stream()
+															.map(word -> word + CARET_CHARACTER + boost)
+															.collect(Collectors.toSet()), SPACE_CHAR);
 	}
 
 	public String escapeCharsExcludingCaretChar(String string)
@@ -287,8 +292,12 @@ public class SemanticSearchServiceHelper
 	public Set<String> removeStopWords(String description)
 	{
 		Set<String> searchTerms = stream(description.split(ILLEGAL_CHARS_REGEX)).map(String::toLowerCase)
-				.filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w))
-				.collect(Collectors.toSet());
+																				.filter(w ->
+																						!NGramDistanceAlgorithm.STOPWORDSLIST
+																								.contains(w)
+																								&& StringUtils.isNotEmpty(
+																								w))
+																				.collect(Collectors.toSet());
 		return searchTerms;
 	}
 

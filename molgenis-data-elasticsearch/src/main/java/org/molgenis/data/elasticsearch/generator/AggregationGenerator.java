@@ -47,7 +47,8 @@ class AggregationGenerator
 		this.documentIdGenerator = requireNonNull(documentIdGenerator);
 	}
 
-	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2, Attribute aggAttrDistinct)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1, Attribute aggAttr2,
+			Attribute aggAttrDistinct)
 	{
 		List<AggregationBuilder> aggregationBuilders = createAggregations(aggAttr1, aggAttr2, aggAttrDistinct);
 
@@ -107,7 +108,8 @@ class AggregationGenerator
 		return createAggregations(aggAttrs, null, aggAttrDistinct);
 	}
 
-	private List<AggregationBuilder> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr, Attribute distinctAttr)
+	private List<AggregationBuilder> createAggregations(LinkedList<Attribute> attrs, Attribute parentAttr,
+			Attribute distinctAttr)
 	{
 		Attribute attr = attrs.pop();
 
@@ -134,7 +136,8 @@ class AggregationGenerator
 			String cardinalityAggName = distinctAttr.getName() + FieldConstants.AGGREGATION_DISTINCT_POSTFIX;
 			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
 			CardinalityAggregationBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
-					.field(cardinalityAggFieldName).precisionThreshold(PRECISION_THRESHOLD);
+																		   .field(cardinalityAggFieldName)
+																		   .precisionThreshold(PRECISION_THRESHOLD);
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;
@@ -148,7 +151,8 @@ class AggregationGenerator
 				if (AggregateUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
+					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(
+							reverseAggName);
 					reverseNestedBuilder.subAggregation(nestedBuilder);
 					wrappedDistinctAgg = reverseNestedBuilder;
 				}
@@ -162,7 +166,8 @@ class AggregationGenerator
 				if (AggregateUtils.isNestedType(attr))
 				{
 					String reverseAggName = attr.getName() + AggregationGenerator.AGGREGATION_REVERSE_POSTFIX;
-					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
+					ReverseNestedAggregationBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(
+							reverseAggName);
 					reverseNestedBuilder.subAggregation(distinctAgg);
 					wrappedDistinctAgg = reverseNestedBuilder;
 				}

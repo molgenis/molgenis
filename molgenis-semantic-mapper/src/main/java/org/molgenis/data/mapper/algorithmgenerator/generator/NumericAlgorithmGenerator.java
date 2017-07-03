@@ -43,10 +43,12 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 			{
 				String generate = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
 						sourceEntityType);
-				algorithm.append("if(!$('").append(sourceAttribute.getName()).append("').isNull().value()){\n\t")
-						.append("SUM.plus(")
-						.append(generate.endsWith(";") ? generate.substring(0, generate.length() - 1) : generate)
-						.append(");\n\tcounter++;\n}\n");
+				algorithm.append("if(!$('")
+						 .append(sourceAttribute.getName())
+						 .append("').isNull().value()){\n\t")
+						 .append("SUM.plus(")
+						 .append(generate.endsWith(";") ? generate.substring(0, generate.length() - 1) : generate)
+						 .append(");\n\tcounter++;\n}\n");
 			}
 			algorithm.append("if(counter !== 0){\n\tSUM.div(counter);\n\tSUM.value();\n}else{\n\tnull;\n}");
 		}
@@ -87,8 +89,8 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 				{
 					unitConverter = null;
 					// algorithm sets source unit and assigns source value to target
-					algorithm = String
-							.format("$('%s').unit('%s').value();", sourceAttribute.getName(), sourceUnit.toString());
+					algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+							sourceUnit.toString());
 				}
 
 				if (unitConverter != null)
@@ -101,8 +103,8 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 			else
 			{
 				// algorithm sets source unit and assigns source value to target
-				algorithm = String
-						.format("$('%s').unit('%s').value();", sourceAttribute.getName(), sourceUnit.toString());
+				algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+						sourceUnit.toString());
 			}
 		}
 

@@ -177,7 +177,7 @@ public class ImportWizardController extends AbstractWizardController
 		Stream<Object> entityIds = entityTypeIds.stream().map(entityTypeId -> (Object) entityTypeId);
 		List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityIds,
 				new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
-				.collect(Collectors.toList());
+												  .collect(Collectors.toList());
 
 		Group group = dataService.findOneById(GROUP, groupId, Group.class);
 		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
@@ -214,12 +214,12 @@ public class ImportWizardController extends AbstractWizardController
 					SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
 							|| userAccountService.getCurrentUser().isSuperuser()))
 			{
-				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
-						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
+				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
+						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
-					authority
-							.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
+					authority.setRole(
+							SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
 					if (newGroupAuthority)
 					{
 						authority.setId(UUID.randomUUID().toString());
@@ -253,9 +253,9 @@ public class ImportWizardController extends AbstractWizardController
 
 	private List<Authority> getGroupPermissions(Group group)
 	{
-		return dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group),
-						GroupAuthority.class).collect(Collectors.toList());
+		return dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group), GroupAuthority.class)
+						  .collect(Collectors.toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<EntityType> entityTypes)
@@ -292,8 +292,8 @@ public class ImportWizardController extends AbstractWizardController
 
 			// add permissions for inherited authorities from authority that match prefix
 			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
-			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper
-					.mapAuthorities(Collections.singletonList(grantedAuthority));
+			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper.mapAuthorities(
+					Collections.singletonList(grantedAuthority));
 			hierarchyAuthorities.remove(grantedAuthority);
 
 			for (GrantedAuthority hierarchyAuthority : hierarchyAuthorities)
@@ -323,16 +323,15 @@ public class ImportWizardController extends AbstractWizardController
 	 */
 	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
 	{
-		Stream<GroupAuthority> stream = dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId),
-						GroupAuthority.class);
+		Stream<GroupAuthority> stream = dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId), GroupAuthority.class);
 		GroupAuthority existingGroupAuthority = null;
 		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
 		{
 			GroupAuthority groupAuthority = it.next();
 			String entity = "";
-			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX) || groupAuthority
-					.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
+			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX)
+					|| groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
 			{
 				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
 			}
@@ -385,8 +384,9 @@ public class ImportWizardController extends AbstractWizardController
 			File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
 			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
 			{
-				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
-						.body(MessageFormat.format("Package [{0}] does not exist.", packageId));
+				return ResponseEntity.badRequest()
+									 .contentType(TEXT_PLAIN)
+									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
 			if (packageId == null) packageId = PACKAGE_DEFAULT;
 			importRun = importFile(request, tmpFile, action, notify, packageId);
@@ -428,8 +428,9 @@ public class ImportWizardController extends AbstractWizardController
 
 			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
 			{
-				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
-						.body(MessageFormat.format("Package [{0}] does not exist.", packageId));
+				return ResponseEntity.badRequest()
+									 .contentType(TEXT_PLAIN)
+									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
 			if (packageId == null) packageId = PACKAGE_DEFAULT;
 
@@ -461,8 +462,8 @@ public class ImportWizardController extends AbstractWizardController
 	private String getFilename(String originalFileName, String entityTypeId)
 	{
 		String filename;
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(originalFileName, importServiceFactory.getSupportedFileExtensions());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(originalFileName,
+				importServiceFactory.getSupportedFileExtensions());
 		if (entityTypeId == null)
 		{
 			filename = originalFileName;
@@ -486,8 +487,8 @@ public class ImportWizardController extends AbstractWizardController
 					"A repository with name " + getBaseName(file.getName()) + " already exists");
 		}
 		ImportService importService = importServiceFactory.getImportService(file.getName());
-		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-				.createFileRepositoryCollection(file);
+		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+				file);
 
 		importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
 		asyncImportJobs.execute(
@@ -509,8 +510,8 @@ public class ImportWizardController extends AbstractWizardController
 			catch (IllegalArgumentException e)
 			{
 				throw new IllegalArgumentException(
-						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays
-								.toString(DatabaseAction.values())));
+						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays.toString(
+								DatabaseAction.values())));
 			}
 		}
 		return databaseAction;

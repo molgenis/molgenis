@@ -72,10 +72,10 @@ public class AttributeMapperTest
 		when(tagMapper.toEditorTags(tags)).thenReturn(editorTags);
 
 		EditorAttribute editorAttribute = attributeMapper.createEditorAttribute();
-		assertEquals(editorAttribute, EditorAttribute
-				.create(id, null, null, null, null, null, null, null, false, false, false, null, ImmutableMap.of(),
-						null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags, null, null, null,
-						sequenceNumber));
+		assertEquals(editorAttribute,
+				EditorAttribute.create(id, null, null, null, null, null, null, null, false, false, false, null,
+						ImmutableMap.of(), null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags,
+						null, null, null, sequenceNumber));
 	}
 
 	@Test
@@ -88,8 +88,8 @@ public class AttributeMapperTest
 		EditorAttributeIdentifier editorParentAttributeIdentifier = EditorAttributeIdentifier.create(parentId, "label");
 		String refEntityTypeId = "refId";
 		EditorEntityTypeIdentifier editorRefEntityType = EditorEntityTypeIdentifier.create(refEntityTypeId, "label");
-		EditorAttributeIdentifier editorMappedByAttribute = EditorAttributeIdentifier
-				.create("mappedBy", "mappedByLabel");
+		EditorAttributeIdentifier editorMappedByAttribute = EditorAttributeIdentifier.create("mappedBy",
+				"mappedByLabel");
 		EditorSort editorSort = mock(EditorSort.class);
 		String expression = "expression";
 		boolean nullable = false;
@@ -116,8 +116,8 @@ public class AttributeMapperTest
 		Integer sequenceNumber = 1;
 
 		Attribute parentAttribute = mock(Attribute.class);
-		when(attributeReferenceMapper.toAttributeReference(editorParentAttributeIdentifier))
-				.thenReturn(parentAttribute);
+		when(attributeReferenceMapper.toAttributeReference(editorParentAttributeIdentifier)).thenReturn(
+				parentAttribute);
 		EntityType refEntityType = mock(EntityType.class);
 		when(entityTypeReferenceMapper.toEntityTypeReference(refEntityTypeId)).thenReturn(refEntityType);
 		Attribute mappedByAttribute = mock(Attribute.class);
@@ -140,16 +140,14 @@ public class AttributeMapperTest
 		when(editorEntityType.getLabelAttribute()).thenReturn(editorIdAttributeIdentifier);
 		when(editorEntityType.getLookupAttributes()).thenReturn(singletonList(editorIdAttributeIdentifier));
 
-		EditorAttribute editorAttribute = EditorAttribute
-				.create(id, name, type, editorParentAttributeIdentifier, editorRefEntityType, editorMappedByAttribute,
-						editorSort, expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription,
-						aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTagIdentifiers,
-						visibleExpression, validationExpression, defaultValue, sequenceNumber);
-		EditorAttribute editorParentAttribute = EditorAttribute
-				.create(parentId, name, type, null, editorRefEntityType, editorMappedByAttribute, editorSort,
-						expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription,
-						aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTagIdentifiers,
-						visibleExpression, validationExpression, defaultValue, sequenceNumber);
+		EditorAttribute editorAttribute = EditorAttribute.create(id, name, type, editorParentAttributeIdentifier,
+				editorRefEntityType, editorMappedByAttribute, editorSort, expression, nullable, auto, visible, label,
+				i18nLabel, description, i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly,
+				unique, editorTagIdentifiers, visibleExpression, validationExpression, defaultValue, sequenceNumber);
+		EditorAttribute editorParentAttribute = EditorAttribute.create(parentId, name, type, null, editorRefEntityType,
+				editorMappedByAttribute, editorSort, expression, nullable, auto, visible, label, i18nLabel, description,
+				i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique,
+				editorTagIdentifiers, visibleExpression, validationExpression, defaultValue, sequenceNumber);
 		ImmutableList<Attribute> attributes = copyOf(
 				attributeMapper.toAttributes(of(editorAttribute, editorParentAttribute), editorEntityType));
 		assertEquals(attributes.size(), 2);
@@ -249,11 +247,12 @@ public class AttributeMapperTest
 		when(attribute.isAuto()).thenReturn(auto);
 		when(attribute.isVisible()).thenReturn(visible);
 		when(attribute.getLabel()).thenReturn(label);
-		when(attribute.getString(getI18nAttributeName(AttributeMetadata.LABEL, i18nLabelLangEn)))
-				.thenReturn(i18nLabelValue);
+		when(attribute.getString(getI18nAttributeName(AttributeMetadata.LABEL, i18nLabelLangEn))).thenReturn(
+				i18nLabelValue);
 		when(attribute.getDescription()).thenReturn(description);
-		when(attribute.getString(getI18nAttributeName(AttributeMetadata.DESCRIPTION, i18nDescriptionLangEn)))
-				.thenReturn(i18nDescriptionValue);
+		when(attribute.getString(
+				getI18nAttributeName(AttributeMetadata.DESCRIPTION, i18nDescriptionLangEn))).thenReturn(
+				i18nDescriptionValue);
 		when(attribute.isAggregatable()).thenReturn(aggregatable);
 		when(attribute.getEnumOptions()).thenReturn(of("option0"));
 		when(attribute.getRangeMin()).thenReturn(rangeMin);
@@ -273,8 +272,8 @@ public class AttributeMapperTest
 		EditorEntityTypeIdentifier editorRefEntityType = mock(EditorEntityTypeIdentifier.class);
 		when(entityTypeReferenceMapper.toEditorEntityTypeIdentifier(refEntityType)).thenReturn(editorRefEntityType);
 		EditorAttributeIdentifier editorMappedByAttribute = mock(EditorAttributeIdentifier.class);
-		when(attributeReferenceMapper.toEditorAttributeIdentifier(mappedByAttribute))
-				.thenReturn(editorMappedByAttribute);
+		when(attributeReferenceMapper.toEditorAttributeIdentifier(mappedByAttribute)).thenReturn(
+				editorMappedByAttribute);
 		EditorSort editorSort = mock(EditorSort.class);
 		when(sortMapper.toEditorSort(sort)).thenReturn(editorSort);
 		@SuppressWarnings("unchecked")
@@ -282,11 +281,10 @@ public class AttributeMapperTest
 		when(tagMapper.toEditorTags(tags)).thenReturn(editorTags);
 
 		ImmutableList<EditorAttribute> editorAttributes = attributeMapper.toEditorAttributes(of(attribute));
-		EditorAttribute expectedEditorAttribute = EditorAttribute
-				.create(id, name, type, editorParentAttribute, editorRefEntityType, editorMappedByAttribute, editorSort,
-						expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription,
-						aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTags,
-						visibleExpression, validationExpression, defaultValue, sequenceNumber);
+		EditorAttribute expectedEditorAttribute = EditorAttribute.create(id, name, type, editorParentAttribute,
+				editorRefEntityType, editorMappedByAttribute, editorSort, expression, nullable, auto, visible, label,
+				i18nLabel, description, i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly,
+				unique, editorTags, visibleExpression, validationExpression, defaultValue, sequenceNumber);
 		assertEquals(editorAttributes, of(expectedEditorAttribute));
 
 	}

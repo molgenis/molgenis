@@ -134,14 +134,14 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	public void testResult() throws Exception
 	{
 		GavinJobExecution gavinJobExecution = mock(GavinJobExecution.class);
-		File resultFile = File
-				.createTempFile("gavin", ".vcf", new File(ResourceUtils.getFile(getClass(), "/").getPath()));
+		File resultFile = File.createTempFile("gavin", ".vcf",
+				new File(ResourceUtils.getFile(getClass(), "/").getPath()));
 		resultFile.deleteOnExit();
 
 		when(gavinJobExecution.getFilename()).thenReturn("annotate-file");
 		when(gavinJobFactory.findGavinJobExecution("ABCDE")).thenReturn(gavinJobExecution);
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
-				.thenReturn(resultFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf")).thenReturn(
+				resultFile);
 
 		HttpServletResponse response = mock(HttpServletResponse.class);
 

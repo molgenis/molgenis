@@ -64,9 +64,10 @@ public class GavinAlgorithmTest
 			Double spec95thPerCADDThreshold, Double sens95thPerCADDThreshold, Category category,
 			Judgment.Classification classification, Judgment.Method method, String reason)
 	{
-		assertEquals(gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, gene, GavinThresholds
-				.create(pathoMAFThreshold, meanPathogenicCADDScore, meanPopulationCADDScore, spec95thPerCADDThreshold,
-						sens95thPerCADDThreshold, category)), Judgment.create(classification, method, gene, reason));
+		assertEquals(gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, gene,
+				GavinThresholds.create(pathoMAFThreshold, meanPathogenicCADDScore, meanPopulationCADDScore,
+						spec95thPerCADDThreshold, sens95thPerCADDThreshold, category)),
+				Judgment.create(classification, method, gene, reason));
 	}
 
 	@DataProvider(name = "genomeWideClassifyVariant")
@@ -120,8 +121,8 @@ public class GavinAlgorithmTest
 	public void testNullThresholdsZeroMAF()
 	{
 		//TODO: Is this intended behavior? Taken from GavinAlgorithmTest but defaulting to MAF threshold of 0 seems peculiar.
-		assertEquals(gavinAlgorithm
-						.classifyVariant(HIGH, 80.0, 1e-5, "ABCD1", GavinThresholds.create(0.0, null, null, null, null, I1)),
+		assertEquals(gavinAlgorithm.classifyVariant(HIGH, 80.0, 1e-5, "ABCD1",
+				GavinThresholds.create(0.0, null, null, null, null, I1)),
 				Judgment.create(Benign, calibrated, "ABCD1", "Variant MAF of 1.0E-5 is greater than 0.0."));
 	}
 }

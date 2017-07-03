@@ -27,17 +27,20 @@ class ClientFactory
 		return createClient(clusterName, inetAddresses, null);
 	}
 
-	private static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses, @SuppressWarnings("SameParameterValue") Map<String, String> settings)
+	private static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses,
+			@SuppressWarnings("SameParameterValue") Map<String, String> settings)
 	{
 		Settings clientSettings = createSettings(clusterName, settings);
 		InetSocketTransportAddress[] socketTransportAddresses = createInetTransportAddresses(inetAddresses);
 
-		TransportClient transportClient = new PreBuiltTransportClient(clientSettings).addTransportAddresses(socketTransportAddresses);
+		TransportClient transportClient = new PreBuiltTransportClient(clientSettings).addTransportAddresses(
+				socketTransportAddresses);
 
 		if (transportClient.connectedNodes().isEmpty())
 		{
-			throw new RuntimeException(format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
-					clusterName, Arrays.toString(socketTransportAddresses)));
+			throw new RuntimeException(
+					format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
+							clusterName, Arrays.toString(socketTransportAddresses)));
 		}
 		return transportClient;
 	}

@@ -12,7 +12,9 @@ public class StockChart extends BasicChart
 
 	public StockChart()
 	{
-		this.setMarginBottom(MARGIN_BOTTOM).setMarginLeft(MARGIN_LEFT).setMarginRight(MARGIN_RIGHT)
-				.setMarginTop(MARGIN_TOP);
+		this.setMarginBottom(MARGIN_BOTTOM)
+			.setMarginLeft(MARGIN_LEFT)
+			.setMarginRight(MARGIN_RIGHT)
+			.setMarginTop(MARGIN_TOP);
 	}
 }

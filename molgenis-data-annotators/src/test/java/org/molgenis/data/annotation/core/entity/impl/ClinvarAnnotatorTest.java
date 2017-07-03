@@ -276,8 +276,8 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity clinvarAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getPath());
+			when(settings.getString(ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getPath());
 			return settings;
 		}
 

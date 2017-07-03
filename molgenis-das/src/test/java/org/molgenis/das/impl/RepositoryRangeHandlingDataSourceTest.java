@@ -133,20 +133,20 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 			}
 		});
 
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityType()))
-				.thenReturn("CHROM");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, entity.getEntityType()))
-				.thenReturn("POS");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, entity.getEntityType()))
-				.thenReturn("STOP");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_IDENTIFIER, entity.getEntityType()))
-				.thenReturn("ID");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_DESCRIPTION, entity.getEntityType()))
-				.thenReturn("INFO");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_NAME, entity.getEntityType()))
-				.thenReturn("NAME");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_LINKOUT, entity.getEntityType()))
-				.thenReturn("linkout");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityType())).thenReturn(
+				"CHROM");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, entity.getEntityType())).thenReturn(
+				"POS");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, entity.getEntityType())).thenReturn(
+				"STOP");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_IDENTIFIER,
+				entity.getEntityType())).thenReturn("ID");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_DESCRIPTION,
+				entity.getEntityType())).thenReturn("INFO");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_NAME, entity.getEntityType())).thenReturn(
+				"NAME");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_LINKOUT,
+				entity.getEntityType())).thenReturn("linkout");
 
 	}
 
@@ -170,20 +170,30 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{
-		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next()
-						.getFeatureLabel(),
-				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next()
-						.getFeatureLabel());
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100)
+						   .getFeatures()
+						   .iterator()
+						   .next()
+						   .getFeatureLabel(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures()
+																				 .iterator()
+																				 .next()
+																				 .getFeatureLabel());
 	}
 
 	@Test
 	public void getFeaturesId() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{
-		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next()
-						.getFeatureId(),
-				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next()
-						.getFeatureId());
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100)
+						   .getFeatures()
+						   .iterator()
+						   .next()
+						   .getFeatureId(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures()
+																				 .iterator()
+																				 .next()
+																				 .getFeatureId());
 	}
 
 	@Test

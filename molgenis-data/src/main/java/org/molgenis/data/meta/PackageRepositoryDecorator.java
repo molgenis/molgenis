@@ -78,8 +78,8 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
 	private void deleteEntityTypesInPackageAndSubPackages(Package package_)
 	{
 		Repository<EntityType> entityRepo = getEntityRepository();
-		List<EntityType> entityTypesToDelete = getPackageTreeTraversal(package_)
-				.flatMap(p -> stream(p.getEntityTypes().spliterator(), false)).collect(toList());
+		List<EntityType> entityTypesToDelete = getPackageTreeTraversal(package_).flatMap(
+				p -> stream(p.getEntityTypes().spliterator(), false)).collect(toList());
 		entityRepo.delete(reverse(entityTypeDependencyResolver.resolve(entityTypesToDelete)).stream());
 	}
 

@@ -30,16 +30,16 @@ public class DataExplorerHyperlinkDirectiveTest
 	public void setUp()
 	{
 		MolgenisPluginRegistry mpr = mock(MolgenisPluginRegistry.class);
-		when(mpr.getPlugin(DataExplorerController.ID))
-				.thenReturn(new MolgenisPlugin("dataex", "dataex", "dataex", "/menu/data/dataex"));
+		when(mpr.getPlugin(DataExplorerController.ID)).thenReturn(
+				new MolgenisPlugin("dataex", "dataex", "dataex", "/menu/data/dataex"));
 
 		dataService = mock(DataService.class);
 		when(dataService.hasRepository("thedataset")).thenReturn(true);
 
 		directive = new DataExplorerHyperlinkDirective(mpr, dataService);
 		envWriter = new StringWriter();
-		fakeTemplate = Template
-				.getPlainTextTemplate("name", "content", new Configuration(Configuration.VERSION_2_3_21));
+		fakeTemplate = Template.getPlainTextTemplate("name", "content",
+				new Configuration(Configuration.VERSION_2_3_21));
 	}
 
 	@Test

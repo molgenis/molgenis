@@ -56,15 +56,15 @@ public class GavinAlgorithm
 					if (gavinThresholds.isAboveMeanPathogenicCADDScore(caddScaled))
 					{
 						return Judgment.create(Pathogenic, calibrated, gene,
-								"Variant CADD score of " + caddScaled + " is greater than " + gavinThresholds
-										.getMeanPathogenicCADDScore()
+								"Variant CADD score of " + caddScaled + " is greater than "
+										+ gavinThresholds.getMeanPathogenicCADDScore()
 										+ " in a gene for which CADD scores are informative.");
 					}
 					if (gavinThresholds.isBelowMeanPopulationCADDScore(caddScaled))
 					{
 						return Judgment.create(Benign, calibrated, gene,
-								"Variant CADD score of " + caddScaled + " is less than " + gavinThresholds
-										.getMeanPopulationCADDScore()
+								"Variant CADD score of " + caddScaled + " is less than "
+										+ gavinThresholds.getMeanPopulationCADDScore()
 										+ " in a gene for which CADD scores are informative.");
 					}
 					//this rule does not classify apparently, just continue onto the next rules
@@ -75,14 +75,14 @@ public class GavinAlgorithm
 					if (gavinThresholds.isAboveSpec95thPerCADDThreshold(caddScaled))
 					{
 						return Judgment.create(Pathogenic, calibrated, gene,
-								"Variant CADD score of " + caddScaled + " is greater than " + gavinThresholds
-										.getSpec95thPerCADDThreshold() + " for this gene.");
+								"Variant CADD score of " + caddScaled + " is greater than "
+										+ gavinThresholds.getSpec95thPerCADDThreshold() + " for this gene.");
 					}
 					if (gavinThresholds.isBelowSens95PerCADDThreshold(caddScaled))
 					{
 						return Judgment.create(Benign, calibrated, gene,
-								"Variant CADD score of " + caddScaled + " is less than " + gavinThresholds
-										.getSens95thPerCADDThreshold() + " for this gene.");
+								"Variant CADD score of " + caddScaled + " is less than "
+										+ gavinThresholds.getSens95thPerCADDThreshold() + " for this gene.");
 					}
 					//this rule does not classify apparently, just continue onto the next rules
 					break;

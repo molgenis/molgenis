@@ -46,8 +46,8 @@ public class AttributeReferenceMapperTest
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getIdentifier()).thenReturn(id);
 		when(attribute.getLabel()).thenReturn(label);
-		ImmutableList<EditorAttributeIdentifier> editorAttributeIdentifier = attributeReferenceMapper
-				.toEditorAttributeIdentifiers(of(attribute));
+		ImmutableList<EditorAttributeIdentifier> editorAttributeIdentifier = attributeReferenceMapper.toEditorAttributeIdentifiers(
+				of(attribute));
 		assertEquals(editorAttributeIdentifier, of(EditorAttributeIdentifier.create(id, label)));
 	}
 
@@ -59,8 +59,8 @@ public class AttributeReferenceMapperTest
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getIdentifier()).thenReturn(id);
 		when(attribute.getLabel()).thenReturn(label);
-		EditorAttributeIdentifier editorAttributeIdentifier = attributeReferenceMapper
-				.toEditorAttributeIdentifier(attribute);
+		EditorAttributeIdentifier editorAttributeIdentifier = attributeReferenceMapper.toEditorAttributeIdentifier(
+				attribute);
 		assertEquals(editorAttributeIdentifier, EditorAttributeIdentifier.create(id, label));
 	}
 

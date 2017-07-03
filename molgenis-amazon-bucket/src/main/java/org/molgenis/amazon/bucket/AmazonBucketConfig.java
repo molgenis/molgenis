@@ -46,10 +46,8 @@ public class AmazonBucketConfig
 				final String secretKey = amazonBucketJobExecution.getSecretKey();
 				final String region = amazonBucketJobExecution.getRegion();
 				final boolean isExpression = amazonBucketJobExecution.isExpression();
-				return progress -> ingester
-						.ingest(jobExecutionID, targetEntityId, bucket, key, extension, accessKey, secretKey, region,
-								isExpression,
-								progress);
+				return progress -> ingester.ingest(jobExecutionID, targetEntityId, bucket, key, extension, accessKey,
+						secretKey, region, isExpression, progress);
 			}
 		};
 	}

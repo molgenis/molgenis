@@ -26,8 +26,7 @@ public class RunAsSystemProxy implements Advice, MethodInterceptor
 	{
 		Method interfaceMethod = invocation.getMethod();
 
-		Class<?> clazz = targetObject instanceof Advised ? ((Advised) targetObject).getTargetClass() : targetObject
-				.getClass();
+		Class<?> clazz = targetObject instanceof Advised ? ((Advised) targetObject).getTargetClass() : targetObject.getClass();
 
 		Method targetMethod = clazz.getMethod(interfaceMethod.getName(), interfaceMethod.getParameterTypes());
 

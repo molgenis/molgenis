@@ -126,16 +126,16 @@ public class AttributeValidatorTest
 	@Test(dataProvider = "disallowedTransitionProvider", expectedExceptions = MolgenisDataException.class)
 	public void testDisallowedTransition(Attribute currentAttr, Attribute newAttr)
 	{
-		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
-				.thenReturn(currentAttr);
+		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class)).thenReturn(
+				currentAttr);
 		attributeValidator.validate(newAttr, ValidationMode.UPDATE);
 	}
 
 	@Test(dataProvider = "allowedTransitionProvider")
 	public void testAllowedTransition(Attribute currentAttr, Attribute newAttr)
 	{
-		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
-				.thenReturn(currentAttr);
+		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class)).thenReturn(
+				currentAttr);
 	}
 
 	@Test

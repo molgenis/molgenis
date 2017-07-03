@@ -93,8 +93,9 @@ public class LocalizationService
 	@RunAsSystem
 	public Map<String, String> getMessages(String namespace, String languageCode)
 	{
-		return getL10nStrings(namespace).stream().filter(e -> e.getString(languageCode) != null)
-				.collect(toMap(L10nString::getMessageID, e -> e.getString(languageCode)));
+		return getL10nStrings(namespace).stream()
+										.filter(e -> e.getString(languageCode) != null)
+										.collect(toMap(L10nString::getMessageID, e -> e.getString(languageCode)));
 	}
 
 	/**
@@ -112,11 +113,10 @@ public class LocalizationService
 		String namespace = messageSource.getNamespace();
 		Set<String> messageIDs = messageSource.getMessageIDs();
 
-		Stream<L10nString> stream = dataService
-				.findAll(L10N_STRING, new QueryImpl<L10nString>().in(MSGID, messageIDs).and().eq(NAMESPACE, namespace),
-						L10nString.class);
+		Stream<L10nString> stream = dataService.findAll(L10N_STRING,
+				new QueryImpl<L10nString>().in(MSGID, messageIDs).and().eq(NAMESPACE, namespace), L10nString.class);
 		Map<String, L10nString> toUpdate = stream.map(l10nStringFactory::create)
-				.collect(toMap(L10nString::getMessageID, identity()));
+												 .collect(toMap(L10nString::getMessageID, identity()));
 
 		Map<String, L10nString> toAdd = Sets.difference(messageIDs, toUpdate.keySet()).stream().map(msgId ->
 		{
@@ -153,15 +153,18 @@ public class LocalizationService
 	@Transactional
 	public void addMissingMessageIDs(String namespace, Set<String> messageIDs)
 	{
-		Set<String> alreadyPresent = dataService
-				.findAll(L10N_STRING, new QueryImpl<L10nString>().in(MSGID, messageIDs).and().eq(NAMESPACE, namespace),
-						L10nString.class).map(L10nString::getMessageID).collect(toCollection(TreeSet::new));
+		Set<String> alreadyPresent = dataService.findAll(L10N_STRING,
+				new QueryImpl<L10nString>().in(MSGID, messageIDs).and().eq(NAMESPACE, namespace), L10nString.class)
+												.map(L10nString::getMessageID)
+												.collect(toCollection(TreeSet::new));
 
 		Set<String> toAdd = Sets.difference(messageIDs, alreadyPresent);
 		if (!toAdd.isEmpty())
 		{
 			Stream<L10nString> entities = toAdd.stream()
-					.map(key -> l10nStringFactory.create().setMessageID(key).setNamespace(namespace));
+											   .map(key -> l10nStringFactory.create()
+																			.setMessageID(key)
+																			.setNamespace(namespace));
 			try
 			{
 				dataService.add(L10N_STRING, entities);

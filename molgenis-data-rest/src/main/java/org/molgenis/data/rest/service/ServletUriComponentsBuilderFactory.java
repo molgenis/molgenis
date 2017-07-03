@@ -9,7 +9,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @Component
 public class ServletUriComponentsBuilderFactory
 {
-	public ServletUriComponentsBuilder fromCurrentRequest() {
+	public ServletUriComponentsBuilder fromCurrentRequest()
+	{
 		return ServletUriComponentsBuilder.fromCurrentRequest();
 	}
 }

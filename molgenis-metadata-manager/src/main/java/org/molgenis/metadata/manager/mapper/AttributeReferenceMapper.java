@@ -28,8 +28,8 @@ class AttributeReferenceMapper
 
 	ImmutableList<EditorAttributeIdentifier> toEditorAttributeIdentifiers(Iterable<Attribute> attributes)
 	{
-		return ImmutableList
-				.copyOf(stream(attributes.spliterator(), false).map(this::toEditorAttributeIdentifier).iterator());
+		return ImmutableList.copyOf(
+				stream(attributes.spliterator(), false).map(this::toEditorAttributeIdentifier).iterator());
 	}
 
 	EditorAttributeIdentifier toEditorAttributeIdentifier(Attribute attribute)

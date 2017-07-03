@@ -143,21 +143,19 @@ public class EmxMetaDataParser implements MetaDataParser
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_I18NSTRINGS, L10N_STRING);
 	}
 
-	private static final List<String> EMX_ENTITIES_ALLOWED_ATTRS = Arrays
-			.asList(EMX_ENTITIES_NAME.toLowerCase(), EMX_ENTITIES_PACKAGE.toLowerCase(),
-					EMX_ENTITIES_LABEL.toLowerCase(), EMX_ENTITIES_DESCRIPTION, EMX_ENTITIES_ABSTRACT.toLowerCase(),
-					EMX_ENTITIES_EXTENDS.toLowerCase(), EMX_ENTITIES_BACKEND.toLowerCase(),
-					EMX_ENTITIES_TAGS.toLowerCase());
+	private static final List<String> EMX_ENTITIES_ALLOWED_ATTRS = Arrays.asList(EMX_ENTITIES_NAME.toLowerCase(),
+			EMX_ENTITIES_PACKAGE.toLowerCase(), EMX_ENTITIES_LABEL.toLowerCase(), EMX_ENTITIES_DESCRIPTION,
+			EMX_ENTITIES_ABSTRACT.toLowerCase(), EMX_ENTITIES_EXTENDS.toLowerCase(), EMX_ENTITIES_BACKEND.toLowerCase(),
+			EMX_ENTITIES_TAGS.toLowerCase());
 
-	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays
-			.asList(EMX_ATTRIBUTES_AGGREGATEABLE, EMX_ATTRIBUTES_DATA_TYPE, EMX_ATTRIBUTES_DESCRIPTION,
-					EMX_ATTRIBUTES_ENTITY, EMX_ATTRIBUTES_ENUM_OPTIONS, EMX_ATTRIBUTES_ID_ATTRIBUTE,
-					EMX_ATTRIBUTES_LABEL, EMX_ATTRIBUTES_LABEL_ATTRIBUTE, EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE,
-					EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_NILLABLE, EMX_ATTRIBUTES_PART_OF_ATTRIBUTE,
-					EMX_ATTRIBUTES_RANGE_MAX, EMX_ATTRIBUTES_RANGE_MIN, EMX_ATTRIBUTES_READ_ONLY,
-					EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_MAPPED_BY, EMX_ATTRIBUTES_VISIBLE, EMX_ATTRIBUTES_UNIQUE,
-					EMX_ATTRIBUTES_EXPRESSION, EMX_ATTRIBUTES_VALIDATION_EXPRESSION, EMX_ATTRIBUTES_DEFAULT_VALUE,
-					EMX_ATTRIBUTES_TAGS);
+	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(EMX_ATTRIBUTES_AGGREGATEABLE,
+			EMX_ATTRIBUTES_DATA_TYPE, EMX_ATTRIBUTES_DESCRIPTION, EMX_ATTRIBUTES_ENTITY, EMX_ATTRIBUTES_ENUM_OPTIONS,
+			EMX_ATTRIBUTES_ID_ATTRIBUTE, EMX_ATTRIBUTES_LABEL, EMX_ATTRIBUTES_LABEL_ATTRIBUTE,
+			EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE, EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_NILLABLE,
+			EMX_ATTRIBUTES_PART_OF_ATTRIBUTE, EMX_ATTRIBUTES_RANGE_MAX, EMX_ATTRIBUTES_RANGE_MIN,
+			EMX_ATTRIBUTES_READ_ONLY, EMX_ATTRIBUTES_REF_ENTITY, EMX_ATTRIBUTES_MAPPED_BY, EMX_ATTRIBUTES_VISIBLE,
+			EMX_ATTRIBUTES_UNIQUE, EMX_ATTRIBUTES_EXPRESSION, EMX_ATTRIBUTES_VALIDATION_EXPRESSION,
+			EMX_ATTRIBUTES_DEFAULT_VALUE, EMX_ATTRIBUTES_TAGS);
 
 	private static final String AUTO = "auto";
 
@@ -293,8 +291,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		}));
 
 		// validate package/entity/attribute tags
-		metaDataMap.values().stream().map(EntityType::getPackage).filter(Objects::nonNull)
-				.forEach(package_ -> package_.getTags().forEach(tagValidator::validate));
+		metaDataMap.values()
+				   .stream()
+				   .map(EntityType::getPackage)
+				   .filter(Objects::nonNull)
+				   .forEach(package_ -> package_.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
@@ -535,7 +536,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				if (!EMX_ENTITIES_ALLOWED_ATTRS.contains(attr.getName().toLowerCase()) && !(isI18n(attr.getName()) && (
 						attr.getName().startsWith(EMX_ENTITIES_DESCRIPTION) || attr.getName()
-								.startsWith(EMX_ENTITIES_LABEL))))
+																				   .startsWith(EMX_ENTITIES_LABEL))))
 				{
 					throw new IllegalArgumentException("Unsupported entity metadata: entities." + attr.getName());
 				}
@@ -746,7 +747,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName()) && !((isI18n(attr.getName()) && (
 					attr.getName().startsWith(EMX_ATTRIBUTES_LABEL) || attr.getName()
-							.startsWith(EMX_ATTRIBUTES_DESCRIPTION)))))
+																		   .startsWith(EMX_ATTRIBUTES_DESCRIPTION)))))
 			{
 				// check if casing mismatch
 				SUPPORTED_ATTRIBUTE_ATTRIBUTES.forEach(emxAttrMetaAttr ->
@@ -1365,8 +1366,9 @@ public class EmxMetaDataParser implements MetaDataParser
 						// See comment above regarding import of bi-directional one-to-many data
 						if (att.getDataType() != COMPOUND && !(att.getDataType() == ONE_TO_MANY && att.isMappedBy()))
 						{
-							if (!att.isAuto() && att.getExpression() == null && !report.getFieldsImportable().get(sheet)
-									.contains(att.getName()))
+							if (!att.isAuto() && att.getExpression() == null && !report.getFieldsImportable()
+																					   .get(sheet)
+																					   .contains(att.getName()))
 							{
 								boolean required = !att.isNillable() && !att.isAuto();
 								report = report.addAttribute(att.getName(), required ? REQUIRED : AVAILABLE);

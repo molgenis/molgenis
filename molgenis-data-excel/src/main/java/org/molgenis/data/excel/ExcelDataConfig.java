@@ -19,8 +19,8 @@ public class ExcelDataConfig
 	@PostConstruct
 	public void registerExcelRepositorySource()
 	{
-		fileRepositoryCollectionFactory
-				.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class, ExcelFileExtensions.getExcel());
+		fileRepositoryCollectionFactory.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class,
+				ExcelFileExtensions.getExcel());
 	}
 
 }

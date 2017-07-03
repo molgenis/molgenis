@@ -278,7 +278,8 @@ public class RestService
 				fileEntity.setSize(multipartFile.getSize());
 				ServletUriComponentsBuilder currentRequest = servletUriComponentsBuilderFactory.fromCurrentRequest();
 				UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + id)
-						.replaceQuery(null).build();
+														  .replaceQuery(null)
+														  .build();
 				fileEntity.setUrl(downloadUri.toUriString());
 				dataService.add(FILE_META, fileEntity);
 
@@ -420,8 +421,9 @@ public class RestService
 			EntityType mrefEntity = attr.getRefEntity();
 			Attribute mrefEntityIdAttr = mrefEntity.getIdAttribute();
 			value = mrefParamValues.stream()
-					.map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue, null))
-					.map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue)).collect(toList());
+								   .map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue, null))
+								   .map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
+								   .collect(toList());
 		}
 		else
 		{
@@ -554,8 +556,8 @@ public class RestService
 		if (existingEntity != null)
 		{
 			// filter out unchanged ref entities
-			Set<Object> refEntityIds = stream(existingEntity.getEntities(attr.getName()).spliterator(), false)
-					.map(Entity::getIdValue).collect(toSet());
+			Set<Object> refEntityIds = stream(existingEntity.getEntities(attr.getName()).spliterator(), false).map(
+					Entity::getIdValue).collect(toSet());
 			stream = stream.filter(refEntity -> !refEntityIds.contains(refEntity.getIdValue()));
 		}
 		List<Entity> updatedRefEntities = stream.map(refEntity ->
@@ -575,18 +577,18 @@ public class RestService
 		// update ref entities of existing entity
 		if (existingEntity != null)
 		{
-			Set<Object> refEntityIds = stream(entity.getEntities(attr.getName()).spliterator(), false)
-					.map(Entity::getIdValue).collect(toSet());
+			Set<Object> refEntityIds = stream(entity.getEntities(attr.getName()).spliterator(), false).map(
+					Entity::getIdValue).collect(toSet());
 			List<Entity> updatedRefEntitiesExistingEntity = stream(
-					existingEntity.getEntities(attr.getName()).spliterator(), false)
-					.filter(refEntity -> !refEntityIds.contains(refEntity.getIdValue())).map(refEntity ->
-					{
-						refEntity.set(refAttr.getName(), null);
-						return refEntity;
-					}).collect(toList());
+					existingEntity.getEntities(attr.getName()).spliterator(), false).filter(
+					refEntity -> !refEntityIds.contains(refEntity.getIdValue())).map(refEntity ->
+			{
+				refEntity.set(refAttr.getName(), null);
+				return refEntity;
+			}).collect(toList());
 
 			updatedRefEntities = Stream.concat(updatedRefEntities.stream(), updatedRefEntitiesExistingEntity.stream())
-					.collect(toList());
+									   .collect(toList());
 		}
 
 		if (!updatedRefEntities.isEmpty())

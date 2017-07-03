@@ -36,8 +36,8 @@ class EntityTypeReferenceMapper
 
 	ImmutableList<EditorEntityTypeIdentifier> toEditorEntityTypeIdentifiers(Iterable<EntityType> extendedBy)
 	{
-		return ImmutableList
-				.copyOf(stream(extendedBy.spliterator(), false).map(this::toEditorEntityTypeIdentifier).iterator());
+		return ImmutableList.copyOf(
+				stream(extendedBy.spliterator(), false).map(this::toEditorEntityTypeIdentifier).iterator());
 	}
 
 	EditorEntityTypeIdentifier toEditorEntityTypeIdentifier(EntityType entityType)

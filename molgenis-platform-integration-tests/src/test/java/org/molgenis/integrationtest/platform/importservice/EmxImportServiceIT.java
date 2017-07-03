@@ -115,18 +115,24 @@ public class EmxImportServiceIT extends ImportServiceIT
 				ImmutableMap.<String, Integer>builder().put("TypeTestRef", 5).put("TypeTest", 38).build(),
 				ImmutableSet.of("Person", "TypeTestRef", "Location", "TypeTest"), this::verifyItEmxDataTypes));
 
-		data.add(createAddData("it_emx_deep_nesting.xlsx", asList("it", "deep"),
-				ImmutableMap.<String, Integer>builder().put("TestCategorical1", 50).put("TestMref1", 50)
-						.put("TestXref2", 50).put("TestXref1", 50)
-						.put("advanced" + PACKAGE_SEPARATOR + "p" + PACKAGE_SEPARATOR + "TestEntity2", 50).build(),
-				ImmutableSet.of("TestCategorical1", "TestMref1", "TestXref2", "TestXref1", "TestEntity0",
-						"advanced_TestEntity1", "advanced_p_TestEntity2"), this::verifyItEmxDeepNesting));
+		data.add(createAddData("it_emx_deep_nesting.xlsx", asList("it", "deep"), ImmutableMap.<String, Integer>builder()
+				.put("TestCategorical1", 50)
+				.put("TestMref1", 50)
+				.put("TestXref2", 50)
+				.put("TestXref1", 50)
+				.put("advanced" + PACKAGE_SEPARATOR + "p" + PACKAGE_SEPARATOR + "TestEntity2", 50)
+				.build(), ImmutableSet.of("TestCategorical1", "TestMref1", "TestXref2", "TestXref1", "TestEntity0",
+				"advanced_TestEntity1", "advanced_p_TestEntity2"), this::verifyItEmxDeepNesting));
 
 		data.add(createAddData("it_emx_lookup_attribute.xlsx", asList("it", "emx", "lookupattribute"),
-				ImmutableMap.<String, Integer>builder().put("Ref1", 2).put("Ref2", 2).put("Ref3", 2).put("Ref4", 2)
-						.put("Ref5", 2).build(), ImmutableSet
-						.of("AbstractTop", "AbstractMiddle", "Ref1", "Ref2", "Ref3", "Ref4", "Ref5",
-								"TestLookupAttributes"), this::verifyItEmxLookupAttribute));
+				ImmutableMap.<String, Integer>builder().put("Ref1", 2)
+													   .put("Ref2", 2)
+													   .put("Ref3", 2)
+													   .put("Ref4", 2)
+													   .put("Ref5", 2)
+													   .build(),
+				ImmutableSet.of("AbstractTop", "AbstractMiddle", "Ref1", "Ref2", "Ref3", "Ref4", "Ref5",
+						"TestLookupAttributes"), this::verifyItEmxLookupAttribute));
 
 		data.add(createAddData("it_emx_autoid.xlsx", asList("it", "emx", "autoid"), ImmutableMap.of("testAutoId", 4),
 				ImmutableSet.of("testAutoId"), this::verifyItEmxAutoId));
@@ -311,17 +317,17 @@ public class EmxImportServiceIT extends ImportServiceIT
 	private void executeAddUpdateOrUpdateTest(File file, File addUpdateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
-		FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory
-				.createFileRepositoryCollection(file);
+		FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+				file);
 		ImportService addImportService = importServiceFactory.getImportService(file, addRepoCollection);
 		addImportService.doImport(addRepoCollection, ADD, PACKAGE_DEFAULT);
 
-		FileRepositoryCollection addUpdateRepoCollection = fileRepositoryCollectionFactory
-				.createFileRepositoryCollection(addUpdateFile);
-		ImportService addUpdateImportService = importServiceFactory
-				.getImportService(addUpdateFile, addUpdateRepoCollection);
-		EntityImportReport importReport = addUpdateImportService
-				.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
+		FileRepositoryCollection addUpdateRepoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+				addUpdateFile);
+		ImportService addUpdateImportService = importServiceFactory.getImportService(addUpdateFile,
+				addUpdateRepoCollection);
+		EntityImportReport importReport = addUpdateImportService.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING,
+				PACKAGE_DEFAULT);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
 		entityValidationMethod.run();
@@ -365,10 +371,15 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		File file = getFile("/xls/" + fileName);
 		String packageName = String.join(PACKAGE_SEPARATOR, packageTokens);
-		Map<String, Object> entityTypeCountMap = entityCountMap.entrySet().stream().collect(
-				Collectors.toMap(entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(), Map.Entry::getValue));
+		Map<String, Object> entityTypeCountMap = entityCountMap.entrySet()
+															   .stream()
+															   .collect(Collectors.toMap(
+																	   entry -> packageName + PACKAGE_SEPARATOR
+																			   + entry.getKey(), Map.Entry::getValue));
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
-				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
+																   .map(entityName -> packageName + PACKAGE_SEPARATOR
+																		   + entityName)
+																   .collect(toSet());
 		return new Object[] { file, entityTypeCountMap, entityTypeFullyQualifiedNames, entityValidationMethod };
 	}
 
@@ -378,10 +389,15 @@ public class EmxImportServiceIT extends ImportServiceIT
 		File addFile = getFile("/xls/" + fileName);
 		File updateFile = getFile("/xls/" + updateFileName);
 		String packageName = String.join(PACKAGE_SEPARATOR, packageTokens);
-		Map<String, Object> entityTypeCountMap = entityCountMap.entrySet().stream().collect(
-				Collectors.toMap(entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(), Map.Entry::getValue));
+		Map<String, Object> entityTypeCountMap = entityCountMap.entrySet()
+															   .stream()
+															   .collect(Collectors.toMap(
+																	   entry -> packageName + PACKAGE_SEPARATOR
+																			   + entry.getKey(), Map.Entry::getValue));
 		Set<String> entityTypeFullyQualifiedNames = entityTypeNames.stream()
-				.map(entityName -> packageName + PACKAGE_SEPARATOR + entityName).collect(toSet());
+																   .map(entityName -> packageName + PACKAGE_SEPARATOR
+																		   + entityName)
+																   .collect(toSet());
 		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames,
 				entityValidationMethod };
 	}

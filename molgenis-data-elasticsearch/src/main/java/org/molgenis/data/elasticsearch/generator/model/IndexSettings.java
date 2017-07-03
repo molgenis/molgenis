@@ -31,7 +31,7 @@ public abstract class IndexSettings
 	public static Builder builder()
 	{
 		return new AutoValue_IndexSettings.Builder().setNumberOfShards(DEFAULT_NUMBER_OF_SHARDS)
-				.setNumberOfReplicas(DEFAULT_NUMBER_OF_REPLICAS);
+													.setNumberOfReplicas(DEFAULT_NUMBER_OF_REPLICAS);
 	}
 
 	@AutoValue.Builder

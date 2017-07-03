@@ -29,16 +29,18 @@ public class CacheFactory
 	 */
 	public static <K, V> LoadingCache<K, V> loadingCache(RemoteFunction<K, V> loader)
 	{
-		return CacheBuilder.newBuilder().maximumSize(Integer.MAX_VALUE).refreshAfterWrite(1, TimeUnit.DAYS)
-				.build(new CacheLoader<K, V>()
-				{
-					@Override
-					public V load(K key) throws Exception
-					{
-						return loader.apply(key);
-					}
+		return CacheBuilder.newBuilder()
+						   .maximumSize(Integer.MAX_VALUE)
+						   .refreshAfterWrite(1, TimeUnit.DAYS)
+						   .build(new CacheLoader<K, V>()
+						   {
+							   @Override
+							   public V load(K key) throws Exception
+							   {
+								   return loader.apply(key);
+							   }
 
-				});
+						   });
 	}
 
 	/**
@@ -53,9 +55,10 @@ public class CacheFactory
 			RemoteFunction<Params, Result[]> loader, BiPredicate<Params, Result> filter,
 			Function<Result, Pathway> pathwayTransformer)
 	{
-		return loadingCache(
-				params -> Arrays.stream(loader.apply(params)).filter((result) -> filter.test(params, result))
-						.map(pathwayTransformer).collect(Collectors.toCollection(LinkedHashSet::new)));
+		return loadingCache(params -> Arrays.stream(loader.apply(params))
+											.filter((result) -> filter.test(params, result))
+											.map(pathwayTransformer)
+											.collect(Collectors.toCollection(LinkedHashSet::new)));
 	}
 
 }

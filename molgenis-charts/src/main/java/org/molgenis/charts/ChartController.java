@@ -66,9 +66,8 @@ public class ChartController
 	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
 	{
 		Query<Entity> query = request.getQuery();
-		XYDataChart xYDataChart = chartDataService
-				.getXYDataChart(request.getEntity(), request.getX(), request.getY(), request.getSplit(),
-						query != null ? query.getRules() : Collections.<QueryRule>emptyList());
+		XYDataChart xYDataChart = chartDataService.getXYDataChart(request.getEntity(), request.getX(), request.getY(),
+				request.getSplit(), query != null ? query.getRules() : Collections.<QueryRule>emptyList());
 
 		xYDataChart.setTitle(request.getTitle());
 		xYDataChart.setHeight(request.getHeight());
@@ -77,8 +76,8 @@ public class ChartController
 		xYDataChart.setxAxisLabel(request.getxAxisLabel());
 		xYDataChart.setyAxisLabel(request.getyAxisLabel());
 
-		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(MolgenisChartType.valueOf(request.getType()));
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(
+				MolgenisChartType.valueOf(request.getType()));
 
 		return (Options) service.renderChart(xYDataChart, model);
 	}
@@ -96,8 +95,8 @@ public class ChartController
 		chart.setWidth(request.getWidth());
 		chart.setTitle(request.getTitle());
 
-		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(MolgenisChartType.BOXPLOT_CHART);
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(
+				MolgenisChartType.BOXPLOT_CHART);
 		return (Options) service.renderChart(chart, model);
 	}
 
@@ -149,8 +148,8 @@ public class ChartController
 	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model)
 			throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
-		DataMatrix matrix = chartDataService
-				.getDataMatrix(request.getEntity(), request.getX(), request.getY(), request.getQueryRules());
+		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
+				request.getQueryRules());
 
 		HeatMapChart chart = new HeatMapChart(matrix);
 		chart.setTitle(request.getTitle());
@@ -160,8 +159,8 @@ public class ChartController
 		chart.setyLabel(request.getyLabel());
 		chart.setScale(request.getScale());
 
-		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(MolgenisChartType.HEAT_MAP);
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(
+				MolgenisChartType.HEAT_MAP);
 
 		return (String) service.renderChart(chart, model);
 	}

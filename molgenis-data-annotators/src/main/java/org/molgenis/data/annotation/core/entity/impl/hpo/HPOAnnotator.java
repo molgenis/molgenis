@@ -86,12 +86,12 @@ public class HPOAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = createHpoOutputAttributes();
 
-		AnnotatorInfo info = AnnotatorInfo
-				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION, NAME,
-						"The Human Phenotype Ontology (HPO) aims to provide a standardized vocabulary of phenotypic abnormalities encountered in human disease."
-								+ "Terms in the HPO describes a phenotypic abnormality, such as atrial septal defect.The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO currently contains approximately 11,000 terms and over 115,000 annotations to hereditary diseases."
-								+ "Please note that if SnpEff was used to annotate in order to add the gene symbols to the variants, than this annotator should be used on the result entity rather than the variant entity itself.",
-						attributes);
+		AnnotatorInfo info = AnnotatorInfo.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION,
+				NAME,
+				"The Human Phenotype Ontology (HPO) aims to provide a standardized vocabulary of phenotypic abnormalities encountered in human disease."
+						+ "Terms in the HPO describes a phenotypic abnormality, such as atrial septal defect.The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO currently contains approximately 11,000 terms and over 115,000 annotations to hereditary diseases."
+						+ "Please note that if SnpEff was used to annotate in order to add the gene symbols to the variants, than this annotator should be used on the result entity rather than the variant entity itself.",
+				attributes);
 
 		EntityAnnotator entityAnnotator = new AbstractAnnotator(HPO_RESOURCE, info, geneNameQueryCreator,
 				new HpoResultFilter(entityTypeFactory, attributeFactory, this), dataService, resources,
