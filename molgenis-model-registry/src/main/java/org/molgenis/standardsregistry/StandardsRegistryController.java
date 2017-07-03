@@ -128,8 +128,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			Package p = searchResult.getPackageFound();
 			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
-			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists
-					.newArrayList(Iterables.filter(entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
+			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists.newArrayList(
+					Iterables.filter(entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
 					{
 						@Override
 						public boolean apply(PackageResponse.Entity entity)

@@ -66,11 +66,11 @@ public class PackageWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
-				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-						.createFileRepositoryCollection(importWizard.getFile());
+				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+						importWizard.getFile());
 
-				ImportService importService = importServiceFactory
-						.getImportService(importWizard.getFile(), repositoryCollection);
+				ImportService importService = importServiceFactory.getImportService(importWizard.getFile(),
+						repositoryCollection);
 
 				// Do integration test only if there are no previous errors found
 				if (!importWizard.getEntitiesImportable().containsValue(false))
@@ -79,16 +79,18 @@ public class PackageWizardPage extends AbstractWizardPage
 					String selectedPackage = request.getParameter("defaultEntity");
 
 					// The entities that can be imported
-					LinkedHashMap<String, Boolean> entitiesImportable = importService
-							.determineImportableEntities(metaDataService, repositoryCollection, selectedPackage);
+					LinkedHashMap<String, Boolean> entitiesImportable = importService.determineImportableEntities(
+							metaDataService, repositoryCollection, selectedPackage);
 
 					// Set the entities that can be imported
 					importWizard.setEntitiesImportable(entitiesImportable);
 
 					// The entities that can not be imported. If even one entity can not be imported, everything fails
-					List<String> entitiesNotImportable = entitiesImportable.entrySet().stream()
-							.filter(entity -> entity.getValue() == false).map(entity -> entity.getKey())
-							.collect(toList());
+					List<String> entitiesNotImportable = entitiesImportable.entrySet()
+																		   .stream()
+																		   .filter(entity -> entity.getValue() == false)
+																		   .map(entity -> entity.getKey())
+																		   .collect(toList());
 
 					if (!entitiesNotImportable.isEmpty()) throw new RuntimeException(
 							"You are trying to upload entities that are not compatible with the already existing entities: "

@@ -15,8 +15,7 @@ public class MolgenisUiUtils
 	 */
 	public static String getCurrentUri()
 	{
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
 		StringBuilder uri = new StringBuilder();
 		uri.append(request.getAttribute("javax.servlet.forward.request_uri"));

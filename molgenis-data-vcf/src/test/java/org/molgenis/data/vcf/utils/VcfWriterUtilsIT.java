@@ -138,7 +138,9 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 
 		annotatedEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
 		annotatedEntityType.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING))
-				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'");
+						   .setDescription(
+								   "Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION
+										   + "'");
 		Attribute annoAttr = attributeFactory.create().setName("ANNO").setDataType(STRING).setParent(INFO_ATTR);
 		annotatedEntityType.addAttribute(INFO_ATTR);
 		annotatedEntityType.addAttribute(AC_ATTR);
@@ -180,22 +182,36 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 		entities.add(entity2);
 		entities.add(entity3);
 
-		Attribute geneId = attributeFactory.create().setName("id").setDataType(STRING)
-				.setDescription("Random generated ID").setVisible(false).setIdAttribute(true);
+		Attribute geneId = attributeFactory.create()
+										   .setName("id")
+										   .setDataType(STRING)
+										   .setDescription("Random generated ID")
+										   .setVisible(false)
+										   .setIdAttribute(true);
 		geneMeta.addAttribute(geneId);
 		geneMeta.addAttribute(
 				attributeFactory.create().setName("Gene").setDataType(STRING).setDescription("HGNC symbol"));
-		Attribute id = attributeFactory.create().setName("id").setDataType(STRING).setDescription("effect identifier")
-				.setVisible(false).setIdAttribute(true);
+		Attribute id = attributeFactory.create()
+									   .setName("id")
+									   .setDataType(STRING)
+									   .setDescription("effect identifier")
+									   .setVisible(false)
+									   .setIdAttribute(true);
 		effectMeta.addAttribute(id);
 		effectMeta.addAttribute(
 				attributeFactory.create().setName(ALT).setDataType(STRING).setDescription("Alternative allele"));
-		effectMeta.addAttribute(attributeFactory.create().setName("ALT_GENE").setDataType(STRING)
-				.setDescription("Alternative allele and gene"));
-		effectMeta.addAttribute(attributeFactory.create().setName("GENE").setDataType(STRING)
-				.setDescription("Gene identifier (HGNC symbol)"));
-		effectMeta.addAttribute(attributeFactory.create().setName(PUTATIVE_IMPACT).setDataType(STRING)
-				.setDescription("Level of effect on the gene"));
+		effectMeta.addAttribute(attributeFactory.create()
+												.setName("ALT_GENE")
+												.setDataType(STRING)
+												.setDescription("Alternative allele and gene"));
+		effectMeta.addAttribute(attributeFactory.create()
+												.setName("GENE")
+												.setDataType(STRING)
+												.setDescription("Gene identifier (HGNC symbol)"));
+		effectMeta.addAttribute(attributeFactory.create()
+												.setName(PUTATIVE_IMPACT)
+												.setDataType(STRING)
+												.setDescription("Level of effect on the gene"));
 		effectMeta.addAttribute(
 				attributeFactory.create().setName(TYPE).setDataType(STRING).setDescription("Type of mutation"));
 

@@ -71,17 +71,21 @@ public class IndexActionMetaData extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(INDEX_ACTION_GROUP_ATTR).setDescription("The group that this index action belongs to")
-				.setDataType(XREF).setRefEntity(indexActionGroupMetaData);
+											 .setDataType(XREF)
+											 .setRefEntity(indexActionGroupMetaData);
 		addAttribute(ACTION_ORDER).setDataType(INT)
-				.setDescription("The order in which the action is registered within its IndexActionJob")
-				.setNillable(false);
-		addAttribute(ENTITY_TYPE_ID)
-				.setDescription("The id of the entity type that needs to be indexed (e.g. myEntityType).")
-				.setNillable(false);
-		addAttribute(ENTITY_ID).setDescription("The id of the entity that needs to be indexed").setDataType(TEXT)
-				.setNillable(true);
-		addAttribute(INDEX_STATUS).setDescription("The status of index action").setDataType(ENUM)
-				.setEnumOptions(IndexStatus.class).setNillable(false);
+								  .setDescription(
+										  "The order in which the action is registered within its IndexActionJob")
+								  .setNillable(false);
+		addAttribute(ENTITY_TYPE_ID).setDescription(
+				"The id of the entity type that needs to be indexed (e.g. myEntityType).").setNillable(false);
+		addAttribute(ENTITY_ID).setDescription("The id of the entity that needs to be indexed")
+							   .setDataType(TEXT)
+							   .setNillable(true);
+		addAttribute(INDEX_STATUS).setDescription("The status of index action")
+								  .setDataType(ENUM)
+								  .setEnumOptions(IndexStatus.class)
+								  .setNillable(false);
 	}
 
 	/**

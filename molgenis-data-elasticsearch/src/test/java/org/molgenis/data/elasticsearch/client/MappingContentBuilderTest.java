@@ -61,10 +61,15 @@ public class MappingContentBuilderTest
 	@Test
 	public void testCreateMappingNested() throws IOException
 	{
-		FieldMapping nestedFieldMapping = FieldMapping.builder().setName("nestedField").setType(MappingType.BOOLEAN)
-				.build();
-		Mapping mapping = createMapping(FieldMapping.builder().setName("field").setType(MappingType.NESTED)
-				.setNestedFieldMappings(singletonList(nestedFieldMapping)).build());
+		FieldMapping nestedFieldMapping = FieldMapping.builder()
+													  .setName("nestedField")
+													  .setType(MappingType.BOOLEAN)
+													  .build();
+		Mapping mapping = createMapping(FieldMapping.builder()
+													.setName("field")
+													.setType(MappingType.NESTED)
+													.setNestedFieldMappings(singletonList(nestedFieldMapping))
+													.build());
 		XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
 		assertEquals(xContentBuilder.string(), JSON_NESTED);
 	}

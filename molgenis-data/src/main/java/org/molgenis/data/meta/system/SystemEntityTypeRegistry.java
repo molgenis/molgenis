@@ -58,7 +58,9 @@ public class SystemEntityTypeRegistry
 	public Attribute getSystemAttribute(String attrIdentifier)
 	{
 		return getSystemEntityTypes().map(systemEntityType -> getSystemAttribute(systemEntityType, attrIdentifier))
-				.filter(Objects::nonNull).findFirst().orElse(null);
+									 .filter(Objects::nonNull)
+									 .findFirst()
+									 .orElse(null);
 	}
 
 	private static Attribute getSystemAttribute(SystemEntityType systemEntityType, String attrIdentifier)

@@ -25,18 +25,18 @@ public class IndexingStrategy
 	/**
 	 * Determines which {@link Impact}s follow from a set of changes.
 	 *
-	 * @param changes            The {@link Impact}s of which the impact needs to be determined
-	 * @param dependencyModel     {@link IndexDependencyModel} to determine which entities depend on which entities
+	 * @param changes         The {@link Impact}s of which the impact needs to be determined
+	 * @param dependencyModel {@link IndexDependencyModel} to determine which entities depend on which entities
 	 * @return Set<Impact> containing the impact of the changes
 	 */
-	Set<Impact> determineImpact(Set<Impact> changes,
-			IndexDependencyModel dependencyModel)
+	Set<Impact> determineImpact(Set<Impact> changes, IndexDependencyModel dependencyModel)
 	{
 		Stopwatch sw = Stopwatch.createStarted();
 		Map<Boolean, List<Impact>> split = changes.stream().collect(partitioningBy(Impact::isWholeRepository));
 		ImmutableSet<String> allEntityTypeIds = changes.stream().map(Impact::getEntityTypeId).collect(toImmutableSet());
-		Set<String> dependentEntities = allEntityTypeIds.stream().flatMap(dependencyModel::getEntityTypesDependentOn)
-				.collect(toImmutableSet());
+		Set<String> dependentEntities = allEntityTypeIds.stream()
+														.flatMap(dependencyModel::getEntityTypesDependentOn)
+														.collect(toImmutableSet());
 		Set<Impact> result = collectResult(split.get(false), split.get(true), dependentEntities);
 		if (LOG.isDebugEnabled())
 		{
@@ -57,14 +57,14 @@ public class IndexingStrategy
 			Set<String> dependentEntityIds)
 	{
 		Set<String> wholeRepoIds = union(
-				wholeRepoActions.stream().map(Impact::getEntityTypeId).collect(toImmutableSet()),
-				dependentEntityIds);
+				wholeRepoActions.stream().map(Impact::getEntityTypeId).collect(toImmutableSet()), dependentEntityIds);
 
 		ImmutableSet.Builder<Impact> result = ImmutableSet.builder();
 		result.addAll(wholeRepoActions);
 		dependentEntityIds.stream().map(Impact::createWholeRepositoryImpact).forEach(result::add);
-		singleEntityChanges.stream().filter(action -> !wholeRepoIds.contains(action.getEntityTypeId()))
-				.forEach(result::add);
+		singleEntityChanges.stream()
+						   .filter(action -> !wholeRepoIds.contains(action.getEntityTypeId()))
+						   .forEach(result::add);
 		return result.build();
 	}
 }

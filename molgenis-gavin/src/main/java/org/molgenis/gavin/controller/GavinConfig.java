@@ -13,7 +13,7 @@ public class GavinConfig
 	@Bean
 	public ExecutorService gavinExecutors()
 	{
-		return Executors
-				.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("molgenis-gavin-job-%d").build());
+		return Executors.newFixedThreadPool(3,
+				new ThreadFactoryBuilder().setNameFormat("molgenis-gavin-job-%d").build());
 	}
 }

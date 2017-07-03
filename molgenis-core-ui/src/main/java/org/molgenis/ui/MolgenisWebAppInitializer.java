@@ -47,8 +47,8 @@ public class MolgenisWebAppInitializer
 		servletContext.addListener(new ContextLoaderListener(rootContext));
 
 		// Register and map the dispatcher servlet
-		ServletRegistration.Dynamic dispatcherServlet = servletContext
-				.addServlet("dispatcher", new DispatcherServlet(rootContext));
+		ServletRegistration.Dynamic dispatcherServlet = servletContext.addServlet("dispatcher",
+				new DispatcherServlet(rootContext));
 		if (dispatcherServlet == null)
 		{
 			LOG.warn("ServletContext already contains a complete ServletRegistration for servlet 'dispatcher'");
@@ -59,15 +59,15 @@ public class MolgenisWebAppInitializer
 			int loadOnStartup = (isDasUsed ? 2 : 1);
 			dispatcherServlet.setLoadOnStartup(loadOnStartup);
 			dispatcherServlet.addMapping("/");
-			dispatcherServlet
-					.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
+			dispatcherServlet.setMultipartConfig(
+					new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 
 		}
 
 		// add filters
-		Dynamic browserDetectionFiler = servletContext
-				.addFilter("browserDetectionFilter", BrowserDetectionFilter.class);
+		Dynamic browserDetectionFiler = servletContext.addFilter("browserDetectionFilter",
+				BrowserDetectionFilter.class);
 		browserDetectionFiler.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
 
 		Dynamic etagFilter = servletContext.addFilter("etagFilter", ShallowEtagHeaderFilter.class);

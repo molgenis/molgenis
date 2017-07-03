@@ -41,9 +41,11 @@ public class EntitySelfXrefTestHarness
 
 	public EntityType createDynamicEntityType()
 	{
-		return entityTypeFactory.create("SelfRef").setLabel("SelfRef").setBackend("PostgreSQL")
-				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL);
+		return entityTypeFactory.create("SelfRef")
+								.setLabel("SelfRef")
+								.setBackend("PostgreSQL")
+								.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID)
+								.addAttribute(createAttribute(ATTR_STRING, STRING).setNillable(false), ROLE_LABEL);
 	}
 
 	public void addSelfReference(EntityType entityType)

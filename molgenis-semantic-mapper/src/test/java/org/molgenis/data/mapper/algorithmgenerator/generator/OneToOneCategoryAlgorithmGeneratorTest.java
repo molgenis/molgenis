@@ -59,12 +59,13 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 				of("code", 4, "label", "Never + fewer than once a week"));
 		Entity targetEntity5 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "missing"));
 
-		targetAttribute = attrMetaFactory.create().setName("Current Consumption Frequency of Potatoes")
-				.setDataType(CATEGORICAL);
+		targetAttribute = attrMetaFactory.create()
+										 .setName("Current Consumption Frequency of Potatoes")
+										 .setDataType(CATEGORICAL);
 		targetAttribute.setRefEntity(targetRefEntityType);
 
 		Mockito.when(dataService.findAll(targetRefEntityType.getId()))
-				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
+			   .thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
 		targetEntityType = entityTypeFactory.create("target");
 		targetEntityType.addAttribute(targetAttribute);
@@ -84,9 +85,9 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttribute.setRefEntity(sourceRefEntityType);
 
-		Mockito.when(dataService.findAll(sourceRefEntityType.getId())).thenReturn(
-				Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
-						sourceEntity7, sourceEntity8));
+		Mockito.when(dataService.findAll(sourceRefEntityType.getId()))
+			   .thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
+					   sourceEntity6, sourceEntity7, sourceEntity8));
 
 		sourceEntityType = entityTypeFactory.create("source");
 		sourceEntityType.addAttributes(Lists.newArrayList(sourceAttribute));
@@ -101,8 +102,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 	@Test
 	public void testGenerate()
 	{
-		String generatedAlgorithm = categoryAlgorithmGenerator
-				.generate(targetAttribute, singletonList(sourceAttribute), targetEntityType, sourceEntityType);
+		String generatedAlgorithm = categoryAlgorithmGenerator.generate(targetAttribute, singletonList(sourceAttribute),
+				targetEntityType, sourceEntityType);
 		String expectedAlgorithm = "$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
 		Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
@@ -118,7 +119,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 				of("code", 1, "label", "Ever had high blood pressure "));
 		Entity targetEntity3 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "Missing"));
 		Mockito.when(dataService.findAll(targetRefEntityType.getId()))
-				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3));
+			   .thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3));
 		targetAttribute = attrMetaFactory.create().setName("History of Hypertension").setDataType(CATEGORICAL);
 		targetAttribute.setRefEntity(targetRefEntityType);
 
@@ -127,13 +128,13 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 		Entity sourceEntity2 = new DynamicEntity(targetRefEntityType, of("code", 2, "label", "no"));
 		Entity sourceEntity3 = new DynamicEntity(targetRefEntityType, of("code", 3, "label", "I do not know"));
 		Mockito.when(dataService.findAll(sourceRefEntityType.getId()))
-				.thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3));
+			   .thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3));
 
 		sourceAttribute = attrMetaFactory.create().setName("High_blood_pressure").setDataType(CATEGORICAL);
 		sourceAttribute.setRefEntity(sourceRefEntityType);
 
-		String generatedAlgorithm = categoryAlgorithmGenerator
-				.generate(targetAttribute, singletonList(sourceAttribute), targetEntityType, sourceEntityType);
+		String generatedAlgorithm = categoryAlgorithmGenerator.generate(targetAttribute, singletonList(sourceAttribute),
+				targetEntityType, sourceEntityType);
 
 		String expectedAlgorithm = "$('High_blood_pressure').map({\"1\":\"1\",\"2\":\"0\",\"3\":\"9\"}, null, null).value();";
 

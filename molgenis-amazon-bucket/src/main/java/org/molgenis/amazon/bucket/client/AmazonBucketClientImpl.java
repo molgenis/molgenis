@@ -28,8 +28,10 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 	public AmazonS3 getClient(String accessKey, String secretKey, String region)
 	{
 		BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
-		return AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-				.withRegion(region).build();
+		return AmazonS3ClientBuilder.standard()
+									.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+									.withRegion(region)
+									.build();
 	}
 
 	@Override

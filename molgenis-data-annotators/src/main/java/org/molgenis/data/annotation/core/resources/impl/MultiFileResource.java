@@ -65,8 +65,13 @@ public abstract class MultiFileResource implements Resource
 
 	private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
 	{
-		return q.getRules().stream().filter(rule -> attributeName.equals(rule.getField())
-				&& rule.getOperator() == QueryRule.Operator.EQUALS).findFirst().get().getValue();
+		return q.getRules()
+				.stream()
+				.filter(rule -> attributeName.equals(rule.getField())
+						&& rule.getOperator() == QueryRule.Operator.EQUALS)
+				.findFirst()
+				.get()
+				.getValue();
 	}
 
 	@Override

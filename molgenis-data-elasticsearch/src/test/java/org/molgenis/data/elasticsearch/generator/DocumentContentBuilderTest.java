@@ -39,10 +39,10 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(documentIdGenerator.generateId(any(EntityType.class)))
-				.thenAnswer(invocation -> invocation.getArgumentAt(0, EntityType.class).getId());
-		when(documentIdGenerator.generateId(any(Attribute.class)))
-				.thenAnswer(invocation -> invocation.getArgumentAt(0, Attribute.class).getIdentifier());
+		when(documentIdGenerator.generateId(any(EntityType.class))).thenAnswer(
+				invocation -> invocation.getArgumentAt(0, EntityType.class).getId());
+		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
+				invocation -> invocation.getArgumentAt(0, Attribute.class).getIdentifier());
 		documentContentBuilder = new DocumentContentBuilder(documentIdGenerator);
 	}
 
@@ -116,8 +116,8 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest
 		for (AttributeType attributeType : EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY))
 		{
 			dataItems.add(new Object[] { attributeType, emptyList(), "{\"attr\":null}" });
-			dataItems.add(new Object[] { attributeType, singletonList(refEntity),
-					"{\"attr\":[{\"refAttr\":\"str\"}]}" });
+			dataItems.add(
+					new Object[] { attributeType, singletonList(refEntity), "{\"attr\":[{\"refAttr\":\"str\"}]}" });
 		}
 		return dataItems.iterator();
 	}
@@ -157,8 +157,8 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest
 	{
 		List<Object[]> dataItems = new ArrayList<>();
 		dataItems.add(new Object[] { null, "{\"attr\":null}" });
-		dataItems.add(new Object[] { Instant.parse("2017-06-19T14:01:48.079Z"),
-				"{\"attr\":\"2017-06-19T14:01:48.079Z\"}" });
+		dataItems.add(
+				new Object[] { Instant.parse("2017-06-19T14:01:48.079Z"), "{\"attr\":\"2017-06-19T14:01:48.079Z\"}" });
 		return dataItems.iterator();
 	}
 

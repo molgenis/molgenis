@@ -43,8 +43,8 @@ public class AmazonBucketIngester
 	}
 
 	public FileMeta ingest(String jobExecutionID, String targetEntityTypeName, String bucket, String key,
-			String extension,
-			String accessKey, String secretKey, String region, boolean isExpression, Progress progress)
+			String extension, String accessKey, String secretKey, String region, boolean isExpression,
+			Progress progress)
 	{
 		FileMeta fileMeta;
 		try
@@ -53,9 +53,8 @@ public class AmazonBucketIngester
 			progress.progress(0, "Connection to Amazon Bucket with accessKey '" + accessKey + "'");
 			AmazonS3 client = amazonBucketClient.getClient(accessKey, secretKey, region);
 			progress.progress(1, "downloading...");
-			File file = amazonBucketClient
-					.downloadFile(client, fileStore, jobExecutionID, bucket, key, extension, isExpression,
-							targetEntityTypeName);
+			File file = amazonBucketClient.downloadFile(client, fileStore, jobExecutionID, bucket, key, extension,
+					isExpression, targetEntityTypeName);
 			if (targetEntityTypeName != null && ExcelUtils.isExcelFile(file.getName()))
 			{
 				if (ExcelUtils.getNumberOfSheets(file) == 1)
@@ -73,10 +72,10 @@ public class AmazonBucketIngester
 			File renamed = new File(
 					String.format("%s%s%s.%s", file.getParent(), File.separatorChar, targetEntityTypeName, extension));
 			Files.copy(file.toPath(), renamed.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(renamed);
-			EntityImportReport report = importService
-					.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING, "base");
+			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+					renamed);
+			EntityImportReport report = importService.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING,
+					"base");
 			progress.status("Download and import from Amazon Bucket done.");
 			progress.progress(3,
 					"Successfully imported " + report.getNrImportedEntitiesMap().keySet().toString() + " entities.");

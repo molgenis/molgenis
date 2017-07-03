@@ -102,8 +102,8 @@ public class PostgreSqlRepositoryTest
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getIdValue()).thenReturn("id1");
 
-		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class)))
-				.thenReturn(new int[] { 2 });
+		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class))).thenReturn(
+				new int[] { 2 });
 		postgreSqlRepo.setEntityType(entityType);
 
 		postgreSqlRepo.update(Stream.of(entity0, entity1));
@@ -131,8 +131,10 @@ public class PostgreSqlRepositoryTest
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getIdValue()).thenReturn("id1");
 
-		when(jdbcTemplate.query(any(String.class), any(Object[].class), any(RowMapper.class))).thenReturn(singletonList(entity0));
-		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class))).thenReturn(new int[] { 1 });
+		when(jdbcTemplate.query(any(String.class), any(Object[].class), any(RowMapper.class))).thenReturn(
+				singletonList(entity0));
+		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class))).thenReturn(
+				new int[] { 1 });
 		postgreSqlRepo.setEntityType(entityType);
 
 		postgreSqlRepo.update(Stream.of(entity0, entity1));

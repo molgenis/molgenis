@@ -46,8 +46,8 @@ class EntityTypeParentMapper
 
 		String id = entityType.getId();
 		String label = entityType.getLabel();
-		ImmutableList<EditorAttributeIdentifier> attributes = attributeReferenceMapper
-				.toEditorAttributeIdentifiers(entityType.getOwnAllAttributes());
+		ImmutableList<EditorAttributeIdentifier> attributes = attributeReferenceMapper.toEditorAttributeIdentifiers(
+				entityType.getOwnAllAttributes());
 		EditorEntityTypeParent parent = toEditorEntityTypeParent(entityType.getExtends());
 		return EditorEntityTypeParent.create(id, label, attributes, parent);
 	}

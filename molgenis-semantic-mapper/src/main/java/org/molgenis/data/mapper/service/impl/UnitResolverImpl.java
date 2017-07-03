@@ -105,8 +105,8 @@ public class UnitResolverImpl implements UnitResolver
 			if (!tokens.isEmpty())
 			{
 				List<String> ontologyIds = Arrays.asList(unitOntology.getId());
-				List<OntologyTerm> ontologyTerms = ontologyService
-						.findExcatOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
+				List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyIds, tokens,
+						Integer.MAX_VALUE);
 				if (ontologyTerms != null && !ontologyTerms.isEmpty())
 				{
 					if (ontologyTerms.size() == 1)
@@ -158,10 +158,16 @@ public class UnitResolverImpl implements UnitResolver
 		Set<String> tokens = new HashSet<>();
 		if (terms != null && terms.length > 0)
 		{
-			Sets.newHashSet(terms).stream().filter(StringUtils::isNotBlank).map(StringUtils::lowerCase)
-					.map(this::replaceIllegalChars).forEach(term -> tokens
-					.addAll(Sets.newHashSet(term.split("\\s+")).stream().filter(this::notPureNumberExpression)
-							.map(UnitHelper::numberToSuperscript).collect(Collectors.toSet())));
+			Sets.newHashSet(terms)
+				.stream()
+				.filter(StringUtils::isNotBlank)
+				.map(StringUtils::lowerCase)
+				.map(this::replaceIllegalChars)
+				.forEach(term -> tokens.addAll(Sets.newHashSet(term.split("\\s+"))
+												   .stream()
+												   .filter(this::notPureNumberExpression)
+												   .map(UnitHelper::numberToSuperscript)
+												   .collect(Collectors.toSet())));
 
 			tokens.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
 		}

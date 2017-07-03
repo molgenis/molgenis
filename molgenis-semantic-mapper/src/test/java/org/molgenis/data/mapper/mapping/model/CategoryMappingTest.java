@@ -10,8 +10,8 @@ public class CategoryMappingTest
 	private CategoryMapping<String, String> mapping = CategoryMapping.<String, String>create("blah",
 			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"));
 
-	private CategoryMapping<String, String> mappingWithNullValueInMap = CategoryMapping
-			.create("$('LifeLines_GENDER').map({\"0\":null,\"1\":\"0\"}).value();");
+	private CategoryMapping<String, String> mappingWithNullValueInMap = CategoryMapping.create(
+			"$('LifeLines_GENDER').map({\"0\":null,\"1\":\"0\"}).value();");
 
 	private CategoryMapping<String, String> mappingWithDefault = CategoryMapping.<String, String>create("blah",
 			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), "3");

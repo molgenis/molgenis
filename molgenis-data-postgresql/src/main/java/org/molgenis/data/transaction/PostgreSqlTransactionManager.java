@@ -193,11 +193,10 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 
 	private MolgenisDataException translateTransactionException(TransactionException transactionException)
 	{
-		for (TransactionExceptionTranslator transactionExceptionTranslator : transactionExceptionTranslatorRegistry
-				.getTransactionExceptionTranslators())
+		for (TransactionExceptionTranslator transactionExceptionTranslator : transactionExceptionTranslatorRegistry.getTransactionExceptionTranslators())
 		{
-			MolgenisDataException molgenisDataException = transactionExceptionTranslator
-					.doTranslate(transactionException);
+			MolgenisDataException molgenisDataException = transactionExceptionTranslator.doTranslate(
+					transactionException);
 			if (molgenisDataException != null)
 			{
 				return molgenisDataException;

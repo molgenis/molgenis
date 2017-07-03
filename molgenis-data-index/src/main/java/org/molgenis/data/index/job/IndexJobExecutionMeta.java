@@ -48,7 +48,7 @@ public class IndexJobExecutionMeta extends SystemEntityType
 		setExtends(jobExecutionMetaData);
 		addAttribute(INDEX_ACTION_JOB_ID).setDescription(
 				"ID of the IndexActionJob that contains the group of IndexActions that this index job execution will index.")
-				.setNillable(false);
+										 .setNillable(false);
 	}
 
 	@Override

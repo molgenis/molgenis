@@ -76,8 +76,8 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 			}
 		});
 
-		DataMatrix matrix = chartDataService
-				.getDataMatrix(entityTypeId, Arrays.asList("probe"), "patient", Collections.<QueryRule>emptyList());
+		DataMatrix matrix = chartDataService.getDataMatrix(entityTypeId, Arrays.asList("probe"), "patient",
+				Collections.<QueryRule>emptyList());
 
 		assertNotNull(matrix);
 		assertEquals(matrix.getColumnTargets(), Arrays.asList(new Target("probe")));

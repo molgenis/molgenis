@@ -102,20 +102,26 @@ public class VcfToEntity
 		{
 			String attrName = toAttributeName(info.getId());
 			AttributeType attrType = vcfReaderFormatToMolgenisType(info);
-			String attrDescription = StringUtils
-					.isBlank(info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info
-					.getDescription();
+			String attrDescription = StringUtils.isBlank(
+					info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info.getDescription();
 
-			Attribute attribute = attrMetaFactory.create().setName(attrName).setDataType(attrType)
-					.setDescription(attrDescription).setAggregatable(true).setParent(infoMetaData);
+			Attribute attribute = attrMetaFactory.create()
+												 .setName(attrName)
+												 .setDataType(attrType)
+												 .setDescription(attrDescription)
+												 .setAggregatable(true)
+												 .setParent(infoMetaData);
 
 			entityType.addAttribute(attribute);
 		}
 		entityType.addAttribute(infoMetaData);
 		if (sampleEntityType != null)
 		{
-			Attribute samplesAttributeMeta = attrMetaFactory.create().setName(SAMPLES).setDataType(MREF)
-					.setRefEntity(sampleEntityType).setLabel("SAMPLES");
+			Attribute samplesAttributeMeta = attrMetaFactory.create()
+															.setName(SAMPLES)
+															.setDataType(MREF)
+															.setRefEntity(sampleEntityType)
+															.setLabel("SAMPLES");
 			entityType.addAttribute(samplesAttributeMeta);
 		}
 		return entityType;
@@ -130,8 +136,11 @@ public class VcfToEntity
 			result = entityTypeFactory.create(sampleEntityTypeId);
 			result.setLabel(sampleEntityTypeId);
 			Attribute idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
-			Attribute nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true)
-					.setNillable(false);
+			Attribute nameAttr = attrMetaFactory.create()
+												.setName(NAME)
+												.setDataType(TEXT)
+												.setAggregatable(true)
+												.setNillable(false);
 			Attribute originalNameAttr = attrMetaFactory.create().setName(ORIGINAL_NAME).setDataType(TEXT);
 
 			result.addAttribute(idAttr, ROLE_ID);
@@ -143,9 +152,11 @@ public class VcfToEntity
 				{
 					name = name + "_";
 				}
-				Attribute attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?_]", ""))
-						.setDataType(vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true)
-						.setLabel(meta.getId());
+				Attribute attr = attrMetaFactory.create()
+												.setName(name.replaceAll("[-.*$&%^()#!@?_]", ""))
+												.setDataType(vcfFieldTypeToMolgenisFieldType(meta))
+												.setAggregatable(true)
+												.setLabel(meta.getId());
 
 				result.addAttribute(attr);
 			}
@@ -368,8 +379,9 @@ public class VcfToEntity
 					List<?> vcfInfoValTokens = (List<?>) vcfInfoVal;
 					// TODO Use list data type once available (see http://www.molgenis.org/ticket/2681)
 					val = vcfInfoValTokens.stream()
-							.map(vcfInfoValToken -> vcfInfoValToken != null ? vcfInfoValToken.toString() : ".")
-							.collect(joining(","));
+										  .map(vcfInfoValToken ->
+												  vcfInfoValToken != null ? vcfInfoValToken.toString() : ".")
+										  .collect(joining(","));
 				}
 				else if (vcfInfoVal instanceof Float)
 				{
@@ -379,8 +391,8 @@ public class VcfToEntity
 					}
 					else
 					{
-						val = new BigDecimal(String.valueOf(vcfInfoVal))
-								.doubleValue(); // TODO why not Double.valueOf(string)?
+						val = new BigDecimal(
+								String.valueOf(vcfInfoVal)).doubleValue(); // TODO why not Double.valueOf(string)?
 					}
 				}
 				else if (vcfInfoVal instanceof Character)
@@ -427,9 +439,10 @@ public class VcfToEntity
 	 */
 	private static Set<String> determineVcfInfoFlagFields(VcfMeta vcfMeta)
 	{
-		return stream(vcfMeta.getInfoMeta().spliterator(), false)
-				.filter(vcfInfoMeta -> vcfInfoMeta.getType().equals(VcfMetaInfo.Type.FLAG)).map(VcfMetaInfo::getId)
-				.collect(toSet());
+		return stream(vcfMeta.getInfoMeta().spliterator(), false).filter(
+				vcfInfoMeta -> vcfInfoMeta.getType().equals(VcfMetaInfo.Type.FLAG))
+																 .map(VcfMetaInfo::getId)
+																 .collect(toSet());
 	}
 
 	/**

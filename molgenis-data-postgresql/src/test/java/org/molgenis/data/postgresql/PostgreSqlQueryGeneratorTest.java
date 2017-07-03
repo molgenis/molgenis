@@ -637,65 +637,62 @@ public class PostgreSqlQueryGeneratorTest
 		when(refEntityTypeInt.getId()).thenReturn("refEntityInt");
 		when(refEntityTypeInt.getIdAttribute()).thenReturn(refIdAttrInt);
 
-		return Arrays
-				.asList(new Object[] { BOOL, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean" },
-						new Object[] { CATEGORICAL, true, refEntityTypeInt,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
-						new Object[] { DATE, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date" },
-						new Object[] { DATE_TIME, true, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" timestamp with time zone" },
-						new Object[] { DECIMAL, true, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" double precision" },
-						new Object[] { EMAIL, true, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
-						new Object[] { ENUM, true, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
-						new Object[] { FILE, true, refEntityTypeString,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
-						new Object[] { HTML, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
-						new Object[] { HYPERLINK, true, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
-						new Object[] { INT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer" },
-						new Object[] { LONG, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint" },
-						new Object[] { SCRIPT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
-						new Object[] { STRING, true, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
-						new Object[] { TEXT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
-						new Object[] { XREF, true, refEntityTypeString,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
-						new Object[] { BOOL, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean NOT NULL" },
-						new Object[] { CATEGORICAL, false, refEntityTypeInt,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
-						new Object[] { DATE, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date NOT NULL" },
-						new Object[] { DATE_TIME, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" timestamp with time zone NOT NULL" },
-						new Object[] { DECIMAL, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" double precision NOT NULL" },
-						new Object[] { EMAIL, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
-						new Object[] { ENUM, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
-						new Object[] { FILE, false, refEntityTypeString,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
-						new Object[] { HTML, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
-						new Object[] { HYPERLINK, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
-						new Object[] { INT, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL" },
-						new Object[] { LONG, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint NOT NULL" },
-						new Object[] { SCRIPT, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
-						new Object[] { STRING, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
-						new Object[] { TEXT, false, null,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
-						new Object[] { XREF, false, refEntityTypeString,
-								"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" })
-				.iterator();
+		return Arrays.asList(
+				new Object[] { BOOL, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean" },
+				new Object[] { CATEGORICAL, true, refEntityTypeInt,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
+				new Object[] { DATE, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date" },
+				new Object[] { DATE_TIME, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" timestamp with time zone" },
+				new Object[] { DECIMAL, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" double precision" },
+				new Object[] { EMAIL, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
+				new Object[] { ENUM, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
+				new Object[] { FILE, true, refEntityTypeString,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+				new Object[] { HTML, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
+				new Object[] { HYPERLINK, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
+				new Object[] { INT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer" },
+				new Object[] { LONG, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint" },
+				new Object[] { SCRIPT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
+				new Object[] { STRING, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
+				new Object[] { TEXT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
+				new Object[] { XREF, true, refEntityTypeString,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+				new Object[] { BOOL, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean NOT NULL" },
+				new Object[] { CATEGORICAL, false, refEntityTypeInt,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
+				new Object[] { DATE, false, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date NOT NULL" },
+				new Object[] { DATE_TIME, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" timestamp with time zone NOT NULL" },
+				new Object[] { DECIMAL, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" double precision NOT NULL" },
+				new Object[] { EMAIL, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { ENUM, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
+				new Object[] { FILE, false, refEntityTypeString,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+				new Object[] { HTML, false, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
+				new Object[] { HYPERLINK, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { INT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL" },
+				new Object[] { LONG, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint NOT NULL" },
+				new Object[] { SCRIPT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
+				new Object[] { STRING, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { TEXT, false, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
+				new Object[] { XREF, false, refEntityTypeString,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" })
+					 .iterator();
 	}
 
 	@Test(dataProvider = "getSqlAddColumnProvider")
@@ -723,7 +720,7 @@ public class PostgreSqlQueryGeneratorTest
 	public static Iterator<Object[]> getSqlAddColumnInvalidTypeProvider()
 	{
 		return Arrays.asList(new Object[] { COMPOUND }, new Object[] { CATEGORICAL_MREF }, new Object[] { MREF })
-				.iterator();
+					 .iterator();
 	}
 
 	@Test(dataProvider = "getSqlAddColumnInvalidType", expectedExceptions = RuntimeException.class)
@@ -779,8 +776,8 @@ public class PostgreSqlQueryGeneratorTest
 		when(collectionsEntity.getPackage()).thenReturn(eric);
 		when(collectionsEntity.getAttribute("type")).thenReturn(typeAttribute);
 		when(collectionsEntity.getAttribute("category")).thenReturn(categoryAttribute);
-		when(collectionsEntity.getAtomicAttributes())
-				.thenReturn(asList(collectionsIdAttribute, typeAttribute, categoryAttribute));
+		when(collectionsEntity.getAtomicAttributes()).thenReturn(
+				asList(collectionsIdAttribute, typeAttribute, categoryAttribute));
 
 		QueryImpl<Entity> q = new QueryImpl<>();
 
@@ -810,8 +807,8 @@ public class PostgreSqlQueryGeneratorTest
 		when(collectionsEntity.getPackage()).thenReturn(eric);
 		when(collectionsEntity.getAttribute("type")).thenReturn(typeAttribute);
 		when(collectionsEntity.getAttribute("data_categories")).thenReturn(categoryAttribute);
-		when(collectionsEntity.getAtomicAttributes())
-				.thenReturn(asList(collectionsIdAttribute, typeAttribute, categoryAttribute));
+		when(collectionsEntity.getAtomicAttributes()).thenReturn(
+				asList(collectionsIdAttribute, typeAttribute, categoryAttribute));
 
 		QueryRule typeRule = new QueryRule(NESTED,
 				newArrayList(new QueryRule("type", EQUALS, "POPULATION_BASED"), new QueryRule(OR),

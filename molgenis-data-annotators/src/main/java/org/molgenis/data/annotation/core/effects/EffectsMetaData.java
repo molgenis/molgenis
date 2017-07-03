@@ -79,103 +79,149 @@ public class EffectsMetaData implements AnnotatorEntityType
 
 	public Attribute getTranscriptBiotypeAttr()
 	{
-		return attributeFactory.create().setName(TRANSCRIPT_BIOTYPE).setDataType(STRING).setDescription(
-				"The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)")
-				.setAggregatable(true);
+		return attributeFactory.create()
+							   .setName(TRANSCRIPT_BIOTYPE)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)")
+							   .setAggregatable(true);
 	}
 
 	public Attribute getRankTotalAttr()
 	{
-		return attributeFactory.create().setName(RANK_TOTAL).setDataType(STRING).setDescription(
-				"Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(RANK_TOTAL)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getHgvsCAttr()
 	{
-		return attributeFactory.create().setName(HGVS_C).setDataType(TEXT)
-				.setDescription("Variant using HGVS notation (DNA level)(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(HGVS_C)
+							   .setDataType(TEXT)
+							   .setDescription(
+									   "Variant using HGVS notation (DNA level)(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getHgvsPAttr()
 	{
-		return attributeFactory.create().setName(HGVS_P).setDataType(STRING).setDescription(
-				"If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(HGVS_P)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getCdnaPositionAttr()
 	{
-		return attributeFactory.create().setName(C_DNA_POSITION).setDataType(STRING).setDescription(
-				"Position in cDNA and trancript’s cDNA length (one based)(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(C_DNA_POSITION)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Position in cDNA and trancript’s cDNA length (one based)(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getCdsPositionAttr()
 	{
-		return attributeFactory.create().setName(CDS_POSITION).setDataType(STRING).setDescription(
-				"Position and number of coding bases (one based includes START and STOP codons)(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(CDS_POSITION)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Position and number of coding bases (one based includes START and STOP codons)(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getProteinPositionAttr()
 	{
-		return attributeFactory.create().setName(PROTEIN_POSITION).setDataType(STRING)
-				.setDescription("Position and number of AA (one based, including START, but not STOP)");
+		return attributeFactory.create()
+							   .setName(PROTEIN_POSITION)
+							   .setDataType(STRING)
+							   .setDescription("Position and number of AA (one based, including START, but not STOP)");
 	}
 
 	public Attribute getDistanceToFeatureAttr()
 	{
-		return attributeFactory.create().setName(DISTANCE_TO_FEATURE).setDataType(STRING).setDescription(
-				"All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(DISTANCE_TO_FEATURE)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getErrorsAttr()
 	{
-		return attributeFactory.create().setName(ERRORS).setDataType(STRING).setDescription(
-				"Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(ERRORS)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getAnnotationAttr()
 	{
-		return attributeFactory.create().setName(ANNOTATION).setDataType(STRING).setDescription(
-				"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)")
-				.setAggregatable(true);
+		return attributeFactory.create()
+							   .setName(ANNOTATION)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)")
+							   .setAggregatable(true);
 	}
 
 	public Attribute getFeatureIdAttr()
 	{
-		return attributeFactory.create().setName(FEATURE_ID).setDataType(STRING).setDescription(
-				"Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).(source:http://snpeff.sourceforge.net)");
+		return attributeFactory.create()
+							   .setName(FEATURE_ID)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).(source:http://snpeff.sourceforge.net)");
 	}
 
 	public Attribute getFeatureTypeAttr()
 	{
-		return attributeFactory.create().setName(FEATURE_TYPE).setDataType(STRING).setDescription(
-				"Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
-						+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)")
-				.setAggregatable(true);
+		return attributeFactory.create()
+							   .setName(FEATURE_TYPE)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
+											   + "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)")
+							   .setAggregatable(true);
 	}
 
 	public Attribute getGeneIdAttr()
 	{
-		return attributeFactory.create().setName(GENE_ID).setDataType(STRING).setDescription("Gene ID")
-				.setAggregatable(true);
+		return attributeFactory.create()
+							   .setName(GENE_ID)
+							   .setDataType(STRING)
+							   .setDescription("Gene ID")
+							   .setAggregatable(true);
 	}
 
 	public Attribute getGeneNameAttr()
 	{
-		return attributeFactory.create().setName(GENE_NAME).setDataType(STRING).setDescription(
-				"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)")
-				.setAggregatable(true);
+		return attributeFactory.create()
+							   .setName(GENE_NAME)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)")
+							   .setAggregatable(true);
 	}
 
 	public Attribute getPutativeImpactAttr()
 	{
-		return attributeFactory.create().setName(PUTATIVE_IMPACT).setDataType(STRING).setDescription(
-				"A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)")
-				.setAggregatable(true);
+		return attributeFactory.create()
+							   .setName(PUTATIVE_IMPACT)
+							   .setDataType(STRING)
+							   .setDescription(
+									   "A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)")
+							   .setAggregatable(true);
 	}
 
 	public Attribute getAltAttr()
 	{
-		return attributeFactory.create().setName(ALT).setDataType(TEXT)
-				.setDescription("The alternative allele on which this EFFECT applies");
+		return attributeFactory.create()
+							   .setName(ALT)
+							   .setDataType(TEXT)
+							   .setDescription("The alternative allele on which this EFFECT applies");
 	}
 }

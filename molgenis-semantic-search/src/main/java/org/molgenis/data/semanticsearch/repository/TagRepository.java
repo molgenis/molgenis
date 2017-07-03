@@ -40,8 +40,13 @@ public class TagRepository
 	 */
 	public Tag getTagEntity(String objectIRI, String label, Relation relation, String codeSystemIRI)
 	{
-		Tag tag = dataService.query(TAG, Tag.class).eq(OBJECT_IRI, objectIRI).and().eq(RELATION_IRI, relation.getIRI())
-				.and().eq(CODE_SYSTEM, codeSystemIRI).findOne();
+		Tag tag = dataService.query(TAG, Tag.class)
+							 .eq(OBJECT_IRI, objectIRI)
+							 .and()
+							 .eq(RELATION_IRI, relation.getIRI())
+							 .and()
+							 .eq(CODE_SYSTEM, codeSystemIRI)
+							 .findOne();
 		if (tag == null)
 		{
 			tag = tagFactory.create();

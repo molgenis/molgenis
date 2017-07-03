@@ -34,12 +34,12 @@ public class Step31UpdateApplicationSettings extends MolgenisUpgrade
 		// add custom javascript headers setting
 		String customJavascriptHeadersId = idGenerator.generateId();
 		boolean googleSignInIdDefaultValue = true;
-		jdbcTemplate
-				.update("INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`isAggregatable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-						customJavascriptHeadersId, "custom_javascript", "text", null, null, true, false, true,
-						"Custom javascript headers",
-						"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.",
-						false, null, null, null, false, false, null, null, "");
+		jdbcTemplate.update(
+				"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`isAggregatable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				customJavascriptHeadersId, "custom_javascript", "text", null, null, true, false, true,
+				"Custom javascript headers",
+				"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.",
+				false, null, null, null, false, false, null, null, "");
 
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 4,
 				"settings_app", customJavascriptHeadersId);

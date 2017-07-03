@@ -44,7 +44,8 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	{
 		Set<Object> existingIDs = getExistingIDs(entities.stream().map(Entity::getIdValue).collect(toSet()));
 		Map<Boolean, List<E>> partitioned = entities.stream()
-				.collect(partitioningBy(entity -> existingIDs.contains(entity.getIdValue())));
+													.collect(partitioningBy(
+															entity -> existingIDs.contains(entity.getIdValue())));
 		add(partitioned.get(FALSE).stream());
 		update(partitioned.get(TRUE).stream());
 	}

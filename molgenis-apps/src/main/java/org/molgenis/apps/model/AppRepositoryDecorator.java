@@ -218,8 +218,8 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 				}
 				//noinspection StringConcatenationMissingWhitespace
 				zipFile.extractAll(
-						fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar + app
-								.getId() + separatorChar);
+						fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar
+								+ app.getId() + separatorChar);
 			}
 			catch (ZipException e)
 			{

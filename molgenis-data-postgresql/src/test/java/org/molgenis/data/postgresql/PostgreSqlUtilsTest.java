@@ -218,13 +218,13 @@ public class PostgreSqlUtilsTest
 		when(categoricalMrefValue0.toString()).thenReturn("categoricalMrefValue0");
 		when(categoricalMrefValue0.getIdValue()).thenReturn(categoricalMrefValueId0);
 		Entity categoricalMrefValue1 = when(mock(Entity.class).getEntityType()).thenReturn(refStringIdEntityType)
-				.getMock();
+																			   .getMock();
 		when(categoricalMrefValue1.toString()).thenReturn("categoricalMrefValue1");
 		when(categoricalMrefValue1.getIdValue()).thenReturn(categoricalMrefValueId1);
 		when(categoricalMrefValue0.getString(attrRefStringIdName)).thenReturn(categoricalMrefValueId0);
 		when(categoricalMrefValue1.getString(attrRefStringIdName)).thenReturn(categoricalMrefValueId1);
-		when(entity.getEntities(attrCategoricalMrefName))
-				.thenReturn(asList(categoricalMrefValue0, categoricalMrefValue1));
+		when(entity.getEntities(attrCategoricalMrefName)).thenReturn(
+				asList(categoricalMrefValue0, categoricalMrefValue1));
 		when(entity.getEntities(attrCategoricalMrefNillableName)).thenReturn(emptyList());
 
 		dateValue = LocalDate.of(2012, Month.DECEMBER, 21);

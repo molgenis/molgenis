@@ -32,8 +32,9 @@ public class IdGeneratorImplTest
 		idGeneratorImpl.generateId(strategy);
 
 		Stopwatch sw = Stopwatch.createStarted();
-		Set<String> ids = IntStream.range(0, numIds).mapToObj((x) -> idGeneratorImpl.generateId(strategy))
-				.collect(Collectors.toSet());
+		Set<String> ids = IntStream.range(0, numIds)
+								   .mapToObj((x) -> idGeneratorImpl.generateId(strategy))
+								   .collect(Collectors.toSet());
 		LOG.info("Generated {} identifiers using strategy {} in {}", numIds, strategy, sw);
 		assertTrue(ids.size() == numIds);
 		assertTrue(ids.stream().allMatch(id -> id.length() == expectedLength));

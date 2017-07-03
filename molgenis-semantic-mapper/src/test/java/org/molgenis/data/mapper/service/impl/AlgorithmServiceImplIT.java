@@ -244,8 +244,8 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		// ref entities
 		EntityType refEntityType = entityTypeFactory.create(refEntityName);
 		refEntityType.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
-		refEntityType
-				.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName).setDataType(STRING), ROLE_LABEL);
+		refEntityType.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName).setDataType(STRING),
+				ROLE_LABEL);
 
 		Entity refEntity0 = new DynamicEntity(refEntityType);
 		refEntity0.set(refEntityIdAttrName, refEntityId0);
@@ -266,12 +266,13 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		// source Entity
 		EntityType entityTypeSource = entityTypeFactory.create(sourceEntityName);
-		entityTypeSource
-				.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true),
-						ROLE_ID);
 		entityTypeSource.addAttribute(
-				attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF).setNillable(false)
-						.setRefEntity(refEntityType));
+				attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true), ROLE_ID);
+		entityTypeSource.addAttribute(attrMetaFactory.create()
+													 .setName(sourceEntityAttrName)
+													 .setDataType(MREF)
+													 .setNillable(false)
+													 .setRefEntity(refEntityType));
 		Entity source = new DynamicEntity(entityTypeSource);
 		source.set(sourceEntityAttrName, Arrays.asList(refEntity0, refEntity1));
 
@@ -303,12 +304,13 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		// source Entity
 		EntityType entityTypeSource = entityTypeFactory.create(sourceEntityName);
-		entityTypeSource
-				.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true),
-						ROLE_ID);
 		entityTypeSource.addAttribute(
-				attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF).setNillable(true)
-						.setRefEntity(refEntityType));
+				attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true), ROLE_ID);
+		entityTypeSource.addAttribute(attrMetaFactory.create()
+													 .setName(sourceEntityAttrName)
+													 .setDataType(MREF)
+													 .setNillable(true)
+													 .setRefEntity(refEntityType));
 
 		Entity source = new DynamicEntity(entityTypeSource);
 		source.set(sourceEntityAttrName, emptyList());
@@ -344,15 +346,14 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
-		Map<Attribute, ExplainedAttribute> matches = ImmutableMap.of(sourceAttribute, ExplainedAttribute
-				.create(sourceAttribute, singletonList(ExplainedQueryString.create("height", "height", "height", 100)),
-						true));
+		Map<Attribute, ExplainedAttribute> matches = ImmutableMap.of(sourceAttribute,
+				ExplainedAttribute.create(sourceAttribute,
+						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
-		when(semanticSearchService
-				.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute, ontologyTermTags.values(),
-						null)).thenReturn(matches);
+		when(semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute,
+				ontologyTermTags.values(), null)).thenReturn(matches);
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute)).thenReturn(ontologyTermTags);
 
@@ -388,12 +389,11 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
-		when(semanticSearchService
-				.findAttributes(sourceEntityType, Sets.newHashSet("targetHeight", "height"), Collections.emptyList()))
-				.thenReturn(emptyMap());
+		when(semanticSearchService.findAttributes(sourceEntityType, Sets.newHashSet("targetHeight", "height"),
+				Collections.emptyList())).thenReturn(emptyMap());
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute))
-				.thenReturn(LinkedHashMultimap.create());
+		when(ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute)).thenReturn(
+				LinkedHashMultimap.create());
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping, targetAttribute);
 
@@ -430,15 +430,14 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
-		Map<Attribute, ExplainedAttribute> mappings = ImmutableMap
-				.of(sourceAttribute1, ExplainedAttribute.create(sourceAttribute1), sourceAttribute2,
-						ExplainedAttribute.create(sourceAttribute2));
+		Map<Attribute, ExplainedAttribute> mappings = ImmutableMap.of(sourceAttribute1,
+				ExplainedAttribute.create(sourceAttribute1), sourceAttribute2,
+				ExplainedAttribute.create(sourceAttribute2));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
-		when(semanticSearchService
-				.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute, ontologyTermTags.values(),
-						null)).thenReturn(mappings);
+		when(semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute,
+				ontologyTermTags.values(), null)).thenReturn(mappings);
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute)).thenReturn(ontologyTermTags);
 

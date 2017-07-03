@@ -36,7 +36,7 @@ public class AutoValuePopulatorTest
 		when(attrId.getDataType()).thenReturn(STRING);
 		when(attrId.isAuto()).thenReturn(true);
 		Attribute attrDateAutoDefault = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATE_AUTO_DEFAULT)
-				.getMock();
+																			 .getMock();
 		when(attrDateAutoDefault.getDataType()).thenReturn(DATE);
 		Attribute attrDateAutoFalse = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATE_AUTO_FALSE).getMock();
 		when(attrDateAutoFalse.getDataType()).thenReturn(DATE);
@@ -45,14 +45,14 @@ public class AutoValuePopulatorTest
 		when(attrDateAutoTrue.getDataType()).thenReturn(DATE);
 		when(attrDateAutoTrue.isAuto()).thenReturn(true);
 		Attribute attrDateTimeAutoDefault = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATETIME_AUTO_DEFAULT)
-				.getMock();
+																				 .getMock();
 		when(attrDateTimeAutoDefault.getDataType()).thenReturn(DATE_TIME);
 		Attribute attrDateTimeAutoFalse = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATETIME_AUTO_FALSE)
-				.getMock();
+																			   .getMock();
 		when(attrDateTimeAutoFalse.getDataType()).thenReturn(DATE_TIME);
 		when(attrDateTimeAutoFalse.isAuto()).thenReturn(false);
 		Attribute attrDateTimeAutoTrue = when(mock(Attribute.class).getName()).thenReturn(ATTR_DATETIME_AUTO_TRUE)
-				.getMock();
+																			  .getMock();
 		when(attrDateTimeAutoTrue.getDataType()).thenReturn(DATE_TIME);
 		when(attrDateTimeAutoTrue.isAuto()).thenReturn(true);
 		when(entityType.getIdAttribute()).thenReturn(attrId);

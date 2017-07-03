@@ -36,8 +36,7 @@ public class AnnotatorRunner
 	public void runAnnotator(RepositoryAnnotator annotator, File inputFile, File outputFile, boolean update)
 			throws IOException, MolgenisInvalidFormatException
 	{
-		CmdLineAnnotatorUtils
-				.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory, effectStructureConverter,
-						inputFile, outputFile, emptyList(), update);
+		CmdLineAnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory,
+				effectStructureConverter, inputFile, outputFile, emptyList(), update);
 	}
 }

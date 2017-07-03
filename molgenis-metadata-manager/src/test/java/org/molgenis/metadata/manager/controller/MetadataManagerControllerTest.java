@@ -61,14 +61,18 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 				languageService, appSettings);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(metadataEditorController)
-				.setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter).build();
+								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
+								 .build();
 	}
 
 	@Test
 	public void testInit() throws Exception
 	{
-		this.mockMvc.perform(get("/plugin/metadata-manager")).andExpect(status().isOk())
-				.andExpect(view().name("view-metadata-manager")).andExpect(model().attribute("baseUrl", "/test/path"))
-				.andExpect(model().attribute("lng", "en")).andExpect(model().attribute("fallbackLng", "nl"));
+		this.mockMvc.perform(get("/plugin/metadata-manager"))
+					.andExpect(status().isOk())
+					.andExpect(view().name("view-metadata-manager"))
+					.andExpect(model().attribute("baseUrl", "/test/path"))
+					.andExpect(model().attribute("lng", "en"))
+					.andExpect(model().attribute("fallbackLng", "nl"));
 	}
 }

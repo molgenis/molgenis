@@ -300,14 +300,18 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 		// User permissions
 		List<UserAuthority> userPermissions = dataService.query(USER_AUTHORITY, UserAuthority.class)
-				.in(ROLE, authorities).findAll().collect(toList());
+														 .in(ROLE, authorities)
+														 .findAll()
+														 .collect(toList());
 		if (!userPermissions.isEmpty())
 		{
 			dataService.delete(USER_AUTHORITY, userPermissions.stream());
 		}
 		// Group permissions
 		List<GroupAuthority> groupPermissions = dataService.query(GROUP_AUTHORITY, GroupAuthority.class)
-				.in(ROLE, authorities).findAll().collect(toList());
+														   .in(ROLE, authorities)
+														   .findAll()
+														   .collect(toList());
 		if (!groupPermissions.isEmpty())
 		{
 			dataService.delete(GROUP_AUTHORITY, groupPermissions.stream());
@@ -397,8 +401,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
 	{
-		return EntityTypeStream
-				.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getId(), permission));
+		return EntityTypeStream.filter(
+				entityType -> permissionService.hasPermissionOnEntity(entityType.getId(), permission));
 	}
 
 	private static class FilteredConsumer
@@ -415,8 +419,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		void filter(List<EntityType> entityTypes)
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
-					.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getId(), READ))
-					.collect(toList());
+															  .filter(entityType -> permissionService.hasPermissionOnEntity(
+																	  entityType.getId(), READ))
+															  .collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}
 	}

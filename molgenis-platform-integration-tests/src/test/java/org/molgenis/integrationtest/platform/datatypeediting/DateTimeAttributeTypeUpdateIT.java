@@ -43,7 +43,7 @@ public class DateTimeAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	{
 		Instant value = Instant.parse("2016-11-13T19:20:20Z");
 		String formattedInDefaultTimezone = value.atZone(ZoneId.systemDefault())
-				.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx"));
+												 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx"));
 		return new Object[][] { { value, STRING, formattedInDefaultTimezone },
 				{ value, TEXT, formattedInDefaultTimezone }, { value, DATE, "2016-11-13" } };
 	}

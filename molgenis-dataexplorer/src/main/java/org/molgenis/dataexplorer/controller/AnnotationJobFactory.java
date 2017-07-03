@@ -75,10 +75,13 @@ public class AnnotationJobFactory
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
 		Repository<Entity> repository = dataService.getRepository(targetName);
-		List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
-				.filter(RepositoryAnnotator::annotationDataExists).collect(toList());
+		List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators()
+																		 .stream()
+																		 .filter(RepositoryAnnotator::annotationDataExists)
+																		 .collect(toList());
 		List<RepositoryAnnotator> requestedAnnotators = Arrays.stream(annotatorNames.split(","))
-				.map(annotationService::getAnnotatorByName).collect(toList());
+															  .map(annotationService::getAnnotatorByName)
+															  .collect(toList());
 		AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
 		List<RepositoryAnnotator> annotators = Lists.newArrayList(
 				resolver.getAnnotatorSelectionDependencyList(availableAnnotators, requestedAnnotators, repository,

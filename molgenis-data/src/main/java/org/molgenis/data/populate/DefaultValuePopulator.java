@@ -44,7 +44,7 @@ public class DefaultValuePopulator
 	public void populate(Entity entity)
 	{
 		asStream(entity.getEntityType().getAllAttributes()).filter(Attribute::hasDefaultValue)
-				.forEach(attr -> populateDefaultValues(entity, attr));
+														   .forEach(attr -> populateDefaultValues(entity, attr));
 	}
 
 	private void populateDefaultValues(Entity entity, Attribute attr)
