@@ -143,11 +143,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
 		metaDataService = mock(MetaDataService.class);
-		when(metaDataService.createRepository(argThat(obj -> obj.getId().equals(hopMetaData.getId()))))
+		when(metaDataService.createRepository(argThat(obj -> obj != null && obj.getId().equals(hopMetaData.getId()))))
 				.thenReturn(hopRepo);
-		when(metaDataService.createRepository(argThat(obj -> obj.getId().equals(geneMetaData.getId()))))
+		when(metaDataService.createRepository(argThat(obj -> obj != null && obj.getId().equals(geneMetaData.getId()))))
 				.thenReturn(geneRepo);
-		when(metaDataService.createRepository(argThat(obj -> obj.getId().equals(SOURCE_EXON_ENTITY))))
+		when(metaDataService.createRepository(argThat(obj -> obj != null && obj.getId().equals(SOURCE_EXON_ENTITY))))
 				.thenReturn(exonRepo);
 
 		when(hopRepo.getName()).thenReturn(TARGET_HOP_ENTITY);
@@ -672,12 +672,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			geneEntity.set("length", i * 2d);
 			sourceGeneEntities.add(geneEntity);
 
-			when(algorithmService.apply(argThat(obj -> obj.getAlgorithm().equals("$('id').value()")), eq(geneEntity),
-					eq(geneMetaData))).thenReturn(geneEntity.getString("id"));
+			when(algorithmService.apply(argThat(obj -> obj != null && obj.getAlgorithm().equals("$('id').value()")),
+					eq(geneEntity), eq(geneMetaData))).thenReturn(geneEntity.getString("id"));
 
-			when(algorithmService
-					.apply(argThat(obj -> obj.getAlgorithm().equals("$('length').value()")), eq(geneEntity),
-							eq(geneMetaData))).thenReturn(geneEntity.getDouble("length"));
+			when(algorithmService.apply(argThat(obj -> obj != null && obj.getAlgorithm().equals("$('length').value()")),
+					eq(geneEntity), eq(geneMetaData))).thenReturn(geneEntity.getDouble("length"));
 
 			Entity expectedEntity = new DynamicEntity(targetMeta);
 			expectedEntity.set("identifier", String.valueOf(i));
