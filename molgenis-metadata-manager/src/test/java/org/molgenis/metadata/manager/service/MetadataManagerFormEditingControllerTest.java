@@ -85,7 +85,7 @@ public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpri
 		when(metaDataService.getPackages()).thenReturn(packages);
 		when(packageMapper.toEditorPackage(package_)).thenReturn(getEditorPackage());
 
-		this.mockMvc.perform(get("/metadata-manager-service/editorPackages")).andExpect(status().isOk())
+		this.mockMvc.perform(get("/plugin/metadata-manager-service/editorPackages")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(getEditorPackageResponse()));
 	}
@@ -102,7 +102,7 @@ public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpri
 
 		when(entityTypeMapper.toEditorEntityType(entityType)).thenReturn(getEditorEntityType());
 
-		this.mockMvc.perform(get("/metadata-manager-service/entityType/1")).andExpect(status().isOk())
+		this.mockMvc.perform(get("/plugin/metadata-manager-service/entityType/1")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(getEditorEntityTypeResponseJson()));
 	}
@@ -113,7 +113,7 @@ public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpri
 		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
 				.thenThrow(new UnknownEntityException("Unknown entity [unknownId]"));
 
-		this.mockMvc.perform(get("/metadata-manager-service/entityType/unknownId")).andExpect(status().isBadRequest())
+		this.mockMvc.perform(get("/plugin/metadata-manager-service/entityType/unknownId")).andExpect(status().isBadRequest())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"errors\":[{\"message\":\"Unknown entity [unknownId]\"}]}"));
 	}
@@ -126,7 +126,7 @@ public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpri
 
 		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);
 
-		mockMvc.perform(get("/metadata-manager-service/entityType/unknownId")).andExpect(status().isBadRequest())
+		mockMvc.perform(get("/plugin/metadata-manager-service/entityType/unknownId")).andExpect(status().isBadRequest())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"errors\":[{\"message\":\"Unknown EntityType [unknownId]\"}]}"));
 	}
@@ -135,7 +135,7 @@ public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpri
 	public void testCreateEntityType() throws Exception
 	{
 		when(entityTypeMapper.createEditorEntityType()).thenReturn(getEditorEntityType());
-		this.mockMvc.perform(get("/metadata-manager-service/create/entityType")).andExpect(status().isOk())
+		this.mockMvc.perform(get("/plugin/metadata-manager-service/create/entityType")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(getEditorEntityTypeResponseJson()));
 	}
@@ -145,7 +145,7 @@ public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpri
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityTypeMapper.toEntityType(getEditorEntityType())).thenReturn(entityType);
-		this.mockMvc.perform(post("/metadata-manager-service/entityType").contentType(APPLICATION_JSON)
+		this.mockMvc.perform(post("/plugin/metadata-manager-service/entityType").contentType(APPLICATION_JSON)
 				.content(getEditorEntityTypeJson())).andExpect(status().isOk());
 		Mockito.verify(metaDataService).upsertEntityTypes(newArrayList(entityType));
 	}
@@ -154,7 +154,7 @@ public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpri
 	public void testCreateAttribute() throws Exception
 	{
 		when(attributeMapper.createEditorAttribute()).thenReturn(getEditorAttribute());
-		this.mockMvc.perform(get("/metadata-manager-service/create/attribute")).andExpect(status().isOk())
+		this.mockMvc.perform(get("/plugin/metadata-manager-service/create/attribute")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(getEditorAttributeResponse()));
 	}
