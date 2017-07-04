@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.standardsregistry.services;
 
 import org.molgenis.standardsregistry.model.PackageSearchResultItem;
 

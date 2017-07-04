@@ -6,7 +6,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.standardsregistry.services.PackageResponseService;
+import org.molgenis.standardsregistry.services.StandardRegistryService;
 import org.molgenis.standardsregistry.model.*;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -43,15 +44,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	// Services for model-registry use only
-	private final PackageResponseService packageResponseService;
+	private final StandardRegistryService standardRegistryService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, PackageResponseService packageResponseService)
+	public StandardsRegistryController(MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, StandardRegistryService standardRegistryService)
 	{
 		super(URI);
 		this.metaDataService = metaDataService;
 		this.tagService = tagService;
-		this.packageResponseService = packageResponseService;
+		this.standardRegistryService = standardRegistryService;
 	}
 
 	@RequestMapping(method = GET)
@@ -76,8 +77,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/documentation/{packageName}", method = GET)
-	public String getModelDocumentation(@PathVariable("packageName") String packageName,
-			@RequestParam(value = "embed", required = false) Boolean embed, Model model)
+	public String getModelDocumentation(@PathVariable("packageName") String packageName, @RequestParam(value = "embed", required = false) Boolean embed, Model model)
 	{
 		Package aPackage = metaDataService.getPackage(packageName);
 		model.addAttribute("package", aPackage);
@@ -94,7 +94,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		packageSearchRequest.setOffset(0);
 		packageSearchRequest.setNum(3);
 
-		PackageSearchResponse packageSearchResponse = packageResponseService.search(packageSearchRequest);
+		PackageSearchResponse packageSearchResponse = standardRegistryService.search(packageSearchRequest);
 		if (packageSearchRequest != null)
 		{
 			model.addAttribute("packageSearchResponse", gson.toJson(packageSearchResponse));
@@ -103,9 +103,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return VIEW_NAME;
 	}
 
-//	@RequestMapping(value = "/search", method = POST)
-//	@ResponseBody
-
+	@RequestMapping(value = "/search", method = POST)
+	@ResponseBody
+	public PackageSearchResponse search(@RequestAttribute PackageSearchRequest packageSearchRequest)
+	{
+		return standardRegistryService.search(packageSearchRequest);
+	}
 
 	@RequestMapping(value = "/details", method = GET)
 	public String showView(@RequestParam(value = "package", required = false) String selectedPackageName, Model model)
@@ -128,7 +131,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		LOG.info("Requested package: [ " +selectedPackageName+ " ]");
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 
-		LOG.info("Converted MOLGENIS package: [ " + molgenisPackage + " ]");
+		LOG.info("Converted package: [ " + molgenisPackage + " ]");
 
 		if (molgenisPackage != null)
 		{
@@ -146,8 +149,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		if (molgenisPackage == null) return null;
 
 		return new PackageResponse(molgenisPackage.getId(), molgenisPackage.getLabel(),
-				molgenisPackage.getDescription(), null, packageResponseService.getEntitiesInPackage(molgenisPackage.getId()),
-				packageResponseService.getTagsForPackage(molgenisPackage));
+				molgenisPackage.getDescription(), null, standardRegistryService.getEntitiesInPackage(molgenisPackage.getId()),
+				standardRegistryService.getTagsForPackage(molgenisPackage));
 	}
 
 	/* PACKAGE TREE */
@@ -158,6 +161,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null) return null;
 
-		return Collections.singletonList(packageResponseService.createPackageTreeNode(molgenisPackage));
+		return Collections.singletonList(standardRegistryService.createPackageTreeNode(molgenisPackage));
 	}
 }

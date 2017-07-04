@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -29,7 +28,7 @@ import java.util.*;
  * @author sido
  */
 @Component
-public class PackageResponseServiceImpl implements PackageResponseService {
+public class StandardRegistryServiceImpl implements StandardRegistryService {
 
     private final MetaDataService metaDataService;
     private final TagService<LabeledResource, LabeledResource> tagService;
@@ -38,7 +37,7 @@ public class PackageResponseServiceImpl implements PackageResponseService {
     private final DataService dataService;
 
     @Autowired
-    public PackageResponseServiceImpl(MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService, MolgenisPermissionService molgenisPermissionService, DataService dataService)
+    public StandardRegistryServiceImpl(MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService, MolgenisPermissionService molgenisPermissionService, DataService dataService)
     {
         this.metaDataService = Objects.requireNonNull(metaDataService);
         this.tagService = Objects.requireNonNull(tagService);

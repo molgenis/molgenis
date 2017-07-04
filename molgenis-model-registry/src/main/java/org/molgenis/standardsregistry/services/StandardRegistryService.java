@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author sido
  */
-public interface PackageResponseService {
+public interface StandardRegistryService {
 
     /**
      *
