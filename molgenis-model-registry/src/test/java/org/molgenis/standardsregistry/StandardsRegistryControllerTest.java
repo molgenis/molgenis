@@ -11,6 +11,8 @@ import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.standardsregistry.utils.StandardRegistryTestHarnessConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,13 +34,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  * @author sido
  */
-@ContextConfiguration(classes = TestHarnessConfig.class)
+@ContextConfiguration(classes = StandardRegistryTestHarnessConfig.class)
 public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest {
 
     @Autowired
     private EntityTestHarness entityTestHarness;
-
-    @Mock
+    @Autowired
+    private PackageFactory packageFactory;
+    @Autowired
     private MetaDataService metaDataService;
 
     @InjectMocks
@@ -50,45 +53,26 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest 
 
     private MockMvc mockMvc;
 
-    @Before
-    public void setup()
-    {
-        // Process mock annotations
-        MockitoAnnotations.initMocks(this);
-        // Setup Spring test in standalone mode
-        this.mockMvc = MockMvcBuilders.standaloneSetup(standardRegistryController).build();
-    }
-
     @BeforeClass
     public void beforeClass()
     {
+        MockitoAnnotations.initMocks(this);
+        this.mockMvc = MockMvcBuilders.standaloneSetup(standardRegistryController).build();
         emd = entityTestHarness.createDynamicRefEntityType();
-//        entities = entityTestHarness.createTestRefEntities(emd, 4);
-        pkg = new Package(emd);
-
-        logger.info("created package is: [ " + pkg + " ]");
+        pkg = packageFactory.create("testPackage");
     }
 
     @BeforeMethod
     public void beforeMethod()
     {
-
-        when(metaDataService.getPackage("test")).thenReturn(pkg);
-    }
-
-
-    @Test
-    public void testGetPackage() {
-        Package pkg = metaDataService.getPackage("test");
-        logger.info("found package is: [ " + pkg + " ]");
-//        assetEquals(pkg)
+        when(metaDataService.getPackage("testPackage")).thenReturn(pkg);
     }
 
     @Test
     public void testGetUml() throws Exception {
-
-        this.mockMvc.perform(get(StandardsRegistryController.URI + "/uml").param("package", "test"));
+        this.mockMvc.perform(get(StandardsRegistryController.URI + "/uml").param("package", "testPackage"));
 
     }
+
 
 }
