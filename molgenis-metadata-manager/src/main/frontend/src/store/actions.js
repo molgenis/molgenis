@@ -213,19 +213,35 @@ export default {
   [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
     post({apiUrl: '/plugin/metadata-manager-service'}, '/entityType', state.editorEntityType)
       .then(response => {
-        commit(CREATE_ALERT, {
-          type: 'success',
-          message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
-        })
+        if (!response.redirected) {
+          commit(CREATE_ALERT, {
+            type: 'success',
+            message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
+          })
 
-        const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
-        editorEntityType.isNew = false
-        editorEntityType.attributes.forEach(attribute => {
-          attribute.isNew = false
-        })
+          if (state.editorEntityType.isNew) {
+            console.log('test')
+            const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
 
-        commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
-        commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
+            editorEntityType.isNew = false
+            editorEntityType.attributes.forEach(attribute => {
+              attribute.isNew = false
+            })
+
+            commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
+            commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
+          } else {
+            response
+            commit(SET_EDITOR_ENTITY_TYPE, state.editorEntityType)
+          }
+        } else {
+          // Workaround for molgenis-api-client.
+          // We were logged out when doing a request, so we got a redirect response
+          commit(CREATE_ALERT, {
+            type: 'error',
+            message: 'No [WRITE] permission on entity type [Entity type] with id [sys_md_EntityType]'
+          })
+        }
       }, error => {
         commit(CREATE_ALERT, {
           type: 'error',
