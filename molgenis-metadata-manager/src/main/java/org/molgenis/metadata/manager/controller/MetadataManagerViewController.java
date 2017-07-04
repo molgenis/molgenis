@@ -9,12 +9,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.metadata.manager.controller.MetadataManagerController.URI;
+import static org.molgenis.metadata.manager.controller.MetadataManagerViewController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI + "/**")
-public class MetadataManagerController extends MolgenisPluginController
+public class MetadataManagerViewController extends MolgenisPluginController
 {
 	public static final String METADATA_MANAGER = "metadata-manager";
 	public static final String URI = PLUGIN_URI_PREFIX + METADATA_MANAGER;
@@ -23,7 +23,7 @@ public class MetadataManagerController extends MolgenisPluginController
 	private LanguageService languageService;
 	private AppSettings appSettings;
 
-	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService, AppSettings appSettings)
+	public MetadataManagerViewController(MenuReaderService menuReaderService, LanguageService languageService, AppSettings appSettings)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
@@ -42,6 +42,6 @@ public class MetadataManagerController extends MolgenisPluginController
 
 	private String getBaseUrl()
 	{
-		return menuReaderService.getMenu().findMenuItemPath(MetadataManagerController.METADATA_MANAGER);
+		return menuReaderService.getMenu().findMenuItemPath(MetadataManagerViewController.METADATA_MANAGER);
 	}
 }

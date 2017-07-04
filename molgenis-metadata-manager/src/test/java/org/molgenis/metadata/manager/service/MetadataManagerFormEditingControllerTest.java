@@ -8,6 +8,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.metadata.manager.controller.MetadataManagerFormEditingController;
 import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
@@ -42,8 +43,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = { MetadataManagerServiceTest.Config.class, GsonConfig.class })
-public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
+@ContextConfiguration(classes = { MetadataManagerFormEditingControllerTest.Config.class, GsonConfig.class })
+public class MetadataManagerFormEditingControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private MetaDataService metaDataService;
@@ -67,10 +68,10 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 	{
 		FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
 		freeMarkerViewResolver.setSuffix(".ftl");
-		MetadataManagerService metadataManagerService = new MetadataManagerService(metaDataService, packageMapper,
+		MetadataManagerFormEditingController metadataManagerFormEditingController = new MetadataManagerFormEditingController(metaDataService, packageMapper,
 				entityTypeMapper, attributeMapper);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(metadataManagerService)
+		mockMvc = MockMvcBuilders.standaloneSetup(metadataManagerFormEditingController)
 				.setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter).build();
 	}
 

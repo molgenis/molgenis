@@ -1,4 +1,4 @@
-package org.molgenis.metadata.manager.service;
+package org.molgenis.metadata.manager.controller;
 
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.UnknownEntityException;
@@ -10,11 +10,12 @@ import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
 import org.molgenis.metadata.manager.model.*;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,28 +24,29 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
-import static org.molgenis.metadata.manager.service.MetadataManagerService.URI;
+import static org.molgenis.metadata.manager.controller.MetadataManagerFormEditingController.URI;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-@Service
+@Controller
 @RequestMapping(URI)
-public class MetadataManagerService
+public class MetadataManagerFormEditingController extends MolgenisPluginController
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerFormEditingController.class);
 
-	public static final String URI = "metadata-manager-service";
+	public static final String URI = PLUGIN_URI_PREFIX + "metadata-manager-service";
 
 	private final MetaDataService metadataService;
 	private final PackageMapper packageMapper;
 	private final EntityTypeMapper entityTypeMapper;
 	private final AttributeMapper attributeMapper;
 
-	public MetadataManagerService(MetaDataService metadataService, PackageMapper packageMapper,
+	public MetadataManagerFormEditingController(MetaDataService metadataService, PackageMapper packageMapper,
 			EntityTypeMapper entityTypeMapper, AttributeMapper attributeMapper)
 	{
+		super(URI);
 		this.metadataService = requireNonNull(metadataService);
 		this.packageMapper = requireNonNull(packageMapper);
 		this.entityTypeMapper = requireNonNull(entityTypeMapper);

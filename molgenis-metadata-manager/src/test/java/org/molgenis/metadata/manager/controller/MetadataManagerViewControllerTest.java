@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { GsonConfig.class })
-public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTests
+public class MetadataManagerViewControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
@@ -51,13 +51,13 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		freeMarkerViewResolver.setSuffix(".ftl");
 
 		Menu menu = mock(Menu.class);
-		when(menu.findMenuItemPath(MetadataManagerController.METADATA_MANAGER)).thenReturn("/test/path");
+		when(menu.findMenuItemPath(MetadataManagerViewController.METADATA_MANAGER)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 
 		when(languageService.getCurrentUserLanguageCode()).thenReturn("en");
 		when(appSettings.getLanguageCode()).thenReturn("nl");
 
-		MetadataManagerController metadataEditorController = new MetadataManagerController(menuReaderService,
+		MetadataManagerViewController metadataEditorController = new MetadataManagerViewController(menuReaderService,
 				languageService, appSettings);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(metadataEditorController)
