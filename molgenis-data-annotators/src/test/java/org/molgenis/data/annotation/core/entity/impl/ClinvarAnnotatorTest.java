@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;

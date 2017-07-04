@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -131,7 +131,7 @@ public class PostgreSqlRepositoryTest
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getIdValue()).thenReturn("id1");
 
-		when(jdbcTemplate.query(any(String.class), any(Object[].class), any(RowMapper.class))).thenReturn(
+		when(jdbcTemplate.query(any(String.class), any(Object[].class), isNull(RowMapper.class))).thenReturn(
 				singletonList(entity0));
 		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class))).thenReturn(
 				new int[] { 1 });

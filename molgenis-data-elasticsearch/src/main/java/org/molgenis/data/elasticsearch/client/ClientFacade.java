@@ -209,7 +209,7 @@ public class ClientFacade implements Closeable
 
 		if (!deleteIndexResponse.isAcknowledged())
 		{
-			throw new IndexException(format("Error deleting index(es) '%s'", toString(indexes)));
+			throw new IndexException(format("Error deleting index(es) '%s'.", toString(indexes)));
 		}
 		if (LOG.isDebugEnabled())
 		{
@@ -522,6 +522,7 @@ public class ClientFacade implements Closeable
 		}
 
 		String indexName = searchHit.getIndex();
+		//FIXME: ClientFacade shouldn't assume that typename equals typename
 		ExplainRequestBuilder explainRequestBuilder = client.prepareExplain(indexName, indexName, searchHit.getId())
 															.setQuery(query);
 		ExplainResponse explainResponse;
@@ -577,11 +578,12 @@ public class ClientFacade implements Closeable
 			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 
+		//TODO: Is it good enough if at least one shard succeeds? Shouldn't we at least log something if failures > 0?
 		if (indexResponse.getShardInfo().getSuccessful() == 0)
 		{
 			LOG.error(Arrays.stream(indexResponse.getShardInfo().getFailures())
-							.map(ReplicationResponse.ShardInfo.Failure::toString)
-							.collect(joining("\n")));
+							//FIXME: logs Object.toString()
+							.map(ReplicationResponse.ShardInfo.Failure::toString).collect(joining("\n")));
 			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 
@@ -620,6 +622,8 @@ public class ClientFacade implements Closeable
 			LOG.debug("", e);
 			throw new IndexException(format("Error deleting doc with id '%s' in index '%s'.", documentId, indexName));
 		}
+
+		//TODO: Check why not check shardinfo?
 
 		if (LOG.isDebugEnabled())
 		{

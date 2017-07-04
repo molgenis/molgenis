@@ -32,7 +32,6 @@ import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
-import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,13 +50,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
-
 import java.util.Collection;
 
 import static java.util.Collections.singleton;

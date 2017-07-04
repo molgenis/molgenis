@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
@@ -40,9 +39,11 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.isNull;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -108,7 +109,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(attrId.getLabel()).thenReturn("id");
-		when(attrId.getLabel(anyString())).thenReturn("id");
+		when(attrId.getLabel(isNull())).thenReturn("id");
 		when(attrId.getDataType()).thenReturn(STRING);
 		when(attrId.isReadOnly()).thenReturn(true);
 		when(attrId.isUnique()).thenReturn(true);
@@ -119,7 +120,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(attrName.getLabel()).thenReturn("name");
-		when(attrName.getLabel(anyString())).thenReturn("name");
+		when(attrName.getLabel(isNull())).thenReturn("name");
 		when(attrName.getDataType()).thenReturn(STRING);
 		when(attrName.isNillable()).thenReturn(true);
 		when(attrName.isVisible()).thenReturn(true);
@@ -128,7 +129,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrEnum = when(mock(Attribute.class).getName()).thenReturn("enum").getMock();
 		when(attrEnum.getLabel()).thenReturn("enum");
-		when(attrEnum.getLabel(anyString())).thenReturn("enum");
+		when(attrEnum.getLabel(isNull())).thenReturn("enum");
 		when(attrEnum.getDataType()).thenReturn(ENUM);
 		when(attrEnum.getEnumOptions()).thenReturn(asList("enum0, enum1"));
 		when(attrEnum.isNillable()).thenReturn(true);
@@ -137,7 +138,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrInt = when(mock(Attribute.class).getName()).thenReturn("int").getMock();
 		when(attrInt.getLabel()).thenReturn("int");
-		when(attrInt.getLabel(anyString())).thenReturn("int");
+		when(attrInt.getLabel(isNull())).thenReturn("int");
 		when(attrInt.getDataType()).thenReturn(INT);
 		when(attrInt.isNillable()).thenReturn(true);
 		when(attrInt.isVisible()).thenReturn(true);
@@ -149,9 +150,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(entityType.getAttribute("int")).thenReturn(attrInt);
 		when(entityType.getMappedByAttributes()).thenReturn(Stream.empty());
 		when(entityType.getIdAttribute()).thenReturn(attrId);
+		//TODO: This upgrades the test to mockito 2 but actually shows an error in the test
+		when(entityType.getLookupAttributes()).thenReturn(null);
 		when(entityType.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		when(entityType.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		when(entityType.getId()).thenReturn(ENTITY_NAME);
+		when(entityType.getLabel(isNull())).thenReturn(null);
 
 		when(repo.getEntityType()).thenReturn(entityType);
 		when(repo.getName()).thenReturn(ENTITY_NAME);
@@ -198,7 +202,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			   .andExpect(status().isCreated())
 			   .andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).add(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -209,7 +213,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			   .andExpect(status().isCreated())
 			   .andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).add(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -508,7 +512,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
 			   .andExpect(status().isOk());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -551,7 +555,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(
 				post(HREF_ENTITY_ID + "/name").param("_method", "PUT").content("Klaas").contentType(APPLICATION_JSON))
 			   .andExpect(status().isOk());
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -589,7 +593,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 											.contentType(APPLICATION_FORM_URLENCODED))
 			   .andExpect(status().isNoContent());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -599,7 +603,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				post(HREF_ENTITY_ID).param("_method", "PUT").content("{name:Klaas}").contentType(APPLICATION_JSON))
 			   .andExpect(status().isOk());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
+		verify(dataService).update(eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test

@@ -3,7 +3,6 @@ package org.molgenis.ontology.core.repository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
@@ -28,13 +27,10 @@ import static org.testng.Assert.assertEquals;
 public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	DataService dataService;
+	private DataService dataService;
 
 	@Autowired
-	OntologyRepository ontologyRepository;
-
-	@Autowired
-	OntologyMetaData ontologyMetaData;
+	private OntologyRepository ontologyRepository;
 
 	private Entity ontologyEntity;
 
@@ -78,12 +74,6 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 		public OntologyRepository ontologyRepository()
 		{
 			return new OntologyRepository();
-		}
-
-		@Bean
-		public OntologyMetaData ontologyMetaData()
-		{
-			return mock(OntologyMetaData.class);
 		}
 	}
 }

@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -33,9 +33,9 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		when(documentIdGenerator.generateId(any(EntityType.class))).thenAnswer(
-				invocation -> invocation.getArgumentAt(0, EntityType.class).getId());
+				invocation -> invocation.<EntityType>getArgument(0).getId());
 		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
-				invocation -> invocation.getArgumentAt(0, Attribute.class).getIdentifier());
+				invocation -> invocation.<Attribute>getArgument(0).getIdentifier());
 		mappingGenerator = new MappingGenerator(documentIdGenerator);
 	}
 
