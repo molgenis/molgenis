@@ -16,5 +16,7 @@ public interface StaticContentService
 
 	boolean submitContent(final String uniqueReference, final String content);
 
-	boolean isCurrentUserCanEdit();
+	boolean isCurrentUserCanEdit(String pluginId);
+
+	void checkPermissions(String pluginId);
 }
