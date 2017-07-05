@@ -16,7 +16,7 @@ function getRsqlFromConstraint(constraint) {
 }
 
 function getRsqlFromSimpleConstraint(constraint) {
-    const rsqlValue = constraint.arguments.constructor === Array ? '(' + constraint.arguments.map(toRsqlValue).join(',') + ')' : constraint.arguments
+    const rsqlValue = constraint.arguments.constructor === Array ? '(' + constraint.arguments.map(toRsqlValue).join(',') + ')' : toRsqlValue(constraint.arguments)
     return toRsqlValue(constraint.selector) + constraint.comparison + rsqlValue
 }
 
