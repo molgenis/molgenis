@@ -166,9 +166,12 @@ function toComplexRefOr(labels, constraint) {
 }
 
 function toComplexRef(labels, constraint) {
-    return {
-        'type': 'COMPLEX_REF',
-        'lines': toComplexRefOr(labels, constraint)
+    return constraint.operator && constraint.operator === 'AND' ? {
+      'type': 'COMPLEX_REF',
+      'lines': toComplexRefAnd(labels, constraint)
+    } : {
+      'type': 'COMPLEX_REF',
+      'lines': toComplexRefOr(labels, constraint)
     }
 }
 
