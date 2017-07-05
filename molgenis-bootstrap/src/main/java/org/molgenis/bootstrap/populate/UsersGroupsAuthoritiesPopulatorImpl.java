@@ -1,5 +1,6 @@
 package org.molgenis.bootstrap.populate;
 
+import com.google.common.collect.Streams;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountService;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
@@ -102,21 +104,33 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + UserAccountController.ID);
 
 		// allow all users to read meta data entities
-		List<String> entityTypeIds = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
-				L10N_STRING, FILE_META, OWNED);
-		Stream<GroupAuthority> entityGroupAuthorities = entityTypeIds.stream().map(entityTypeId ->
-		{
-			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
-			usersGroupAuthority.setGroup(allUsersGroup);
-			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityTypeId);
-			return usersGroupAuthority;
-		});
+		List<String> readEntityTypeIds = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
+				L10N_STRING, OWNED);
+
+		Stream<GroupAuthority> entityGroupReadAuthorities = readEntityTypeIds.stream()
+				.map(entityTypeId -> createUserGroupAuthority(allUsersGroup, entityTypeId,
+						AUTHORITY_ENTITY_READ_PREFIX));
+
+		// allow all users to write to FileMeta table
+		List<String> writeEntityTypeIds = newArrayList(FILE_META);
+		Stream<GroupAuthority> entityGroupWriteAuthorities = writeEntityTypeIds.stream()
+				.map(entityTypeId -> createUserGroupAuthority(allUsersGroup, entityTypeId,
+						AUTHORITY_ENTITY_WRITE_PREFIX));
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
 		dataService.add(USER_AUTHORITY, anonymousAuthority);
 		dataService.add(GROUP, allUsersGroup);
-		dataService
-				.add(GROUP_AUTHORITY, Stream.concat(Stream.of(usersGroupUserAccountAuthority), entityGroupAuthorities));
+		dataService.add(GROUP_AUTHORITY,
+				Streams.concat(Stream.of(usersGroupUserAccountAuthority), entityGroupReadAuthorities,
+						entityGroupWriteAuthorities));
+	}
+
+	private GroupAuthority createUserGroupAuthority(Group group, String entityTypeId, String rolePrefix)
+	{
+		GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
+		usersGroupAuthority.setGroup(group);
+		usersGroupAuthority.setRole(rolePrefix + entityTypeId);
+		return usersGroupAuthority;
 	}
 }
