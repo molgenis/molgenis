@@ -1,29 +1,20 @@
 package org.molgenis.standardsregistry;
 
-import org.junit.Before;
 import org.junit.Ignore;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
-import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
-import org.molgenis.standardsregistry.utils.StandardRegistryTestHarness;
 import org.molgenis.standardsregistry.utils.StandardRegistryTestHarnessConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,17 +32,15 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest 
 
     @Autowired
     private EntityTestHarness entityTestHarness;
-    @Autowired
-    private PackageFactory packageFactory;
+
     @Autowired
     private MetaDataService metaDataService;
 
-    @InjectMocks
-    private StandardsRegistryController standardRegistryController;
+    @Autowired
+    private PackageFactory packageFactory;
 
-    private List<Entity> entities;
-    private EntityType emd;
-    private Package pkg;
+    @Mock
+    private StandardsRegistryController standardRegistryController;
 
     private MockMvc mockMvc;
 
@@ -60,15 +49,8 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest 
     {
         MockitoAnnotations.initMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(standardRegistryController).build();
-        emd = entityTestHarness.createDynamicRefEntityType();
-//        pkg = packageFactory.create(StandardRegistryTestHarness.TEST_PACKAGE_NAME);
     }
 
-    @BeforeMethod
-    public void beforeMethod()
-    {
-//        when(metaDataService.getPackage(StandardRegistryTestHarness.TEST_PACKAGE_NAME)).thenReturn(pkg);
-    }
 
     @Ignore
     @Test
@@ -96,8 +78,18 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest 
     @Test
     public void testGetUml() throws Exception
     {
-//        this.mockMvc.perform(get(StandardsRegistryController.URI + "/uml").param("package", StandardRegistryTestHarness.TEST_PACKAGE_NAME));
-        //TODO-sido: Perform onExpect to test result of controller
+        String TEST_PACKAGE = "test-package";
+        Package pkg = packageFactory.create(TEST_PACKAGE);
+        when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
+        this.mockMvc.perform(get(StandardsRegistryController.URI + "/uml").param("package", TEST_PACKAGE)).andExpect(mvcResult -> {
+            if(mvcResult != null) {
+                System.out.println(mvcResult);
+//                mvcResult.getModelAndView().getView().getContentType();
+            } else {
+                System.out.println("no view is resolved");
+            }
+
+        });
     }
 
     @Ignore

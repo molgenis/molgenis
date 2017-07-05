@@ -1,11 +1,17 @@
 package org.molgenis.standardsregistry.services;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.EntityTestHarness;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.standardsregistry.model.*;
 import org.molgenis.standardsregistry.utils.StandardRegistryTestHarness;
 import org.molgenis.standardsregistry.utils.StandardRegistryTestHarnessConfig;
@@ -26,48 +32,37 @@ import static org.junit.Assert.assertEquals;
  * @author sido
  */
 @ContextConfiguration(classes = StandardRegistryTestHarnessConfig.class)
-public class StandardRegistryServiceTest extends AbstractMolgenisSpringTest {
+public class TreeNodeServiceTest extends AbstractMolgenisSpringTest {
 
-
+    @Autowired
+    private PackageFactory packageFactory;
     @Autowired
     private EntityTestHarness entityTestHarness;
     @Autowired
     private StandardRegistryTestHarness standardRegistryTestHarness;
 
-    @Mock
-    private StandardRegistryService standardRegistryService;
+    @Autowired
+    private TagService<LabeledResource, LabeledResource> tagService;
 
-
-    // models to test with
-    private final static String testPackageName = "test";
-    private List<StandardRegistryEntity> entities;
-    private PackageTreeNode packageTreeNode;
-    private EntityType emd;
-    private Package pkg;
-
-    private MockMvc mockMvc;
-
-    @BeforeClass
-    public void beforeClass()
-    {
-        MockitoAnnotations.initMocks(this);
-        this.mockMvc = MockMvcBuilders.standaloneSetup(standardRegistryService).build();
-
-        emd = entityTestHarness.createDynamicRefEntityType();
-        entities = standardRegistryTestHarness.createStandardRegistryEntities();
-        packageTreeNode = standardRegistryTestHarness.createPackageTreeNode();
-    }
-
-    @BeforeMethod
-    public void beforeMethod()
-    {
-        when(standardRegistryService.createPackageTreeNode(pkg)).thenReturn(packageTreeNode);
-    }
+    @Autowired
+    private TreeNodeService treeNodeService;
 
     @Test
     public void testCreatePackageTreeNode()
     {
-        PackageTreeNode packageTreeNode = standardRegistryService.createPackageTreeNode(pkg);
+        String TEST_PACKAGE = "test-package";
+        EntityType e1 = standardRegistryTestHarness.createEntityType(false);
+        Package pkg = packageFactory.create(TEST_PACKAGE);
+        pkg.set(PackageMetadata.ENTITY_TYPES, Lists.newArrayList(e1));
+
+        Multimap<Relation, LabeledResource> tags =  ArrayListMultimap.create();
+        tags.put(Relation.hasLowerValue, new LabeledResource("test-id", "test-label"));
+
+        pkg.getEntityTypes().forEach(entityType -> {
+            when(tagService.getTagsForAttribute(pkg.getEntityType(), entityType.getIdAttribute())).thenReturn(tags);
+        });
+
+        PackageTreeNode packageTreeNode = treeNodeService.createPackageTreeNode(pkg);
         assertEquals(true, packageTreeNode.getTitle().equalsIgnoreCase("testTreeNode"));
     }
 

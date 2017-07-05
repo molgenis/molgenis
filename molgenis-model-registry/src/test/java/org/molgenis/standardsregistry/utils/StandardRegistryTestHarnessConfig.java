@@ -9,6 +9,8 @@ import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.standardsregistry.services.MetaDataSearchService;
 import org.molgenis.standardsregistry.services.MetaDataSearchServiceImpl;
+import org.molgenis.standardsregistry.services.TreeNodeService;
+import org.molgenis.standardsregistry.services.TreeNodeServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -23,28 +25,39 @@ import static org.mockito.Mockito.mock;
 public class StandardRegistryTestHarnessConfig {
 
     @Bean
-    public MetaDataService metaDataService() {
+    public MetaDataService metaDataService()
+    {
         return mock(MetaDataService.class);
     }
 
     @Bean
-    public DataService dataService() {
+    public DataService dataService()
+    {
         return mock(DataService.class);
     }
 
     @Bean
-    public TagService<LabeledResource, LabeledResource> tagService() {
+    public TagService<LabeledResource, LabeledResource> tagService()
+    {
         return mock(UntypedTagService.class);
     }
 
     @Bean
-    public MolgenisPermissionService molgenisPermissionService() {
+    public MolgenisPermissionService molgenisPermissionService()
+    {
         return mock(MolgenisPermissionService.class);
     }
 
     @Bean
-    public MetaDataSearchService metaDataSearchService() {
+    public MetaDataSearchService metaDataSearchService()
+    {
         return new MetaDataSearchServiceImpl(dataService(), metaDataService(), tagService(), molgenisPermissionService());
+    }
+
+    @Bean
+    public TreeNodeService treeNodeService()
+    {
+        return new TreeNodeServiceImpl(tagService());
     }
 
 }

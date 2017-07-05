@@ -1,23 +1,13 @@
 package org.molgenis.standardsregistry.services;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import org.molgenis.data.DataService;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.standardsregistry.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -29,13 +19,13 @@ import java.util.*;
  * @author sido
  */
 @Service
-public class StandardRegistryServiceImpl implements StandardRegistryService {
+public class TreeNodeServiceImpl implements TreeNodeService {
 
 
     private final TagService<LabeledResource, LabeledResource> tagService;
 
     @Autowired
-    public StandardRegistryServiceImpl(TagService<LabeledResource, LabeledResource> tagService)
+    public TreeNodeServiceImpl(TagService<LabeledResource, LabeledResource> tagService)
     {
         this.tagService = Objects.requireNonNull(tagService);
     }

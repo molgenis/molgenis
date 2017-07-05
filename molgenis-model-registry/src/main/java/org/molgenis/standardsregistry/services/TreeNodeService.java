@@ -7,13 +7,11 @@ import java.util.List;
 
 /**
  *
- * <p>Service to create responses for model registry.</p>
+ * <p>Service to create treenodes for model registry.</p>
  *
  * @author sido
  */
-public interface StandardRegistryService {
-
-
+public interface TreeNodeService {
 
     /**
      *

@@ -7,7 +7,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.standardsregistry.services.MetaDataSearchService;
-import org.molgenis.standardsregistry.services.StandardRegistryService;
+import org.molgenis.standardsregistry.services.TreeNodeService;
 import org.molgenis.standardsregistry.model.*;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
@@ -46,15 +46,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	// Services for model-registry use only
-	private final StandardRegistryService standardRegistryService;
+	private final TreeNodeService treeNodeService;
 	private final MetaDataSearchService metaDataSearchService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService, TagService<LabeledResource, LabeledResource> tagService, StandardRegistryService standardRegistryService)
+	public StandardsRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService, TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService)
 	{
 		super(URI);
 		this.metaDataSearchService = Objects.requireNonNull(metaDataSearchService);
-		this.standardRegistryService = Objects.requireNonNull(standardRegistryService);
+		this.treeNodeService = Objects.requireNonNull(treeNodeService);
 		this.metaDataService = Objects.requireNonNull(metaDataService);
 		this.tagService = Objects.requireNonNull(tagService);
 
@@ -172,6 +172,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null) return null;
 
-		return Collections.singletonList(standardRegistryService.createPackageTreeNode(molgenisPackage));
+		return Collections.singletonList(treeNodeService.createPackageTreeNode(molgenisPackage));
 	}
 }
