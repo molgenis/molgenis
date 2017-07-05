@@ -1,5 +1,7 @@
 package org.molgenis.standardsregistry.services;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -8,34 +10,142 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.SemanticTag;
+import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.standardsregistry.model.PackageSearchResultItem;
+import org.molgenis.standardsregistry.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
-@Component
+@Service
 public class MetaDataSearchServiceImpl implements MetaDataSearchService
 {
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
+	private final TagService<LabeledResource, LabeledResource> tagService;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	public MetaDataSearchServiceImpl(DataService dataService, MetaDataService metaDataService)
+	public MetaDataSearchServiceImpl(DataService dataService, MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.metaDataService = metaDataService;
+		this.tagService = tagService;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Override
-	@RunAsSystem
-	public List<PackageSearchResultItem> findRootPackages(String searchTerm)
+	public PackageSearchResponse search(PackageSearchRequest packageSearchRequest)
+	{
+		String searchQuery = packageSearchRequest.getQuery();
+		List<PackageResponse> packageResponses = Lists.newArrayList();
+
+		List<PackageSearchResultItem> searchResults = findRootPackages(searchQuery);
+		for (PackageSearchResultItem searchResult : searchResults)
+		{
+			Package p = searchResult.getPackageFound();
+			List<StandardRegistryEntity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
+			List<StandardRegistryEntity> entitiesInPackageFiltered = Lists.newArrayList(entitiesInPackageUnfiltered.stream().filter(entity -> {
+				if (entity.isAbtract())
+				{
+					return false;
+				}
+
+				String entityTypeId = entity.getName();
+
+				// Check read permission
+				if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ)) {
+					return false;
+				}
+
+				// Check has data
+				if (!dataService.hasRepository(entityTypeId) || dataService.count(entityTypeId, new QueryImpl<>()) == 0)
+				{
+					return false;
+				}
+
+				return true;
+			}).collect(Collectors.toList()));
+
+			PackageResponse pr = new PackageResponse(p.getId(), p.getLabel(), p.getDescription(), searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
+			packageResponses.add(pr);
+		}
+
+		int total = packageResponses.size();
+		if (total > 0)
+		{
+			if (packageSearchRequest.getOffset() != null)
+			{
+				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(), packageResponses.size());
+			}
+
+			if (packageSearchRequest.getNum() != null && packageResponses.size() > packageSearchRequest.getNum())
+			{
+				packageResponses = packageResponses.subList(0, packageSearchRequest.getNum());
+			}
+		}
+
+		int offset = packageSearchRequest.getOffset() != null ? packageSearchRequest.getOffset() : 0;
+		int num = packageSearchRequest.getNum() != null ? packageSearchRequest.getNum() : packageResponses.size();
+
+		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total,
+				packageResponses);
+
+		return packageSearchResponse;
+	}
+
+	@Override
+	public List<StandardRegistryTag> getTagsForPackage(Package p)
+	{
+		List<StandardRegistryTag> tags = Lists.newArrayList();
+
+		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
+		{
+			tags.add(new StandardRegistryTag(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation().toString()));
+		}
+
+		return tags;
+	}
+
+	@Override
+	public List<StandardRegistryEntity> getEntitiesInPackage(String packageName)
+	{
+		List<StandardRegistryEntity> entiesForThisPackage = new ArrayList<>();
+		Package aPackage = metaDataService.getPackage(packageName);
+		getEntitiesInPackageRec(aPackage, entiesForThisPackage);
+		return entiesForThisPackage;
+	}
+
+	private void getEntitiesInPackageRec(Package aPackage, List<StandardRegistryEntity> entiesForThisPackage)
+	{
+		for (EntityType emd : aPackage.getEntityTypes())
+		{
+			entiesForThisPackage.add(new StandardRegistryEntity(emd.getId(), emd.getLabel(), emd.isAbstract()));
+		}
+		Iterable<Package> subPackages = aPackage.getChildren();
+		if (subPackages != null)
+		{
+			for (Package subPackage : subPackages)
+			{
+				getEntitiesInPackageRec(subPackage, entiesForThisPackage);
+			}
+		}
+	}
+
+	private List<PackageSearchResultItem> findRootPackages(String searchTerm)
 	{
 		List<PackageSearchResultItem> results = Lists.newArrayList();
 

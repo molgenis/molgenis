@@ -18,6 +18,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.standardsregistry.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
@@ -27,122 +28,16 @@ import java.util.*;
  *
  * @author sido
  */
-@Component
+@Service
 public class StandardRegistryServiceImpl implements StandardRegistryService {
 
-    private final MetaDataService metaDataService;
+
     private final TagService<LabeledResource, LabeledResource> tagService;
-    private final MetaDataSearchService metaDataSearchService;
-    private final MolgenisPermissionService molgenisPermissionService;
-    private final DataService dataService;
 
     @Autowired
-    public StandardRegistryServiceImpl(MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService, MolgenisPermissionService molgenisPermissionService, DataService dataService)
+    public StandardRegistryServiceImpl(TagService<LabeledResource, LabeledResource> tagService)
     {
-        this.metaDataService = Objects.requireNonNull(metaDataService);
         this.tagService = Objects.requireNonNull(tagService);
-        this.metaDataSearchService = Objects.requireNonNull(metaDataSearchService);
-        this.molgenisPermissionService = Objects.requireNonNull(molgenisPermissionService);
-        this.dataService = Objects.requireNonNull(dataService);
-    }
-
-    @Override
-    public PackageSearchResponse search(PackageSearchRequest packageSearchRequest)
-    {
-        String searchQuery = packageSearchRequest.getQuery();
-        List<PackageResponse> packageResponses = Lists.newArrayList();
-
-        List<PackageSearchResultItem> searchResults = metaDataSearchService.findRootPackages(searchQuery);
-        for (PackageSearchResultItem searchResult : searchResults)
-        {
-            Package p = searchResult.getPackageFound();
-            List<StandardRegistryEntity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
-            List<StandardRegistryEntity> entitiesInPackageFiltered = Lists.newArrayList(Iterables.filter(entitiesInPackageUnfiltered, new Predicate<StandardRegistryEntity>()
-            {
-                @Override
-                public boolean apply(StandardRegistryEntity entity)
-                {
-                    if (entity.isAbtract()) return false;
-
-                    String entityTypeId = entity.getName();
-
-                    // Check read permission
-                    if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
-                        return false;
-
-                    // Check has data
-                    if (!dataService.hasRepository(entityTypeId)
-                            || dataService.count(entityTypeId, new QueryImpl<>()) == 0) return false;
-
-                    return true;
-                }
-            }));
-
-            PackageResponse pr = new PackageResponse(p.getId(), p.getLabel(), p.getDescription(),
-                    searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
-            packageResponses.add(pr);
-        }
-
-        int total = packageResponses.size();
-        if (total > 0)
-        {
-            if (packageSearchRequest.getOffset() != null)
-            {
-                packageResponses = packageResponses.subList(packageSearchRequest.getOffset(), packageResponses.size());
-            }
-
-            if (packageSearchRequest.getNum() != null && packageResponses.size() > packageSearchRequest.getNum())
-            {
-                packageResponses = packageResponses.subList(0, packageSearchRequest.getNum());
-            }
-        }
-
-        int offset = packageSearchRequest.getOffset() != null ? packageSearchRequest.getOffset() : 0;
-        int num = packageSearchRequest.getNum() != null ? packageSearchRequest.getNum() : packageResponses.size();
-
-        PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total,
-                packageResponses);
-
-        return packageSearchResponse;
-    }
-
-    @Override
-    public List<StandardRegistryTag> getTagsForPackage(Package p)
-    {
-        List<StandardRegistryTag> tags = Lists.newArrayList();
-
-        for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
-        {
-            tags.add(new StandardRegistryTag(tag.getObject().getLabel(), tag.getObject().getIri(),
-                    tag.getRelation().toString()));
-        }
-
-        return tags;
-    }
-
-    @Override
-    public List<StandardRegistryEntity> getEntitiesInPackage(String packageName)
-    {
-        List<StandardRegistryEntity> entiesForThisPackage = new ArrayList<StandardRegistryEntity>();
-        Package aPackage = metaDataService.getPackage(packageName);
-        getEntitiesInPackageRec(aPackage, entiesForThisPackage);
-        return entiesForThisPackage;
-    }
-
-    private void getEntitiesInPackageRec(Package aPackage, List<StandardRegistryEntity> entiesForThisPackage)
-    {
-        for (EntityType emd : aPackage.getEntityTypes())
-        {
-            entiesForThisPackage.add(new StandardRegistryEntity(emd.getId(), emd.getLabel(), emd.isAbstract()));
-        }
-        Iterable<Package> subPackages = aPackage.getChildren();
-        if (subPackages != null)
-        {
-            for (Package subPackage : subPackages)
-            {
-                getEntitiesInPackageRec(subPackage, entiesForThisPackage);
-            }
-        }
     }
 
     @Override

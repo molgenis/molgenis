@@ -6,6 +6,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.standardsregistry.services.MetaDataSearchService;
 import org.molgenis.standardsregistry.services.StandardRegistryService;
 import org.molgenis.standardsregistry.model.*;
 import org.molgenis.ui.MolgenisPluginController;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -45,14 +47,17 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	// Services for model-registry use only
 	private final StandardRegistryService standardRegistryService;
+	private final MetaDataSearchService metaDataSearchService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, StandardRegistryService standardRegistryService)
+	public StandardsRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService, TagService<LabeledResource, LabeledResource> tagService, StandardRegistryService standardRegistryService)
 	{
 		super(URI);
-		this.metaDataService = metaDataService;
-		this.tagService = tagService;
-		this.standardRegistryService = standardRegistryService;
+		this.metaDataSearchService = Objects.requireNonNull(metaDataSearchService);
+		this.standardRegistryService = Objects.requireNonNull(standardRegistryService);
+		this.metaDataService = Objects.requireNonNull(metaDataService);
+		this.tagService = Objects.requireNonNull(tagService);
+
 	}
 
 	@RequestMapping(method = GET)
@@ -94,7 +99,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		packageSearchRequest.setOffset(0);
 		packageSearchRequest.setNum(3);
 
-		PackageSearchResponse packageSearchResponse = standardRegistryService.search(packageSearchRequest);
+		PackageSearchResponse packageSearchResponse = metaDataSearchService.search(packageSearchRequest);
 		if (packageSearchRequest != null)
 		{
 			model.addAttribute("packageSearchResponse", gson.toJson(packageSearchResponse));
@@ -107,7 +112,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	@ResponseBody
 	public PackageSearchResponse search(@RequestAttribute PackageSearchRequest packageSearchRequest)
 	{
-		return standardRegistryService.search(packageSearchRequest);
+		return metaDataSearchService.search(packageSearchRequest);
 	}
 
 	@RequestMapping(value = "/details", method = GET)
@@ -149,11 +154,17 @@ public class StandardsRegistryController extends MolgenisPluginController
 		if (molgenisPackage == null) return null;
 
 		return new PackageResponse(molgenisPackage.getId(), molgenisPackage.getLabel(),
-				molgenisPackage.getDescription(), null, standardRegistryService.getEntitiesInPackage(molgenisPackage.getId()),
-				standardRegistryService.getTagsForPackage(molgenisPackage));
+				molgenisPackage.getDescription(), null, metaDataSearchService.getEntitiesInPackage(molgenisPackage.getId()),
+				metaDataSearchService.getTagsForPackage(molgenisPackage));
 	}
 
-	/* PACKAGE TREE */
+	/**
+	 *
+	 * <p>PackageTree</p>
+	 *
+	 * @param packageName
+	 * @return
+	 */
 	@RequestMapping(value = "/getTreeData", method = GET)
 	@ResponseBody
 	public Collection<PackageTreeNode> getTree(@RequestParam(value = "package") String packageName)

@@ -13,31 +13,7 @@ import java.util.List;
  */
 public interface StandardRegistryService {
 
-    /**
-     *
-     *
-     *
-     * @param packageSearchRequest
-     * @return {@link PackageSearchResponse}
-     */
-    PackageSearchResponse search(PackageSearchRequest packageSearchRequest);
 
-    /**
-     *
-     * @param {@link Package}
-     * @return {@link List<StandardRegistryTag>}
-     */
-    List<StandardRegistryTag> getTagsForPackage(Package pkg);
-
-
-    /**
-     *
-     *
-     *
-     * @param packageName
-     * @return {@List<StandardRegistryEntity>}
-     */
-    List<StandardRegistryEntity> getEntitiesInPackage(String packageName);
 
     /**
      *
