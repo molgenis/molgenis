@@ -36,11 +36,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public static final String ID = "standardsregistry";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final String VIEW_NAME = "model-standardsregistry";
-	private static final String VIEW_NAME_DETAILS = "model-standardsregistry_details";
-	private static final String VIEW_NAME_DOCUMENTATION = "model-standardsregistry_docs";
-	private static final String VIEW_NAME_DOCUMENTATION_EMBED = "model-standardsregistry_docs-body";
-	private static final String VIEW_NAME_UML = "model-standardsregistry_uml";
+	private static final String VIEW_NAME = "view-model-standardsregistry";
+	private static final String VIEW_NAME_DETAILS = "view-model-standardsregistry_details";
+	private static final String VIEW_NAME_DOCUMENTATION = "view-model-standardsregistry_docs";
+	private static final String VIEW_NAME_DOCUMENTATION_EMBED = "view-model-standardsregistry_docs-macros";
+	private static final String VIEW_NAME_UML = "view-model-standardsregistry_uml";
 
 	private final MetaDataService metaDataService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
@@ -61,8 +61,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound,
-			Model model)
+	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound, Model model)
 	{
 		if (showPackageNotFound != null && showPackageNotFound.equalsIgnoreCase("true"))
 		{
