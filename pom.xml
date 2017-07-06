@@ -874,6 +874,7 @@
         <module>molgenis-metadata-manager</module>
         <module>molgenis-model-registry</module>
         <module>molgenis-navigator</module>
+        <module>molgenis-one-click-importer</module>
         <module>molgenis-ontology-core</module>
         <module>molgenis-ontology</module>
         <module>molgenis-pathways</module>
