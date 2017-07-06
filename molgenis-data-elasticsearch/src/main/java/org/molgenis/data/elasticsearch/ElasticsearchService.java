@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Streams;
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -37,6 +38,7 @@ import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing
 public class ElasticsearchService implements SearchService, IndexService
 {
 	private static final int BATCH_SIZE = 1000;
+	public static final int MAX_BATCH_SIZE = 10000;
 
 	private final ClientFacade clientFacade;
 	private final ContentGenerators contentGenerators;
@@ -112,17 +114,38 @@ public class ElasticsearchService implements SearchService, IndexService
 	public Stream<Object> search(EntityType entityType, Query<Entity> q)
 	{
 		int from = q.getOffset();
-		int size = q.getPageSize() > 0 ? q.getPageSize() : 10000;
-		return search(entityType, q, from, size);
+
+		return search(entityType, q, from, q.getPageSize());
 	}
 
-	private Stream<Object> search(EntityType entityType, Query<Entity> q, int from, int size)
+	private Stream<Object> search(EntityType entityType, Query<Entity> q, int offset, int pageSize)
 	{
 		QueryBuilder query = contentGenerators.createQuery(q, entityType);
 		Sort sort = q.getSort() != null ? contentGenerators.createSorts(q.getSort(), entityType) : null;
 		Index index = contentGenerators.createIndex(entityType);
-		SearchHits searchHits = clientFacade.search(query, from, size, sort, index);
-		return toEntityIds(entityType, searchHits.getHits().stream().map(SearchHit::getId));
+		Stream<SearchHit> searchHits = Stream.empty();
+
+		boolean done = false;
+		int currentOffset;
+		int i = 0;
+		while (!done)
+		{
+			int batchSize = pageSize < MAX_BATCH_SIZE && pageSize != 0 ? pageSize : MAX_BATCH_SIZE;
+			currentOffset = offset + (i * MAX_BATCH_SIZE);
+
+			SearchHits currentSearchHits = clientFacade.search(query, currentOffset, batchSize, sort, index);
+			searchHits = Streams.concat(searchHits, currentSearchHits.getHits().stream());
+
+			if (currentSearchHits.getHits().size() < MAX_BATCH_SIZE)
+			{
+				done = true;
+			}
+
+			if (pageSize != 0) pageSize -= MAX_BATCH_SIZE;
+			i++;
+		}
+
+		return toEntityIds(entityType, searchHits.map(SearchHit::getId));
 	}
 
 	private static Stream<Object> toEntityIds(EntityType entityType, Stream<String> documentIdStream)
@@ -157,15 +180,13 @@ public class ElasticsearchService implements SearchService, IndexService
 	@Override
 	public AggregateResult aggregate(final EntityType entityType, AggregateQuery aggregateQuery)
 	{
-		List<AggregationBuilder> aggregationList = contentGenerators
-				.createAggregations(aggregateQuery.getAttributeX(), aggregateQuery.getAttributeY(),
-						aggregateQuery.getAttributeDistinct());
+		List<AggregationBuilder> aggregationList = contentGenerators.createAggregations(aggregateQuery.getAttributeX(),
+				aggregateQuery.getAttributeY(), aggregateQuery.getAttributeDistinct());
 		QueryBuilder query = contentGenerators.createQuery(aggregateQuery.getQuery(), entityType);
 		Index index = contentGenerators.createIndex(entityType);
 		Aggregations aggregations = clientFacade.aggregate(aggregationList, query, index);
-		return new AggregateResponseParser()
-				.parseAggregateResponse(aggregateQuery.getAttributeX(), aggregateQuery.getAttributeY(),
-						aggregateQuery.getAttributeDistinct(), aggregations, dataService);
+		return new AggregateResponseParser().parseAggregateResponse(aggregateQuery.getAttributeX(),
+				aggregateQuery.getAttributeY(), aggregateQuery.getAttributeDistinct(), aggregations, dataService);
 	}
 
 	public Explanation explain(EntityType entityType, Object entityId, Query<Entity> q)
@@ -230,6 +251,6 @@ public class ElasticsearchService implements SearchService, IndexService
 	{
 		Stream<Object> entityIds = entities.map(Entity::getIdValue);
 		Iterators.partition(entityIds.iterator(), BATCH_SIZE)
-				.forEachRemaining(batchEntityIds -> deleteAll(entityType, batchEntityIds.stream()));
+				 .forEachRemaining(batchEntityIds -> deleteAll(entityType, batchEntityIds.stream()));
 	}
 }
