@@ -40,6 +40,6 @@
 
 <script>
   export default {
-    name: 'molgenis-app'
+    name: 'molgenis-navigator'
   }
 </script>
