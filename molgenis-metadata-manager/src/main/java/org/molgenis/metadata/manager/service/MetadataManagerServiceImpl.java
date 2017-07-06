@@ -1,4 +1,4 @@
-package org.molgenis.metadata.manager.controller;
+package org.molgenis.metadata.manager.service;
 
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.UnknownEntityException;
@@ -10,61 +10,41 @@ import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
 import org.molgenis.metadata.manager.model.*;
-import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.util.ErrorMessageResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
-import static org.molgenis.metadata.manager.controller.MetadataManagerFormEditingController.URI;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-@Controller
-@RequestMapping(URI)
-public class MetadataManagerFormEditingController extends MolgenisPluginController
+@Component
+public class MetadataManagerServiceImpl implements MetadataManagerService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerFormEditingController.class);
-
-	public static final String URI = PLUGIN_URI_PREFIX + "metadata-manager-service";
-
 	private final MetaDataService metadataService;
 	private final PackageMapper packageMapper;
 	private final EntityTypeMapper entityTypeMapper;
 	private final AttributeMapper attributeMapper;
 
-	public MetadataManagerFormEditingController(MetaDataService metadataService, PackageMapper packageMapper,
+	public MetadataManagerServiceImpl(MetaDataService metadataService, PackageMapper packageMapper,
 			EntityTypeMapper entityTypeMapper, AttributeMapper attributeMapper)
 	{
-		super(URI);
 		this.metadataService = requireNonNull(metadataService);
 		this.packageMapper = requireNonNull(packageMapper);
 		this.entityTypeMapper = requireNonNull(entityTypeMapper);
 		this.attributeMapper = requireNonNull(attributeMapper);
 	}
 
-	@RequestMapping(value = "/editorPackages", method = GET)
-	@ResponseBody
-	public List<EditorPackageIdentifier> getPackages()
+	@Override
+	public List<EditorPackageIdentifier> getEditorPackages()
 	{
 		return createPackageListResponse(metadataService.getPackages());
 	}
 
-	@RequestMapping(value = "/entityType/{id:.+}", method = GET)
-	@ResponseBody
-	public EditorEntityTypeResponse getEntityType(@PathVariable("id") String entityTypeId)
+	@Override
+	public EditorEntityTypeResponse getEditorEntityType(String entityTypeId)
 	{
-		// metadataService.getEntityType cannot be used due to https://github.com/molgenis/molgenis/issues/5783
+		// metadataService.getEditorEntityType cannot be used due to https://github.com/molgenis/molgenis/issues/5783
 		EntityType entityType = metadataService
 				.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class).findOneById(entityTypeId);
 
@@ -76,44 +56,23 @@ public class MetadataManagerFormEditingController extends MolgenisPluginControll
 		return createEntityTypeResponse(entityType);
 	}
 
-	@RequestMapping(value = "/create/entityType", method = GET)
-	@ResponseBody
-	public EditorEntityTypeResponse createEntityType()
+	@Override
+	public EditorEntityTypeResponse createEditorEntityType()
 	{
 		return createEntityTypeResponse();
 	}
 
-	@RequestMapping(value = "/entityType", method = POST, consumes = "application/json")
-	@ResponseStatus(OK)
-	public void upsertEntityType(@RequestBody EditorEntityType editorEntityType)
+	@Override
+	public void upsertEntityType(EditorEntityType editorEntityType)
 	{
 		EntityType entityType = entityTypeMapper.toEntityType(editorEntityType);
 		metadataService.upsertEntityTypes(newArrayList(entityType));
 	}
 
-	@RequestMapping(value = "/create/attribute", method = GET)
-	@ResponseBody
-	public EditorAttributeResponse createAttribute()
+	@Override
+	public EditorAttributeResponse createEditorAttribute()
 	{
 		return createAttributeResponse();
-	}
-
-	@ExceptionHandler(UnknownEntityException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
 	private List<EditorPackageIdentifier> createPackageListResponse(List<Package> packages)
