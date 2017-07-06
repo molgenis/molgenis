@@ -2,7 +2,9 @@ package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.EntityPopulator;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
@@ -49,21 +51,21 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	public void isCurrentUserCanEdit_SuperUser()
 	{
 		this.setSecurityContextSuperUser();
-		assertTrue(this.staticContentService.isCurrentUserCanEdit());
+		assertTrue(this.staticContentService.isCurrentUserCanEdit("home"));
 	}
 
 	@Test
 	public void isCurrentUserCanEdit_NonSuperUser()
 	{
 		this.setSecurityContextNonSuperUser();
-		assertFalse(this.staticContentService.isCurrentUserCanEdit());
+		assertFalse(this.staticContentService.isCurrentUserCanEdit("home"));
 	}
 
 	@Test
 	public void isCurrentUserCanEdit_AnonymousUsers()
 	{
 		this.setSecurityContextAnonymousUsers();
-		assertFalse(this.staticContentService.isCurrentUserCanEdit());
+		assertFalse(this.staticContentService.isCurrentUserCanEdit("home"));
 	}
 
 	@Test
@@ -124,6 +126,11 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	public static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
+		public MolgenisPermissionService molgenisPermissionService(){
+			return new MolgenisPermissionServiceImpl();
+		}
+
+		@Bean
 		public StaticContentFactory staticContentFactory()
 		{
 			return new StaticContentFactory(mock(StaticContentMeta.class), mock(EntityPopulator.class));
@@ -132,7 +139,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentService staticContentService()
 		{
-			return new StaticContentServiceImpl(dataService(), staticContentFactory());
+			return new StaticContentServiceImpl(dataService(), staticContentFactory(), molgenisPermissionService());
 		}
 
 		@Bean
