@@ -1,4 +1,4 @@
-<#include "view-standardsregistry_docs-macros.ftl">
+<#include "view-model-standardsregistry_docs-macros.ftl">
 <div class="row">
     <div class="col-md-12 hidden-print">
         <button id="search-results-back-btn" class="btn btn-default btn-md pull-left"><span

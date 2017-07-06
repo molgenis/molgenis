@@ -20,7 +20,7 @@
     <script src="/js/standardsregistry-doc.js"></script>
 </head>
 <body>
-<#include "view-standardsregistry_docs-macros.ftl">
+<#include "view-model-standardsregistry_docs-macros.ftl">
 <div class="col-md-12 hidden-print">
     <button id="print-doc-btn" class="btn btn-default btn-md pull-right"><span class="glyphicon glyphicon-print"></span>
     </button>
