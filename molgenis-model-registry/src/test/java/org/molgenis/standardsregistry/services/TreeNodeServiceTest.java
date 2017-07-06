@@ -3,30 +3,23 @@ package org.molgenis.standardsregistry.services;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.EntityTestHarness;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.standardsregistry.model.*;
+import org.molgenis.standardsregistry.model.PackageTreeNode;
 import org.molgenis.standardsregistry.utils.StandardRegistryTestHarness;
 import org.molgenis.standardsregistry.utils.StandardRegistryTestHarnessConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
-
-import static org.mockito.Mockito.when;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 /**
  * @author sido
@@ -36,8 +29,6 @@ public class TreeNodeServiceTest extends AbstractMolgenisSpringTest {
 
     @Autowired
     private PackageFactory packageFactory;
-    @Autowired
-    private EntityTestHarness entityTestHarness;
     @Autowired
     private StandardRegistryTestHarness standardRegistryTestHarness;
 
@@ -63,7 +54,7 @@ public class TreeNodeServiceTest extends AbstractMolgenisSpringTest {
         });
 
         PackageTreeNode packageTreeNode = treeNodeService.createPackageTreeNode(pkg);
-        assertEquals(true, packageTreeNode.getTitle().equalsIgnoreCase("testTreeNode"));
+        assertEquals(true, packageTreeNode.getTitle().equalsIgnoreCase("test-package"));
     }
 
 }
