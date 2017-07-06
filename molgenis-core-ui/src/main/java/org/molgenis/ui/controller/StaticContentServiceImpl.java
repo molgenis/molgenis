@@ -90,7 +90,7 @@ public class StaticContentServiceImpl implements StaticContentService
 
 	public void checkPermissions(String pluginId){
 		if(!this.isCurrentUserCanEdit(pluginId)){
-			throw new MolgenisDataAccessException("No write permissions on static content");
+			throw new MolgenisDataAccessException("No write permissions on static content page");
 		}
 	}
 }
