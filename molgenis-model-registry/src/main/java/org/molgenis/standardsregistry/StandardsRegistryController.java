@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -89,6 +90,14 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return VIEW_NAME_DOCUMENTATION_EMBED;
 	}
 
+	/**
+	 *
+	 *
+	 *
+	 * @param packageSearchValue
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/search", method = GET)
 	public String search(@RequestParam("packageSearchValue") String packageSearchValue, Model model)
 	{
@@ -107,9 +116,16 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return VIEW_NAME;
 	}
 
+	/**
+	 *
+	 * <p>Only at the initialization of the model-registry.</p>
+	 *
+	 * @param packageSearchRequest
+	 * @return
+	 */
 	@RequestMapping(value = "/search", method = POST)
 	@ResponseBody
-	public PackageSearchResponse search(@RequestAttribute PackageSearchRequest packageSearchRequest)
+	public PackageSearchResponse search(@Valid @RequestBody PackageSearchRequest packageSearchRequest)
 	{
 		return metaDataSearchService.search(packageSearchRequest);
 	}
