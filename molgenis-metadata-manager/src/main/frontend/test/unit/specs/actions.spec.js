@@ -39,7 +39,7 @@ describe('actions', () => {
 
     it('should retrieve all Packages and store them in the state via a mutation', done => {
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/editorPackages')).thenResolve(response)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/editorPackages')).thenResolve(response)
       td.replace(api, 'get', get)
 
       testAction(actions.__GET_PACKAGES__, null, {}, [{ type: SET_PACKAGES, payload: response }], [], done)
@@ -47,7 +47,7 @@ describe('actions', () => {
 
     it('should fail and create an alert in the state via a mutation', done => {
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/editorPackages')).thenReject(rejection)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/editorPackages')).thenReject(rejection)
       td.replace(api, 'get', get)
 
       testAction(actions.__GET_PACKAGES__, null, {}, [{ type: CREATE_ALERT, payload: alertPayload }], [], done)
@@ -124,7 +124,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/entityType/' + entityTypeId)).thenResolve(response)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/entityType/' + entityTypeId)).thenResolve(response)
       td.replace(api, 'get', get)
 
       const payload = toEntityType(response.entityType)
@@ -137,7 +137,7 @@ describe('actions', () => {
 
     it('should fail and create an alert in the state via a mutation', done => {
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/entityType/' + entityTypeId)).thenReject(rejection)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/entityType/' + entityTypeId)).thenReject(rejection)
       td.replace(api, 'get', get)
 
       testAction(actions.__GET_EDITOR_ENTITY_TYPE__, entityTypeId, {}, [{
@@ -160,7 +160,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/create/entityType')).thenResolve(response)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/create/entityType')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const payload = {...toEntityType(response.entityType), isNew: true}
@@ -172,7 +172,7 @@ describe('actions', () => {
 
     it('should fail and create an alert in the state via a mutation', done => {
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/create/entityType')).thenReject(rejection)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/create/entityType')).thenReject(rejection)
       td.replace(api, 'get', get)
 
       testAction(actions.__CREATE_ENTITY_TYPE__, null, {}, [{ type: CREATE_ALERT, payload: alertPayload }], [], done)
@@ -226,7 +226,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/create/attribute')).thenResolve(response)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/create/attribute')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const attribute = {...toAttribute(response.attribute), isNew: true}
@@ -242,7 +242,7 @@ describe('actions', () => {
 
     it('should fail and create an alert in the state via a mutation', done => {
       const get = td.function('api.get')
-      td.when(get({ apiUrl: '/metadata-manager-service' }, '/create/attribute')).thenReject(rejection)
+      td.when(get({ apiUrl: '/plugin/metadata-manager' }, '/create/attribute')).thenReject(rejection)
       td.replace(api, 'get', get)
 
       testAction(actions.__CREATE_ATTRIBUTE__, null, {}, [{
@@ -262,7 +262,7 @@ describe('actions', () => {
       }
 
       const post = td.function('api.post')
-      td.when(post({ apiUrl: '/metadata-manager-service' }, '/entityType', editorEntityType)).thenResolve({})
+      td.when(post({ apiUrl: '/plugin/metadata-manager' }, '/entityType', editorEntityType)).thenResolve({})
       td.replace(api, 'post', post)
 
       const payload = {
@@ -282,7 +282,7 @@ describe('actions', () => {
       }
 
       const post = td.function('api.post')
-      td.when(post({ apiUrl: '/metadata-manager-service' }, '/entityType', editorEntityType)).thenReject(rejection)
+      td.when(post({ apiUrl: '/plugin/metadata-manager' }, '/entityType', editorEntityType)).thenReject(rejection)
       td.replace(api, 'post', post)
 
       testAction(actions.__SAVE_EDITOR_ENTITY_TYPE__, null, state, [{
