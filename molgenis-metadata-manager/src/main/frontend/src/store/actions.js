@@ -1,5 +1,5 @@
 // @flow
-import { get, post, callApi } from '@molgenis/molgenis-api-client'
+import { get, post, delete_ } from '@molgenis/molgenis-api-client'
 
 import {
   UPDATE_EDITOR_ENTITY_TYPE,
@@ -78,43 +78,31 @@ export default {
    * Retrieve all Packages and filter on non-system Packages
    */
   [GET_PACKAGES] ({commit}: { commit: Function }) {
-    get({apiUrl: '/plugin/metadata-manager'}, '/editorPackages')
-      .then(response => {
-        commit(SET_PACKAGES, response)
-      }, error => {
-        commit(CREATE_ALERT, {
-          type: 'error',
-          message: error.errors[0].message
-        })
-      })
+    get('/plugin/metadata-manager/editorPackages').then(response => {
+      commit(SET_PACKAGES, response)
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error.toString() + ' packages'})
+    })
   },
   /**
    * Retrieve all EntityTypes and filter on non-system EntityTypes
    */
   [GET_ENTITY_TYPES] ({commit}: { commit: Function }) {
-    get({apiUrl: '/api'}, '/v2/sys_md_EntityType?num=10000')
-      .then(response => {
-        commit(SET_ENTITY_TYPES, response.items)
-      }, error => {
-        commit(CREATE_ALERT, {
-          type: 'error',
-          message: error.errors[0].message
-        })
-      })
+    get('/api/v2/sys_md_EntityType?num=10000').then(response => {
+      commit(SET_ENTITY_TYPES, response.items)
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error.toString()})
+    })
   },
   /**
    * Retrieve all Attribute types
    */
   [GET_ATTRIBUTE_TYPES] ({commit}: { commit: Function }) {
-    get({apiUrl: '/api'}, '/v2/sys_md_Attribute/meta/type')
-      .then(response => {
-        commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map((type) => type.toUpperCase()))
-      }, error => {
-        commit(CREATE_ALERT, {
-          type: 'error',
-          message: error.errors[0].message
-        })
-      })
+    get('/api/v2/sys_md_Attribute/meta/type').then(response => {
+      commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map((type) => type.toUpperCase()))
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error.toString() + ' attribute types'})
+    })
   },
   /**
    * Retrieve EditorEntityType based on EntityType ID
@@ -122,15 +110,11 @@ export default {
    * @param entityTypeId The selected EntityType identifier
    */
   [GET_EDITOR_ENTITY_TYPE] ({commit}: { commit: Function }, entityTypeId: string) {
-    get({apiUrl: '/plugin/metadata-manager'}, '/entityType/' + entityTypeId)
-      .then(response => {
-        commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
-      }, error => {
-        commit(CREATE_ALERT, {
-          type: 'error',
-          message: error.errors[0].message
-        })
-      })
+    get('/plugin/metadata-manager/entityType/' + entityTypeId).then(response => {
+      commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error})
+    })
   },
   /**
    * Create a new EntityType
@@ -138,25 +122,14 @@ export default {
    * EditorEntityType is added to the list of entityTypes in the state
    */
   [CREATE_ENTITY_TYPE] ({commit}: { commit: Function }) {
-    get({apiUrl: '/plugin/metadata-manager'}, '/create/entityType')
-      .then(response => {
-        const newEditorEntityType = toEntityType(response.entityType)
-        newEditorEntityType.isNew = true
-        commit(SET_EDITOR_ENTITY_TYPE, newEditorEntityType)
-        commit(SET_SELECTED_ENTITY_TYPE_ID, newEditorEntityType.id)
-      }, error => {
-        if (error.errors) {
-          commit(CREATE_ALERT, {
-            type: 'error',
-            message: error.errors[0].message
-          })
-        } else {
-          commit(CREATE_ALERT, {
-            type: 'error',
-            message: 'Something went wrong, make sure you have permissions for creating entities.'
-          })
-        }
-      })
+    get('/plugin/metadata-manager/create/entityType').then(response => {
+      const newEditorEntityType = toEntityType(response.entityType)
+      newEditorEntityType.isNew = true
+      commit(SET_EDITOR_ENTITY_TYPE, newEditorEntityType)
+      commit(SET_SELECTED_ENTITY_TYPE_ID, newEditorEntityType.id)
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error})
+    })
   },
   /**
    * Deletes an EntityType and reloads the EntityTypes present in the state
@@ -164,22 +137,17 @@ export default {
    * @param selectedEntityTypeId the ID of the EntityType to be deleted
    */
   [DELETE_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }, selectedEntityTypeId: string) {
-    callApi({apiUrl: '/api'}, '/v1/' + selectedEntityTypeId + '/meta', 'delete')
-      .then(response => {
-        // Never reached due to https://github.com/molgenis/molgenis-api-client/issues/1
-      }, error => {
-        if (error.errors) {
-          commit(CREATE_ALERT, {
-            type: 'error',
-            message: error.errors[0].message
-          })
-        } else {
-          commit(SET_ENTITY_TYPES, state.entityTypes.filter(entityType => entityType.id !== selectedEntityTypeId))
-          commit(SET_SELECTED_ENTITY_TYPE_ID, null)
-          commit(SET_SELECTED_ATTRIBUTE_ID, null)
-          commit(SET_EDITOR_ENTITY_TYPE, null)
-        }
-      })
+    delete_('/api/v1/' + selectedEntityTypeId + '/meta').then(response => {
+      commit(SET_ENTITY_TYPES, state.entityTypes.filter(entityType => entityType.id !== selectedEntityTypeId))
+      commit(SET_SELECTED_ENTITY_TYPE_ID, null)
+      commit(SET_SELECTED_ATTRIBUTE_ID, null)
+      commit(SET_EDITOR_ENTITY_TYPE, null)
+
+      const message = response.statusText + ': Successfully deleted EntityType [' + selectedEntityTypeId + ']'
+      commit(CREATE_ALERT, {type: 'success', message: message})
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error})
+    })
   },
   /**
    * Create a new Attribute
@@ -187,66 +155,42 @@ export default {
    * Attribute is added to the list of attributes in the existing editorEntityType
    */
   [CREATE_ATTRIBUTE] ({commit, state}: { commit: Function, state: State }) {
-    get({apiUrl: '/plugin/metadata-manager'}, '/create/attribute')
-      .then(response => {
-        const attribute = toAttribute(response.attribute)
-        attribute.isNew = true
-        commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
-        commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
-      }, error => {
-        if (error.errors) {
-          commit(CREATE_ALERT, {
-            type: 'error',
-            message: error.errors[0].message
-          })
-        } else {
-          commit(CREATE_ALERT, {
-            type: 'error',
-            message: 'Something went wrong, make sure you have permissions for creating entities.'
-          })
-        }
-      })
+    get('/plugin/metadata-manager/create/attribute').then(response => {
+      const attribute = toAttribute(response.attribute)
+      attribute.isNew = true
+      commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
+      commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error})
+    })
   },
   /**
    * Persist metadata changes to the database
    */
   [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
-    post({apiUrl: '/plugin/metadata-manager'}, '/entityType', state.editorEntityType)
-      .then(response => {
-        if (!response.redirected) {
-          commit(CREATE_ALERT, {
-            type: 'success',
-            message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
-          })
+    const options = {
+      body: JSON.stringify(state.editorEntityType)
+    }
 
-          if (state.editorEntityType.isNew) {
-            console.log('test')
-            const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
+    post('/plugin/metadata-manager/entityType', options).then(response => {
+      const message = response.statusText + ': Successfully updated metadata for EntityType: ' + state.editorEntityType.label
+      commit(CREATE_ALERT, { type: 'success', message: message })
 
-            editorEntityType.isNew = false
-            editorEntityType.attributes.forEach(attribute => {
-              attribute.isNew = false
-            })
+      if (state.editorEntityType.isNew) {
+        const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
 
-            commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
-            commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
-          } else {
-            response
-            commit(SET_EDITOR_ENTITY_TYPE, state.editorEntityType)
-          }
-        } else {
-          // Workaround for molgenis-api-client.
-          // We were logged out when doing a request, so we got a redirect response
-          commit(CREATE_ALERT, {
-            type: 'error',
-            message: 'No [WRITE] permission on entity type [Entity type] with id [sys_md_EntityType]'
-          })
-        }
-      }, error => {
-        commit(CREATE_ALERT, {
-          type: 'error',
-          message: error.errors[0].message
+        editorEntityType.isNew = false
+        editorEntityType.attributes.forEach(attribute => {
+          attribute.isNew = false
         })
-      })
+
+        commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
+        commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
+      } else {
+        commit(SET_EDITOR_ENTITY_TYPE, state.editorEntityType)
+      }
+    }, error => {
+      commit(CREATE_ALERT, {type: 'error', message: error})
+    })
   }
 }
