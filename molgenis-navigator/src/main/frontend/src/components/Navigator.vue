@@ -78,6 +78,7 @@
   import {QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE} from '../store/actions'
   import {SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES} from '../store/mutations'
   import { Package } from '../store/state'
+  import { mapState } from 'vuex'
 
   export default {
     name: 'Navigator',
@@ -119,6 +120,7 @@
       }
     },
     computed: {
+      ...mapState(['path', 'packages', 'entities']),
       query: {
         get () {
           return this.$store.state.query
@@ -126,17 +128,6 @@
         set (query) {
           this.$store.commit(SET_QUERY, query)
           this.submitQuery()
-        }
-      },
-      packages () {
-        return this.$store.state.packages
-      },
-      entities () {
-        return this.$store.state.entities
-      },
-      path: {
-        get () {
-          return this.$store.state.path
         }
       },
       items () {
