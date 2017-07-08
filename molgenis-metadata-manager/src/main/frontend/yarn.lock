@@ -2,11 +2,12 @@
 # yarn lockfile v1
 
 
-"@molgenis/molgenis-api-client@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-1.0.0.tgz#c6eb12d2ed54506fc0c5dd12611b371743c614b7"
+"@molgenis/molgenis-api-client@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-1.1.0.tgz#38c68536007becc65f05994e6d539eccdf6ea1cf"
   dependencies:
     isomorphic-fetch "^2.2.1"
+    lodash "^4.17.4"
 
 "@molgenis/molgenis-i18n-js@^0.0.5":
   version "0.0.5"
