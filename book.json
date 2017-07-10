@@ -21,10 +21,9 @@
       "gitbookConfigURL": "https://raw.githubusercontent.com/molgenis/molgenis/master/book.json",
       "options": [
         {
-          "value": "https://molgenis.gitbooks.io/molgenis/content/v/5.0/",
-          "text": "MOLGENIS 5.0",
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/master/",
+          "text": "MOLGENIS version currently under development",
           "selected": true
-<<<<<<< HEAD
         },
         {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/5.0/",
@@ -41,8 +40,6 @@
         {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/1.21/",
           "text": "MOLGENIS v1.21.x"
-=======
->>>>>>> 60873e449bb67d10b53247ee9a38b8b6cccb0686
         }
       ]
     }
