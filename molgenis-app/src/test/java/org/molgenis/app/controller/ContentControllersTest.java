@@ -184,7 +184,7 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	private void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
 	{
 		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
-		when(this.staticContentService.isCurrentUserCanEdit()).thenReturn(true);
+		when(this.staticContentService.isCurrentUserCanEdit("staticcontent")).thenReturn(true);
 
 		mockMvc.perform(MockMvcRequestBuilders.get(uri + "/edit"))
 			   .andExpect(MockMvcResultMatchers.status().isOk())
