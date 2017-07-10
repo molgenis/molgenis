@@ -1,7 +1,7 @@
 // @flow
 import type {Package} from './state'
 // $FlowFixMe
-import {get} from 'molgenis-api-client'
+import {get} from '@molgenis/molgenis-api-client'
 import {SET_PACKAGES, SET_ENTITIES, SET_PATH, RESET_PATH, SET_ERROR} from './mutations'
 
 export const QUERY_PACKAGES = 'QUERY_PACKAGES'
@@ -64,11 +64,11 @@ function toEntity (item:any) {
  */
 function getAllPackages () {
   return new Promise((resolve, reject) => {
-    const uri = '/sys_md_Package?sort=label&num=1000'
-    get({apiUrl: '/api/v2'}, uri).then((response) => {
+    const uri = '/api/v2/sys_md_Package?sort=label&num=1000'
+    get(uri).then((response) => {
       resolve(response.items)
     }).catch((error) => {
-      reject(error.errors[0].message)
+      reject(error)
     })
   })
 }
@@ -80,11 +80,11 @@ function getAllPackages () {
  */
 function queryPackages (query: string) {
   return new Promise((resolve, reject) => {
-    const uri = '/sys_md_Package?sort=label&num=1000&q=id=q=' + query + ',description=q=' + query + ',label=q=' + query
-    get({apiUrl: '/api/v2'}, uri).then((response) => {
+    const uri = '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=' + query + ',description=q=' + query + ',label=q=' + query
+    get(uri).then((response) => {
       resolve(response.items)
     }).catch((error) => {
-      reject(error.errors[0].message)
+      reject(error)
     })
   })
 }
@@ -116,12 +116,12 @@ export default {
       if (!query) {
         resolve()
       } else {
-        get({apiUrl: '/api/v2'}, '/sys_md_EntityType?sort=label&num=1000&q=(label=q=' + query + ',description=q=' + query + ');isAbstract==false').then((response) => {
+        get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q=' + query + ',description=q=' + query + ');isAbstract==false').then((response) => {
           const entities = response.items.map(toEntity)
           commit(SET_ENTITIES, entities)
           resolve()
         }).catch((error) => {
-          commit(SET_ERROR, error.errors[0].message)
+          commit(SET_ERROR, error)
           reject()
         })
       }
@@ -129,12 +129,13 @@ export default {
   },
   [GET_ENTITIES_IN_PACKAGE] ({commit}: { commit: Function }, packageId: string) {
     return new Promise((resolve, reject) => {
-      get({apiUrl: '/api/v2'}, '/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==' + packageId).then((response) => {
+      const uri = '/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==' + packageId
+      get(uri).then((response) => {
         const entities = response.items.map(toEntity)
         commit(SET_ENTITIES, entities)
         resolve()
       }).catch((error) => {
-        commit(SET_ERROR, error.errors[0].message)
+        commit(SET_ERROR, error)
         reject()
       })
     })

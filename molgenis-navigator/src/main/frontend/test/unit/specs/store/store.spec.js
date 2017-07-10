@@ -1,4 +1,4 @@
-import * as api from 'molgenis-api-client'
+import * as api from '@molgenis/molgenis-api-client'
 import store from 'src/store'
 
 describe('store', function () {
@@ -34,9 +34,7 @@ describe('store', function () {
 
       it('should pass the error message to the state when the get fails', function (done) {
         // mock api response
-        let getFail = Promise.reject({
-          errors: [{message: 'an error yo'}]
-        })
+        let getFail = Promise.reject('an error yo')
         get.onFirstCall().returns(getFail)
 
         // execute
@@ -70,9 +68,7 @@ describe('store', function () {
 
       it('should set the error when the query fails', function (done) {
         // mock api response
-        let getFail = Promise.reject({
-          errors: [{message: 'error on entity query'}]
-        })
+        let getFail = Promise.reject('error on entity query')
         get.onFirstCall().returns(getFail)
 
         // execute
