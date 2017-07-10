@@ -107,7 +107,7 @@
      */
     function createComplexRefFilter(attribute, model) {
         var lines = model.lines
-        lines.push('OR')
+        lines.push(lines[1])
 
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
         for (var index = 0; index < lines.length; index += 2) {
