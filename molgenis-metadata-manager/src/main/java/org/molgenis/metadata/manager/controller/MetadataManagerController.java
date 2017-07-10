@@ -50,7 +50,8 @@ public class MetadataManagerController extends MolgenisPluginController
 		this.metadataManagerService = requireNonNull(metadataManagerService);
 	}
 
-	@RequestMapping(method = GET)
+	// Place '/**' annotation on method instead of class to avoid wrongly matching of URLs with a path variable
+	@RequestMapping(value = "/**", method = GET)
 	public String init(Model model)
 	{
 		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
@@ -67,10 +68,10 @@ public class MetadataManagerController extends MolgenisPluginController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/entityType/{id:.+}", method = GET, produces = "application/json")
-	public EditorEntityTypeResponse getEditorEntityType(@PathVariable("id") String entityTypeId)
+	@RequestMapping(value = "/entityType/{id:.*}", method = GET, produces = "application/json")
+	public EditorEntityTypeResponse getEditorEntityType(@PathVariable("id") String id)
 	{
-		return metadataManagerService.getEditorEntityType(entityTypeId);
+		return metadataManagerService.getEditorEntityType(id);
 	}
 
 	@ResponseBody
