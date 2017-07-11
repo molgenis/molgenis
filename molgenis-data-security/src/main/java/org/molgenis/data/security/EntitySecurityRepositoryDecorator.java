@@ -5,14 +5,14 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.security.acl.EntityAce;
+import org.molgenis.data.security.acl.EntityAclManager;
+import org.molgenis.data.security.acl.SecurityId;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserService;
 import org.molgenis.util.Pair;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,15 +42,15 @@ import static org.molgenis.util.EntityUtils.asStream;
 public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final Repository<Entity> decoratedRepository;
-	private final MutableAclService mutableAclService;
 	private final UserService userService;
+	private final EntityAclManager entityAclManager;
 
-	public EntitySecurityRepositoryDecorator(Repository<Entity> decoratedRepository,
-			MutableAclService mutableAclService, UserService userService)
+	public EntitySecurityRepositoryDecorator(Repository<Entity> decoratedRepository, UserService userService,
+			EntityAclManager entityAclManager)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
-		this.mutableAclService = requireNonNull(mutableAclService);
 		this.userService = requireNonNull(userService);
+		this.entityAclManager = requireNonNull(entityAclManager);
 	}
 
 	@Override
@@ -93,6 +93,23 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		// current user is allowed to add entity, see RepositorySecurityDecorator
 		createAcl(entity);
 		decoratedRepository.add(entity);
+	}
+
+	private void createAcl(Entity entity)
+	{
+		System.out.println(entity.getEntityType().getId() + '.' + entity.getIdValue().toString());
+		List<EntityAce> entityAces;
+		if (!currentUserIsSuOrSystem())
+		{
+			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername());
+			EntityAce entityAce = EntityAce.create(Permission.WRITE, securityId, true);
+			entityAces = singletonList(entityAce);
+		}
+		else
+		{
+			entityAces = emptyList();
+		}
+		entityAclManager.createAcl(entity, entityAces);
 	}
 
 	@Override
@@ -251,8 +268,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		else
 		{
 			Map<Pair<Object, Object>, Long> countMap = entityStream
-					.map(entity -> new Pair<Object, Object>(entity.get(attributeX.getName()),
-							entity.get(attributeY.getName())))
+					.map(entity -> new Pair<>(entity.get(attributeX.getName()), entity.get(attributeY.getName())))
 					.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
 			xLabels = newArrayList(countMap.keySet().stream().map(Pair::getA).collect(toSet()));
@@ -277,65 +293,20 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		return new AggregateResult(matrix, xLabels, yLabels);
 	}
 
-	private ObjectIdentity createObjectIdentity(Entity entity)
-	{
-		return new ObjectIdentityImpl(entity.getEntityType().getId(), entity.getIdValue().toString());
-	}
-
-	private List<Sid> createCurrentUserSids()
+	private List<SecurityId> createCurrentUserSecurityIds()
 	{
 		String currentUsername = SecurityUtils.getCurrentUsername();
 		List<String> groupIds = asStream(userService.getUserGroups(currentUsername)).map(Group::getId)
 				.collect(toList());
-		List<Sid> sids = new ArrayList<>(groupIds.size() + 1);
-		sids.add(new PrincipalSid(currentUsername));
-		groupIds.forEach(groupId -> sids.add(new PrincipalSid(groupId)));
+		List<SecurityId> sids = new ArrayList<>(groupIds.size() + 1);
+		sids.add(SecurityId.create(currentUsername));
+		groupIds.forEach(groupId -> sids.add(SecurityId.create(groupId)));
 		return sids;
-	}
-
-	private Acl getAcl(Entity entity)
-	{
-		try
-		{
-			return mutableAclService.readAclById(createObjectIdentity(entity));
-		}
-		catch (NotFoundException e)
-		{
-			return null;
-		}
-	}
-
-	private void createAcl(Entity entity)
-	{
-		MutableAcl acl = mutableAclService.createAcl(createObjectIdentity(entity));
-		Attribute attribute = entity.getEntityType().getEntityLevelSecurityInheritance();
-		Entity inheritedEntity = attribute != null ? entity.getEntity(attribute.getName()) : null;
-		Acl parentAcl = inheritedEntity != null ? getAcl(inheritedEntity) : null;
-		acl.setParent(parentAcl);
-		mutableAclService.updateAcl(acl);
-
-		if (!currentUserIsSuOrSystem())
-		{
-			try
-			{
-				Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-				acl.insertAce(acl.getEntries().size(), BasePermission.WRITE, sid, true);
-				mutableAclService.updateAcl(acl);
-			}
-			catch (NotFoundException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	private boolean currentUserCanReadEntity(Entity entity)
 	{
-		if (currentUserIsSuOrSystem())
-		{
-			return true;
-		}
-		return currentUserCanAccessEntity(entity, BasePermission.READ);
+		return currentUserIsSuOrSystem() || currentUserCanAccessEntity(entity, Permission.READ);
 	}
 
 	private void validateCurrentUserCanUpdateEntity(Entity entity)
@@ -344,7 +315,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		{
 			return;
 		}
-		validateCurrentUserCanAccessEntity(entity, BasePermission.WRITE);
+		validateCurrentUserCanAccessEntity(entity, Permission.WRITE);
 	}
 
 	private void validateCurrentUserCanDeleteEntity(Entity entity)
@@ -353,7 +324,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		{
 			return;
 		}
-		validateCurrentUserCanAccessEntity(entity, BasePermission.WRITE);
+		validateCurrentUserCanAccessEntity(entity, Permission.WRITE);
 	}
 
 	private void validateCurrentUserCanDeleteEntityById(Object entityId)
@@ -371,52 +342,32 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 			throw new UnknownEntityException(format("Unknown entity [%s] of type [%s]", entityIdStr, entityTypeIdStr));
 		}
 
-		validateCurrentUserCanAccessEntity(entity, BasePermission.WRITE);
+		validateCurrentUserCanAccessEntity(entity, Permission.WRITE);
 	}
 
 	private boolean currentUserCanAccessEntity(Entity entity, Permission permission)
 	{
-		Acl acl = mutableAclService.readAclById(createObjectIdentity(entity));
-		boolean isGranted;
-		try
-		{
-			isGranted = acl.isGranted(expandPermissions(permission), createCurrentUserSids(), false);
-		}
-		catch (NotFoundException e)
-		{
-			isGranted = false;
-		}
-		return isGranted;
+		List<Permission> permissions = expandPermissions(permission);
+		List<SecurityId> securityIds = createCurrentUserSecurityIds();
+		return entityAclManager.isGranted(entity, permissions, securityIds);
 	}
 
 	private static List<Permission> expandPermissions(Permission permission)
 	{
-		if (permission == BasePermission.READ)
+		switch (permission)
 		{
-			return Arrays
-					.asList(BasePermission.READ, BasePermission.WRITE, BasePermission.CREATE, BasePermission.DELETE,
-							BasePermission.ADMINISTRATION);
-		}
-		else if (permission == BasePermission.WRITE)
-		{
-			return Arrays.asList(BasePermission.WRITE, BasePermission.CREATE, BasePermission.DELETE,
-					BasePermission.ADMINISTRATION);
-		}
-		else if (permission == BasePermission.CREATE)
-		{
-			return Arrays.asList(BasePermission.CREATE, BasePermission.DELETE, BasePermission.ADMINISTRATION);
-		}
-		else if (permission == BasePermission.DELETE)
-		{
-			return Arrays.asList(BasePermission.DELETE, BasePermission.ADMINISTRATION);
-		}
-		else if (permission == BasePermission.ADMINISTRATION)
-		{
-			return singletonList(BasePermission.ADMINISTRATION);
-		}
-		else
-		{
-			throw new RuntimeException();
+			case NONE:
+				return singletonList(Permission.NONE);
+			case COUNT:
+				return Arrays.asList(Permission.COUNT, Permission.READ, Permission.WRITE, Permission.WRITEMETA);
+			case READ:
+				return Arrays.asList(Permission.READ, Permission.WRITE, Permission.WRITEMETA);
+			case WRITE:
+				return Arrays.asList(Permission.WRITE, Permission.WRITEMETA);
+			case WRITEMETA:
+				return singletonList(Permission.WRITEMETA);
+			default:
+				throw new RuntimeException(String.format("Unknown permission '%s'", permission.toString()));
 		}
 	}
 
