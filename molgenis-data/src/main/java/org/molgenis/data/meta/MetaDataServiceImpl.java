@@ -582,21 +582,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public boolean isMetaEntityType(EntityType entityType)
-	{
-		switch (entityType.getId())
-		{
-			case ENTITY_TYPE_META_DATA:
-			case ATTRIBUTE_META_DATA:
-			case TAG:
-			case PACKAGE:
-				return true;
-			default:
-				return false;
-		}
-	}
-
-	@Override
 	public Stream<EntityType> getConcreteChildren(EntityType entityType)
 	{
 		if (!entityType.isAbstract())
