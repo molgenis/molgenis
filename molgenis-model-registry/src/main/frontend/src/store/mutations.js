@@ -7,4 +7,5 @@ export default {
   [SET_MESSAGE] (state: State, message: string) {
     state.message = message
   }
+
 }
