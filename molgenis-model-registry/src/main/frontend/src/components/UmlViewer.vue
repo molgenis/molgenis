@@ -1,37 +1,59 @@
 <template>
-    <div>
-        <h1>Home</h1>
-        <div id="myholder"></div>
-    </div>
+  <div id="sample">
+    <div style="border: solid 1px black; width:600px; height:600px" ref="targetDiv"></div>
+  </div>
 </template>
 
 <script>
-    export default {
-        created() {
-            let graph = new joint.dia.Graph
 
-            let paper = new joint.dia.Paper({
-                el: $('#myholder'),
-                width: 600,
-                height: 200,
-                model: graph,
-                gridSize: 1
-            })
+  import { newGraph } from './Graph.js'
 
-            let rect = new joint.shapes.basic.Rect({
-                position: { x: 100, y: 30 },
-                size: { width: 100, height: 30 },
-                attrs: { rect: { fill: 'blue' }, text: { text: 'my box', fill: 'white' } }
-            })
+  const graphData = {
+    nodeData: [
+      {
+        key: 'Products',
+        items: [{name: 'ProductID', iskey: true, figure: 'Decision', color: 'yellow'},
+          {name: 'ProductName', iskey: false, figure: 'Cube1', color: 'blue'},
+          {name: 'SupplierID', iskey: false, figure: 'Decision', color: 'purple'},
+          {name: 'CategoryID', iskey: false, figure: 'Decision', color: 'purple'}]
+      },
+      {
+        key: 'Suppliers',
+        items: [{name: 'SupplierID', iskey: true, figure: 'Decision', color: 'yellow'},
+          {name: 'CompanyName', iskey: false, figure: 'Cube1', color: 'blue'},
+          {name: 'ContactName', iskey: false, figure: 'Cube1', color: 'blue'},
+          {name: 'Address', iskey: false, figure: 'Cube1', color: 'blue'}]
+      },
+      {
+        key: 'Categories',
+        items: [{name: 'CategoryID', iskey: true, figure: 'Decision', color: 'yellow'},
+          {name: 'CategoryName', iskey: false, figure: 'Cube1', color: 'blue'},
+          {name: 'Description', iskey: false, figure: 'Cube1', color: 'blue'},
+          {name: 'Picture', iskey: false, figure: 'TriangleUp', color: 'red'}]
+      },
+      {
+        key: 'Order Details',
+        items: [{name: 'OrderID', iskey: true, figure: 'Decision', color: 'yellow'},
+          {name: 'ProductID', iskey: true, figure: 'Decision', color: 'yellow'},
+          {name: 'UnitPrice', iskey: false, figure: 'MagneticData', color: 'green'},
+          {name: 'Quantity', iskey: false, figure: 'MagneticData', color: 'green'},
+          {name: 'Discount', iskey: false, figure: 'MagneticData', color: 'green'}]
+      }
+    ],
+    linkData: [
+      {from: 'Products', to: 'Suppliers', text: '0..N', toText: '1'},
+      {from: 'Products', to: 'Categories', text: '0..N', toText: '1'},
+      {from: 'Order Details', to: 'Products', text: '0..N', toText: '1'}
+    ]
+  }
 
-            let rect2 = rect.clone()
-            rect2.translate(300)
-
-            let link = new joint.dia.Link({
-                source: { id: rect.id },
-                target: { id: rect2.id }
-            })
-            graph.addCells([rect, rect2, link])
-        }
+  export default {
+    name: 'model-registry-uml-viewer',
+    mounted: function () {
+      const targetDiv = this.$refs.targetDiv
+      newGraph(targetDiv, graphData)
     }
+
+  }
+
 </script>

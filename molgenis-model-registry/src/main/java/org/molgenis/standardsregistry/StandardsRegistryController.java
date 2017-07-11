@@ -161,6 +161,17 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return VIEW_NAME_UML;
 	}
 
+	@RequestMapping(value = "/uml/json", method = GET)
+	public @ResponseBody Package getUmlJson(@RequestParam(value = "package", required = true) String selectedPackageName)
+	{
+		LOG.info("Requested package: [ " +selectedPackageName+ " ]");
+		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
+
+		LOG.info("Converted package: [ " + molgenisPackage + " ]");
+
+		return molgenisPackage;
+	}
+
 	@RequestMapping(value = "/getPackage", method = GET)
 	@ResponseBody
 	public PackageResponse getPackage(@RequestParam(value = "package") String packageName)

@@ -1,9 +1,7 @@
 <template>
   <div class="container">
     <div id="app">
-      <h1>{{test}}</h1>
-      <p>{{uml}}</p>
-      <!--<hello-world></hello-world>-->
+      <uml-viewer></uml-viewer>
     </div>
   </div>
 </template>
@@ -11,20 +9,14 @@
 <style lang="scss">
   @import "~variables";
   @import "~mixins";
-
-  #app {
-    background-color: $red;
-  }
+  /*<!--#app {-->*/
+  /*background-color: $red;*/
+  /*}*/
 </style>
-
 
 <script>
 
   import umlViewer from 'components/UmlViewer'
-
-  window.$ = require('jquery');
-  window.joint = require('jointjs');
-  window._ = require('underscore')
 
   export default {
     name: 'molgenis-model-registry-uml-viewer',
@@ -32,10 +24,10 @@
       return {
         test: 'Hallo mark'
       }
+    },
+    components: {
+      umlViewer
     }
   }
-
-
-  $(document).ready()
 
 </script>

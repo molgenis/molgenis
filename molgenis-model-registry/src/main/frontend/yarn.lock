@@ -2772,6 +2772,10 @@ globule@^1.0.0:
     lodash "~4.17.4"
     minimatch "~3.0.2"
 
+gojs@^1.7.15:
+  version "1.7.15"
+  resolved "https://registry.yarnpkg.com/gojs/-/gojs-1.7.15.tgz#6d35cdd6f970611673df7cc37635df9bb25e67a7"
+
 graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.1.9:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
