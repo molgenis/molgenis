@@ -283,7 +283,7 @@ class PostgreSqlQueryGenerator
 			   .append(getTableName(attr.getRefEntity()))
 			   .append('(')
 			   .append(getColumnName(attr.getRefEntity().getIdAttribute()))
-			   .append(") ON DELETE CASCADE");
+			   .append(")");
 
 			// for self-referencing data defer checking constraints until the end of the transaction
 			if (attr.getRefEntity().getId().equals(entityType.getId()))
