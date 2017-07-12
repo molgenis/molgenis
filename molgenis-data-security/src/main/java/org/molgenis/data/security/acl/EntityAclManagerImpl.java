@@ -3,8 +3,6 @@ package org.molgenis.data.security.acl;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.security.core.Permission;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.acls.model.*;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +15,6 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class EntityAclManagerImpl implements EntityAclManager
 {
-	private static final Logger LOG = LoggerFactory.getLogger(EntityAclManagerImpl.class);
-
 	private final AclService aclService;
 	private final ObjectIdMapper objectIdMapper;
 	private final AclMapper aclMapper;
@@ -105,7 +101,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 
 	private void insertAclAces(List<EntityAce> entityAces, MutableAcl acl)
 	{
-		for (int i = 0; i < entityAces.size(); i++)
+		int nrEntityAces = entityAces.size();
+		for (int i = 0; i < nrEntityAces; i++)
 		{
 			EntityAce entityAce = entityAces.get(i);
 			org.springframework.security.acls.model.Permission permission = permissionMapper

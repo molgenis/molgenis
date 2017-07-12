@@ -30,6 +30,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.security.acl.SecurityId.Type.GROUP;
+import static org.molgenis.data.security.acl.SecurityId.Type.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.util.EntityUtils.asStream;
 
@@ -101,7 +103,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		List<EntityAce> entityAces;
 		if (!currentUserIsSuOrSystem())
 		{
-			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername());
+			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername(), USER);
 			EntityAce entityAce = EntityAce.create(Permission.WRITE, securityId, true);
 			entityAces = singletonList(entityAce);
 		}
@@ -299,8 +301,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		List<String> groupIds = asStream(userService.getUserGroups(currentUsername)).map(Group::getId)
 				.collect(toList());
 		List<SecurityId> sids = new ArrayList<>(groupIds.size() + 1);
-		sids.add(SecurityId.create(currentUsername));
-		groupIds.forEach(groupId -> sids.add(SecurityId.create(groupId)));
+		sids.add(SecurityId.create(currentUsername, USER));
+		groupIds.forEach(groupId -> sids.add(SecurityId.create(groupId, GROUP)));
 		return sids;
 	}
 

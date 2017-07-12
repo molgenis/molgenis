@@ -92,7 +92,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem())
 		{
-			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername());
+			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername(), SecurityId.Type.USER);
 			if (entityAclService.isGranted(attribute, singletonList(Permission.READ), singletonList(securityId)))
 			{
 				attribute.setReadOnly(true);

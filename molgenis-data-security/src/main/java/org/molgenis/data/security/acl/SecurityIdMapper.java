@@ -7,18 +7,48 @@ import org.springframework.stereotype.Component;
 @Component
 class SecurityIdMapper
 {
-	private SecurityId toSecurityId(Sid sid)
+	SecurityId toSecurityId(Sid sid)
 	{
 		if (!(sid instanceof PrincipalSid))
 		{
 			throw new RuntimeException("Sid is not a PrincipalSid");
 		}
-		PrincipalSid principalSid = (PrincipalSid) sid;
-		return SecurityId.create(principalSid.getPrincipal());
+		String principal = ((PrincipalSid) sid).getPrincipal();
+
+		SecurityId.Type type = getSecurityIdType(principal);
+		String id = principal.substring(2);
+		return SecurityId.create(id, type);
 	}
 
-	public Sid toSid(SecurityId securityId)
+	private SecurityId.Type getSecurityIdType(String principal)
 	{
-		return new PrincipalSid(securityId.getId());
+		switch (principal.charAt(0))
+		{
+			case 'U':
+				return SecurityId.Type.USER;
+			case 'G':
+				return SecurityId.Type.GROUP;
+			default:
+				throw new IllegalArgumentException(String.format("Unknown principal prefix '%s'", principal));
+		}
+	}
+
+	Sid toSid(SecurityId securityId)
+	{
+		char principalPrefix = getPrincipalPrefix(securityId);
+		return new PrincipalSid(principalPrefix + '-' + securityId.getId());
+	}
+
+	private char getPrincipalPrefix(SecurityId securityId)
+	{
+		switch (securityId.getType())
+		{
+			case USER:
+				return 'U';
+			case GROUP:
+				return 'G';
+			default:
+				throw new IllegalArgumentException(String.format("Unknown security id type '%s'", securityId));
+		}
 	}
 }

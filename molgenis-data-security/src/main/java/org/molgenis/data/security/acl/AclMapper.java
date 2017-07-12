@@ -1,10 +1,8 @@
 package org.molgenis.data.security.acl;
 
 import org.molgenis.security.core.Permission;
-import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
-import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,18 +18,20 @@ class AclMapper
 {
 	private final ObjectIdMapper objectIdMapper;
 	private final PermissionMapper permissionMapper;
+	private final SecurityIdMapper securityIdMapper;
 
-	AclMapper(ObjectIdMapper objectIdMapper, PermissionMapper permissionMapper)
+	AclMapper(ObjectIdMapper objectIdMapper, PermissionMapper permissionMapper, SecurityIdMapper securityIdMapper)
 	{
 		this.objectIdMapper = requireNonNull(objectIdMapper);
 		this.permissionMapper = requireNonNull(permissionMapper);
+		this.securityIdMapper = requireNonNull(securityIdMapper);
 	}
 
 	EntityAcl toEntityAcl(Acl acl)
 	{
 		String entityTypeId = objectIdMapper.toEntityTypeId(acl.getObjectIdentity());
 		Object entityId = objectIdMapper.toEntityId(acl.getObjectIdentity());
-		SecurityId owner = toSecurityId(acl.getOwner());
+		SecurityId owner = securityIdMapper.toSecurityId(acl.getOwner());
 		Acl parentAcl = acl.getParentAcl();
 		EntityAcl parent = parentAcl != null ? toEntityAcl(parentAcl) : null;
 		List<EntityAce> entries = toEntries(acl.getEntries());
@@ -46,17 +46,7 @@ class AclMapper
 	private EntityAce toEntry(AccessControlEntry accessControlEntry)
 	{
 		Permission permission = permissionMapper.toPermission(accessControlEntry.getPermission());
-		SecurityId securityId = toSecurityId(accessControlEntry.getSid());
+		SecurityId securityId = securityIdMapper.toSecurityId(accessControlEntry.getSid());
 		return EntityAce.create(permission, securityId, accessControlEntry.isGranting());
-	}
-
-	private SecurityId toSecurityId(Sid sid)
-	{
-		if (!(sid instanceof PrincipalSid))
-		{
-			throw new RuntimeException("Sid is not a PrincipalSid");
-		}
-		PrincipalSid principalSid = (PrincipalSid) sid;
-		return SecurityId.create(principalSid.getPrincipal());
 	}
 }
