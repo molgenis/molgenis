@@ -4,7 +4,7 @@ import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeRepositoryDecorator;
-import org.molgenis.data.security.acl.AclService;
+import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.data.security.meta.AttributeRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.AttributeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.AttributeValidator;
@@ -21,15 +21,15 @@ public class AttributeRepositoryDecoratorFactory
 {
 	private final DataService dataService;
 	private final AttributeValidator attributeValidator;
-	private final AclService aclService;
+	private final EntityAclService entityAclService;
 
 	public AttributeRepositoryDecoratorFactory(AttributeMetadata attributeMetadata, DataService dataService,
-			AttributeValidator attributeValidator, AclService aclService)
+			AttributeValidator attributeValidator, EntityAclService entityAclService)
 	{
 		super(attributeMetadata);
 		this.dataService = requireNonNull(dataService);
 		this.attributeValidator = requireNonNull(attributeValidator);
-		this.aclService = requireNonNull(aclService);
+		this.entityAclService = requireNonNull(entityAclService);
 	}
 
 	@Override
@@ -37,6 +37,6 @@ public class AttributeRepositoryDecoratorFactory
 	{
 		repository = new AttributeRepositoryDecorator(repository, dataService);
 		repository = new AttributeRepositoryValidationDecorator(repository, attributeValidator);
-		return new AttributeRepositorySecurityDecorator(repository, aclService);
+		return new AttributeRepositorySecurityDecorator(repository, entityAclService);
 	}
 }

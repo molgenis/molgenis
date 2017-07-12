@@ -1,7 +1,6 @@
 package org.molgenis.data.security.acl;
 
 import org.molgenis.data.Entity;
-import org.molgenis.security.core.Permission;
 
 import java.util.List;
 
@@ -10,8 +9,6 @@ import java.util.List;
  */
 public interface EntityAclManager extends EntityAclService
 {
-	boolean isGranted(Entity entity, List<Permission> permissions, List<SecurityId> securityIds);
-
 	EntityAcl createAcl(Entity entity, List<EntityAce> entityAces);
 
 	void updateAcl(EntityAcl entityAcl);

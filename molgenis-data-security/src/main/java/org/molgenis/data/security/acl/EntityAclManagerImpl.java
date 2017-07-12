@@ -54,7 +54,13 @@ public class EntityAclManagerImpl implements EntityAclManager
 	@Override
 	public EntityAcl readAcl(Entity entity)
 	{
-		Acl acl = readDomainAcl(entity);
+		return readAcl(entity, null);
+	}
+
+	@Override
+	public EntityAcl readAcl(Entity entity, List<SecurityId> securityIds)
+	{
+		Acl acl = readDomainAcl(entity, securityIds);
 		return aclMapper.toEntityAcl(acl);
 	}
 
@@ -134,22 +140,28 @@ public class EntityAclManagerImpl implements EntityAclManager
 
 	private MutableAcl readDomainAcl(Entity entity)
 	{
+		return readDomainAcl(entity, null);
+	}
+
+	private MutableAcl readDomainAcl(Entity entity, List<SecurityId> securityIds)
+	{
 		ObjectIdentity objectId = objectIdMapper.toObjectIdentity(entity);
-		return readDomainAcl(objectId);
+		return readDomainAcl(objectId, securityIds);
 	}
 
 	private MutableAcl readDomainAcl(EntityAcl entityAcl)
 	{
 		ObjectIdentity objectId = objectIdMapper.toObjectIdentity(entityAcl.getEntityTypeId(), entityAcl.getEntityId());
-		return readDomainAcl(objectId);
+		return readDomainAcl(objectId, null);
 	}
 
-	private MutableAcl readDomainAcl(ObjectIdentity objectIdentity)
+	private MutableAcl readDomainAcl(ObjectIdentity objectIdentity, List<SecurityId> securityIds)
 	{
+		List<Sid> sids = securityIds != null ? toSids(securityIds) : null;
 		MutableAcl acl;
 		try
 		{
-			acl = (MutableAcl) aclService.readAclById(objectIdentity);
+			acl = (MutableAcl) aclService.readAclById(objectIdentity, sids);
 		}
 		catch (NotFoundException e)
 		{

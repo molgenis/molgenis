@@ -5,36 +5,30 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.acl.AclService;
+import org.molgenis.data.security.acl.EntityAclService;
+import org.molgenis.data.security.acl.SecurityId;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.Acl;
-import org.springframework.security.acls.model.NotFoundException;
-import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Sid;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
 	private final Repository<Attribute> decoratedRepo;
-	private final AclService aclService;
+	private final EntityAclService entityAclService;
 
-	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo, AclService aclService)
+	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo, EntityAclService entityAclService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
-		this.aclService = requireNonNull(aclService);
+		this.entityAclService = requireNonNull(entityAclService);
 	}
 
 	@Override
@@ -98,19 +92,10 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem())
 		{
-			ObjectIdentity objectIdentity = new ObjectIdentityImpl(ATTRIBUTE_META_DATA, attribute.getIdentifier());
-			Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-			Acl acl = aclService.readAclById(objectIdentity, Collections.singletonList(sid));
-			try
+			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername());
+			if (entityAclService.isGranted(attribute, singletonList(Permission.READ), singletonList(securityId)))
 			{
-				if (acl.isGranted(Collections.singletonList(BasePermission.READ), Collections.singletonList(sid), true))
-				{
-					attribute.setReadOnly(true);
-				}
-			}
-			catch (NotFoundException e)
-			{
-				return attribute;
+				attribute.setReadOnly(true);
 			}
 		}
 		return attribute;
