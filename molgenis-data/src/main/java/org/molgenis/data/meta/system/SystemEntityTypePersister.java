@@ -67,13 +67,11 @@ public class SystemEntityTypePersister
 
 	private void persistMetadataMetadata()
 	{
-		MetaDataService metadataService = dataService.getMeta();
-
 		RepositoryCollection metadataRepoCollection = dataService.getMeta().getDefaultBackend();
 
 		// collect meta entity meta
 		List<EntityType> metaEntityTypeList = systemEntityTypeRegistry.getSystemEntityTypes()
-																	  .filter(metadataService::isMetaEntityType)
+																	  .filter(MetaDataService::isMetaEntityType)
 																	  .collect(toList());
 		List<EntityType> resolvedEntityTypeList = entityTypeDependencyResolver.resolve(metaEntityTypeList);
 
