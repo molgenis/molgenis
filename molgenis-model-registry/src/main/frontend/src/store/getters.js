@@ -1,46 +1,48 @@
 import type { State } from 'utils/flow.types'
-// import { _ } from 'lodash'
 
-const mapNodeData = (entityTypes) => {
-  const nodeDataArray = []
-  console.log(JSON.stringify(entityTypes, null, 2))
-  entityTypes.forEach(function (entityType) {
-    // FigureTypes: Decision, Cubel, MagneticData, TriangleUp, TriangleDown
-    // Colors: yellow, green, blue
+// FigureTypes: Decision, Cubel, MagneticData, TriangleUp, TriangleDown
+// Colors: yellow, green, blue
+const mapAttributeToNode = attribute => {
+  let figure = 'Cubel'
+  let color = 'Blue'
+  let isKey = false
+  if (attribute.type === 'xref') {
+    figure = 'Decision'
+    color = 'red'
+    isKey = true
+  }
+  return {
+    name: attribute.name, iskey: isKey, figure: figure, color: color
+  }
+}
 
-    const items = []
+const mapNodeData = (entityTypes) => entityTypes.map(entityType => ({
+  key: entityType.id,
+  items: entityType.attributes.map(mapAttributeToNode)
+}))
 
-    for (const val of Object.values(entityType)) {
-      console.log(JSON.stringify(val, null, 2))
-    }
-
-    for (const attributeKey in entityType.attributes) {
-      console.log(JSON.stringify(attributeKey, null, 2))
-      const attribute = entityType.attributes[attributeKey]
-      const nodeData = {
-        name: attribute.getName,
-        iskey: false,
-        figure: 'Decision',
-        color: 'blue'
+const mapLinkData = (entityTypes) => {
+  const links = []
+  entityTypes.forEach(entityType => {
+    entityType.attributes.forEach(attribute => {
+      if (attribute.type === 'xref') {
+        console.log(attribute.name)
+        const attributeDesc = attribute.name + ' | 0..N'
+        const refAttributeDesc = attribute.refEntityType.id + ' | 1'
+        links.push({from: entityType.id, to: attribute.refEntityType.id, text: attributeDesc, toText: refAttributeDesc})
       }
-      items.push(nodeData)
-    }
-    const nodeData = {
-      key: entityType.__labelValue,
-      items: items
-    }
-    nodeDataArray.push(nodeData)
+    })
   })
-  return nodeDataArray
+  return links
 }
 
 export default {
 
-  graph: (state: State) => {
-    if (state.rawData.entityTypes) {
+  umlData: (state: State) => {
+    if (state.umlData.entityTypes) {
       return {
-        nodeData: mapNodeData(state.rawData.entityTypes),
-        linkData: []
+        nodeData: mapNodeData(state.umlData.entityTypes),
+        linkData: mapLinkData(state.umlData.entityTypes)
       }
     }
   }

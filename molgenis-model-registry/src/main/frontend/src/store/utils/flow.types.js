@@ -2,5 +2,5 @@
 
 export type State = {
   message: string,
-  rawData: any
+  umlData: any
 }

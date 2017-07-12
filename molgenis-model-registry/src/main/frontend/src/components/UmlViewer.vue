@@ -1,9 +1,19 @@
 <template>
   <div id="sample">
     <!-- read out graph so we can watch it -->
-    <div style="border: solid 1px black; width:600px; height:600px" ref="targetDiv" v-if="graph"></div>
+    <div id="graph" ref="graphDiv" v-if="umlData"></div>
   </div>
 </template>
+
+<style lang="scss">
+  @import "~variables";
+  @import "~mixins";
+  #graph {
+    border: solid 1px black;
+    width: 100%;
+    height: 1000px;
+  }
+</style>
 
 <script>
 
@@ -13,12 +23,11 @@
   export default {
     name: 'model-registry-uml-viewer',
     updated () {
-      const targetDiv = this.$refs.targetDiv
-      console.log(this.graph)
-      newGraph(targetDiv, this.graph)
+      const graphDiv = this.$refs.graphDiv
+      newGraph(graphDiv, this.umlData)
     },
     computed: {
-      ...mapGetters(['graph'])
+      ...mapGetters(['umlData'])
     }
 
   }
