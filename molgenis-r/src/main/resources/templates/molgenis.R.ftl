@@ -263,6 +263,36 @@ molgenis.delete <- local(function(entity, id) {
 
 #####################################################################
 #
+# Deletes a list of entities in an entityType.
+#
+# Parameters:
+#    entity: The entityType name
+#    rows: List with ids of the rows
+#
+# Example: molgenis.deleteList(entity = "Person", rows = c("1", "2", "3"))
+#
+#####################################################################
+molgenis.deleteList <- local(function(entity, rows) {
+  url <- paste0(molgenis.api.url.v2, entity)
+  #only 1000 rows can be processed ad once, so make chunks of 1000
+  chunks <- split(rows, ceiling(seq_along(rows)/1000))
+  for(i in chunks){
+    param =  paste0('{entityIds:["',paste0(i,collapse = '","'),'"]}')
+    #dont use curl, use httr POST
+    response <- DELETE(url, add_headers('x-molgenis-token' = molgenis.token), body = param, content_type_json())
+    status <- status_code(response)
+    #On success the api returns httpcode 204 No Content
+    if (status != "204") {
+      cat(status)
+      error_message <- content(response)$errors[[1]]$message
+      stop(paste0("Error deleting entities: ", error_message))
+    }
+  }
+  return (rows)
+}, molgenis.env)
+
+#####################################################################
+#
 # Gets entity metadata
 #
 # Parameters:
