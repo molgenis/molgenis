@@ -78,7 +78,7 @@ export default {
    * Retrieve all Packages and filter on non-system Packages
    */
   [GET_PACKAGES] ({commit}: { commit: Function }) {
-    get({apiUrl: '/metadata-manager-service'}, '/editorPackages')
+    get({apiUrl: '/plugin/metadata-manager'}, '/editorPackages')
       .then(response => {
         commit(SET_PACKAGES, response)
       }, error => {
@@ -122,7 +122,7 @@ export default {
    * @param entityTypeId The selected EntityType identifier
    */
   [GET_EDITOR_ENTITY_TYPE] ({commit}: { commit: Function }, entityTypeId: string) {
-    get({apiUrl: '/metadata-manager-service'}, '/entityType/' + entityTypeId)
+    get({apiUrl: '/plugin/metadata-manager'}, '/entityType/' + entityTypeId)
       .then(response => {
         commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
       }, error => {
@@ -138,7 +138,7 @@ export default {
    * EditorEntityType is added to the list of entityTypes in the state
    */
   [CREATE_ENTITY_TYPE] ({commit}: { commit: Function }) {
-    get({apiUrl: '/metadata-manager-service'}, '/create/entityType')
+    get({apiUrl: '/plugin/metadata-manager'}, '/create/entityType')
       .then(response => {
         const newEditorEntityType = toEntityType(response.entityType)
         newEditorEntityType.isNew = true
@@ -187,7 +187,7 @@ export default {
    * Attribute is added to the list of attributes in the existing editorEntityType
    */
   [CREATE_ATTRIBUTE] ({commit, state}: { commit: Function, state: State }) {
-    get({apiUrl: '/metadata-manager-service'}, '/create/attribute')
+    get({apiUrl: '/plugin/metadata-manager'}, '/create/attribute')
       .then(response => {
         const attribute = toAttribute(response.attribute)
         attribute.isNew = true
@@ -211,21 +211,37 @@ export default {
    * Persist metadata changes to the database
    */
   [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
-    post({apiUrl: '/metadata-manager-service'}, '/entityType', state.editorEntityType)
+    post({apiUrl: '/plugin/metadata-manager'}, '/entityType', state.editorEntityType)
       .then(response => {
-        commit(CREATE_ALERT, {
-          type: 'success',
-          message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
-        })
+        if (!response.redirected) {
+          commit(CREATE_ALERT, {
+            type: 'success',
+            message: 'Successfully updated metadata for EntityType: ' + state.editorEntityType.label
+          })
 
-        const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
-        editorEntityType.isNew = false
-        editorEntityType.attributes.forEach(attribute => {
-          attribute.isNew = false
-        })
+          if (state.editorEntityType.isNew) {
+            console.log('test')
+            const editorEntityType = JSON.parse(JSON.stringify(state.editorEntityType))
 
-        commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
-        commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
+            editorEntityType.isNew = false
+            editorEntityType.attributes.forEach(attribute => {
+              attribute.isNew = false
+            })
+
+            commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
+            commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
+          } else {
+            response
+            commit(SET_EDITOR_ENTITY_TYPE, state.editorEntityType)
+          }
+        } else {
+          // Workaround for molgenis-api-client.
+          // We were logged out when doing a request, so we got a redirect response
+          commit(CREATE_ALERT, {
+            type: 'error',
+            message: 'No [WRITE] permission on entity type [Entity type] with id [sys_md_EntityType]'
+          })
+        }
       }, error => {
         commit(CREATE_ALERT, {
           type: 'error',

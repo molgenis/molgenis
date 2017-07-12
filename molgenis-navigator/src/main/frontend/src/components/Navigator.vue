@@ -9,7 +9,7 @@
     <!-- Search element -->
     <div class="navigator-search row justify-content-center">
       <div class="col-lg-6 input-group">
-        <input v-model="query" v-on:keyup="submitQuery()" type="text" class="form-control"
+        <input v-model="query" type="text" class="form-control"
                :placeholder="$t('search-input-placeholder')">
         <span class="input-group-btn">
           <button @click="submitQuery()"  class="btn btn-secondary" :disabled="!query" type="button">{{ 'search-button' | i18n }}</button>
@@ -125,6 +125,7 @@
         },
         set (query) {
           this.$store.commit(SET_QUERY, query)
+          this.submitQuery()
         }
       },
       packages () {

@@ -1,15 +1,12 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -20,30 +17,21 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.slf4j.LoggerFactory.getLogger;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class FileTypeEditing extends AbstractTestNGSpringContextTests
+public class FileTypeEditingIT extends AbstractTestNGSpringContextTests
 {
-	private final Logger LOG = getLogger(FileTypeEditing.class);
+	@Autowired
+	private AttributeFactory attributeFactory;
 
 	@Autowired
-	IndexJobScheduler indexService;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
-	AttributeFactory attributeFactory;
+	private DataService dataService;
 
 	@Autowired
-	EntityTypeFactory entityTypeFactory;
-
-	@Autowired
-	DataService dataService;
-
-	@Autowired
-	EntityManager entityManager;
-
-	@Autowired
-	MetaDataService metaDataService;
+	private MetaDataService metaDataService;
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[FILE\\] to \\[STRING\\] not allowed, allowed types are \\[\\]")
 	public void testNoConversionsAllowed()

@@ -776,7 +776,8 @@
                     }
 
                     if (values.length > 1) {
-                        if (attrOperator === 'EQUALS') {
+                        operator = operator && operator !== 'undefined' ? operator : 'OR'
+                        if (attrOperator === 'EQUALS' && operator === 'OR') {
                             rule = {
                                 field: queryRuleField,
                                 operator: 'IN',
@@ -791,7 +792,7 @@
                             $.each(values, function (index, value) {
                                 if (index > 0) {
                                     nestedRule.nestedRules.push({
-                                        operator: operator || 'OR'
+                                        operator: operator
                                     });
                                 }
 
