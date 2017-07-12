@@ -14,15 +14,16 @@
     "lint:fix": "eslint --ext .js,.vue src test/unit/specs"
   },
   "dependencies": {
-    "@molgenis/molgenis-i18n-js": "^0.0.5",
     "@molgenis/molgenis-api-client": "^1.0.0",
+    "@molgenis/molgenis-i18n-js": "^0.0.5",
     "bootstrap": "4.0.0-alpha.6",
+    "bootstrap-vue": "^0.18.0",
     "font-awesome": "^4.7.0",
     "vue": "^2.2.6",
     "vue-router": "^2.3.1",
     "vue-sweetalert": "^0.1.17",
-    "vuex-router-sync": "4.1.2",
-    "vuex": "^2.2.1"
+    "vuex": "^2.2.1",
+    "vuex-router-sync": "4.1.2"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",
@@ -42,10 +43,10 @@
     "css-loader": "^0.28.4",
     "es6-promise": "^4.1.0",
     "eslint": "^3.14.1",
+    "eslint-config-standard": "^6.2.1",
     "eslint-friendly-formatter": "^2.0.7",
     "eslint-loader": "^1.8.0",
     "eslint-plugin-html": "^2.0.0",
-    "eslint-config-standard": "^6.2.1",
     "eslint-plugin-promise": "^3.4.0",
     "eslint-plugin-standard": "^2.0.1",
     "eventsource-polyfill": "^0.9.6",

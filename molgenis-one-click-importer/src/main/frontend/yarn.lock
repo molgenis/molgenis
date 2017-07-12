@@ -947,7 +947,15 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
-bootstrap@4.0.0-alpha.6:
+bootstrap-vue@^0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-0.18.0.tgz#e8570724dd0dd4cba82344aec9acd7d7b8a9dfec"
+  dependencies:
+    bootstrap "^4.0.0-alpha.6"
+    tether latest
+    vue "^2.3.3"
+
+bootstrap@4.0.0-alpha.6, bootstrap@^4.0.0-alpha.6:
   version "4.0.0-alpha.6"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-4.0.0-alpha.6.tgz#4f54dd33ac0deac3b28407bc2df7ec608869c9c8"
   dependencies:
@@ -5735,7 +5743,7 @@ testdouble@^1.11.1:
     quibble "^0.4.0"
     stringify-object "^2.4.0"
 
-tether@^1.4.0:
+tether@^1.4.0, tether@latest:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/tether/-/tether-1.4.0.tgz#0f9fa171f75bf58485d8149e94799d7ae74d1c1a"
 
@@ -6038,7 +6046,7 @@ vue-template-es2015-compiler@^1.2.2:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.5.3.tgz#22787de4e37ebd9339b74223bc467d1adee30545"
 
-vue@^2.2.1, vue@^2.2.6:
+vue@^2.2.1, vue@^2.2.6, vue@^2.3.3:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.3.4.tgz#5ec3b87a191da8090bbef56b7cfabd4158038171"
 
