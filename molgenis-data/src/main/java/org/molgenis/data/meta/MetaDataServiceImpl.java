@@ -472,6 +472,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		List<EntityType> entityTypeList = newArrayList();
 		Fetch entityTypeFetch = getEntityTypeFetch();
 
+		// Fetch the entitytypes page by page so that the results can be cached
 		final int pageSize = 1000;
 		for (int page = 0; entityTypeList.size() == page * pageSize; page++)
 		{
