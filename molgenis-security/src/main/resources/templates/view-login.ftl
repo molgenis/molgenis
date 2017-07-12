@@ -9,7 +9,7 @@
 <#if googleSignIn>
     <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
 </#if>
-    <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+    <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
     <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
     <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>

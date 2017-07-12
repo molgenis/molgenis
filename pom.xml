@@ -23,7 +23,15 @@
         <connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
-    <developers/>
+         
+    <developers>
+        <developer>
+            <name>MOLGENIS development team</name>
+            <email>molgenis@gmail.com</email>
+            <organization>University Medical Centre Groningen, System Genetics, Genomics Coordination Centre</organization>
+            <organizationUrl>http://www.molgenis.org</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

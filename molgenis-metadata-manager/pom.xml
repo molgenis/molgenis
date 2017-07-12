@@ -63,7 +63,7 @@
                         <configuration>
                             <arguments>test</arguments>
                             <!-- Do not stop the build on JS test failure -->
-                            <maven.test.failure.ignore>true</maven.test.failure.ignore>
+                            <failOnError>true</failOnError>
                         </configuration>
                     </execution>
                 </executions>

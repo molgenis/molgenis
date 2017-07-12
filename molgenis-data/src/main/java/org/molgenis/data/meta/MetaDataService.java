@@ -12,6 +12,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
+
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
 	/**
@@ -257,10 +262,21 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * Returns whether the given {@link EntityType} defines a meta entity such as {@link EntityTypeMetadata} or
 	 * {@link Attribute}.
 	 *
-	 * @param entityTypeData
-	 * @return
+	 * @param entityType the EntityType that is checked
 	 */
-	boolean isMetaEntityType(EntityType entityTypeData);
+	static boolean isMetaEntityType(EntityType entityType)
+	{
+		switch (entityType.getId())
+		{
+			case ENTITY_TYPE_META_DATA:
+			case ATTRIBUTE_META_DATA:
+			case TAG:
+			case PACKAGE:
+				return true;
+			default:
+				return false;
+		}
+	}
 
 	/**
 	 * Returns whether the given {@link EntityType} attributes are compatible with

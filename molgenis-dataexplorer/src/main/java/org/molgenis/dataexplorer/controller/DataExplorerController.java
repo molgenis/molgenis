@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
@@ -39,12 +40,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
+import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -333,15 +339,14 @@ public class DataExplorerController extends MolgenisPluginController
 		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
-		String fileName;
+		final String fileName = getDownloadFilename(dataRequest.getEntityName(), LocalDateTime.now(),
+				dataRequest.getDownloadType());
 		ServletOutputStream outputStream;
 
 		switch (dataRequest.getDownloadType())
 		{
 			case DOWNLOAD_TYPE_CSV:
 				response.setContentType("text/csv");
-				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(
-						new Date()) + ".csv";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();
@@ -349,14 +354,18 @@ public class DataExplorerController extends MolgenisPluginController
 				break;
 			case DOWNLOAD_TYPE_XLSX:
 				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(
-						new Date()) + ".xlsx";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();
 				download.writeToExcel(dataRequest, outputStream);
 				break;
 		}
+	}
+
+	public String getDownloadFilename(String entityTypeId, LocalDateTime localDateTime, DownloadType downloadType)
+	{
+		String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss"));
+		return String.format("%s_%s.%s", entityTypeId, timestamp, downloadType == DOWNLOAD_TYPE_CSV ? "csv" : "xlsx");
 	}
 
 	@RequestMapping(value = "/galaxy/export", method = POST)
