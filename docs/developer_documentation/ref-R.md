@@ -167,6 +167,24 @@ id| The id of the entity|Yes
 molgenis.delete(entity = "Person", id = 8)
 ```
 
+## deleteList
+```
+molgenis.deleteList(entity, c("id1", "id2"))
+```
+
+Deletes a list of entities in an entityType.
+
+Parameter|Description|Required
+---------|-----------|--------
+entity| The entityType name|yes
+rows| List with id's of the rows|Yes
+
+**Example**
+
+```
+molgenis.delete(entity = "Person", id = 8)
+```
+
 ## getEntityMetaData
 ```
 molgenis.getEntityMetaData(entity)
