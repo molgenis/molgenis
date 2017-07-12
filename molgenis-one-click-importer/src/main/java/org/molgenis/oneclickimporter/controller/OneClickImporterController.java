@@ -1,9 +1,9 @@
 package org.molgenis.oneclickimporter.controller;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.ui.MolgenisPluginController;
@@ -21,7 +21,6 @@ import java.io.IOException;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -52,42 +51,76 @@ public class OneClickImporterController extends MolgenisPluginController
 		return "view-one-click-importer";
 	}
 
-	private static enum exelTypeExtentions {
-
-	}
-
 	@PostMapping("/upload")
-	public void importFile(@RequestParam("file") MultipartFile multipartFile)
+	public void importFile(@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
-		String fileName = multipartFile.getOriginalFilename();
+		File file = multipartToFile(multipartFile);
+
+		String fileName = file.getName();
 		String fileTypePart = fileName.substring(fileName.lastIndexOf('.') + 1);
 
-		//Every xls/xlsx/csv/csv-zip file with 1 sheet is importable with the upload plugin
-
-
-
+		if (fileTypePart.equals("xls") || fileTypePart.equals("xlsx"))
+		{
+			Sheet sheet = buildExcelSheetFromFile(file);
+			writeSheetToConsole(sheet);
+		}
+		else
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
-	private HSSFSheet buildExelSheetFromFile(MultipartFile multipartFile) {
-		POIFSFileSystem fs = null;
-		try
-		{
-			fs = new POIFSFileSystem(multipartFile.getInputStream());
-			HSSFWorkbook wb = null;
+	private File multipartToFile(MultipartFile multipart) throws IllegalStateException, IOException
+	{
+		File convFile = new File(multipart.getOriginalFilename());
+		multipart.transferTo(convFile);
+		return convFile;
+	}
 
-			wb = new HSSFWorkbook(fs);
+	private Sheet buildExcelSheetFromFile(File file) throws Exception
+	{
+		Workbook workbook = WorkbookFactory.create(file);
+		return workbook.getSheetAt(0);
+	}
 
-			// at the moment only single sheet is supported
-			return wb.getSheetAt(0);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+	private void writeSheetToConsole(Sheet sheet)
+	{
+		Row headerRow = sheet.getRow(0);
+		headerRow.cellIterator().forEachRemaining(cell -> System.out.println("cell = " + cell));
 
-		HSSFCell cell = new HSSFCell();
-
-		return null;
+		//		int rows; // No of rows
+		//		rows = sheet.getPhysicalNumberOfRows();
+		//
+		//		int cols = 0; // No of columns
+		//		int tmp = 0;
+		//
+		//		// This trick ensures that we get the data properly even if it doesn't start from first few rows
+		//		for (int i = 0; i < 10 || i < rows; i++)
+		//		{
+		//			row = sheet.getRow(i);
+		//			if (row != null)
+		//			{
+		//				tmp = sheet.getRow(i).getPhysicalNumberOfCells();
+		//				if (tmp > cols) cols = tmp;
+		//			}
+		//		}
+		//
+		//		for (int r = 0; r < rows; r++)
+		//		{
+		//			row = sheet.getRow(r);
+		//			System.out.println("row = " + row);
+		//			if (row != null)
+		//			{
+		//				for (int c = 0; c < cols; c++)
+		//				{
+		//					cell = row.getCell((short) c);
+		//					if (cell != null)
+		//					{
+		//
+		//					}
+		//				}
+		//			}
+		//		}
 	}
 
 	private String getBaseUrl()

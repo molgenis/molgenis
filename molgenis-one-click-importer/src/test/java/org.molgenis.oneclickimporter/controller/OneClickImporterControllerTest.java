@@ -1,5 +1,6 @@
 package org.molgenis.oneclickimporter.controller;
 
+import com.google.common.io.Resources;
 import org.mockito.Mock;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
@@ -13,14 +14,19 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Configuration
 @EnableWebMvc
@@ -37,14 +43,14 @@ public class OneClickImporterControllerTest
 	@Mock
 	private AppSettings appSettings;
 
-
 	@BeforeMethod
 	public void before()
 	{
 		initMocks(this);
 
-		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService, languageService,
-				appSettings);
+		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
+				languageService, appSettings);
+
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
@@ -60,23 +66,27 @@ public class OneClickImporterControllerTest
 	public void testInit() throws Exception
 	{
 		mockMvc.perform(get(OneClickImporterController.URI))
-				.andExpect(status().isOk())
-				.andExpect(view().name("view-one-click-importer"))
-				.
-						andExpect(model().attribute("baseUrl", "/test-path"))
-				.
-						andExpect(model().attribute("lng", "nl"))
-				.
-						andExpect(model().attribute("fallbackLng", "en"));
+			   .andExpect(status().isOk())
+			   .andExpect(view().name("view-one-click-importer"))
+			   .andExpect(model().attribute("baseUrl", "/test-path"))
+			   .andExpect(model().attribute("lng", "nl"))
+			   .andExpect(model().attribute("fallbackLng", "en"));
 	}
 
 	@Test
 	public void testFileImport() throws Exception
 	{
-		MockMultipartFile multipartFile = new MockMultipartFile(
-				"file", "test.xls", "application/vnd.ms-exceln", "Spring Framework".getBytes());
+		URL resourceUrl = Resources.getResource(OneClickImporterControllerTest.class, "/simple-valid.xlsx");
+		File file = new File(new URI(resourceUrl.toString()).getPath());
+
+		Path path = Paths.get(file.getAbsolutePath());
+		byte[] data = Files.readAllBytes(path);
+
+		MockMultipartFile multipartFile = new MockMultipartFile("file", file.getName(),
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", data);
+
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-				.andExpect(status().isOk());
+			   .andExpect(status().isOk());
 	}
 
 }
