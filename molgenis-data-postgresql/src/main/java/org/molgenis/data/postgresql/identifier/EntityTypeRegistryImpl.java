@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.postgresql.PostgreSqlNameGenerator;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getJunctionTableName;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
+/**
+ * Tracks PostgreSQL table names.
+ */
 @Component
 public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener implements EntityTypeRegistry
 {
@@ -39,6 +45,7 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 		String tableName = getTableName(entityType);
 		EntityTypeDescription entityTypeDescription = createEntityTypeDescription(entityType);
 		getEntityTypeDescriptionMap().put(tableName, entityTypeDescription);
+		putJunctionTableNames(entityType, entityTypeDescription);
 	}
 
 	@Override
@@ -46,12 +53,20 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	{
 		String tableName = getTableName(entityType);
 		getEntityTypeDescriptionMap().put(tableName, null);
+		putJunctionTableNames(entityType, null);
+	}
+
+	private void putJunctionTableNames(EntityType entityType, EntityTypeDescription entityTypeDescription)
+	{
+		StreamSupport.stream(entityType.getAllAttributes().spliterator(), false)
+					 .filter(EntityTypeUtils::isReferenceType)
+					 .map(attribute -> getJunctionTableName(entityType, attribute, false))
+					 .forEach(junctionName -> getEntityTypeDescriptionMap().put(junctionName, entityTypeDescription));
 	}
 
 	@Override
-	public EntityTypeDescription getEntityTypeDescription(String tableOrJunctionTableName)
+	public EntityTypeDescription getEntityTypeDescription(String tableName)
 	{
-		String tableName = getEntityTypeTableName(tableOrJunctionTableName);
 		Map<String, EntityTypeDescription> transactionEntityTypeDescriptionMap = transactionsEntityTypeDescriptionMap.get(
 				getTransactionId());
 		if (transactionEntityTypeDescriptionMap != null && transactionEntityTypeDescriptionMap.containsKey(tableName))
@@ -125,11 +140,5 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	private Map<String, EntityTypeDescription> getEntityTypeDescriptionMap()
 	{
 		return transactionsEntityTypeDescriptionMap.computeIfAbsent(getTransactionId(), k -> new HashMap<>());
-	}
-
-	private String getEntityTypeTableName(String tableOrJunctionTableName)
-	{
-		int idx = tableOrJunctionTableName.indexOf('_', tableOrJunctionTableName.indexOf('#'));
-		return idx != -1 ? tableOrJunctionTableName.substring(0, idx) : tableOrJunctionTableName;
 	}
 }
