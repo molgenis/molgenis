@@ -1,9 +1,11 @@
 package org.molgenis.oneclickimporter.controller;
 
 import com.google.common.io.Resources;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.mockito.Mock;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.context.annotation.Configuration;
@@ -15,12 +17,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -32,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableWebMvc
 public class OneClickImporterControllerTest
 {
+	private static final String CONTENT_TYPE_EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	private MockMvc mockMvc;
 
 	@Mock
@@ -43,13 +48,16 @@ public class OneClickImporterControllerTest
 	@Mock
 	private AppSettings appSettings;
 
+	@Mock
+	private ExcelService excelService;
+
 	@BeforeMethod
 	public void before()
 	{
 		initMocks(this);
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings);
+				languageService, appSettings, excelService);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");
@@ -74,19 +82,50 @@ public class OneClickImporterControllerTest
 	}
 
 	@Test
-	public void testFileImport() throws Exception
+	public void testXLSXFileImport() throws Exception
 	{
-		URL resourceUrl = Resources.getResource(OneClickImporterControllerTest.class, "/simple-valid.xlsx");
-		File file = new File(new URI(resourceUrl.toString()).getPath());
+		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xlsx", CONTENT_TYPE_EXCEL);
 
-		Path path = Paths.get(file.getAbsolutePath());
-		byte[] data = Files.readAllBytes(path);
 
-		MockMultipartFile multipartFile = new MockMultipartFile("file", file.getName(),
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", data);
+		Sheet sheet = mock(Sheet.class);
+		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 			   .andExpect(status().isOk());
+	}
+
+	@Test
+	public void testXLSFileImport() throws Exception
+	{
+		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xls", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+		Sheet sheet = mock(Sheet.class);
+		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
+
+		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testUnsupportedFileTypeImport() throws Exception
+	{
+		MockMultipartFile multipartFile = getTestMultipartFile("/unsupported-file-type.nft", "some-unknown-type");
+
+		Sheet sheet = mock(Sheet.class);
+		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
+
+		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
+				.andExpect(status().isBadRequest());
+	}
+
+	private MockMultipartFile getTestMultipartFile(final String path, final String contentType) throws URISyntaxException, IOException
+	{
+		URL resourceUrl = Resources.getResource(OneClickImporterControllerTest.class, path);
+		File file = new File(new URI(resourceUrl.toString()).getPath());
+
+		byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+
+		return new MockMultipartFile("file", file.getName(), contentType, data);
 	}
 
 }

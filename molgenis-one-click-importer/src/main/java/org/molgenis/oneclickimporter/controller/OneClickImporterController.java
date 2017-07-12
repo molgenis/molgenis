@@ -1,25 +1,32 @@
 package org.molgenis.oneclickimporter.controller;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
+import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.util.ErrorMessageResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
@@ -33,13 +40,19 @@ public class OneClickImporterController extends MolgenisPluginController
 	private LanguageService languageService;
 	private AppSettings appSettings;
 
-	public OneClickImporterController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings)
+	private ExcelService excelService;
+
+	public OneClickImporterController(
+			MenuReaderService menuReaderService,
+			LanguageService languageService,
+			AppSettings appSettings,
+			ExcelService excelService)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.languageService = requireNonNull(languageService);
 		this.appSettings = requireNonNull(appSettings);
+		this.excelService = requireNonNull(excelService);
 	}
 
 	@RequestMapping(method = GET)
@@ -52,75 +65,31 @@ public class OneClickImporterController extends MolgenisPluginController
 	}
 
 	@PostMapping("/upload")
-	public void importFile(@RequestParam("file") MultipartFile multipartFile) throws Exception
+	public void importFile(@RequestParam("file") MultipartFile multipartFile)
+			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
-		File file = multipartToFile(multipartFile);
+		File file = new File(multipartFile.getOriginalFilename());
+		multipartFile.transferTo(file);
 
 		String fileName = file.getName();
 		String fileTypePart = fileName.substring(fileName.lastIndexOf('.') + 1);
 
 		if (fileTypePart.equals("xls") || fileTypePart.equals("xlsx"))
 		{
-			Sheet sheet = buildExcelSheetFromFile(file);
-			writeSheetToConsole(sheet);
+			Sheet sheet = excelService.buildExcelSheetFromFile(file);
 		}
 		else
 		{
-			throw new UnsupportedOperationException();
+			throw new UnknownFileTypeException("File with extention: " + fileTypePart + " is not a valid one-click importer file");
 		}
 	}
 
-	private File multipartToFile(MultipartFile multipart) throws IllegalStateException, IOException
+	@ResponseBody
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler({UnknownFileTypeException.class, IOException.class, InvalidFormatException.class})
+	public ErrorMessageResponse handleUnknownEntityException(Exception e)
 	{
-		File convFile = new File(multipart.getOriginalFilename());
-		multipart.transferTo(convFile);
-		return convFile;
-	}
-
-	private Sheet buildExcelSheetFromFile(File file) throws Exception
-	{
-		Workbook workbook = WorkbookFactory.create(file);
-		return workbook.getSheetAt(0);
-	}
-
-	private void writeSheetToConsole(Sheet sheet)
-	{
-		Row headerRow = sheet.getRow(0);
-		headerRow.cellIterator().forEachRemaining(cell -> System.out.println("cell = " + cell));
-
-		//		int rows; // No of rows
-		//		rows = sheet.getPhysicalNumberOfRows();
-		//
-		//		int cols = 0; // No of columns
-		//		int tmp = 0;
-		//
-		//		// This trick ensures that we get the data properly even if it doesn't start from first few rows
-		//		for (int i = 0; i < 10 || i < rows; i++)
-		//		{
-		//			row = sheet.getRow(i);
-		//			if (row != null)
-		//			{
-		//				tmp = sheet.getRow(i).getPhysicalNumberOfCells();
-		//				if (tmp > cols) cols = tmp;
-		//			}
-		//		}
-		//
-		//		for (int r = 0; r < rows; r++)
-		//		{
-		//			row = sheet.getRow(r);
-		//			System.out.println("row = " + row);
-		//			if (row != null)
-		//			{
-		//				for (int c = 0; c < cols; c++)
-		//				{
-		//					cell = row.getCell((short) c);
-		//					if (cell != null)
-		//					{
-		//
-		//					}
-		//				}
-		//			}
-		//		}
+		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
 	private String getBaseUrl()
