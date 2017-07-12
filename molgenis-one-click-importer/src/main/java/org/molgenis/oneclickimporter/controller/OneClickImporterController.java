@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
+import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -70,7 +71,7 @@ public class OneClickImporterController extends MolgenisPluginController
 		if (fileTypePart.equals("xls") || fileTypePart.equals("xlsx"))
 		{
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
-			oneClickImporterService.buildDataSheet(sheet);
+			DataCollection dataCollection = oneClickImporterService.buildDataCollection(sheet);
 		}
 		else
 		{

@@ -24,7 +24,7 @@ public class OneClickImporterServiceTest
 		File file = new File(new URI(resourceUrl.toString()).getPath());
 
 		Sheet sheet = loadTestFile(file);
-		oneClickImporterService.buildDataSheet(sheet);
+		oneClickImporterService.buildDataCollection(sheet);
 	}
 
 	private Sheet loadTestFile(File file) throws IOException, InvalidFormatException

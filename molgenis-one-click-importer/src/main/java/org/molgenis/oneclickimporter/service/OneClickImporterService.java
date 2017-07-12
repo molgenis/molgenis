@@ -1,16 +1,16 @@
 package org.molgenis.oneclickimporter.service;
 
 import org.apache.poi.ss.usermodel.Sheet;
-import org.molgenis.oneclickimporter.model.Column;
+import org.molgenis.oneclickimporter.model.DataCollection;
 
 public interface OneClickImporterService
 {
 	/**
-	 * Generate {@link Column} with sheet contents
+	 * Generate {@link DataCollection} with sheet contents
 	 *
 	 * @param sheet
 	 */
-	void buildDataSheet(Sheet sheet);
+	DataCollection buildDataCollection(Sheet sheet);
 
-	// void buildDataSheet(String csvContent);
+	// void buildDataCollection(String csvContent);
 }
