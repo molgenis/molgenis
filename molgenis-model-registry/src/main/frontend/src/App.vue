@@ -17,16 +17,15 @@
 <script>
 
   import umlViewer from 'components/UmlViewer'
+  import { GET_UMLDATA } from './store/actions'
 
   export default {
     name: 'molgenis-model-registry-uml-viewer',
-    data: function () {
-      return {
-        test: 'Hallo mark'
-      }
-    },
     components: {
       umlViewer
+    },
+    created: function () {
+      this.$store.dispatch(GET_UMLDATA)
     }
   }
 

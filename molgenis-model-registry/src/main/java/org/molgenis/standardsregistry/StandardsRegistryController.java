@@ -3,6 +3,8 @@ package org.molgenis.standardsregistry;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
@@ -18,10 +20,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -159,17 +159,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		return VIEW_NAME_UML;
-	}
-
-	@RequestMapping(value = "/uml/json", method = GET)
-	public @ResponseBody Package getUmlJson(@RequestParam(value = "package", required = true) String selectedPackageName)
-	{
-		LOG.info("Requested package: [ " +selectedPackageName+ " ]");
-		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
-
-		LOG.info("Converted package: [ " + molgenisPackage + " ]");
-
-		return molgenisPackage;
 	}
 
 	@RequestMapping(value = "/getPackage", method = GET)

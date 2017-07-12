@@ -1,5 +1,6 @@
 // @flow
 
 export type State = {
-  message: string
+  message: string,
+  rawData: any
 }

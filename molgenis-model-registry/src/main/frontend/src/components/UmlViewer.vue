@@ -1,6 +1,7 @@
 <template>
   <div id="sample">
-    <div style="border: solid 1px black; width:600px; height:600px" ref="targetDiv"></div>
+    <!-- read out graph so we can watch it -->
+    <div style="border: solid 1px black; width:600px; height:600px" ref="targetDiv" v-if="graph"></div>
   </div>
 </template>
 
@@ -11,12 +12,9 @@
 
   export default {
     name: 'model-registry-uml-viewer',
-    mounted: function () {
+    updated () {
       const targetDiv = this.$refs.targetDiv
-      newGraph(targetDiv, this.graph)
-    },
-    updated: function () {
-      const targetDiv = this.$refs.targetDiv
+      console.log(this.graph)
       newGraph(targetDiv, this.graph)
     },
     computed: {
