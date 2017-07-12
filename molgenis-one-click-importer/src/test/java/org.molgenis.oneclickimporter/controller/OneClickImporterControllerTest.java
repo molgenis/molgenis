@@ -6,13 +6,13 @@ import org.mockito.Mock;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.oneclickimporter.service.ExcelService;
+import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,8 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Configuration
-@EnableWebMvc
+@WebAppConfiguration
 public class OneClickImporterControllerTest
 {
 	private static final String CONTENT_TYPE_EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -51,13 +50,16 @@ public class OneClickImporterControllerTest
 	@Mock
 	private ExcelService excelService;
 
+	@Mock
+	private OneClickImporterService oneClickImporterService;
+
 	@BeforeMethod
 	public void before()
 	{
 		initMocks(this);
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings, excelService);
+				languageService, appSettings, excelService, oneClickImporterService);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");
@@ -86,7 +88,6 @@ public class OneClickImporterControllerTest
 	{
 		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xlsx", CONTENT_TYPE_EXCEL);
 
-
 		Sheet sheet = mock(Sheet.class);
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 
@@ -97,13 +98,14 @@ public class OneClickImporterControllerTest
 	@Test
 	public void testXLSFileImport() throws Exception
 	{
-		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xls", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xls",
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 		Sheet sheet = mock(Sheet.class);
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-				.andExpect(status().isOk());
+			   .andExpect(status().isOk());
 	}
 
 	@Test
@@ -115,10 +117,11 @@ public class OneClickImporterControllerTest
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-				.andExpect(status().isBadRequest());
+			   .andExpect(status().isBadRequest());
 	}
 
-	private MockMultipartFile getTestMultipartFile(final String path, final String contentType) throws URISyntaxException, IOException
+	private MockMultipartFile getTestMultipartFile(final String path, final String contentType)
+			throws URISyntaxException, IOException
 	{
 		URL resourceUrl = Resources.getResource(OneClickImporterControllerTest.class, path);
 		File file = new File(new URI(resourceUrl.toString()).getPath());
@@ -127,5 +130,4 @@ public class OneClickImporterControllerTest
 
 		return new MockMultipartFile("file", file.getName(), contentType, data);
 	}
-
 }

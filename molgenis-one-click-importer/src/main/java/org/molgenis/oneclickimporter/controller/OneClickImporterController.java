@@ -1,20 +1,15 @@
 package org.molgenis.oneclickimporter.controller;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.service.ExcelService;
+import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,20 +34,18 @@ public class OneClickImporterController extends MolgenisPluginController
 	private MenuReaderService menuReaderService;
 	private LanguageService languageService;
 	private AppSettings appSettings;
-
+	private OneClickImporterService oneClickImporterService;
 	private ExcelService excelService;
 
-	public OneClickImporterController(
-			MenuReaderService menuReaderService,
-			LanguageService languageService,
-			AppSettings appSettings,
-			ExcelService excelService)
+	public OneClickImporterController(MenuReaderService menuReaderService, LanguageService languageService,
+			AppSettings appSettings, ExcelService excelService, OneClickImporterService oneClickImporterService)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.languageService = requireNonNull(languageService);
 		this.appSettings = requireNonNull(appSettings);
 		this.excelService = requireNonNull(excelService);
+		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 	}
 
 	@RequestMapping(method = GET)
@@ -77,19 +70,28 @@ public class OneClickImporterController extends MolgenisPluginController
 		if (fileTypePart.equals("xls") || fileTypePart.equals("xlsx"))
 		{
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
+			oneClickImporterService.buildDataSheet(sheet);
 		}
 		else
 		{
-			throw new UnknownFileTypeException("File with extention: " + fileTypePart + " is not a valid one-click importer file");
+			throw new UnknownFileTypeException(
+					"File with extention: " + fileTypePart + " is not a valid one-click importer file");
 		}
 	}
 
 	@ResponseBody
 	@ResponseStatus(BAD_REQUEST)
-	@ExceptionHandler({UnknownFileTypeException.class, IOException.class, InvalidFormatException.class})
+	@ExceptionHandler({ UnknownFileTypeException.class, IOException.class, InvalidFormatException.class })
 	public ErrorMessageResponse handleUnknownEntityException(Exception e)
 	{
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+	}
+
+	private File multipartToFile(MultipartFile multipart) throws IllegalStateException, IOException
+	{
+		File convFile = new File(multipart.getOriginalFilename());
+		multipart.transferTo(convFile);
+		return convFile;
 	}
 
 	private String getBaseUrl()
