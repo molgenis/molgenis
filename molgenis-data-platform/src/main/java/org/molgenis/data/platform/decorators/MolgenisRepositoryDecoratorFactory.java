@@ -22,7 +22,6 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.*;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.security.user.UserService;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,7 +50,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
 	private final EntityAclManager entityAclManager;
-	private final UserService userService;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -62,7 +60,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			L2Cache l2Cache, TransactionInformation transactionInformation,
 			EntityListenersService entityListenersService, L3Cache l3Cache,
 			PlatformTransactionManager transactionManager, QueryValidator queryValidator,
-			EntityAclManager entityAclManager, UserService userService)
+			EntityAclManager entityAclManager)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -82,7 +80,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
 		this.entityAclManager = requireNonNull(entityAclManager);
-		this.userService = requireNonNull(userService);
 	}
 
 	@Override
@@ -137,7 +134,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 1.5
 		if (repository.getEntityType().isEntityLevelSecurity())
 		{
-			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, userService, entityAclManager);
+			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, entityAclManager);
 		}
 
 		// 1. transaction decorator

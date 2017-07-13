@@ -1,36 +1,31 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.security.acl.EntityAclService;
+import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Component
 public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 {
-	private final MutableAclService mutableAclService;
+	private final EntityAclService entityAclService;
 
-	public MolgenisPermissionServiceImpl(MutableAclService mutableAclService) {
-
-		this.mutableAclService = requireNonNull(mutableAclService);
+	public MolgenisPermissionServiceImpl(EntityAclService entityAclService)
+	{
+		this.entityAclService = requireNonNull(entityAclService);
 	}
+
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginId, Permission permission)
 	{
@@ -44,41 +39,7 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 		{
 			return true;
 		}
-
-		ObjectIdentity objectIdentity = new ObjectIdentityImpl(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityTypeId);
-		Acl acl = mutableAclService.readAclById(objectIdentity);
-		boolean isGranted;
-		try
-		{
-			Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-			isGranted = acl.isGranted(expandPermissions(permission),
-					singletonList(sid), false);
-		}
-		catch (NotFoundException e)
-		{
-			isGranted = false;
-		}
-		return isGranted;
-	}
-
-	private static List<org.springframework.security.acls.model.Permission> expandPermissions(Permission permission)
-	{
-		if (permission == Permission.READ)
-		{
-			return Arrays
-					.asList(BasePermission.READ, BasePermission.WRITE, BasePermission.CREATE, BasePermission.DELETE,
-							BasePermission.ADMINISTRATION);
-		}
-		else if (permission ==Permission.WRITE)
-		{
-			return Arrays.asList(BasePermission.WRITE, BasePermission.CREATE, BasePermission.DELETE,
-					BasePermission.ADMINISTRATION);
-		} else {
-			// FIXME decide what to do here
-			return Arrays
-					.asList(BasePermission.READ, BasePermission.WRITE, BasePermission.CREATE, BasePermission.DELETE,
-							BasePermission.ADMINISTRATION);
-		}
+		return entityAclService.isGranted(EntityIdentity.create(ENTITY_TYPE_META_DATA, entityTypeId), permission);
 	}
 
 	private boolean hasPermission(String authorityId, Permission permission, String authorityPrefix)

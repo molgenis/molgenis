@@ -8,9 +8,7 @@ import java.util.List;
 @AutoValue
 public abstract class EntityAcl
 {
-	public abstract String getEntityTypeId();
-
-	public abstract Object getEntityId();
+	public abstract EntityIdentity getEntityIdentity();
 
 	public abstract SecurityId getOwner();
 
@@ -19,14 +17,14 @@ public abstract class EntityAcl
 
 	public abstract List<EntityAce> getEntries();
 
-	public abstract Builder toBuilder();
-
-	public static EntityAcl create(String newEntityTypeId, Object newEntityId, SecurityId newOwner, EntityAcl newParent,
+	public static EntityAcl create(EntityIdentity newEntityIdentity, SecurityId newOwner, EntityAcl newParent,
 			List<EntityAce> newEntries)
 	{
-		return builder().setEntityTypeId(newEntityTypeId).setEntityId(newEntityId).setOwner(newOwner)
-				.setParent(newParent).setEntries(newEntries).build();
+		return builder().setEntityIdentity(newEntityIdentity).setOwner(newOwner).setParent(newParent)
+				.setEntries(newEntries).build();
 	}
+
+	public abstract Builder toBuilder();
 
 	public static Builder builder()
 	{
@@ -36,9 +34,7 @@ public abstract class EntityAcl
 	@AutoValue.Builder
 	public abstract static class Builder
 	{
-		public abstract Builder setEntityTypeId(String newEntityTypeId);
-
-		public abstract Builder setEntityId(Object newEntityId);
+		public abstract Builder setEntityIdentity(EntityIdentity newEntityIdentity);
 
 		public abstract Builder setOwner(SecurityId newOwner);
 
@@ -48,4 +44,6 @@ public abstract class EntityAcl
 
 		public abstract EntityAcl build();
 	}
+
+
 }

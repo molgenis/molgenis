@@ -10,14 +10,9 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -28,14 +23,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 @Service
 public class PermissionManagerServiceImpl implements PermissionManagerService
@@ -43,11 +36,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private final DataService dataService;
 	private final MolgenisPluginRegistry molgenisPluginRegistry;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-	private final MutableAclService mutableAclService;
 
 	@Autowired
 	public PermissionManagerServiceImpl(DataService dataService, MolgenisPluginRegistry molgenisPluginRegistry,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper, MutableAclService mutableAclService)
+			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (molgenisPluginRegistry == null) throw new IllegalArgumentException("Molgenis plugin registry is null");
@@ -55,7 +47,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		this.dataService = dataService;
 		this.molgenisPluginRegistry = molgenisPluginRegistry;
 		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
-		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
 	@Override
@@ -85,7 +76,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<Object> getEntityClassIds()
 	{
-		return dataService.findAll(ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue()).collect(toList());
+		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue())
+				.collect(toList());
 	}
 
 	@Override
@@ -216,54 +208,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional
 	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, String userId)
 	{
-		RunAsSystemProxy.runAsSystem(() ->
-		{
-			User user = dataService.findOneById(USER, userId, User.class);
-			Sid sid = new PrincipalSid(user.getUsername());
-
-			pluginAuthorities.forEach(userAuthority ->
-			{
-				String role = userAuthority.getRole();
-				// ROLE_ENTITY_WRITE_sys_set_dataexplorer --> WRITE_sys_set_dataexplorer
-				String permissionAndEntityTypeIdStr = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
-				int idx = permissionAndEntityTypeIdStr.indexOf('_');
-				String permissionStr = permissionAndEntityTypeIdStr.substring(0, idx);
-				String entityTypeIdStr = permissionAndEntityTypeIdStr.substring(idx + 1);
-
-				org.springframework.security.acls.model.Permission basePermission;
-				switch (permissionStr)
-				{
-					case "READ":
-						basePermission = BasePermission.READ;
-						break;
-					case "WRITE":
-						basePermission = BasePermission.WRITE;
-						break;
-					default:
-						throw new UnsupportedOperationException("FIXME unsupported permission " + permissionStr);
-				}
-				ObjectIdentity objectIdentity = new ObjectIdentityImpl(ENTITY_TYPE_META_DATA, entityTypeIdStr);
-				Acl acl = mutableAclService.readAclById(objectIdentity);
-				if (!(acl instanceof MutableAcl))
-				{
-					throw new RuntimeException("ACL is not a MutableAcl");
-				}
-				MutableAcl mutableAcl = (MutableAcl) acl;
-				List<AccessControlEntry> accessControlEntries = mutableAcl.getEntries();
-
-				for (int i = 0; i < accessControlEntries.size(); ++i)
-				{
-					AccessControlEntry accessControlEntry = accessControlEntries.get(i);
-					if (accessControlEntry.getSid().equals(sid))
-					{
-						mutableAcl.deleteAce(i);
-					}
-				}
-
-				mutableAcl.insertAce(acl.getEntries().size(), basePermission, sid, true);
-				mutableAclService.updateAcl(mutableAcl);
-			});
-		});
+		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 	}
 
 	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, String userId, String authorityType)
@@ -348,9 +293,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
 		{
 			List<Object> entityClassIds = this.getEntityClassIds();
-			List<EntityType> entityTypes = dataService.findAll(ENTITY_TYPE_META_DATA, entityClassIds.stream(),
-					new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
-					.collect(Collectors.toList());
+			List<EntityType> entityTypes = dataService
+					.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityClassIds.stream(),
+							new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE),
+							EntityType.class).collect(Collectors.toList());
 			if (entityClassIds != null)
 			{
 				Map<String, String> entityClassMap = new TreeMap<String, String>();

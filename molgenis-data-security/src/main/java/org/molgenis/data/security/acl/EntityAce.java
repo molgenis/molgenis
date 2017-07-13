@@ -6,7 +6,7 @@ import org.molgenis.security.core.Permission;
 @AutoValue
 public abstract class EntityAce
 {
-	public abstract Permission getPermission();
+	public abstract Permission getPermission(); // Set permissions?
 
 	public abstract SecurityId getSecurityId();
 

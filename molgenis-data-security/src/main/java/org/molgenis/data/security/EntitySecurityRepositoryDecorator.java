@@ -1,21 +1,16 @@
 package org.molgenis.data.security;
 
-import org.molgenis.auth.Group;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.acl.EntityAce;
 import org.molgenis.data.security.acl.EntityAclManager;
-import org.molgenis.data.security.acl.SecurityId;
+import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.UserService;
 import org.molgenis.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -30,10 +25,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.security.acl.SecurityId.Type.GROUP;
-import static org.molgenis.data.security.acl.SecurityId.Type.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
-import static org.molgenis.util.EntityUtils.asStream;
 
 /**
  * TODO Deleting entity type should delete ACLs (RepositoryCollectionDecorator?)
@@ -44,14 +36,11 @@ import static org.molgenis.util.EntityUtils.asStream;
 public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final Repository<Entity> decoratedRepository;
-	private final UserService userService;
 	private final EntityAclManager entityAclManager;
 
-	public EntitySecurityRepositoryDecorator(Repository<Entity> decoratedRepository, UserService userService,
-			EntityAclManager entityAclManager)
+	public EntitySecurityRepositoryDecorator(Repository<Entity> decoratedRepository, EntityAclManager entityAclManager)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
-		this.userService = requireNonNull(userService);
 		this.entityAclManager = requireNonNull(entityAclManager);
 	}
 
@@ -93,25 +82,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	public void add(Entity entity)
 	{
 		// current user is allowed to add entity, see RepositorySecurityDecorator
-		createAcl(entity);
+		entityAclManager.createAcl(entity);
 		decoratedRepository.add(entity);
-	}
-
-	private void createAcl(Entity entity)
-	{
-		System.out.println(entity.getEntityType().getId() + '.' + entity.getIdValue().toString());
-		List<EntityAce> entityAces;
-		if (!currentUserIsSuOrSystem())
-		{
-			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername(), USER);
-			EntityAce entityAce = EntityAce.create(Permission.WRITE, securityId, true);
-			entityAces = singletonList(entityAce);
-		}
-		else
-		{
-			entityAces = emptyList();
-		}
-		entityAclManager.createAcl(entity, entityAces);
 	}
 
 	@Override
@@ -120,7 +92,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		// current user is allowed to add entities, see RepositorySecurityDecorator
 		return decoratedRepository.add(entities.filter(entity ->
 		{
-			createAcl(entity);
+			entityAclManager.createAcl(entity);
 			return true;
 		}));
 	}
@@ -147,6 +119,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	public void delete(Entity entity)
 	{
 		validateCurrentUserCanDeleteEntity(entity);
+		deleteAcl(entity);
 		decoratedRepository.delete(entity);
 	}
 
@@ -154,6 +127,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	public void deleteById(Object id)
 	{
 		validateCurrentUserCanDeleteEntityById(id);
+		deleteAcl(id);
 		decoratedRepository.deleteById(id);
 	}
 
@@ -162,6 +136,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		if (currentUserIsSuOrSystem())
 		{
+			query().findAll().forEach(this::deleteAcl);
 			decoratedRepository.deleteAll();
 		}
 		else
@@ -177,6 +152,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		decoratedRepository.delete(entities.filter(entity ->
 		{
 			validateCurrentUserCanDeleteEntity(entity);
+			deleteAcl(entity);
 			return true;
 		}));
 	}
@@ -187,6 +163,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		decoratedRepository.deleteAll(ids.filter(id ->
 		{
 			validateCurrentUserCanDeleteEntityById(id);
+			deleteAcl(id);
 			return true;
 		}));
 	}
@@ -295,17 +272,6 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		return new AggregateResult(matrix, xLabels, yLabels);
 	}
 
-	private List<SecurityId> createCurrentUserSecurityIds()
-	{
-		String currentUsername = SecurityUtils.getCurrentUsername();
-		List<String> groupIds = asStream(userService.getUserGroups(currentUsername)).map(Group::getId)
-				.collect(toList());
-		List<SecurityId> sids = new ArrayList<>(groupIds.size() + 1);
-		sids.add(SecurityId.create(currentUsername, USER));
-		groupIds.forEach(groupId -> sids.add(SecurityId.create(groupId, GROUP)));
-		return sids;
-	}
-
 	private boolean currentUserCanReadEntity(Entity entity)
 	{
 		return currentUserIsSuOrSystem() || currentUserCanAccessEntity(entity, Permission.READ);
@@ -349,28 +315,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 
 	private boolean currentUserCanAccessEntity(Entity entity, Permission permission)
 	{
-		List<Permission> permissions = expandPermissions(permission);
-		List<SecurityId> securityIds = createCurrentUserSecurityIds();
-		return entityAclManager.isGranted(entity, permissions, securityIds);
-	}
-
-	private static List<Permission> expandPermissions(Permission permission)
-	{
-		switch (permission)
-		{
-			case NONE:
-				return singletonList(Permission.NONE);
-			case COUNT:
-				return Arrays.asList(Permission.COUNT, Permission.READ, Permission.WRITE, Permission.WRITEMETA);
-			case READ:
-				return Arrays.asList(Permission.READ, Permission.WRITE, Permission.WRITEMETA);
-			case WRITE:
-				return Arrays.asList(Permission.WRITE, Permission.WRITEMETA);
-			case WRITEMETA:
-				return singletonList(Permission.WRITEMETA);
-			default:
-				throw new RuntimeException(String.format("Unknown permission '%s'", permission.toString()));
-		}
+		EntityIdentity entityIdentity = EntityIdentity.create(entity.getEntityType().getId(), entity.getIdValue());
+		return entityAclManager.isGranted(entityIdentity, permission);
 	}
 
 	private void validateCurrentUserCanAccessEntity(Entity entity, Permission permission)
@@ -383,6 +329,18 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 			throw new MolgenisDataAccessException(
 					format("Updating entity [%s] of type [%s] is not allowed", entityIdStr, entityTypeIdStr));
 		}
+	}
+
+	private void deleteAcl(Entity entity)
+	{
+		EntityIdentity entityIdentity = EntityIdentity.create(entity.getEntityType().getId(), entity.getIdValue());
+		entityAclManager.deleteAcl(entityIdentity);
+	}
+
+	private void deleteAcl(Object entityId)
+	{
+		EntityIdentity entityIdentity = EntityIdentity.create(getEntityType().getId(), entityId);
+		entityAclManager.deleteAcl(entityIdentity);
 	}
 
 	private class FilteredConsumer

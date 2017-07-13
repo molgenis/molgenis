@@ -6,7 +6,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.acl.EntityAclService;
-import org.molgenis.data.security.acl.SecurityId;
+import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 
@@ -16,7 +16,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -92,8 +91,9 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem())
 		{
-			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername(), SecurityId.Type.USER);
-			if (entityAclService.isGranted(attribute, singletonList(Permission.READ), singletonList(securityId)))
+			EntityIdentity entityIdentity = EntityIdentity
+					.create(attribute.getEntityType().getId(), attribute.getIdValue());
+			if (entityAclService.isGranted(entityIdentity, Permission.READ))
 			{
 				attribute.setReadOnly(true);
 			}
