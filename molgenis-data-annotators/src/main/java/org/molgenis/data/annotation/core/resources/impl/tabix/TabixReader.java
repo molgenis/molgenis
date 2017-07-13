@@ -146,7 +146,7 @@ public class TabixReader
 
 	public static String readLine(final InputStream is) throws IOException
 	{
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		int c;
 		while ((c = is.read()) >= 0 && c != '\n') buf.append((char) c);
 		if (c < 0) return null;
