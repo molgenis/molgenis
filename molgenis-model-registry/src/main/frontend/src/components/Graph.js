@@ -127,5 +127,4 @@ export function newGraph (targetDiv, graphData) {
         new go.Binding('text', 'toText'))
     )
   diagram.model = new go.GraphLinksModel(graphData.nodeData, graphData.linkData)
-  console.log(diagram)
 }

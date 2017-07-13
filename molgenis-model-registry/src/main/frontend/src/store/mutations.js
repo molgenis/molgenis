@@ -11,5 +11,4 @@ export default {
   [SET_UMLDATA] (state: State, umlData: any) {
     state.umlData = umlData
   }
-
 }

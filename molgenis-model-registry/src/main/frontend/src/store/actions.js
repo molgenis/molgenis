@@ -5,13 +5,19 @@ export const GET_UMLDATA = '__GET_UMLDATA__'
 
 export default {
   /**
-   * Example action for retrieving all EntityTypes from the server
+   *
+   * Query parameters
+   *
+   * route = GET /api/v2/{entity_name}/{id}
+   * attrs = entityTypes(attributes(id,type,name,label,refEntityType,isNullable,isIdAttribute,isCascadeDelete),id,label,package)
+   * id = sys_job
+   *
    */
   [GET_UMLDATA] ({commit}) {
-    api.get('/api/v2/sys_md_Package?attrs=entityTypes(attributes(id%2Cname%2Ctype%2Clabel%2CrefEntityType)%2Cid%2Clabel%2Cpackage)&q=id%3D%3Dsys&num=10000')
+    api.get('/api/v2/sys_md_Package/sys_job?attrs=entityTypes(attributes(id%2Ctype%2Cname%2Clabel%2CrefEntityType%2CisNullable%2CisIdAttribute)%2Cid%2Clabel%2Cpackage)')
       .then(response => {
         console.log(response)
-        commit(SET_UMLDATA, response.items[0])
+        commit(SET_UMLDATA, response)
       }, error => {
         console.log(error)
       })
