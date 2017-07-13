@@ -312,11 +312,8 @@ public class EntityTypeUtils
 	{
 		if (package_ != null)
 		{
-			StringBuilder sb = new StringBuilder();
-			sb.append(package_.getId());
-			sb.append(PACKAGE_SEPARATOR);
-			sb.append(simpleName);
-			return sb.toString();
+			String sb = package_.getId() + PACKAGE_SEPARATOR + simpleName;
+			return sb;
 		}
 		else
 		{
