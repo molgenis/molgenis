@@ -1,14 +1,23 @@
-import { postFile } from '@molgenis/molgenis-api-client'
+import fetch from 'isomorphic-fetch'
 
 export const IMPORT = '__IMPORT__'
 
 export default {
   [IMPORT] ({commit}, file) {
-    postFile({apiUrl: '/api/v2'}, '/one-click-importer', file)
-      .then(response => {
-        console.log(response)
-      }, error => {
-        console.log(error)
-      })
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const options = {
+      body: formData,
+      method: 'POST',
+      credentials: 'same-origin'
+    }
+
+    // FIXME use molgenis-api-client
+    fetch('/plugin/one-click-importer/upload', options).then(response => {
+      console.log(response)
+    }, error => {
+      console.log(error)
+    })
   }
 }

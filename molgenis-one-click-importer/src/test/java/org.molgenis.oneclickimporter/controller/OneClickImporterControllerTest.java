@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
@@ -58,13 +59,16 @@ public class OneClickImporterControllerTest
 	@Mock
 	private EntityService entityService;
 
+	@Mock
+	private FileStore fileStore;
+
 	@BeforeMethod
 	public void before()
 	{
 		initMocks(this);
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings, excelService, oneClickImporterService, entityService);
+				languageService, appSettings, excelService, oneClickImporterService, entityService, fileStore);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");

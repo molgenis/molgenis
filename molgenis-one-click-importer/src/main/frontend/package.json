@@ -14,11 +14,12 @@
     "lint:fix": "eslint --ext .js,.vue src test/unit/specs"
   },
   "dependencies": {
-    "@molgenis/molgenis-api-client": "^1.0.0",
+    "@molgenis/molgenis-api-client": "^1.2.5",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
     "bootstrap": "4.0.0-alpha.6",
     "bootstrap-vue": "^0.18.0",
     "font-awesome": "^4.7.0",
+    "isomorphic-fetch": "^2.2.1",
     "vue": "^2.2.6",
     "vue-router": "^2.3.1",
     "vue-sweetalert": "^0.1.17",

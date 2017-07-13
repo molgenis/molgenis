@@ -19,16 +19,13 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
 
 public class EntityServiceImplTest extends AbstractMockitoTest
 {
@@ -103,5 +100,4 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		verify(table).setId(generatedId);
 		verify(table).setLabel(tableName);
 	}
-
 }

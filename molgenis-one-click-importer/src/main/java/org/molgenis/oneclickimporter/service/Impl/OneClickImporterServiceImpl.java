@@ -91,7 +91,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			case ERROR:
 				value = "#ERROR";
 				break;
-			default: // TODO How to handle default
+			default:
 				value = null;
 				break;
 		}

@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.EntityService;
@@ -26,6 +27,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -40,10 +42,11 @@ public class OneClickImporterController extends MolgenisPluginController
 	private OneClickImporterService oneClickImporterService;
 	private ExcelService excelService;
 	private EntityService entityService;
+	private FileStore fileStore;
 
 	public OneClickImporterController(MenuReaderService menuReaderService, LanguageService languageService,
 			AppSettings appSettings, ExcelService excelService, OneClickImporterService oneClickImporterService,
-			EntityService entityService)
+			EntityService entityService, FileStore fileStore)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
@@ -52,6 +55,7 @@ public class OneClickImporterController extends MolgenisPluginController
 		this.excelService = requireNonNull(excelService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 		this.entityService = requireNonNull(entityService);
+		this.fileStore = requireNonNull(fileStore);
 	}
 
 	@RequestMapping(method = GET)
@@ -60,21 +64,22 @@ public class OneClickImporterController extends MolgenisPluginController
 		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
 		model.addAttribute("baseUrl", getBaseUrl());
+
 		return "view-one-click-importer";
 	}
 
-	@PostMapping("/upload")
-	public String importFile(@RequestParam("file") MultipartFile multipartFile)
+	@ResponseBody
+	@RequestMapping(value = "/upload", method = POST)
+	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile)
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
-		File file = new File(multipartFile.getOriginalFilename());
-		multipartFile.transferTo(file);
+		String filename = multipartFile.getOriginalFilename();
+		File file = fileStore.store(multipartFile.getInputStream(), filename);
 
-		String fileName = file.getName();
-		String fileTypePart = fileName.substring(fileName.lastIndexOf('.') + 1);
-		String dataCollectionName = fileName.substring(0, fileName.lastIndexOf('.'));
+		String fileExtension = filename.substring(filename.lastIndexOf('.') + 1);
+		String dataCollectionName = filename.substring(0, filename.lastIndexOf('.'));
 
-		if (fileTypePart.equals("xls") || fileTypePart.equals("xlsx"))
+		if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
 			DataCollection dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
@@ -84,7 +89,7 @@ public class OneClickImporterController extends MolgenisPluginController
 		else
 		{
 			throw new UnknownFileTypeException(
-					"File with extention: " + fileTypePart + " is not a valid one-click importer file");
+					"File with extention: " + fileExtension + " is not a valid one-click importer file");
 		}
 	}
 
@@ -94,13 +99,6 @@ public class OneClickImporterController extends MolgenisPluginController
 	public ErrorMessageResponse handleUnknownEntityException(Exception e)
 	{
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
-	}
-
-	private File multipartToFile(MultipartFile multipart) throws IllegalStateException, IOException
-	{
-		File convFile = new File(multipart.getOriginalFilename());
-		multipart.transferTo(convFile);
-		return convFile;
 	}
 
 	private String getBaseUrl()
