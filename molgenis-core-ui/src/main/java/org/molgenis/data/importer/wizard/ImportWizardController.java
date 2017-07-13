@@ -195,7 +195,7 @@ public class ImportWizardController extends AbstractWizardController
 
 		dataService.getEntityTypeIds().forEach(entityClassId ->
 		{
-			GroupAuthority authority = getGroupAuthority(groupId, entityClassId.toString());
+			GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
 
 			boolean newGroupAuthority;
 			if (authority == null)

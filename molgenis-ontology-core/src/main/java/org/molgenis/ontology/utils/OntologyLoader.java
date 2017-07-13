@@ -215,7 +215,7 @@ public class OntologyLoader
 				if (annotation.getValue() instanceof OWLLiteral)
 				{
 					OWLLiteral val = (OWLLiteral) annotation.getValue();
-					annotations.add(val.getLiteral().toString());
+					annotations.add(val.getLiteral());
 				}
 			}
 		}
@@ -235,7 +235,7 @@ public class OntologyLoader
 			if (annotation.getValue() instanceof OWLLiteral)
 			{
 				OWLLiteral val = (OWLLiteral) annotation.getValue();
-				String value = val.getLiteral().toString();
+				String value = val.getLiteral();
 				if (value.matches(DB_ID_PATTERN))
 				{
 					String databaseName = value.replaceAll(DB_ID_PATTERN, "$1");
@@ -259,7 +259,7 @@ public class OntologyLoader
 			if (annotation.getValue() instanceof OWLLiteral)
 			{
 				OWLLiteral val = (OWLLiteral) annotation.getValue();
-				String value = val.getLiteral().toString();
+				String value = val.getLiteral();
 				if (value.matches(DB_ID_PATTERN))
 				{
 					dbAnnotations.add(value);
