@@ -237,22 +237,19 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				});
 
 				Query<Entity> q = new QueryImpl<>().fetch(fetch);
-				decoratedRepository.findAll(q).forEach(entity ->
+				decoratedRepository.findAll(q).forEach(entity -> uniqueAttrs.forEach(uniqueAttr ->
 				{
-					uniqueAttrs.forEach(uniqueAttr ->
+					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
+					Object attrValue = entity.get(uniqueAttr.getName());
+					if (attrValue != null)
 					{
-						HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
-						Object attrValue = entity.get(uniqueAttr.getName());
-						if (attrValue != null)
+						if (isSingleReferenceType(uniqueAttr))
 						{
-							if (isSingleReferenceType(uniqueAttr))
-							{
-								attrValue = ((Entity) attrValue).getIdValue();
-							}
-							uniqueAttrValues.put(attrValue, entity.getIdValue());
+							attrValue = ((Entity) attrValue).getIdValue();
 						}
-					});
-				});
+						uniqueAttrValues.put(attrValue, entity.getIdValue());
+					}
+				}));
 
 				validationResource.setUniqueAttrsValues(uniqueAttrsValues);
 			}

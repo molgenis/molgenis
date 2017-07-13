@@ -75,18 +75,12 @@ public class SemanticSearchServiceHelper
 		}
 
 		// Handle tags with only one ontologyterm
-		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot ->
-		{
-			queryTerms.addAll(parseOntologyTermQueries(ot));
-		});
+		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot -> queryTerms.addAll(parseOntologyTermQueries(ot)));
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
 
 		// Handle tags with multiple ontologyterms
-		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot ->
-		{
-			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
-		});
+		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot -> disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI())));
 
 		return disMaxQueryRule;
 	}

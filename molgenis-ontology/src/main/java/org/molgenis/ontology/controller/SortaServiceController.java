@@ -247,10 +247,7 @@ public class SortaServiceController extends MolgenisPluginController
 			User currentUser = userAccountService.getCurrentUser();
 			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
-				RunAsSystemProxy.runAsSystem(() ->
-				{
-					dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier());
-				});
+				RunAsSystemProxy.runAsSystem(() -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
 				tryDeleteRepository(sortaJobExecution.getResultEntityName());
 				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
 			}
@@ -513,15 +510,12 @@ public class SortaServiceController extends MolgenisPluginController
 		User currentUser = userAccountService.getCurrentUser();
 		Query<Entity> query = QueryImpl.EQ(JobExecutionMetaData.USER, currentUser.getUsername());
 		query.sort().on(JobExecutionMetaData.START_DATE, DESC);
-		RunAsSystemProxy.runAsSystem(() ->
+		RunAsSystemProxy.runAsSystem(() -> dataService.findAll(SORTA_JOB_EXECUTION, query).forEach(job ->
 		{
-			dataService.findAll(SORTA_JOB_EXECUTION, query).forEach(job ->
-			{
-				// TODO: fetch the user as well
-				job.set(JobExecutionMetaData.USER, currentUser.getUsername());
-				jobs.add(job);
-			});
-		});
+			// TODO: fetch the user as well
+			job.set(JobExecutionMetaData.USER, currentUser.getUsername());
+			jobs.add(job);
+		}));
 		return jobs;
 	}
 

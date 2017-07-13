@@ -228,9 +228,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user), UserAuthority.class);
 
 		return authorities.filter(authority ->
-		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-		}).collect(toList());
+				authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true).collect(toList());
 	}
 
 	private List<Authority> getGroupPermissions(Group group)
@@ -254,9 +252,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups), GroupAuthority.class);
 
 		return authorities.filter(authority ->
-		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-		}).collect(toList());
+				authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true).collect(toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)
