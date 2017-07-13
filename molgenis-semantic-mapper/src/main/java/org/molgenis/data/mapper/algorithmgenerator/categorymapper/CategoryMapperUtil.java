@@ -74,7 +74,7 @@ public class CategoryMapperUtil
 	public static boolean containNegativeAdjectives(String description)
 	{
 		String lowerCase = description.toLowerCase();
-		return NEGATIVE_ADJECTIVES.stream().anyMatch(adj -> lowerCase.contains(adj));
+		return NEGATIVE_ADJECTIVES.stream().anyMatch(lowerCase::contains);
 	}
 
 	public static Unit<?> getMoreSpecificUnit(Unit<?> unit)
@@ -171,7 +171,7 @@ public class CategoryMapperUtil
 	public static boolean containsNegativeAdjectives(String description)
 	{
 		String lowerCasedDesc = description.toLowerCase();
-		return NEGATIVE_ADJECTIVES.stream().anyMatch(adj -> lowerCasedDesc.contains(adj));
+		return NEGATIVE_ADJECTIVES.stream().anyMatch(lowerCasedDesc::contains);
 	}
 
 	public static boolean isAmountRanged(Amount<?> amount)

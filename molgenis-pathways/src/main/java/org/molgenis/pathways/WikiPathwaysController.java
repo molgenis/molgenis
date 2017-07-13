@@ -173,8 +173,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 																						  WikiPathwaysController::getGeneFromEffect,
 																						  reducing(Impact.NONE,
 																								  WikiPathwaysController::getImpactFromEffect,
-																								  maxBy((i1, i2) -> i1.compareTo(
-																										  i2)))));
+																								  maxBy(Enum::compareTo))));
 	}
 
 	/**

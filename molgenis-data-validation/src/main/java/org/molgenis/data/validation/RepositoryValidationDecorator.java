@@ -298,10 +298,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
 		if (attrViolations != null && !attrViolations.isEmpty())
 		{
-			attrViolations.forEach(attrViolation ->
-			{
-				validationResource.addViolation(attrViolation);
-			});
+			attrViolations.forEach(validationResource::addViolation);
 		}
 	}
 

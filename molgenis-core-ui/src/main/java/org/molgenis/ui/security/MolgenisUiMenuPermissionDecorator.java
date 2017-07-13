@@ -77,7 +77,7 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 							throw new RuntimeException(
 									"Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
 					}
-				}), molgenisUiMenuItem -> hasPermission(molgenisUiMenuItem)));
+				}), this::hasPermission));
 	}
 
 	@Override

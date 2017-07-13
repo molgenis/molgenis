@@ -118,7 +118,7 @@ public class EntityTypeResponse
 		{
 			Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
-					Iterables.transform(lookupAttributes, attribute -> attribute.getName())) : null;
+					Iterables.transform(lookupAttributes, Attribute::getName)) : null;
 		}
 		else this.lookupAttributes = null;
 

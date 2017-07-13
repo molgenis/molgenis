@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -102,7 +103,7 @@ public class IndexStatus
 			return true;
 		}
 		Set<String> referencedEntityIds = stream(emd.getAtomicAttributes().spliterator(), false).map(
-				Attribute::getRefEntity).filter(e -> e != null).map(EntityType::getId).collect(toSet());
+				Attribute::getRefEntity).filter(Objects::nonNull).map(EntityType::getId).collect(toSet());
 		referencedEntityIds.add(emd.getId());
 		return referencedEntityIds.stream().noneMatch(actionCountsPerEntity::containsKey);
 	}

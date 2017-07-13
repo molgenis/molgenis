@@ -81,7 +81,7 @@ public class TagWizardController extends MolgenisPluginController
 	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
 		List<String> entityTypeIds = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-												.map(entityType -> entityType.getId())
+												.map(EntityType::getId)
 												.collect(toList());
 
 		if (StringUtils.isEmpty(target))
@@ -102,7 +102,7 @@ public class TagWizardController extends MolgenisPluginController
 		EntityType emd = dataService.getEntityType(target);
 		List<Attribute> attributes = newArrayList(emd.getAttributes());
 		Map<String, Multimap<Relation, OntologyTerm>> taggedAttributes = attributes.stream()
-																				   .collect(toMap((x -> x.getName()),
+																				   .collect(toMap((Attribute::getName),
 																						   (x -> ontologyTagService.getTagsForAttribute(
 																								   emd, x))));
 

@@ -380,7 +380,7 @@ public class AttributeValidator
 		// Every type that is listed as a valid ID attribute type is allowed to be converted to an XREF and CATEGORICAL
 		DATA_TYPE_ALLOWED_TRANSITIONS.keySet()
 									 .stream()
-									 .filter(type -> allowedIdAttributeTypes.contains(type))
+									 .filter(allowedIdAttributeTypes::contains)
 									 .forEach(type -> DATA_TYPE_ALLOWED_TRANSITIONS.get(type).addAll(referenceTypes));
 	}
 }

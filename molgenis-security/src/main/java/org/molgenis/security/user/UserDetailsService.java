@@ -97,7 +97,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 
 		if (!groupMembers.isEmpty())
 		{
-			List<Group> groups = Lists.transform(groupMembers, groupMember -> groupMember.getGroup());
+			List<Group> groups = Lists.transform(groupMembers, GroupMember::getGroup);
 
 			return dataService.findAll(GROUP_AUTHORITY,
 					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups), GroupAuthority.class)

@@ -76,7 +76,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 								  entry.getValue().getExplainedQueryStrings().spliterator(), false)
 														.allMatch(explain -> explain.getTagName()
 																					.equalsIgnoreCase(param.getName())))
-						  .map(entry -> entry.getKey())
+						  .map(Map.Entry::getKey)
 						  .findFirst()
 						  .orElse(null);
 	}

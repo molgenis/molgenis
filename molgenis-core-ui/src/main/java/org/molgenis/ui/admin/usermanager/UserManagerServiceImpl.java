@@ -210,7 +210,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
-			groups = Lists.transform(groupMembers, groupMember -> groupMember.getGroup());
+			groups = Lists.transform(groupMembers, GroupMember::getGroup);
 		}
 
 		return groups;
@@ -228,7 +228,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
-			user = Lists.transform(groupMembers, groupMember -> groupMember.getUser());
+			user = Lists.transform(groupMembers, GroupMember::getUser);
 		}
 
 		return user;

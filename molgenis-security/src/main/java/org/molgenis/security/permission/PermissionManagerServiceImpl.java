@@ -3,6 +3,7 @@ package org.molgenis.security.permission;
 import com.google.common.collect.Lists;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -76,7 +77,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	public List<Object> getEntityClassIds()
 	{
 		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
-						  .map(entity -> entity.getIdValue())
+						  .map(Entity::getIdValue)
 						  .collect(toList());
 	}
 
@@ -146,7 +147,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		if (!groupMembers.isEmpty())
 		{
-			List<Group> groups = Lists.transform(groupMembers, molgenisGroupMember -> molgenisGroupMember.getGroup());
+			List<Group> groups = Lists.transform(groupMembers, GroupMember::getGroup);
 			List<Authority> groupAuthorities = getGroupPermissions(groups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 		}

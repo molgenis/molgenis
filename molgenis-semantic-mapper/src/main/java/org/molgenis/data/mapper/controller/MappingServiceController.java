@@ -481,8 +481,8 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			searchTerms.addAll(Sets.newHashSet(searchTermsString.toLowerCase().split("\\s+or\\s+"))
 								   .stream()
-								   .filter(term -> StringUtils.isNotBlank(term))
-								   .map(term -> term.trim())
+								   .filter(StringUtils::isNotBlank)
+								   .map(String::trim)
 								   .collect(Collectors.toSet()));
 		}
 
@@ -502,8 +502,7 @@ public class MappingServiceController extends MolgenisPluginController
 		// If no relevant attributes are found, return all source attributes
 		if (relevantAttributes.isEmpty())
 		{
-			return stream(entityMapping.getSourceEntityType().getAllAttributes()).map(
-					attribute -> ExplainedAttribute.create(attribute)).collect(toList());
+			return stream(entityMapping.getSourceEntityType().getAllAttributes()).map(ExplainedAttribute::create).collect(toList());
 		}
 		return newArrayList(relevantAttributes.values());
 	}
@@ -520,7 +519,7 @@ public class MappingServiceController extends MolgenisPluginController
 
 		List<Attribute> sourceAttributes = generateAlgorithmRequest.getSourceAttributes()
 																   .stream()
-																   .map(name -> sourceEntityType.getAttribute(name))
+																   .map(sourceEntityType::getAttribute)
 																   .collect(Collectors.toList());
 
 		String generateAlgorithm = algorithmService.generateAlgorithm(targetAttribute, targetEntityType,
@@ -817,7 +816,7 @@ public class MappingServiceController extends MolgenisPluginController
 			targetAttributeLabelAttribute = dataService.getEntityType(target).getLabelAttribute().getName();
 		}
 
-		model.addAttribute("targetAttributeEntities", (Iterable<Entity>) () -> targetAttributeEntities.iterator());
+		model.addAttribute("targetAttributeEntities", (Iterable<Entity>) targetAttributeEntities::iterator);
 		model.addAttribute("targetAttributeIdAttribute", targetAttributeIdAttribute);
 		model.addAttribute("targetAttributeLabelAttribute", targetAttributeLabelAttribute);
 

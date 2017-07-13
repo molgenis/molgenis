@@ -33,7 +33,7 @@ public class MolgenisValidationException extends MolgenisDataException
 	{
 		if ((violations == null) || (violations.isEmpty())) return "Unknown validation exception.";
 
-		return StringUtils.join(Collections2.transform(violations, violation -> violation.getMessage()), '.');
+		return StringUtils.join(Collections2.transform(violations, ConstraintViolation::getMessage), '.');
 	}
 
 	/**
