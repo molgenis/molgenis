@@ -263,7 +263,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			List<MolgenisPlugin> plugins = this.getPlugins();
 			if (plugins != null)
 			{
-				plugins.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+				plugins.sort(Comparator.comparing(MolgenisPlugin::getName));
 				Map<String, String> pluginMap = new LinkedHashMap<>();
 				for (MolgenisPlugin plugin : plugins)
 					pluginMap.put(plugin.getId(), plugin.getName());

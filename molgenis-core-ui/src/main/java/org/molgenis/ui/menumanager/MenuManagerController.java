@@ -20,6 +20,7 @@ import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.molgenis.ui.menumanager.MenuManagerController.URI;
@@ -78,7 +79,7 @@ public class MenuManagerController extends MolgenisPluginController
 		}.preOrderTraversal(molgenisUi.getMenu()).toList();
 
 		List<MolgenisPlugin> plugins = Lists.newArrayList(menuManagerService.getPlugins());
-		plugins.sort((molgenisPlugin1, molgenisPlugin2) -> molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId()));
+		plugins.sort(Comparator.comparing(MolgenisPlugin::getId));
 
 		model.addAttribute("menus", menus);
 		model.addAttribute("plugins", plugins);
