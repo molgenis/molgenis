@@ -271,7 +271,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			return findAttributeEntity(entityTypeEntity.getExtends().getId(), attributeName);
 		}
 
-		return result.isPresent() ? result.get() : null;
+		return result.orElse(null);
 	}
 
 	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,

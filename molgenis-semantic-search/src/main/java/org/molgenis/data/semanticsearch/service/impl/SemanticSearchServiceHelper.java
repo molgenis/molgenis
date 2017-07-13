@@ -299,6 +299,6 @@ public class SemanticSearchServiceHelper
 	{
 		Optional<String> findFirst = terms.stream().sorted(Comparator.comparingInt(String::length)).findFirst();
 
-		return findFirst.isPresent() ? termFrequencyService.getTermFrequency(findFirst.get()) : null;
+		return findFirst.map(termFrequencyService::getTermFrequency).orElse(null);
 	}
 }
