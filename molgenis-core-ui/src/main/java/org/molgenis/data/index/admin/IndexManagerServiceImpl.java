@@ -8,7 +8,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -46,7 +45,7 @@ public class IndexManagerServiceImpl implements IndexManagerService
 		});
 
 		// sort indexed repos by entity label
-		Collections.sort(indexedEntityTypeList, (e1, e2) -> e1.getLabel().compareTo(e2.getLabel()));
+		indexedEntityTypeList.sort((e1, e2) -> e1.getLabel().compareTo(e2.getLabel()));
 		return indexedEntityTypeList;
 	}
 

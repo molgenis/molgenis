@@ -100,7 +100,7 @@ public class Permissions
 			{
 				if (pluginPermissions.size() > 1)
 				{
-					Collections.sort(pluginPermissions, (o1, o2) ->
+					pluginPermissions.sort((o1, o2) ->
 					{
 						String group1 = o1.getGroup();
 						String group2 = o2.getGroup();
@@ -116,7 +116,7 @@ public class Permissions
 			{
 				if (pluginPermissions.size() > 1)
 				{
-					Collections.sort(pluginPermissions, (o1, o2) ->
+					pluginPermissions.sort((o1, o2) ->
 					{
 						String group1 = o1.getGroup();
 						String group2 = o2.getGroup();

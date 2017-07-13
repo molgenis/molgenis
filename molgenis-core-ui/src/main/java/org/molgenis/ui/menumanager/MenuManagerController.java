@@ -78,8 +78,7 @@ public class MenuManagerController extends MolgenisPluginController
 		}.preOrderTraversal(molgenisUi.getMenu()).toList();
 
 		List<MolgenisPlugin> plugins = Lists.newArrayList(menuManagerService.getPlugins());
-		Collections.sort(plugins,
-				(molgenisPlugin1, molgenisPlugin2) -> molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId()));
+		plugins.sort((molgenisPlugin1, molgenisPlugin2) -> molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId()));
 
 		model.addAttribute("menus", menus);
 		model.addAttribute("plugins", plugins);

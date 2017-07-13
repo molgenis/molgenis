@@ -159,7 +159,8 @@ public class SortaServiceImpl implements SortaService
 					rulesForOntologyTermFieldsNGram, relevantEntities);
 		}
 
-		Collections.sort(relevantEntities, (entity_1, entity_2) -> entity_2.getDouble(COMBINED_SCORE).compareTo(entity_1.getDouble(COMBINED_SCORE)));
+		relevantEntities.sort((entity_1, entity_2) -> entity_2.getDouble(COMBINED_SCORE)
+															  .compareTo(entity_1.getDouble(COMBINED_SCORE)));
 
 		return relevantEntities;
 	}

@@ -10,7 +10,6 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.quality.Quality;
 import org.molgenis.data.mapper.algorithmgenerator.rules.quality.impl.NumericQuality;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,6 +73,6 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule
 
 	private void sortBasedOnLength(List<String> words)
 	{
-		Collections.sort(words, (string1, string2) -> Integer.compare(string1.length(), string2.length()));
+		words.sort((string1, string2) -> Integer.compare(string1.length(), string2.length()));
 	}
 }
