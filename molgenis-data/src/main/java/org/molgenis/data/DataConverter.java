@@ -228,7 +228,7 @@ public class DataConverter
 			result.addAll(Arrays.asList(((String) source).split(",")));
 			return result;
 		}
-		else return Arrays.asList(new Object[] { source });
+		else return Arrays.asList(source);
 	}
 
 	public static List<Integer> toIntList(Object source)
