@@ -149,7 +149,6 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Assert.assertEquals(semanticSearchService.distanceFrom("Maternal Hypertension",
 				ImmutableSet.of("history", "hypertens"), stemmer), .5454, 0.0001,
 				"String distance should be equal");
-		;
 	}
 
 	@Test
