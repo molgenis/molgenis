@@ -195,7 +195,7 @@ public class LazyEntityTest
 	public void getLong()
 	{
 		String attrName = "attr";
-		Long value = 0l;
+		Long value = 0L;
 		when(entity.getLong(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getLong(attrName));
 		assertEquals(value, lazyEntity.getLong(attrName));

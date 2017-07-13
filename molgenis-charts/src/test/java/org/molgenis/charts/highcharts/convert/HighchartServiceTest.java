@@ -213,9 +213,9 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		assertFalse(options.getSeries().isEmpty());
 		assertEquals(options.getSeries().get(0).getType(), SeriesType.LINE.toString());
 		assertEquals(options.getSeries().get(0).getData().get(0),
-				Arrays.<Object>asList(1392940800000l, Double.valueOf("1.1")));
+				Arrays.<Object>asList(1392940800000L, Double.valueOf("1.1")));
 		assertEquals(options.getSeries().get(0).getData().get(1),
-				Arrays.<Object>asList(1393027200000l, Double.valueOf("2.2")));
+				Arrays.<Object>asList(1393027200000L, Double.valueOf("2.2")));
 	}
 
 	@Test

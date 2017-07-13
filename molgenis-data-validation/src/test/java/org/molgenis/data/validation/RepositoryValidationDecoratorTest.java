@@ -327,7 +327,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2l));
+		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2L));
 		when(entityAttributesValidator.validate(entity0, entityType)).thenReturn(violations);
 
 		// actual tests
@@ -855,7 +855,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity1.get(attrUniqueStringName)).thenReturn("unique1");
 		when(entity1.get(attrUniqueXrefName)).thenReturn(refEntity1);
 
-		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2l));
+		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2L));
 		when(entityAttributesValidator.validate(entity1, entityType)).thenReturn(violations);
 
 		// actual tests
@@ -1632,7 +1632,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity1);
 
-		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2l));
+		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2L));
 		when(entityAttributesValidator.validate(entity0, entityType)).thenReturn(violations);
 
 		// actual tests
@@ -2576,7 +2576,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity1.get(attrUniqueStringName)).thenReturn("unique1");
 		when(entity1.get(attrUniqueXrefName)).thenReturn(refEntity1);
 
-		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2l));
+		Set<ConstraintViolation> violations = singleton(new ConstraintViolation("violation", 2L));
 		when(entityAttributesValidator.validate(entity1, entityType)).thenReturn(violations);
 
 		// actual tests

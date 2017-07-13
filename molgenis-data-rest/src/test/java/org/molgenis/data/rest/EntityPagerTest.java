@@ -14,13 +14,13 @@ public class EntityPagerTest
 		EntityPager pager = new EntityPager(10, 15, null, null);
 		assertEquals(pager.getNextStart(), Integer.valueOf(25));
 
-		pager = new EntityPager(0, 10, 25l, null);
+		pager = new EntityPager(0, 10, 25L, null);
 		assertEquals(pager.getNextStart(), Integer.valueOf(10));
 
-		pager = new EntityPager(10, 10, 25l, null);
+		pager = new EntityPager(10, 10, 25L, null);
 		assertEquals(pager.getNextStart(), Integer.valueOf(20));
 
-		pager = new EntityPager(0, 25, 25l, null);
+		pager = new EntityPager(0, 25, 25L, null);
 		assertNull(pager.getNextStart());
 	}
 
@@ -30,13 +30,13 @@ public class EntityPagerTest
 		EntityPager pager = new EntityPager(10, 15, null, null);
 		assertEquals(pager.getPrevStart(), Integer.valueOf(0));
 
-		pager = new EntityPager(0, 15, 30l, null);
+		pager = new EntityPager(0, 15, 30L, null);
 		assertNull(pager.getPrevStart());
 
-		pager = new EntityPager(15, 15, 30l, null);
+		pager = new EntityPager(15, 15, 30L, null);
 		assertEquals(pager.getPrevStart(), Integer.valueOf(0));
 
-		pager = new EntityPager(30, 15, 30l, null);
+		pager = new EntityPager(30, 15, 30L, null);
 		assertEquals(pager.getPrevStart(), Integer.valueOf(15));
 	}
 }
