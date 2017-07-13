@@ -188,7 +188,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 													.filter(gonl -> (alt).equals((gonl.getString(
 															vcfAttributes.getAltAttribute().getName()))))
 													.findFirst()
-													.orElseGet(() -> null));
+													.orElse(null));
 					}
 
 					if (!alleleMatches.stream().allMatch(Predicates.isNull()::apply))
