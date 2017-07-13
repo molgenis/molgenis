@@ -41,7 +41,7 @@ public class RangeHandlingDataSourceTest
 		notes.add("track:");
 		notes.add("source:MOLGENIS");
 		dasFeature = new DasFeature("vatiant_identifier", "name,variant_description", new DasType("0", "", "", "type"),
-				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, new Double(0),
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, 0d,
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
 				dasTarget, new ArrayList<>(), null);
 		source = new TestDataSource();
@@ -65,7 +65,7 @@ public class RangeHandlingDataSourceTest
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
 	public void getFeatures() throws UnimplementedFeatureException, DataSourceException
 	{
-		source.getFeatures(new ArrayList<>(), new Integer(-1), null);
+		source.getFeatures(new ArrayList<>(), -1, null);
 	}
 
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
@@ -84,7 +84,7 @@ public class RangeHandlingDataSourceTest
 	public void getFeatures1() throws BadReferenceObjectException, CoordinateErrorException, DataSourceException,
 			UnimplementedFeatureException
 	{
-		source.getFeatures("", -1, -1, new Integer(-1), null);
+		source.getFeatures("", -1, -1, -1, null);
 	}
 
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
@@ -96,13 +96,13 @@ public class RangeHandlingDataSourceTest
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
 	public void getFeatures3() throws UnimplementedFeatureException, DataSourceException
 	{
-		source.getFeatures(new ArrayList<>(), new Integer(-1));
+		source.getFeatures(new ArrayList<>(), -1);
 	}
 
 	@Test(expectedExceptions = BadReferenceObjectException.class)
 	public void getFeatures4() throws BadReferenceObjectException, DataSourceException
 	{
-		source.getFeatures("", new Integer(-1));
+		source.getFeatures("", -1);
 	}
 
 }

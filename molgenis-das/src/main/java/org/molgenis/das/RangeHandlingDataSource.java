@@ -53,7 +53,7 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
 		dasTargets.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
 
 		List<String> parents = new ArrayList<>();
-		DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop, new Double(0),
+		DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop, 0d,
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
 				dasTargets, parents, null);
 		return feature;

@@ -156,7 +156,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
@@ -173,7 +173,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
@@ -185,7 +185,7 @@ public class OwnedEntityRepositoryDecoratorTest
 	@Test
 	public void findOneByIdObjectFetchNotExtendsOwned()
 	{
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);

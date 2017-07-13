@@ -321,8 +321,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				{
 					ConstraintViolation constraintViolation = new ConstraintViolation(
 							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
-									uniqueAttr.getName(), getName()), uniqueAttr,
-							Long.valueOf(validationResource.getRow()));
+									uniqueAttr.getName(), getName()), uniqueAttr, (long) validationResource.getRow());
 					validationResource.addViolation(constraintViolation);
 				}
 				else
@@ -368,7 +367,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 								DataConverter.toString(refEntity.getIdValue()), refAttr.getName(), getName());
 
 						ConstraintViolation constraintViolation = new ConstraintViolation(message, refAttr,
-								Long.valueOf(validationResource.getRow()));
+								(long) validationResource.getRow());
 						validationResource.addViolation(constraintViolation);
 					}
 				}
@@ -421,7 +420,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			{
 				validationResource.addViolation(new ConstraintViolation(
 						format("The attribute '%s' of entity '%s' can not be changed it is readonly.",
-								readonlyAttr.getName(), getName()), Long.valueOf(validationResource.getRow())));
+								readonlyAttr.getName(), getName()), (long) validationResource.getRow()));
 			}
 		});
 	}

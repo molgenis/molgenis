@@ -109,7 +109,7 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
 		try
 		{
-			Object id = Integer.valueOf(0);
+			Object id = 0;
 			Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 			inMemoryRepository.add(entity);
 			Fetch fetch = new Fetch();
@@ -131,7 +131,7 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
 		try
 		{
-			Object id = Integer.valueOf(0);
+			Object id = 0;
 			Fetch fetch = new Fetch();
 			assertNull(inMemoryRepository.findOneById(id, fetch));
 		}
@@ -151,9 +151,9 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
 		try
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
@@ -177,9 +177,9 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
 		try
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
@@ -204,9 +204,9 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
 		try
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
@@ -229,13 +229,13 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
 		try
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get("attr")).thenReturn("a").getMock();
 			when(entity0.get("id")).thenReturn(id0);
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get("attr")).thenReturn("a").getMock();
 			when(entity1.get("id")).thenReturn(id1);
-			Object id2 = Integer.valueOf(2);
+			Object id2 = 2;
 			Entity entity2 = when(mock(Entity.class).get("attr")).thenReturn("b").getMock();
 			when(entity2.get("id")).thenReturn(id2);
 			inMemoryRepository.add(entity0);
@@ -281,9 +281,9 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
 		try
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);

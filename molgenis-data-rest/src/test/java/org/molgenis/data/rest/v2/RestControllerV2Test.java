@@ -779,7 +779,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesMolgenisValidationException() throws Exception
 	{
 		Exception e = new MolgenisValidationException(
-				Collections.singleton(new ConstraintViolation("Message", Long.valueOf(5L))));
+				Collections.singleton(new ConstraintViolation("Message", 5L)));
 		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";

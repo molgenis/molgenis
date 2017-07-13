@@ -3722,7 +3722,7 @@ public class RepositoryValidationDecoratorTest
 		RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
 				decoratedRepository, entityAttributesValidator, expressionValidator);
 
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);

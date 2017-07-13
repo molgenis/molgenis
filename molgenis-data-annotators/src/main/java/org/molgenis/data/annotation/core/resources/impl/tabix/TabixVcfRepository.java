@@ -81,7 +81,7 @@ public class TabixVcfRepository extends VcfRepository
 		{
 			int posIntValue = Integer.parseInt(posValue.toString());
 			String chromStringValue = chromValue.toString();
-			result = query(chromStringValue, Integer.valueOf(posIntValue), Integer.valueOf(posIntValue));
+			result = query(chromStringValue, posIntValue, posIntValue);
 		}
 		return result.stream();
 	}

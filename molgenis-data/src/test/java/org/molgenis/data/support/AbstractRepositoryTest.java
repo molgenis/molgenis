@@ -88,7 +88,7 @@ public class AbstractRepositoryTest
 	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void findOneObjectFetch()
 	{
-		abstractRepository.findOneById(Integer.valueOf(0), new Fetch());
+		abstractRepository.findOneById(0, new Fetch());
 	}
 
 	@SuppressWarnings("unchecked")

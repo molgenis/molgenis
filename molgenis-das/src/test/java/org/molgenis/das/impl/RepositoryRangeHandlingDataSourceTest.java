@@ -86,7 +86,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		notes.add("track:dataset");
 		notes.add("source:MOLGENIS");
 
-		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
+		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, 0d,
 				ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout, dasTarget, new ArrayList<>(),
 				null);
 

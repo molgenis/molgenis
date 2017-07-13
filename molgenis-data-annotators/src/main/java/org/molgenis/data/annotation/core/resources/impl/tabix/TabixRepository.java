@@ -90,7 +90,7 @@ public class TabixRepository extends AbstractRepository
 		{
 			int posIntValue = Integer.parseInt(posValue.toString());
 			String chromStringValue = chromValue.toString();
-			result = query(chromStringValue, Integer.valueOf(posIntValue));
+			result = query(chromStringValue, posIntValue);
 		}
 		return result.stream();
 	}

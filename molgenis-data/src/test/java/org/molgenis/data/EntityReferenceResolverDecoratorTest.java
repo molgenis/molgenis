@@ -288,7 +288,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void findOneObjectFetch()
 	{
-		Object id = Integer.valueOf(1);
+		Object id = 1;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
@@ -300,7 +300,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void findOneObjectFetchNull()
 	{
-		Object id = Integer.valueOf(1);
+		Object id = 1;
 		entityReferenceResolverDecorator.findOneById(id, null);
 		verify(decoratedRepo, times(1)).findOneById(id, null);
 		verifyZeroInteractions(entityManager);

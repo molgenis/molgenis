@@ -27,10 +27,10 @@ public class EntityListenersServiceTest
 		String repoFullName = "EntityRepo";
 		entityListenersService.register(repoFullName);
 		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-												.thenReturn(Integer.valueOf(1))
+												.thenReturn(1)
 												.getMock();
 		EntityListener entityListener2 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-												.thenReturn(Integer.valueOf(2))
+												.thenReturn(2)
 												.getMock();
 		entityListenersService.addEntityListener(repoFullName, entityListener1);
 		entityListenersService.addEntityListener(repoFullName, entityListener2);
@@ -50,13 +50,13 @@ public class EntityListenersServiceTest
 		Entity entity2 = Mockito.mock(Entity.class);
 		entityListenersService.register(repoFullName);
 		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-												.thenReturn(Integer.valueOf(1))
+												.thenReturn(1)
 												.getMock();
 		EntityListener entityListener2 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-												.thenReturn(Integer.valueOf(2))
+												.thenReturn(2)
 												.getMock();
-		Mockito.when(entity1.getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
-		Mockito.when(entity2.getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
+		Mockito.when(entity1.getIdValue()).thenReturn(1).getMock();
+		Mockito.when(entity2.getIdValue()).thenReturn(2).getMock();
 		entityListenersService.addEntityListener(repoFullName, entityListener1);
 		entityListenersService.addEntityListener(repoFullName, entityListener2);
 		entityListenersService.updateEntities(repoFullName, Stream.of(entity1, entity2))
@@ -74,12 +74,12 @@ public class EntityListenersServiceTest
 		String repoFullName = "EntityRepo";
 		Entity entity = Mockito.mock(Entity.class);
 		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-												.thenReturn(Integer.valueOf(1))
+												.thenReturn(1)
 												.getMock();
 		EntityListener entityListener2 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-												.thenReturn(Integer.valueOf(1))
+												.thenReturn(1)
 												.getMock();
-		Mockito.when(entity.getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
+		Mockito.when(entity.getIdValue()).thenReturn(1).getMock();
 		entityListenersService.register(repoFullName);
 		entityListenersService.addEntityListener(repoFullName, entityListener1);
 		entityListenersService.addEntityListener(repoFullName, entityListener2);
@@ -96,7 +96,7 @@ public class EntityListenersServiceTest
 	{
 		String repoFullName = "EntityRepo";
 		EntityListener entityListener = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-											   .thenReturn(Integer.valueOf(1))
+											   .thenReturn(1)
 											   .getMock();
 		entityListenersService.register(repoFullName);
 		entityListenersService.addEntityListener(repoFullName, entityListener);
@@ -110,7 +110,7 @@ public class EntityListenersServiceTest
 	{
 		String repoFullName = "EntityRepo";
 		EntityListener entityListener = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-											   .thenReturn(Integer.valueOf(1))
+											   .thenReturn(1)
 											   .getMock();
 		entityListenersService.register(repoFullName);
 		entityListenersService.addEntityListener(repoFullName, entityListener);
@@ -133,7 +133,7 @@ public class EntityListenersServiceTest
 		this.entityListenersService = new EntityListenersService();
 		String repoFullName = "EntityRepo";
 		EntityListener entityListener = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-											   .thenReturn(Integer.valueOf(1))
+											   .thenReturn(1)
 											   .getMock();
 		try
 		{
@@ -205,7 +205,7 @@ public class EntityListenersServiceTest
 			{
 				entityListenersService.register(repoFullName);
 				EntityListener entityListener = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-													   .thenReturn(Integer.valueOf(i))
+													   .thenReturn(i)
 													   .getMock();
 				entityListenersService.addEntityListener(repoFullName, entityListener);
 				entityListenersService.removeEntityListener(repoFullName, entityListener);
