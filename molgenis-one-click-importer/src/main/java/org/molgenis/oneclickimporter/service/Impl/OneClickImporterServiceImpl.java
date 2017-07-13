@@ -1,6 +1,7 @@
 package org.molgenis.oneclickimporter.service.Impl;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.oneclickimporter.model.Column;
@@ -20,7 +21,6 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	public DataCollection buildDataCollection(Sheet sheet)
 	{
 		Row headerRow = sheet.getRow(0);
-
 		List<Column> columns = newArrayList();
 		headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
 
@@ -36,8 +36,66 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	private List<Object> getColumnData(Sheet sheet, int columnIndex)
 	{
 		List<Object> dataValues = newLinkedList();
-		sheet.rowIterator().forEachRemaining(row -> dataValues.add(row.getCell(columnIndex)));
+		sheet.rowIterator().forEachRemaining(row -> dataValues.add(getCellValue(row.getCell(columnIndex))));
 		dataValues.remove(0); // Remove the header value
 		return dataValues;
+	}
+
+	private Object getCellValue(Cell cell)
+	{
+		Object value;
+
+		// Empty cells are often null instead of BLANK
+		if (cell == null || cell.getCellTypeEnum() == CellType.BLANK)
+		{
+			return null;
+		}
+
+		switch (cell.getCellTypeEnum())
+		{
+			case STRING:
+				value = cell.getStringCellValue();
+				break;
+			case NUMERIC:
+				value = cell.getNumericCellValue();
+				break;
+			case BOOLEAN:
+				value = cell.getBooleanCellValue();
+				break;
+			case FORMULA:
+				value = getTypedFormulaValue(cell);
+				break;
+			default: // TODO How to handle default
+				value = null;
+				break;
+		}
+		return value;
+	}
+
+	private Object getTypedFormulaValue(Cell cell)
+	{
+		Object value;
+		switch (cell.getCachedFormulaResultTypeEnum())
+		{
+			case STRING:
+				value = cell.getStringCellValue();
+				break;
+			case NUMERIC:
+				value = cell.getNumericCellValue();
+				break;
+			case BOOLEAN:
+				value = cell.getBooleanCellValue();
+				break;
+			case BLANK:
+				value = null;
+				break;
+			case ERROR:
+				value = "#ERROR";
+				break;
+			default: // TODO How to handle default
+				value = null;
+				break;
+		}
+		return value;
 	}
 }
