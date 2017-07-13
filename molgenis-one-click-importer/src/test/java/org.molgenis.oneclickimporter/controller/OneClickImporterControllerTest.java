@@ -98,7 +98,7 @@ public class OneClickImporterControllerTest
 		EntityType table = mock(EntityType.class);
 		String tableId = "genrated_table_id";
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
-		when(oneClickImporterService.buildDataCollection(sheet)).thenReturn(dataCollection);
+		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
 		when(entityService.createEntity(dataCollection)).thenReturn(table);
 		when(table.getId()).thenReturn(tableId);
 
@@ -119,7 +119,7 @@ public class OneClickImporterControllerTest
 		EntityType table = mock(EntityType.class);
 		String tableId = "genrated_table_id";
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
-		when(oneClickImporterService.buildDataCollection(sheet)).thenReturn(dataCollection);
+		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
 		when(entityService.createEntity(dataCollection)).thenReturn(table);
 		when(table.getId()).thenReturn(tableId);
 
