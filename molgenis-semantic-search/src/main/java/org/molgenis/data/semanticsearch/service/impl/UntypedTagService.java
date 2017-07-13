@@ -84,9 +84,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Multimap<Relation, LabeledResource> getTagsForAttribute(EntityType entityType, Attribute attribute)
 	{
 		Entity entity = findAttributeEntity(entityType, attribute.getName());
-		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource>create();
+		if (entity == null) return ArrayListMultimap.create();
 
-		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource>create();
+		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.create();
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
 			SemanticTag<Attribute, LabeledResource, LabeledResource> tag = SemanticTag.asTag(attribute, tagEntity);
@@ -137,7 +137,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		{
 			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getId() + "]");
 		}
-		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.<SemanticTag<EntityType, LabeledResource, LabeledResource>>copyOf(
+		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.copyOf(
 				getTagsForEntity(tag.getSubject()));
 		if (existingTags.contains(tag))
 		{
@@ -145,7 +145,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 			return;
 		}
 
-		ImmutableList.Builder<Entity> builder = ImmutableList.<Entity>builder();
+		ImmutableList.Builder<Entity> builder = ImmutableList.builder();
 		builder.addAll(entity.getEntities(EntityTypeMetadata.TAGS));
 		builder.add(getTagEntity(tag));
 		entity.set(EntityTypeMetadata.TAGS, builder.build());

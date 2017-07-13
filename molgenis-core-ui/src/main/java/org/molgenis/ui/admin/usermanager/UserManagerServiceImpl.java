@@ -141,7 +141,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		Predicate<Group> predicate = new PredicateNotInMolgenisGroupList(groupsWhereUserIsMember);
 		List<Group> groups = this.getAllGroups();
 
-		return Lists.<Group>newArrayList(Iterables.filter(groups, predicate));
+		return Lists.newArrayList(Iterables.filter(groups, predicate));
 	}
 
 	@Override

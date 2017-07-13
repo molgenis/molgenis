@@ -1172,7 +1172,7 @@ public class RestController
 			sort = null;
 		}
 
-		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule>emptyList() : request.getQ();
+		List<QueryRule> queryRules = request.getQ() == null ? Collections.emptyList() : request.getQ();
 		Query<Entity> q = new QueryImpl<>(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
 		Iterable<Entity> it = () -> dataService.findAll(entityTypeId, q).iterator();

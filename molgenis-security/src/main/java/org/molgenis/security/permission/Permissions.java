@@ -43,7 +43,7 @@ public class Permissions
 
 	public Map<String, List<Permission>> getUserPermissions()
 	{
-		return userPermissionMap != null ? userPermissionMap : Collections.<String, List<Permission>>emptyMap();
+		return userPermissionMap != null ? userPermissionMap : Collections.emptyMap();
 	}
 
 	public void addUserPermission(String pluginId, Permission pluginPermission)
@@ -60,7 +60,7 @@ public class Permissions
 
 	public Map<String, List<Permission>> getGroupPermissions()
 	{
-		return groupPermissionMap != null ? groupPermissionMap : Collections.<String, List<Permission>>emptyMap();
+		return groupPermissionMap != null ? groupPermissionMap : Collections.emptyMap();
 	}
 
 	public void addGroupPermission(String pluginId, Permission pluginPermission)

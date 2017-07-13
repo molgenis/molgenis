@@ -106,7 +106,7 @@ public class TabixRepository extends AbstractRepository
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		LOG.debug("query({})", queryString);
-		Builder<Entity> builder = ImmutableList.<Entity>builder();
+		Builder<Entity> builder = ImmutableList.builder();
 		try
 		{
 			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator = reader.query(

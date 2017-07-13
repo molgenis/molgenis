@@ -152,7 +152,7 @@ public class SemanticSearchServiceHelper
 	{
 		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream()
 																	 .map(this::processQueryString)
-																	 .collect(Collectors.<String>toList());
+																	 .collect(Collectors.toList());
 
 		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
 		{

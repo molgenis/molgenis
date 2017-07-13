@@ -146,15 +146,15 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	@Override
 	public ImmutableMap<String, Boolean> getSheetsImportable()
 	{
-		return ImmutableMap.<String, Boolean>copyOf(sheetsImportable);
+		return ImmutableMap.copyOf(sheetsImportable);
 	}
 
 	private static ImmutableMap<String, Collection<String>> getImmutableCopy(Map<String, Collection<String>> map)
 	{
-		Builder<String, Collection<String>> builder = ImmutableMap.<String, Collection<String>>builder();
+		Builder<String, Collection<String>> builder = ImmutableMap.builder();
 		for (Entry<String, Collection<String>> entry : map.entrySet())
 		{
-			builder.put(entry.getKey(), ImmutableList.<String>copyOf(entry.getValue()));
+			builder.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));
 		}
 		return builder.build();
 	}
@@ -201,13 +201,13 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	@Override
 	public ImmutableList<String> getImportOrder()
 	{
-		return ImmutableList.<String>copyOf(importOrder);
+		return ImmutableList.copyOf(importOrder);
 	}
 
 	@Override
 	public List<String> getPackages()
 	{
-		return ImmutableList.<String>copyOf(packages);
+		return ImmutableList.copyOf(packages);
 	}
 
 	@Override

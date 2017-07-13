@@ -89,18 +89,18 @@ public abstract class CategoryMapping<S, T>
 		String defaultValueString = m.group("default");
 		if (defaultValueString == null)
 		{
-			return CategoryMapping.<S, T>create(attr, map);
+			return CategoryMapping.create(attr, map);
 		}
 		T defaultValue = gson.fromJson(defaultValueString, tType);
 		String nullValueString = m.group("null");
 		if (nullValueString == null)
 		{
-			return CategoryMapping.<S, T>create(attr, map, defaultValue);
+			return CategoryMapping.create(attr, map, defaultValue);
 		}
 		else
 		{
 			T nullValueJson = gson.fromJson(nullValueString, tType);
-			return CategoryMapping.<S, T>create(attr, map, defaultValue, nullValueJson);
+			return CategoryMapping.create(attr, map, defaultValue, nullValueJson);
 		}
 	}
 }

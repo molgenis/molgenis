@@ -78,7 +78,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			sourceEntityType = null;
 		}
 
-		List<Entity> attributeMappingEntities = Lists.<Entity>newArrayList(
+		List<Entity> attributeMappingEntities = Lists.newArrayList(
 				entityMappingEntity.getEntities(EntityMappingMetaData.ATTRIBUTE_MAPPINGS));
 		List<AttributeMapping> attributeMappings = attributeMappingRepository.getAttributeMappings(
 				attributeMappingEntities, sourceEntityType, targetEntityType);

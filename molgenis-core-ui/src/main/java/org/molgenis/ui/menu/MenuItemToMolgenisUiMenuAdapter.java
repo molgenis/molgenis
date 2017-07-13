@@ -32,7 +32,7 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 					if (menuItem.getType() == MenuItemType.PLUGIN)
 						return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
 					else return new MenuItemToMolgenisUiMenuAdapter(menuItem, rootMenu);
-				})) : Collections.<MolgenisUiMenuItem>emptyList();
+				})) : Collections.emptyList();
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	@Override
 	public List<MolgenisUiMenu> getBreadcrumb()
 	{
-		if (menu.equals(rootMenu)) return Collections.<MolgenisUiMenu>singletonList(this);
+		if (menu.equals(rootMenu)) return Collections.singletonList(this);
 
 		Map<String, MenuItem> menuParentMap = new HashMap<>();
 		createMenuParentMapRec(rootMenu, null, menu, menuParentMap);

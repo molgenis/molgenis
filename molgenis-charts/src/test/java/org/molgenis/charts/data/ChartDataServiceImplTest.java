@@ -1,6 +1,9 @@
 package org.molgenis.charts.data;
 
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -68,7 +71,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataServiceMock.getRepository(entityTypeId)).thenAnswer(invocation -> repo);
 
 		DataMatrix matrix = chartDataService.getDataMatrix(entityTypeId, Arrays.asList("probe"), "patient",
-				Collections.<QueryRule>emptyList());
+				Collections.emptyList());
 
 		assertNotNull(matrix);
 		assertEquals(matrix.getColumnTargets(), Arrays.asList(new Target("probe")));
