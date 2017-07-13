@@ -258,33 +258,36 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)
 	{
 		Permissions permissions = new Permissions();
-		if (authorityPrefix.equals(SecurityUtils.AUTHORITY_PLUGIN_PREFIX))
+		switch (authorityPrefix)
 		{
-			List<MolgenisPlugin> plugins = this.getPlugins();
-			if (plugins != null)
-			{
-				plugins.sort(Comparator.comparing(MolgenisPlugin::getName));
-				Map<String, String> pluginMap = new LinkedHashMap<>();
-				for (MolgenisPlugin plugin : plugins)
-					pluginMap.put(plugin.getId(), plugin.getName());
-				permissions.setEntityIds(pluginMap);
-			}
+			case SecurityUtils.AUTHORITY_PLUGIN_PREFIX:
+				List<MolgenisPlugin> plugins = this.getPlugins();
+				if (plugins != null)
+				{
+					plugins.sort(Comparator.comparing(MolgenisPlugin::getName));
+					Map<String, String> pluginMap = new LinkedHashMap<>();
+					for (MolgenisPlugin plugin : plugins)
+						pluginMap.put(plugin.getId(), plugin.getName());
+					permissions.setEntityIds(pluginMap);
+				}
+				break;
+			case SecurityUtils.AUTHORITY_ENTITY_PREFIX:
+				List<Object> entityClassIds = this.getEntityClassIds();
+				List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+						entityClassIds.stream(),
+						new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
+														  .collect(Collectors.toList());
+				if (entityClassIds != null)
+				{
+					Map<String, String> entityClassMap = new TreeMap<>();
+					for (EntityType entityType : entityTypes)
+						entityClassMap.put(entityType.getId(), entityType.getId());
+					permissions.setEntityIds(entityClassMap);
+				}
+				break;
+			default:
+				throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 		}
-		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
-		{
-			List<Object> entityClassIds = this.getEntityClassIds();
-			List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-					entityClassIds.stream(), new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE),
-					EntityType.class).collect(Collectors.toList());
-			if (entityClassIds != null)
-			{
-				Map<String, String> entityClassMap = new TreeMap<>();
-				for (EntityType entityType : entityTypes)
-					entityClassMap.put(entityType.getId(), entityType.getId());
-				permissions.setEntityIds(entityClassMap);
-			}
-		}
-		else throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 
 		for (Authority authority : entityAuthorities)
 		{
