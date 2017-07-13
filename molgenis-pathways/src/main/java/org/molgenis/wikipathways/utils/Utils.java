@@ -47,17 +47,17 @@ public class Utils
 		HttpEntity entity = response.getEntity();
 		try (InputStream instream = entity.getContent())
 		{
-			String content = "";
+			StringBuilder content = new StringBuilder();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"));
 			String line;
 			while ((line = reader.readLine()) != null)
 			{
-				content = content + line + "\n";
+				content.append(line).append("\n");
 			}
 			reader.close();
 
 			SAXBuilder jdomBuilder = new SAXBuilder();
-			Document jdomDocument = jdomBuilder.build(new StringReader(content));
+			Document jdomDocument = jdomBuilder.build(new StringReader(content.toString()));
 			return jdomDocument;
 		}
 	}

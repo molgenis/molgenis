@@ -140,26 +140,26 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	{
 		try
 		{
-			String url = baseUrl + "/findPathwaysByXref";
+			StringBuilder url = new StringBuilder(baseUrl + "/findPathwaysByXref");
 			int count = 0;
 			for (String i : ids)
 			{
 				if (count == 0)
 				{
-					url = url + "?ids=" + i;
+					url.append("?ids=").append(i);
 					count++;
 				}
 				else
 				{
-					url = url + "&ids=" + i;
+					url.append("&ids=").append(i);
 				}
 			}
 			for (String c : codes)
 			{
-				url = url + "&codes=" + c;
+				url.append("&codes=").append(c);
 			}
 
-			Document jdomDocument = Utils.connect(url, client);
+			Document jdomDocument = Utils.connect(url.toString(), client);
 			Element root = jdomDocument.getRootElement();
 			List<Element> list = root.getChildren("result", WSNamespaces.NS1);
 			WSSearchResult[] res = new WSSearchResult[list.size()];
@@ -181,17 +181,18 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	{
 		try
 		{
-			String url = baseUrl + "/getColoredPathway?pwId=" + pwId + "&revision=" + revision;
+			StringBuilder url = new StringBuilder(
+					baseUrl + "/getColoredPathway?pwId=" + pwId + "&revision=" + revision);
 			for (String g : graphId)
 			{
-				url = url + "&graphId=" + g;
+				url.append("&graphId=").append(g);
 			}
 			for (String c : color)
 			{
-				url = url + "&color=" + c;
+				url.append("&color=").append(c);
 			}
-			url = url + "&fileType=" + fileType;
-			Document jdomDocument = Utils.connect(url, client);
+			url.append("&fileType=").append(fileType);
+			Document jdomDocument = Utils.connect(url.toString(), client);
 			Element data = jdomDocument.getRootElement().getChild("data", WSNamespaces.NS1);
 			return Base64.decodeBase64(data.getValue());
 		}
