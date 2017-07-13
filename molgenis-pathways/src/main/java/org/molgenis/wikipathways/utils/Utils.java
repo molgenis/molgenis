@@ -45,8 +45,7 @@ public class Utils
 		HttpGet httpget = new HttpGet(url);
 		HttpResponse response = client.execute(httpget);
 		HttpEntity entity = response.getEntity();
-		InputStream instream = entity.getContent();
-		try
+		try (InputStream instream = entity.getContent())
 		{
 			String content = "";
 			BufferedReader reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"));
@@ -60,10 +59,6 @@ public class Utils
 			SAXBuilder jdomBuilder = new SAXBuilder();
 			Document jdomDocument = jdomBuilder.build(new StringReader(content));
 			return jdomDocument;
-		}
-		finally
-		{
-			instream.close();
 		}
 	}
 

@@ -282,14 +282,9 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 		vcfEntity.set(SAMPLES, newArrayList(sampleEntity));
 
 		StringWriter strWriter = new StringWriter();
-		BufferedWriter writer = new BufferedWriter(strWriter);
-		try
+		try (BufferedWriter writer = new BufferedWriter(strWriter))
 		{
 			writeToVcf(vcfEntity, newArrayList(), newArrayList(), writer);
-		}
-		finally
-		{
-			writer.close();
 		}
 		assertEquals(strWriter.toString(),
 				"1	565286	rs1578391	C	T	.	flt	idAttr=0	GT:DP:EC	1/1:5:5");

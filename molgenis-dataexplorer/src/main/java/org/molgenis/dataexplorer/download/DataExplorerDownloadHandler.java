@@ -39,12 +39,11 @@ public class DataExplorerDownloadHandler
 
 	public void writeToExcel(DataRequest dataRequest, OutputStream outputStream) throws IOException
 	{
-		ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX);
 		String entityTypeId = dataRequest.getEntityName();
 
 		QueryImpl<Entity> query = dataRequest.getQuery();
 		ExcelSheetWriter excelSheetWriter = null;
-		try
+		try (ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX))
 		{
 			EntityType entityType = dataService.getEntityType(entityTypeId);
 			final Set<String> attributeNames = new LinkedHashSet<>(dataRequest.getAttributeNames());
@@ -76,10 +75,6 @@ public class DataExplorerDownloadHandler
 
 			excelSheetWriter.add(dataService.findAll(entityTypeId, query));
 			excelSheetWriter.close();
-		}
-		finally
-		{
-			excelWriter.close();
 		}
 	}
 
