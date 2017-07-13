@@ -77,7 +77,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 		Set<GrantedAuthority> allGrantedAuthorities = new HashSet<>();
 		if (grantedAuthorities != null) allGrantedAuthorities.addAll(grantedAuthorities);
 		if (grantedGroupAuthorities != null) allGrantedAuthorities.addAll(grantedGroupAuthorities);
-		if (user.isSuperuser() != null && user.isSuperuser().booleanValue() == true)
+		if (user.isSuperuser() != null && user.isSuperuser() == true)
 		{
 			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 		}

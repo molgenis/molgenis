@@ -78,7 +78,7 @@ public class Script extends StaticEntity
 	public boolean isGenerateToken()
 	{
 		Boolean generateToken = getBoolean(GENERATE_TOKEN);
-		return generateToken != null && generateToken.booleanValue();
+		return generateToken != null && generateToken;
 	}
 
 	public void setGenerateToken(Boolean generateToken)

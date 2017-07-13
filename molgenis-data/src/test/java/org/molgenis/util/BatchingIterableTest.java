@@ -68,7 +68,7 @@ public class BatchingIterableTest
 		int actualNrItems = 0;
 		for (Integer anIterable : iterable)
 		{
-			int intValue = anIterable.intValue();
+			int intValue = anIterable;
 			assertEquals(intValue, expectedValue++);
 			++actualNrItems;
 		}
