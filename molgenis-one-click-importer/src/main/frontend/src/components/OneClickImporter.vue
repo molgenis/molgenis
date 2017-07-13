@@ -27,12 +27,9 @@
     },
     methods: {
       setFile: function (event) {
-        console.log('set the file')
-        console.log(event.target.files[0])
         this.file = event.target.files[0]
       },
       importFile: function () {
-        console.log('submit the file please...')
         this.$store.dispatch(IMPORT, this.file)
       }
     }
