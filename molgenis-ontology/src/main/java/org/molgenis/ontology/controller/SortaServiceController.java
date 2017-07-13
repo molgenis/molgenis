@@ -289,7 +289,7 @@ public class SortaServiceController extends MolgenisPluginController
 	public EntityCollectionResponse retrieveSortaJobResults(@RequestBody SortaServiceRequest sortaServiceRequest,
 			HttpServletRequest httpServletRequest)
 	{
-		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> entityMaps = new ArrayList<>();
 		String sortaJobExecutionId = sortaServiceRequest.getSortaJobExecutionId();
 		String filterQuery = sortaServiceRequest.getFilterQuery();
 		String ontologyIri = sortaServiceRequest.getOntologyIri();
@@ -310,7 +310,7 @@ public class SortaServiceController extends MolgenisPluginController
 		if (isNotEmpty(filterQuery))
 		{
 			Iterable<String> filteredInputTermIds = dataService.findAll(sortaJobExecution.getSourceEntityName(),
-					new QueryImpl<Entity>().search(filterQuery))
+					new QueryImpl<>().search(filterQuery))
 															   .map(inputEntity -> inputEntity.getString(
 																	   SortaServiceImpl.DEFAULT_MATCHING_IDENTIFIER))
 															   .collect(Collectors.toList());
@@ -330,7 +330,7 @@ public class SortaServiceController extends MolgenisPluginController
 				query.offset(start).pageSize(num).sort(new Sort().on(VALIDATED, DESC).on(SCORE, DESC)));
 		findAll.forEach(mappingEntity ->
 		{
-			Map<String, Object> outputEntity = new HashMap<String, Object>();
+			Map<String, Object> outputEntity = new HashMap<>();
 			outputEntity.put("inputTerm", getEntityAsMap(mappingEntity.getEntity(INPUT_TERM)));
 			outputEntity.put("matchedTerm", getEntityAsMap(mappingEntity));
 			Object matchedTerm = mappingEntity.get(MATCHED_TERM);
@@ -450,7 +450,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 			response.setContentType("text/csv");
 			response.addHeader("Content-Disposition", "attachment; filename=" + generateCsvFileName("match-result"));
-			List<String> columnHeaders = new ArrayList<String>();
+			List<String> columnHeaders = new ArrayList<>();
 
 			EntityType sourceMetaData = dataService.getEntityType(sortaJobExecution.getSourceEntityName());
 			for (Attribute attribute : sourceMetaData.getAttributes())

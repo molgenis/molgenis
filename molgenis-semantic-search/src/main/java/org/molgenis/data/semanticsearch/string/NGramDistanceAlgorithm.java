@@ -80,7 +80,7 @@ public class NGramDistanceAlgorithm
 		List<String> wordsInString = Lists.newArrayList(Stemmer.replaceIllegalCharacter(inputQuery).split(" "));
 		if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
 		List<String> stemmedWordsInString = wordsInString.stream().map(Stemmer::stem).collect(Collectors.toList());
-		Map<String, Integer> tokens = new HashMap<String, Integer>();
+		Map<String, Integer> tokens = new HashMap<>();
 		// Padding the string
 		for (String singleWord : stemmedWordsInString)
 		{

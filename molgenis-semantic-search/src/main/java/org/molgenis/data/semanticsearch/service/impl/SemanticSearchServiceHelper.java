@@ -64,7 +64,7 @@ public class SemanticSearchServiceHelper
 	 */
 	public QueryRule createDisMaxQueryRuleForAttribute(Set<String> searchTerms, Collection<OntologyTerm> ontologyTerms)
 	{
-		List<String> queryTerms = new ArrayList<String>();
+		List<String> queryTerms = new ArrayList<>();
 
 		if (searchTerms != null)
 		{
@@ -99,7 +99,7 @@ public class SemanticSearchServiceHelper
 	 */
 	public QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms)
 	{
-		List<QueryRule> rules = new ArrayList<QueryRule>();
+		List<QueryRule> rules = new ArrayList<>();
 		queryTerms.stream().filter(StringUtils::isNotEmpty).map(this::escapeCharsExcludingCaretChar).forEach(query ->
 		{
 			rules.add(new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH, query));
@@ -135,7 +135,7 @@ public class SemanticSearchServiceHelper
 	 */
 	public QueryRule createShouldQueryRule(String multiOntologyTermIri)
 	{
-		QueryRule shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
+		QueryRule shouldQueryRule = new QueryRule(new ArrayList<>());
 		shouldQueryRule.setOperator(Operator.SHOULD);
 		for (String ontologyTermIri : multiOntologyTermIri.split(COMMA_CHAR))
 		{
@@ -184,7 +184,7 @@ public class SemanticSearchServiceHelper
 
 	public Map<String, String> collectExpandedQueryMap(Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms)
 	{
-		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
+		Map<String, String> expandedQueryMap = new LinkedHashMap<>();
 
 		queryTerms.stream()
 				  .filter(StringUtils::isNotBlank)

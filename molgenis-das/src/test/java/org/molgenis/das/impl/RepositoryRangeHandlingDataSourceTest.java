@@ -79,12 +79,12 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		propertyType.setValue("type");
 		when(dataSourceConfig.getDataSourceProperties()).thenReturn(Collections.singletonMap("type", propertyType));
 		source.init(null, null, dataSourceConfig);
-		Map<URL, String> linkout = new HashMap<URL, String>();
+		Map<URL, String> linkout = new HashMap<>();
 		linkout.put(new URL("http://www.molgenis.org/"), "Link");
 
-		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
+		List<DasTarget> dasTarget = new ArrayList<>();
 		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "description"));
-		List<String> notes = new ArrayList<String>();
+		List<String> notes = new ArrayList<>();
 		notes.add("track:dataset");
 		notes.add("source:MOLGENIS");
 
@@ -110,7 +110,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 
 		DynamicEntity entity = new DynamicEntity(emd);
 
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("STOP", 1000);
 		map.put("linkout", "http://www.molgenis.org/");
 		map.put("NAME", "mutation name");

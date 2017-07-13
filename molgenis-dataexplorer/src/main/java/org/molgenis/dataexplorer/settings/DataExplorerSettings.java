@@ -526,7 +526,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		String entityReportsStr = getEntityReports();
 		if (entityReportsStr != null)
 		{
-			Map<String, String> entityReports = new LinkedHashMap<String, String>();
+			Map<String, String> entityReports = new LinkedHashMap<>();
 			for (String entityReport : entityReportsStr.split(","))
 			{
 				String[] tokens = entityReport.split(":");

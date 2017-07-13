@@ -166,7 +166,7 @@ public class TabixReader
 
 		is.read(buf, 0, 4); // read "TBI\1"
 		mSeq = new String[readInt(is)]; // # sequences
-		mChr2tid = new HashMap<String, Integer>();
+		mChr2tid = new HashMap<>();
 		mPreset = readInt(is);
 		mSc = readInt(is);
 		mBc = readInt(is);
@@ -196,7 +196,7 @@ public class TabixReader
 			// the binning index
 			int n_bin = readInt(is);
 			mIndex[i] = new TIndex();
-			mIndex[i].b = new HashMap<Integer, TPair64[]>();
+			mIndex[i].b = new HashMap<>();
 			for (j = 0; j < n_bin; ++j)
 			{
 				int bin = readInt(is);

@@ -333,7 +333,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void iterator()
 	{
-		QueryImpl<Entity> q = new QueryImpl<Entity>();
+		QueryImpl<Entity> q = new QueryImpl<>();
 		Stream<Entity> entities = Stream.of(mock(Entity.class));
 		when(decoratedRepo.findAll(q)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityType, entities, null)).thenReturn(entities);

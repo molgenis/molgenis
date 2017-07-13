@@ -62,7 +62,7 @@ public class CategoryMapperTest
 	@Test
 	public void testGetMostGeneralUnit()
 	{
-		List<Unit<?>> units = new ArrayList<Unit<?>>();
+		List<Unit<?>> units = new ArrayList<>();
 
 		units.add(NonSI.DAY.inverse());
 		units.add(NonSI.YEAR.inverse());

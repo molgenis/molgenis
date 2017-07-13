@@ -72,7 +72,7 @@ public class Utils
 
 		HttpPost httpost = new HttpPost(url);
 		// Adding all form parameters in a List of type NameValuePair
-		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		List<NameValuePair> nvps = new ArrayList<>();
 		for (String key : attributes.keySet())
 		{
 			nvps.add(new BasicNameValuePair(key, attributes.get(key)));

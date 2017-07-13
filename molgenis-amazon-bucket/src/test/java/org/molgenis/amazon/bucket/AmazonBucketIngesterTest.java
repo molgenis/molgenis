@@ -66,7 +66,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 	@Test
 	public void ingest() throws FileNotFoundException
 	{
-		Map<String, Integer> imported = new HashMap<String, Integer>();
+		Map<String, Integer> imported = new HashMap<>();
 		imported.put("test", 1);
 		when(report.getNrImportedEntitiesMap()).thenReturn(imported);
 		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(

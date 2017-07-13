@@ -47,7 +47,7 @@ public class DataExplorerDownloadHandler
 		try
 		{
 			EntityType entityType = dataService.getEntityType(entityTypeId);
-			final Set<String> attributeNames = new LinkedHashSet<String>(dataRequest.getAttributeNames());
+			final Set<String> attributeNames = new LinkedHashSet<>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 
@@ -108,7 +108,7 @@ public class DataExplorerDownloadHandler
 		try
 		{
 			EntityType entityType = dataService.getEntityType(entityTypeId);
-			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
+			final Set<String> attributeNames = new HashSet<>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 

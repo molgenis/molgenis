@@ -282,7 +282,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 						return o1.getName().compareTo(o2.getName());
 					}
 				});
-				Map<String, String> pluginMap = new LinkedHashMap<String, String>();
+				Map<String, String> pluginMap = new LinkedHashMap<>();
 				for (MolgenisPlugin plugin : plugins)
 					pluginMap.put(plugin.getId(), plugin.getName());
 				permissions.setEntityIds(pluginMap);
@@ -296,7 +296,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 					EntityType.class).collect(Collectors.toList());
 			if (entityClassIds != null)
 			{
-				Map<String, String> entityClassMap = new TreeMap<String, String>();
+				Map<String, String> entityClassMap = new TreeMap<>();
 				for (EntityType entityType : entityTypes)
 					entityClassMap.put(entityType.getId(), entityType.getId());
 				permissions.setEntityIds(entityClassMap);

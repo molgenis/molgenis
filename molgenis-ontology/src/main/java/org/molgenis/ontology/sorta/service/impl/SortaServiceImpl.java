@@ -72,7 +72,7 @@ public class SortaServiceImpl implements SortaService
 	@Override
 	public Entity getOntologyEntity(String ontologyIri)
 	{
-		return dataService.findOne(ONTOLOGY, new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+		return dataService.findOne(ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 	}
 
 	@Override
@@ -82,9 +82,9 @@ public class SortaServiceImpl implements SortaService
 		if (ontologyEntity != null)
 		{
 			return dataService.findOne(ONTOLOGY_TERM,
-					new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri)
-										   .and()
-										   .eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
+					new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri)
+									 .and()
+									 .eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 		}
 		return null;
 	}
@@ -175,7 +175,7 @@ public class SortaServiceImpl implements SortaService
 			List<QueryRule> rulesForOtherFields)
 	{
 		List<Entity> ontologyTermAnnotationEntities = dataService.findAll(ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				new QueryImpl<Entity>(rulesForOtherFields).pageSize(Integer.MAX_VALUE)).collect(Collectors.toList());
+				new QueryImpl<>(rulesForOtherFields).pageSize(Integer.MAX_VALUE)).collect(Collectors.toList());
 
 		if (ontologyTermAnnotationEntities.size() > 0)
 		{
@@ -183,8 +183,7 @@ public class SortaServiceImpl implements SortaService
 					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, IN,
 							ontologyTermAnnotationEntities));
 
-			Stream<Entity> ontologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
-					new QueryImpl<Entity>(rules).pageSize(Integer.MAX_VALUE));
+			Stream<Entity> ontologyTermEntities = dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(rules).pageSize(Integer.MAX_VALUE));
 
 			List<Entity> relevantOntologyTermEntities = ontologyTermEntities.map(
 					ontologyTermEntity -> calculateNGromOTAnnotations(inputEntity, ontologyTermEntity))
@@ -205,7 +204,7 @@ public class SortaServiceImpl implements SortaService
 				disMaxQueryRule);
 
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
-				new QueryImpl<Entity>(finalQueryRules).pageSize(pageSize))
+				new QueryImpl<>(finalQueryRules).pageSize(pageSize))
 																	   .map(ontologyTerm -> addLexicalScoreToMatchedEntity(
 																			   inputEntity, ontologyTerm, ontologyIri));
 

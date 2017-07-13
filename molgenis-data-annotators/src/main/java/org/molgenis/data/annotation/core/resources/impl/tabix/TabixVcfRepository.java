@@ -74,7 +74,7 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		Object posValue = getFirstEqualsValueFor(VcfAttributes.POS, q);
 		Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
-		List<Entity> result = new ArrayList<Entity>();
+		List<Entity> result = new ArrayList<>();
 
 		// if one of both required attributes is null, skip the query and return an empty list
 		if (posValue != null && chromValue != null)

@@ -344,7 +344,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		entity.set(attrTextOptionalName, null);
 		entity.set(attrXrefOptionalName, null);
 
-		Query<Entity> q = new QueryImpl<Entity>().offset(0).pageSize(100);
+		Query<Entity> q = new QueryImpl<>().offset(0).pageSize(100);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);

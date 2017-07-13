@@ -14,7 +14,7 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 
 	public MolgenisPluginRegistryImpl()
 	{
-		pluginFactories = new ArrayList<MolgenisPluginFactory>();
+		pluginFactories = new ArrayList<>();
 	}
 
 	@Override

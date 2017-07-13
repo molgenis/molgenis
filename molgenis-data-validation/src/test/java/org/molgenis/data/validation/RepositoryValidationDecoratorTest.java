@@ -163,7 +163,7 @@ public class RepositoryValidationDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		when(decoratedRepo.getName()).thenReturn(entityTypeId);
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(
 				new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName)))).thenReturn(Stream.empty());
 		refRepo = mock(Repository.class);
 		when(refRepo.getEntityType()).thenReturn(refEntityType);
@@ -171,8 +171,7 @@ public class RepositoryValidationDecoratorTest
 		dataService = mock(DataService.class);
 		when(dataService.getRepository(entityTypeId)).thenReturn(decoratedRepo);
 		when(dataService.getRepository(refEntityName)).thenReturn(refRepo);
-		when(dataService.findAll(refEntityName,
-				new QueryImpl<Entity>().fetch(new Fetch().field(refAttrIdName)))).thenReturn(
+		when(dataService.findAll(refEntityName, new QueryImpl<>().fetch(new Fetch().field(refAttrIdName)))).thenReturn(
 				Stream.of(refEntity0, refEntity1));
 
 		metaDataService = mock(MetaDataService.class);
@@ -474,7 +473,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		when(dataService.findAll(entityTypeId,
-				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
+				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.add(entity0);
 
 		verify(decoratedRepo, times(1)).add(entity0);
@@ -629,7 +628,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -690,7 +689,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -741,7 +740,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1035,7 +1034,7 @@ public class RepositoryValidationDecoratorTest
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
 		when(dataService.findAll(entityTypeId,
-				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
+				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -1094,7 +1093,7 @@ public class RepositoryValidationDecoratorTest
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		when(dataService.findAll(entityTypeId,
-				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.empty());
+				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.empty());
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -1338,7 +1337,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1407,7 +1406,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1530,7 +1529,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1779,7 +1778,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		when(dataService.findAll(entityTypeId,
-				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
+				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.update(entity0);
 		verify(decoratedRepo, times(1)).update(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
@@ -1933,7 +1932,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1994,7 +1993,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -2045,7 +2044,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -2756,7 +2755,7 @@ public class RepositoryValidationDecoratorTest
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0);
 		when(dataService.findAll(entityTypeId,
-				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
+				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -2815,7 +2814,7 @@ public class RepositoryValidationDecoratorTest
 		// actual tests
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		when(dataService.findAll(entityTypeId,
-				new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0, entity1));
+				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0, entity1));
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -3059,7 +3058,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -3128,7 +3127,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -3251,7 +3250,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities

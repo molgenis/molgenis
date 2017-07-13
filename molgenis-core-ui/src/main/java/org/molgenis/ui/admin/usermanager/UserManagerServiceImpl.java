@@ -207,7 +207,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	 */
 	private List<Group> getAllMolgenisGroupsFromGroupMembers(final List<GroupMember> groupMembers)
 	{
-		List<Group> groups = new ArrayList<Group>();
+		List<Group> groups = new ArrayList<>();
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
@@ -232,7 +232,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	 */
 	private List<User> getAllMolgenisUsersFromGroupMembers(final List<GroupMember> groupMembers)
 	{
-		List<User> user = new ArrayList<User>();
+		List<User> user = new ArrayList<>();
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{

@@ -337,7 +337,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private String getColoredPathway(String selectedVcf, String pathwayId, Multimap<String, String> graphIdsPerGene)
 			throws ExecutionException
 	{
-		Map<String, Impact> impactPerGraphId = new HashMap<String, Impact>();
+		Map<String, Impact> impactPerGraphId = new HashMap<>();
 		getGenesForVcf(selectedVcf).forEach(
 				(gene, impact) -> graphIdsPerGene.get(gene).forEach(graphId -> impactPerGraphId.put(graphId, impact)));
 

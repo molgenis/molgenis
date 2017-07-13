@@ -133,7 +133,7 @@ public class ImportWriter
 	{
 		return runAsSystem(() ->
 		{
-			Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+			Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 			for (EntityType entityType : entities)
 			{
 				EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(),
@@ -394,7 +394,7 @@ public class ImportWriter
 
 		ImmutableCollection<EntityType> updatedEntityTypes = groupedEntityTypes.getUpdatedEntityTypes();
 
-		Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+		Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 		for (EntityType entityType : updatedEntityTypes)
 		{
 			EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);

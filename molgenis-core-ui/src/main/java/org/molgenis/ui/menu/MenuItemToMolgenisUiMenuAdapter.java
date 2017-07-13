@@ -72,10 +72,10 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	{
 		if (menu.equals(rootMenu)) return Collections.<MolgenisUiMenu>singletonList(this);
 
-		Map<String, MenuItem> menuParentMap = new HashMap<String, MenuItem>();
+		Map<String, MenuItem> menuParentMap = new HashMap<>();
 		createMenuParentMapRec(rootMenu, null, menu, menuParentMap);
 
-		List<MolgenisUiMenu> breadcrumb = new ArrayList<MolgenisUiMenu>();
+		List<MolgenisUiMenu> breadcrumb = new ArrayList<>();
 		MenuItem currentMenu = menu;
 		while (currentMenu != null)
 		{

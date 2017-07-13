@@ -224,7 +224,7 @@ public class DataConverter
 		else if (source instanceof List) return (List<Object>) source;
 		else if (source instanceof String)
 		{
-			List<Object> result = new ArrayList<Object>();
+			List<Object> result = new ArrayList<>();
 			for (String str : ((String) source).split(","))
 				result.add(str);
 			return result;
@@ -238,7 +238,7 @@ public class DataConverter
 		else if (source instanceof String)
 		{
 			List<String> stringList = ListEscapeUtils.toList((String) source);
-			List<Integer> intList = new ArrayList<Integer>();
+			List<Integer> intList = new ArrayList<>();
 			for (String s : stringList)
 			{
 				if (!StringUtils.isNumeric(s))
@@ -252,7 +252,7 @@ public class DataConverter
 		}
 		else if (source instanceof Iterable<?>)
 		{
-			ArrayList<Integer> intList = new ArrayList<Integer>();
+			ArrayList<Integer> intList = new ArrayList<>();
 			for (Object o : (Iterable<?>) source)
 			{
 				if (o instanceof Entity)
@@ -263,7 +263,7 @@ public class DataConverter
 			}
 			return intList;
 		}
-		else if (source instanceof Integer) return new ArrayList<Integer>(Arrays.asList((Integer) source));
+		else if (source instanceof Integer) return new ArrayList<>(Arrays.asList((Integer) source));
 		else return null;
 	}
 

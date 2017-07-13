@@ -87,7 +87,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 				}) : null;
 
 		// union of user and group authorities
-		Set<GrantedAuthority> allGrantedAuthorities = new HashSet<GrantedAuthority>();
+		Set<GrantedAuthority> allGrantedAuthorities = new HashSet<>();
 		if (grantedAuthorities != null) allGrantedAuthorities.addAll(grantedAuthorities);
 		if (grantedGroupAuthorities != null) allGrantedAuthorities.addAll(grantedGroupAuthorities);
 		if (user.isSuperuser() != null && user.isSuperuser().booleanValue() == true)

@@ -108,7 +108,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 
 	public void registerTypeAdapterFactory(TypeAdapterFactory typeAdapterFactory)
 	{
-		if (typeAdapterFactoryList == null) typeAdapterFactoryList = new ArrayList<TypeAdapterFactory>();
+		if (typeAdapterFactoryList == null) typeAdapterFactoryList = new ArrayList<>();
 		typeAdapterFactoryList.add(typeAdapterFactory);
 	}
 

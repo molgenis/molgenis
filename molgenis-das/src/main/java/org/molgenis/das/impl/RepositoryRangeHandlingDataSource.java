@@ -86,10 +86,10 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			maxbins = 1000;
 		}
 		Stream<Entity> entityIterable = queryDataSet(segmentId, start, stop, dataSet, maxbins);
-		List<DasFeature> features = new ArrayList<DasFeature>();
+		List<DasFeature> features = new ArrayList<>();
 
 		Integer score = 0;
-		Map<String, DasType> patients = new HashMap<String, DasType>();
+		Map<String, DasType> patients = new HashMap<>();
 		for (Iterator<Entity> it = entityIterable.iterator(); it.hasNext(); )
 		{
 			Entity entity = it.next();
@@ -166,7 +166,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			valueAlt = StringUtils.isNotEmpty(altAttribute) && StringUtils.isNotEmpty(
 					entity.getString(altAttribute)) ? entity.getString(altAttribute) : "";
 
-			List<String> notes = new ArrayList<String>();
+			List<String> notes = new ArrayList<>();
 			if (StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute + "~" + valueRef);
 			if (StringUtils.isNotEmpty(valueAlt)) notes.add(altAttribute + "~" + valueAlt);
 

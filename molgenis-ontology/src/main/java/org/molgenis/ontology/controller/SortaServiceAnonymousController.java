@@ -115,7 +115,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	{
 		Object filePath = httpServletRequest.getSession().getAttribute("filePath");
 		Object ontologyIriObject = httpServletRequest.getSession().getAttribute("ontologyIri");
-		List<Map<String, Object>> responseResults = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> responseResults = new ArrayList<>();
 		if (filePath != null && ontologyIriObject != null)
 		{
 			File uploadFile = new File(filePath.toString());
@@ -205,7 +205,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 																 SortaCsvRepository.ALLOWED_IDENTIFIER))
 														 .toList();
 
-		List<String> columnHeaders = new ArrayList<String>(inputAttributeNames);
+		List<String> columnHeaders = new ArrayList<>(inputAttributeNames);
 		columnHeaders.addAll(
 				Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE,
 						COMBINED_SCORE));

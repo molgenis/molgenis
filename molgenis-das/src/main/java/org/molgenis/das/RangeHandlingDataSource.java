@@ -40,7 +40,7 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
 			notes.add("patient:" + patient);
 		}
 
-		Map<URL, String> linkout = new HashMap<URL, String>();
+		Map<URL, String> linkout = new HashMap<>();
 		try
 		{
 			linkout.put(new URL(link), "Link");
@@ -49,10 +49,10 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
 		{
 		}
 
-		List<DasTarget> dasTargets = new ArrayList<DasTarget>();
+		List<DasTarget> dasTargets = new ArrayList<>();
 		dasTargets.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
 
-		List<String> parents = new ArrayList<String>();
+		List<String> parents = new ArrayList<>();
 		DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop, new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
 				dasTargets, parents, null);

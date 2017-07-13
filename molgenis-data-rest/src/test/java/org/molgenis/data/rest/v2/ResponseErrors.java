@@ -5,7 +5,7 @@ import java.util.List;
 
 class ResponseErrors
 {
-	private List<Message> errors = new ArrayList<Message>();
+	private List<Message> errors = new ArrayList<>();
 
 	void setErrors(List<Message> errors)
 	{

@@ -670,7 +670,7 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	{
 		try
 		{
-			Map<String, String> map = new HashMap<String, String>();
+			Map<String, String> map = new HashMap<>();
 			map.put("pwId", pwId);
 			map.put("description", description);
 			map.put("gpml", gpml);
@@ -698,7 +698,7 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	{
 		try
 		{
-			Map<String, String> map = new HashMap<String, String>();
+			Map<String, String> map = new HashMap<>();
 			map.put("gpml", gpml);
 			map.put("auth", auth.getKey());
 			map.put("username", auth.getUser());
@@ -707,7 +707,7 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 
 			HttpPost httpost = new HttpPost(url);
 			// Adding all form parameters in a List of type NameValuePair
-			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+			List<NameValuePair> nvps = new ArrayList<>();
 			for (String key : map.keySet())
 			{
 				nvps.add(new BasicNameValuePair(key, map.get(key)));

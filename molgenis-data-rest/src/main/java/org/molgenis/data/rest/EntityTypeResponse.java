@@ -77,7 +77,7 @@ public class EntityTypeResponse
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
-			this.attributes = new LinkedHashMap<String, Object>();
+			this.attributes = new LinkedHashMap<>();
 			//the newArraylist is a fix for concurrency trouble
 			//FIXME properly fix this by making metadata immutable
 			for (Attribute attr : Lists.newArrayList(meta.getAttributes()))

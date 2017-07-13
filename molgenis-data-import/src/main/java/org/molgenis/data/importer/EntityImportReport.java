@@ -16,7 +16,7 @@ public class EntityImportReport implements Serializable
 
 	public EntityImportReport()
 	{
-		nrImportedEntitiesMap = new HashMap<String, Integer>();
+		nrImportedEntitiesMap = new HashMap<>();
 	}
 
 	public void addEntityCount(String entityTypeId, int count)

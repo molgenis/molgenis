@@ -23,7 +23,7 @@ public class BatchingIterableTest
 	@DataProvider(name = "iteratorTest")
 	public static Iterator<Object[]> createData1()
 	{
-		List<Object[]> paramList = new ArrayList<Object[]>();
+		List<Object[]> paramList = new ArrayList<>();
 
 		for (int batchSize = 1; batchSize < ITEMS_LIST.size() + 1; ++batchSize)
 		{

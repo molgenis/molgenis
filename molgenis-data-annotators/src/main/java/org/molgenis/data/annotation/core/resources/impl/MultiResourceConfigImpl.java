@@ -95,7 +95,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 
 	private Map<String, String> getOverrideChromosomeFiles()
 	{
-		Map<String, String> overrideChromosomeFilesMap = new HashMap<String, String>();
+		Map<String, String> overrideChromosomeFilesMap = new HashMap<>();
 		if (null != this.overrideChromosomeFilesProperty
 				&& molgenisSettings.getString(this.overrideChromosomeFilesProperty) != null)
 		{

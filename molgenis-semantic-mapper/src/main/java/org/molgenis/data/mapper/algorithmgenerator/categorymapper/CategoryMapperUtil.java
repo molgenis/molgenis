@@ -36,7 +36,7 @@ public class CategoryMapperUtil
 
 	static
 	{
-		POSITIVE_ADJECTIVES = new HashSet<String>();
+		POSITIVE_ADJECTIVES = new HashSet<>();
 		POSITIVE_ADJECTIVES.add("almost");
 	}
 
@@ -44,7 +44,7 @@ public class CategoryMapperUtil
 
 	static
 	{
-		NEGATIVE_ADJECTIVES = new HashSet<String>();
+		NEGATIVE_ADJECTIVES = new HashSet<>();
 		NEGATIVE_ADJECTIVES.add("never");
 		NEGATIVE_ADJECTIVES.add("less");
 		NEGATIVE_ADJECTIVES.add("fewer");
@@ -55,7 +55,7 @@ public class CategoryMapperUtil
 
 	static
 	{
-		WORD_TO_NUMBER_MAP = new HashMap<String, Integer>();
+		WORD_TO_NUMBER_MAP = new HashMap<>();
 		WORD_TO_NUMBER_MAP.put("one", 1);
 		WORD_TO_NUMBER_MAP.put("two", 2);
 		WORD_TO_NUMBER_MAP.put("three", 3);
@@ -125,7 +125,7 @@ public class CategoryMapperUtil
 	{
 		Set<String> tokens = Sets.newHashSet(description.toLowerCase().split(NON_LETTER_REGEX));
 
-		List<Unit<?>> candidateUnits = new ArrayList<Unit<?>>();
+		List<Unit<?>> candidateUnits = new ArrayList<>();
 
 		for (Unit<?> unit : DURATION_UNITS)
 		{
@@ -161,7 +161,7 @@ public class CategoryMapperUtil
 
 	public static List<Double> extractNumbers(String description)
 	{
-		List<Double> extractedNumbers = new ArrayList<Double>();
+		List<Double> extractedNumbers = new ArrayList<>();
 		String lowerCasedDesc = description.toLowerCase();
 		Matcher mather = NUMBER_PATTERN.matcher(lowerCasedDesc);
 		while (mather.find())

@@ -421,7 +421,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
 		assertTrue(entitiesValidationReport.valid());
 		assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
-		Map<String, List<String>> importableFields = new HashMap<String, List<String>>();
+		Map<String, List<String>> importableFields = new HashMap<>();
 		importableFields.put(entityTypeId0, singletonList(VcfAttributes.SAMPLES));
 		importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
 		assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);
@@ -486,7 +486,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
 		assertFalse(entitiesValidationReport.valid());
 		assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
-		Map<String, List<String>> importableFields = new HashMap<String, List<String>>();
+		Map<String, List<String>> importableFields = new HashMap<>();
 		importableFields.put(entityTypeId0, singletonList(VcfAttributes.SAMPLES));
 		importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
 		assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);

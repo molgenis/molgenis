@@ -105,7 +105,7 @@ public abstract class MultiFileResource implements Resource
 		// initialize after autowiring is complete and resources is empty
 		isAvailable();
 		Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
-		Iterable<Entity> result = new ArrayList<Entity>();
+		Iterable<Entity> result = new ArrayList<>();
 
 		if (chromValue != null)
 		{

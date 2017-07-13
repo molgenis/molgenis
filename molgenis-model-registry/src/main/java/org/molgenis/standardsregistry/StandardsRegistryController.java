@@ -234,11 +234,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		String title = package_.getLabel() != null ? package_.getLabel() : package_.getId();
 		String key = package_.getId();
 		String tooltip = package_.getDescription();
-		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
+		List<PackageTreeNode> result = new ArrayList<>();
 		boolean folder = true;
 		boolean expanded = true;
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("type", "package");
 
 		for (Package subPackage : package_.getChildren())
@@ -259,11 +259,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		String title = emd.getLabel();
 		String key = emd.getId();
 		String tooltip = emd.getDescription();
-		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
+		List<PackageTreeNode> result = new ArrayList<>();
 		boolean folder = true;
 		boolean expanded = false;
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("type", "entity");
 		data.put("href", "/api/v1/" + emd.getId() + "/meta");
 
@@ -280,11 +280,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		String title = amd.getLabel();
 		String key = amd.getName();
 		String tooltip = amd.getDescription();
-		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
+		List<PackageTreeNode> result = new ArrayList<>();
 		boolean folder;
 		boolean expanded = false;
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("type", "attribute");
 		data.put("href", "/api/v1/" + emd.getId() + "/meta/" + amd.getName());
 		data.put("tags", tagService.getTagsForAttribute(emd, amd));
@@ -320,7 +320,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
 	{
-		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<PackageResponse.Entity>();
+		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<>();
 		Package aPackage = metaDataService.getPackage(packageName);
 		getEntitiesInPackageRec(aPackage, entiesForThisPackage);
 		return entiesForThisPackage;

@@ -98,7 +98,7 @@ public class PermissionManagerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void updateGroupPluginPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
+		List<GroupAuthority> authorities = new ArrayList<>();
 		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
 		{
 			String param = "radio-" + plugin.getId();
@@ -120,7 +120,7 @@ public class PermissionManagerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void updateGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
+		List<GroupAuthority> authorities = new ArrayList<>();
 		for (Object entityClassId : pluginPermissionManagerService.getEntityClassIds())
 		{
 			String param = "radio-" + entityClassId;
@@ -141,7 +141,7 @@ public class PermissionManagerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserPluginPermissions(@RequestParam String userId, WebRequest webRequest)
 	{
-		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
+		List<UserAuthority> authorities = new ArrayList<>();
 		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
 		{
 			String param = "radio-" + plugin.getId();
@@ -162,7 +162,7 @@ public class PermissionManagerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserEntityClassPermissions(@RequestParam String userId, WebRequest webRequest)
 	{
-		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
+		List<UserAuthority> authorities = new ArrayList<>();
 		for (Object entityClassId : pluginPermissionManagerService.getEntityClassIds())
 		{
 			String param = "radio-" + entityClassId;
