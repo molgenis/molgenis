@@ -418,8 +418,8 @@ public class TabixReader
 		if (n_off == 0) return null;
 		off = new TPair64[n_off];
 		for (i = n_off = 0; i < n_bins; ++i)
-			if ((chunks = idx.b.get(bins[i])) != null) for (int j = 0; j < chunks.length; ++j)
-				if (less64(min_off, chunks[j].v)) off[n_off++] = new TPair64(chunks[j]);
+			if ((chunks = idx.b.get(bins[i])) != null)
+				for (TPair64 chunk : chunks) if (less64(min_off, chunk.v)) off[n_off++] = new TPair64(chunk);
 		if (n_off == 0) return null;
 		Arrays.sort(off, 0, n_off);
 		// resolve completely contained adjacent blocks
