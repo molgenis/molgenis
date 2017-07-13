@@ -21,12 +21,7 @@ public class EntityImportReport implements Serializable
 
 	public void addEntityCount(String entityTypeId, int count)
 	{
-		Integer entityCount = nrImportedEntitiesMap.get(entityTypeId);
-		if (entityCount == null)
-		{
-			entityCount = 0;
-			nrImportedEntitiesMap.put(entityTypeId, entityCount);
-		}
+		Integer entityCount = nrImportedEntitiesMap.computeIfAbsent(entityTypeId, k -> 0);
 		nrImportedEntitiesMap.put(entityTypeId, entityCount + count);
 	}
 

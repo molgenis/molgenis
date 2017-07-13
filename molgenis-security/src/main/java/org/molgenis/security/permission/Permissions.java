@@ -49,12 +49,7 @@ public class Permissions
 	public void addUserPermission(String pluginId, Permission pluginPermission)
 	{
 		if (userPermissionMap == null) userPermissionMap = new HashMap<>();
-		List<Permission> pluginPermissions = userPermissionMap.get(pluginId);
-		if (pluginPermissions == null)
-		{
-			pluginPermissions = new ArrayList<>();
-			userPermissionMap.put(pluginId, pluginPermissions);
-		}
+		List<Permission> pluginPermissions = userPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
 		pluginPermissions.add(pluginPermission);
 	}
 
@@ -66,12 +61,7 @@ public class Permissions
 	public void addGroupPermission(String pluginId, Permission pluginPermission)
 	{
 		if (groupPermissionMap == null) groupPermissionMap = new HashMap<>();
-		List<Permission> pluginPermissions = groupPermissionMap.get(pluginId);
-		if (pluginPermissions == null)
-		{
-			pluginPermissions = new ArrayList<>();
-			groupPermissionMap.put(pluginId, pluginPermissions);
-		}
+		List<Permission> pluginPermissions = groupPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
 		pluginPermissions.add(pluginPermission);
 	}
 
@@ -83,12 +73,7 @@ public class Permissions
 	public void addHierarchyPermission(String pluginId, Permission pluginPermission)
 	{
 		if (hierarchyPermissionMap == null) hierarchyPermissionMap = new HashMap<>();
-		List<Permission> pluginPermissions = hierarchyPermissionMap.get(pluginId);
-		if (pluginPermissions == null)
-		{
-			pluginPermissions = new ArrayList<>();
-			hierarchyPermissionMap.put(pluginId, pluginPermissions);
-		}
+		List<Permission> pluginPermissions = hierarchyPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
 		pluginPermissions.add(pluginPermission);
 	}
 

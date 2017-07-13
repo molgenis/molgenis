@@ -236,8 +236,7 @@ public class TabixReader
 
 	private int chr2tid(final String chr)
 	{
-		if (mChr2tid.containsKey(chr)) return mChr2tid.get(chr);
-		else return -1;
+		return mChr2tid.getOrDefault(chr, -1);
 	}
 
 	/**
