@@ -76,7 +76,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		{
 			segmentId = segmentParts[0];
 			customParam = segmentParts[1];
-			if (customParam.indexOf(DasURLFilter.DATASET_PREFIX) != -1)
+			if (customParam.contains(DasURLFilter.DATASET_PREFIX))
 			{
 				dataSet = customParam.substring(11);
 			}
