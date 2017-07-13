@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class BoxPlotChart extends AbstractChart
 {
-	private List<XYDataSerie> xYDataSeries = new ArrayList<XYDataSerie>();
-	private List<BoxPlotSerie> boxPlotSeries = new ArrayList<BoxPlotSerie>();
-	private List<String> categories = new ArrayList<String>();
+	private List<XYDataSerie> xYDataSeries = new ArrayList<>();
+	private List<BoxPlotSerie> boxPlotSeries = new ArrayList<>();
+	private List<String> categories = new ArrayList<>();
 
 	public BoxPlotChart()
 	{

@@ -248,7 +248,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	@Override
 	public Map<Attribute, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIds)
 	{
-		Map<Attribute, Hit<OntologyTerm>> result = new LinkedHashMap<Attribute, Hit<OntologyTerm>>();
+		Map<Attribute, Hit<OntologyTerm>> result = new LinkedHashMap<>();
 		EntityType emd = metaDataService.getEntityType(entity);
 		for (Attribute amd : emd.getAtomicAttributes())
 		{

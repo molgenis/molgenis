@@ -45,25 +45,20 @@ public class Utils
 		HttpGet httpget = new HttpGet(url);
 		HttpResponse response = client.execute(httpget);
 		HttpEntity entity = response.getEntity();
-		InputStream instream = entity.getContent();
-		try
+		try (InputStream instream = entity.getContent())
 		{
-			String content = "";
+			StringBuilder content = new StringBuilder();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"));
 			String line;
 			while ((line = reader.readLine()) != null)
 			{
-				content = content + line + "\n";
+				content.append(line).append("\n");
 			}
 			reader.close();
 
 			SAXBuilder jdomBuilder = new SAXBuilder();
-			Document jdomDocument = jdomBuilder.build(new StringReader(content));
+			Document jdomDocument = jdomBuilder.build(new StringReader(content.toString()));
 			return jdomDocument;
-		}
-		finally
-		{
-			instream.close();
 		}
 	}
 
@@ -72,7 +67,7 @@ public class Utils
 
 		HttpPost httpost = new HttpPost(url);
 		// Adding all form parameters in a List of type NameValuePair
-		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		List<NameValuePair> nvps = new ArrayList<>();
 		for (String key : attributes.keySet())
 		{
 			nvps.add(new BasicNameValuePair(key, attributes.get(key)));

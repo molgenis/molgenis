@@ -27,15 +27,11 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	{
 		List<MenuItem> items = menu.getItems();
 		return items != null ? Lists.newArrayList(
-				Iterables.transform(items, new Function<MenuItem, MolgenisUiMenuItem>()
+				Iterables.transform(items, (Function<MenuItem, MolgenisUiMenuItem>) menuItem ->
 				{
-					@Override
-					public MolgenisUiMenuItem apply(MenuItem menuItem)
-					{
-						if (menuItem.getType() == MenuItemType.PLUGIN)
-							return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
-						else return new MenuItemToMolgenisUiMenuAdapter(menuItem, rootMenu);
-					}
+					if (menuItem.getType() == MenuItemType.PLUGIN)
+						return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
+					else return new MenuItemToMolgenisUiMenuAdapter(menuItem, rootMenu);
 				})) : Collections.<MolgenisUiMenuItem>emptyList();
 	}
 
@@ -72,10 +68,10 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	{
 		if (menu.equals(rootMenu)) return Collections.<MolgenisUiMenu>singletonList(this);
 
-		Map<String, MenuItem> menuParentMap = new HashMap<String, MenuItem>();
+		Map<String, MenuItem> menuParentMap = new HashMap<>();
 		createMenuParentMapRec(rootMenu, null, menu, menuParentMap);
 
-		List<MolgenisUiMenu> breadcrumb = new ArrayList<MolgenisUiMenu>();
+		List<MolgenisUiMenu> breadcrumb = new ArrayList<>();
 		MenuItem currentMenu = menu;
 		while (currentMenu != null)
 		{

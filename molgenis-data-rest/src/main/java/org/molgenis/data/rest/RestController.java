@@ -504,7 +504,7 @@ public class RestController
 	public void createFromFormPost(@PathVariable("entityTypeId") String entityTypeId, HttpServletRequest request,
 			HttpServletResponse response)
 	{
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<>();
 		for (String param : request.getParameterMap().keySet())
 		{
 			String[] values = request.getParameterValues(param);
@@ -531,7 +531,7 @@ public class RestController
 	public void createFromFormPostMultiPart(@PathVariable("entityTypeId") String entityTypeId,
 			MultipartHttpServletRequest request, HttpServletResponse response)
 	{
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<>();
 		for (String param : request.getParameterMap().keySet())
 		{
 			String[] values = request.getParameterValues(param);
@@ -671,7 +671,7 @@ public class RestController
 	public void updateFromFormPostMultiPart(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, MultipartHttpServletRequest request)
 	{
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<>();
 		for (String param : request.getParameterMap().keySet())
 		{
 			String[] values = request.getParameterValues(param);
@@ -711,7 +711,7 @@ public class RestController
 	public void updateFromFormPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, HttpServletRequest request)
 	{
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<>();
 		for (String param : request.getParameterMap().keySet())
 		{
 			String[] values = request.getParameterValues(param);
@@ -1102,7 +1102,7 @@ public class RestController
 		switch (attr.getDataType())
 		{
 			case COMPOUND:
-				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
+				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<>();
 				entityHasAttributeMap.put("href", attrHref);
 				@SuppressWarnings("unchecked")
 				Iterable<Attribute> attributeParts = (Iterable<Attribute>) entity.get(refAttributeName);
@@ -1115,14 +1115,14 @@ public class RestController
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
-				List<Entity> mrefEntities = new ArrayList<Entity>();
+				List<Entity> mrefEntities = new ArrayList<>();
 				for (Entity e : entity.getEntities((attr.getName())))
 					mrefEntities.add(e);
 				int count = mrefEntities.size();
 				int toIndex = request.getStart() + request.getNum();
 				mrefEntities = mrefEntities.subList(request.getStart(), toIndex > count ? count : toIndex);
 
-				List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
+				List<Map<String, Object>> refEntityMaps = new ArrayList<>();
 				for (Entity refEntity : mrefEntities)
 				{
 					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, attr.getRefEntity(), attributesSet,
@@ -1140,7 +1140,7 @@ public class RestController
 				entityXrefAttributeMap.put("href", attrHref);
 				return entityXrefAttributeMap;
 			default:
-				Map<String, Object> entityAttributeMap = new LinkedHashMap<String, Object>();
+				Map<String, Object> entityAttributeMap = new LinkedHashMap<>();
 				entityAttributeMap.put("href", attrHref);
 				entityAttributeMap.put(refAttributeName, entity.get(refAttributeName));
 				return entityAttributeMap;
@@ -1197,7 +1197,7 @@ public class RestController
 
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
-		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> entityMap = new LinkedHashMap<>();
 		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getId(), entity.getIdValue()));
 
 		for (Attribute attr : meta.getAtomicAttributes())
@@ -1257,7 +1257,7 @@ public class RestController
 				Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
 
 				Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-				List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
+				List<Map<String, Object>> refEntityMaps = new ArrayList<>();
 				for (Entity refEntity : mrefEntities)
 				{
 					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityType, subAttributesSet, null);
@@ -1278,7 +1278,7 @@ public class RestController
 					|| attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
 			{
 				// Add href to ref field
-				Map<String, String> ref = new LinkedHashMap<String, String>();
+				Map<String, String> ref = new LinkedHashMap<>();
 				ref.put("href",
 						Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(), attrName));
 				entityMap.put(attrName, ref);
@@ -1295,14 +1295,7 @@ public class RestController
 	private Set<String> toAttributeSet(String[] attributes)
 	{
 		return attributes != null && attributes.length > 0 ? Sets.newHashSet(
-				Iterables.transform(Arrays.asList(attributes), new com.google.common.base.Function<String, String>()
-				{
-					@Override
-					public String apply(String attribute)
-					{
-						return attribute.toLowerCase();
-					}
-				})) : null;
+				Iterables.transform(Arrays.asList(attributes), String::toLowerCase)) : null;
 	}
 
 	/**
@@ -1315,7 +1308,7 @@ public class RestController
 	{
 		if (expands != null)
 		{
-			Map<String, Set<String>> expandMap = new HashMap<String, Set<String>>();
+			Map<String, Set<String>> expandMap = new HashMap<>();
 			for (String expand : expands)
 			{
 				// validate
@@ -1328,7 +1321,7 @@ public class RestController
 				Set<String> attrSet;
 				if (attrsStr != null && !attrsStr.isEmpty())
 				{
-					attrSet = new HashSet<String>();
+					attrSet = new HashSet<>();
 					for (String attr : attrsStr.split(";"))
 					{
 						attrSet.add(attr.toLowerCase());

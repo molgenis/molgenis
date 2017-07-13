@@ -1,7 +1,5 @@
 package org.molgenis.charts.data;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -67,14 +65,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 		final Repository<Entity> repo = mock(Repository.class);
 		when(repo.iterator()).thenReturn(entities.iterator());
 
-		when(dataServiceMock.getRepository(entityTypeId)).thenAnswer(new Answer<Repository<Entity>>()
-		{
-			@Override
-			public Repository<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return repo;
-			}
-		});
+		when(dataServiceMock.getRepository(entityTypeId)).thenAnswer(invocation -> repo);
 
 		DataMatrix matrix = chartDataService.getDataMatrix(entityTypeId, Arrays.asList("probe"), "patient",
 				Collections.<QueryRule>emptyList());

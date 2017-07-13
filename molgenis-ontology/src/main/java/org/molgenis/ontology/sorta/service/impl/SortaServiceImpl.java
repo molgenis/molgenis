@@ -1,6 +1,5 @@
 package org.molgenis.ontology.sorta.service.impl;
 
-import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -72,7 +71,7 @@ public class SortaServiceImpl implements SortaService
 	@Override
 	public Entity getOntologyEntity(String ontologyIri)
 	{
-		return dataService.findOne(ONTOLOGY, new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+		return dataService.findOne(ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 	}
 
 	@Override
@@ -82,9 +81,9 @@ public class SortaServiceImpl implements SortaService
 		if (ontologyEntity != null)
 		{
 			return dataService.findOne(ONTOLOGY_TERM,
-					new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri)
-										   .and()
-										   .eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
+					new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri)
+									 .and()
+									 .eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 		}
 		return null;
 	}
@@ -160,13 +159,8 @@ public class SortaServiceImpl implements SortaService
 					rulesForOntologyTermFieldsNGram, relevantEntities);
 		}
 
-		Collections.sort(relevantEntities, new Comparator<Entity>()
-		{
-			public int compare(Entity entity_1, Entity entity_2)
-			{
-				return entity_2.getDouble(COMBINED_SCORE).compareTo(entity_1.getDouble(COMBINED_SCORE));
-			}
-		});
+		relevantEntities.sort((entity_1, entity_2) -> entity_2.getDouble(COMBINED_SCORE)
+															  .compareTo(entity_1.getDouble(COMBINED_SCORE)));
 
 		return relevantEntities;
 	}
@@ -175,7 +169,7 @@ public class SortaServiceImpl implements SortaService
 			List<QueryRule> rulesForOtherFields)
 	{
 		List<Entity> ontologyTermAnnotationEntities = dataService.findAll(ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				new QueryImpl<Entity>(rulesForOtherFields).pageSize(Integer.MAX_VALUE)).collect(Collectors.toList());
+				new QueryImpl<>(rulesForOtherFields).pageSize(Integer.MAX_VALUE)).collect(Collectors.toList());
 
 		if (ontologyTermAnnotationEntities.size() > 0)
 		{
@@ -183,8 +177,7 @@ public class SortaServiceImpl implements SortaService
 					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, IN,
 							ontologyTermAnnotationEntities));
 
-			Stream<Entity> ontologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
-					new QueryImpl<Entity>(rules).pageSize(Integer.MAX_VALUE));
+			Stream<Entity> ontologyTermEntities = dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(rules).pageSize(Integer.MAX_VALUE));
 
 			List<Entity> relevantOntologyTermEntities = ontologyTermEntities.map(
 					ontologyTermEntity -> calculateNGromOTAnnotations(inputEntity, ontologyTermEntity))
@@ -205,7 +198,7 @@ public class SortaServiceImpl implements SortaService
 				disMaxQueryRule);
 
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
-				new QueryImpl<Entity>(finalQueryRules).pageSize(pageSize))
+				new QueryImpl<>(finalQueryRules).pageSize(pageSize))
 																	   .map(ontologyTerm -> addLexicalScoreToMatchedEntity(
 																			   inputEntity, ontologyTerm, ontologyIri));
 
@@ -292,27 +285,17 @@ public class SortaServiceImpl implements SortaService
 			String cleanedQueryString = removeIllegalCharWithSingleWhiteSpace(queryString);
 
 			// Calculate the Ngram silmiarity score for all the synonyms and sort them in descending order
-			List<Entity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, Entity>()
+			List<Entity> synonymEntities = FluentIterable.from(entities).transform(ontologyTermSynonymEntity ->
 			{
-				public Entity apply(Entity ontologyTermSynonymEntity)
-				{
-					Entity mapEntity = ontologyTermSynonymFactory.create();
-					mapEntity.set(ontologyTermSynonymEntity);
-					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(
-							ontologyTermSynonymEntity.getString(
-									OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
-					mapEntity.set(SCORE,
-							NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
-					return mapEntity;
-				}
-
-			}).toSortedList(new Comparator<Entity>()
-			{
-				public int compare(Entity entity_1, Entity entity_2)
-				{
-					return entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE));
-				}
-			});
+				Entity mapEntity = ontologyTermSynonymFactory.create();
+				mapEntity.set(ontologyTermSynonymEntity);
+				String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(
+						ontologyTermSynonymEntity.getString(
+								OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
+				mapEntity.set(SCORE,
+						NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
+				return mapEntity;
+			}).toSortedList((entity_1, entity_2) -> entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE)));
 
 			Entity firstMatchedSynonymEntity = Iterables.getFirst(synonymEntities, ontologyTermSynonymFactory.create());
 			double topNgramScore = firstMatchedSynonymEntity.getDouble(SCORE);

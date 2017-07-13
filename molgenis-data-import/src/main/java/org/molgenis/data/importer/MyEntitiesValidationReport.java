@@ -63,10 +63,10 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		valid = valid && importable;
 		if (importable)
 		{
-			fieldsImportable.put(entityTypeId, new ArrayList<String>());
-			fieldsUnknown.put(entityTypeId, new ArrayList<String>());
-			fieldsRequired.put(entityTypeId, new ArrayList<String>());
-			fieldsAvailable.put(entityTypeId, new ArrayList<String>());
+			fieldsImportable.put(entityTypeId, new ArrayList<>());
+			fieldsUnknown.put(entityTypeId, new ArrayList<>());
+			fieldsRequired.put(entityTypeId, new ArrayList<>());
+			fieldsAvailable.put(entityTypeId, new ArrayList<>());
 			importOrder.add(entityTypeId);
 		}
 		return this;
@@ -135,7 +135,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	{
 		if (!sheets.containsKey(entityTypeId))
 		{
-			sheets.put(entityTypeId, new ArrayList<String>());
+			sheets.put(entityTypeId, new ArrayList<>());
 		}
 		sheets.get(entityTypeId).add(attributeName);
 	}

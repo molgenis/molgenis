@@ -64,10 +64,7 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 		}
 
 		SecurityContext securityContext = SecurityContextHolder.getContext();
-		runAsSystem(() ->
-		{
-			giveUserEntityPermissionsAsSystem(securityContext, entityTypes);
-		});
+		runAsSystem(() -> giveUserEntityPermissionsAsSystem(securityContext, entityTypes));
 	}
 
 	private void giveUserEntityPermissionsAsSystem(SecurityContext securityContext, Collection<EntityType> entityTypes)

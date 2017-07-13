@@ -232,7 +232,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 	 */
 	public Iterable<Entity> merge(Iterable<Entity> resourceEntities)
 	{
-		ArrayList<Entity> resourceEntitiesMerged = new ArrayList<Entity>();
+		ArrayList<Entity> resourceEntitiesMerged = new ArrayList<>();
 
 		PeekingIterator<Entity> resourceEntitiesIterator = Iterators.peekingIterator(resourceEntities.iterator());
 

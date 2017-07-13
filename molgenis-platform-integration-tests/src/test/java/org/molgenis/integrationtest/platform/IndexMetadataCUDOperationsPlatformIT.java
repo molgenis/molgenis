@@ -61,10 +61,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 				1);
 
 		// 2. delete sys_test_TypeTestDynamic metadata and wait on index
-		runAsSystem(() ->
-		{
-			dataService.getMeta().deleteEntityType(entityTypeDynamic.getId());
-		});
+		runAsSystem(() -> dataService.getMeta().deleteEntityType(entityTypeDynamic.getId()));
 		PlatformIT.waitForIndexToBeStable(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA),
 				indexService, LOG);
 		waitForWorkToBeFinished(indexService, LOG);
@@ -73,10 +70,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		assertFalse(searchService.hasIndex(entityTypeDynamic));
 
 		// Reset context
-		RunAsSystemProxy.runAsSystem(() ->
-		{
-			metaDataService.addEntityType(entityTypeDynamic);
-		});
+		RunAsSystemProxy.runAsSystem(() -> metaDataService.addEntityType(entityTypeDynamic));
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
@@ -100,10 +94,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		Object toUpdateAttributeId = toUpdateAttribute.getIdValue();
 
 		// 3. Preform update
-		runAsSystem(() ->
-		{
-			metaDataService.updateEntityType(entityTypeDynamic);
-		});
+		runAsSystem(() -> metaDataService.updateEntityType(entityTypeDynamic));
 		waitForWorkToBeFinished(indexService, LOG);
 		assertTrue(searchService.hasIndex(entityTypeDynamic));
 
@@ -142,10 +133,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		emd.removeAttribute(toRemoveAttribute);
 
 		// 3. Preform update
-		runAsSystem(() ->
-		{
-			metaDataService.updateEntityType(emd);
-		});
+		runAsSystem(() -> metaDataService.updateEntityType(emd));
 		waitForWorkToBeFinished(indexService, LOG);
 		assertTrue(searchService.hasIndex(emd));
 
@@ -157,10 +145,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 
 		// Reset context
 		emd.addAttribute(toRemoveAttribute);
-		runAsSystem(() ->
-		{
-			metaDataService.updateEntityType(emd);
-		});
+		runAsSystem(() -> metaDataService.updateEntityType(emd));
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 }

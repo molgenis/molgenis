@@ -90,7 +90,7 @@ public class TagRepositoryValidationDecoratorTest
 		doNothing().when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.update(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).update(tagCaptor.capture());
 		assertEquals(tagCaptor.getValue().collect(toList()), asList(tag0, tag1));
 		verify(tagValidator).validate(tag0);
@@ -106,7 +106,7 @@ public class TagRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.update(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).update(tagCaptor.capture());
 		tagCaptor.getValue().count(); // consume stream
 	}
@@ -120,7 +120,7 @@ public class TagRepositoryValidationDecoratorTest
 		doNothing().when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.add(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).add(tagCaptor.capture());
 		assertEquals(tagCaptor.getValue().collect(toList()), asList(tag0, tag1));
 		verify(tagValidator).validate(tag0);
@@ -136,7 +136,7 @@ public class TagRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.add(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).add(tagCaptor.capture());
 		tagCaptor.getValue().count(); // consume stream
 	}

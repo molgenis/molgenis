@@ -48,11 +48,11 @@ public class Permissions
 
 	public void addUserPermission(String pluginId, Permission pluginPermission)
 	{
-		if (userPermissionMap == null) userPermissionMap = new HashMap<String, List<Permission>>();
+		if (userPermissionMap == null) userPermissionMap = new HashMap<>();
 		List<Permission> pluginPermissions = userPermissionMap.get(pluginId);
 		if (pluginPermissions == null)
 		{
-			pluginPermissions = new ArrayList<Permission>();
+			pluginPermissions = new ArrayList<>();
 			userPermissionMap.put(pluginId, pluginPermissions);
 		}
 		pluginPermissions.add(pluginPermission);
@@ -65,11 +65,11 @@ public class Permissions
 
 	public void addGroupPermission(String pluginId, Permission pluginPermission)
 	{
-		if (groupPermissionMap == null) groupPermissionMap = new HashMap<String, List<Permission>>();
+		if (groupPermissionMap == null) groupPermissionMap = new HashMap<>();
 		List<Permission> pluginPermissions = groupPermissionMap.get(pluginId);
 		if (pluginPermissions == null)
 		{
-			pluginPermissions = new ArrayList<Permission>();
+			pluginPermissions = new ArrayList<>();
 			groupPermissionMap.put(pluginId, pluginPermissions);
 		}
 		pluginPermissions.add(pluginPermission);
@@ -82,11 +82,11 @@ public class Permissions
 
 	public void addHierarchyPermission(String pluginId, Permission pluginPermission)
 	{
-		if (hierarchyPermissionMap == null) hierarchyPermissionMap = new HashMap<String, List<Permission>>();
+		if (hierarchyPermissionMap == null) hierarchyPermissionMap = new HashMap<>();
 		List<Permission> pluginPermissions = hierarchyPermissionMap.get(pluginId);
 		if (pluginPermissions == null)
 		{
-			pluginPermissions = new ArrayList<Permission>();
+			pluginPermissions = new ArrayList<>();
 			hierarchyPermissionMap.put(pluginId, pluginPermissions);
 		}
 		pluginPermissions.add(pluginPermission);
@@ -100,16 +100,12 @@ public class Permissions
 			{
 				if (pluginPermissions.size() > 1)
 				{
-					Collections.sort(pluginPermissions, new Comparator<Permission>()
+					pluginPermissions.sort((o1, o2) ->
 					{
-						@Override
-						public int compare(Permission o1, Permission o2)
-						{
-							String group1 = o1.getGroup();
-							String group2 = o2.getGroup();
-							if (group1 == null) return group2 == null ? 0 : -1;
-							else return group2 == null ? 1 : group1.compareTo(group2);
-						}
+						String group1 = o1.getGroup();
+						String group2 = o2.getGroup();
+						if (group1 == null) return group2 == null ? 0 : -1;
+						else return group2 == null ? 1 : group1.compareTo(group2);
 					});
 				}
 			}
@@ -120,16 +116,12 @@ public class Permissions
 			{
 				if (pluginPermissions.size() > 1)
 				{
-					Collections.sort(pluginPermissions, new Comparator<Permission>()
+					pluginPermissions.sort((o1, o2) ->
 					{
-						@Override
-						public int compare(Permission o1, Permission o2)
-						{
-							String group1 = o1.getGroup();
-							String group2 = o2.getGroup();
-							if (group1 == null) return group2 == null ? 0 : -1;
-							else return group2 == null ? 1 : group1.compareTo(group2);
-						}
+						String group1 = o1.getGroup();
+						String group2 = o2.getGroup();
+						if (group1 == null) return group2 == null ? 0 : -1;
+						else return group2 == null ? 1 : group1.compareTo(group2);
 					});
 				}
 			}

@@ -297,15 +297,8 @@ public class FeedbackController extends AbstractStaticContentController
 		@Override
 		public String toString()
 		{
-			StringBuilder builder = new StringBuilder();
-			builder.append("[From: ");
-			builder.append(getFrom());
-			builder.append("\nSubject: ");
-			builder.append(getSubject());
-			builder.append("\nBody: ");
-			builder.append(getFeedback());
-			builder.append(']');
-			return builder.toString();
+			String builder = "[From: " + getFrom() + "\nSubject: " + getSubject() + "\nBody: " + getFeedback() + ']';
+			return builder;
 		}
 	}
 }

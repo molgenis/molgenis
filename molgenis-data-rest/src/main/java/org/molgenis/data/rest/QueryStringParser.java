@@ -40,7 +40,7 @@ public class QueryStringParser
 
 	public Query<Entity> parseQueryString(Map<String, String[]> parameterMap) throws RSQLParserException
 	{
-		QueryImpl<Entity> q = new QueryImpl<Entity>();
+		QueryImpl<Entity> q = new QueryImpl<>();
 
 		for (Map.Entry<String, String[]> entry : parameterMap.entrySet())
 		{
