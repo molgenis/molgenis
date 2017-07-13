@@ -66,10 +66,7 @@ public class Options
 	 */
 	public void addSeries(List<Series> series)
 	{
-		for (Series serie : series)
-		{
-			this.series.add(serie);
-		}
+		this.series.addAll(series);
 	}
 
 	/**

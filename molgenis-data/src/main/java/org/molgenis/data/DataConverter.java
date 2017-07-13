@@ -225,8 +225,7 @@ public class DataConverter
 		else if (source instanceof String)
 		{
 			List<Object> result = new ArrayList<>();
-			for (String str : ((String) source).split(","))
-				result.add(str);
+			result.addAll(Arrays.asList(((String) source).split(",")));
 			return result;
 		}
 		else return Arrays.asList(new Object[] { source });

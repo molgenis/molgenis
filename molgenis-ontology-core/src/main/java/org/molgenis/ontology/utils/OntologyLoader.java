@@ -116,10 +116,7 @@ public class OntologyLoader
 				{
 					if (owlObjectProperties.contains(property.getIRI().toString()))
 					{
-						for (OWLClass associatedClass : expression.getClassesInSignature())
-						{
-							associatedTerms.add(associatedClass);
-						}
+						associatedTerms.addAll(expression.getClassesInSignature());
 					}
 				}
 			}
