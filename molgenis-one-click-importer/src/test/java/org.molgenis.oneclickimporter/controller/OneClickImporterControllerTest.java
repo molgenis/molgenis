@@ -110,7 +110,8 @@ public class OneClickImporterControllerTest
 		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isOk());
+				.andExpect(status().isOk())
+				.andExpect(content().string(tableId));
 
 		verify(oneClickImporterService).buildDataCollection("simple-valid", sheet);
 	}
@@ -133,9 +134,11 @@ public class OneClickImporterControllerTest
 		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isOk());
+				.andExpect(status().isOk())
+				.andExpect(content().string(tableId));
 
 		verify(oneClickImporterService, times(1)).buildDataCollection("simple-valid", sheet);
+
 	}
 
 	@Test
