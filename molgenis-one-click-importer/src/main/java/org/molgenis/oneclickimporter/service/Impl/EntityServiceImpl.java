@@ -6,15 +6,20 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
-import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeType.*;
 
 @Component
 public class EntityServiceImpl implements EntityService
@@ -56,10 +61,10 @@ public class EntityServiceImpl implements EntityService
 
 		// Add a auto id column
 		Attribute idAttribute = attributeFactory.create()
-				.setName(ID_ATTR_NAME)
-				.setVisible(Boolean.FALSE)
-				.setAuto(Boolean.TRUE)
-				.setIdAttribute(Boolean.TRUE);
+												.setName(ID_ATTR_NAME)
+												.setVisible(Boolean.FALSE)
+												.setAuto(Boolean.TRUE)
+												.setIdAttribute(Boolean.TRUE);
 		entityType.addAttribute(idAttribute, EntityType.AttributeRole.ROLE_ID);
 
 		// Store the dataTable
@@ -67,12 +72,13 @@ public class EntityServiceImpl implements EntityService
 		meta.addEntityType(entityType);
 
 		// Add the columns the the dataTable
-		for(Column column: dataCollection.getColumns()) {
+		for (Column column : dataCollection.getColumns())
+		{
 
 			Attribute attribute = attributeFactory.create();
 			attribute.setName(column.getName());
 
-			attribute.setDataType(AttributeType.STRING);
+			attribute.setDataType(guessAttributeType(column.getDataValues()));
 
 			entityType.addAttribute(attribute);
 
@@ -82,11 +88,14 @@ public class EntityServiceImpl implements EntityService
 		// Fill the dataTable with data
 		// All columns have a equal number of rows
 		int numberOfRows = dataCollection.getColumns().get(0).getDataValues().size();
-		for(int columnIndex = 0; columnIndex < numberOfRows; columnIndex++) {
+		for (int columnIndex = 0; columnIndex < numberOfRows; columnIndex++)
+		{
 
 			Entity row = entityManager.create(entityType, EntityManager.CreationMode.NO_POPULATE);
+			row.setIdValue(idGenerator.generateId());
 
-			for(Column column: dataCollection.getColumns()) {
+			for (Column column : dataCollection.getColumns())
+			{
 				row.set(column.getName(), column.getDataValues().get(columnIndex));
 			}
 
@@ -94,5 +103,30 @@ public class EntityServiceImpl implements EntityService
 		}
 
 		return entityType;
+	}
+
+	private AttributeType guessAttributeType(List<Object> dataValues)
+	{
+		Object value = dataValues.get(0);
+		if (value instanceof Integer)
+		{
+			return INT;
+		}
+		else if (value instanceof Double || value instanceof Float)
+		{
+			return DECIMAL;
+		}
+		else if (value instanceof Long)
+		{
+			return LONG;
+		}
+		else if (value instanceof Boolean)
+		{
+			return BOOL;
+		}
+		else
+		{
+			return STRING;
+		}
 	}
 }
