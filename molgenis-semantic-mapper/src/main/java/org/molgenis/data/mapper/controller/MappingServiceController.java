@@ -159,7 +159,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return redirect url to the same page to force a refresh
 	 */
 	@RequestMapping(value = "/removeMappingProject", method = RequestMethod.POST)
-	public String deleteMappingProject(@RequestParam(required = true) String mappingProjectId)
+	public String deleteMappingProject(@RequestParam() String mappingProjectId)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(project))
@@ -180,9 +180,9 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return
 	 */
 	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST)
-	public String removeAttributeMapping(@RequestParam(required = true) String mappingProjectId,
-			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String attribute)
+	public String removeAttributeMapping(@RequestParam() String mappingProjectId,
+			@RequestParam() String target, @RequestParam() String source,
+			@RequestParam() String attribute)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(project))
@@ -336,10 +336,10 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @return redirect URL for the attributemapping
 	 */
 	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
-	public String saveAttributeMapping(@RequestParam(required = true) String mappingProjectId,
-			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
-			@RequestParam(required = true) AlgorithmState algorithmState)
+	public String saveAttributeMapping(@RequestParam() String mappingProjectId,
+			@RequestParam() String target, @RequestParam() String source,
+			@RequestParam() String targetAttribute, @RequestParam() String algorithm,
+			@RequestParam() AlgorithmState algorithmState)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(mappingProject))
@@ -376,8 +376,8 @@ public class MappingServiceController extends MolgenisPluginController
 	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST)
 	@ResponseBody
 	public FirstAttributeMappingInfo getFirstAttributeMappingInfo(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true, value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates,
+			@RequestParam() String mappingProjectId, @RequestParam() String target,
+			@RequestParam(value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates,
 			Model model)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
@@ -648,9 +648,9 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param targetAttribute  name of the target attribute
 	 */
 	@RequestMapping("/attributeMapping")
-	public String viewAttributeMapping(@RequestParam(required = true) String mappingProjectId,
-			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute, Model model)
+	public String viewAttributeMapping(@RequestParam() String mappingProjectId,
+			@RequestParam() String target, @RequestParam() String source,
+			@RequestParam() String targetAttribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
@@ -686,9 +686,9 @@ public class MappingServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST)
-	public String attributeMappingFeedback(@RequestParam(required = true) String mappingProjectId,
-			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
+	public String attributeMappingFeedback(@RequestParam() String mappingProjectId,
+			@RequestParam() String target, @RequestParam() String source,
+			@RequestParam() String targetAttribute, @RequestParam() String algorithm,
 			Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
@@ -771,10 +771,10 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param model
 	 */
 	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.POST)
-	public String advancedMappingEditor(@RequestParam(required = true) String mappingProjectId,
-			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) String sourceAttribute, @RequestParam String algorithm, Model model)
+	public String advancedMappingEditor(@RequestParam() String mappingProjectId,
+			@RequestParam() String target, @RequestParam() String source,
+			@RequestParam() String targetAttribute,
+			@RequestParam() String sourceAttribute, @RequestParam String algorithm, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
@@ -902,9 +902,9 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST)
 	@ResponseBody
-	public void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
-			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
-			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
+	public void saveCategoryMapping(@RequestParam() String mappingProjectId,
+			@RequestParam() String target, @RequestParam() String source,
+			@RequestParam() String targetAttribute, @RequestParam() String algorithm)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(mappingProject))

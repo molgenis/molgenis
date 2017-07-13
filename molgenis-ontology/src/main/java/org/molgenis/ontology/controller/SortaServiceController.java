@@ -175,7 +175,7 @@ public class SortaServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/threshold/{sortaJobExecutionId}")
-	public String updateThreshold(@RequestParam(value = "threshold", required = true) String threshold,
+	public String updateThreshold(@RequestParam(value = "threshold") String threshold,
 			@PathVariable String sortaJobExecutionId, Model model)
 	{
 		if (!StringUtils.isEmpty(threshold))
@@ -345,9 +345,9 @@ public class SortaServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match")
-	public String match(@RequestParam(value = "taskName", required = true) String jobName,
-			@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "inputTerms", required = true) String inputTerms, Model model,
+	public String match(@RequestParam(value = "taskName") String jobName,
+			@RequestParam(value = "selectOntologies") String ontologyIri,
+			@RequestParam(value = "inputTerms") String inputTerms, Model model,
 			HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (isEmpty(ontologyIri) || isEmpty(inputTerms)) return init(model);
@@ -356,9 +356,9 @@ public class SortaServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
-	public String upload(@RequestParam(value = "taskName", required = true) String jobName,
-			@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "file", required = true) Part file, Model model,
+	public String upload(@RequestParam(value = "taskName") String jobName,
+			@RequestParam(value = "selectOntologies") String ontologyIri,
+			@RequestParam(value = "file") Part file, Model model,
 			HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (isEmpty(ontologyIri) || file == null) return init(model);

@@ -82,8 +82,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match")
-	public String match(@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "inputTerms", required = true) String inputTerms,
+	public String match(@RequestParam(value = "selectOntologies") String ontologyIri,
+			@RequestParam(value = "inputTerms") String inputTerms,
 			HttpServletRequest httpServletRequest, Model model) throws UnsupportedEncodingException, IOException
 	{
 		String fileName = httpServletRequest.getSession().getId() + "_input.txt";
@@ -95,8 +95,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload")
-	public String upload(@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "file", required = true) Part file, HttpServletRequest httpServletRequest,
+	public String upload(@RequestParam(value = "selectOntologies") String ontologyIri,
+			@RequestParam(value = "file") Part file, HttpServletRequest httpServletRequest,
 			Model model) throws UnsupportedEncodingException, IOException
 	{
 

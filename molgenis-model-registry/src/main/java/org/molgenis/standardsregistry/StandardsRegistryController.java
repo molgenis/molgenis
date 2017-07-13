@@ -189,7 +189,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/uml", method = GET)
-	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
+	public String getUml(@RequestParam(value = "package") String selectedPackageName, Model model)
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 
