@@ -171,7 +171,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 				Arrays.<MolgenisPlugin>asList(plugin1, plugin2, plugin3).iterator());
 
 		when(dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(Stream.empty());
-		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), anyObject(),
+		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
 				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)),
 				eq(EntityType.class))).thenReturn(Stream.empty());
 	}

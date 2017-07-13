@@ -101,7 +101,7 @@ public class AbstractRepositoryTest
 		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 
-		doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+		doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(ArgumentMatchers.any(Query.class));
 
 		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
@@ -118,7 +118,7 @@ public class AbstractRepositoryTest
 		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 
-		doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+		doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(ArgumentMatchers.any(Query.class));
 
 		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));

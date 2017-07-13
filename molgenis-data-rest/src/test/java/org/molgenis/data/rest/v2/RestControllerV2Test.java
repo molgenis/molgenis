@@ -497,7 +497,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		// have count return a non null value irrespective of query
 		Long countResult = 2L;
-		when(dataService.count(anyString(), anyObject())).thenReturn(countResult);
+		when(dataService.count(anyString(), any())).thenReturn(countResult);
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION).param("num", "0"))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$.items").isEmpty())

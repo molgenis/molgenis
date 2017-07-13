@@ -53,7 +53,7 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 	public void getMetadataTest() throws Exception
 	{
 		Entity answer = mock(Entity.class);
-		when(dataService.findOne(eq("fdp_Metadata"), anyObject())).thenReturn(answer);
+		when(dataService.findOne(eq("fdp_Metadata"), any())).thenReturn(answer);
 
 		this.mockMvc.perform(get("/fdp").header("X-Forwarded-Host", "website.com")
 										.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk());

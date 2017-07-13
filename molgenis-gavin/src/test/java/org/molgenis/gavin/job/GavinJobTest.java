@@ -113,13 +113,13 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 				gavinResult);
 
 		Iterator<Entity> iterator = Collections.<Entity>emptyList().iterator();
-		when(cadd.annotate(anyObject(), eq(true))).thenReturn(iterator);
-		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
-		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
-		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
+		when(cadd.annotate(any(), eq(true))).thenReturn(iterator);
+		when(exac.annotate(any(), eq(true))).thenReturn(iterator);
+		when(snpeff.annotate(any(), eq(false))).thenReturn(iterator);
+		when(gavin.annotate(any(), eq(false))).thenReturn(iterator);
 		when(gavinJobExecution.getIdentifier()).thenReturn("ABCDE");
 		when(gavinJobExecution.getInputFileExtension()).thenReturn("tsv");
-		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
+		when(effectStructureConverter.createVcfEntityStructure(any())).thenReturn(iterator);
 
 		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
 				exac, snpeff, gavin, parser, annotatorRunner, gavinJobExecution);
