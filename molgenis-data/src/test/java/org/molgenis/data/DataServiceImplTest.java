@@ -1,7 +1,5 @@
 package org.molgenis.data;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DataServiceImpl;
@@ -49,14 +47,8 @@ public class DataServiceImplTest
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn("Entity2").getMock();
 		EntityType entityType3 = when(mock(EntityType.class).getId()).thenReturn("Entity3").getMock();
 
-		when(metaDataService.getEntityTypes()).thenAnswer(new Answer<Stream<EntityType>>()
-		{
-			@Override
-			public Stream<EntityType> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(entityType1, entityType2, entityType3);
-			}
-		});
+		when(metaDataService.getEntityTypes()).thenAnswer(
+				invocation -> Stream.of(entityType1, entityType2, entityType3));
 		dataService.setMetaDataService(metaDataService);
 	}
 

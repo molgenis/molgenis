@@ -140,19 +140,16 @@ public class CategoryMapperUtil
 
 	public static Unit<?> getMostGeneralUnit(List<Unit<?>> candidateUnits)
 	{
-		Collections.sort(candidateUnits, new Comparator<Unit<?>>()
+		Collections.sort(candidateUnits, (o1, o2) ->
 		{
-			public int compare(Unit<?> o1, Unit<?> o2)
+			UnitConverter converterTo = o1.inverse().getConverterTo(o2.inverse());
+			if (converterTo.convert(1) > 1)
 			{
-				UnitConverter converterTo = o1.inverse().getConverterTo(o2.inverse());
-				if (converterTo.convert(1) > 1)
-				{
-					return -1;
-				}
-				else
-				{
-					return 1;
-				}
+				return -1;
+			}
+			else
+			{
+				return 1;
 			}
 		});
 

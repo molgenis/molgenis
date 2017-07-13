@@ -1,8 +1,6 @@
 package org.molgenis.das.impl;
 
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -124,14 +122,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 
 		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
-		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<DynamicEntity>>()
-		{
-			@Override
-			public Stream<DynamicEntity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(entity);
-			}
-		});
+		when(dataService.findAll("dataset", q)).thenAnswer(invocation -> Stream.of(entity));
 
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityType())).thenReturn(
 				"CHROM");

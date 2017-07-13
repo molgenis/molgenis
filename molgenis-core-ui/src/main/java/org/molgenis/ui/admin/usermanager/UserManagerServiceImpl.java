@@ -1,6 +1,5 @@
 package org.molgenis.ui.admin.usermanager;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -211,14 +210,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
-			groups = Lists.transform(groupMembers, new Function<GroupMember, Group>()
-			{
-				@Override
-				public Group apply(GroupMember groupMember)
-				{
-					return groupMember.getGroup();
-				}
-			});
+			groups = Lists.transform(groupMembers, groupMember -> groupMember.getGroup());
 		}
 
 		return groups;
@@ -236,14 +228,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
-			user = Lists.transform(groupMembers, new Function<GroupMember, User>()
-			{
-				@Override
-				public User apply(GroupMember groupMember)
-				{
-					return groupMember.getUser();
-				}
-			});
+			user = Lists.transform(groupMembers, groupMember -> groupMember.getUser());
 		}
 
 		return user;

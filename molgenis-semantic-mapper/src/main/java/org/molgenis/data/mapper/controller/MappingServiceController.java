@@ -817,14 +817,7 @@ public class MappingServiceController extends MolgenisPluginController
 			targetAttributeLabelAttribute = dataService.getEntityType(target).getLabelAttribute().getName();
 		}
 
-		model.addAttribute("targetAttributeEntities", new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return targetAttributeEntities.iterator();
-			}
-		});
+		model.addAttribute("targetAttributeEntities", (Iterable<Entity>) () -> targetAttributeEntities.iterator());
 		model.addAttribute("targetAttributeIdAttribute", targetAttributeIdAttribute);
 		model.addAttribute("targetAttributeLabelAttribute", targetAttributeLabelAttribute);
 

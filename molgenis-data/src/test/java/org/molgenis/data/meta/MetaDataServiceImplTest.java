@@ -2,8 +2,6 @@ package org.molgenis.data.meta;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -776,14 +774,7 @@ public class MetaDataServiceImplTest
 		when(existingEntityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
 
-		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
-		{
-			@Override
-			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(invocation -> Stream.empty());
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getLabel()).thenReturn("new label");
 		when(entityType.getId()).thenReturn(entityTypeId);
@@ -793,14 +784,7 @@ public class MetaDataServiceImplTest
 		when(entityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
 
-		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
-		{
-			@Override
-			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+		when(entityType.getOwnMappedByAttributes()).thenAnswer(invocation -> Stream.empty());
 
 		when(entityTypeDependencyResolver.resolve(singletonList(entityType))).thenReturn(singletonList(entityType));
 
@@ -864,14 +848,7 @@ public class MetaDataServiceImplTest
 		when(existingEntityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
 
-		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
-		{
-			@Override
-			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(attrShared1);
-			}
-		});
+		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(invocation -> Stream.of(attrShared1));
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
@@ -882,14 +859,7 @@ public class MetaDataServiceImplTest
 		when(entityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
 
-		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
-		{
-			@Override
-			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(attrShared1Updated);
-			}
-		});
+		when(entityType.getOwnMappedByAttributes()).thenAnswer(invocation -> Stream.of(attrShared1Updated));
 
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
@@ -964,14 +934,7 @@ public class MetaDataServiceImplTest
 		when(existingEntityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
 
-		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
-		{
-			@Override
-			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(attrShared1);
-			}
-		});
+		when(existingEntityType.getOwnMappedByAttributes()).thenAnswer(invocation -> Stream.of(attrShared1));
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
@@ -982,14 +945,7 @@ public class MetaDataServiceImplTest
 		when(entityType.getTags()).thenReturn(emptyList());
 		//noinspection AnonymousInnerClassMayBeStatic
 
-		when(entityType.getOwnMappedByAttributes()).thenAnswer(new Answer<Stream<Attribute>>()
-		{
-			@Override
-			public Stream<Attribute> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+		when(entityType.getOwnMappedByAttributes()).thenAnswer(invocation -> Stream.empty());
 
 		Query<EntityType> entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);

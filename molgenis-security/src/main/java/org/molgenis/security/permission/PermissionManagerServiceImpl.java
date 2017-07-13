@@ -1,6 +1,5 @@
 package org.molgenis.security.permission;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
@@ -147,14 +146,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		if (!groupMembers.isEmpty())
 		{
-			List<Group> groups = Lists.transform(groupMembers, new Function<GroupMember, Group>()
-			{
-				@Override
-				public Group apply(GroupMember molgenisGroupMember)
-				{
-					return molgenisGroupMember.getGroup();
-				}
-			});
+			List<Group> groups = Lists.transform(groupMembers, molgenisGroupMember -> molgenisGroupMember.getGroup());
 			List<Authority> groupAuthorities = getGroupPermissions(groups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 		}
@@ -274,14 +266,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			List<MolgenisPlugin> plugins = this.getPlugins();
 			if (plugins != null)
 			{
-				Collections.sort(plugins, new Comparator<MolgenisPlugin>()
-				{
-					@Override
-					public int compare(MolgenisPlugin o1, MolgenisPlugin o2)
-					{
-						return o1.getName().compareTo(o2.getName());
-					}
-				});
+				Collections.sort(plugins, (o1, o2) -> o1.getName().compareTo(o2.getName()));
 				Map<String, String> pluginMap = new LinkedHashMap<>();
 				for (MolgenisPlugin plugin : plugins)
 					pluginMap.put(plugin.getId(), plugin.getName());

@@ -1,6 +1,5 @@
 package org.molgenis.ontology.sorta.service.impl;
 
-import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -160,13 +159,7 @@ public class SortaServiceImpl implements SortaService
 					rulesForOntologyTermFieldsNGram, relevantEntities);
 		}
 
-		Collections.sort(relevantEntities, new Comparator<Entity>()
-		{
-			public int compare(Entity entity_1, Entity entity_2)
-			{
-				return entity_2.getDouble(COMBINED_SCORE).compareTo(entity_1.getDouble(COMBINED_SCORE));
-			}
-		});
+		Collections.sort(relevantEntities, (entity_1, entity_2) -> entity_2.getDouble(COMBINED_SCORE).compareTo(entity_1.getDouble(COMBINED_SCORE)));
 
 		return relevantEntities;
 	}
@@ -291,27 +284,17 @@ public class SortaServiceImpl implements SortaService
 			String cleanedQueryString = removeIllegalCharWithSingleWhiteSpace(queryString);
 
 			// Calculate the Ngram silmiarity score for all the synonyms and sort them in descending order
-			List<Entity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, Entity>()
+			List<Entity> synonymEntities = FluentIterable.from(entities).transform(ontologyTermSynonymEntity ->
 			{
-				public Entity apply(Entity ontologyTermSynonymEntity)
-				{
-					Entity mapEntity = ontologyTermSynonymFactory.create();
-					mapEntity.set(ontologyTermSynonymEntity);
-					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(
-							ontologyTermSynonymEntity.getString(
-									OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
-					mapEntity.set(SCORE,
-							NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
-					return mapEntity;
-				}
-
-			}).toSortedList(new Comparator<Entity>()
-			{
-				public int compare(Entity entity_1, Entity entity_2)
-				{
-					return entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE));
-				}
-			});
+				Entity mapEntity = ontologyTermSynonymFactory.create();
+				mapEntity.set(ontologyTermSynonymEntity);
+				String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(
+						ontologyTermSynonymEntity.getString(
+								OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
+				mapEntity.set(SCORE,
+						NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
+				return mapEntity;
+			}).toSortedList((entity_1, entity_2) -> entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE)));
 
 			Entity firstMatchedSynonymEntity = Iterables.getFirst(synonymEntities, ontologyTermSynonymFactory.create());
 			double topNgramScore = firstMatchedSynonymEntity.getDouble(SCORE);

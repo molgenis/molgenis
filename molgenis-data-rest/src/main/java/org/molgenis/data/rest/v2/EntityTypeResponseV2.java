@@ -1,6 +1,5 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
@@ -101,14 +100,7 @@ class EntityTypeResponseV2
 
 		Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
-				Iterables.transform(lookupAttributes, new Function<Attribute, String>()
-				{
-					@Override
-					public String apply(Attribute attribute)
-					{
-						return attribute.getName();
-					}
-				})) : null;
+				Iterables.transform(lookupAttributes, attribute -> attribute.getName())) : null;
 
 		this.isAbstract = meta.isAbstract();
 

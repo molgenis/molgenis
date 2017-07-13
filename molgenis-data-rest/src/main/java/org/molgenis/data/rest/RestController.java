@@ -1295,14 +1295,7 @@ public class RestController
 	private Set<String> toAttributeSet(String[] attributes)
 	{
 		return attributes != null && attributes.length > 0 ? Sets.newHashSet(
-				Iterables.transform(Arrays.asList(attributes), new com.google.common.base.Function<String, String>()
-				{
-					@Override
-					public String apply(String attribute)
-					{
-						return attribute.toLowerCase();
-					}
-				})) : null;
+				Iterables.transform(Arrays.asList(attributes), attribute -> attribute.toLowerCase())) : null;
 	}
 
 	/**

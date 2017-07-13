@@ -48,26 +48,12 @@ public class OntologyTermRepository
 		// #1 find exact match
 		Query<Entity> termNameQuery = new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY_TERM_NAME, term)
 													   .pageSize(pageSize);
-		ontologyTermEntities = new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(ONTOLOGY_TERM, termNameQuery).iterator();
-			}
-		};
+		ontologyTermEntities = () -> dataService.findAll(ONTOLOGY_TERM, termNameQuery).iterator();
 
 		if (!ontologyTermEntities.iterator().hasNext())
 		{
 			Query<Entity> termsQuery = new QueryImpl<>().search(term).pageSize(pageSize);
-			ontologyTermEntities = new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return dataService.findAll(ONTOLOGY_TERM, termsQuery).iterator();
-				}
-			};
+			ontologyTermEntities = () -> dataService.findAll(ONTOLOGY_TERM, termsQuery).iterator();
 		}
 		return Lists.newArrayList(Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
 	}
@@ -128,15 +114,8 @@ public class OntologyTermRepository
 				new QueryRule(rules));
 
 		final List<QueryRule> finalRules = rules;
-		Iterable<Entity> termEntities = new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(finalRules).pageSize(pageSize))
-								  .iterator();
-			}
-		};
+		Iterable<Entity> termEntities = () -> dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(finalRules).pageSize(pageSize))
+												 .iterator();
 
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
@@ -148,17 +127,9 @@ public class OntologyTermRepository
 
 		if (ontologyEntity != null)
 		{
-			Iterable<Entity> ontologyTermEntities = new Iterable<Entity>()
-			{
-
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM,
-							new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)
-											 .pageSize(Integer.MAX_VALUE)).iterator();
-				}
-			};
+			Iterable<Entity> ontologyTermEntities = () -> dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM,
+					new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)
+									 .pageSize(Integer.MAX_VALUE)).iterator();
 
 			return Lists.newArrayList(
 					Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
@@ -262,15 +233,8 @@ public class OntologyTermRepository
 	 */
 	public List<OntologyTerm> getChildren(OntologyTerm ontologyTerm)
 	{
-		Iterable<Entity> ontologyTermEntities = new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()))
-								  .iterator();
-			}
-		};
+		Iterable<Entity> ontologyTermEntities = () -> dataService.findAll(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()))
+														 .iterator();
 
 		List<OntologyTerm> children = new ArrayList<>();
 		for (Entity ontologyTermEntity : ontologyTermEntities)
@@ -287,19 +251,10 @@ public class OntologyTermRepository
 	{
 		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.NODE_PATH);
 
-		Iterable<Entity> relatedOntologyTermEntities = new Iterable<Entity>()
-		{
-
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM, new QueryImpl<>(
-						new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
-								"\"" + nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))
-								  .iterator();
-
-			}
-		};
+		Iterable<Entity> relatedOntologyTermEntities = () -> dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM, new QueryImpl<>(
+				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
+						"\"" + nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))
+																.iterator();
 		Iterable<Entity> childOntologyTermEntities = FluentIterable.from(relatedOntologyTermEntities)
 																   .filter(entity -> qualifiedNodePath(nodePath,
 																		   entity))

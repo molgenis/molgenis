@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -119,14 +118,7 @@ public class EntityTypeResponse
 		{
 			Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
-					Iterables.transform(lookupAttributes, new Function<Attribute, String>()
-					{
-						@Override
-						public String apply(Attribute attribute)
-						{
-							return attribute.getName();
-						}
-					})) : null;
+					Iterables.transform(lookupAttributes, attribute -> attribute.getName())) : null;
 		}
 		else this.lookupAttributes = null;
 

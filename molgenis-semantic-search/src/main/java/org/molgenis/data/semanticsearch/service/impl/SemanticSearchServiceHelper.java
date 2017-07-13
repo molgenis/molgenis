@@ -303,13 +303,7 @@ public class SemanticSearchServiceHelper
 
 	private Double getBestInverseDocumentFrequency(List<String> terms)
 	{
-		Optional<String> findFirst = terms.stream().sorted(new Comparator<String>()
-		{
-			public int compare(String o1, String o2)
-			{
-				return Integer.compare(o1.length(), o2.length());
-			}
-		}).findFirst();
+		Optional<String> findFirst = terms.stream().sorted((o1, o2) -> Integer.compare(o1.length(), o2.length())).findFirst();
 
 		return findFirst.isPresent() ? termFrequencyService.getTermFrequency(findFirst.get()) : null;
 	}

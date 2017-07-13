@@ -1,7 +1,5 @@
 package org.molgenis.ui.admin.usermanager;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -239,24 +237,10 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
 
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
-				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
-		{
-			@Override
-			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(groupMember);
-			}
-		});
+				GroupMember.class)).thenAnswer(invocation -> Stream.of(groupMember));
 
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group22),
-				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
-		{
-			@Override
-			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(groupMember);
-			}
-		});
+				GroupMember.class)).thenAnswer(invocation -> Stream.of(groupMember));
 
 		List<UserViewData> users = this.userManagerService.getUsersMemberInGroup("22");
 		assertEquals(users.size(), 1);

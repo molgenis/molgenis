@@ -327,15 +327,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			q.sort(sort);
 		}
 
-		return new Iterable<Entity>()
-		{
-
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return repo.findAll(q).iterator();
-			}
-		};
+		return () -> repo.findAll(q).iterator();
 	}
 
 	/**
@@ -389,14 +381,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			}
 
 			final Iterable<Entity> AllEntitiesIterable = iterable;
-			iterable = new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return ((Repository<Entity>) AllEntitiesIterable).findAll(q).iterator();
-				}
-			};
+			iterable = () -> ((Repository<Entity>) AllEntitiesIterable).findAll(q).iterator();
 		}
 
 		List<Target> rowTargets = new ArrayList<>();

@@ -1,6 +1,5 @@
 package org.molgenis.ui.menumanager;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeTraverser;
@@ -21,7 +20,6 @@ import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.molgenis.ui.menumanager.MenuManagerController.URI;
@@ -72,28 +70,16 @@ public class MenuManagerController extends MolgenisPluginController
 				if (root.getType() == MolgenisUiMenuItemType.MENU)
 				{
 					MolgenisUiMenu menu = (MolgenisUiMenu) root;
-					return Iterables.filter(menu.getItems(), new Predicate<MolgenisUiMenuItem>()
-					{
-						@Override
-						public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
-						{
-							return molgenisUiMenuItem.getType() == MolgenisUiMenuItemType.MENU;
-						}
-					});
+					return Iterables.filter(menu.getItems(),
+							molgenisUiMenuItem -> molgenisUiMenuItem.getType() == MolgenisUiMenuItemType.MENU);
 				}
 				else return Collections.emptyList();
 			}
 		}.preOrderTraversal(molgenisUi.getMenu()).toList();
 
 		List<MolgenisPlugin> plugins = Lists.newArrayList(menuManagerService.getPlugins());
-		Collections.sort(plugins, new Comparator<MolgenisPlugin>()
-		{
-			@Override
-			public int compare(MolgenisPlugin molgenisPlugin1, MolgenisPlugin molgenisPlugin2)
-			{
-				return molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId());
-			}
-		});
+		Collections.sort(plugins,
+				(molgenisPlugin1, molgenisPlugin2) -> molgenisPlugin1.getId().compareTo(molgenisPlugin2.getId()));
 
 		model.addAttribute("menus", menus);
 		model.addAttribute("plugins", plugins);

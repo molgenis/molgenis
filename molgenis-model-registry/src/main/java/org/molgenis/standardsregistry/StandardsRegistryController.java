@@ -1,6 +1,5 @@
 package org.molgenis.standardsregistry;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -129,25 +128,21 @@ public class StandardsRegistryController extends MolgenisPluginController
 			Package p = searchResult.getPackageFound();
 			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
 			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists.newArrayList(
-					Iterables.filter(entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
+					Iterables.filter(entitiesInPackageUnfiltered, entity ->
 					{
-						@Override
-						public boolean apply(PackageResponse.Entity entity)
-						{
-							if (entity.isAbtract()) return false;
+						if (entity.isAbtract()) return false;
 
-							String entityTypeId = entity.getName();
+						String entityTypeId = entity.getName();
 
-							// Check read permission
-							if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
-								return false;
+						// Check read permission
+						if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
+							return false;
 
-							// Check has data
-							if (!dataService.hasRepository(entityTypeId)
-									|| dataService.count(entityTypeId, new QueryImpl<>()) == 0) return false;
+						// Check has data
+						if (!dataService.hasRepository(entityTypeId)
+								|| dataService.count(entityTypeId, new QueryImpl<>()) == 0) return false;
 
-							return true;
-						}
+						return true;
 					}));
 
 			PackageResponse pr = new PackageResponse(p.getId(), p.getLabel(), p.getDescription(),

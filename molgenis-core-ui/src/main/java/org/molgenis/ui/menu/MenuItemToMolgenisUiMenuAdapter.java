@@ -27,15 +27,11 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	{
 		List<MenuItem> items = menu.getItems();
 		return items != null ? Lists.newArrayList(
-				Iterables.transform(items, new Function<MenuItem, MolgenisUiMenuItem>()
+				Iterables.transform(items, (Function<MenuItem, MolgenisUiMenuItem>) menuItem ->
 				{
-					@Override
-					public MolgenisUiMenuItem apply(MenuItem menuItem)
-					{
-						if (menuItem.getType() == MenuItemType.PLUGIN)
-							return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
-						else return new MenuItemToMolgenisUiMenuAdapter(menuItem, rootMenu);
-					}
+					if (menuItem.getType() == MenuItemType.PLUGIN)
+						return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
+					else return new MenuItemToMolgenisUiMenuAdapter(menuItem, rootMenu);
 				})) : Collections.<MolgenisUiMenuItem>emptyList();
 	}
 

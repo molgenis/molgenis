@@ -1,8 +1,6 @@
 package org.molgenis.data.vcf.importer;
 
 import org.mockito.*;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
@@ -119,15 +117,11 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(dataService.hasRepository(entityTypeId0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
 		when(metaDataService.createRepository(argThat(eqName(entityType0)))).thenReturn(outRepo0);
-		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
+		when(outRepo0.add(any(Stream.class))).thenAnswer(invocation ->
 		{
-			@Override
-			public Integer answer(InvocationOnMock invocation) throws Throwable
-			{
-				Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
-				List<Entity> entityList = entities.collect(Collectors.toList());
-				return entityList.size();
-			}
+			Stream<Entity> entities1 = (Stream<Entity>) invocation.getArguments()[0];
+			List<Entity> entityList = entities1.collect(Collectors.toList());
+			return entityList.size();
 		});
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
@@ -220,15 +214,11 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(dataService.hasRepository(entityTypeId0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
 		when(metaDataService.createRepository(argThat(eqName(entityType0)))).thenReturn(outRepo0);
-		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
+		when(outRepo0.add(any(Stream.class))).thenAnswer(invocation ->
 		{
-			@Override
-			public Integer answer(InvocationOnMock invocation) throws Throwable
-			{
-				Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
-				List<Entity> entityList = entities.collect(Collectors.toList());
-				return entityList.size();
-			}
+			Stream<Entity> entities1 = (Stream<Entity>) invocation.getArguments()[0];
+			List<Entity> entityList = entities1.collect(Collectors.toList());
+			return entityList.size();
 		});
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);

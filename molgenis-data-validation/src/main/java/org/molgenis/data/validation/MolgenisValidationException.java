@@ -1,6 +1,5 @@
 package org.molgenis.data.validation;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.MolgenisDataException;
@@ -34,15 +33,7 @@ public class MolgenisValidationException extends MolgenisDataException
 	{
 		if ((violations == null) || (violations.isEmpty())) return "Unknown validation exception.";
 
-		return StringUtils.join(Collections2.transform(violations, new Function<ConstraintViolation, String>()
-		{
-			@Override
-			public String apply(ConstraintViolation violation)
-			{
-				return violation.getMessage();
-			}
-
-		}), '.');
+		return StringUtils.join(Collections2.transform(violations, violation -> violation.getMessage()), '.');
 	}
 
 	/**

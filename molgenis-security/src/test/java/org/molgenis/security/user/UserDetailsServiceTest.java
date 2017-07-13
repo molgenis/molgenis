@@ -2,8 +2,6 @@ package org.molgenis.security.user;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -16,7 +14,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.collections.Sets;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -45,55 +42,19 @@ public class UserDetailsServiceTest
 		when(dataService.findOne(USER, qAdmin, User.class)).thenReturn(adminUser);
 		Query<User> qUser = new QueryImpl<User>().eq(UserMetaData.USERNAME, "user");
 		when(dataService.findOne(USER, qUser, User.class)).thenReturn(userUser);
-		GrantedAuthoritiesMapper authoritiesMapper = new GrantedAuthoritiesMapper()
-		{
-			@Override
-			public Collection<? extends GrantedAuthority> mapAuthorities(
-					Collection<? extends GrantedAuthority> authorities)
-			{
-				return authorities;
-			}
-		};
+		GrantedAuthoritiesMapper authoritiesMapper = authorities -> authorities;
 		when(dataService.findAll(USER_AUTHORITY,
 				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, userUser),
-				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
-		{
-			@Override
-			public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+				UserAuthority.class)).thenAnswer(invocation -> Stream.empty());
 		when(dataService.findAll(USER_AUTHORITY,
 				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, adminUser),
-				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
-		{
-			@Override
-			public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.empty();
-			}
-		});
+				UserAuthority.class)).thenAnswer(invocation -> Stream.empty());
 		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
 				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, userUser), GroupMember.class)).thenAnswer(
-				new Answer<Stream<GroupMember>>()
-				{
-					@Override
-					public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
-					{
-						return Stream.empty();
-					}
-				});
+				invocation -> Stream.empty());
 		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
 				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, adminUser), GroupMember.class)).thenAnswer(
-				new Answer<Stream<GroupMember>>()
-				{
-					@Override
-					public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
-					{
-						return Stream.empty();
-					}
-				});
+				invocation -> Stream.empty());
 		userDetailsService = new UserDetailsService(dataService, authoritiesMapper);
 	}
 
@@ -108,14 +69,8 @@ public class UserDetailsServiceTest
 	{
 		UserDetails user = userDetailsService.loadUserByUsername("admin");
 		Set<String> authorities = Sets.newHashSet(
-				Collections2.transform(user.getAuthorities(), new Function<GrantedAuthority, String>()
-				{
-					@Override
-					public String apply(GrantedAuthority authority)
-					{
-						return authority.getAuthority();
-					}
-				}));
+				Collections2.transform(user.getAuthorities(),
+						(Function<GrantedAuthority, String>) authority -> authority.getAuthority()));
 		assertTrue(authorities.contains(SecurityUtils.AUTHORITY_SU));
 		assertEquals(authorities.size(), 1);
 	}
@@ -125,14 +80,8 @@ public class UserDetailsServiceTest
 	{
 		UserDetails user = userDetailsService.loadUserByUsername("user");
 		Set<String> authorities = Sets.newHashSet(
-				Collections2.transform(user.getAuthorities(), new Function<GrantedAuthority, String>()
-				{
-					@Override
-					public String apply(GrantedAuthority authority)
-					{
-						return authority.getAuthority();
-					}
-				}));
+				Collections2.transform(user.getAuthorities(),
+						(Function<GrantedAuthority, String>) authority -> authority.getAuthority()));
 		assertEquals(authorities.size(), 0);
 	}
 }
