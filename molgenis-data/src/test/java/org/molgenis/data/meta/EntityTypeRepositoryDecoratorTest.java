@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -203,13 +204,15 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(entityType1.getMappedByAttributes()).thenReturn(Stream.of(mappedByAttribute));
 		when(entityType2.getMappedByAttributes()).thenReturn(Stream.empty());
 		when(entityTypeDependencyResolver.resolve(any())).thenReturn(asList(entityType1, entityType2));
+		InOrder repositoryCollectionInOrder = inOrder(repositoryCollection);
+		InOrder decoratedRepoInOrder = inOrder(decoratedRepo);
 
 		repo.delete(Stream.of(entityType1, entityType2));
 
 		verify(dataService).delete(ATTRIBUTE_META_DATA, mappedByAttribute);
-		verify(repositoryCollection).deleteRepository(entityType2);
-		verify(repositoryCollection).deleteRepository(entityType1);
-		verify(decoratedRepo).delete(entityType1);
-		verify(decoratedRepo).delete(entityType2);
+		repositoryCollectionInOrder.verify(repositoryCollection).deleteRepository(entityType2);
+		repositoryCollectionInOrder.verify(repositoryCollection).deleteRepository(entityType1);
+		decoratedRepoInOrder.verify(decoratedRepo).delete(entityType2);
+		decoratedRepoInOrder.verify(decoratedRepo).delete(entityType1);
 	}
 }
