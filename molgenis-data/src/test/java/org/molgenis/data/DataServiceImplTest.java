@@ -54,7 +54,7 @@ public class DataServiceImplTest
 			@Override
 			public Stream<EntityType> answer(InvocationOnMock invocation) throws Throwable
 			{
-				return asList(entityType1, entityType2, entityType3).stream();
+				return Stream.of(entityType1, entityType2, entityType3);
 			}
 		});
 		dataService.setMetaDataService(metaDataService);

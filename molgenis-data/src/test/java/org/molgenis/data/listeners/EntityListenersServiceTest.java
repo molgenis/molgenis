@@ -7,9 +7,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntityListenersServiceTest
 {
@@ -59,7 +59,7 @@ public class EntityListenersServiceTest
 		Mockito.when(entity2.getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
 		entityListenersService.addEntityListener(repoFullName, entityListener1);
 		entityListenersService.addEntityListener(repoFullName, entityListener2);
-		entityListenersService.updateEntities(repoFullName, Arrays.asList(entity1, entity2).stream())
+		entityListenersService.updateEntities(repoFullName, Stream.of(entity1, entity2))
 							  .collect(Collectors.toList());
 		Mockito.verify(entityListener1).postUpdate(entity1);
 		Mockito.verify(entityListener2).postUpdate(entity2);
@@ -159,7 +159,7 @@ public class EntityListenersServiceTest
 		ts.add(new NewThread("EntityRepo2", 0, 10).getThread());
 		ts.add(new NewThread("EntityRepo2", 0, 10).getThread());
 
-		ts.stream().forEach(t ->
+		ts.forEach(t ->
 		{
 			try
 			{
@@ -171,7 +171,7 @@ public class EntityListenersServiceTest
 			}
 		});
 
-		ts.stream().forEach(t -> Assert.assertFalse(t.isAlive()));
+		ts.forEach(t -> Assert.assertFalse(t.isAlive()));
 
 		Assert.assertTrue(entityListenersService.isEmpty("EntityRepo1"));
 		Assert.assertTrue(entityListenersService.isEmpty("EntityRepo2"));
