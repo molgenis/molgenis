@@ -189,10 +189,9 @@ public class VcfImporterService implements ImportService
 					Iterable<Entity> samples = entity.getEntities(VcfAttributes.SAMPLES);
 					if (samples != null)
 					{
-						Iterator<Entity> sampleIterator = samples.iterator();
-						while (sampleIterator.hasNext())
+						for (Entity sample : samples)
 						{
-							sampleEntities.add(sampleIterator.next());
+							sampleEntities.add(sample);
 
 							if (sampleEntities.size() == BATCH_SIZE)
 							{

@@ -170,12 +170,9 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 
 		OWLClass pseudoRootClass = loader.createClass(PSEUDO_ROOT_CLASS_LABEL, loader.getRootClasses());
 
-		Iterator<OWLClassContainer> iterator = traverser.preOrderTraversal(
-				new OWLClassContainer(pseudoRootClass, PSEUDO_ROOT_CLASS_NODEPATH, true)).iterator();
-
-		while (iterator.hasNext())
+		for (OWLClassContainer container : traverser.preOrderTraversal(
+				new OWLClassContainer(pseudoRootClass, PSEUDO_ROOT_CLASS_NODEPATH, true)))
 		{
-			OWLClassContainer container = iterator.next();
 			OWLClass ontologyTerm = container.getOwlClass();
 			String ontologyTermNodePath = container.getNodePath();
 			String ontologyTermIRI = ontologyTerm.getIRI().toString();
@@ -337,10 +334,9 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
-		Iterator<String> it = getEntityTypeIds().iterator();
-		while (it.hasNext())
+		for (String s : getEntityTypeIds())
 		{
-			if (it.next().equals(name)) return true;
+			if (s.equals(name)) return true;
 		}
 		return false;
 	}
