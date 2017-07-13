@@ -33,6 +33,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.model.*;
@@ -57,6 +58,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static org.elasticsearch.action.DocWriteRequest.OpType.INDEX;
+import static org.molgenis.data.elasticsearch.ElasticsearchService.MAX_BATCH_SIZE;
 
 /**
  * Elasticsearch client facade:
@@ -348,6 +350,13 @@ public class ClientFacade implements Closeable
 
 	private SearchHits search(QueryBuilder query, int from, int size, Sort sort, List<Index> indexes)
 	{
+		if (size > 10000)
+		{
+			throw new MolgenisQueryException(
+					String.format("Batch size of %s exceeds the maximum batch size of %s for search queries", size,
+							MAX_BATCH_SIZE));
+		}
+
 		if (LOG.isTraceEnabled())
 		{
 			if (sort != null)
@@ -583,7 +592,8 @@ public class ClientFacade implements Closeable
 		{
 			LOG.error(Arrays.stream(indexResponse.getShardInfo().getFailures())
 							//FIXME: logs Object.toString()
-							.map(ReplicationResponse.ShardInfo.Failure::toString).collect(joining("\n")));
+							.map(ReplicationResponse.ShardInfo.Failure::toString)
+							.collect(joining("\n")));
 			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 

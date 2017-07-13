@@ -83,7 +83,7 @@ public class SystemEntityTypeInitializer
 	{
 		if (systemEntityType.getPackage() == null)
 		{
-			if (metaDataService.isMetaEntityType(systemEntityType))
+			if (MetaDataService.isMetaEntityType(systemEntityType))
 			{
 				systemEntityType.setPackage(metaPackage);
 			}

@@ -19,18 +19,14 @@
           </div>
         </div>
 
-        <div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
-          <div class="btn-group mr-2" role="group">
+        <div class="form-group-row float-right">
             <save-button :onClick="saveEntityType" :disabled="!isEntityTypeEdited">
               {{ 'save-changes-button' | i18n }}
             </save-button>
-          </div>
-          <div class="btn-group" role="group">
-            <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger btn-sm left"
-                    :disabled="editorEntityType.isNew">
-              {{ 'delete-entity-button' | i18n }}
-            </button>
-          </div>
+          <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger"
+                  :disabled="editorEntityType.isNew">
+            {{ 'delete-entity-button' | i18n }}
+          </button>
         </div>
       </div>
 
