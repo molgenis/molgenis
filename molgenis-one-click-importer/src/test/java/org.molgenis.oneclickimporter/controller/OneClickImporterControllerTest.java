@@ -4,7 +4,10 @@ import com.google.common.io.Resources;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.mockito.Mock;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.oneclickimporter.model.DataCollection;
+import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.molgenis.ui.menu.Menu;
@@ -53,13 +56,16 @@ public class OneClickImporterControllerTest
 	@Mock
 	private OneClickImporterService oneClickImporterService;
 
+	@Mock
+	private EntityService entityService;
+
 	@BeforeMethod
 	public void before()
 	{
 		initMocks(this);
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings, excelService, oneClickImporterService);
+				languageService, appSettings, excelService, oneClickImporterService, entityService);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");
@@ -89,7 +95,13 @@ public class OneClickImporterControllerTest
 		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xlsx", CONTENT_TYPE_EXCEL);
 
 		Sheet sheet = mock(Sheet.class);
+		DataCollection dataCollection = mock(DataCollection.class);
+		EntityType table = mock(EntityType.class);
+		String tableId = "genrated_table_id";
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
+		when(oneClickImporterService.buildDataCollection(sheet)).thenReturn(dataCollection);
+		when(entityService.createEntity(dataCollection)).thenReturn(table);
+		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 			   .andExpect(status().isOk());
@@ -102,7 +114,13 @@ public class OneClickImporterControllerTest
 				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 		Sheet sheet = mock(Sheet.class);
+		DataCollection dataCollection = mock(DataCollection.class);
+		EntityType table = mock(EntityType.class);
+		String tableId = "genrated_table_id";
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
+		when(oneClickImporterService.buildDataCollection(sheet)).thenReturn(dataCollection);
+		when(entityService.createEntity(dataCollection)).thenReturn(table);
+		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 			   .andExpect(status().isOk());

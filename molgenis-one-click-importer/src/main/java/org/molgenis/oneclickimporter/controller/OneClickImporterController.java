@@ -3,9 +3,11 @@ package org.molgenis.oneclickimporter.controller;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
+import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -37,9 +39,11 @@ public class OneClickImporterController extends MolgenisPluginController
 	private AppSettings appSettings;
 	private OneClickImporterService oneClickImporterService;
 	private ExcelService excelService;
+	private EntityService entityService;
 
 	public OneClickImporterController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings, ExcelService excelService, OneClickImporterService oneClickImporterService)
+			AppSettings appSettings, ExcelService excelService, OneClickImporterService oneClickImporterService,
+			EntityService entityService)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
@@ -47,6 +51,7 @@ public class OneClickImporterController extends MolgenisPluginController
 		this.appSettings = requireNonNull(appSettings);
 		this.excelService = requireNonNull(excelService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
+		this.entityService = requireNonNull(entityService);
 	}
 
 	@RequestMapping(method = GET)
@@ -59,7 +64,7 @@ public class OneClickImporterController extends MolgenisPluginController
 	}
 
 	@PostMapping("/upload")
-	public void importFile(@RequestParam("file") MultipartFile multipartFile)
+	public String importFile(@RequestParam("file") MultipartFile multipartFile)
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
 		File file = new File(multipartFile.getOriginalFilename());
@@ -72,6 +77,8 @@ public class OneClickImporterController extends MolgenisPluginController
 		{
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
 			DataCollection dataCollection = oneClickImporterService.buildDataCollection(sheet);
+			EntityType dataTable = entityService.createEntity(dataCollection);
+			return dataTable.getId();
 		}
 		else
 		{
