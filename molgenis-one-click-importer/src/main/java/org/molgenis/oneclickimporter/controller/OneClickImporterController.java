@@ -67,11 +67,12 @@ public class OneClickImporterController extends MolgenisPluginController
 
 		String fileName = file.getName();
 		String fileTypePart = fileName.substring(fileName.lastIndexOf('.') + 1);
+		String dataCollectionName = fileName.substring(0, fileName.lastIndexOf('.'));
 
 		if (fileTypePart.equals("xls") || fileTypePart.equals("xlsx"))
 		{
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
-			DataCollection dataCollection = oneClickImporterService.buildDataCollection(sheet);
+			DataCollection dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
 		}
 		else
 		{

@@ -9,9 +9,6 @@ import org.molgenis.oneclickimporter.service.ExcelService;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Created by connorstroomberg on 12/07/2017.
- */
 public class ExcelServiceImpl implements ExcelService
 {
 	@Override

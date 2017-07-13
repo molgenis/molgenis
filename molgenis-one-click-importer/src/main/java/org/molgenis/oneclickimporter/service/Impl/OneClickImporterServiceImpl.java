@@ -1,7 +1,6 @@
 package org.molgenis.oneclickimporter.service.Impl;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.oneclickimporter.model.Column;
@@ -18,13 +17,13 @@ import static com.google.common.collect.Lists.newLinkedList;
 public class OneClickImporterServiceImpl implements OneClickImporterService
 {
 	@Override
-	public DataCollection buildDataCollection(Sheet sheet)
+	public DataCollection buildDataCollection(String dataCollectionName, Sheet sheet)
 	{
 		Row headerRow = sheet.getRow(0);
 		List<Column> columns = newArrayList();
 		headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
 
-		return DataCollection.create(sheet.getSheetName(), columns);
+		return DataCollection.create(dataCollectionName, columns);
 	}
 
 	private Column createColumnFromCell(Sheet sheet, Cell cell)
@@ -45,8 +44,8 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	{
 		Object value;
 
-		// Empty cells are often null instead of BLANK
-		if (cell == null || cell.getCellTypeEnum() == CellType.BLANK)
+		// Empty cells are null, instead of BLANK
+		if (cell == null)
 		{
 			return null;
 		}
@@ -65,7 +64,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			case FORMULA:
 				value = getTypedFormulaValue(cell);
 				break;
-			default: // TODO How to handle default
+			default:
 				value = null;
 				break;
 		}
