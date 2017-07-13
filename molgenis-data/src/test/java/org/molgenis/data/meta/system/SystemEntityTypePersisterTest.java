@@ -124,7 +124,7 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 		when(dataService.findAll(PACKAGE, Package.class)).thenAnswer(invocation -> Stream.of(package0));
 		systemEntityTypePersister.persist();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(metaDataService).upsertPackages(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), newArrayList(package0, package1));
 	}
@@ -155,7 +155,7 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 		when(dataService.findAll(PACKAGE, Package.class)).thenAnswer(invocation -> Stream.of(package0, package1));
 		systemEntityTypePersister.persist();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(metaDataService).upsertPackages(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), newArrayList(package0, package1));
 	}

@@ -131,7 +131,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 					"Google ID token is missing required [email] claim, did you forget to specify scope [email]?");
 		}
 		Boolean emailVerified = payload.getEmailVerified();
-		if (emailVerified != null && emailVerified.booleanValue() == false)
+		if (emailVerified != null && emailVerified == false)
 		{
 			throw new AuthenticationServiceException("Google account email is not verified");
 		}

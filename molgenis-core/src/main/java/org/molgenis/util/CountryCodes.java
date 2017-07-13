@@ -12,7 +12,7 @@ public class CountryCodes
 
 	static
 	{
-		COUNTRIES = new LinkedHashMap<String, String>();
+		COUNTRIES = new LinkedHashMap<>();
 		COUNTRIES.put("AF", "Afghanistan");
 		COUNTRIES.put("AL", "Albania");
 		COUNTRIES.put("DZ", "Algeria");

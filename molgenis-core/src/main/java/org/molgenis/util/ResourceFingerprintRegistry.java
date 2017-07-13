@@ -14,7 +14,7 @@ public class ResourceFingerprintRegistry
 
 	public ResourceFingerprintRegistry()
 	{
-		resourceFingerprints = new ConcurrentHashMap<String, String>();
+		resourceFingerprints = new ConcurrentHashMap<>();
 	}
 
 	public String getFingerprint(String resourceName) throws IOException

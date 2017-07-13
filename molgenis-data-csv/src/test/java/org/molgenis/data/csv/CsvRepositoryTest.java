@@ -77,8 +77,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		when(processor.process("col1")).thenReturn("col1");
 		when(processor.process("col2")).thenReturn("col2");
 
-		CsvRepository csvRepository = new CsvRepository(test, entityTypeFactory, attrMetaFactory, null);
-		try
+		try (CsvRepository csvRepository = new CsvRepository(test, entityTypeFactory, attrMetaFactory, null))
 		{
 			csvRepository.addCellProcessor(processor);
 			for (@SuppressWarnings("unused") Entity entity : csvRepository)
@@ -87,18 +86,13 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			verify(processor).process("col1");
 			verify(processor).process("col2");
 		}
-		finally
-		{
-			csvRepository.close();
-		}
 	}
 
 	@Test
 	public void addCellProcessor_data() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
-		CsvRepository csvRepository = new CsvRepository(test, entityTypeFactory, attrMetaFactory, null);
-		try
+		try (CsvRepository csvRepository = new CsvRepository(test, entityTypeFactory, attrMetaFactory, null))
 		{
 			csvRepository.addCellProcessor(processor);
 			for (@SuppressWarnings("unused") Entity entity : csvRepository)
@@ -106,10 +100,6 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			}
 			verify(processor).process("val1");
 			verify(processor).process("val2");
-		}
-		finally
-		{
-			csvRepository.close();
 		}
 	}
 
@@ -185,39 +175,28 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator_noValues() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(novalues, entityTypeFactory, attrMetaFactory, null);
-		try
+		try (CsvRepository csvRepository = new CsvRepository(novalues, entityTypeFactory, attrMetaFactory, null))
 		{
 			Iterator<Entity> it = csvRepository.iterator();
 			assertFalse(it.hasNext());
-		}
-		finally
-		{
-			csvRepository.close();
 		}
 	}
 
 	@Test
 	public void iterator_emptyValues() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptyvalues, entityTypeFactory, attrMetaFactory, null);
-		try
+		try (CsvRepository csvRepository = new CsvRepository(emptyvalues, entityTypeFactory, attrMetaFactory, null))
 		{
 			Iterator<Entity> it = csvRepository.iterator();
 			assertTrue(it.hasNext());
 			assertNull(it.next().get("col1"));
-		}
-		finally
-		{
-			csvRepository.close();
 		}
 	}
 
 	@Test
 	public void iterator_tsv() throws IOException
 	{
-		CsvRepository tsvRepository = new CsvRepository(testtsv, entityTypeFactory, attrMetaFactory, null);
-		try
+		try (CsvRepository tsvRepository = new CsvRepository(testtsv, entityTypeFactory, attrMetaFactory, null))
 		{
 			Iterator<Entity> it = tsvRepository.iterator();
 			Entity entity = it.next();
@@ -225,17 +204,12 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			assertEquals(entity.get("col2"), "val2");
 			assertFalse(it.hasNext());
 		}
-		finally
-		{
-			tsvRepository.close();
-		}
 	}
 
 	@Test
 	public void iterator_emptylines() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptylines, entityTypeFactory, attrMetaFactory, null);
-		try
+		try (CsvRepository csvRepository = new CsvRepository(emptylines, entityTypeFactory, attrMetaFactory, null))
 		{
 			Iterator<Entity> it = csvRepository.iterator();
 			Entity entity = it.next();
@@ -243,17 +217,13 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			assertEquals(entity.get("col2"), "val2");
 			assertFalse(it.hasNext());
 		}
-		finally
-		{
-			csvRepository.close();
-		}
 	}
 
 	@Test
 	public void iterator_emptylines_singlecol() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptylinessinglecol, entityTypeFactory, attrMetaFactory, null);
-		try
+		try (CsvRepository csvRepository = new CsvRepository(emptylinessinglecol, entityTypeFactory, attrMetaFactory,
+				null))
 		{
 			Iterator<Entity> it = csvRepository.iterator();
 			Entity entity = it.next();
@@ -264,10 +234,6 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			assertNull(entity.get("col1"));
 
 			assertFalse(it.hasNext());
-		}
-		finally
-		{
-			csvRepository.close();
 		}
 	}
 }

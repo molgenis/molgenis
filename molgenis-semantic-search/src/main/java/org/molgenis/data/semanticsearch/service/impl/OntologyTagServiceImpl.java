@@ -79,7 +79,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		Attribute attribute = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityType.getId(), attribute.getName());
-		List<Entity> tags = new ArrayList<Entity>();
+		List<Entity> tags = new ArrayList<>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
 			SemanticTag<Attribute, OntologyTerm, Ontology> tag = asTag(attribute, tagEntity);
@@ -134,7 +134,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public void addAttributeTag(EntityType entityType, SemanticTag<Attribute, OntologyTerm, Ontology> tag)
 	{
 		Entity entity = findAttributeEntity(entityType.getId(), tag.getSubject().getName());
-		List<Entity> tags = new ArrayList<Entity>();
+		List<Entity> tags = new ArrayList<>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
 			tags.add(tagEntity);
@@ -271,7 +271,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			return findAttributeEntity(entityTypeEntity.getExtends().getId(), attributeName);
 		}
 
-		return result.isPresent() ? result.get() : null;
+		return result.orElse(null);
 	}
 
 	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,
@@ -285,8 +285,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		{
 			return null;
 		}
-		return new SemanticTag<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
-				ontology);
+		return new SemanticTag<>(identifier, subjectType, relation, ontologyTerm, ontology);
 	}
 
 	private static Relation asRelation(Entity tagEntity)

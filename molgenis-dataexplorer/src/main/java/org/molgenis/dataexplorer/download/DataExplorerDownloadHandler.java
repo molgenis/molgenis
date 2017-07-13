@@ -39,15 +39,14 @@ public class DataExplorerDownloadHandler
 
 	public void writeToExcel(DataRequest dataRequest, OutputStream outputStream) throws IOException
 	{
-		ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX);
 		String entityTypeId = dataRequest.getEntityName();
 
 		QueryImpl<Entity> query = dataRequest.getQuery();
 		ExcelSheetWriter excelSheetWriter = null;
-		try
+		try (ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX))
 		{
 			EntityType entityType = dataService.getEntityType(entityTypeId);
-			final Set<String> attributeNames = new LinkedHashSet<String>(dataRequest.getAttributeNames());
+			final Set<String> attributeNames = new LinkedHashSet<>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 
@@ -77,10 +76,6 @@ public class DataExplorerDownloadHandler
 			excelSheetWriter.add(dataService.findAll(entityTypeId, query));
 			excelSheetWriter.close();
 		}
-		finally
-		{
-			excelWriter.close();
-		}
 	}
 
 	public void writeToCsv(DataRequest request, OutputStream outputStream, char separator) throws IOException
@@ -108,7 +103,7 @@ public class DataExplorerDownloadHandler
 		try
 		{
 			EntityType entityType = dataService.getEntityType(entityTypeId);
-			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
+			final Set<String> attributeNames = new HashSet<>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 

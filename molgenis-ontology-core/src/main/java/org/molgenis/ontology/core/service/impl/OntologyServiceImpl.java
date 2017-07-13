@@ -36,7 +36,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public List<String> getAllOntologiesIds()
 	{
-		final List<String> allOntologiesIds = new ArrayList<String>();
+		final List<String> allOntologiesIds = new ArrayList<>();
 		ontologyRepository.getOntologies().forEach(e -> allOntologiesIds.add(e.getId()));
 		return allOntologiesIds;
 	}

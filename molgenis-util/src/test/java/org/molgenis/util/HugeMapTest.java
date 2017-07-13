@@ -20,7 +20,7 @@ public class HugeMapTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		hugeMap = new HugeMap<String, String>();
+		hugeMap = new HugeMap<>();
 	}
 
 	@AfterMethod
@@ -147,7 +147,7 @@ public class HugeMapTest
 	@Test
 	public void putAllLarge()
 	{
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		for (int i = 0; i < HugeMap.THRESHOLD; i++)
 		{
 			map.put(Integer.toString(i), Integer.toString(i));

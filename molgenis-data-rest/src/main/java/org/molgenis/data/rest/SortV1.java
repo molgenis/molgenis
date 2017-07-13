@@ -81,7 +81,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 	 */
 	public SortV1(DirectionV1 direction, String... properties)
 	{
-		this(direction, properties == null ? new ArrayList<String>() : Arrays.asList(properties));
+		this(direction, properties == null ? new ArrayList<>() : Arrays.asList(properties));
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 			throw new IllegalArgumentException("You have to provide at least one property to sort by!");
 		}
 
-		this.orders = new ArrayList<OrderV1>(properties.size());
+		this.orders = new ArrayList<>(properties.size());
 
 		for (String property : properties)
 		{
@@ -121,7 +121,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 			return this;
 		}
 
-		ArrayList<OrderV1> these = new ArrayList<OrderV1>(this.orders);
+		ArrayList<OrderV1> these = new ArrayList<>(this.orders);
 
 		for (OrderV1 order : sort)
 		{
@@ -293,7 +293,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 		public static List<OrderV1> create(DirectionV1 direction, Iterable<String> properties)
 		{
 
-			List<OrderV1> orders = new ArrayList<SortV1.OrderV1>();
+			List<OrderV1> orders = new ArrayList<>();
 			for (String property : properties)
 			{
 				orders.add(new OrderV1(direction, property));

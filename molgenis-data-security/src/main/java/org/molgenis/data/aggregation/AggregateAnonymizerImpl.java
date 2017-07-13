@@ -1,6 +1,5 @@
 package org.molgenis.data.aggregation;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Component;
 
@@ -16,15 +15,10 @@ public class AggregateAnonymizerImpl implements AggregateAnonymizer
 
 		for (List<Long> row : result.getMatrix())
 		{
-			List<Long> anonymizedRow = Lists.transform(row, new Function<Long, Long>()
+			List<Long> anonymizedRow = Lists.transform(row, input ->
 			{
-				@Override
-				public Long apply(Long input)
-				{
-					if (input == null) return null;
-					return input <= threshold ? AGGREGATE_ANONYMIZATION_VALUE : input;
-				}
-
+				if (input == null) return null;
+				return input <= threshold ? AGGREGATE_ANONYMIZATION_VALUE : input;
 			});
 			anonymizedmatrix.add(anonymizedRow);
 		}

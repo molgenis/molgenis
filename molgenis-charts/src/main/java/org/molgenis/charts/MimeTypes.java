@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class MimeTypes
 {
-	private static final Map<String, String> mimeTypesMap = new HashMap<String, String>();
+	private static final Map<String, String> mimeTypesMap = new HashMap<>();
 
 	static
 	{

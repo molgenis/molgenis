@@ -53,7 +53,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	public Attribute attributeAlt;
 	public Attribute attributeCantAnnotateChrom;
 
-	public ArrayList<Entity> input = new ArrayList<Entity>();
+	public ArrayList<Entity> input = new ArrayList<>();
 	public Entity entity;
 	public Entity entity1;
 	public Entity entity2;

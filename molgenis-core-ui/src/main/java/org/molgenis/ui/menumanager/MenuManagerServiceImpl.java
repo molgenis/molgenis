@@ -102,7 +102,7 @@ public class MenuManagerServiceImpl implements MenuManagerService
 			List<Object> defaultMenuItems = menuType.getMenuOrPlugin();
 			if (defaultMenuItems != null)
 			{
-				List<MenuItem> items = new ArrayList<MenuItem>(defaultMenuItems.size());
+				List<MenuItem> items = new ArrayList<>(defaultMenuItems.size());
 				for (Object defaultSubMenuObj : defaultMenuItems)
 				{
 					MenuItem subMenuItem = new MenuItem();

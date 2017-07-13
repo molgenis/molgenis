@@ -119,7 +119,7 @@ public class AnnotatorController
 	 */
 	private Map<String, Map<String, Object>> setMapOfAnnotators(String dataSetName)
 	{
-		Map<String, Map<String, Object>> mapOfAnnotators = new HashMap<String, Map<String, Object>>();
+		Map<String, Map<String, Object>> mapOfAnnotators = new HashMap<>();
 
 		if (dataSetName != null)
 		{
@@ -128,7 +128,7 @@ public class AnnotatorController
 			{
 				List<Attribute> outputAttrs = annotator.getOutputAttributes();
 				outputAttrs = getAtomicAttributesFromList(outputAttrs);
-				Map<String, Object> map = new HashMap<String, Object>();
+				Map<String, Object> map = new HashMap<>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityType));
 				map.put("inputAttributes", createAttrsResponse(annotator.getRequiredAttributes()));
@@ -149,7 +149,7 @@ public class AnnotatorController
 	{
 		return inputMetaData.stream().map(attr ->
 		{
-			Map<String, Object> attrMap = new HashMap<String, Object>();
+			Map<String, Object> attrMap = new HashMap<>();
 			attrMap.put("name", attr.getName());
 			attrMap.put("description", attr.getDescription());
 			return attrMap;

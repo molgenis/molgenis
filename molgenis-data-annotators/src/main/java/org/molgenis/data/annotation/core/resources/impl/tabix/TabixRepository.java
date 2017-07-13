@@ -83,14 +83,14 @@ public class TabixRepository extends AbstractRepository
 	{
 		Object posValue = getFirstEqualsValueFor(positionAttributeName, q);
 		Object chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q);
-		List<Entity> result = new ArrayList<Entity>();
+		List<Entity> result = new ArrayList<>();
 
 		// if one of both required attributes is null, skip the query and return an empty list
 		if (posValue != null && chromValue != null)
 		{
 			int posIntValue = Integer.parseInt(posValue.toString());
 			String chromStringValue = chromValue.toString();
-			result = query(chromStringValue, Integer.valueOf(posIntValue));
+			result = query(chromStringValue, posIntValue);
 		}
 		return result.stream();
 	}

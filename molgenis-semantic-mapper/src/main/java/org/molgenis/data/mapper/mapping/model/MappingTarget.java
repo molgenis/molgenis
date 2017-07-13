@@ -24,7 +24,7 @@ public class MappingTarget
 	{
 		this.identifier = null;
 		this.target = target;
-		this.entityMappings = new LinkedHashMap<String, EntityMapping>();
+		this.entityMappings = new LinkedHashMap<>();
 	}
 
 	/**
@@ -34,7 +34,7 @@ public class MappingTarget
 	{
 		this.identifier = identifier;
 		this.target = target;
-		this.entityMappings = new LinkedHashMap<String, EntityMapping>();
+		this.entityMappings = new LinkedHashMap<>();
 		for (EntityMapping mapping : entityMappings)
 		{
 			this.entityMappings.put(mapping.getName(), mapping);

@@ -28,7 +28,7 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	public Set<Style> getAvailableStyles()
 	{
-		Set<Style> availableStyles = new HashSet<Style>();
+		Set<Style> availableStyles = new HashSet<>();
 
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		try

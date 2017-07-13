@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.core.entity.impl;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
