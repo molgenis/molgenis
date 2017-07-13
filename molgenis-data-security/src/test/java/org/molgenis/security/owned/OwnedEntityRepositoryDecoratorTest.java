@@ -37,7 +37,7 @@ public class OwnedEntityRepositoryDecoratorTest
 	{
 		entityType = mock(EntityType.class);
 		decoratedRepository = mock(Repository.class);
-		consumerCaptor = ArgumentCaptor.forClass((Class) Consumer.class);
+		consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		ownedEntityRepositoryDecorator = new OwnedEntityRepositoryDecorator(decoratedRepository);
 	}
@@ -78,7 +78,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		ownedEntityRepositoryDecorator.add(entities);
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepository, times(1)).add(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
 		assertEquals(myEntities, asList(entity0, entity1));
@@ -110,7 +110,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		ownedEntityRepositoryDecorator.delete(Stream.of(myEntity, notMyEntity));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepository, times(1)).delete(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
 		assertEquals(myEntities, asList(myEntity));
@@ -122,7 +122,7 @@ public class OwnedEntityRepositoryDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0);
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		ownedEntityRepositoryDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), asList(entity0));
@@ -140,7 +140,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.get(OwnedEntityType.OWNER_USERNAME)).thenReturn("usernameUpdate");
 		Stream<Entity> entities = Stream.of(entity0);
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		ownedEntityRepositoryDecorator.update(entities);
 		List<Entity> entityList = captor.getValue().collect(Collectors.toList());

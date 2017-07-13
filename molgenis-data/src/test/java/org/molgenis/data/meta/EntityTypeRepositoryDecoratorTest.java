@@ -118,7 +118,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(repoCollection).deleteRepository(entityType);
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), newArrayList(attr0, attrCompound, attr1a, attr1b));
 	}
@@ -143,7 +143,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(repoCollection, times(0)).deleteRepository(entityType); // entity is abstract
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
 		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
 	}

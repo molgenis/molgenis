@@ -364,7 +364,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0);
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepo).update(captor.capture());
 		entityReferenceResolverDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));

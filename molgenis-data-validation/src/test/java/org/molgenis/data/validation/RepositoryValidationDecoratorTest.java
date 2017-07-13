@@ -805,7 +805,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -862,7 +862,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -907,7 +907,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -953,7 +953,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -989,7 +989,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -1037,7 +1037,7 @@ public class RepositoryValidationDecoratorTest
 				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -1096,7 +1096,7 @@ public class RepositoryValidationDecoratorTest
 				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.empty());
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -1159,7 +1159,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -1233,7 +1233,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -1296,7 +1296,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -1364,7 +1364,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -1433,7 +1433,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -1488,7 +1488,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -1556,7 +1556,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.add(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -2526,7 +2526,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -2583,7 +2583,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -2628,7 +2628,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -2674,7 +2674,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -2710,7 +2710,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -2758,7 +2758,7 @@ public class RepositoryValidationDecoratorTest
 				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0));
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -2817,7 +2817,7 @@ public class RepositoryValidationDecoratorTest
 				new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(Stream.of(entity0, entity1));
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -2880,7 +2880,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -2954,7 +2954,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -3017,7 +3017,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -3085,7 +3085,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -3154,7 +3154,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -3209,7 +3209,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -3277,7 +3277,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(entity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -3357,7 +3357,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> updatedEntities = Arrays.asList(updatedEntity0);
 		repositoryValidationDecorator.update(updatedEntities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -3437,7 +3437,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(updatedEntity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -3508,7 +3508,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> updatedEntities = Arrays.asList(updatedEntity0);
 		repositoryValidationDecorator.update(updatedEntities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
@@ -3590,7 +3590,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> entities = Arrays.asList(updatedEntity0);
 		repositoryValidationDecorator.update(entities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
@@ -3664,7 +3664,7 @@ public class RepositoryValidationDecoratorTest
 		List<Entity> updatedEntities = Arrays.asList(updatedEntity0);
 		repositoryValidationDecorator.update(updatedEntities.stream());
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try

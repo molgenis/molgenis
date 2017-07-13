@@ -183,7 +183,7 @@ public class EntityListenerRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		entityListenerRepositoryDecorator.update(entities);
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		Mockito.verify(decoratedRepository).update(captor.capture());
 		Assert.assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 
@@ -209,7 +209,7 @@ public class EntityListenerRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		entityListenerRepositoryDecorator.update(entities);
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		Mockito.verify(decoratedRepository).update(captor.capture());
 		Assert.assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 		Mockito.verify(entityListener1, Mockito.times(1)).postUpdate(entity1);
@@ -229,7 +229,7 @@ public class EntityListenerRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		entityListenerRepositoryDecorator.update(entities);
 
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		Mockito.verify(decoratedRepository, Mockito.times(1)).update(captor.capture());
 		Assert.assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}

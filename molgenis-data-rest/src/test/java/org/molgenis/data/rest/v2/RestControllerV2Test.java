@@ -923,7 +923,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					.andExpect(status().isNoContent());
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
 	}

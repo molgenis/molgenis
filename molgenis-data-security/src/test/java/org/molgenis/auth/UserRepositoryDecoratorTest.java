@@ -199,7 +199,7 @@ public class UserRepositoryDecoratorTest
 		when(user.getPassword()).thenReturn("password");
 
 		Stream<User> entities = Stream.of(user);
-		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
@@ -223,7 +223,7 @@ public class UserRepositoryDecoratorTest
 		when(user.getPassword()).thenReturn("currentPasswordHash");
 
 		Stream<User> entities = Stream.of(user);
-		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));

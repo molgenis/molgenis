@@ -47,7 +47,7 @@ public class ScriptTypePopulatorTest
 		when(scriptTypeFactory.create(scriptRunner1Name)).thenReturn(scriptType1);
 		scriptTypePopulator.populate();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(SCRIPT_TYPE), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(scriptType1));
 	}

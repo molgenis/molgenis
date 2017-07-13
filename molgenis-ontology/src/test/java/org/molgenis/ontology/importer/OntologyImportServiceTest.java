@@ -63,12 +63,12 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 		assertEquals(entityImportReport.getNrImportedEntitiesMap(), of(entityTypeId0, 1, entityTypeId1, 1));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> entityTypeId0Captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> entityTypeId0Captor = ArgumentCaptor.forClass(Stream.class);
 		verify(targetRepository0).add(entityTypeId0Captor.capture());
 		assertEquals(entityTypeId0Captor.getValue().collect(toList()), singletonList(entity0));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> entityTypeId1Captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> entityTypeId1Captor = ArgumentCaptor.forClass(Stream.class);
 		verify(targetRepository1).add(entityTypeId1Captor.capture());
 		assertEquals(entityTypeId1Captor.getValue().collect(toList()), singletonList(entity1));
 	}

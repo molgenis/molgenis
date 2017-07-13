@@ -258,7 +258,7 @@ public class MetaDataServiceImplTest
 		assertEquals(metaDataServiceImpl.createRepository(entityType), repo);
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
 
@@ -294,7 +294,7 @@ public class MetaDataServiceImplTest
 		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 		assertEquals(metaDataServiceImpl.createRepository(entityType, entityClass), repo);
 
-		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
 
@@ -406,7 +406,7 @@ public class MetaDataServiceImplTest
 		Package package1 = mock(Package.class);
 		metaDataServiceImpl.upsertPackages(Stream.of(package0, package1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(packagePersister).upsertPackages(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(package0, package1));
 	}
@@ -442,7 +442,7 @@ public class MetaDataServiceImplTest
 		metaDataServiceImpl.addEntityType(entityType);
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
 
@@ -474,12 +474,12 @@ public class MetaDataServiceImplTest
 		InOrder inOrder = inOrder(dataService);
 
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
-		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor1.capture());
 		assertEquals(attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
 
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType0);
-		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0.capture());
 		assertEquals(attrsCaptor0.getValue().collect(toList()), newArrayList(entity0Attr0, entity0Attr1));
 	}
@@ -524,7 +524,7 @@ public class MetaDataServiceImplTest
 		InOrder inOrder = inOrder(dataService);
 
 		inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType1);
-		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor1.capture());
 		assertEquals(attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
 
@@ -532,7 +532,7 @@ public class MetaDataServiceImplTest
 		inOrder.verify(dataService).add(eq(ENTITY_TYPE_META_DATA), entityCaptor0.capture());
 		assertEquals(newArrayList(entityCaptor0.getValue().getOwnAllAttributes()), singletonList(entity0Attr1));
 
-		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0.capture());
 		assertEquals(attrsCaptor0.getValue().collect(toList()), singletonList(entity0Attr1));
 
@@ -540,7 +540,7 @@ public class MetaDataServiceImplTest
 		inOrder.verify(dataService).update(eq(ENTITY_TYPE_META_DATA), entityCaptor0b.capture());
 		assertEquals(entityCaptor0b.getValue(), entityType0);
 
-		ArgumentCaptor<Stream<Entity>> attrsCaptor0b = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrsCaptor0b = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0b.capture());
 		assertEquals(attrsCaptor0b.getValue().collect(toList()), singletonList(entity0Attr0));
 	}
@@ -573,7 +573,7 @@ public class MetaDataServiceImplTest
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
 		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityTypeId0, entityTypeId1));
 		verifyNoMoreInteractions(dataService);
@@ -627,7 +627,7 @@ public class MetaDataServiceImplTest
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<EntityType>> entityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<EntityType>> entityCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).update(eq(ENTITY_TYPE_META_DATA), entityCaptor.capture());
 		List<EntityType> updatedEntities = entityCaptor.getValue().collect(toList());
 		assertEquals(updatedEntities.size(), 1);
@@ -635,7 +635,7 @@ public class MetaDataServiceImplTest
 		assertEquals(newArrayList(updatedEntities.get(0).getOwnAllAttributes()), newArrayList(entity0Attr1));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
 		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityTypeId0, entityTypeId1));
 		inOrder.verifyNoMoreInteractions();
@@ -698,12 +698,12 @@ public class MetaDataServiceImplTest
 		metaDataServiceImpl.updateEntityType(entityType);
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
@@ -793,11 +793,11 @@ public class MetaDataServiceImplTest
 
 		metaDataServiceImpl.upsertEntityTypes(singletonList(entityType));
 
-		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
-		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
@@ -876,15 +876,15 @@ public class MetaDataServiceImplTest
 		InOrder inOrder = inOrder(dataService);
 		inOrder.verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
 
-		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
-		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
-		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
 		assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));
 
@@ -962,15 +962,15 @@ public class MetaDataServiceImplTest
 		InOrder inOrder = inOrder(dataService);
 		inOrder.verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
 
-		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
 		assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
 
-		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
-		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass(Stream.class);
 		inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
 		assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));
 
