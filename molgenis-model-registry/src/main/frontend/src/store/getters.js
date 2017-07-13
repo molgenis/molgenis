@@ -6,14 +6,15 @@ import type { State } from 'utils/flow.types'
 // categorical_mref 1 - N
 // onetomany 1 - N
 const types = {
-  'xref': '1...1',
-  'mref': '1...N',
-  'categorical': '1...1',
-  'categorical_mref': '1...N',
-  'onetomany': '1...N'
+  'xref': {nullable: '0...1', notnullable: '1...1'},
+  'mref': {nullable: '0...N', notnullable: '1...N'},
+  'categorical': {nullable: '0...1', notnullable: '1...1'},
+  'categorical_mref': {nullable: '0...N', notnullable: '1...N'},
+  'onetomany': {nullable: '0...N', notnullable: '1...N'}
 }
 
-let nodeData = {}
+let nodeData = []
+let linkData = []
 
 const mapAttributeToNode = attribute => {
   let figure = 'Cubel'
@@ -29,10 +30,19 @@ const mapAttributeToNode = attribute => {
   }
 }
 
-const mapNodeData = (entityTypes) => entityTypes.map(entityType => ({
-  key: entityType.id,
-  items: entityType.attributes.map(mapAttributeToNode)
-}))
+const mapNodeData = (entityTypes) => entityTypes.map(entityType => {
+  let nodeKey = (entityType.isAbstract) ? '<abstract>\n' + entityType.id : entityType.id
+  if (entityType.extends && entityType.extends.id) {
+    nodeKey = '<extends ' + (entityType.extends.name || entityType.extends.label) + '>\n' + nodeKey
+    const abstractEntityType = entityType.extends.id
+    entityType = entityTypes.find(entityType => entityType.id === abstractEntityType)
+    linkData.push({from: abstractEntityType, to: entityType.id, text: '', toText: ''})
+  }
+  return {
+    key: nodeKey,
+    items: entityType.attributes.map(mapAttributeToNode)
+  }
+})
 
 const isRef = (attribute) => types[attribute.type]
 
@@ -45,44 +55,43 @@ const determineRefAttribute = (entityTypes, refEntityType) => {
 }
 
 const mapLinkData = (entityTypes) => {
-  const links = []
   entityTypes.forEach(entityType => {
     entityType.attributes.forEach(attribute => {
       if (isRef(attribute)) {
         const refAttribute = determineRefAttribute(entityTypes, attribute.refEntityType.id)
         const attributeDesc = attribute.label || attribute.name
-        let refAttributeDesc = types[attribute.type]
-        if (refAttribute) {
-          refAttributeDesc = (refAttribute.label || refAttribute.name) + ' | ' + types[attribute.type]
-        }
-        mapEnvironmentEntityTypes(attribute.refEntityType.id)
-        links.push({from: entityType.id, to: attribute.refEntityType.id, text: attributeDesc, toText: refAttributeDesc})
+        let refAttributeType = types[attribute.type].notnullable
+        if (attribute.isNullable) refAttributeType = types[attribute.type].nullable
+        let refAttributeDesc = refAttributeType
+        if (refAttribute) refAttributeDesc = (refAttribute.label || refAttribute.name) + ' | ' + refAttributeType
+        // mapEnvironmentEntityTypes(attribute.refEntityType.id)
+        linkData.push({from: entityType.id, to: attribute.refEntityType.id, text: attributeDesc, toText: refAttributeDesc})
       }
     })
   })
-  return links
 }
 
-const mapEnvironmentEntityTypes = (refEntityTypeId) => {
-  console.log(nodeData)
-  const isPresent = nodeData.some(node => {
-    node.key === refEntityTypeId
-  })
-  console.log(isPresent)
-  if (!isPresent) {
-    console.log(refEntityTypeId)
-    nodeData.push({key: refEntityTypeId, items: {}})
-  }
-}
+// const mapEnvironmentEntityTypes = (refEntityTypeId) => {
+//   console.log(nodeData)
+//   const isPresent = nodeData.some(node => {
+//     node.key === refEntityTypeId
+//   })
+//   console.log(isPresent)
+//   if (!isPresent) {
+//     console.log(refEntityTypeId)
+//     nodeData.push({key: refEntityTypeId, items: {}})
+//   }
+// }
 
 export default {
 
   umlData: (state: State) => {
     if (state.umlData.entityTypes) {
       nodeData = mapNodeData(state.umlData.entityTypes)
+      linkData = mapLinkData(state.umlData.entityTypes)
       return {
         nodeData: nodeData,
-        linkData: mapLinkData(state.umlData.entityTypes)
+        linkData: linkData
       }
     }
   }
