@@ -8,9 +8,8 @@ public interface OneClickImporterService
 	/**
 	 * Generate {@link DataCollection} with sheet contents
 	 *
+	 * @param dataCollectionName
 	 * @param sheet
 	 */
-	DataCollection buildDataCollection(Sheet sheet);
-
-	// void buildDataCollection(String csvContent);
+	DataCollection buildDataCollection(String dataCollectionName, Sheet sheet);
 }

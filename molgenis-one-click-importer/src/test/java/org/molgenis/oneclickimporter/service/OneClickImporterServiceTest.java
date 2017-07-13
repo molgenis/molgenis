@@ -26,13 +26,13 @@ public class OneClickImporterServiceTest
 	public void testBuildDataSheetWithSimpleValidFile() throws IOException, InvalidFormatException, URISyntaxException
 	{
 		Sheet sheet = loadTestFile("/simple-valid.xlsx");
-		DataCollection actual = oneClickImporterService.buildDataCollection(sheet);
+		DataCollection actual = oneClickImporterService.buildDataCollection("simple-valid", sheet);
 
 		Column c1 = Column.create("name", 0, newArrayList("Mark", "Connor", "Fleur", "Dennis"));
 		Column c2 = Column.create("superpower", 1,
 				newArrayList("arrow functions", "Oldschool syntax", "Lambda Magician", "Root access"));
 
-		DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
+		DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2));
 
 		assertEquals(actual, expected);
 	}
@@ -41,12 +41,12 @@ public class OneClickImporterServiceTest
 	public void testBuildDataSheetWithValidFormulaFile() throws IOException, InvalidFormatException, URISyntaxException
 	{
 		Sheet sheet = loadTestFile("/valid-with-formula.xlsx");
-		DataCollection actual = oneClickImporterService.buildDataCollection(sheet);
+		DataCollection actual = oneClickImporterService.buildDataCollection("valid-with-formula", sheet);
 
 		Column c1 = Column.create("name", 0, newArrayList("Mark", "Mariska"));
 		Column c2 = Column.create("age", 1, newArrayList(26.0, 22.0));
 
-		DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
+		DataCollection expected = DataCollection.create("valid-with-formula", newArrayList(c1, c2));
 
 		assertEquals(actual, expected);
 	}
@@ -56,13 +56,13 @@ public class OneClickImporterServiceTest
 			throws IOException, InvalidFormatException, URISyntaxException
 	{
 		Sheet sheet = loadTestFile("/valid-with-blank-values.xlsx");
-		DataCollection actual = oneClickImporterService.buildDataCollection(sheet);
+		DataCollection actual = oneClickImporterService.buildDataCollection("valid-with-blank-values", sheet);
 
 		Column c1 = Column.create("name", 0, newArrayList("Mark", "Bart", "Tommy", "Sido", "Connor", null));
 		Column c2 = Column.create("favorite food", 1,
 				newArrayList("Fries", null, "Vegan food", "Pizza", null, "Spinache"));
 
-		DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
+		DataCollection expected = DataCollection.create("valid-with-blank-values", newArrayList(c1, c2));
 		assertEquals(actual, expected);
 
 		assertEquals(6, c1.getDataValues().size());
@@ -73,7 +73,7 @@ public class OneClickImporterServiceTest
 	public void testBuildDataSheetWithComplexFile() throws IOException, InvalidFormatException, URISyntaxException
 	{
 		Sheet sheet = loadTestFile("/complex-valid.xlsx");
-		DataCollection actual = oneClickImporterService.buildDataCollection(sheet);
+		DataCollection actual = oneClickImporterService.buildDataCollection("complex-valid", sheet);
 
 		Column c1 = Column.create("first name", 0,
 				newArrayList("Mark", "Fleur", "Dennis", "Bart", "Sido", "Mariska", "Tommy", "Connor", "Piet", "Jan"));
@@ -87,7 +87,7 @@ public class OneClickImporterServiceTest
 				newArrayList(true, true, true, true, true, true, true, true, false, false));
 		Column c5 = Column.create("Age", 4, newArrayList(26.0, null, null, null, null, 22.0, 27.0, null, 53.0, 32.0));
 
-		DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2, c3, c4, c5));
+		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5));
 		assertEquals(actual, expected);
 	}
 

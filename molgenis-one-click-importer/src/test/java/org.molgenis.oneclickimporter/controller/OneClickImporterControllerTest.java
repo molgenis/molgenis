@@ -28,8 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -105,6 +104,8 @@ public class OneClickImporterControllerTest
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 			   .andExpect(status().isOk());
+
+		verify(oneClickImporterService).buildDataCollection("simple-valid", sheet);
 	}
 
 	@Test
@@ -124,6 +125,8 @@ public class OneClickImporterControllerTest
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 			   .andExpect(status().isOk());
+
+		verify(oneClickImporterService, times(1)).buildDataCollection("simple-valid", sheet);
 	}
 
 	@Test
@@ -136,6 +139,8 @@ public class OneClickImporterControllerTest
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 			   .andExpect(status().isBadRequest());
+
+		verifyZeroInteractions(oneClickImporterService);
 	}
 
 	private MockMultipartFile getTestMultipartFile(final String path, final String contentType)
