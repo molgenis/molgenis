@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -101,7 +102,9 @@ public class OneClickImporterControllerTest
 		DataCollection dataCollection = mock(DataCollection.class);
 		EntityType table = mock(EntityType.class);
 		String tableId = "genrated_table_id";
-		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
+		File file = mock(File.class);
+		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
+		when(excelService.buildExcelSheetFromFile(file)).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
 		when(entityService.createEntity(dataCollection)).thenReturn(table);
 		when(table.getId()).thenReturn(tableId);
@@ -122,6 +125,8 @@ public class OneClickImporterControllerTest
 		DataCollection dataCollection = mock(DataCollection.class);
 		EntityType table = mock(EntityType.class);
 		String tableId = "genrated_table_id";
+		File file = mock(File.class);
+		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
 		when(entityService.createEntity(dataCollection)).thenReturn(table);
