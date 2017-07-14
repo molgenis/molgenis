@@ -44,7 +44,7 @@ const mapAttributeToNode = attribute => {
 
 const capitalize = (string) => (string[0].toUpperCase() + string.slice(1))
 
-const mapNodeData = (entityTypes) => entityTypes.filter(entityType => (!entityType.extends && !entityType.isAbstract)).map(entityType => {
+const mapNodeData = (entityTypes) => entityTypes.filter(entityType => (!entityType.extends)).map(entityType => {
   return {
     key: entityType.id,
     items: entityType.attributes.map(mapAttributeToNode)
@@ -53,14 +53,12 @@ const mapNodeData = (entityTypes) => entityTypes.filter(entityType => (!entityTy
 
 const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (entityType.extends && !entityType.isAbstract)).map(entityType => {
   const abstractEntityType = entityTypes.filter(aEntityType => (aEntityType.id === entityType.extends.id))[0]
-  if (abstractEntityType && abstractEntityType.attributes) {
-    // abstractEntityType.attributes.push({label: '<extends ' + abstractEntityType.id + '>'})
-    nodeData.push({key: entityType.id, items: abstractEntityType.attributes.map(mapAttributeToNode)})
-  }
+  linkData.push({from: abstractEntityType.id, to: entityType.id, text: 'isAbstract', toText: '<extends ' + abstractEntityType.id + '>'})
+  nodeData.push({key: entityType.id, items: entityType.attributes.map(mapAttributeToNode)})
 })
 
 const isRef = (attribute) => types[attribute.type]
-
+//
 const mapLinkData = (entityTypes) => {
   entityTypes.forEach(entityType => {
     entityType.attributes.forEach(attribute => {
@@ -99,6 +97,7 @@ export default {
       nodeData = mapNodeData(state.umlData.entityTypes)
       mapExtendedNodeData(state.umlData.entityTypes)
       mapLinkData(state.umlData.entityTypes)
+      console.log(nodeData)
       console.log(linkData)
       return {
         nodeData: nodeData,
