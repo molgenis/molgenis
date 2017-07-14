@@ -180,6 +180,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@AfterClass
 	public void tearDown()
 	{
+		entityTypeDynamic = dataService.getEntityType(entityTypeDynamic.getId());
+		refEntityTypeDynamic = dataService.getEntityType(refEntityTypeDynamic.getId());
+		selfXrefEntityType = dataService.getEntityType(selfXrefEntityType.getId());
+
 		runAsSystem(() -> metaDataService.deleteEntityType(
 				asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType)));
 	}
