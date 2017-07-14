@@ -23,49 +23,58 @@ const mapAttributeToNode = attribute => {
   if (isRef(attribute)) {
     figure = 'Decision'
     color = 'red'
+  }
+  if (attribute.isIdAttribute) {
     isKey = true
+    color = 'yellow'
+  }
+  let attributeTypeRef = ''
+  let attributeType = types[attribute.type]
+  if (attributeType) {
+    attributeTypeRef = ' [ ' + types[attribute.type].notnullable + ' ]'
+    if (attribute.isNullable) attributeTypeRef = '[ ' + types[attribute.type].nullable + ' ]'
   }
   return {
-    name: attribute.label || attribute.name, iskey: isKey, figure: figure, color: color
+    name: (attribute.label || attribute.name) + ': ' + capitalize(attribute.type) + attributeTypeRef,
+    iskey: isKey,
+    figure: figure,
+    color: color
   }
 }
 
-const mapNodeData = (entityTypes) => entityTypes.map(entityType => {
-  let nodeKey = (entityType.isAbstract) ? '<abstract>\n' + entityType.id : entityType.id
-  if (entityType.extends && entityType.extends.id) {
-    nodeKey = '<extends ' + (entityType.extends.name || entityType.extends.label) + '>\n' + nodeKey
-    const abstractEntityType = entityType.extends.id
-    entityType = entityTypes.find(entityType => entityType.id === abstractEntityType)
-    linkData.push({from: abstractEntityType, to: entityType.id, text: '', toText: ''})
-  }
+const capitalize = (string) => (string[0].toUpperCase() + string.slice(1))
+
+const mapNodeData = (entityTypes) => entityTypes.filter(entityType => (!entityType.extends && !entityType.isAbstract)).map(entityType => {
   return {
-    key: nodeKey,
+    key: entityType.id,
     items: entityType.attributes.map(mapAttributeToNode)
+  }
+})
+
+const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (entityType.extends && !entityType.isAbstract)).map(entityType => {
+  const abstractEntityType = entityTypes.filter(aEntityType => (aEntityType.id === entityType.extends.id))[0]
+  if (abstractEntityType && abstractEntityType.attributes) {
+    // abstractEntityType.attributes.push({label: '<extends ' + abstractEntityType.id + '>'})
+    nodeData.push({key: entityType.id, items: abstractEntityType.attributes.map(mapAttributeToNode)})
   }
 })
 
 const isRef = (attribute) => types[attribute.type]
 
-const determineRefEntityType = (entityTypes, refEntityType) => entityTypes.find(entityType => entityType.id === refEntityType)
-const determineRefAttribute = (entityTypes, refEntityType) => {
-  const referenceEntityType = determineRefEntityType(entityTypes, refEntityType)
-  if (referenceEntityType && referenceEntityType.attributes) {
-    return referenceEntityType.attributes.find(attribute => attribute.isIdAttribute === true)
-  }
-}
-
 const mapLinkData = (entityTypes) => {
   entityTypes.forEach(entityType => {
     entityType.attributes.forEach(attribute => {
       if (isRef(attribute)) {
-        const refAttribute = determineRefAttribute(entityTypes, attribute.refEntityType.id)
-        const attributeDesc = attribute.label || attribute.name
+        const attributeName = attribute.label || attribute.name
         let refAttributeType = types[attribute.type].notnullable
         if (attribute.isNullable) refAttributeType = types[attribute.type].nullable
-        let refAttributeDesc = refAttributeType
-        if (refAttribute) refAttributeDesc = (refAttribute.label || refAttribute.name) + ' | ' + refAttributeType
         // mapEnvironmentEntityTypes(attribute.refEntityType.id)
-        linkData.push({from: entityType.id, to: attribute.refEntityType.id, text: attributeDesc, toText: refAttributeDesc})
+        linkData.push({
+          from: entityType.id,
+          to: attribute.refEntityType.id,
+          text: attributeName,
+          toText: refAttributeType
+        })
       }
     })
   })
@@ -88,7 +97,9 @@ export default {
   umlData: (state: State) => {
     if (state.umlData.entityTypes) {
       nodeData = mapNodeData(state.umlData.entityTypes)
-      linkData = mapLinkData(state.umlData.entityTypes)
+      mapExtendedNodeData(state.umlData.entityTypes)
+      mapLinkData(state.umlData.entityTypes)
+      console.log(linkData)
       return {
         nodeData: nodeData,
         linkData: linkData
