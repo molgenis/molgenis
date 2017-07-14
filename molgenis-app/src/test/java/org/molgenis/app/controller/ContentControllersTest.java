@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -184,7 +184,7 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	private void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
 	{
 		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
-		when(this.staticContentService.isCurrentUserCanEdit()).thenReturn(true);
+		when(this.staticContentService.isCurrentUserCanEdit("staticcontent")).thenReturn(true);
 
 		mockMvc.perform(MockMvcRequestBuilders.get(uri + "/edit"))
 			   .andExpect(MockMvcResultMatchers.status().isOk())

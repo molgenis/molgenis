@@ -2,8 +2,6 @@ package org.molgenis.security.account;
 
 import com.google.gson.Gson;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
@@ -328,14 +326,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		public UserFactory molgenisUserFactory()
 		{
 			UserFactory userFactory = mock(UserFactory.class);
-			when(userFactory.create()).thenAnswer(new Answer<User>()
-			{
-				@Override
-				public User answer(InvocationOnMock invocationOnMock) throws Throwable
-				{
-					return mock(User.class);
-				}
-			});
+			when(userFactory.create()).thenAnswer(invocationOnMock -> mock(User.class));
 			return userFactory;
 		}
 	}

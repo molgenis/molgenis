@@ -9,7 +9,7 @@
 <#-- FIXME enable resource_href>
 <#--<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">-->
 <#--<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">-->
-    <link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
+    <link rel="icon" href="/img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="/css/standardsregistry.css" type="text/css">
     <link rel="stylesheet" href="/css/molgenis.css" type="text/css">

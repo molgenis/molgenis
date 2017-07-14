@@ -3,19 +3,22 @@
   <div class="container">
 
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
-      <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button> {{error}}
+      <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
+      {{error}}
     </div>
 
     <!-- Search element -->
     <div class="navigator-search row justify-content-center">
       <div class="col-lg-6 input-group">
-        <input v-model="query" v-on:keyup="submitQuery()" type="text" class="form-control"
+        <input v-model="query" type="text" class="form-control"
                :placeholder="$t('search-input-placeholder')">
         <span class="input-group-btn">
-          <button @click="submitQuery()"  class="btn btn-secondary" :disabled="!query" type="button">{{ 'search-button' | i18n }}</button>
+          <button @click="submitQuery()" class="btn btn-secondary" :disabled="!query"
+                  type="button">{{ 'search-button' | i18n }}</button>
         </span>
         <span class="input-group-btn">
-          <button @click="clearQuery()" class="btn btn-secondary" :disabled="!query" type="button">{{ 'clear-button' | i18n }}</button>
+          <button @click="clearQuery()" class="btn btn-secondary" :disabled="!query"
+                  type="button">{{ 'clear-button' | i18n }}</button>
         </span>
       </div>
     </div>
@@ -42,7 +45,7 @@
 
     <!-- Main table element -->
     <b-table bordered :items="items" :fields="fields" :filter="filter" class="text-left">
-      <template slot="label" scope="label" >
+      <template slot="label" scope="label">
         <span v-if="label.item.type === 'entity'">
             <a :href="'/menu/main/dataexplorer?entity=' + label.item.id" target="_blank">
               <i class="fa fa-list" aria-hidden="true"></i> {{label.item.label}}
@@ -50,7 +53,7 @@
           </span>
         <span v-else>
           <router-link :to="label.item.id">
-            <i class="fa fa-folder-open-o" aria-hidden="true" ></i> {{label.item.label}}
+            <i class="fa fa-folder-open-o" aria-hidden="true"></i> {{label.item.label}}
           </router-link>
         </span>
       </template>
@@ -62,8 +65,9 @@
   .navigator-path {
     margin-top: 2rem;
   }
-  .navigator-path  {
-    .breadcrumb{
+
+  .navigator-path {
+    .breadcrumb {
       background-color: transparent;
     }
   }
@@ -75,9 +79,10 @@
 
 <script>
   import _ from 'lodash'
-  import {QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE} from '../store/actions'
-  import {SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES} from '../store/mutations'
+  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE } from '../store/actions'
+  import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
   import { Package } from '../store/state'
+  import { mapState } from 'vuex'
 
   export default {
     name: 'Navigator',
@@ -125,19 +130,10 @@
         },
         set (query) {
           this.$store.commit(SET_QUERY, query)
+          this.submitQuery()
         }
       },
-      packages () {
-        return this.$store.state.packages
-      },
-      entities () {
-        return this.$store.state.entities
-      },
-      path: {
-        get () {
-          return this.$store.state.path
-        }
-      },
+      ...mapState(['packages', 'entities', 'path']),
       items () {
         return [].concat(this.packages).concat(this.entities)
       },

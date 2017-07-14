@@ -110,12 +110,7 @@ public class HPORepository extends AbstractRepository
 					entity.set(HPO_ID_COL_NAME, values[3]);
 					entity.set(HPO_TERM_COL_NAME, values[4]);
 
-					List<Entity> entities = entitiesByGeneSymbol.get(geneSymbol);
-					if (entities == null)
-					{
-						entities = new ArrayList<>();
-						entitiesByGeneSymbol.put(geneSymbol, entities);
-					}
+					List<Entity> entities = entitiesByGeneSymbol.computeIfAbsent(geneSymbol, k -> new ArrayList<>());
 					entities.add(entity);
 
 					values = csvReader.readNext();

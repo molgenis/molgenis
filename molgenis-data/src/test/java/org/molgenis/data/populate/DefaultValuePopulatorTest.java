@@ -19,8 +19,6 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 

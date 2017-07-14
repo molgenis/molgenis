@@ -26,7 +26,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
@@ -101,7 +101,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(ontologyTermEntity2.get(ONTOLOGY_TERM_SYNONYM)).thenReturn(singletonList(synonymEntity4));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<Entity>> queryCaptor = forClass(Query.class);
 		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture())).thenReturn(
 				Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
@@ -116,7 +116,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 	public void testFindOntologyTerms()
 	{
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<Entity>> queryCaptor = forClass(Query.class);
 		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture())).thenReturn(Stream.of(ontologyTermEntity));
 
 		List<OntologyTerm> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),

@@ -35,17 +35,17 @@ public class CategoryMapperTest
 	{
 		Assert.assertEquals(CategoryMapperUtil.extractNumbers("1-3 per month")
 											  .stream()
-											  .mapToInt(doubleValue -> doubleValue.intValue())
+											  .mapToInt(Double::intValue)
 											  .sum(), 4);
 
 		Assert.assertEquals(CategoryMapperUtil.extractNumbers("2.6-3.4 per month")
 											  .stream()
-											  .mapToInt(doubleValue -> doubleValue.intValue())
+											  .mapToInt(Double::intValue)
 											  .sum(), 5);
 
 		Assert.assertEquals(CategoryMapperUtil.extractNumbers("not this month")
 											  .stream()
-											  .mapToInt(doubleValue -> doubleValue.intValue())
+											  .mapToInt(Double::intValue)
 											  .sum(), 0);
 	}
 
@@ -62,7 +62,7 @@ public class CategoryMapperTest
 	@Test
 	public void testGetMostGeneralUnit()
 	{
-		List<Unit<?>> units = new ArrayList<Unit<?>>();
+		List<Unit<?>> units = new ArrayList<>();
 
 		units.add(NonSI.DAY.inverse());
 		units.add(NonSI.YEAR.inverse());

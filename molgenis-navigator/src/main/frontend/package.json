@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "@molgenis/molgenis-i18n-js": "^0.0.5",
+    "@molgenis/molgenis-api-client": "^1.2.5",
     "bootstrap-vue": "^0.11.1",
     "flow": "^0.2.3",
     "font-awesome": "^4.7.0",
     "isomorphic-fetch": "^2.2.1",
     "karma-junit-reporter": "^1.2.0",
     "lodash": "^4.17.4",
-    "molgenis-api-client": "^1.1.0",
     "moment": "^2.18.1",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.5",
@@ -95,7 +95,7 @@
     "webpack-merge": "^2.6.1"
   },
   "engines": {
-    "node": ">= 7.6.0",
+    "node": ">= 6.11.0",
     "yarn": ">= 0.24.5"
   }
 }

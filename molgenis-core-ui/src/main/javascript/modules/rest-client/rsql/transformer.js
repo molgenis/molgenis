@@ -16,7 +16,7 @@ function getRsqlFromConstraint(constraint) {
 }
 
 function getRsqlFromSimpleConstraint(constraint) {
-    const rsqlValue = constraint.arguments.constructor === Array ? '(' + constraint.arguments.map(toRsqlValue).join(',') + ')' : constraint.arguments
+    const rsqlValue = constraint.arguments.constructor === Array ? '(' + constraint.arguments.map(toRsqlValue).join(',') + ')' : toRsqlValue(constraint.arguments)
     return toRsqlValue(constraint.selector) + constraint.comparison + rsqlValue
 }
 
@@ -166,9 +166,12 @@ function toComplexRefOr(labels, constraint) {
 }
 
 function toComplexRef(labels, constraint) {
-    return {
-        'type': 'COMPLEX_REF',
-        'lines': toComplexRefOr(labels, constraint)
+    return constraint.operator && constraint.operator === 'AND' ? {
+      'type': 'COMPLEX_REF',
+      'lines': toComplexRefAnd(labels, constraint)
+    } : {
+      'type': 'COMPLEX_REF',
+      'lines': toComplexRefOr(labels, constraint)
     }
 }
 

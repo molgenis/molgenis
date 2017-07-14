@@ -82,7 +82,7 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void createScatterPlotChart()
 	{
-		List<XYDataSerie> data = new ArrayList<XYDataSerie>();
+		List<XYDataSerie> data = new ArrayList<>();
 		XYDataSerie serieOne = new XYDataSerie();
 		serieOne.setAttributeXFieldTypeEnum(AttributeType.INT);
 		serieOne.setAttributeXFieldTypeEnum(AttributeType.DECIMAL);
@@ -153,7 +153,7 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void createScatterPlotStockChart()
 	{
-		List<XYDataSerie> data = new ArrayList<XYDataSerie>();
+		List<XYDataSerie> data = new ArrayList<>();
 		XYDataSerie serieOne = new XYDataSerie();
 		serieOne.setAttributeXFieldTypeEnum(AttributeType.DATE);
 		serieOne.setAttributeYFieldTypeEnum(AttributeType.DECIMAL);
@@ -213,9 +213,9 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		assertFalse(options.getSeries().isEmpty());
 		assertEquals(options.getSeries().get(0).getType(), SeriesType.LINE.toString());
 		assertEquals(options.getSeries().get(0).getData().get(0),
-				Arrays.<Object>asList(1392940800000l, Double.valueOf("1.1")));
+				Arrays.<Object>asList(1392940800000L, Double.valueOf("1.1")));
 		assertEquals(options.getSeries().get(0).getData().get(1),
-				Arrays.<Object>asList(1393027200000l, Double.valueOf("2.2")));
+				Arrays.<Object>asList(1393027200000L, Double.valueOf("2.2")));
 	}
 
 	@Test
@@ -223,13 +223,13 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 	{
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
 
-		List<BoxPlotSerie> boxPlotSeries = new ArrayList<BoxPlotSerie>();
+		List<BoxPlotSerie> boxPlotSeries = new ArrayList<>();
 		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
 		boxPlotSerie.addData(new Double[] { 20.5, 50.5, 100.5, 200.5, 400.5 });
 		boxPlotSeries.add(boxPlotSerie);
 		boxPlotChart.setBoxPlotSeries(boxPlotSeries);
 
-		List<XYDataSerie> xYDataSeries = new ArrayList<XYDataSerie>();
+		List<XYDataSerie> xYDataSeries = new ArrayList<>();
 		XYDataSerie xYDataSerie = new XYDataSerie();
 		XYData xYDataOne = new XYData(Double.valueOf("0"), Double.valueOf("10"));
 		XYData xYDataTwo = new XYData(Double.valueOf("0"), Double.valueOf("500"));

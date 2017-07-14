@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -77,7 +76,7 @@ public class EntityTypeResponse
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
-			this.attributes = new LinkedHashMap<String, Object>();
+			this.attributes = new LinkedHashMap<>();
 			//the newArraylist is a fix for concurrency trouble
 			//FIXME properly fix this by making metadata immutable
 			for (Attribute attr : Lists.newArrayList(meta.getAttributes()))
@@ -119,14 +118,7 @@ public class EntityTypeResponse
 		{
 			Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
-					Iterables.transform(lookupAttributes, new Function<Attribute, String>()
-					{
-						@Override
-						public String apply(Attribute attribute)
-						{
-							return attribute.getName();
-						}
-					})) : null;
+					Iterables.transform(lookupAttributes, Attribute::getName)) : null;
 		}
 		else this.lookupAttributes = null;
 

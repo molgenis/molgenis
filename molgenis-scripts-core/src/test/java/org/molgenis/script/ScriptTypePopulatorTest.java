@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
 import static org.testng.Assert.assertEquals;
@@ -47,7 +46,7 @@ public class ScriptTypePopulatorTest
 		when(scriptTypeFactory.create(scriptRunner1Name)).thenReturn(scriptType1);
 		scriptTypePopulator.populate();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(SCRIPT_TYPE), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(scriptType1));
 	}

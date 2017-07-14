@@ -13,7 +13,6 @@ import org.molgenis.data.support.DynamicEntity;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 import static org.molgenis.data.annotation.core.entity.impl.hpo.HPOAnnotator.HPO_IDS;
 import static org.molgenis.data.annotation.core.entity.impl.hpo.HPOAnnotator.HPO_TERMS;
@@ -51,10 +50,8 @@ public class HpoResultFilter implements ResultFilter
 		StringBuilder ids = new StringBuilder();
 		StringBuilder terms = new StringBuilder();
 
-		Iterator<Entity> it = results.iterator();
-		while (it.hasNext())
+		for (Entity hpoEntity : results)
 		{
-			Entity hpoEntity = it.next();
 			if (ids.length() > 0)
 			{
 				ids.append('/');

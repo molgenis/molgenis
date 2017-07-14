@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.testng.Assert.assertEquals;
@@ -67,12 +66,12 @@ public class PackagePersisterTest extends AbstractMockitoTest
 		packagePersister.upsertPackages(Stream.of(newPackage, unchangedPackage, updatedPackage));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> addCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> addCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).add(eq(PACKAGE), addCaptor.capture());
 		assertEquals(addCaptor.getValue().collect(toList()), singletonList(newPackage));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> updateCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> updateCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).update(eq(PACKAGE), updateCaptor.capture());
 		assertEquals(updateCaptor.getValue().collect(toList()), singletonList(updatedPackage));
 	}

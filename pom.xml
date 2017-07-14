@@ -23,7 +23,15 @@
         <connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
-    <developers/>
+         
+    <developers>
+        <developer>
+            <name>MOLGENIS development team</name>
+            <email>molgenis@gmail.com</email>
+            <organization>University Medical Centre Groningen, System Genetics, Genomics Coordination Centre</organization>
+            <organizationUrl>http://www.molgenis.org</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -47,6 +55,7 @@
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
         <elasticsearch.version>5.4.1</elasticsearch.version>
         <postgres.version>9.4.1211</postgres.version>
+        <mockito.version>2.7.22</mockito.version>
     </properties>
 
     <distributionManagement>
@@ -818,7 +827,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>1.10.19</version>
+                <version>${mockito.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

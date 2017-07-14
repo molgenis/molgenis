@@ -18,7 +18,7 @@ public class HugeSetTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		hugeSet = new HugeSet<String>();
+		hugeSet = new HugeSet<>();
 	}
 
 	@AfterMethod

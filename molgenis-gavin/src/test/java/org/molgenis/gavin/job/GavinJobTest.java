@@ -31,8 +31,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import static java.io.File.separator;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
 import static org.molgenis.gavin.job.input.model.LineType.*;
@@ -115,13 +113,13 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 				gavinResult);
 
 		Iterator<Entity> iterator = Collections.<Entity>emptyList().iterator();
-		when(cadd.annotate(anyObject(), eq(true))).thenReturn(iterator);
-		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
-		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
-		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
+		when(cadd.annotate(any(), eq(true))).thenReturn(iterator);
+		when(exac.annotate(any(), eq(true))).thenReturn(iterator);
+		when(snpeff.annotate(any(), eq(false))).thenReturn(iterator);
+		when(gavin.annotate(any(), eq(false))).thenReturn(iterator);
 		when(gavinJobExecution.getIdentifier()).thenReturn("ABCDE");
 		when(gavinJobExecution.getInputFileExtension()).thenReturn("tsv");
-		when(effectStructureConverter.createVcfEntityStructure(anyObject())).thenReturn(iterator);
+		when(effectStructureConverter.createVcfEntityStructure(any())).thenReturn(iterator);
 
 		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
 				exac, snpeff, gavin, parser, annotatorRunner, gavinJobExecution);

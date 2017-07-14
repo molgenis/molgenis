@@ -1,9 +1,9 @@
 package org.molgenis.security.permission;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -77,7 +77,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	public List<Object> getEntityClassIds()
 	{
 		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
-						  .map(entity -> entity.getIdValue())
+						  .map(Entity::getIdValue)
 						  .collect(toList());
 	}
 
@@ -147,14 +147,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		if (!groupMembers.isEmpty())
 		{
-			List<Group> groups = Lists.transform(groupMembers, new Function<GroupMember, Group>()
-			{
-				@Override
-				public Group apply(GroupMember molgenisGroupMember)
-				{
-					return molgenisGroupMember.getGroup();
-				}
-			});
+			List<Group> groups = Lists.transform(groupMembers, GroupMember::getGroup);
 			List<Authority> groupAuthorities = getGroupPermissions(groups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 		}
@@ -235,9 +228,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user), UserAuthority.class);
 
 		return authorities.filter(authority ->
-		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-		}).collect(toList());
+				authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true).collect(toList());
 	}
 
 	private List<Authority> getGroupPermissions(Group group)
@@ -261,48 +252,42 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups), GroupAuthority.class);
 
 		return authorities.filter(authority ->
-		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-		}).collect(toList());
+				authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true).collect(toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)
 	{
 		Permissions permissions = new Permissions();
-		if (authorityPrefix.equals(SecurityUtils.AUTHORITY_PLUGIN_PREFIX))
+		switch (authorityPrefix)
 		{
-			List<MolgenisPlugin> plugins = this.getPlugins();
-			if (plugins != null)
-			{
-				Collections.sort(plugins, new Comparator<MolgenisPlugin>()
+			case SecurityUtils.AUTHORITY_PLUGIN_PREFIX:
+				List<MolgenisPlugin> plugins = this.getPlugins();
+				if (plugins != null)
 				{
-					@Override
-					public int compare(MolgenisPlugin o1, MolgenisPlugin o2)
-					{
-						return o1.getName().compareTo(o2.getName());
-					}
-				});
-				Map<String, String> pluginMap = new LinkedHashMap<String, String>();
-				for (MolgenisPlugin plugin : plugins)
-					pluginMap.put(plugin.getId(), plugin.getName());
-				permissions.setEntityIds(pluginMap);
-			}
+					plugins.sort(Comparator.comparing(MolgenisPlugin::getName));
+					Map<String, String> pluginMap = new LinkedHashMap<>();
+					for (MolgenisPlugin plugin : plugins)
+						pluginMap.put(plugin.getId(), plugin.getName());
+					permissions.setEntityIds(pluginMap);
+				}
+				break;
+			case SecurityUtils.AUTHORITY_ENTITY_PREFIX:
+				List<Object> entityClassIds = this.getEntityClassIds();
+				List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+						entityClassIds.stream(),
+						new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
+														  .collect(Collectors.toList());
+				if (entityClassIds != null)
+				{
+					Map<String, String> entityClassMap = new TreeMap<>();
+					for (EntityType entityType : entityTypes)
+						entityClassMap.put(entityType.getId(), entityType.getId());
+					permissions.setEntityIds(entityClassMap);
+				}
+				break;
+			default:
+				throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 		}
-		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
-		{
-			List<Object> entityClassIds = this.getEntityClassIds();
-			List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-					entityClassIds.stream(), new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE),
-					EntityType.class).collect(Collectors.toList());
-			if (entityClassIds != null)
-			{
-				Map<String, String> entityClassMap = new TreeMap<String, String>();
-				for (EntityType entityType : entityTypes)
-					entityClassMap.put(entityType.getId(), entityType.getId());
-				permissions.setEntityIds(entityClassMap);
-			}
-		}
-		else throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 
 		for (Authority authority : entityAuthorities)
 		{

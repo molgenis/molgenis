@@ -78,14 +78,8 @@ public class RScriptExecutor
 
 			// Capture the error output
 			final StringBuilder sb = new StringBuilder();
-			RStreamHandler errorHandler = new RStreamHandler(process.getErrorStream(), new ROutputHandler()
-			{
-				@Override
-				public void outputReceived(String output)
-				{
-					sb.append(output).append("\n");
-				}
-			});
+			RStreamHandler errorHandler = new RStreamHandler(process.getErrorStream(),
+					output -> sb.append(output).append("\n"));
 			errorHandler.start();
 
 			// Capture r output if an r output handler is defined
