@@ -62,4 +62,10 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 			}
 		}, null);
 	}
+
+	@Override
+	public Iterable<MolgenisPlugin> getPlugins()
+	{
+		return this;
+	}
 }

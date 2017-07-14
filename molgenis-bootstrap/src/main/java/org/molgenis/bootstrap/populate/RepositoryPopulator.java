@@ -23,18 +23,21 @@ public class RepositoryPopulator
 	private final DataService dataService;
 	private final UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator;
 	private final SystemEntityPopulator systemEntityPopulator;
+	private final PluginPopulator pluginPopulator;
 	private final SettingsPopulator settingsPopulator;
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
-			SystemEntityPopulator systemEntityPopulator, SettingsPopulator settingsPopulator,
+			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
+			SettingsPopulator settingsPopulator,
 			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
 		this.systemEntityPopulator = requireNonNull(systemEntityPopulator);
+		this.pluginPopulator = requireNonNull(pluginPopulator);
 		this.settingsPopulator = requireNonNull(settingsPopulator);
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
@@ -57,6 +60,10 @@ public class RepositoryPopulator
 			systemEntityPopulator.populate(event);
 			LOG.trace("Populated database with application entities");
 		}
+
+		LOG.trace("Populating plugin entities ...");
+		pluginPopulator.populate();
+		LOG.trace("Populated plugin entities");
 
 		LOG.trace("Populating settings entities ...");
 		settingsPopulator.initialize(event);

@@ -4,24 +4,19 @@ import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.SystemSecurityToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
+import static org.molgenis.ui.PluginMetadata.PLUGIN;
 
 @Component
 public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 {
 	private final EntityAclService entityAclService;
 
-	public MolgenisPermissionServiceImpl(EntityAclService entityAclService)
+	MolgenisPermissionServiceImpl(EntityAclService entityAclService)
 	{
 		this.entityAclService = requireNonNull(entityAclService);
 	}
@@ -29,35 +24,27 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginId, Permission permission)
 	{
-		return hasPermission(pluginId, permission, AUTHORITY_PLUGIN_PREFIX);
+		return hasPermissionOnEntity(PLUGIN, pluginId, permission);
 	}
 
 	@Override
 	public boolean hasPermissionOnEntity(String entityTypeId, Permission permission)
 	{
-		if (currentUserIsSuOrSystem())
-		{
-			return true;
-		}
-		return entityAclService.isGranted(EntityIdentity.create(ENTITY_TYPE_META_DATA, entityTypeId), permission);
+		return hasPermissionOnEntity(ENTITY_TYPE_META_DATA, entityTypeId, permission);
 	}
 
-	private boolean hasPermission(String authorityId, Permission permission, String authorityPrefix)
+	private boolean hasPermissionOnEntity(String entityTypeId, Object entityId, Permission permission)
 	{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null) return false;
-
-		String pluginAuthority = authorityPrefix + permission.toString() + '_' + authorityId;
-		Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities();
-		if (grantedAuthorities != null)
+		boolean hasPermission;
+		if (currentUserIsSuOrSystem())
 		{
-			for (GrantedAuthority grantedAuthority : grantedAuthorities)
-			{
-				String authority = grantedAuthority.getAuthority();
-				if (authority.equals(AUTHORITY_SU) || authority.equals(SystemSecurityToken.ROLE_SYSTEM) || authority
-						.equals(pluginAuthority)) return true;
-			}
+			hasPermission = true;
 		}
-		return false;
+		else
+		{
+			EntityIdentity entityIdentity = EntityIdentity.create(entityTypeId, entityId);
+			hasPermission = entityAclService.isGranted(entityIdentity, permission);
+		}
+		return hasPermission;
 	}
 }

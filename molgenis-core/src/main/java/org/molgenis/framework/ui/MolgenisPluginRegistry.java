@@ -7,4 +7,6 @@ public interface MolgenisPluginRegistry extends Iterable<MolgenisPlugin>
 	void registerPluginFactory(MolgenisPluginFactory molgenisPluginFactory);
 
 	MolgenisPlugin getPlugin(String id);
+
+	Iterable<MolgenisPlugin> getPlugins();
 }
