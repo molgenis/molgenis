@@ -9,6 +9,7 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -162,8 +163,12 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	 */
 	private LoadingCache<Object, Optional<Map<String, Object>>> createEntityCache(Repository<Entity> repository)
 	{
-		return CaffeinatedGuava.build(Caffeine.newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_ENTITY)
-				.expireAfterAccess(10, MINUTES), createCacheLoader(repository));
+		Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder().recordStats().expireAfterAccess(10, MINUTES);
+		if (!MetaDataService.isMetaEntityType(repository.getEntityType()))
+		{
+			cacheBuilder.maximumSize(MAX_CACHE_SIZE_PER_ENTITY);
+		}
+		return CaffeinatedGuava.build(cacheBuilder, createCacheLoader(repository));
 	}
 
 	/**
