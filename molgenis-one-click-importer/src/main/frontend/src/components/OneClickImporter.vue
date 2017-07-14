@@ -4,7 +4,7 @@
       <h1>One click importer</h1>
       <hr>
 
-      <vue-clip :options="options" :on-complete="importFile">
+      <vue-clip :options="options" :on-complete="importFile" class="uploader">
 
         <template slot="clip-uploader-action" scope="params">
           <div class="upload-action" :class="{'is-dragging': params.dragging}">
@@ -85,6 +85,15 @@
 
   .uploader {
     box-sizing: border-box;
+    width: 400px;
+    height: 550px;
+    display: flex;
+    border-radius: 6px;
+    box-shadow: 1px 2px 19px rgba(195, 195, 195, 0.43);
+    flex-direction: column-reverse;
+    background: #fff;
+    box-sizing: border-box;
+    padding: 2em;
   }
 
   .uploader-action .dz-message {
