@@ -46,7 +46,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
 			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(),
-					grantedAuthoritiesMapper(), null); // FIXME replace null
+					grantedAuthoritiesMapper());
 		}
 
 		@Bean
@@ -168,19 +168,19 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
 		when(plugin3.getName()).thenReturn("plugin3");
 		when(plugin1.getId()).thenReturn("plugin3");
-		when(molgenisPluginRegistry.iterator())
-				.thenReturn(Arrays.<MolgenisPlugin>asList(plugin1, plugin2, plugin3).iterator());
+		when(molgenisPluginRegistry.iterator()).thenReturn(
+				Arrays.<MolgenisPlugin>asList(plugin1, plugin2, plugin3).iterator());
 
 		when(dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(Stream.empty());
 		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), anyObject(),
-				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class)))
-				.thenReturn(Stream.empty());
+				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)),
+				eq(EntityType.class))).thenReturn(Stream.empty());
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void PluginPermissionManagerServiceImpl()
 	{
-		new PermissionManagerServiceImpl(null, null, null, null);
+		new PermissionManagerServiceImpl(null, null, null);
 	}
 
 	@Test
