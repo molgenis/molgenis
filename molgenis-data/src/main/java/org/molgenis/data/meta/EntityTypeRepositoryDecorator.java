@@ -6,15 +6,20 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Lists.reverse;
 import static com.google.common.collect.Sets.difference;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.Spliterators.spliteratorUnknownSize;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -31,11 +36,14 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 {
 	private final Repository<EntityType> decoratedRepo;
 	private final DataService dataService;
+	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-	public EntityTypeRepositoryDecorator(Repository<EntityType> decoratedRepo, DataService dataService)
+	public EntityTypeRepositoryDecorator(Repository<EntityType> decoratedRepo, DataService dataService,
+			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
+		this.entityTypeDependencyResolver = entityTypeDependencyResolver;
 	}
 
 	@Override
@@ -65,7 +73,9 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public void delete(Stream<EntityType> entities)
 	{
-		entities.forEach(this::deleteEntityType);
+		Map<String, EntityType> resolvedEntityTypes = resolveDependencies(entities.collect(toList()));
+		removeMappedByAttributes(resolvedEntityTypes);
+		resolvedEntityTypes.values().forEach(this::deleteEntityType);
 	}
 
 	@Override
@@ -83,13 +93,13 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		findAll(ids).forEach(this::deleteEntityType);
+		delete(findAll(ids));
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(this::deleteEntityType);
+		delete(stream(spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false));
 	}
 
 	@Override
@@ -168,8 +178,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
 	private Map<String, Attribute> toAttributesMap(EntityType entityType)
 	{
-		return stream(entityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getName, Function.identity()));
+		return stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
+				toMap(Attribute::getName, identity()));
 	}
 
 	private void deleteRemovedAttributesInBackend(Map<String, Attribute> attrsMap,
@@ -185,6 +195,25 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	{
 		difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream().map(attrsMap::get)
 				.forEach(addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
+	}
+
+	private LinkedHashMap<String, EntityType> resolveDependencies(List<EntityType> entityTypes)
+	{
+		List<EntityType> resolvedEntityTypes = reverse(entityTypeDependencyResolver.resolve(entityTypes));
+		return resolvedEntityTypes.stream()
+								  .collect(toMap(EntityType::getId, identity(), (u, v) -> u, LinkedHashMap::new));
+	}
+
+	/**
+	 * Removes the mappedBy attributes of each OneToMany pair in the supplied map of EntityTypes
+	 */
+	private void removeMappedByAttributes(Map<String, EntityType> resolvedEntityTypes)
+	{
+		resolvedEntityTypes.values()
+						   .stream()
+						   .flatMap(EntityType::getMappedByAttributes)
+						   .filter(attribute -> resolvedEntityTypes.containsKey(attribute.getEntity().getId()))
+						   .forEach(attribute -> dataService.delete(ATTRIBUTE_META_DATA, attribute));
 	}
 
 	private void deleteEntityType(EntityType entityType)
@@ -205,9 +234,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void deleteEntityAttributes(EntityType entityType)
 	{
 		Iterable<Attribute> rootAttrs = entityType.getOwnAttributes();
-		Stream<Attribute> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
-				attrEntity -> StreamSupport
-						.stream(new AttributeTreeTraverser().preOrderTraversal(attrEntity).spliterator(), false));
+		Stream<Attribute> allAttrs = stream(rootAttrs.spliterator(), false).flatMap(
+				attrEntity -> stream(new AttributeTreeTraverser().preOrderTraversal(attrEntity).spliterator(), false));
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
 	}
 

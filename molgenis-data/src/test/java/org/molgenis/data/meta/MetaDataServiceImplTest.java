@@ -575,15 +575,12 @@ public class MetaDataServiceImplTest
 		String entityTypeId1 = "entity1";
 		when(entityType1.getId()).thenReturn(entityTypeId1);
 
-		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
-				.thenReturn(newArrayList(entityType1, entityType0));
-
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
-		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityTypeId0, entityTypeId1));
+		ArgumentCaptor<Stream<EntityType>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
+		verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
+		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityType0, entityType1));
 		verifyNoMoreInteractions(dataService);
 	}
 
