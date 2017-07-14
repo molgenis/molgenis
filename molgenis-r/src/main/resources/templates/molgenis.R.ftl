@@ -263,11 +263,11 @@ molgenis.delete <- local(function(entity, id) {
 
 #####################################################################
 #
-# Deletes an existing entity
+# Deletes a list of entities in an entityType.
 #
 # Parameters:
-#    entity: entityname
-#    rows: vector of entityIds that should be deleted
+#    entity: The entityType name
+#    rows: List with ids of the rows
 #
 # Example: molgenis.deleteList(entity = "Person", rows = c("1", "2", "3"))
 #
