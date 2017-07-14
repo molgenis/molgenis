@@ -569,9 +569,9 @@ public class MetaDataServiceImplTest
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
-		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityTypeId0, entityTypeId1));
+		ArgumentCaptor<Stream<EntityType>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
+		verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
+		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityType0, entityType1));
 
 		verifyNoMoreInteractions(dataService);
 	}
