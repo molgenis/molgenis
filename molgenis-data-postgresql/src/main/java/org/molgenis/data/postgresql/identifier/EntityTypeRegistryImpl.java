@@ -67,6 +67,8 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	@Override
 	public EntityTypeDescription getEntityTypeDescription(String tableName)
 	{
+		Map<String, EntityTypeDescription> transactionEntityTypeDescriptionMap = transactionsEntityTypeDescriptionMap.get(
+				getTransactionId());
 		if (transactionEntityTypeDescriptionMap != null && transactionEntityTypeDescriptionMap.containsKey(tableName))
 		{
 			return transactionEntityTypeDescriptionMap.get(tableName);
