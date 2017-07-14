@@ -1,7 +1,9 @@
 package org.molgenis.data.meta;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
@@ -40,10 +42,13 @@ public class MetaDataServiceImplTest
 	private RepositoryCollectionRegistry repoCollectionRegistry;
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private PackagePersister packagePersister;
+	@Captor
+	ArgumentCaptor<Stream<EntityType>> entityIdCaptor;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		MockitoAnnotations.initMocks(this);
 		dataService = mock(DataService.class);
 		repoCollectionRegistry = mock(RepositoryCollectionRegistry.class);
 
@@ -577,8 +582,6 @@ public class MetaDataServiceImplTest
 
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<EntityType>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
 		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityType0, entityType1));
 		verifyNoMoreInteractions(dataService);
