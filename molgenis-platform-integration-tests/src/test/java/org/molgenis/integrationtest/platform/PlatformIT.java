@@ -180,8 +180,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@AfterClass
 	public void tearDown()
 	{
-		runAsSystem(() -> metaDataService
-				.deleteEntityType(asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType)));
+		entityTypeDynamic = dataService.getEntityType(entityTypeDynamic.getId());
+		refEntityTypeDynamic = dataService.getEntityType(refEntityTypeDynamic.getId());
+		selfXrefEntityType = dataService.getEntityType(selfXrefEntityType.getId());
+
+		runAsSystem(() -> metaDataService.deleteEntityType(
+				asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType)));
 	}
 
 	static List<GrantedAuthority> makeAuthorities(String entityTypeId, boolean write, boolean read, boolean count)
