@@ -182,7 +182,7 @@ rows| List with ids of the rows|yes
 **Example**
 
 ```
-molgenis.delete(entity = "Person", id = 8)
+molgenis.deleteList(entity = "Person", rows = c("1", "2", "3"))
 ```
 
 ## getEntityMetaData
