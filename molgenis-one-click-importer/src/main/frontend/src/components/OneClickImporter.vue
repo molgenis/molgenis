@@ -20,25 +20,23 @@
               <div class="file-avatar">
                 <img :src="file.dataUrl" alt="">
               </div>
-              {{ file.name }}
+              <div class="file-details">
+
+                <div class="file-name">
+                  {{ file.name }}
+                </div>
+
+                <div class="file-progress">
+                  <!--Don't you dare to change it back to span, it won't work!-->
+                  <div class="progress-indicator" :style="{width: file.progress + '%'}"></div>
+                </div>
+
+                <div class="file-meta">
+                  <div class="badge badge-default file-status"><strong>{{ file.status }}</strong></div>
+                </div>
+              </div>
             </div>
           </div>
-
-            <!--<div class="file-details">-->
-
-              <!--<div class="file-name">-->
-
-              <!--</div>-->
-
-              <!--<div class="file-progress">-->
-                <!--<div class="progress-indicator" :style="{width: file.progress + '%'}"></div>-->
-              <!--</div>-->
-
-              <!--<div class="file-meta">-->
-                <!--<div class="badge file-status"><strong>{{ file.status }}</strong></div>-->
-              <!--</div>-->
-            <!--</div>-->
-          <!--</div>-->
         </template>
 
       </vue-clip>
@@ -57,11 +55,13 @@
         options: {
           url: '/plugin/one-click-importer/upload',
           paramName: 'file',
+          // FIXME: more than one file now produces error, should clear for next
           maxFiles: {
             limit: 1,
             message: 'You can only upload one file'
           },
-          acceptedFiles: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+          // This has to be a comma separated string, don't ask me why
+          acceptedFiles: 'application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         }
       }
     },
@@ -79,7 +79,7 @@
 <style scoped>
   body {
     display: flex;
-    background: #F8F8F8;
+    background: #e8e8e8;
     font-size: 16px;
   }
 
@@ -93,14 +93,13 @@
     flex-direction: column-reverse;
     background: #fff;
     box-sizing: border-box;
-    padding: 2em;
   }
 
-  .uploader-action .dz-message {
-    color: blue;
+  .upload-action .dz-message {
+    color: #94a7c2;
     text-align: center;
     padding: 20px 40px;
-    border: 3px dashed black;
+    border: 3px dashed #dfe8fe;
     border-radius: 4px;
     font-size: 16px;
   }
@@ -111,11 +110,20 @@
   }
 
   .progress-indicator {
-    background-color: #317C9C;
-    height: 20px;
+    display: block;
+    background-color: #00d28a;
+    border-radius: 8px;
+    height: 4px;
+  }
+
+  .upload-action {
+    background: #f1f5ff;
+    padding: 20px;
+    cursor: pointer;
+    transition: background 300ms ease;
   }
 
   .upload-action.is-dragging {
-    background: #317C9C;
+    background: #00d28a;
   }
 </style>
