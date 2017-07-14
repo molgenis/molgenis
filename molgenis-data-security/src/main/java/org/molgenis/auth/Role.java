@@ -29,9 +29,10 @@ public class Role extends StaticEntity
 		return getString(ID);
 	}
 
-	public void setId(String id)
+	public Role setId(String id)
 	{
 		set(ID, id);
+		return this;
 	}
 
 	public String getLabel()
@@ -39,8 +40,9 @@ public class Role extends StaticEntity
 		return getString(RoleMetadata.LABEL);
 	}
 
-	public void setLabel(String label)
+	public Role setLabel(String label)
 	{
 		set(RoleMetadata.LABEL, label);
+		return this;
 	}
 }

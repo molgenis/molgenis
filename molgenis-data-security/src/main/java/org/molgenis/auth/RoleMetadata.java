@@ -13,7 +13,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 public class RoleMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Role";
-	public static final String GROUP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String ROLE = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String LABEL = "label";
