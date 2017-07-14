@@ -18,12 +18,12 @@ public abstract class Authority extends StaticEntity
 		super(entityType);
 	}
 
-	public String getRole()
+	public Role getRole()
 	{
-		return getString(ROLE);
+		return getEntity(ROLE, Role.class);
 	}
 
-	public void setRole(String role)
+	public void setRole(Role role)
 	{
 		set(ROLE, role);
 	}

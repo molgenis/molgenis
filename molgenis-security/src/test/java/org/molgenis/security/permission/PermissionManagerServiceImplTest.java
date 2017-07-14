@@ -10,7 +10,6 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -107,30 +106,31 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(Stream.of(groupMember1));
 
+		// FIXME use EntityAclService
 		groupPlugin1Authority = mock(GroupAuthority.class);
-		when(groupPlugin1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin1");
+		//		when(groupPlugin1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin1");
 		when(groupPlugin1Authority.getGroup()).thenReturn(group1);
 		groupPlugin2Authority = mock(GroupAuthority.class);
-		when(groupPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
+		//		when(groupPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
 		when(groupPlugin2Authority.getGroup()).thenReturn(group1);
 		groupEntity1Authority = mock(GroupAuthority.class);
-		when(groupEntity1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity1");
+		//		when(groupEntity1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity1");
 		when(groupEntity1Authority.getGroup()).thenReturn(group1);
 		groupEntity2Authority = mock(GroupAuthority.class);
-		when(groupEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
+		//		when(groupEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
 		when(groupEntity2Authority.getGroup()).thenReturn(group1);
 
 		userPlugin2Authority = mock(UserAuthority.class);
-		when(userPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
+		//		when(userPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
 		when(userPlugin2Authority.getUser()).thenReturn(user1);
 		userPlugin3Authority = mock(UserAuthority.class);
-		when(userPlugin3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin3");
+		//		when(userPlugin3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin3");
 		when(userPlugin3Authority.getUser()).thenReturn(user1);
 		userEntity2Authority = mock(UserAuthority.class);
-		when(userEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
+		//		when(userEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
 		when(userEntity2Authority.getUser()).thenReturn(user1);
 		userEntity3Authority = mock(UserAuthority.class);
-		when(userEntity3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity3");
+		//		when(userEntity3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity3");
 		when(userEntity3Authority.getUser()).thenReturn(user1);
 
 		when(dataService.findAll(GROUP, Group.class)).thenReturn(Stream.of(group1));

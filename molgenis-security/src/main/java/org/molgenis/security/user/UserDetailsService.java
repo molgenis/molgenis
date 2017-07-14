@@ -22,8 +22,8 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.auth.UserMetaData.USER;
 
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
 {
@@ -45,8 +45,8 @@ public class UserDetailsService implements org.springframework.security.core.use
 	{
 		try
 		{
-			User user = dataService
-					.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username), User.class);
+			User user = dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
+					User.class);
 
 			if (user == null) throw new UsernameNotFoundException("unknown user '" + username + "'");
 
@@ -70,19 +70,19 @@ public class UserDetailsService implements org.springframework.security.core.use
 					@Override
 					public GrantedAuthority apply(Authority authority)
 					{
-						return new SimpleGrantedAuthority(authority.getRole());
+						return new SimpleGrantedAuthority("ROLE_" + authority.getRole().getId());
 					}
 				}) : null;
 
 		// // user group authorities
 		List<GroupAuthority> groupAuthorities = getGroupAuthorities(user);
-		List<GrantedAuthority> grantedGroupAuthorities = groupAuthorities != null ? Lists
-				.transform(groupAuthorities, new Function<GroupAuthority, GrantedAuthority>()
+		List<GrantedAuthority> grantedGroupAuthorities = groupAuthorities != null ? Lists.transform(groupAuthorities,
+				new Function<GroupAuthority, GrantedAuthority>()
 				{
 					@Override
 					public GrantedAuthority apply(GroupAuthority groupAuthority)
 					{
-						return new SimpleGrantedAuthority(groupAuthority.getRole());
+						return new SimpleGrantedAuthority("ROLE_" + groupAuthority.getRole().getId());
 					}
 				}) : null;
 
@@ -93,6 +93,10 @@ public class UserDetailsService implements org.springframework.security.core.use
 		if (user.isSuperuser() != null && user.isSuperuser().booleanValue() == true)
 		{
 			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+		}
+		if (user.getUsername().equals(SecurityUtils.ANONYMOUS_USERNAME))
+		{
+			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
 		}
 		return grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities);
 	}
@@ -105,9 +109,8 @@ public class UserDetailsService implements org.springframework.security.core.use
 
 	private List<GroupAuthority> getGroupAuthorities(User user)
 	{
-		List<GroupMember> groupMembers = dataService
-				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-						GroupMember.class).collect(toList());
+		List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
@@ -120,9 +123,9 @@ public class UserDetailsService implements org.springframework.security.core.use
 				}
 			});
 
-			return dataService
-					.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
-							GroupAuthority.class).collect(toList());
+			return dataService.findAll(GROUP_AUTHORITY,
+					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups), GroupAuthority.class)
+							  .collect(toList());
 		}
 		return null;
 	}

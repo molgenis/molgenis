@@ -9,7 +9,6 @@ import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -21,8 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -38,7 +35,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -51,7 +49,6 @@ import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.importer.wizard.ImportWizardController.URI;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.security.core.Permission.*;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 @Controller
@@ -192,63 +189,63 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-
-		dataService.getEntityTypeIds().forEach(entityClassId ->
-		{
-			GroupAuthority authority = getGroupAuthority(groupId, entityClassId.toString());
-
-			boolean newGroupAuthority;
-			if (authority == null)
-			{
-				newGroupAuthority = true;
-				authority = groupAuthorityFactory.create();
-			}
-			else
-			{
-				newGroupAuthority = false;
-			}
-
-			String param = "radio-" + entityClassId;
-			String value = webRequest.getParameter(param);
-			if (value != null && (
-					SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
-							|| userAccountService.getCurrentUser().isSuperuser()))
-			{
-				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
-						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
-				{
-					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
-					authority
-							.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
-					if (newGroupAuthority)
-					{
-						authority.setId(UUID.randomUUID().toString());
-						dataService.add(GROUP_AUTHORITY, authority);
-					}
-					else
-					{
-						dataService.update(GROUP_AUTHORITY, authority);
-					}
-				}
-				else if (value.equalsIgnoreCase(NONE.toString()))
-				{
-					if (authority.getId() != null)
-					{
-						dataService.deleteById(GROUP_AUTHORITY, authority.getId());
-					}
-				}
-				else
-				{
-					throw new RuntimeException(
-							"Unknown value: " + value + " for permission on entity: " + entityClassId);
-				}
-			}
-			else
-			{
-				if (value != null) throw new MolgenisDataAccessException(
-						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
-			}
-		});
+		// FIXME use EntityAclService
+		//		dataService.getEntityTypeIds().forEach(entityClassId ->
+		//		{
+		//			GroupAuthority authority = getGroupAuthority(groupId, entityClassId.toString());
+		//
+		//			boolean newGroupAuthority;
+		//			if (authority == null)
+		//			{
+		//				newGroupAuthority = true;
+		//				authority = groupAuthorityFactory.create();
+		//			}
+		//			else
+		//			{
+		//				newGroupAuthority = false;
+		//			}
+		//
+		//			String param = "radio-" + entityClassId;
+		//			String value = webRequest.getParameter(param);
+		//			if (value != null && (
+		//					SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
+		//							|| userAccountService.getCurrentUser().isSuperuser()))
+		//			{
+		//				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
+		//						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
+		//				{
+		//					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
+		//					authority
+		//							.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
+		//					if (newGroupAuthority)
+		//					{
+		//						authority.setId(UUID.randomUUID().toString());
+		//						dataService.add(GROUP_AUTHORITY, authority);
+		//					}
+		//					else
+		//					{
+		//						dataService.update(GROUP_AUTHORITY, authority);
+		//					}
+		//				}
+		//				else if (value.equalsIgnoreCase(NONE.toString()))
+		//				{
+		//					if (authority.getId() != null)
+		//					{
+		//						dataService.deleteById(GROUP_AUTHORITY, authority.getId());
+		//					}
+		//				}
+		//				else
+		//				{
+		//					throw new RuntimeException(
+		//							"Unknown value: " + value + " for permission on entity: " + entityClassId);
+		//				}
+		//			}
+		//			else
+		//			{
+		//				if (value != null) throw new MolgenisDataAccessException(
+		//						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
+		//			}
+		//		});
 	}
 
 	private List<Authority> getGroupPermissions(Group group)
@@ -262,108 +259,109 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		Permissions permissions = new Permissions();
 
-		if (entityTypes != null)
-		{
-			Map<String, String> entityClassMap = new TreeMap<>();
-			for (EntityType entityType : entityTypes)
-			{
-				entityClassMap.put(entityType.getId(), entityType.getId());
-			}
-			permissions.setEntityIds(entityClassMap);
-		}
-
-		for (Authority authority : entityAuthorities)
-		{
-
-			// add permissions for authorities that match prefix
-			if (authority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
-			{
-				Permission permission = new Permission();
-
-				String authorityType = getAuthorityType(authority.getRole());
-				String authorityPluginId = getAuthorityEntityId(authority.getRole());
-				permission.setType(authorityType);
-				if (authority instanceof GroupAuthority)
-				{
-					permission.setGroup(((GroupAuthority) authority).getGroup().getName());
-					permissions.addGroupPermission(authorityPluginId, permission);
-				}
-			}
-
-			// add permissions for inherited authorities from authority that match prefix
-			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
-			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper
-					.mapAuthorities(Collections.singletonList(grantedAuthority));
-			hierarchyAuthorities.remove(grantedAuthority);
-
-			for (GrantedAuthority hierarchyAuthority : hierarchyAuthorities)
-			{
-				if (hierarchyAuthority.getAuthority().startsWith(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
-				{
-					String authorityPluginId = getAuthorityEntityId(hierarchyAuthority.getAuthority());
-
-					Permission hierarchyPermission = new Permission();
-					hierarchyPermission.setType(getAuthorityType(hierarchyAuthority.getAuthority()));
-					permissions.addHierarchyPermission(authorityPluginId, hierarchyPermission);
-				}
-			}
-		}
-
-		permissions.sort();
+		// FIXME use EntityAclService
+		//		if (entityTypes != null)
+		//		{
+		//			Map<String, String> entityClassMap = new TreeMap<>();
+		//			for (EntityType entityType : entityTypes)
+		//			{
+		//				entityClassMap.put(entityType.getId(), entityType.getId());
+		//			}
+		//			permissions.setEntityIds(entityClassMap);
+		//		}
+		//
+		//		for (Authority authority : entityAuthorities)
+		//		{
+		//
+		//			// add permissions for authorities that match prefix
+		//			if (authority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
+		//			{
+		//				Permission permission = new Permission();
+		//
+		//				String authorityType = getAuthorityType(authority.getRole());
+		//				String authorityPluginId = getAuthorityEntityId(authority.getRole());
+		//				permission.setType(authorityType);
+		//				if (authority instanceof GroupAuthority)
+		//				{
+		//					permission.setGroup(((GroupAuthority) authority).getGroup().getName());
+		//					permissions.addGroupPermission(authorityPluginId, permission);
+		//				}
+		//			}
+		//
+		//			// add permissions for inherited authorities from authority that match prefix
+		//			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
+		//			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper
+		//					.mapAuthorities(Collections.singletonList(grantedAuthority));
+		//			hierarchyAuthorities.remove(grantedAuthority);
+		//
+		//			for (GrantedAuthority hierarchyAuthority : hierarchyAuthorities)
+		//			{
+		//				if (hierarchyAuthority.getAuthority().startsWith(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
+		//				{
+		//					String authorityPluginId = getAuthorityEntityId(hierarchyAuthority.getAuthority());
+		//
+		//					Permission hierarchyPermission = new Permission();
+		//					hierarchyPermission.setType(getAuthorityType(hierarchyAuthority.getAuthority()));
+		//					permissions.addHierarchyPermission(authorityPluginId, hierarchyPermission);
+		//				}
+		//			}
+		//		}
+		//
+		//		permissions.sort();
 
 		return permissions;
 	}
 
-	/**
-	 * Returns a group authority based on group and entity class identifier.
-	 *
-	 * @param groupId       group identifier
-	 * @param entityClassId entity class identifier
-	 * @return existing group authority or <code>null</code> if no matching group authority exists.
-	 */
-	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
-	{
-		Stream<GroupAuthority> stream = dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId),
-						GroupAuthority.class);
-		GroupAuthority existingGroupAuthority = null;
-		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
-		{
-			GroupAuthority groupAuthority = it.next();
-			String entity = "";
-			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX) || groupAuthority
-					.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
-			{
-				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
-			}
-			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX))
-			{
-				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX.length());
-			}
-			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX))
-			{
-				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX.length());
-			}
-			if (entity.equals(entityClassId))
-			{
-				existingGroupAuthority = groupAuthority;
-			}
-		}
-		return existingGroupAuthority;
-
-	}
-
-	private String getAuthorityEntityId(String role)
-	{
-		role = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
-		return role.substring(role.indexOf('_') + 1).toLowerCase();
-	}
-
-	private String getAuthorityType(String role)
-	{
-		role = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
-		return role.substring(0, role.indexOf('_')).toLowerCase();
-	}
+	//	/**
+	//	 * Returns a group authority based on group and entity class identifier.
+	//	 *
+	//	 * @param groupId       group identifier
+	//	 * @param entityClassId entity class identifier
+	//	 * @return existing group authority or <code>null</code> if no matching group authority exists.
+	//	 */
+	//	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
+	//	{
+	//		Stream<GroupAuthority> stream = dataService
+	//				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId),
+	//						GroupAuthority.class);
+	//		GroupAuthority existingGroupAuthority = null;
+	//		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
+	//		{
+	//			GroupAuthority groupAuthority = it.next();
+	//			String entity = "";
+	//			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX) || groupAuthority
+	//					.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
+	//			{
+	//				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
+	//			}
+	//			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX))
+	//			{
+	//				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX.length());
+	//			}
+	//			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX))
+	//			{
+	//				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX.length());
+	//			}
+	//			if (entity.equals(entityClassId))
+	//			{
+	//				existingGroupAuthority = groupAuthority;
+	//			}
+	//		}
+	//		return existingGroupAuthority;
+	//
+	//	}
+	//
+	//	private String getAuthorityEntityId(String role)
+	//	{
+	//		role = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
+	//		return role.substring(role.indexOf('_') + 1).toLowerCase();
+	//	}
+	//
+	//	private String getAuthorityType(String role)
+	//	{
+	//		role = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
+	//		return role.substring(0, role.indexOf('_')).toLowerCase();
+	//	}
 
 	/**
 	 * Imports entities present in the submitted file

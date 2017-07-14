@@ -237,7 +237,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		return authorities.filter(authority ->
 		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
+			return authorityPrefix != null ? authority.getRole().getId().startsWith(authorityPrefix) : true;
 		}).collect(toList());
 	}
 
@@ -264,7 +264,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		return authorities.filter(authority ->
 		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
+			return authorityPrefix != null ? authority.getRole().getId().startsWith(authorityPrefix) : true;
 		}).collect(toList());
 	}
 
@@ -311,12 +311,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		{
 
 			// add permissions for authorities that match prefix
-			if (authority.getRole().startsWith(authorityPrefix))
+			if (authority.getRole().getId().startsWith(authorityPrefix))
 			{
 				Permission permission = new Permission();
 
-				String authorityType = getAuthorityType(authority.getRole(), authorityPrefix);
-				String authorityPluginId = getAuthorityEntityId(authority.getRole(), authorityPrefix);
+				String authorityType = getAuthorityType(authority.getRole().getId(), authorityPrefix);
+				String authorityPluginId = getAuthorityEntityId(authority.getRole().getId(), authorityPrefix);
 				permission.setType(authorityType);
 				if (authority instanceof GroupAuthority)
 				{
@@ -330,7 +330,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			}
 
 			// add permissions for inherited authorities from authority that match prefix
-			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
+			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole().getId());
 			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper
 					.mapAuthorities(Collections.singletonList(grantedAuthority));
 			hierarchyAuthorities.remove(grantedAuthority);
