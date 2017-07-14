@@ -118,7 +118,7 @@ public class MultiFileResourceTest extends AbstractMockitoTest
 	public void whenConfigsChangeThenIsAvailableUpdates() throws IOException
 	{
 		SingleResourceConfig chrom5Config = Mockito.mock(SingleResourceConfig.class);
-		when(config.getConfigs()).thenReturn(ImmutableMap.<String, ResourceConfig>of("5", chrom5Config));
+		when(config.getConfigs()).thenReturn(ImmutableMap.of("5", chrom5Config));
 
 		File chrom5File = new File("Bogus");
 		when(chrom5Config.getFile()).thenReturn(chrom5File);

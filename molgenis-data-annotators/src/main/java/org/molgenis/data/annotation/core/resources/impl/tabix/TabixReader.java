@@ -146,7 +146,7 @@ public class TabixReader
 
 	public static String readLine(final InputStream is) throws IOException
 	{
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		int c;
 		while ((c = is.read()) >= 0 && c != '\n') buf.append((char) c);
 		if (c < 0) return null;
@@ -236,8 +236,7 @@ public class TabixReader
 
 	private int chr2tid(final String chr)
 	{
-		if (mChr2tid.containsKey(chr)) return mChr2tid.get(chr);
-		else return -1;
+		return mChr2tid.getOrDefault(chr, -1);
 	}
 
 	/**

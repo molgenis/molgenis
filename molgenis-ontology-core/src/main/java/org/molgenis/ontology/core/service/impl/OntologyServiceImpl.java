@@ -65,7 +65,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.size() == 0)
 		{
-			return Lists.<OntologyTerm>newArrayList();
+			return Lists.newArrayList();
 		}
 		return ontologyTermRepository.findExcatOntologyTerms(ontologyIds, terms, pageSize);
 	}
@@ -75,7 +75,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.size() == 0)
 		{
-			return Lists.<OntologyTerm>newArrayList();
+			return Lists.newArrayList();
 		}
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}

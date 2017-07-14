@@ -323,7 +323,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		Query<Entity> q = new QueryImpl<>().in(boolAttrName, values);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
 		QueryBuilder expectedQuery = constantScoreQuery(
-				termsQuery(boolAttrName, new Object[] { Boolean.TRUE, Boolean.FALSE }));
+				termsQuery(boolAttrName, Boolean.TRUE, Boolean.FALSE));
 		assertQueryBuilderEquals(query, expectedQuery);
 	}
 

@@ -57,7 +57,7 @@ public class MenuMolgenisUiTest
 		String id = "id1";
 		subMenu.setId(id);
 		subMenu.setType(MenuItemType.MENU);
-		menu.setItems(Collections.<MenuItem>singletonList(subMenu));
+		menu.setItems(Collections.singletonList(subMenu));
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		assertNotNull(menuMolgenisUi.getMenu(id));
 	}

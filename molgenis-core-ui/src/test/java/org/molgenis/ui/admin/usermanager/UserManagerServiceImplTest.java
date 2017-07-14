@@ -334,7 +334,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private void setSecurityContextSuperUser()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 		SecurityContextHolder.getContext()
 							 .setAuthentication(new UsernamePasswordAuthenticationToken(null, null, authorities));
@@ -342,7 +342,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private void setSecurityContextNonSuperUserWrite()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "USERMANAGER"),
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "USERMANAGER"));
 		SecurityContextHolder.getContext()

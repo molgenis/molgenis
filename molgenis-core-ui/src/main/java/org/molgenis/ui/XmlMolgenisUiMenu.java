@@ -116,7 +116,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	@Override
 	public List<MolgenisUiMenu> getBreadcrumb()
 	{
-		if (parentMenu == null) return Collections.<MolgenisUiMenu>singletonList(this);
+		if (parentMenu == null) return Collections.singletonList(this);
 		List<MolgenisUiMenu> breadcrumb = new ArrayList<>();
 		for (MolgenisUiMenu menu = this; menu != null; menu = menu.getParentMenu())
 			breadcrumb.add(menu);

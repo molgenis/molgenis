@@ -7,23 +7,23 @@ import static org.testng.Assert.assertEquals;
 
 public class CategoryMappingTest
 {
-	private CategoryMapping<String, String> mapping = CategoryMapping.<String, String>create("blah",
-			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"));
+	private CategoryMapping<String, String> mapping = CategoryMapping.create("blah",
+			ImmutableMap.of("Human", "1", "Orc", "2"));
 
 	private CategoryMapping<String, String> mappingWithNullValueInMap = CategoryMapping.create(
 			"$('LifeLines_GENDER').map({\"0\":null,\"1\":\"0\"}).value();");
 
-	private CategoryMapping<String, String> mappingWithDefault = CategoryMapping.<String, String>create("blah",
-			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), "3");
+	private CategoryMapping<String, String> mappingWithDefault = CategoryMapping.create("blah",
+			ImmutableMap.of("Human", "1", "Orc", "2"), "3");
 
-	private CategoryMapping<String, String> mappingWithDefaultNull = CategoryMapping.<String, String>create("blah",
-			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), null);
+	private CategoryMapping<String, String> mappingWithDefaultNull = CategoryMapping.create("blah",
+			ImmutableMap.of("Human", "1", "Orc", "2"), null);
 
-	private CategoryMapping<String, String> mappingWithNullValue = CategoryMapping.<String, String>create("blah",
-			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), "3", "5");
+	private CategoryMapping<String, String> mappingWithNullValue = CategoryMapping.create("blah",
+			ImmutableMap.of("Human", "1", "Orc", "2"), "3", "5");
 
-	private CategoryMapping<String, String> mappingWithNullValueEqualsNull = CategoryMapping.<String, String>create(
-			"blah", ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), "3", null);
+	private CategoryMapping<String, String> mappingWithNullValueEqualsNull = CategoryMapping.create(
+			"blah", ImmutableMap.of("Human", "1", "Orc", "2"), "3", null);
 
 	@Test
 	public void testCreateFromAlgorithm()

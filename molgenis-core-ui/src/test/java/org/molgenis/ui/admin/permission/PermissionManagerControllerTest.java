@@ -1,7 +1,7 @@
 package org.molgenis.ui.admin.permission;
 
-import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.Group;
+import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
@@ -101,8 +101,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(user1.isSuperuser()).thenReturn(true);
 		user2 = when(mock(User.class).getId()).thenReturn("2").getMock();
 		when(user2.isSuperuser()).thenReturn(false);
-		when(permissionManagerService.getUsers()).thenReturn(Arrays.<User>asList(user1, user2));
-		when(permissionManagerService.getGroups()).thenReturn(Arrays.<Group>asList(group1, group2));
+		when(permissionManagerService.getUsers()).thenReturn(Arrays.asList(user1, user2));
+		when(permissionManagerService.getGroups()).thenReturn(Arrays.asList(group1, group2));
 
 	}
 

@@ -97,11 +97,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				}
 
 			}
-			catch (RuntimeException e)
-			{
-				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
-			}
-			catch (IOException e)
+			catch (RuntimeException | IOException e)
 			{
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}

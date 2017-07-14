@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -89,10 +88,8 @@ public class OntologyImportService implements ImportService
 
 		if (ontologyExists) throw new MolgenisDataException("The ontology you are trying to import already exists");
 
-		Iterator<String> it = source.getEntityTypeIds().iterator();
-		while (it.hasNext())
+		for (String entityTypeId : source.getEntityTypeIds())
 		{
-			String entityTypeId = it.next();
 			report.getSheetsImportable().put(entityTypeId, !ontologyExists);
 		}
 		return report;

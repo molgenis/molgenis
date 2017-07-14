@@ -425,17 +425,16 @@ public class RestController
 				if (sortOrderArray != null && sortOrderArray.length == 1 && StringUtils.isNotEmpty(sortOrderArray[0]))
 				{
 					String sortOrder = sortOrderArray[0];
-					if (sortOrder.equals("ASC"))
+					switch (sortOrder)
 					{
-						order = Sort.Direction.ASC;
-					}
-					else if (sortOrder.equals("DESC"))
-					{
-						order = Sort.Direction.DESC;
-					}
-					else
-					{
-						throw new RuntimeException("unknown sort order");
+						case "ASC":
+							order = Sort.Direction.ASC;
+							break;
+						case "DESC":
+							order = Sort.Direction.DESC;
+							break;
+						default:
+							throw new RuntimeException("unknown sort order");
 					}
 				}
 				q.sort().on(sortAttribute, order);
@@ -1172,7 +1171,7 @@ public class RestController
 			sort = null;
 		}
 
-		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule>emptyList() : request.getQ();
+		List<QueryRule> queryRules = request.getQ() == null ? Collections.emptyList() : request.getQ();
 		Query<Entity> q = new QueryImpl<>(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
 		Iterable<Entity> it = () -> dataService.findAll(entityTypeId, q).iterator();

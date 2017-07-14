@@ -153,7 +153,7 @@ public class TabixVcfRepository extends VcfRepository
 	protected Collection<String> getLines(
 			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator)
 	{
-		Builder<String> builder = ImmutableList.<String>builder();
+		Builder<String> builder = ImmutableList.builder();
 		if (iterator != null)
 		{
 			try

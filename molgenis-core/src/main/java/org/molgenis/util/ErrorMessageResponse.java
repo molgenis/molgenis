@@ -26,7 +26,7 @@ public class ErrorMessageResponse
 
 	public List<ErrorMessage> getErrors()
 	{
-		return errors != null ? errors : Collections.<ErrorMessage>emptyList();
+		return errors != null ? errors : Collections.emptyList();
 	}
 
 	public void addErrorMessage(ErrorMessage errorMessage)
