@@ -114,20 +114,27 @@ public class EntityAclManagerImpl implements EntityAclManager
 			acl = aclService.createAcl(objectIdentity);
 		}
 		Attribute attribute = entity.getEntityType().getEntityLevelSecurityInheritance();
-		Entity inheritedEntity = attribute != null ? entity.getEntity(attribute.getName()) : null;
-
 		Acl parentAcl;
-		if (inheritedEntity != null)
+		if (attribute != null)
 		{
-			parentAcl = readDomainAcl(inheritedEntity);
-			if (parentAcl == null)
+			Entity inheritedEntity = attribute != null ? entity.getEntity(attribute.getName()) : null;
+
+			if (inheritedEntity != null)
 			{
-				parentAcl = createDomainAcl(inheritedEntity, emptyList());
+				parentAcl = readDomainAcl(inheritedEntity);
+				if (parentAcl == null)
+				{
+					parentAcl = createDomainAcl(inheritedEntity, emptyList());
+				}
+			}
+			else
+			{
+				parentAcl = null;
 			}
 		}
 		else
 		{
-			parentAcl = null;
+			parentAcl = createDomainAcl(entity.getEntityType(), emptyList());
 		}
 		acl.setParent(parentAcl);
 
