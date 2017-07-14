@@ -1070,7 +1070,7 @@ public class MetaDataServiceImplTest
 	public void isMetaEntityType(String entityTypeId, boolean isMeta)
 	{
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-		assertEquals(metaDataServiceImpl.isMetaEntityType(entityType), isMeta);
+		assertEquals(MetaDataService.isMetaEntityType(entityType), isMeta);
 	}
 
 	@Test
