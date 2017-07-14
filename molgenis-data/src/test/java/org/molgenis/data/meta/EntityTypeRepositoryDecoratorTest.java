@@ -15,6 +15,7 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -204,6 +205,10 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(entityType1.getMappedByAttributes()).thenReturn(Stream.of(mappedByAttribute));
 		when(entityType2.getMappedByAttributes()).thenReturn(Stream.empty());
 		when(entityTypeDependencyResolver.resolve(any())).thenReturn(asList(entityType1, entityType2));
+
+		when(entityType1.getOwnAttributes()).thenReturn(Collections.emptyList());
+		when(entityType2.getOwnAttributes()).thenReturn(Collections.emptyList());
+
 		InOrder repositoryCollectionInOrder = inOrder(repositoryCollection);
 		InOrder decoratedRepoInOrder = inOrder(decoratedRepo);
 
