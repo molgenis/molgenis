@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -469,8 +470,18 @@ public class MetaDataServiceImpl implements MetaDataService
 	public Stream<EntityType> getEntityTypes()
 	{
 		List<EntityType> entityTypeList = newArrayList();
-		dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
-				.forEachBatched(getEntityTypeFetch(), entityTypeList::addAll, 1000);
+		Fetch entityTypeFetch = getEntityTypeFetch();
+
+		final int pageSize = 1000;
+		for (int page = 0; entityTypeList.size() == page * pageSize; page++)
+		{
+			QueryImpl<EntityType> query = new QueryImpl<>();
+			query.setFetch(entityTypeFetch);
+			query.setPageSize(pageSize);
+			query.setOffset(page * pageSize);
+			dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).forEach(entityTypeList::add);
+		}
+
 		return entityTypeList.stream();
 	}
 
