@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.ListIterator;
 
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -77,15 +76,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		}
 
 		// Remove default package
-		ListIterator<PackageSearchResultItem> it = results.listIterator();
-		while (it.hasNext())
-		{
-			PackageSearchResultItem item = it.next();
-			if (item.getPackageFound().getId().equals("default"))
-			{
-				it.remove();
-			}
-		}
+		results.removeIf(item -> item.getPackageFound().getId().equals("default"));
 
 		return results;
 	}

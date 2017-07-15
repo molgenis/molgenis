@@ -79,7 +79,7 @@ public class JobsController extends MolgenisPluginController
 	{
 		final List<Entity> jobs = new ArrayList<>();
 
-		Instant weekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
+		Instant weekAgo = Instant.now().minus(7, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
 		User currentUser = userAccountService.getCurrentUser();
 
 		dataService.getMeta()

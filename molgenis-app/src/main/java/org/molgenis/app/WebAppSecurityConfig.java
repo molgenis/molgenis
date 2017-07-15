@@ -39,7 +39,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	protected void configureUrlAuthorization(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
-		List<AccessDecisionVoter<?>> listOfVoters = new ArrayList<AccessDecisionVoter<?>>();
+		List<AccessDecisionVoter<?>> listOfVoters = new ArrayList<>();
 		listOfVoters.add(new WebExpressionVoter());
 		listOfVoters.add(new MolgenisAccessDecisionVoter());
 		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
@@ -54,8 +54,6 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 									  .antMatchers("/fdp/**").permitAll()
 
 									  .antMatchers("/annotators/**").authenticated()
-
-									  .antMatchers("/metadata-manager-service/**").authenticated()
 
 									  .antMatchers("/charts/**").authenticated();
 	}

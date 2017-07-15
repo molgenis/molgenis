@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.reverse;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -173,20 +173,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			return;
 		}
 
-		List<EntityType> resolvedEntityTypes = reverse(entityTypeDependencyResolver.resolve(entityTypes));
-
-		// 1st pass: remove mappedBy attributes
-		List<EntityType> mappedByEntityTypes = resolvedEntityTypes.stream()
-																  .filter(EntityType::hasMappedByAttributes)
-																  .map(EntityTypeWithoutMappedByAttributes::new)
-																  .collect(toList());
-		if (!mappedByEntityTypes.isEmpty())
-		{
-			dataService.update(ENTITY_TYPE_META_DATA, mappedByEntityTypes.stream());
-		}
-
-		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getId));
+		dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
 
 		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
 	}
@@ -477,8 +464,19 @@ public class MetaDataServiceImpl implements MetaDataService
 	public Stream<EntityType> getEntityTypes()
 	{
 		List<EntityType> entityTypeList = newArrayList();
-		dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
-				   .forEachBatched(getEntityTypeFetch(), entityTypeList::addAll, 1000);
+		Fetch entityTypeFetch = getEntityTypeFetch();
+
+		// Fetch the entitytypes page by page so that the results can be cached
+		final int pageSize = 1000;
+		for (int page = 0; entityTypeList.size() == page * pageSize; page++)
+		{
+			QueryImpl<EntityType> query = new QueryImpl<>();
+			query.setFetch(entityTypeFetch);
+			query.setPageSize(pageSize);
+			query.setOffset(page * pageSize);
+			dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).forEach(entityTypeList::add);
+		}
+
 		return entityTypeList.stream();
 	}
 
@@ -579,21 +577,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	public boolean hasBackend(String backendName)
 	{
 		return repoCollectionRegistry.hasRepositoryCollection(backendName);
-	}
-
-	@Override
-	public boolean isMetaEntityType(EntityType entityType)
-	{
-		switch (entityType.getId())
-		{
-			case ENTITY_TYPE_META_DATA:
-			case ATTRIBUTE_META_DATA:
-			case TAG:
-			case PACKAGE:
-				return true;
-			default:
-				return false;
-		}
 	}
 
 	@Override

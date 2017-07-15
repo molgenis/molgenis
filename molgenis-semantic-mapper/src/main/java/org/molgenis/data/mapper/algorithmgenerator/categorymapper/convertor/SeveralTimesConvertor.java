@@ -26,7 +26,7 @@ public class SeveralTimesConvertor extends AmountConvertor
 	public boolean matchCriteria(String description)
 	{
 		String lowerCase = description.toLowerCase();
-		return CRITERIA.stream().anyMatch(keyWord -> lowerCase.contains(keyWord));
+		return CRITERIA.stream().anyMatch(lowerCase::contains);
 	}
 
 	AmountWrapper getInternalAmount(String description)

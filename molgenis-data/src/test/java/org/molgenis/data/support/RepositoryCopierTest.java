@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;

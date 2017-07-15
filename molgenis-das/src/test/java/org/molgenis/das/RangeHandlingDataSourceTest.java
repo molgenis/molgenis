@@ -31,19 +31,19 @@ public class RangeHandlingDataSourceTest
 	public void setUp() throws DataSourceException, MalformedURLException
 	{
 		dataService = mock(DataService.class);
-		HashMap<URL, String> linkout = new HashMap<URL, String>();
+		HashMap<URL, String> linkout = new HashMap<>();
 		linkout.put(new URL("http://www.molgenis.org/"), "Link");
 
-		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
+		List<DasTarget> dasTarget = new ArrayList<>();
 
 		dasTarget.add(new MolgenisDasTarget("vatiant_identifier", 0, 1000, "name,variant_description"));
-		List<String> notes = new ArrayList<String>();
+		List<String> notes = new ArrayList<>();
 		notes.add("track:");
 		notes.add("source:MOLGENIS");
 		dasFeature = new DasFeature("vatiant_identifier", "name,variant_description", new DasType("0", "", "", "type"),
-				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, new Double(0),
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, 0d,
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
-				dasTarget, new ArrayList<String>(), null);
+				dasTarget, new ArrayList<>(), null);
 		source = new TestDataSource();
 	}
 
@@ -58,14 +58,14 @@ public class RangeHandlingDataSourceTest
 	{
 		DasFeature dasFeatureUnderTest = source.createDasFeature(0, 1000, "vatiant_identifier", "name",
 				"variant_description", "http://www.molgenis.org/", new DasType("0", "", "", "type"),
-				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), "", "", new ArrayList<String>());
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), "", "", new ArrayList<>());
 		assertEquals(dasFeature, dasFeatureUnderTest);
 	}
 
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
 	public void getFeatures() throws UnimplementedFeatureException, DataSourceException
 	{
-		source.getFeatures(new ArrayList<String>(), new Integer(-1), null);
+		source.getFeatures(new ArrayList<>(), -1, null);
 	}
 
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
@@ -84,7 +84,7 @@ public class RangeHandlingDataSourceTest
 	public void getFeatures1() throws BadReferenceObjectException, CoordinateErrorException, DataSourceException,
 			UnimplementedFeatureException
 	{
-		source.getFeatures("", -1, -1, new Integer(-1), null);
+		source.getFeatures("", -1, -1, -1, null);
 	}
 
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
@@ -96,13 +96,13 @@ public class RangeHandlingDataSourceTest
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
 	public void getFeatures3() throws UnimplementedFeatureException, DataSourceException
 	{
-		source.getFeatures(new ArrayList<String>(), new Integer(-1));
+		source.getFeatures(new ArrayList<>(), -1);
 	}
 
 	@Test(expectedExceptions = BadReferenceObjectException.class)
 	public void getFeatures4() throws BadReferenceObjectException, DataSourceException
 	{
-		source.getFeatures("", new Integer(-1));
+		source.getFeatures("", -1);
 	}
 
 }

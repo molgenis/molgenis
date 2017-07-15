@@ -36,22 +36,17 @@ public abstract class MultiFileResource implements Resource
 		for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet())
 		{
 			final String key = chromConfig.getKey();
-			this.resources.put(key, new ResourceImpl(name + key, new ResourceConfig()
+			// Config may change so keep querying the MultiResourceConfig for the current File
+			this.resources.put(key, new ResourceImpl(name + key, () ->
 			{
-				// Config may change so keep querying the MultiResourceConfig for the current File
-				@Override
-				public File getFile()
+				ResourceConfig resourceConfig = config.getConfigs().get(key);
+				if (resourceConfig == null)
 				{
-					ResourceConfig resourceConfig = config.getConfigs().get(key);
-					if (resourceConfig == null)
-					{
-						initializeResources();
-						return null;
-					}
-					File file = resourceConfig.getFile();
-					return file;
+					initializeResources();
+					return null;
 				}
-
+				File file = resourceConfig.getFile();
+				return file;
 			})
 			{
 				@Override
@@ -105,7 +100,7 @@ public abstract class MultiFileResource implements Resource
 		// initialize after autowiring is complete and resources is empty
 		isAvailable();
 		Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
-		Iterable<Entity> result = new ArrayList<Entity>();
+		Iterable<Entity> result = new ArrayList<>();
 
 		if (chromValue != null)
 		{

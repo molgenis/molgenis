@@ -69,7 +69,7 @@ public class ListEscapeUtils
 		if (str == null) return null;
 		if (str.isEmpty()) return Collections.emptyList();
 
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 
 		StringBuilder strBuilder = new StringBuilder(INITIAL_STRING_SIZE);
 		boolean isEscape = false;

@@ -146,7 +146,7 @@ public class TabixReader
 
 	public static String readLine(final InputStream is) throws IOException
 	{
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		int c;
 		while ((c = is.read()) >= 0 && c != '\n') buf.append((char) c);
 		if (c < 0) return null;
@@ -166,7 +166,7 @@ public class TabixReader
 
 		is.read(buf, 0, 4); // read "TBI\1"
 		mSeq = new String[readInt(is)]; // # sequences
-		mChr2tid = new HashMap<String, Integer>();
+		mChr2tid = new HashMap<>();
 		mPreset = readInt(is);
 		mSc = readInt(is);
 		mBc = readInt(is);
@@ -196,7 +196,7 @@ public class TabixReader
 			// the binning index
 			int n_bin = readInt(is);
 			mIndex[i] = new TIndex();
-			mIndex[i].b = new HashMap<Integer, TPair64[]>();
+			mIndex[i].b = new HashMap<>();
 			for (j = 0; j < n_bin; ++j)
 			{
 				int bin = readInt(is);
@@ -236,8 +236,7 @@ public class TabixReader
 
 	private int chr2tid(final String chr)
 	{
-		if (mChr2tid.containsKey(chr)) return mChr2tid.get(chr);
-		else return -1;
+		return mChr2tid.getOrDefault(chr, -1);
 	}
 
 	/**
@@ -418,8 +417,8 @@ public class TabixReader
 		if (n_off == 0) return null;
 		off = new TPair64[n_off];
 		for (i = n_off = 0; i < n_bins; ++i)
-			if ((chunks = idx.b.get(bins[i])) != null) for (int j = 0; j < chunks.length; ++j)
-				if (less64(min_off, chunks[j].v)) off[n_off++] = new TPair64(chunks[j]);
+			if ((chunks = idx.b.get(bins[i])) != null)
+				for (TPair64 chunk : chunks) if (less64(min_off, chunk.v)) off[n_off++] = new TPair64(chunk);
 		if (n_off == 0) return null;
 		Arrays.sort(off, 0, n_off);
 		// resolve completely contained adjacent blocks

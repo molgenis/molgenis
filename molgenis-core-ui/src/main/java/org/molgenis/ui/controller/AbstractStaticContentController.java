@@ -4,7 +4,6 @@ import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,7 +33,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 		try
 		{
 			model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
-			model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit());
+			model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit(uniqueReference));
 		}
 		catch (RuntimeException re)
 		{
@@ -45,10 +44,10 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 		return "view-staticcontent";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/edit", method = RequestMethod.GET)
 	public String initEditView(final Model model)
 	{
+		this.staticContentService.checkPermissions(this.uniqueReference);
 		try
 		{
 			model.addAttribute("content", this.staticContentService.getContent(this.uniqueReference));
@@ -62,11 +61,11 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 		return "view-staticcontent-edit";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/edit", method = RequestMethod.POST)
-	public String submitContent(@RequestParam(value = "content", required = true) final String content,
+	public String submitContent(@RequestParam(value = "content") final String content,
 			final Model model)
 	{
+		this.staticContentService.checkPermissions(this.uniqueReference);
 		try
 		{
 			this.staticContentService.submitContent(this.uniqueReference, content);

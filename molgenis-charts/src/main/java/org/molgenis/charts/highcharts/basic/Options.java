@@ -8,9 +8,9 @@ public class Options
 	private BasicChart chart;
 	private ChartTitle title;
 	private Legend legend;
-	private List<Series> series = new ArrayList<Series>();
-	private List<XAxis> xAxis = new ArrayList<XAxis>();
-	private List<YAxis> yAxis = new ArrayList<YAxis>();
+	private List<Series> series = new ArrayList<>();
+	private List<XAxis> xAxis = new ArrayList<>();
+	private List<YAxis> yAxis = new ArrayList<>();
 	private Credits credits;
 
 	/**
@@ -66,10 +66,7 @@ public class Options
 	 */
 	public void addSeries(List<Series> series)
 	{
-		for (Series serie : series)
-		{
-			this.series.add(serie);
-		}
+		this.series.addAll(series);
 	}
 
 	/**

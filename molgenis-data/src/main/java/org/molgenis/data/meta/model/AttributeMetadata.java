@@ -264,18 +264,18 @@ public class AttributeMetadata extends SystemEntityType
 																 .collect(Collectors.toList());
 
 		boolean first = true;
-		String typeIsNullOrStringOrIntOrLong = "";
+		StringBuilder typeIsNullOrStringOrIntOrLong = new StringBuilder();
 		for (String expression : typeExpressions)
 		{
 			if (first)
 			{
-				typeIsNullOrStringOrIntOrLong += expression;
+				typeIsNullOrStringOrIntOrLong.append(expression);
 				first = false;
 				continue;
 			}
-			typeIsNullOrStringOrIntOrLong += ".or(" + expression + ")";
+			typeIsNullOrStringOrIntOrLong.append(".or(").append(expression).append(")");
 		}
-		typeIsNullOrStringOrIntOrLong += ".or($('" + TYPE + "').isNull())";
+		typeIsNullOrStringOrIntOrLong.append(".or($('" + TYPE + "').isNull())");
 
 		String nullableIsFalse = "$('" + IS_NULLABLE + "').eq(false)";
 

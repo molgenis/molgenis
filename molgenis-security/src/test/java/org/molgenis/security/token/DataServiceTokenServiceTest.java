@@ -14,7 +14,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.TokenMetaData.TOKEN;
 import static org.molgenis.auth.TokenMetaData.TOKEN_ATTR;

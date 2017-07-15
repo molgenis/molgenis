@@ -93,7 +93,7 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m)
 	{
-		m.forEach((k, v) -> put(k, v));
+		m.forEach(this::put);
 	}
 
 	@Override

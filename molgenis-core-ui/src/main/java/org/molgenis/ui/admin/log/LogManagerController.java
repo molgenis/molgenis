@@ -56,7 +56,7 @@ public class LogManagerController extends MolgenisPluginController
 		}
 		LoggerContext loggerContext = (LoggerContext) iLoggerFactory;
 
-		List<Logger> loggers = new ArrayList<Logger>();
+		List<Logger> loggers = new ArrayList<>();
 		for (ch.qos.logback.classic.Logger logger : loggerContext.getLoggerList())
 		{
 			if (logger.getLevel() != null || logger.iteratorForAppenders().hasNext())
