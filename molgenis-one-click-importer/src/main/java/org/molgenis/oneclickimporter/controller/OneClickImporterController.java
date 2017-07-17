@@ -98,7 +98,7 @@ public class OneClickImporterController extends MolgenisPluginController
 
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
 		response.setStatus(HttpServletResponse.SC_CREATED);
-		response.setHeader("Location", builder.build().toUriString() + dataTable.getId());
+		response.setHeader("Location", builder.build().toUriString() + "/" + dataTable.getId());
 	}
 
 	@ResponseBody
