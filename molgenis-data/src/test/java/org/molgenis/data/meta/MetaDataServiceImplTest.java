@@ -1,7 +1,9 @@
 package org.molgenis.data.meta;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
@@ -40,10 +42,13 @@ public class MetaDataServiceImplTest
 	private RepositoryCollectionRegistry repoCollectionRegistry;
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private PackagePersister packagePersister;
+	@Captor
+	ArgumentCaptor<Stream<EntityType>> entityIdCaptor;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		MockitoAnnotations.initMocks(this);
 		dataService = mock(DataService.class);
 		repoCollectionRegistry = mock(RepositoryCollectionRegistry.class);
 
@@ -575,15 +580,10 @@ public class MetaDataServiceImplTest
 		String entityTypeId1 = "entity1";
 		when(entityType1.getId()).thenReturn(entityTypeId1);
 
-		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
-				.thenReturn(newArrayList(entityType1, entityType0));
-
 		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
 
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
-		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityTypeId0, entityTypeId1));
+		verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
+		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityType0, entityType1));
 		verifyNoMoreInteractions(dataService);
 	}
 
@@ -592,61 +592,6 @@ public class MetaDataServiceImplTest
 	{
 		metaDataServiceImpl.deleteEntityType(emptyList());
 		verifyNoMoreInteractions(dataService);
-	}
-
-	@Test
-	public void deleteEntityTypeCollectionMappedBy()
-	{
-		EntityType entityType0 = mock(EntityType.class);
-		String entityTypeId0 = "entity0";
-		when(entityType0.getId()).thenReturn(entityTypeId0);
-		when(entityType0.hasMappedByAttributes()).thenReturn(true);
-
-		Attribute entity0Attr0 = mock(Attribute.class);
-		when(entity0Attr0.getName()).thenReturn("entity0Attr0");
-		when(entity0Attr0.getIdentifier()).thenReturn("id00");
-		when(entity0Attr0.getChildren()).thenReturn(emptyList());
-		when(entity0Attr0.getTags()).thenReturn(emptyList());
-		when(entity0Attr0.isMappedBy()).thenReturn(true);
-
-		Attribute entity0Attr1 = mock(Attribute.class);
-		when(entity0Attr1.getName()).thenReturn("entity0Attr1");
-		when(entity0Attr1.getIdentifier()).thenReturn("id01");
-		when(entity0Attr1.getChildren()).thenReturn(emptyList());
-		when(entity0Attr1.getTags()).thenReturn(emptyList());
-
-		when(entityType0.getOwnAllAttributes()).thenReturn(newArrayList(entity0Attr0, entity0Attr1));
-		when(entityType0.getOwnAttributes()).thenReturn(newArrayList(entity0Attr0, entity0Attr1));
-		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
-		when(entityType0.getTags()).thenReturn(emptyList());
-
-		EntityType entityType1 = mock(EntityType.class);
-		String entityTypeId1 = "entity1";
-		when(entityType1.getId()).thenReturn(entityTypeId1);
-		when(entityType1.hasMappedByAttributes()).thenReturn(false);
-		Attribute entity1Attr0 = mock(Attribute.class);
-		Attribute entity1Attr1 = mock(Attribute.class);
-		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
-
-		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
-				.thenReturn(newArrayList(entityType1, entityType0));
-
-		InOrder inOrder = inOrder(dataService);
-		metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<EntityType>> entityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		inOrder.verify(dataService).update(eq(ENTITY_TYPE_META_DATA), entityCaptor.capture());
-		List<EntityType> updatedEntities = entityCaptor.getValue().collect(toList());
-		assertEquals(updatedEntities.size(), 1);
-		assertEquals(updatedEntities.get(0).getId(), entityTypeId0);
-		assertEquals(newArrayList(updatedEntities.get(0).getOwnAllAttributes()), newArrayList(entity0Attr1));
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		inOrder.verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
-		assertEquals(entityIdCaptor.getValue().collect(toList()), newArrayList(entityTypeId0, entityTypeId1));
-		inOrder.verifyNoMoreInteractions();
 	}
 
 	@Test
@@ -1070,7 +1015,7 @@ public class MetaDataServiceImplTest
 	public void isMetaEntityType(String entityTypeId, boolean isMeta)
 	{
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-		assertEquals(metaDataServiceImpl.isMetaEntityType(entityType), isMeta);
+		assertEquals(MetaDataService.isMetaEntityType(entityType), isMeta);
 	}
 
 	@Test
