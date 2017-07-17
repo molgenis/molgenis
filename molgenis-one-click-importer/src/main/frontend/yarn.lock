@@ -2,14 +2,6 @@
 # yarn lockfile v1
 
 
-"@molgenis/molgenis-api-client@^1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-1.2.5.tgz#d6972b710eca9b09eac191c2ac1612ff35cec40f"
-  dependencies:
-    babel-runtime "^6.11.6"
-    isomorphic-fetch "^2.2.1"
-    lodash "^4.17.4"
-
 "@molgenis/molgenis-i18n-js@^0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@molgenis/molgenis-i18n-js/-/molgenis-i18n-js-0.0.5.tgz#addb86b5292edf68cc5d536724582f84ec4882db"
@@ -818,7 +810,7 @@ babel-register@^6.22.0, babel-register@^6.24.1:
     mkdirp "^0.5.1"
     source-map-support "^0.4.2"
 
-babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0:
+babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0:
   version "6.23.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.23.0.tgz#0a9489f144de70efb3ce4300accdb329e2fc543b"
   dependencies:
@@ -1865,9 +1857,9 @@ domutils@^1.5.1:
     dom-serializer "0"
     domelementtype "1"
 
-dropzone@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/dropzone/-/dropzone-4.3.0.tgz#48b0b8f2ad092872e4b535b672a7c3f1a1d67c91"
+dropzone@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/dropzone/-/dropzone-5.1.1.tgz#9f5b02fc4aa84e6466e046ba770bc82776ea49de"
 
 duplexer@^0.1.1:
   version "0.1.1"
@@ -1919,12 +1911,6 @@ emojis-list@^2.0.0:
 encodeurl@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.1.tgz#79e3d58655346909fe6f0f45a5de68103b294d20"
-
-encoding@^0.1.11:
-  version "0.1.12"
-  resolved "https://registry.yarnpkg.com/encoding/-/encoding-0.1.12.tgz#538b66f3ee62cd1ab51ec323829d1f9480c74beb"
-  dependencies:
-    iconv-lite "~0.4.13"
 
 engine.io-client@1.8.3:
   version "1.8.3"
@@ -3000,7 +2986,7 @@ i18next@^7.1.3:
   version "7.2.3"
   resolved "https://registry.yarnpkg.com/i18next/-/i18next-7.2.3.tgz#a6c220ac1c8240ff1078aa9bc997fd449e052dc7"
 
-iconv-lite@0.4.15, iconv-lite@~0.4.13:
+iconv-lite@0.4.15:
   version "0.4.15"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.15.tgz#fe265a218ac6a57cfe854927e9d04c19825eddeb"
 
@@ -3321,13 +3307,6 @@ isobject@^2.0.0:
 isobject@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
-
-isomorphic-fetch@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/isomorphic-fetch/-/isomorphic-fetch-2.2.1.tgz#611ae1acf14f5e81f729507472819fe9733558a9"
-  dependencies:
-    node-fetch "^1.0.1"
-    whatwg-fetch ">=0.10.0"
 
 isstream@~0.1.2:
   version "0.1.2"
@@ -3703,10 +3682,6 @@ lodash.camelcase@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
 
-lodash.clone@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/lodash.clone/-/lodash.clone-4.5.0.tgz#195870450f5a13192478df4bc3d23d2dea1907b6"
-
 lodash.clonedeep@^4.3.2:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
@@ -4021,13 +3996,6 @@ no-case@^2.2.0:
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-2.3.1.tgz#7aeba1c73a52184265554b7dc03baf720df80081"
   dependencies:
     lower-case "^1.1.1"
-
-node-fetch@^1.0.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.1.tgz#899cb3d0a3c92f952c47f1b876f4c8aeabd400d5"
-  dependencies:
-    encoding "^0.1.11"
-    is-stream "^1.0.1"
 
 node-gyp@^3.3.1:
   version "3.6.2"
@@ -6004,13 +5972,6 @@ void-elements@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
 
-vue-clip@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/vue-clip/-/vue-clip-1.0.0.tgz#c28399ea4ca4957a391086584d50548a74340980"
-  dependencies:
-    dropzone "^4.3.0"
-    lodash.clone "^4.5.0"
-
 vue-hot-reload-api@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.1.0.tgz#9ca58a6e0df9078554ce1708688b6578754d86de"
@@ -6062,6 +6023,17 @@ vue-template-compiler@^2.1.10:
 vue-template-es2015-compiler@^1.2.2:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.5.3.tgz#22787de4e37ebd9339b74223bc467d1adee30545"
+
+vue2-dropzone@^2.3.5:
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/vue2-dropzone/-/vue2-dropzone-2.3.5.tgz#a567c873b42c36e4dfd7e1941bba4c65553a471e"
+  dependencies:
+    dropzone "^5.1.1"
+    vue "^2.0.0"
+
+vue@^2.0.0:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-2.4.1.tgz#76e0b8eee614613532216b7bfe784e0b5695b160"
 
 vue@^2.2.1, vue@^2.2.6, vue@^2.3.3:
   version "2.3.4"
@@ -6162,10 +6134,6 @@ webpack@^2.2.1:
     watchpack "^1.3.1"
     webpack-sources "^0.2.3"
     yargs "^6.0.0"
-
-whatwg-fetch@>=0.10.0:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.3.tgz#9c84ec2dcf68187ff00bc64e1274b442176e1c84"
 
 whet.extend@~0.9.9:
   version "0.9.9"

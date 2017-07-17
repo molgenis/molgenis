@@ -6,12 +6,6 @@
   </div>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-  @import "~mixins";
-
-</style>
-
 <script>
   export default {
     name: 'molgenis-one-click-importer'
