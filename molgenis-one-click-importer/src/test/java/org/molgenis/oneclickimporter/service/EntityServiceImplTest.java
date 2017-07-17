@@ -5,6 +5,7 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -48,13 +49,18 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	@Mock
 	private EntityManager entityManager = mock(EntityManager.class);
 
+	@Mock
+	private OneClickImporterService oneClickImporterService = mock(OneClickImporterService.class);
+
 	private EntityService entityService;
 
 	@BeforeMethod
 	public void setup()
 	{
 		this.entityService = new EntityServiceImpl(defaultPackage, entityTypeFactory, attributeFactory, idGenerator,
-				dataService, entityManager);
+				dataService, entityManager, oneClickImporterService);
+
+		when(oneClickImporterService.guessAttributeType(any())).thenReturn(AttributeType.STRING);
 	}
 
 

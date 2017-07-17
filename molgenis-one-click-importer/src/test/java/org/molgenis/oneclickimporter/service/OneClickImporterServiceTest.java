@@ -3,6 +3,7 @@ package org.molgenis.oneclickimporter.service;
 import com.google.common.io.Resources;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.Impl.ExcelServiceImpl;
@@ -14,6 +15,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.testng.Assert.assertEquals;
@@ -89,6 +92,24 @@ public class OneClickImporterServiceTest
 
 		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5));
 		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void guessBasicTypes() {
+		List<Object> columnValues = Arrays.asList(1, 2, 3);
+		assertEquals(AttributeType.INT, oneClickImporterService.guessAttributeType(columnValues));
+
+		columnValues = Arrays.asList("a", "b", "c");
+		assertEquals(AttributeType.STRING, oneClickImporterService.guessAttributeType(columnValues));
+
+		columnValues = Arrays.asList(true, false, true);
+		assertEquals(AttributeType.BOOL, oneClickImporterService.guessAttributeType(columnValues));
+
+		columnValues = Arrays.asList(1.1, 1.2, 1.3);
+		assertEquals(AttributeType.DECIMAL, oneClickImporterService.guessAttributeType(columnValues));
+
+		columnValues = Arrays.asList(1L, 2L, 3L);
+		assertEquals(AttributeType.LONG, oneClickImporterService.guessAttributeType(columnValues));
 	}
 
 	private Sheet loadTestFile(String fileName) throws IOException, InvalidFormatException, URISyntaxException
