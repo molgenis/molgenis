@@ -79,18 +79,20 @@ public class OneClickImporterController extends MolgenisPluginController
 		String fileExtension = filename.substring(filename.lastIndexOf('.') + 1);
 		String dataCollectionName = filename.substring(0, filename.lastIndexOf('.'));
 
+		DataCollection dataCollection;
 		if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
-			DataCollection dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
-			EntityType dataTable = entityService.createEntity(dataCollection);
-			return dataTable.getId();
+			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
 		}
 		else
 		{
 			throw new UnknownFileTypeException(
-					"File with extention: " + fileExtension + " is not a valid one-click importer file");
+						"File with extention: " + fileExtension + " is not a valid one-click importer file");
 		}
+
+		EntityType dataTable = entityService.createEntity(dataCollection);
+		return dataTable.getId();
 	}
 
 	@ResponseBody

@@ -11,11 +11,14 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.oneclickimporter.controller.OneClickImporterController;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.EntityService;
+import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -38,9 +41,11 @@ public class EntityServiceImpl implements EntityService
 
 	private final EntityManager entityManager;
 
+	private final OneClickImporterService oneClickImporterService;
+
 	public EntityServiceImpl(DefaultPackage defaultPackage, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attributeFactory, IdGenerator idGenerator, DataService dataService,
-			EntityManager entityManager)
+			EntityManager entityManager, OneClickImporterService oneClickImporterService)
 	{
 		this.defaultPackage = requireNonNull(defaultPackage);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
@@ -48,6 +53,7 @@ public class EntityServiceImpl implements EntityService
 		this.idGenerator = requireNonNull(idGenerator);
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
+		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 	}
 
 	@Override
@@ -77,17 +83,16 @@ public class EntityServiceImpl implements EntityService
 
 			Attribute attribute = attributeFactory.create();
 			attribute.setName(column.getName());
-
-			attribute.setDataType(guessAttributeType(column.getDataValues()));
-
+			attribute.setDataType(oneClickImporterService.guessAttributeType(column.getDataValues()));
 			entityType.addAttribute(attribute);
-
-			meta.updateEntityType(entityType);
 		}
+
+		meta.updateEntityType(entityType);
 
 		// Fill the dataTable with data
 		// All columns have a equal number of rows
 		int numberOfRows = dataCollection.getColumns().get(0).getDataValues().size();
+		ArrayList<Entity> rows = new ArrayList<>(numberOfRows);
 		for (int columnIndex = 0; columnIndex < numberOfRows; columnIndex++)
 		{
 
@@ -99,34 +104,13 @@ public class EntityServiceImpl implements EntityService
 				row.set(column.getName(), column.getDataValues().get(columnIndex));
 			}
 
-			dataService.add(entityType.getId(), row);
+			rows.add(row);
+
 		}
+
+		dataService.add(entityType.getId(), rows.stream());
 
 		return entityType;
 	}
 
-	private AttributeType guessAttributeType(List<Object> dataValues)
-	{
-		Object value = dataValues.get(0);
-		if (value instanceof Integer)
-		{
-			return INT;
-		}
-		else if (value instanceof Double || value instanceof Float)
-		{
-			return DECIMAL;
-		}
-		else if (value instanceof Long)
-		{
-			return LONG;
-		}
-		else if (value instanceof Boolean)
-		{
-			return BOOL;
-		}
-		else
-		{
-			return STRING;
-		}
-	}
 }
