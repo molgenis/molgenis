@@ -14,7 +14,7 @@
     "lint:fix": "eslint --ext .js,.vue src test/unit/specs"
   },
   "dependencies": {
-    "@molgenis/molgenis-api-client": "^1.2.5",
+    "@molgenis/molgenis-api-client": "^2.x.x",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
     "bootstrap": "4.0.0-alpha.6",
     "bootstrap-vue": "^0.18.0",
