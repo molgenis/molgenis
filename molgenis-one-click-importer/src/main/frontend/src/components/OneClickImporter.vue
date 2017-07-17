@@ -1,4 +1,4 @@
-<template>
+vlb,bmmb<template>
   <div class="row">
     <div class="col">
       <h1 class="text-center">One click importer</h1>
