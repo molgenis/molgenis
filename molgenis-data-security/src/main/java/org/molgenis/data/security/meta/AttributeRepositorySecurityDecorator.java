@@ -9,6 +9,7 @@ import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Iterator;
 import java.util.List;
@@ -89,10 +90,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	private Attribute toPermittedAttribute(Attribute attribute)
 	{
-		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem())
+		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem()
+				&& SecurityContextHolder.getContext().getAuthentication() != null) // FIXME remove authentication check
 		{
-			EntityIdentity entityIdentity = EntityIdentity
-					.create(attribute.getEntityType().getId(), attribute.getIdValue());
+			EntityIdentity entityIdentity = EntityIdentity.create(attribute.getEntityType().getId(),
+					attribute.getIdValue());
 			if (entityAclService.isGranted(entityIdentity, Permission.READ))
 			{
 				attribute.setReadOnly(true);
@@ -116,7 +118,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		public void map(List<Attribute> attributes)
 		{
 			Stream<Attribute> filteredEntities = attributes.stream()
-					.map(attributeRepositorySecurityDecorator::toPermittedAttribute);
+														   .map(attributeRepositorySecurityDecorator::toPermittedAttribute);
 			consumer.accept(filteredEntities.collect(toList()));
 		}
 	}

@@ -24,6 +24,7 @@ import org.molgenis.data.validation.*;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -132,7 +133,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository);
 
 		// 1.5
-		if (repository.getEntityType().isEntityLevelSecurity())
+		if (repository.getEntityType().isEntityLevelSecurity()
+				&& SecurityContextHolder.getContext().getAuthentication() != null) // FIXME remove authentication check
 		{
 			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, entityAclManager);
 		}
