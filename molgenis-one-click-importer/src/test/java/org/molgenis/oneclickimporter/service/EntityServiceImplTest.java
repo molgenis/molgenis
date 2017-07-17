@@ -32,25 +32,25 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 {
 
 	@Mock
-	private DefaultPackage defaultPackage = mock(DefaultPackage.class);
+	private DefaultPackage defaultPackage;
 
 	@Mock
-	private EntityTypeFactory entityTypeFactory = mock(EntityTypeFactory.class);
+	private EntityTypeFactory entityTypeFactory;
 
 	@Mock
-	private AttributeFactory attributeFactory = mock(AttributeFactory.class);
+	private AttributeFactory attributeFactory;
 
 	@Mock
-	private IdGenerator idGenerator = mock(IdGenerator.class);
+	private IdGenerator idGenerator;
 
 	@Mock
-	private DataService dataService = mock(DataService.class);
+	private DataService dataService;
 
 	@Mock
-	private EntityManager entityManager = mock(EntityManager.class);
+	private EntityManager entityManager;
 
 	@Mock
-	private OneClickImporterService oneClickImporterService = mock(OneClickImporterService.class);
+	private OneClickImporterService oneClickImporterService;
 
 	private EntityService entityService;
 
