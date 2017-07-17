@@ -310,7 +310,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -341,7 +340,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -373,7 +371,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 

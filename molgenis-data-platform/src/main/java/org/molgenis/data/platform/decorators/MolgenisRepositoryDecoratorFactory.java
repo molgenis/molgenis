@@ -21,15 +21,12 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.*;
-import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
@@ -108,12 +105,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 8. Perform cascading deletes
 		decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
-
-		// 7. Owned decorator
-		if (EntityUtils.doesExtend(decoratedRepository.getEntityType(), OWNED))
-		{
-			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
-		}
 
 		// 6. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);

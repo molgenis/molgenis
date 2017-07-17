@@ -10,7 +10,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.file.model.FileMetaMetaData;
-import org.molgenis.security.owned.OwnedEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -280,7 +279,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	}
 
 	@Configuration
-	@Import({ FileMetaMetaData.class, OwnedEntityType.class, SecurityPackage.class, RootSystemPackage.class })
+	@Import({ FileMetaMetaData.class, SecurityPackage.class, RootSystemPackage.class })
 	public static class Config
 	{
 

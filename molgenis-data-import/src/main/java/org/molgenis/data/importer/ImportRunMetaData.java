@@ -1,15 +1,10 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.security.owned.OwnedEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Set;
 
-import static java.util.Collections.singleton;
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -31,39 +26,32 @@ public class ImportRunMetaData extends SystemEntityType
 	public static final String IMPORTEDENTITIES = "importedEntities";
 	public static final String NOTIFY = "notify";
 
-	private final OwnedEntityType ownedEntityType;
-
-	@Autowired
-	ImportRunMetaData(OwnedEntityType ownedEntityType)
+	ImportRunMetaData()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.ownedEntityType = requireNonNull(ownedEntityType);
 	}
 
 	@Override
 	public void init()
 	{
-		setExtends(ownedEntityType);
-
 		setLabel("Import");
 		setDescription("Data import reports");
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.");
+		addAttribute(ID, ROLE_ID).setAuto(true)
+								 .setVisible(false)
+								 .setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(STARTDATE).setDataType(DATE_TIME).setNillable(false);
 		addAttribute(ENDDATE).setDataType(DATE_TIME).setNillable(true);
 		addAttribute(USERNAME).setNillable(false);
-		addAttribute(STATUS).setDataType(ENUM).setNillable(false)
-				.setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED"));
+		addAttribute(STATUS).setDataType(ENUM)
+							.setNillable(false)
+							.setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED"));
 		addAttribute(MESSAGE).setDataType(TEXT).setNillable(true);
 		addAttribute(PROGRESS).setDataType(INT).setNillable(false);
 		addAttribute(IMPORTEDENTITIES).setDataType(TEXT).setNillable(true);
-		addAttribute(NOTIFY).setDataType(BOOL).setNillable(true)
-				.setDescription("Boolean to indicate whether or not to send an email on job completion");
-	}
+		addAttribute(NOTIFY).setDataType(BOOL)
+							.setNillable(true)
+							.setDescription("Boolean to indicate whether or not to send an email on job completion");
 
-	@Override
-	public Set<SystemEntityType> getDependencies()
-	{
-		return singleton(ownedEntityType);
+		setEntityLevelSecurity(true);
 	}
 }
