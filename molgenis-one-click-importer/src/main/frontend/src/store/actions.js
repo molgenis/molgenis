@@ -15,6 +15,9 @@ export default {
 
     fetch('/plugin/one-click-importer/upload', options).then(response => {
       console.log(response)
+      const dataSetUri = response.headers.get('Location')
+      const entityId = dataSetUri.substring(dataSetUri.lastIndexOf('/') + 1)
+      window.location.href = 'http://localhost:8080/menu/main/dataexplorer?entity=' + entityId
     }, error => {
       console.log(error)
     })
