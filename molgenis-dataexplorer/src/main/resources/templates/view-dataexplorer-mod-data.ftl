@@ -154,6 +154,7 @@
     <#-- load js dependencies -->
     $.when(
             $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
+            $.ajax("<@resource_href "/js/dalliance-all.min.js"/>", {'cache': true}),
             $.ajax("<@resource_href "/js/dataexplorer-directory.js"/>", {'cache': true}))
             .done(function () {
             <#-- do *not* js escape values below -->

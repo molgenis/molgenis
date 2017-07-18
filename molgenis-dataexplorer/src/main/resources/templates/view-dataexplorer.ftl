@@ -16,8 +16,7 @@
 "jquery.molgenis.xrefmrefsearch.js",
 "dataexplorer.js",
 "dataexplorer-filter-rsql.js",
-"bootbox.min.js",
-"dalliance-all.min.js"]>
+"bootbox.min.js"]>
 
 <@header css js/>
 <div class="row">
