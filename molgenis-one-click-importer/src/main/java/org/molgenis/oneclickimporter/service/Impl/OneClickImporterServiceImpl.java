@@ -43,7 +43,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			AttributeType basicType = getBasicAttributeType(value);
 			// todo enrich type
 
-			guess = getCommomType(guess, basicType);
+			guess = getCommonType(guess, basicType);
 
 			if(guess.equals(AttributeType.STRING)){
 				guesCompleted = true;
@@ -56,7 +56,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	/**
 	 * Returns the AttributeType shared by both types
 	 */
-	private AttributeType getCommomType(AttributeType thisType, AttributeType thatType){
+	private AttributeType getCommonType(AttributeType thisType, AttributeType thatType){
 
 		if(thisType.equals(thatType)){
 			return thisType;

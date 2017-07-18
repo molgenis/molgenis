@@ -87,6 +87,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
             <version>${project.version}</version>
@@ -94,6 +100,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-rest</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -117,6 +128,10 @@
                     <artifactId>stax-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
     </dependencies>
 

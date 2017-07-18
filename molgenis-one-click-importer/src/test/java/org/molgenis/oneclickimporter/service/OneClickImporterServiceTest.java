@@ -110,6 +110,9 @@ public class OneClickImporterServiceTest
 
 		columnValues = Arrays.asList(1L, 2L, 3L);
 		assertEquals(AttributeType.LONG, oneClickImporterService.guessAttributeType(columnValues));
+
+		columnValues = Arrays.asList(1L, "abc", 3L);
+		assertEquals(AttributeType.STRING, oneClickImporterService.guessAttributeType(columnValues));
 	}
 
 	private Sheet loadTestFile(String fileName) throws IOException, InvalidFormatException, URISyntaxException

@@ -3,6 +3,7 @@ package org.molgenis.oneclickimporter.controller;
 import com.google.common.io.Resources;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
@@ -29,8 +30,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.hamcrest.core.StringEndsWith.endsWith;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -110,8 +115,8 @@ public class OneClickImporterControllerTest
 		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-				.andExpect(status().isOk())
-				.andExpect(content().string(tableId));
+				.andExpect(status().isCreated())
+				.andExpect(header().string("Location", endsWith(tableId)));
 
 		verify(oneClickImporterService).buildDataCollection("simple-valid", sheet);
 	}
@@ -133,11 +138,12 @@ public class OneClickImporterControllerTest
 		when(entityService.createEntity(dataCollection)).thenReturn(table);
 		when(table.getId()).thenReturn(tableId);
 
-		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-				.andExpect(status().isOk())
-				.andExpect(content().string(tableId));
 
-		verify(oneClickImporterService, times(1)).buildDataCollection("simple-valid", sheet);
+		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
+				.andExpect(status().isCreated())
+				.andExpect(header().string("Location", endsWith(tableId)));
+
+		verify(oneClickImporterService, Mockito.times(1)).buildDataCollection("simple-valid", sheet);
 
 	}
 
@@ -152,7 +158,7 @@ public class OneClickImporterControllerTest
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 			   .andExpect(status().isBadRequest());
 
-		verifyZeroInteractions(oneClickImporterService);
+		Mockito.verifyZeroInteractions(oneClickImporterService);
 	}
 
 	private MockMultipartFile getTestMultipartFile(final String path, final String contentType)
