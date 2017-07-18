@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -95,34 +94,56 @@ public class OneClickImporterServiceTest
 	}
 
 	@Test
+	public void testBuildDataSheetWithDates() throws IOException, InvalidFormatException, URISyntaxException
+	{
+		Sheet sheet = loadTestFile("/valid-with-dates.xlsx");
+		DataCollection actual = oneClickImporterService.buildDataCollection("valid-with-dates", sheet);
+
+		Column c1 = Column.create("dates", 0,
+				newArrayList("2018-01-03T00:00", "2018-01-04T00:00", "2018-01-05T00:00", "2018-01-06T00:00",
+						"2018-01-07T00:00"));
+		Column c2 = Column.create("event", 1,
+				newArrayList("being cool day", "bike day", "sleep day", "bye bye day", "work day"));
+
+		DataCollection expected = DataCollection.create("valid-with-dates", newArrayList(c1, c2));
+		assertEquals(actual, expected);
+	}
+
+	@Test
 	public void guessBasicTypes()
 	{
-		List<Object> columnValues = Arrays.asList(1, 2, 3);
+		List<Object> columnValues = newArrayList(1, 2, 3);
 		assertEquals(oneClickImporterService.guessAttributeType(columnValues), INT);
 
-		columnValues = Arrays.asList("a", "b", "c");
+		columnValues = newArrayList("a", "b", "c");
 		assertEquals(oneClickImporterService.guessAttributeType(columnValues), STRING);
 
-		columnValues = Arrays.asList(true, false, true);
+		columnValues = newArrayList(true, false, true);
 		assertEquals(oneClickImporterService.guessAttributeType(columnValues), BOOL);
 
-		columnValues = Arrays.asList(1.1, 1.2, 1.3);
+		columnValues = newArrayList(1.1, 1.2, 1.3);
 		assertEquals(oneClickImporterService.guessAttributeType(columnValues), DECIMAL);
 
-		columnValues = Arrays.asList(1L, 2L, 3L);
+		columnValues = newArrayList(1L, 2L, 3L);
 		assertEquals(oneClickImporterService.guessAttributeType(columnValues), LONG);
 
-		columnValues = Arrays.asList(1L, "abc", 3L);
+		columnValues = newArrayList(1L, "abc", 3L);
 		assertEquals(oneClickImporterService.guessAttributeType(columnValues), STRING);
 	}
 
 	@Test
 	public void guessEnrichedTypes()
 	{
-		List<Object> columnValues = Arrays.asList(
+		List<Object> columnValues = newArrayList(
 				"This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. ",
 				"This is a short string", "String...");
 		assertEquals(oneClickImporterService.guessAttributeType(columnValues), TEXT);
+
+		columnValues = newArrayList("2018-01-03T00:00", "2010-05-03T00:00", "2018-02-03T00:00");
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), DATE);
+
+		columnValues = newArrayList("2018-01-03T00:00", "2010-05-03T00:00", "2018-02-03T00:00", "Hello World!");
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), STRING);
 	}
 
 	private Sheet loadTestFile(String fileName) throws IOException, InvalidFormatException, URISyntaxException
