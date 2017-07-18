@@ -5,10 +5,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.security.meta.EntityTypeRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -22,11 +21,11 @@ public class EntityTypeRepositoryDecoratorFactory
 {
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final MolgenisPermissionService permissionService;
+	private final PermissionService permissionService;
 	private final EntityTypeValidator entityTypeValidator;
 
 	public EntityTypeRepositoryDecoratorFactory(DataService dataService, EntityTypeMetadata entityTypeMetadata,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
 			EntityTypeValidator entityTypeValidator)
 	{
 		super(entityTypeMetadata);

@@ -3,8 +3,8 @@ package org.molgenis.data;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -23,10 +23,9 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
 public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final Repository<Entity> decoratedRepository;
-	private final MolgenisPermissionService permissionService;
+	private final PermissionService permissionService;
 
-	public RepositorySecurityDecorator(Repository<Entity> decoratedRepository,
-			MolgenisPermissionService permissionService)
+	public RepositorySecurityDecorator(Repository<Entity> decoratedRepository, PermissionService permissionService)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.permissionService = requireNonNull(permissionService);
@@ -211,7 +210,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 			return;
 		}
 
-		boolean granted = permissionService.hasPermissionOnEntity(ENTITY_TYPE_META_DATA, Permission.WRITE);
+		boolean granted = permissionService.hasPermissionOnEntityType(ENTITY_TYPE_META_DATA, Permission.WRITE);
 		if (!granted)
 		{
 			throw new MolgenisDataAccessException("No permission to create entity types");
@@ -225,7 +224,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 			return;
 		}
 
-		boolean granted = permissionService.hasPermissionOnEntity(entityType.getId(), permission);
+		boolean granted = permissionService.hasPermissionOnEntityType(entityType.getId(), permission);
 		if (!granted)
 		{
 			throw new MolgenisDataAccessException(

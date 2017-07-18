@@ -17,8 +17,8 @@ import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.service.GenomeBrowserService;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -83,7 +83,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService molgenisPermissionService;
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
@@ -153,8 +153,8 @@ public class DataExplorerController extends MolgenisPluginController
 			StringBuilder message)
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
-		boolean hasEntityPermission = molgenisPermissionService
-				.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
+		boolean hasEntityPermission = molgenisPermissionService.hasPermissionOnEntityType(selectedEntityName,
+				Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -195,7 +195,7 @@ public class DataExplorerController extends MolgenisPluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITEMETA))
+				if (!molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
 					throw new MolgenisDataAccessException(
 							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
@@ -216,7 +216,7 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ) && dataService
+		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService
 				.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
@@ -243,9 +243,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, WRITE)) pluginPermission = WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ)) pluginPermission = READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.COUNT))
+		if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, WRITE)) pluginPermission = WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ)) pluginPermission = READ;
+		else if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
@@ -310,8 +310,8 @@ public class DataExplorerController extends MolgenisPluginController
 		Map<String, String> genomeEntities = new HashMap<>();
 		genomeBrowserService.getGenomeBrowserEntities().forEach(entityType ->
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), WRITE);
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntityType(entityType.getId(), READ);
+			boolean canWrite = molgenisPermissionService.hasPermissionOnEntityType(entityType.getId(), WRITE);
 			if (canRead || canWrite)
 			{
 				genomeEntities.put(entityType.getId(), entityType.getLabel());

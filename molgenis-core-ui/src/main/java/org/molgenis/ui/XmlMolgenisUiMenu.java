@@ -1,7 +1,7 @@
 package org.molgenis.ui;
 
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,15 +15,14 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 {
 	private final MenuType menuType;
 	private final MolgenisUiMenu parentMenu;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 
-	public XmlMolgenisUiMenu(MenuType menuType, MolgenisPermissionService molgenisPermissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, PermissionService molgenisPermissionService)
 	{
 		this(menuType, null, molgenisPermissionService);
 	}
 
-	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu,
-			MolgenisPermissionService molgenisPermissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu, PermissionService molgenisPermissionService)
 	{
 		if (menuType == null) throw new IllegalArgumentException("menu type is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");

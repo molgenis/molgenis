@@ -4,8 +4,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
@@ -15,10 +15,9 @@ import java.util.List;
 public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 {
 	private final MolgenisUiMenu molgenisUiMenu;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 
-	public MolgenisUiMenuPermissionDecorator(MolgenisUiMenu molgenisUiMenu,
-			MolgenisPermissionService molgenisPermissionService)
+	public MolgenisUiMenuPermissionDecorator(MolgenisUiMenu molgenisUiMenu, PermissionService molgenisPermissionService)
 	{
 		if (molgenisUiMenu == null) throw new IllegalArgumentException("menu is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");

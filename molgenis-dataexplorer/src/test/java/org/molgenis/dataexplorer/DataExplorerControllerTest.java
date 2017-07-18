@@ -15,8 +15,8 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.GsonConfig;
@@ -80,7 +80,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Mock
 	LanguageService languageService;
 	@Mock
-	MolgenisPermissionService molgenisPermissionService = mock(MolgenisPermissionService.class);
+	PermissionService molgenisPermissionService = mock(PermissionService.class);
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
@@ -88,8 +88,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
-		when(molgenisPermissionService.hasPermissionOnEntity("yes", Permission.WRITEMETA)).thenReturn(true);
-		when(molgenisPermissionService.hasPermissionOnEntity("no", Permission.WRITEMETA)).thenReturn(false);
+		when(molgenisPermissionService.hasPermissionOnEntityType("yes", Permission.WRITEMETA)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntityType("no", Permission.WRITEMETA)).thenReturn(false);
 
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);

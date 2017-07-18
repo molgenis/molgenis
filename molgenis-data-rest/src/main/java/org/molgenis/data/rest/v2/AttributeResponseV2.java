@@ -13,7 +13,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ class AttributeResponseV2
 	 * @param permissionService
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
+			PermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);

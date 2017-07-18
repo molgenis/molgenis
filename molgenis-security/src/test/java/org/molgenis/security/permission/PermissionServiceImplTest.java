@@ -19,17 +19,17 @@ import static org.molgenis.security.core.Permission.*;
 import static org.molgenis.ui.PluginMetadata.PLUGIN;
 import static org.testng.Assert.assertEquals;
 
-public class MolgenisPermissionServiceImplTest extends AbstractMockitoTest
+public class PermissionServiceImplTest extends AbstractMockitoTest
 {
 	@Mock
 	private EntityAclService entityAclService;
 
-	private MolgenisPermissionServiceImpl molgenisPermissionService;
+	private PermissionServiceImpl molgenisPermissionService;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		molgenisPermissionService = new MolgenisPermissionServiceImpl(entityAclService);
+		molgenisPermissionService = new PermissionServiceImpl(entityAclService);
 	}
 
 	@DataProvider(name = "hasPermissionOnEntityProvider")
@@ -48,7 +48,7 @@ public class MolgenisPermissionServiceImplTest extends AbstractMockitoTest
 		EntityIdentity entityIdentity = EntityIdentity.create(ENTITY_TYPE_META_DATA, "myEntityType");
 		when(entityAclService.isGranted(entityIdentity, READ)).thenReturn(true);
 		when(entityAclService.isGranted(entityIdentity, WRITE)).thenReturn(false);
-		assertEquals(molgenisPermissionService.hasPermissionOnEntity(entityTypeId, permission), expectedIsGranted);
+		assertEquals(molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, permission), expectedIsGranted);
 	}
 
 	@DataProvider(name = "hasPermissionOnPluginProvider")

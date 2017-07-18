@@ -14,7 +14,7 @@ import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.converter.RdfConverter;
@@ -72,7 +72,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private AppSettings appSettings;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService molgenisPermissionService;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;

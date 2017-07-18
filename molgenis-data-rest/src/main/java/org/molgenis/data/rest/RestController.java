@@ -20,7 +20,7 @@ import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -91,14 +91,14 @@ public class RestController
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
 	private final LanguageService languageService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
+			AuthenticationManager authenticationManager, PermissionService molgenisPermissionService,
 			MolgenisRSQL molgenisRSQL, RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
