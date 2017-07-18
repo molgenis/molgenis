@@ -1,13 +1,17 @@
 // @flow
 import type { GrantedAuthoritySid, State } from './utils/flow.types'
 
-export const SET_SELECTED_SID = '__SET_SELECTED_SID__'
+export const TOGGLE_SID = '__TOGGLE_SID__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
 export const SET_FILTER = '__SET_FILTER__'
 
 export default {
-  [SET_SELECTED_SID] (state: State, sid: GrantedAuthoritySid) {
-    state.selectedSid = sid
+  [TOGGLE_SID] (state: State, sid: GrantedAuthoritySid) {
+    if (state.selectedSids.includes(sid)) {
+      state.selectedSids.splice(state.selectedSids.indexOf(sid), 1)
+    } else {
+      state.selectedSids.push(sid)
+    }
   },
   [SET_SELECTED_ENTITY_TYPE] (state: State, selectedEntityTypeId: string) {
     state.selectedEntityTypeId = selectedEntityTypeId

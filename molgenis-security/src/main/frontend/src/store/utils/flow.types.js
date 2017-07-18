@@ -33,7 +33,7 @@ export type ACL = {
 export type State = {
   me: PrincipalSid,
   sids: Array<GrantedAuthoritySid>,
-  selectedSid: ?GrantedAuthoritySid,
+  selectedSids: Array<GrantedAuthoritySid>,
   selectedEntityTypeId: ?string,
   entityTypes: Array<EntityType>,
   acls: Array<ACL>,

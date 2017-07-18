@@ -7,7 +7,7 @@ const state: State = {
   me: {
     username: 'admin'
   },
-  selectedSid: null,
+  selectedSids: [],
   sids: [{authority: 'USER'}, {authority: 'SU'}],
   selectedEntityTypeId: null,
   permissions: ['ADMIN', 'WRITE', 'READ', 'COUNT'],

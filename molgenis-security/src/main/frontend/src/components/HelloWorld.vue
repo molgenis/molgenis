@@ -9,8 +9,8 @@
           <ul class="list-group">
             <li v-for="sid in sids"
                 class="list-group-item"
-                :class="{'active': selectedSid && (sid.authority === selectedSid.authority)}"
-                @click="setSelectedSid(sid)">
+                :class="{'active': selectedSids.includes(sid)}"
+                @click="toggleSid(sid)">
               {{ sid.authority }}
             </li>
           </ul>
@@ -73,19 +73,19 @@
 
 <script>
   import { mapState, mapGetters, mapMutations } from 'vuex'
-  import { SET_SELECTED_SID, SET_SELECTED_ENTITY_TYPE, SET_FILTER } from '../store/mutations'
+  import { TOGGLE_SID, SET_SELECTED_ENTITY_TYPE, SET_FILTER } from '../store/mutations'
   import Multiselect from 'vue-multiselect'
 
   export default {
     name: 'permission-manager',
     methods: {
       ...mapMutations({
-        setSelectedSid: SET_SELECTED_SID,
+        toggleSid: TOGGLE_SID,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE
       })
     },
     computed: {
-      ...mapState(['sids', 'selectedSid', 'entityTypes', 'acls', 'selectedEntityTypeId', 'permissions']),
+      ...mapState(['sids', 'selectedSids', 'entityTypes', 'acls', 'selectedEntityTypeId', 'permissions']),
       ...mapGetters(['filteredAcls']),
       selectedEntityType: {
         get () {
