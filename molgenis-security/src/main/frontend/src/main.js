@@ -11,6 +11,7 @@ import { INITIAL_STATE } from './store/state'
 
 import App from './App'
 import VueSweetAlert from 'vue-sweetalert'
+import { INITIALIZED } from './store/actions'
 
 import 'bootstrap/dist/css/bootstrap.css' // Bootstrap import
 import 'font-awesome/css/font-awesome.min.css' // Font awesome import
@@ -30,7 +31,8 @@ Vue.use(i18n, {
       store,
       router,
       template: '<App />',
-      components: { App }
+      components: {App},
+      created () { this.$store.dispatch(INITIALIZED) }
     })
   }
 })
