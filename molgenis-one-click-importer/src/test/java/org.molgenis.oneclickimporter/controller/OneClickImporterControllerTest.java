@@ -103,12 +103,12 @@ public class OneClickImporterControllerTest
 		Sheet sheet = mock(Sheet.class);
 		DataCollection dataCollection = mock(DataCollection.class);
 		EntityType table = mock(EntityType.class);
-		String tableId = "genrated_table_id";
+		String tableId = "generated_table_id";
 		File file = mock(File.class);
 		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
 		when(excelService.buildExcelSheetFromFile(file)).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
-		when(entityService.createEntity(dataCollection)).thenReturn(table);
+		when(entityService.createEntityType(dataCollection)).thenReturn(tableId);
 		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
@@ -126,12 +126,12 @@ public class OneClickImporterControllerTest
 		Sheet sheet = mock(Sheet.class);
 		DataCollection dataCollection = mock(DataCollection.class);
 		EntityType table = mock(EntityType.class);
-		String tableId = "genrated_table_id";
+		String tableId = "generated_table_id";
 		File file = mock(File.class);
 		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
-		when(entityService.createEntity(dataCollection)).thenReturn(table);
+		when(entityService.createEntityType(dataCollection)).thenReturn(tableId);
 		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))

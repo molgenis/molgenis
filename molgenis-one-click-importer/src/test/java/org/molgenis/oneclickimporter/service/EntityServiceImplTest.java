@@ -1,6 +1,5 @@
 package org.molgenis.oneclickimporter.service;
 
-
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -47,10 +46,13 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	private DataService dataService;
 
 	@Mock
+	private MetaDataService metaDataService;
+
+	@Mock
 	private EntityManager entityManager;
 
 	@Mock
-	private OneClickImporterService oneClickImporterService;
+	private AttributeTypeService attributeTypeService;
 
 	private EntityService entityService;
 
@@ -58,11 +60,10 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	public void setup()
 	{
 		this.entityService = new EntityServiceImpl(defaultPackage, entityTypeFactory, attributeFactory, idGenerator,
-				dataService, entityManager, oneClickImporterService);
+				dataService, metaDataService, entityManager, attributeTypeService);
 
-		when(oneClickImporterService.guessAttributeType(any())).thenReturn(AttributeType.STRING);
+		when(attributeTypeService.guessAttributeType(any())).thenReturn(AttributeType.STRING);
 	}
-
 
 	@Test
 	public void testCreateEntity() throws Exception
@@ -70,11 +71,9 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		String tableName = "super-powers";
 		List<Object> userNames = Arrays.asList("Mark", "Mariska", "Bart");
 		List<Object> superPowers = Arrays.asList("Arrow functions", "Cookies", "Knots");
-		List<Column> columns = Arrays.asList(
-				Column.create("user name", 0, userNames),
-				Column.create("super power", 1, superPowers)
-		);
-		DataCollection dataCollection = DataCollection.create(tableName, columns);
+		List<Column> columns = Arrays.asList(Column.create("user name", 0, userNames),
+				Column.create("super power", 1, superPowers));
+		DataCollection dataCollection = DataCollection.create(tableName, columns, 3);
 
 		String generatedId = "id_0";
 		EntityType table = mock(EntityType.class);
@@ -96,11 +95,10 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		Entity row1 = mock(Entity.class);
 		Entity row2 = mock(Entity.class);
 		Entity row3 = mock(Entity.class);
-		when(entityManager.create(table, EntityManager.CreationMode.NO_POPULATE))
-				.thenReturn(row1, row2, row3);
+		when(entityManager.create(table, EntityManager.CreationMode.NO_POPULATE)).thenReturn(row1, row2, row3);
 
-		EntityType dataTable = entityService.createEntity(dataCollection);
-		assertEquals(dataTable, table);
+		String entityTypeId = entityService.createEntityType(dataCollection);
+		assertEquals(entityTypeId, generatedId);
 
 		verify(table).setPackage(defaultPackage);
 		verify(table).setId(generatedId);

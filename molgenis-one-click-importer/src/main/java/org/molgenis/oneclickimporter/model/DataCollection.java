@@ -13,8 +13,10 @@ public abstract class DataCollection
 
 	public abstract List<Column> getColumns();
 
-	public static DataCollection create(String name, List<Column> columns)
+	public abstract int getNumberOfRows();
+
+	public static DataCollection create(String name, List<Column> columns, int numberOfRows)
 	{
-		return new AutoValue_DataCollection(name, columns);
+		return new AutoValue_DataCollection(name, columns, numberOfRows);
 	}
 }

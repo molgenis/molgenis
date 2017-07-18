@@ -4,7 +4,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
@@ -92,8 +91,7 @@ public class OneClickImporterController extends MolgenisPluginController
 					String.format("File with extension: %s is not a valid one-click importer file", fileExtension));
 		}
 
-		EntityType dataTable = entityService.createEntity(dataCollection);
-		return dataTable.getId();
+		return entityService.createEntityType(dataCollection);
 	}
 
 	@ResponseBody
