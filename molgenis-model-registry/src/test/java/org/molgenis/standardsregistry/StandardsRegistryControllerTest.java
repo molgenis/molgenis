@@ -2,6 +2,7 @@ package org.molgenis.standardsregistry;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import org.junit.Ignore;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.TestHarnessConfig;
@@ -108,7 +109,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		PackageResponse packageResponse = new PackageResponse("test-package-response", "", "", null, null, null);
 		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(packageResponse));
-//		when(metaDataSearchService.search()).thenReturn(packageSearchResponse);
+		when(metaDataSearchService.search(TEST_PACKAGE, 0 ,3)).thenReturn(packageSearchResponse);
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		String template = standardRegistryController.search(TEST_PACKAGE, model);
@@ -121,7 +122,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 	public void testSearchPackageNotFound() throws Exception
 	{
 		String TEST_PACKAGE = "test-package";
-//		when(metaDataSearchService.search(TEST_PACKAGE, 3, 0)).thenReturn(null);
+		when(metaDataSearchService.search(TEST_PACKAGE, 3, 0)).thenReturn(null);
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		standardRegistryController.search(TEST_PACKAGE, model);

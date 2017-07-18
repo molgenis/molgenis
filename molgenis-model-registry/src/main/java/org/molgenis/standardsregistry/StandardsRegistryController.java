@@ -105,12 +105,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public String search(@RequestParam("packageSearchValue") String packageSearchValue, Model model)
 	{
 		Gson gson = new Gson();
-		PackageSearchRequest packageSearchRequest = new PackageSearchRequest();
-		packageSearchRequest.setQuery(packageSearchValue);
-		packageSearchRequest.setOffset(0);
-		packageSearchRequest.setNum(3);
-
-		PackageSearchResponse packageSearchResponse = metaDataSearchService.search(packageSearchRequest);
+		PackageSearchResponse packageSearchResponse = metaDataSearchService.search(packageSearchValue, 0, 3);
 		if (packageSearchResponse != null)
 		{
 			model.addAttribute("packageSearchResponse", gson.toJson(packageSearchResponse));
@@ -129,7 +124,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	@ResponseBody
 	public PackageSearchResponse search(@Valid @RequestBody PackageSearchRequest packageSearchRequest)
 	{
-		return metaDataSearchService.search(packageSearchRequest);
+		return metaDataSearchService.search(packageSearchRequest.getQuery(), packageSearchRequest.getOffset(), packageSearchRequest.getNum());
 	}
 
 	@RequestMapping(value = "/details", method = GET)

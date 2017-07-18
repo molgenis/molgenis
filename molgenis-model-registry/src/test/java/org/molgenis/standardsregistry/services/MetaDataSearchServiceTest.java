@@ -120,7 +120,7 @@ public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 				standardRegistryTestHarness.createSemanticTag(pkg));
 		when(tagService.getTagsForPackage(pkg)).thenReturn(symanticTags);
 
-		PackageSearchResponse response = metaDataSearchService.search(request);
+		PackageSearchResponse response = metaDataSearchService.search(TEST_QUERY, 0, 3);
 
 		assertEquals("test-package", response.getPackages().get(0).getName());
 
@@ -134,7 +134,7 @@ public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 		PackageSearchRequest request = new PackageSearchRequest();
 		request.setQuery(TEST_QUERY);
 
-		PackageSearchResponse response = metaDataSearchService.search(request);
+		PackageSearchResponse response = metaDataSearchService.search(TEST_QUERY, 0, 3);
 
 		assertEquals(response, null);
 

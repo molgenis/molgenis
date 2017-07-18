@@ -25,10 +25,13 @@ public interface MetaDataSearchService
 	/**
 	 * <p>Search-method to search in model-registry.</p>
 	 *
-	 * @param packageSearchRequest {@link PackageSearchRequest}
+	 * @param query
+	 * @param offSet
+	 * @param number
+	 *
 	 * @return {@link PackageSearchResponse}
 	 */
-	PackageSearchResponse search(PackageSearchRequest packageSearchRequest);
+	PackageSearchResponse search(String query, int offSet, int number);
 
 	/**
 	 * <p>Return {@link StandardRegistryTag}-list</p>

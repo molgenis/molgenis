@@ -46,9 +46,8 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	@Override
-	public PackageSearchResponse search(PackageSearchRequest packageSearchRequest)
+	public PackageSearchResponse search(String searchQuery, int offSet, int number)
 	{
-		String searchQuery = packageSearchRequest.getQuery();
 		List<PackageResponse> packageResponses = Lists.newArrayList();
 
 		List<PackageSearchResultItem> searchResults = findRootPackages(searchQuery);
@@ -90,19 +89,16 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		int total = packageResponses.size();
 		if (total > 0)
 		{
-			if (packageSearchRequest.getOffset() != null)
-			{
-				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(), packageResponses.size());
-			}
+			packageResponses = packageResponses.subList(offSet, packageResponses.size());
 
-			if (packageSearchRequest.getNum() != null && packageResponses.size() > packageSearchRequest.getNum())
+			if (packageResponses.size() > number)
 			{
-				packageResponses = packageResponses.subList(0, packageSearchRequest.getNum());
+				packageResponses = packageResponses.subList(0, number);
 			}
 		}
 
-		int offset = packageSearchRequest.getOffset() != null ? packageSearchRequest.getOffset() : 0;
-		int num = packageSearchRequest.getNum() != null ? packageSearchRequest.getNum() : packageResponses.size();
+		int offset = offSet;
+		int num = number != 0 ? number : packageResponses.size();
 
 		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total, packageResponses);
 
