@@ -19,9 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
@@ -73,7 +71,7 @@ public class OneClickImporterController extends MolgenisPluginController
 
 	@ResponseBody
 	@RequestMapping(value = "/upload", method = POST)
-	public void importFile(HttpServletResponse response, @RequestParam(value = "file") MultipartFile multipartFile)
+	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile)
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
 		String filename = multipartFile.getOriginalFilename();
@@ -95,10 +93,7 @@ public class OneClickImporterController extends MolgenisPluginController
 		}
 
 		EntityType dataTable = entityService.createEntity(dataCollection);
-
-		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
-		response.setStatus(HttpServletResponse.SC_CREATED);
-		response.setHeader("Location", builder.build().toUriString() + "/" + dataTable.getId());
+		return dataTable.getId();
 	}
 
 	@ResponseBody

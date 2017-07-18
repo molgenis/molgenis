@@ -6,40 +6,63 @@
         <hr>
       </div>
     </div>
+
     <div class="row">
       <div class="col-md-12">
+
         <dropzone
           id="import-dropzone"
           url="/plugin/one-click-importer/upload"
-          :dropzone-options="options"
-          v-on:vdropzone-success="showSuccess">
+          :accepted-filetypes="['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].join(',')"
+          :thumbnail-height=100
+          :thumbnail-width=200
+          :duplicate-check=true
+          :use-font-awesome=true
+          v-on:vdropzone-success="onComplete"
+          v-on:vdropzone-error="onError"
+          v-on:duplicate-file="onDuplicate">
 
-          <div class="text-center">(xlsx, xls, csv, tsv)</div>
+          <div v-if="message" class="alert alert-warning" role="alert">{{message}}</div>
+          <div class="text-center">supported file types: xlsx, xls, csv, tsv</div>
 
         </dropzone>
       </div>
     </div>
+
+    <div class="row">
+      <div class="col">
+        <ul>
+          <li v-for="response in responses">
+            <a :href="response.url">View {{response.filename}}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
-  //  import { UPLOAD } from '../store/actions'
   import Dropzone from 'vue2-dropzone'
 
   export default {
     name: 'one-click-importer',
     data () {
       return {
-        options: {
-          useFontAwesome: true,
-          acceptedFileTypes: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].join(',')
-        }
+        responses: [],
+        message: null
       }
     },
     methods: {
-      'showSuccess': function (file, response) {
-        console.log('A file was successfully uploaded', file)
-        console.log('response', response)
+      onComplete (file, response) {
+        this.responses.push({url: '/menu/main/dataexplorer?entity=' + response, filename: file.upload.filename})
+        this.message = null
+      },
+      onDuplicate (file) {
+        this.message = 'Can not upload duplicate file [' + file.upload.filename + ']'
+      },
+      onError (file) {
+        this.message = 'Something went wrong when uploading [' + file.upload.filename + ']. Please contact an administrator'
       }
     },
     components: {
@@ -47,57 +70,3 @@
     }
   }
 </script>
-<style scoped lang="scss">
-  @import "~variables";
-  @import "~mixins";
-
-  body {
-    display: flex;
-    background: $white;
-    font-size: 16px;
-  }
-
-  .uploader {
-    box-sizing: border-box;
-    width: auto;
-    height: 550px;
-    display: flex;
-    border-radius: 6px;
-    box-shadow: 1px 2px 19px rgba(195, 195, 195, 0.43);
-    flex-direction: column-reverse;
-    background: $white;
-    box-sizing: border-box;
-  }
-
-  .upload-action .dz-message {
-    color: $white;
-    text-align: center;
-    padding: 20px 40px;
-    border: 3px dashed $white;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-
-  .uploader-files {
-    flex: 1;
-    padding: 40px;
-  }
-
-  .progress-indicator {
-    display: block;
-    background-color: $brand-success;
-    border-radius: 8px;
-    height: 4px;
-  }
-
-  .upload-action {
-    background: $brand-info;
-    padding: 20px;
-    cursor: pointer;
-    transition: background 300ms ease;
-  }
-
-  .upload-action.is-dragging {
-    background: $brand-success;
-  }
-</style>
