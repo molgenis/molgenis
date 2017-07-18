@@ -1,5 +1,11 @@
 [ignore]
+.*/node_modules/config-chain/test/broken.json
+.*/node_modules/vue/
+.*/node_modules/vue-router/
+.*/node_modules/npm/test/fixtures/config/package.json
+.*/node_modules/npmconf/test/fixtures/package.json
 node_modules/**
+node_modules/vue-router/src/util/location.js
 *.vue
 
 [include]
