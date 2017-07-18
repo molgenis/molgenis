@@ -18,43 +18,7 @@
               <label for="filter" class="sr-only">{{'FILTER_LABEL' | i18n}}:</label>
               <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n" v-model="filter">
             </form>
-            <table class="table table-sm">
-              <thead>
-              <tr>
-                <th>{{'ROW' | i18n}}</th>
-                <th>{{'OWNER' | i18n}}</th>
-                <th :colspan="permissions.length + 1">{{'PERMISSIONS' | i18n}}</th>
-              </tr>
-              <tr>
-                <th></th>
-                <th></th>
-                <th>{{'GRANTED' | i18n}}</th>
-                <th v-for="permission in permissions">{{permission | capitalizeFirstLetter}}</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="acl in filteredAcls">
-                <tr v-for="(ace, index) in acl.aces">
-                  <td>
-                    <span v-if="index == 0">{{acl.entityLabel || acl.entityId}}</span>
-                  </td>
-                  <td>
-                    <span v-if="index == 0">{{ index == 0 && acl.owner.username }}</span>
-                  </td>
-                  <td v-if="ace.granted"><i class="fa fa-check"></i></td>
-                  <td v-else><i class="fa fa-ban"></i></td>
-                  <td v-for="permission in permissions">
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox"
-                               :checked="ace.permissions.indexOf(permission) >= 0">
-                      </label>
-                    </div>
-                  </td>
-                </tr>
-              </template>
-              </tbody>
-            </table>
+            <acls :permissions="permissions" :acls="filteredAcls"></acls>
           </div>
         </div>
       </div>
@@ -68,7 +32,9 @@
   import { mapState, mapGetters, mapMutations } from 'vuex'
   import { TOGGLE_SID, SET_SELECTED_ENTITY_TYPE, SET_FILTER } from '../store/mutations'
   import Multiselect from 'vue-multiselect'
+  import ACLs from './ACLs'
   import Sids from './Sids'
+  import capitalizeFirstLetter from '../filters/capitalizeFirstLetter'
 
   export default {
     name: 'permission-manager',
@@ -79,7 +45,7 @@
       })
     },
     computed: {
-      ...mapState(['sids', 'selectedSids', 'entityTypes', 'acls', 'selectedEntityTypeId', 'permissions']),
+      ...mapState(['sids', 'selectedSids', 'entityTypes', 'selectedEntityTypeId', 'permissions']),
       ...mapGetters(['filteredAcls']),
       selectedEntityType: {
         get () {
@@ -100,10 +66,11 @@
     },
     components: {
       Multiselect,
-      Sids
+      Sids,
+      acls: ACLs
     },
     filters: {
-      capitalizeFirstLetter (string: string): string { return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() }
+      capitalizeFirstLetter
     }
   }
 </script>
