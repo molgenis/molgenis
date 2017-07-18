@@ -26,11 +26,13 @@ public class RepositoryPopulator
 	private final SettingsPopulator settingsPopulator;
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
+	private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
 			SystemEntityPopulator systemEntityPopulator, SettingsPopulator settingsPopulator,
-			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator)
+			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
+			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
@@ -38,6 +40,7 @@ public class RepositoryPopulator
 		this.settingsPopulator = requireNonNull(settingsPopulator);
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
+		this.genomeBrowserAttributesPopulator = requireNonNull(genomeBrowserAttributesPopulator);
 	}
 
 	public void populate(ContextRefreshedEvent event)
@@ -56,6 +59,10 @@ public class RepositoryPopulator
 			LOG.trace("Populating database with application entities ...");
 			systemEntityPopulator.populate(event);
 			LOG.trace("Populated database with application entities");
+
+			LOG.trace("Populating default genome browser attributes ...");
+			genomeBrowserAttributesPopulator.populate();
+			LOG.trace("Populated default genome browser attributes");
 		}
 
 		LOG.trace("Populating settings entities ...");
@@ -69,6 +76,7 @@ public class RepositoryPopulator
 		LOG.trace("Populating script type entities ...");
 		scriptTypePopulator.populate();
 		LOG.trace("Populated script type entities");
+
 	}
 
 	private boolean isDatabasePopulated()
