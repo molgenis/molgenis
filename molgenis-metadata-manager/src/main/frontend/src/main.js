@@ -1,10 +1,9 @@
 import 'es6-promise/auto'
 import 'babel-polyfill'
 
+import Vue from 'vue'
 import store from './store'
 import router from './router'
-
-import Vue from 'vue'
 
 import App from './App'
 import VueSweetAlert from 'vue-sweetalert'
@@ -22,7 +21,6 @@ sync(store, router)
 
 Vue.use(VueSweetAlert)
 Vue.use(Toaster)
-
 
 Vue.use(i18n, {
   lng: INITIAL_STATE.lng,
