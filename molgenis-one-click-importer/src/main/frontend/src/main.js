@@ -11,6 +11,7 @@ import { INITIAL_STATE } from './store/state'
 
 import App from './App'
 import VueSweetAlert from 'vue-sweetalert'
+import VueClip from 'vue-clip'
 
 import 'bootstrap/dist/css/bootstrap.css' // Bootstrap import
 import 'font-awesome/css/font-awesome.min.css' // Font awesome import
@@ -18,6 +19,7 @@ import 'font-awesome/css/font-awesome.min.css' // Font awesome import
 sync(store, router)
 
 Vue.use(VueSweetAlert)
+Vue.use(VueClip)
 
 Vue.use(i18n, {
   lng: INITIAL_STATE.lng,
@@ -26,7 +28,7 @@ Vue.use(i18n, {
   callback () {
     /* eslint-disable no-new */
     new Vue({
-      el: '#app',
+      el: '#molgenis-one-click-importer',
       store,
       router,
       template: '<App />',
