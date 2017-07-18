@@ -33,7 +33,7 @@ export type State = {
   me: PrincipalSid,
   sids: Array<GrantedAuthoritySid>,
   selectedSid: ?GrantedAuthoritySid,
+  selectedEntityTypeId: ?string,
   entityTypes: Array<EntityType>,
-  entityTypeId: ?string,
   acls: Array<ACL>
 }

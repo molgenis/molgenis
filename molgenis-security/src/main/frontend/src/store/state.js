@@ -9,7 +9,7 @@ const state: State = {
   },
   selectedSid: null,
   sids: [{authority: 'USER'}, {authority: 'SU'}],
-  entityTypeId: 'sys_blah_MolgenisPlugin',
+  selectedEntityTypeId: null,
   acls: [
     {
       entityId: 'home',
