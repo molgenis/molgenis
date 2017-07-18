@@ -9,7 +9,6 @@ import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Iterator;
 import java.util.List;
@@ -90,8 +89,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	private Attribute toPermittedAttribute(Attribute attribute)
 	{
-		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem()
-				&& SecurityContextHolder.getContext().getAuthentication() != null) // FIXME remove authentication check
+		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem())
 		{
 			EntityIdentity entityIdentity = EntityIdentity.create(attribute.getEntityType().getId(),
 					attribute.getIdValue());
