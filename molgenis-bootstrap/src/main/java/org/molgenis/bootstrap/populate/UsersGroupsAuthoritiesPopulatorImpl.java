@@ -46,8 +46,8 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 	}
 
 	@Override
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	public void populate()
 	{
 		if (adminPassword == null)

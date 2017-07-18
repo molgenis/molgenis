@@ -191,8 +191,8 @@ public class LocalizationService
 	 *
 	 * @param namespace
 	 */
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	public void deleteNameSpace(String namespace)
 	{
 		List<L10nString> namespaceEntities = getL10nStrings(namespace);
