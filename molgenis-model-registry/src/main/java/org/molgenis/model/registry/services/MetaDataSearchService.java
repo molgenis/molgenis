@@ -1,10 +1,9 @@
-package org.molgenis.standardsregistry.services;
+package org.molgenis.model.registry.services;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.standardsregistry.model.PackageSearchRequest;
-import org.molgenis.standardsregistry.model.PackageSearchResponse;
-import org.molgenis.standardsregistry.model.StandardRegistryEntity;
-import org.molgenis.standardsregistry.model.StandardRegistryTag;
+import org.molgenis.model.registry.model.PackageSearchResponse;
+import org.molgenis.model.registry.model.ModelRegistryEntity;
+import org.molgenis.model.registry.model.ModelRegistryTag;
 
 import java.util.List;
 
@@ -34,18 +33,18 @@ public interface MetaDataSearchService
 	PackageSearchResponse search(String query, int offSet, int number);
 
 	/**
-	 * <p>Return {@link StandardRegistryTag}-list</p>
+	 * <p>Return {@link ModelRegistryTag}-list</p>
 	 *
 	 * @param pkg {@link Package}
-	 * @return {@link List< StandardRegistryTag >}
+	 * @return {@link List<  ModelRegistryTag  >}
 	 */
-	List<StandardRegistryTag> getTagsForPackage(Package pkg);
+	List<ModelRegistryTag> getTagsForPackage(Package pkg);
 
 	/**
-	 * <p>Return {@link  StandardRegistryEntity}-list</p>
+	 * <p>Return {@link  ModelRegistryEntity}-list</p>
 	 *
 	 * @param packageName package-name
-	 * @return {@link List<StandardRegistryEntity>}
+	 * @return {@link List< ModelRegistryEntity >}
 	 */
-	List<StandardRegistryEntity> getEntitiesInPackage(String packageName);
+	List<ModelRegistryEntity> getEntitiesInPackage(String packageName);
 }

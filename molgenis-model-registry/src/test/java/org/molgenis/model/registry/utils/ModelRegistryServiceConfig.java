@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.utils;
+package org.molgenis.model.registry.utils;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityTestHarness;
@@ -9,13 +9,11 @@ import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.model.registry.services.MetaDataSearchService;
+import org.molgenis.model.registry.services.TreeNodeServiceImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.standardsregistry.StandardsRegistryController;
-import org.molgenis.standardsregistry.StandardsRegistryControllerTest;
-import org.molgenis.standardsregistry.services.MetaDataSearchService;
-import org.molgenis.standardsregistry.services.MetaDataSearchServiceImpl;
-import org.molgenis.standardsregistry.services.TreeNodeService;
-import org.molgenis.standardsregistry.services.TreeNodeServiceImpl;
+import org.molgenis.model.registry.services.MetaDataSearchServiceImpl;
+import org.molgenis.model.registry.services.TreeNodeService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -26,8 +24,8 @@ import static org.mockito.Mockito.mock;
  * @author sido
  */
 @Configuration
-@Import({ TestHarnessConfig.class, StandardRegistryTestHarness.class })
-public class StandardRegistryServiceConfig
+@Import({ TestHarnessConfig.class, ModelRegistryTestHarness.class })
+public class ModelRegistryServiceConfig
 {
 
 	@Bean

@@ -1,7 +1,7 @@
-package org.molgenis.standardsregistry.services;
+package org.molgenis.model.registry.services;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.standardsregistry.model.PackageTreeNode;
+import org.molgenis.model.registry.model.PackageTreeNode;
 
 /**
  * <p>Service to create treenodes for model registry.</p>

@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.model;
+package org.molgenis.model.registry.model;
 
 import java.util.List;
 
@@ -12,11 +12,11 @@ public class PackageResponse
 	private String label;
 	private String description;
 	private String matchDescription;
-	private List<StandardRegistryEntity> entitiesInPackage;
-	private List<StandardRegistryTag> tags;
+	private List<ModelRegistryEntity> entitiesInPackage;
+	private List<ModelRegistryTag> tags;
 
 	public PackageResponse(String name, String label, String description, String matchDescription,
-			List<StandardRegistryEntity> entitiesInPackage, List<StandardRegistryTag> tags)
+			List<ModelRegistryEntity> entitiesInPackage, List<ModelRegistryTag> tags)
 	{
 		this.name = name;
 		this.label = label;
@@ -50,13 +50,13 @@ public class PackageResponse
 	}
 
 	@SuppressWarnings("unused")
-	public List<StandardRegistryEntity> getEntities()
+	public List<ModelRegistryEntity> getEntities()
 	{
 		return entitiesInPackage;
 	}
 
 	@SuppressWarnings("unused")
-	public Iterable<StandardRegistryTag> getTags()
+	public Iterable<ModelRegistryTag> getTags()
 	{
 		return tags;
 	}

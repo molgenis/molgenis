@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry;
+package org.molgenis.model.registry;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -7,12 +7,12 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.standardsregistry.model.PackageResponse;
-import org.molgenis.standardsregistry.model.PackageSearchRequest;
-import org.molgenis.standardsregistry.model.PackageSearchResponse;
-import org.molgenis.standardsregistry.model.PackageTreeNode;
-import org.molgenis.standardsregistry.services.MetaDataSearchService;
-import org.molgenis.standardsregistry.services.TreeNodeService;
+import org.molgenis.model.registry.model.PackageResponse;
+import org.molgenis.model.registry.model.PackageSearchRequest;
+import org.molgenis.model.registry.model.PackageSearchResponse;
+import org.molgenis.model.registry.model.PackageTreeNode;
+import org.molgenis.model.registry.services.MetaDataSearchService;
+import org.molgenis.model.registry.services.TreeNodeService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,25 +27,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
+import static org.molgenis.model.registry.ModelRegistryController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class StandardsRegistryController extends MolgenisPluginController
+public class ModelRegistryController extends MolgenisPluginController
 {
 
-	private static final Logger LOG = LoggerFactory.getLogger(StandardsRegistryController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ModelRegistryController.class);
 
-	public static final String ID = "standardsregistry";
+	public static final String ID = "model-registry";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final String VIEW_NAME = "view-model-standardsregistry";
-	private static final String VIEW_NAME_DETAILS = "view-model-standardsregistry_details";
-	private static final String VIEW_NAME_DOCUMENTATION = "view-model-standardsregistry_docs";
-	private static final String VIEW_NAME_DOCUMENTATION_EMBED = "view-model-standardsregistry_docs-macros";
-	private static final String VIEW_NAME_UML = "view-model-standardsregistry_uml";
+	private static final String VIEW_NAME = "view-model-registry";
+	private static final String VIEW_NAME_DETAILS = "view-model-registry_details";
+	private static final String VIEW_NAME_DOCUMENTATION = "view-model-registry_docs";
+	private static final String VIEW_NAME_DOCUMENTATION_EMBED = "view-model-registry_docs-macros";
+	private static final String VIEW_NAME_UML = "view-model-registry_uml";
 
 	private final MetaDataService metaDataService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
@@ -55,7 +55,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final MetaDataSearchService metaDataSearchService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService,
+	public ModelRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService,
 			TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService)
 	{
 		super(URI);

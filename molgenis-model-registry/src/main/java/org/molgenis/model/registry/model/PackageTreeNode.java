@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.model;
+package org.molgenis.model.registry.model;
 
 import java.util.ArrayList;
 import java.util.List;

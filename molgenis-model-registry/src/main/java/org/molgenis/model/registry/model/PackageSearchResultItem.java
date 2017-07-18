@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.model;
+package org.molgenis.model.registry.model;
 
 import org.molgenis.data.meta.model.Package;
 

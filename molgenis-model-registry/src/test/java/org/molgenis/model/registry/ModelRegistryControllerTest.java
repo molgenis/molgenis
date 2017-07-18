@@ -1,8 +1,7 @@
-package org.molgenis.standardsregistry;
+package org.molgenis.model.registry;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import org.junit.Ignore;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.TestHarnessConfig;
@@ -12,10 +11,10 @@ import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.standardsregistry.model.*;
-import org.molgenis.standardsregistry.services.MetaDataSearchService;
-import org.molgenis.standardsregistry.services.TreeNodeService;
-import org.molgenis.standardsregistry.utils.StandardRegistryTestHarness;
+import org.molgenis.model.registry.model.*;
+import org.molgenis.model.registry.services.MetaDataSearchService;
+import org.molgenis.model.registry.services.TreeNodeService;
+import org.molgenis.model.registry.utils.ModelRegistryTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,12 +38,12 @@ import static org.testng.Assert.assertEquals;
  * @author sido
  */
 @ContextConfiguration(classes = { TestHarnessConfig.class,
-		StandardsRegistryControllerTest.StandardRegistryControllerTestConfig.class })
-public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
+		ModelRegistryControllerTest.ModelRegistryControllerTestConfig.class })
+public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 {
 
 	@Autowired
-	private StandardRegistryTestHarness standardRegistryTestHarness;
+	private ModelRegistryTestHarness modelRegistryTestHarness;
 
 	@Autowired
 	private PackageFactory packageFactory;
@@ -59,18 +58,18 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 	private TreeNodeService treeNodeService;
 
 	@Autowired
-	private StandardsRegistryController standardRegistryController;
+	private ModelRegistryController standardRegistryController;
 
 	@Test
 	public void testInit() {
 		ExtendedModelMap modelWarning = new ExtendedModelMap();
 		String templateWarning = standardRegistryController.init("true", modelWarning);
-		assertEquals(templateWarning, "view-model-standardsregistry");
+		assertEquals(templateWarning, "view-model-registry");
 		assertEquals(modelWarning.asMap().get("warningMessage"), "Package not found");
 
 		ExtendedModelMap modelNoWarning = new ExtendedModelMap();
 		String templateNoWarning = standardRegistryController.init("false", modelNoWarning);
-		assertEquals(templateNoWarning, "view-model-standardsregistry");
+		assertEquals(templateNoWarning, "view-model-registry");
 		assertEquals(modelNoWarning.asMap().get("warningMessage"), null);
 
 	}
@@ -85,7 +84,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		ExtendedModelMap modelDocs = new ExtendedModelMap();
 		String templateDocs = standardRegistryController.getModelDocumentation(modelDocs);
-		assertEquals(templateDocs, "view-model-standardsregistry_docs");
+		assertEquals(templateDocs, "view-model-registry_docs");
 		List<Package> packagesResponse = (ArrayList) modelDocs.asMap().get("packages");
 		assertEquals(packagesResponse, packages);
 
@@ -95,7 +94,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		ExtendedModelMap modelDocsMacros = new ExtendedModelMap();
 		String templateDocsMacros = standardRegistryController.getModelDocumentation(TEST_SINGLE_PACKAGE, true, modelDocsMacros);
-		assertEquals(templateDocsMacros,"view-model-standardsregistry_docs-macros");
+		assertEquals(templateDocsMacros,"view-model-registry_docs-macros");
 		Package pkgResponse = (Package) modelDocsMacros.asMap().get("package");
 		assertEquals(pkgResponse, pkg);
 
@@ -113,7 +112,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		String template = standardRegistryController.search(TEST_PACKAGE, model);
-		assertEquals(template, "view-model-standardsregistry");
+		assertEquals(template, "view-model-registry");
 		assertEquals(model.asMap().get("packageSearchResponse"), gson.toJson(packageSearchResponse));
 
 	}
@@ -122,7 +121,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 	public void testSearchPackageNotFound() throws Exception
 	{
 		String TEST_PACKAGE = "test-package";
-		when(metaDataSearchService.search(TEST_PACKAGE, 3, 0)).thenReturn(null);
+		when(metaDataSearchService.search(TEST_PACKAGE, 0, 3)).thenReturn(null);
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		standardRegistryController.search(TEST_PACKAGE, model);
@@ -140,7 +139,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		String template = standardRegistryController.showView(TEST_PACKAGE, model);
-		assertEquals(template, "view-model-standardsregistry_details");
+		assertEquals(template, "view-model-registry_details");
 		assertEquals(model.get("selectedPackageName"), TEST_PACKAGE);
 		assertEquals(model.get("package"), selectedPackage);
 	}
@@ -154,7 +153,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		String template = standardRegistryController.getUml(TEST_PACKAGE, model);
-		assertEquals(template, "view-model-standardsregistry_uml");
+		assertEquals(template, "view-model-registry_uml");
 		assertEquals(model.get("molgenisPackage"), pkg);
 
 	}
@@ -174,12 +173,12 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 		Package molgenisPackge = packageFactory.create(TEST_PACKAGE);
 		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(molgenisPackge);
 
-		StandardRegistryEntity entity = standardRegistryTestHarness.createStandardRegistryEntity();
-		List<StandardRegistryEntity> entities = Lists.newArrayList(entity);
+		ModelRegistryEntity entity = modelRegistryTestHarness.createStandardRegistryEntity();
+		List<ModelRegistryEntity> entities = Lists.newArrayList(entity);
 		when(metaDataSearchService.getEntitiesInPackage(TEST_PACKAGE)).thenReturn(entities);
 
-		StandardRegistryTag tag = standardRegistryTestHarness.createStandardRegistryTag();
-		List<StandardRegistryTag> tags = Lists.newArrayList(tag);
+		ModelRegistryTag tag = modelRegistryTestHarness.createStandardRegistryTag();
+		List<ModelRegistryTag> tags = Lists.newArrayList(tag);
 		when(metaDataSearchService.getTagsForPackage(molgenisPackge)).thenReturn(tags);
 
 		PackageResponse pacakgeResponse = new PackageResponse(TEST_PACKAGE, "", "", null, entities, tags);
@@ -200,7 +199,7 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		String TEST_PACKAGE = "test-package";
 		Package molgenisPackage = packageFactory.create(TEST_PACKAGE);
-		PackageTreeNode treeNode = standardRegistryTestHarness.createPackageTreeNode();
+		PackageTreeNode treeNode = modelRegistryTestHarness.createPackageTreeNode();
 		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(molgenisPackage);
 		when(treeNodeService.createPackageTreeNode(molgenisPackage)).thenReturn(treeNode);
 
@@ -208,17 +207,9 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(response, Collections.singletonList(treeNode));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testGetTreeDataNotFound()
-	{
-		String TEST_PACKAGE = "test-package";
-		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(null);
-		standardRegistryController.getTree(TEST_PACKAGE);
-	}
-
 	@Configuration
-	@Import(StandardRegistryTestHarness.class)
-	public static class StandardRegistryControllerTestConfig
+	@Import(ModelRegistryTestHarness.class)
+	public static class ModelRegistryControllerTestConfig
 	{
 
 		@Bean
@@ -252,9 +243,9 @@ public class StandardsRegistryControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public StandardsRegistryController standardRegistryController()
+		public ModelRegistryController standardRegistryController()
 		{
-			return new StandardsRegistryController(metaDataService(), metaDataSearchService(), tagService(),
+			return new ModelRegistryController(metaDataService(), metaDataSearchService(), tagService(),
 					treeNodeService());
 		}
 

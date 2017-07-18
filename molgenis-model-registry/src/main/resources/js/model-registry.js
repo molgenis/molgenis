@@ -6,12 +6,13 @@
     var countTemplate;
     var modelTemplate;
 
+    var scale;
     var nrResultsPerPage = 3;
     var query;
     var pageIndex = 0;
 
     /**
-     * @memberOf molgenis.standardsregistry
+     * @memberOf molgenis.model-registry
      */
     function createPackageTree(selectedPackage) {
         if (selectedPackage.name) {
@@ -46,7 +47,7 @@
     }
 
     /**
-     * @memberOf molgenis.standardsregistry
+     * @memberOf molgenis.model-registry
      */
     function renderSearchResults(searchResults, container) {
         container.empty();

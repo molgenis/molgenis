@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.services;
+package org.molgenis.model.registry.services;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -12,9 +12,9 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.model.registry.model.*;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.standardsregistry.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,8 +54,8 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		for (PackageSearchResultItem searchResult : searchResults)
 		{
 			Package p = searchResult.getPackageFound();
-			List<StandardRegistryEntity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
-			List<StandardRegistryEntity> entitiesInPackageFiltered = Lists.newArrayList(
+			List<ModelRegistryEntity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
+			List<ModelRegistryEntity> entitiesInPackageFiltered = Lists.newArrayList(
 					entitiesInPackageUnfiltered.stream().filter(entity ->
 					{
 						if (entity.isAbtract())
@@ -106,13 +106,13 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	@Override
-	public List<StandardRegistryTag> getTagsForPackage(Package p)
+	public List<ModelRegistryTag> getTagsForPackage(Package p)
 	{
-		List<StandardRegistryTag> tags = Lists.newArrayList();
+		List<ModelRegistryTag> tags = Lists.newArrayList();
 
 		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
 		{
-			tags.add(new StandardRegistryTag(tag.getObject().getLabel(), tag.getObject().getIri(),
+			tags.add(new ModelRegistryTag(tag.getObject().getLabel(), tag.getObject().getIri(),
 					tag.getRelation().toString()));
 		}
 
@@ -120,19 +120,19 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	@Override
-	public List<StandardRegistryEntity> getEntitiesInPackage(String packageName)
+	public List<ModelRegistryEntity> getEntitiesInPackage(String packageName)
 	{
-		List<StandardRegistryEntity> entiesForThisPackage = new ArrayList<>();
+		List<ModelRegistryEntity> entiesForThisPackage = new ArrayList<>();
 		Package aPackage = metaDataService.getPackage(packageName);
 		getEntitiesInPackageRec(aPackage, entiesForThisPackage);
 		return entiesForThisPackage;
 	}
 
-	private void getEntitiesInPackageRec(Package aPackage, List<StandardRegistryEntity> entiesForThisPackage)
+	private void getEntitiesInPackageRec(Package aPackage, List<ModelRegistryEntity> entiesForThisPackage)
 	{
 		for (EntityType emd : aPackage.getEntityTypes())
 		{
-			entiesForThisPackage.add(new StandardRegistryEntity(emd.getId(), emd.getLabel(), emd.isAbstract()));
+			entiesForThisPackage.add(new ModelRegistryEntity(emd.getId(), emd.getLabel(), emd.isAbstract()));
 		}
 		Iterable<Package> subPackages = aPackage.getChildren();
 		if (subPackages != null)

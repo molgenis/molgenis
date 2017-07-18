@@ -1,16 +1,16 @@
-package org.molgenis.standardsregistry.model;
+package org.molgenis.model.registry.model;
 
 /**
  * @author sido
  */
-public class StandardRegistryEntity
+public class ModelRegistryEntity
 {
 
 	private String name;
 	private String label;
 	private boolean abstr;
 
-	public StandardRegistryEntity(String name, String label, boolean abstr)
+	public ModelRegistryEntity(String name, String label, boolean abstr)
 	{
 		super();
 		this.name = name;

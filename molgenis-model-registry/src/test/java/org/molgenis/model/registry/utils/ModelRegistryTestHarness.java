@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.utils;
+package org.molgenis.model.registry.utils;
 
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -6,9 +6,9 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.standardsregistry.model.PackageTreeNode;
-import org.molgenis.standardsregistry.model.StandardRegistryEntity;
-import org.molgenis.standardsregistry.model.StandardRegistryTag;
+import org.molgenis.model.registry.model.PackageTreeNode;
+import org.molgenis.model.registry.model.ModelRegistryEntity;
+import org.molgenis.model.registry.model.ModelRegistryTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  * @author sido
  */
 @Component
-public class StandardRegistryTestHarness
+public class ModelRegistryTestHarness
 {
 
 	public final static String TEST_ENTITY_TYPE_NAME = "test-entity-type";
@@ -28,23 +28,23 @@ public class StandardRegistryTestHarness
 
 	/**
 	 *
-	 * <p>Create specific {@link StandardRegistryEntity}-objects</p>
+	 * <p>Create specific {@link ModelRegistryEntity}-objects</p>
 	 *
-	 * @return {@link StandardRegistryEntity}
+	 * @return {@link ModelRegistryEntity}
 	 */
-	public StandardRegistryEntity createStandardRegistryEntity() {
-		StandardRegistryEntity entity = new StandardRegistryEntity("test-entity", "test-description", false);
+	public ModelRegistryEntity createStandardRegistryEntity() {
+		ModelRegistryEntity entity = new ModelRegistryEntity("test-entity", "test-description", false);
 		return entity;
 	}
 
 	/**
 	 *
-	 * <p>Create {@link StandardRegistryTag}-object</p>
+	 * <p>Create {@link ModelRegistryTag}-object</p>
 	 *
-	 * @return {@link StandardRegistryTag}
+	 * @return {@link ModelRegistryTag}
 	 */
-	public StandardRegistryTag createStandardRegistryTag() {
-		return new StandardRegistryTag("test-tag", "", "");
+	public ModelRegistryTag createStandardRegistryTag() {
+		return new ModelRegistryTag("test-tag", "", "");
 	}
 
 	/**

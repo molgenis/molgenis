@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.services;
+package org.molgenis.model.registry.services;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -14,12 +14,12 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.standardsregistry.model.PackageSearchRequest;
-import org.molgenis.standardsregistry.model.PackageSearchResponse;
-import org.molgenis.standardsregistry.model.StandardRegistryEntity;
-import org.molgenis.standardsregistry.model.StandardRegistryTag;
-import org.molgenis.standardsregistry.utils.StandardRegistryTestHarness;
-import org.molgenis.standardsregistry.utils.StandardRegistryServiceConfig;
+import org.molgenis.model.registry.model.PackageSearchRequest;
+import org.molgenis.model.registry.model.PackageSearchResponse;
+import org.molgenis.model.registry.model.ModelRegistryEntity;
+import org.molgenis.model.registry.model.ModelRegistryTag;
+import org.molgenis.model.registry.utils.ModelRegistryServiceConfig;
+import org.molgenis.model.registry.utils.ModelRegistryTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
@@ -34,7 +34,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 /**
  * @author sido
  */
-@ContextConfiguration(classes = StandardRegistryServiceConfig.class)
+@ContextConfiguration(classes = ModelRegistryServiceConfig.class)
 public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 {
 
@@ -51,7 +51,7 @@ public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private StandardRegistryTestHarness standardRegistryTestHarness;
+	private ModelRegistryTestHarness modelRegistryTestHarness;
 	@Autowired
 	private MetaDataSearchService metaDataSearchService;
 
@@ -59,13 +59,13 @@ public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 	public void testGetEntitiesInPackage()
 	{
 		String TEST_PACKAGE = "test-package";
-		EntityType e1 = standardRegistryTestHarness.createEntityType(false);
+		EntityType e1 = modelRegistryTestHarness.createEntityType(false);
 		Package pkg = packageFactory.create(TEST_PACKAGE);
 		pkg.set(PackageMetadata.ENTITY_TYPES, Lists.newArrayList(e1));
 
 		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
 
-		List<StandardRegistryEntity> standardRegistryEntities = metaDataSearchService.getEntitiesInPackage(
+		List<ModelRegistryEntity> standardRegistryEntities = metaDataSearchService.getEntitiesInPackage(
 				TEST_PACKAGE);
 		assertEquals(1, standardRegistryEntities.size());
 	}
@@ -75,9 +75,10 @@ public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 	{
 		String TEST_PACKAGE = "test-package";
 		Package pkg = packageFactory.create(TEST_PACKAGE);
-		Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> semanticTags = Lists.newArrayList(standardRegistryTestHarness.createSemanticTag(pkg));
+		Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> semanticTags = Lists.newArrayList(
+				modelRegistryTestHarness.createSemanticTag(pkg));
 		when(tagService.getTagsForPackage(pkg)).thenReturn(semanticTags);
-		List<StandardRegistryTag> tags = metaDataSearchService.getTagsForPackage(pkg);
+		List<ModelRegistryTag> tags = metaDataSearchService.getTagsForPackage(pkg);
 		assertEquals(1, tags.size());
 	}
 
@@ -112,31 +113,17 @@ public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(PackageMetadata.PACKAGE, packageQuery, Package.class)).thenReturn(packageStream);
 
 		Query<EntityType> entityTypeQuery = new QueryImpl<EntityType>().search(TEST_QUERY);
-		Stream<EntityType> entityStream = Stream.of(standardRegistryTestHarness.createEntityType(false));
+		Stream<EntityType> entityStream = Stream.of(modelRegistryTestHarness.createEntityType(false));
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, entityTypeQuery, EntityType.class)).thenReturn(entityStream);
 
 		// tagservice mocks
 		Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> symanticTags = Lists.newArrayList(
-				standardRegistryTestHarness.createSemanticTag(pkg));
+				modelRegistryTestHarness.createSemanticTag(pkg));
 		when(tagService.getTagsForPackage(pkg)).thenReturn(symanticTags);
 
 		PackageSearchResponse response = metaDataSearchService.search(TEST_QUERY, 0, 3);
 
 		assertEquals("test-package", response.getPackages().get(0).getName());
-
-	}
-
-	@Test
-	public void testSearchPackageNotFound()
-	{
-		String TEST_QUERY = "test-query";
-
-		PackageSearchRequest request = new PackageSearchRequest();
-		request.setQuery(TEST_QUERY);
-
-		PackageSearchResponse response = metaDataSearchService.search(TEST_QUERY, 0, 3);
-
-		assertEquals(response, null);
 
 	}
 

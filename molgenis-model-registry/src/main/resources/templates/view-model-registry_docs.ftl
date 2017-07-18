@@ -11,16 +11,16 @@
 <#--<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">-->
     <link rel="icon" href="/img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="/css/standardsregistry.css" type="text/css">
+    <link rel="stylesheet" href="/css/model-registry.css" type="text/css">
     <link rel="stylesheet" href="/css/molgenis.css" type="text/css">
 <#--<script src="<@resource_href "/js/jquery-2.1.1.min.js"/>"></script>-->
 <#--<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>-->
     <script src="/js/jquery-2.1.1.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/standardsregistry-doc.js"></script>
+    <script src="/js/model-registry-doc.js"></script>
 </head>
 <body>
-<#include "view-model-standardsregistry_docs-macros.ftl">
+<#include "view-model-registry_docs-macros.ftl">
 <div class="col-md-12 hidden-print">
     <button id="print-doc-btn" class="btn btn-default btn-md pull-right"><span class="glyphicon glyphicon-print"></span>
     </button>

@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.services;
+package org.molgenis.model.registry.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -12,9 +12,9 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.standardsregistry.model.PackageTreeNode;
-import org.molgenis.standardsregistry.utils.StandardRegistryTestHarness;
-import org.molgenis.standardsregistry.utils.StandardRegistryServiceConfig;
+import org.molgenis.model.registry.model.PackageTreeNode;
+import org.molgenis.model.registry.utils.ModelRegistryTestHarness;
+import org.molgenis.model.registry.utils.ModelRegistryServiceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
@@ -25,14 +25,14 @@ import static org.mockito.Mockito.when;
 /**
  * @author sido
  */
-@ContextConfiguration(classes = { StandardRegistryServiceConfig.class, TestHarnessConfig.class })
+@ContextConfiguration(classes = { ModelRegistryServiceConfig.class, TestHarnessConfig.class })
 public class TreeNodeServiceTest extends AbstractMolgenisSpringTest
 {
 
 	@Autowired
 	private PackageFactory packageFactory;
 	@Autowired
-	private StandardRegistryTestHarness standardRegistryTestHarness;
+	private ModelRegistryTestHarness modelRegistryTestHarness;
 
 	@Autowired
 	private TagService<LabeledResource, LabeledResource> tagService;
@@ -44,7 +44,7 @@ public class TreeNodeServiceTest extends AbstractMolgenisSpringTest
 	public void testCreatePackageTreeNode()
 	{
 		String TEST_PACKAGE = "test-package";
-		EntityType e1 = standardRegistryTestHarness.createEntityType(false);
+		EntityType e1 = modelRegistryTestHarness.createEntityType(false);
 		Package pkg = packageFactory.create(TEST_PACKAGE);
 		pkg.set(PackageMetadata.ENTITY_TYPES, Lists.newArrayList(e1));
 

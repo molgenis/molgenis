@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.services;
+package org.molgenis.model.registry.services;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -6,7 +6,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.standardsregistry.model.PackageTreeNode;
+import org.molgenis.model.registry.model.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

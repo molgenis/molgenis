@@ -1,4 +1,4 @@
-package org.molgenis.standardsregistry.model;
+package org.molgenis.model.registry.model;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

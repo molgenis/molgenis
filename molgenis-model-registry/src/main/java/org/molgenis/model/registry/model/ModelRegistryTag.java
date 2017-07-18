@@ -1,16 +1,16 @@
-package org.molgenis.standardsregistry.model;
+package org.molgenis.model.registry.model;
 
 /**
  * @author sido
  */
-public class StandardRegistryTag
+public class ModelRegistryTag
 {
 
 	private String label;
 	private String relation;
 	private String iri;
 
-	public StandardRegistryTag(String label, String iri, String relation)
+	public ModelRegistryTag(String label, String iri, String relation)
 	{
 		super();
 		this.label = label;
