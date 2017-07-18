@@ -2,15 +2,17 @@ package org.molgenis.standardsregistry;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.standardsregistry.model.PackageResponse;
+import org.molgenis.standardsregistry.model.PackageSearchRequest;
+import org.molgenis.standardsregistry.model.PackageSearchResponse;
+import org.molgenis.standardsregistry.model.PackageTreeNode;
 import org.molgenis.standardsregistry.services.MetaDataSearchService;
 import org.molgenis.standardsregistry.services.TreeNodeService;
-import org.molgenis.standardsregistry.model.*;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +22,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -51,22 +55,23 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final MetaDataSearchService metaDataSearchService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService, TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService)
+	public StandardsRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService,
+			TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService)
 	{
 		super(URI);
-		this.metaDataSearchService = Objects.requireNonNull(metaDataSearchService);
-		this.treeNodeService = Objects.requireNonNull(treeNodeService);
 		this.metaDataService = Objects.requireNonNull(metaDataService);
+		this.metaDataSearchService = Objects.requireNonNull(metaDataSearchService);
 		this.tagService = Objects.requireNonNull(tagService);
+		this.treeNodeService = Objects.requireNonNull(treeNodeService);
 
 	}
 
 	@RequestMapping(method = GET)
-	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound, Model model)
+	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound,  Model model)
 	{
 		if (showPackageNotFound != null && showPackageNotFound.equalsIgnoreCase("true"))
 		{
-			model.addAttribute("warningMessage", "Model not found");
+			model.addAttribute("warningMessage", "Package not found");
 		}
 
 		return VIEW_NAME;
@@ -82,7 +87,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/documentation/{packageName}", method = GET)
-	public String getModelDocumentation(@PathVariable("packageName") String packageName, @RequestParam(value = "embed", required = false) Boolean embed, Model model)
+	public String getModelDocumentation(@PathVariable("packageName") String packageName,
+			@RequestParam(value = "embed", required = false) Boolean embed, Model model)
 	{
 		Package aPackage = metaDataService.getPackage(packageName);
 		model.addAttribute("package", aPackage);
@@ -91,9 +97,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	/**
-	 *
-	 *
-	 *
 	 * @param packageSearchValue
 	 * @param model
 	 * @return
@@ -108,7 +111,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		packageSearchRequest.setNum(3);
 
 		PackageSearchResponse packageSearchResponse = metaDataSearchService.search(packageSearchRequest);
-		if (packageSearchRequest != null)
+		if (packageSearchResponse != null)
 		{
 			model.addAttribute("packageSearchResponse", gson.toJson(packageSearchResponse));
 		}
@@ -117,7 +120,6 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	/**
-	 *
 	 * <p>Only at the initialization of the model-registry.</p>
 	 *
 	 * @param packageSearchRequest
@@ -138,26 +140,25 @@ public class StandardsRegistryController extends MolgenisPluginController
 			List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
 			selectedPackageName = packages.get(0).getId();
 		}
-		model.addAttribute("tagService", tagService);
+		Package selectedPackage = metaDataService.getPackage(selectedPackageName);
 		model.addAttribute("selectedPackageName", selectedPackageName);
-		model.addAttribute("package", metaDataService.getPackage(selectedPackageName));
-
+		model.addAttribute("package", selectedPackage);
+		model.addAttribute("tagService", tagService);
 		return VIEW_NAME_DETAILS;
 	}
 
 	@RequestMapping(value = "/uml", method = GET)
 	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
 	{
-		LOG.info("Requested package: [ " +selectedPackageName+ " ]");
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
-
-		LOG.info("Converted package: [ " + molgenisPackage + " ]");
-
 		if (molgenisPackage != null)
 		{
 			model.addAttribute("molgenisPackage", molgenisPackage);
 		}
-
+		else
+		{
+			throw new MolgenisDataException("Unknown package: [ " + selectedPackageName + " ]");
+		}
 		return VIEW_NAME_UML;
 	}
 
@@ -166,15 +167,18 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public PackageResponse getPackage(@RequestParam(value = "package") String packageName)
 	{
 		Package molgenisPackage = metaDataService.getPackage(packageName);
-		if (molgenisPackage == null) return null;
+		if (molgenisPackage == null)
+		{
+			throw new MolgenisDataException("Unknown package: [ " + packageName + " ]");
+		}
 
 		return new PackageResponse(molgenisPackage.getId(), molgenisPackage.getLabel(),
-				molgenisPackage.getDescription(), null, metaDataSearchService.getEntitiesInPackage(molgenisPackage.getId()),
+				molgenisPackage.getDescription(), null,
+				metaDataSearchService.getEntitiesInPackage(molgenisPackage.getId()),
 				metaDataSearchService.getTagsForPackage(molgenisPackage));
 	}
 
 	/**
-	 *
 	 * <p>PackageTree</p>
 	 *
 	 * @param packageName
@@ -185,7 +189,10 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public Collection<PackageTreeNode> getTree(@RequestParam(value = "package") String packageName)
 	{
 		Package molgenisPackage = metaDataService.getPackage(packageName);
-		if (molgenisPackage == null) return null;
+		if (molgenisPackage == null)
+		{
+			throw new MolgenisDataException("Unknown package: [ " + packageName + " ]");
+		}
 
 		return Collections.singletonList(treeNodeService.createPackageTreeNode(molgenisPackage));
 	}

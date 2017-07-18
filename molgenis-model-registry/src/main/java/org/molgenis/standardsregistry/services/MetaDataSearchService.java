@@ -1,13 +1,14 @@
 package org.molgenis.standardsregistry.services;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.standardsregistry.model.*;
+import org.molgenis.standardsregistry.model.PackageSearchRequest;
+import org.molgenis.standardsregistry.model.PackageSearchResponse;
+import org.molgenis.standardsregistry.model.StandardRegistryEntity;
+import org.molgenis.standardsregistry.model.StandardRegistryTag;
 
 import java.util.List;
 
-
 /**
- *
  * <p>Service to search for metaData in data library. </p>
  * <ul>It uses the following services:
  * <li>{@link org.molgenis.data.meta.MetaDataService}</li>
@@ -22,7 +23,6 @@ public interface MetaDataSearchService
 {
 
 	/**
-	 *
 	 * <p>Search-method to search in model-registry.</p>
 	 *
 	 * @param packageSearchRequest {@link PackageSearchRequest}
@@ -31,7 +31,6 @@ public interface MetaDataSearchService
 	PackageSearchResponse search(PackageSearchRequest packageSearchRequest);
 
 	/**
-	 *
 	 * <p>Return {@link StandardRegistryTag}-list</p>
 	 *
 	 * @param pkg {@link Package}
@@ -39,9 +38,7 @@ public interface MetaDataSearchService
 	 */
 	List<StandardRegistryTag> getTagsForPackage(Package pkg);
 
-
 	/**
-	 *
 	 * <p>Return {@link  StandardRegistryEntity}-list</p>
 	 *
 	 * @param packageName package-name

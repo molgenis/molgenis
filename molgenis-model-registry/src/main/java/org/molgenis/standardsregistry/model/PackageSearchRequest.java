@@ -6,44 +6,43 @@ import javax.validation.constraints.Min;
 /**
  * @author sido
  */
-public class PackageSearchRequest {
+public class PackageSearchRequest
+{
 
-        private String query;
-        @Min(0)
-        private Integer offset;
-        @Min(0)
-        @Max(100)
-        private Integer num;
+	private String query;
+	@Min(0)
+	private Integer offset;
+	@Min(0)
+	@Max(100)
+	private Integer num;
 
+	public String getQuery()
+	{
+		return query;
+	}
 
+	public void setQuery(String query)
+	{
+		this.query = query;
+	}
 
-        public String getQuery()
-        {
-            return query;
-        }
+	public Integer getOffset()
+	{
+		return offset;
+	}
 
-        public void setQuery(String query)
-        {
-            this.query = query;
-        }
+	public void setOffset(Integer offset)
+	{
+		this.offset = offset;
+	}
 
-        public Integer getOffset()
-        {
-            return offset;
-        }
+	public Integer getNum()
+	{
+		return num;
+	}
 
-        public void setOffset(Integer offset)
-        {
-            this.offset = offset;
-        }
-
-        public Integer getNum()
-        {
-            return num;
-        }
-
-        public void setNum(Integer num)
-        {
-            this.num = num;
-        }
+	public void setNum(Integer num)
+	{
+		this.num = num;
+	}
 }

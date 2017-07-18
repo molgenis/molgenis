@@ -1,9 +1,9 @@
 package org.molgenis.standardsregistry.services;
 
 import com.google.common.collect.Lists;
-import org.junit.Ignore;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -19,7 +19,7 @@ import org.molgenis.standardsregistry.model.PackageSearchResponse;
 import org.molgenis.standardsregistry.model.StandardRegistryEntity;
 import org.molgenis.standardsregistry.model.StandardRegistryTag;
 import org.molgenis.standardsregistry.utils.StandardRegistryTestHarness;
-import org.molgenis.standardsregistry.utils.StandardRegistryTestHarnessConfig;
+import org.molgenis.standardsregistry.utils.StandardRegistryServiceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
@@ -34,91 +34,110 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 /**
  * @author sido
  */
-@ContextConfiguration(classes = StandardRegistryTestHarnessConfig.class)
-public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest {
+@ContextConfiguration(classes = StandardRegistryServiceConfig.class)
+public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
+{
 
-    @Autowired
-    private MetaDataService metaDataService;
-    @Autowired
-    private DataService dataService;
-    @Autowired
-    private TagService<LabeledResource, LabeledResource> tagService;
+	@Autowired
+	private EntityTestHarness entityTestHarness;
+	@Autowired
+	private MetaDataService metaDataService;
+	@Autowired
+	private DataService dataService;
+	@Autowired
+	private TagService<LabeledResource, LabeledResource> tagService;
 
-    @Autowired
-    private PackageFactory packageFactory;
+	@Autowired
+	private PackageFactory packageFactory;
 
-    @Autowired
-    private StandardRegistryTestHarness standardRegistryTestHarness;
-    @Autowired
-    private MetaDataSearchService metaDataSearchService;
+	@Autowired
+	private StandardRegistryTestHarness standardRegistryTestHarness;
+	@Autowired
+	private MetaDataSearchService metaDataSearchService;
 
-    @Test
-    public void testGetEntitiesInPackage()
-    {
-        String TEST_PACKAGE = "test-package";
-        EntityType e1 = standardRegistryTestHarness.createEntityType(false);
-        Package pkg = packageFactory.create(TEST_PACKAGE);
-        pkg.set(PackageMetadata.ENTITY_TYPES, Lists.newArrayList(e1));
+	@Test
+	public void testGetEntitiesInPackage()
+	{
+		String TEST_PACKAGE = "test-package";
+		EntityType e1 = standardRegistryTestHarness.createEntityType(false);
+		Package pkg = packageFactory.create(TEST_PACKAGE);
+		pkg.set(PackageMetadata.ENTITY_TYPES, Lists.newArrayList(e1));
 
-        when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
+		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
 
-        List<StandardRegistryEntity> standardRegistryEntities = metaDataSearchService.getEntitiesInPackage(TEST_PACKAGE);
-        assertEquals(1, standardRegistryEntities.size());
-    }
+		List<StandardRegistryEntity> standardRegistryEntities = metaDataSearchService.getEntitiesInPackage(
+				TEST_PACKAGE);
+		assertEquals(1, standardRegistryEntities.size());
+	}
 
-    @Test
-    public void testGetTagsForPackage()
-    {
-        String TEST_PACKAGE = "test-package";
-        Package pkg = packageFactory.create(TEST_PACKAGE);
-        Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> semanticTags = Lists.newArrayList(standardRegistryTestHarness.createSemanticTag(pkg));
-        when(tagService.getTagsForPackage(pkg)).thenReturn(semanticTags);
-        List<StandardRegistryTag> tags = metaDataSearchService.getTagsForPackage(pkg);
-        assertEquals(1, tags.size());
-    }
+	@Test
+	public void testGetTagsForPackage()
+	{
+		String TEST_PACKAGE = "test-package";
+		Package pkg = packageFactory.create(TEST_PACKAGE);
+		Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> semanticTags = Lists.newArrayList(standardRegistryTestHarness.createSemanticTag(pkg));
+		when(tagService.getTagsForPackage(pkg)).thenReturn(semanticTags);
+		List<StandardRegistryTag> tags = metaDataSearchService.getTagsForPackage(pkg);
+		assertEquals(1, tags.size());
+	}
 
-    @Ignore
-//    @Test
-    public void testSearch()
-    {
-        String TEST_QUERY = "test-query";
-        String TEST_PACKAGE = "test-package";
-        String TEST_DESCRIPTION = "test-description";
-        String TEST_LABEL = "test-label";
+	@Test
+	public void testSearch()
+	{
+		String TEST_QUERY = "test-query";
+		String TEST_PACKAGE = "test-package";
+		String TEST_DESCRIPTION = "test-description";
+		String TEST_LABEL = "test-label";
 
-        PackageSearchRequest request = new PackageSearchRequest();
-        request.setQuery(TEST_QUERY);
+		PackageSearchRequest request = new PackageSearchRequest();
+		request.setQuery(TEST_QUERY);
 
-        Package pkg = packageFactory.create(TEST_PACKAGE, TEST_DESCRIPTION);
-        Iterable<Package> packages = Lists.newArrayList(pkg);
+		Package pkg = packageFactory.create(TEST_PACKAGE, TEST_DESCRIPTION);
+		EntityType refEntityTypeDynamic1 = entityTestHarness.createDynamicRefEntityType();
+		EntityType entityTypeDynamic1 = entityTestHarness.createDynamicTestEntityType(refEntityTypeDynamic1);
+		EntityType refEntityTypeDynamic2 = entityTestHarness.createDynamicRefEntityType();
+		EntityType entityTypeDynamic2 = entityTestHarness.createDynamicTestEntityType(refEntityTypeDynamic2);
+		entityTypeDynamic2.setAbstract(true);
 
-        // metadataservice mocks
-        when(metaDataService.getRootPackages()).thenReturn(packages);
-        when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
+		pkg.set(PackageMetadata.ENTITY_TYPES, Lists.newArrayList(entityTypeDynamic1, entityTypeDynamic2));
+		Iterable<Package> packages = Lists.newArrayList(pkg);
 
-        // dataservice mocks
-        Query<Package> packageQuery = new QueryImpl<Package>().search(TEST_QUERY);
-        Stream<Package> packageStream = Stream.of(packageFactory.create(TEST_PACKAGE, TEST_LABEL));
-        when(dataService.findAll(PackageMetadata.PACKAGE, packageQuery, Package.class)).thenReturn(packageStream);
+		// metadataservice mocks
+		when(metaDataService.getRootPackages()).thenReturn(packages);
+		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
 
-        Query<EntityType> entityTypeQuery = new QueryImpl<EntityType>().search(TEST_QUERY);
-        Stream<EntityType> entityStream = Stream.of(standardRegistryTestHarness.createEntityType(true));
-        when(dataService.findAll(ENTITY_TYPE_META_DATA, entityTypeQuery, EntityType.class)).thenReturn(entityStream);
+		// dataservice mocks
+		Query<Package> packageQuery = new QueryImpl<Package>().search(TEST_QUERY);
+		Stream<Package> packageStream = Stream.of(packageFactory.create(TEST_PACKAGE, TEST_LABEL));
+		when(dataService.findAll(PackageMetadata.PACKAGE, packageQuery, Package.class)).thenReturn(packageStream);
 
-        // tagservice mocks
-        Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> symanticTags = Lists.newArrayList(standardRegistryTestHarness.createSemanticTag(pkg));
-        when(tagService.getTagsForPackage(pkg)).thenReturn(symanticTags);
+		Query<EntityType> entityTypeQuery = new QueryImpl<EntityType>().search(TEST_QUERY);
+		Stream<EntityType> entityStream = Stream.of(standardRegistryTestHarness.createEntityType(false));
+		when(dataService.findAll(ENTITY_TYPE_META_DATA, entityTypeQuery, EntityType.class)).thenReturn(entityStream);
 
+		// tagservice mocks
+		Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> symanticTags = Lists.newArrayList(
+				standardRegistryTestHarness.createSemanticTag(pkg));
+		when(tagService.getTagsForPackage(pkg)).thenReturn(symanticTags);
 
-        PackageSearchResponse response = metaDataSearchService.search(request);
+		PackageSearchResponse response = metaDataSearchService.search(request);
 
+		assertEquals("test-package", response.getPackages().get(0).getName());
 
-    }
+	}
 
+	@Test
+	public void testSearchPackageNotFound()
+	{
+		String TEST_QUERY = "test-query";
 
+		PackageSearchRequest request = new PackageSearchRequest();
+		request.setQuery(TEST_QUERY);
 
+		PackageSearchResponse response = metaDataSearchService.search(request);
 
+		assertEquals(response, null);
 
-
+	}
 
 }

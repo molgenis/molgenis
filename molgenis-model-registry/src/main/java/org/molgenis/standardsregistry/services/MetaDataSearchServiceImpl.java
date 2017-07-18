@@ -1,7 +1,5 @@
 package org.molgenis.standardsregistry.services;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -16,10 +14,8 @@ import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.standardsregistry.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,7 +35,9 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	public MetaDataSearchServiceImpl(DataService dataService, MetaDataService metaDataService, TagService<LabeledResource, LabeledResource> tagService, MolgenisPermissionService molgenisPermissionService)
+	public MetaDataSearchServiceImpl(DataService dataService, MetaDataService metaDataService,
+			TagService<LabeledResource, LabeledResource> tagService,
+			MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.metaDataService = metaDataService;
@@ -58,29 +56,34 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		{
 			Package p = searchResult.getPackageFound();
 			List<StandardRegistryEntity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
-			List<StandardRegistryEntity> entitiesInPackageFiltered = Lists.newArrayList(entitiesInPackageUnfiltered.stream().filter(entity -> {
-				if (entity.isAbtract())
-				{
-					return false;
-				}
+			List<StandardRegistryEntity> entitiesInPackageFiltered = Lists.newArrayList(
+					entitiesInPackageUnfiltered.stream().filter(entity ->
+					{
+						if (entity.isAbtract())
+						{
+							return false;
+						}
 
-				String entityTypeId = entity.getName();
+						String entityTypeId = entity.getName();
 
-				// Check read permission
-				if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ)) {
-					return false;
-				}
+						// Check read permission
+						if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
+						{
+							return false;
+						}
 
-				// Check has data
-				if (!dataService.hasRepository(entityTypeId) || dataService.count(entityTypeId, new QueryImpl<>()) == 0)
-				{
-					return false;
-				}
+						// Check has data
+						if (!dataService.hasRepository(entityTypeId)
+								|| dataService.count(entityTypeId, new QueryImpl<>()) == 0)
+						{
+							return false;
+						}
 
-				return true;
-			}).collect(Collectors.toList()));
+						return true;
+					}).collect(Collectors.toList()));
 
-			PackageResponse pr = new PackageResponse(p.getId(), p.getLabel(), p.getDescription(), searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
+			PackageResponse pr = new PackageResponse(p.getId(), p.getLabel(), p.getDescription(),
+					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
 
@@ -101,8 +104,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		int offset = packageSearchRequest.getOffset() != null ? packageSearchRequest.getOffset() : 0;
 		int num = packageSearchRequest.getNum() != null ? packageSearchRequest.getNum() : packageResponses.size();
 
-		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total,
-				packageResponses);
+		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total, packageResponses);
 
 		return packageSearchResponse;
 	}
@@ -114,7 +116,8 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 
 		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
 		{
-			tags.add(new StandardRegistryTag(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation().toString()));
+			tags.add(new StandardRegistryTag(tag.getObject().getLabel(), tag.getObject().getIri(),
+					tag.getRelation().toString()));
 		}
 
 		return tags;
