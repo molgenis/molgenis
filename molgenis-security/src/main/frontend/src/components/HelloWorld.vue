@@ -6,14 +6,7 @@
         <!-- Roles component -->
         <div class="col col-md-4">
           <h3>Role</h3>
-          <ul class="list-group">
-            <li v-for="sid in sids"
-                class="list-group-item"
-                :class="{'active': selectedSids.includes(sid)}"
-                @click="toggleSid(sid)">
-              {{ sid.authority }}
-            </li>
-          </ul>
+          <sids :sids="sids" :selectedSids="selectedSids" :toggleSid="toggleSid"></sids>
         </div>
         <div class="col col-md-8" v-if="selectedSid">
           <h3>Table</h3>
@@ -75,6 +68,7 @@
   import { mapState, mapGetters, mapMutations } from 'vuex'
   import { TOGGLE_SID, SET_SELECTED_ENTITY_TYPE, SET_FILTER } from '../store/mutations'
   import Multiselect from 'vue-multiselect'
+  import Sids from './Sids'
 
   export default {
     name: 'permission-manager',
@@ -105,7 +99,8 @@
       }
     },
     components: {
-      Multiselect
+      Multiselect,
+      Sids
     },
     filters: {
       capitalizeFirstLetter (string: string): string { return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() }
