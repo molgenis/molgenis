@@ -36,5 +36,6 @@ export type State = {
   selectedSid: ?GrantedAuthoritySid,
   selectedEntityTypeId: ?string,
   entityTypes: Array<EntityType>,
-  acls: Array<ACL>
+  acls: Array<ACL>,
+  filter: ?string
 }

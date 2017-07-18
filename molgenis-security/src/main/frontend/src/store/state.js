@@ -10,13 +10,14 @@ const state: State = {
   selectedSid: null,
   sids: [{authority: 'USER'}, {authority: 'SU'}],
   selectedEntityTypeId: null,
-  permissions: ['ADMINISTRATE', 'WRITE', 'READ', 'COUNT'],
+  permissions: ['ADMIN', 'WRITE', 'READ', 'COUNT'],
+  filter: null,
   acls: [
     {
       entityId: 'home',
       entityLabel: 'Home',
       aces: [{
-        permissions: ['READ', 'WRITE', 'COUNT'],
+        permissions: ['READ', 'WRITE'],
         granted: true
       }],
       owner: {
@@ -26,8 +27,8 @@ const state: State = {
       entityId: 'dataexplorer',
       entityLabel: 'Data Explorer',
       aces: [{
-        permissions: ['READ', 'WRITE', 'COUNT'],
-        granted: true
+        permissions: ['ADMIN'],
+        granted: false
       }],
       owner: {
         username: 'SYSTEM'
