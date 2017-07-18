@@ -25,6 +25,7 @@ export type ACE = {
 
 export type ACL = {
   entityId: string,
+  entityLabel: string,
   owner: PrincipalSid,
   aces: Array<ACE>
 }

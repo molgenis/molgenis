@@ -20,13 +20,37 @@
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
                        selectLabel="" deselectLabel="" placeholder="Select an Entity..."></multiselect>
           <div v-if="selectedEntityTypeId">
-            <h2>Rows</h2>
-            <ul class="list-group">
-              <li v-for="sid in acls"
-                  class="list-group-item">
-                {{ sid.authority }}
-              </li>
-            </ul>
+            <table class="table table-sm">
+              <thead>
+              <tr>
+                <th>Row</th>
+                <th>Owner</th>
+                <th :colspan="permissions.length">Permissions</th>
+              </tr>
+              <tr>
+                <th></th>
+                <th></th>
+                <th v-for="permission in permissions">{{permission | capitalizeFirstLetter}}</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="acl in acls">
+                <td>
+                  {{ acl.entityLabel || acl.entityId }}
+                </td>
+                <td>
+                  {{ acl.owner.username }}
+                </td>
+                <td v-for="permission in permissions">
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input class="form-check-input" type="checkbox" value="">
+                    </label>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -42,7 +66,7 @@
   import Multiselect from 'vue-multiselect'
 
   export default {
-    name: 'hello-world',
+    name: 'permission-manager',
     methods: {
       ...mapMutations({
         setSelectedSid: SET_SELECTED_SID,
@@ -50,21 +74,21 @@
       })
     },
     computed: {
-      ...mapState(['sids', 'selectedSid', 'entityTypes', 'acls', 'selectedEntityTypeId']),
+      ...mapState(['sids', 'selectedSid', 'entityTypes', 'acls', 'selectedEntityTypeId', 'permissions']),
       selectedEntityType: {
         get () {
-          const result = this.$store.state.selectedEntityType
-          console.log('selectedEntityType', result)
-          return result
+          return this.$store.state.selectedEntityType
         },
         set (selectedEntityType) {
-          console.log('set selected entity type', selectedEntityType)
           this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType.id)
         }
       }
     },
     components: {
       Multiselect
+    },
+    filters: {
+      capitalizeFirstLetter (string: string): string { return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() }
     }
   }
 </script>
