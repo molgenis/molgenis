@@ -104,7 +104,8 @@ public class MolgenisPermissionController
 		{
 			permissions.add(permission.name());
 		}
-		return ImmutableMap.of("granted", ace.isGranting(), "permissions", permissions.build());
+		return ImmutableMap.of("granted", ace.isGranting(), "permissions", permissions.build(), "sid",
+				ace.getSecurityId());
 	}
 
 

@@ -542,6 +542,13 @@ definitions:
                 type: array
                 items:
                   type: string
+              sid:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  autority:
+                    type: string
   CopyEntityRequest:
     type: object
     properties:
