@@ -11,7 +11,7 @@
   @import "~mixins";
 
   #app {
-    background-color: $red;
+    background-color: $white;
   }
 </style>
 

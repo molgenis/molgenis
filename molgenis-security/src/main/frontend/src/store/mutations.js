@@ -1,10 +1,11 @@
 // @flow
 import type { State } from './utils/flow.types'
 
-export const SET_MESSAGE = '__SET_MESSAGE__'
+export const SET_SELECTED_SID = 'setSelectedSid'
 
 export default {
-  [SET_MESSAGE] (state: State, message: string) {
-    state.message = message
+  [SET_SELECTED_SID] (state: State, sid: any) {
+    console.log('setSectedSid', sid)
+    state.selectedSid = sid
   }
 }
