@@ -415,7 +415,9 @@ public class ImportWriter
 
 		// add or update entity types
 		List<EntityType> entityTypes = newArrayList(concat(updatedEntityTypes, groupedEntityTypes.getNewEntityTypes()));
-		runAsSystem(() -> dataService.getMeta().upsertEntityTypes(entityTypes));
+
+		// user is not allowed to
+		dataService.getMeta().upsertEntityTypes(entityTypes);
 	}
 
 	private static Fetch createEntityTypeWithAttributesFetch()
@@ -454,12 +456,6 @@ public class ImportWriter
 	private <E extends Entity> int update(Repository<E> repo, Iterable<E> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
-
-		if (!molgenisPermissionService.hasPermissionOnEntity(repo.getName(), Permission.WRITE))
-		{
-			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
-					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
-		}
 
 		int count = 0;
 		switch (dbAction)
