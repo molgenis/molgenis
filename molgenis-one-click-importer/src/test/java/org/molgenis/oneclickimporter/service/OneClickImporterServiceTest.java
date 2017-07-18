@@ -3,7 +3,6 @@ package org.molgenis.oneclickimporter.service;
 import com.google.common.io.Resources;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.Impl.ExcelServiceImpl;
@@ -19,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class OneClickImporterServiceTest
@@ -95,24 +95,34 @@ public class OneClickImporterServiceTest
 	}
 
 	@Test
-	public void guessBasicTypes() {
+	public void guessBasicTypes()
+	{
 		List<Object> columnValues = Arrays.asList(1, 2, 3);
-		assertEquals(AttributeType.INT, oneClickImporterService.guessAttributeType(columnValues));
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), INT);
 
 		columnValues = Arrays.asList("a", "b", "c");
-		assertEquals(AttributeType.STRING, oneClickImporterService.guessAttributeType(columnValues));
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), STRING);
 
 		columnValues = Arrays.asList(true, false, true);
-		assertEquals(AttributeType.BOOL, oneClickImporterService.guessAttributeType(columnValues));
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), BOOL);
 
 		columnValues = Arrays.asList(1.1, 1.2, 1.3);
-		assertEquals(AttributeType.DECIMAL, oneClickImporterService.guessAttributeType(columnValues));
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), DECIMAL);
 
 		columnValues = Arrays.asList(1L, 2L, 3L);
-		assertEquals(AttributeType.LONG, oneClickImporterService.guessAttributeType(columnValues));
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), LONG);
 
 		columnValues = Arrays.asList(1L, "abc", 3L);
-		assertEquals(AttributeType.STRING, oneClickImporterService.guessAttributeType(columnValues));
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), STRING);
+	}
+
+	@Test
+	public void guessEnrichedTypes()
+	{
+		List<Object> columnValues = Arrays.asList(
+				"This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. ",
+				"This is a short string", "String...");
+		assertEquals(oneClickImporterService.guessAttributeType(columnValues), TEXT);
 	}
 
 	private Sheet loadTestFile(String fileName) throws IOException, InvalidFormatException, URISyntaxException

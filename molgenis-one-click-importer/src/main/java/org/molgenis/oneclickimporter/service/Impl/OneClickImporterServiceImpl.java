@@ -14,11 +14,13 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.AttributeType.STRING;
 
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
 {
+
+	public static final int MAX_STRING_LENGTH = 255;
+
 	@Override
 	public DataCollection buildDataCollection(String dataCollectionName, Sheet sheet)
 	{
@@ -32,104 +34,107 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	@Override
 	public AttributeType guessAttributeType(List<Object> dataValues)
 	{
-
-		boolean guesCompleted = false;
+		boolean guessCompleted = false;
 		int rowCount = dataValues.size();
-		int currentRowIndex = 1;
+		int currentRowIndex = 0;
+
 		AttributeType guess = getBasicAttributeType(dataValues.get(0));
-		while (currentRowIndex < rowCount && !guesCompleted) {
+		while (currentRowIndex < rowCount && !guessCompleted)
+		{
 			Object value = dataValues.get(currentRowIndex);
-			currentRowIndex++;
 			AttributeType basicType = getBasicAttributeType(value);
-			// todo enrich type
 
 			guess = getCommonType(guess, basicType);
 
-			if(guess.equals(AttributeType.STRING)){
-				guesCompleted = true;
+			if (guess.equals(STRING))
+			{
+				guess = getEnrichedType(guess, value);
+				guessCompleted = true;
 			}
+			currentRowIndex++;
 		}
 
 		return guess;
 	}
 
 	/**
-	 * Returns the AttributeType shared by both types
+	 * Returns an enriched AttributeType for when the value meets certain criteria
+	 * i.e. if a string value is longer dan 255 characters, the type should be TEXT
 	 */
-	private AttributeType getCommonType(AttributeType thisType, AttributeType thatType){
-
-		if(thisType.equals(thatType)){
-			return thisType;
+	private AttributeType getEnrichedType(AttributeType guess, Object value)
+	{
+		if (guess.equals(STRING))
+		{
+			if (value.toString().length() > MAX_STRING_LENGTH)
+			{
+				return TEXT;
+			}
 		}
-
-		if(thisType.equals(AttributeType.INT) && thatType.equals(AttributeType.DECIMAL)){
-			return AttributeType.DECIMAL;
-		}
-
-		if(thisType.equals(AttributeType.INT) && thatType.equals(AttributeType.LONG)){
-			return AttributeType.LONG;
-		}
-
-		if(thisType.equals(AttributeType.INT) && thatType.equals(AttributeType.BOOL)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.INT) && thatType.equals(AttributeType.STRING)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.DECIMAL) && thatType.equals(AttributeType.INT)){
-			return AttributeType.DECIMAL;
-		}
-
-		if(thisType.equals(AttributeType.DECIMAL) && thatType.equals(AttributeType.LONG)){
-			return AttributeType.DECIMAL;
-		}
-
-		if(thisType.equals(AttributeType.DECIMAL) && thatType.equals(AttributeType.BOOL)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.DECIMAL) && thatType.equals(AttributeType.STRING)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.LONG) && thatType.equals(AttributeType.INT)){
-			return AttributeType.LONG;
-		}
-
-		if(thisType.equals(AttributeType.LONG) && thatType.equals(AttributeType.DECIMAL)){
-			return AttributeType.DECIMAL;
-		}
-
-		if(thisType.equals(AttributeType.LONG) && thatType.equals(AttributeType.BOOL)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.LONG) && thatType.equals(AttributeType.STRING)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.BOOL) && thatType.equals(AttributeType.INT)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.BOOL) && thatType.equals(AttributeType.DECIMAL)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.BOOL) && thatType.equals(AttributeType.LONG)){
-			return AttributeType.STRING;
-		}
-
-		if(thisType.equals(AttributeType.BOOL) && thatType.equals(AttributeType.STRING)){
-			return AttributeType.STRING;
-		}
-
-
-		return AttributeType.STRING;
+		return guess;
 	}
 
+	/**
+	 * Returns the AttributeType shared by both types
+	 */
+	private AttributeType getCommonType(AttributeType existingGuess, AttributeType newGuess)
+	{
+		if (existingGuess.equals(newGuess))
+		{
+			return existingGuess;
+		}
+
+		switch (existingGuess)
+		{
+			case INT:
+				//noinspection Duplicates
+				if (newGuess.equals(DECIMAL))
+				{
+					return DECIMAL;
+				}
+				else if (newGuess.equals(LONG))
+				{
+					return LONG;
+				}
+				else
+				{
+					return STRING;
+				}
+			case DECIMAL:
+				if (newGuess.equals(INT) || newGuess.equals(LONG))
+				{
+					return DECIMAL;
+				}
+				else
+				{
+					return STRING;
+				}
+			case LONG:
+				//noinspection Duplicates
+				if (newGuess.equals(INT))
+				{
+					return LONG;
+				}
+				else if (newGuess.equals(DECIMAL))
+				{
+					return DECIMAL;
+				}
+				else
+				{
+					return STRING;
+				}
+			case BOOL:
+				if (!newGuess.equals(BOOL))
+				{
+					return STRING;
+				}
+			default:
+				return STRING;
+		}
+	}
+
+	/**
+	 * Sets the basic type based on instance of the value Object
+	 */
 	private AttributeType getBasicAttributeType(Object value)
 	{
 		if (value == null)
@@ -172,6 +177,9 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return dataValues;
 	}
 
+	/**
+	 * Retrieves the proper Java type instance based on the Excel CellTypeEnum
+	 */
 	private Object getCellValue(Cell cell)
 	{
 		Object value;
