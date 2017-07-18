@@ -16,9 +16,10 @@
           <div v-if="selectedEntityTypeId">
             <form>
               <label for="filter" class="sr-only">{{'FILTER_LABEL' | i18n}}:</label>
-              <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n" v-model="filter">
+              <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n"
+                     @input.stop="filterChanged($event.target.value)">
             </form>
-            <acls :permissions="permissions" :acls="filteredAcls"></acls>
+            <acls :permissions="permissions" :acls="acls"></acls>
           </div>
         </div>
       </div>
@@ -29,8 +30,9 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
-  import { mapState, mapGetters, mapMutations } from 'vuex'
-  import { TOGGLE_SID, SET_SELECTED_ENTITY_TYPE, SET_FILTER } from '../store/mutations'
+  import { mapState, mapMutations, mapActions } from 'vuex'
+  import { TOGGLE_SID, SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
+  import { GET_ACLS, FILTER_CHANGED } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Sids from './Sids'
@@ -42,25 +44,20 @@
       ...mapMutations({
         toggleSid: TOGGLE_SID,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE
+      }),
+      ...mapActions({
+        filterChanged: FILTER_CHANGED
       })
     },
     computed: {
-      ...mapState(['sids', 'selectedSids', 'entityTypes', 'selectedEntityTypeId', 'permissions']),
-      ...mapGetters(['filteredAcls']),
+      ...mapState(['sids', 'selectedSids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
       selectedEntityType: {
         get () {
           return this.$store.state.selectedEntityType
         },
         set (selectedEntityType) {
           this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType.id)
-        }
-      },
-      filter: {
-        get () {
-          return this.$store.state.filter
-        },
-        set (filter) {
-          this.$store.commit(SET_FILTER, filter)
+          this.$store.dispatch(GET_ACLS)
         }
       }
     },
