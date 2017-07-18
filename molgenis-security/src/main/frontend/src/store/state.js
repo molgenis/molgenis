@@ -7,6 +7,7 @@ const state: State = {
   me: {
     username: 'admin'
   },
+  selectedSid: null,
   sids: [{authority: 'USER'}, {authority: 'SU'}],
   entityTypeId: 'sys_blah_MolgenisPlugin',
   acls: [
