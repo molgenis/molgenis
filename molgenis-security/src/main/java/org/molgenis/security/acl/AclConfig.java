@@ -1,6 +1,7 @@
 package org.molgenis.security.acl;
 
 import org.molgenis.DatabaseConfig;
+import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.security.acl.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.support.NoOpCache;
@@ -146,5 +147,11 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 		DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
 		expressionHandler.setPermissionEvaluator(new AclPermissionEvaluator(aclService()));
 		return expressionHandler;
+	}
+
+	@Bean
+	public PropertiesMessageSource navigatorMessageSource()
+	{
+		return new PropertiesMessageSource("molgenis-security");
 	}
 }

@@ -1,34 +1,34 @@
 <template>
   <div class="row">
     <div class="col">
-      <h1>This is the MOLGENIS HelloWorld Component</h1>
       <div class="row">
-        <!-- Roles component -->
         <div class="col col-md-4">
-          <h3>Role</h3>
-          <sids :sids="sids" :selectedSids="selectedSids" :toggleSid="toggleSid"></sids>
+          <h3>{{'ROLE' | i18n}}</h3>
+          <sids :sids="sids"
+                :selectedSids="selectedSids"
+                :toggleSid="toggleSid"></sids>
         </div>
-        <div class="col col-md-8" v-if="selectedSid">
-          <h3>Table</h3>
+        <div class="col col-md-8" v-if="selectedSids.length">
+          <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
-                       selectLabel="" deselectLabel="" placeholder="Select an Entity..."></multiselect>
-          <h3>Rows</h3>
+                       selectLabel="" deselectLabel="" :placeholder="'SELECT_AN_ENTITY'|i18n"></multiselect>
+          <h3>{{'ROWS' | i18n}}</h3>
           <div v-if="selectedEntityTypeId">
             <form>
-              <label for="filter" class="sr-only">Filter:</label>
-              <input type="text" class="form-control" id="filter" placeholder="Filter rows..." v-model="filter">
+              <label for="filter" class="sr-only">{{'FILTER_LABEL' | i18n}}:</label>
+              <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n" v-model="filter">
             </form>
             <table class="table table-sm">
               <thead>
               <tr>
-                <th>Row</th>
-                <th>Owner</th>
-                <th :colspan="permissions.length + 1">Permissions</th>
+                <th>{{'ROW' | i18n}}</th>
+                <th>{{'OWNER' | i18n}}</th>
+                <th :colspan="permissions.length + 1">{{'PERMISSIONS' | i18n}}</th>
               </tr>
               <tr>
                 <th></th>
                 <th></th>
-                <th>Granted</th>
+                <th>{{'GRANTED' | i18n}}</th>
                 <th v-for="permission in permissions">{{permission | capitalizeFirstLetter}}</th>
               </tr>
               </thead>
