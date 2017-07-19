@@ -143,20 +143,20 @@ public class ModelRegistryController extends MolgenisPluginController
 		return VIEW_NAME_DETAILS;
 	}
 
-	@RequestMapping(value = "/uml", method = GET)
-	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
-	{
-		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
-		if (molgenisPackage != null)
-		{
-			model.addAttribute("molgenisPackage", molgenisPackage);
-		}
-		else
-		{
-			throw new MolgenisDataException("Unknown package: [ " + selectedPackageName + " ]");
-		}
-		return VIEW_NAME_UML;
-	}
+//	@RequestMapping(value = "/uml", method = GET)
+//	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
+//	{
+//		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
+//		if (molgenisPackage != null)
+//		{
+//			model.addAttribute("molgenisPackage", molgenisPackage);
+//		}
+//		else
+//		{
+//			throw new MolgenisDataException("Unknown package: [ " + selectedPackageName + " ]");
+//		}
+//		return VIEW_NAME_UML;
+//	}
 
 	@RequestMapping(value = "/getPackage", method = GET)
 	@ResponseBody

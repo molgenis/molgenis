@@ -1,8 +1,6 @@
 <template>
-  <div class="container">
-    <div id="app">
-      <uml-viewer></uml-viewer>
-    </div>
+  <div id="app">
+    <uml-viewer></uml-viewer>
   </div>
 </template>
 

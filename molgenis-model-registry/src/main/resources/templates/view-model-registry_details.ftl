@@ -1,4 +1,6 @@
 <#include "view-model-registry_docs-macros.ftl">
+<#include "resource-macros.ftl">
+
 <div class="row">
     <div class="col-md-12 hidden-print">
         <button id="search-results-back-btn" class="btn btn-default btn-md pull-left"><span
@@ -47,6 +49,7 @@
         </div>
     </div>
     <div class="tab-pane" id="uml">
+
         <#--<div id="zoom-in-out" class="btn-group hidden-print">-->
             <#--<button type="button" id="zoom-in" class="btn btn-default btn-sm" data-toggle="tooltip"-->
                     <#--data-placement="bottom" title="Zoom in">-->
@@ -92,12 +95,15 @@
             <#--</button>-->
         <#--</div>-->
 
-        <#--<div id="paper-holder">-->
-            <#--<div id="paper"></div>-->
+        <#--<div id="uml-viewer-holder">-->
+            <div id="app"></div>
         <#--</div>-->
 
         <#--<div id="dpi"></div>-->
     </div>
 </div>
+<script type=text/javascript src="<@resource_href "/js/model-registry/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/js/model-registry/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/js/model-registry/app.js"/>"></script>
 
 

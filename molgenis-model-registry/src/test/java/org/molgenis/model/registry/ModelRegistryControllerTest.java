@@ -144,27 +144,27 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(model.get("package"), selectedPackage);
 	}
 
-	@Test
-	public void testGetUml() throws Exception
-	{
-		String TEST_PACKAGE = "test-package";
-		Package pkg = packageFactory.create(TEST_PACKAGE);
-		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
-
-		ExtendedModelMap model = new ExtendedModelMap();
-		String template = standardRegistryController.getUml(TEST_PACKAGE, model);
-		assertEquals(template, "view-model-registry_uml");
-		assertEquals(model.get("molgenisPackage"), pkg);
-
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testUmlPackageNotFound() {
-		String TEST_PACKAGE = "test-package";
-		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(null);
-		ExtendedModelMap model = new ExtendedModelMap();
-		standardRegistryController.getUml(TEST_PACKAGE, model);
-	}
+//	@Test
+//	public void testGetUml() throws Exception
+//	{
+//		String TEST_PACKAGE = "test-package";
+//		Package pkg = packageFactory.create(TEST_PACKAGE);
+//		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
+//
+//		ExtendedModelMap model = new ExtendedModelMap();
+//		String template = standardRegistryController.getUml(TEST_PACKAGE, model);
+//		assertEquals(template, "view-model-registry_uml");
+//		assertEquals(model.get("molgenisPackage"), pkg);
+//
+//	}
+//
+//	@Test(expectedExceptions = MolgenisDataException.class)
+//	public void testUmlPackageNotFound() {
+//		String TEST_PACKAGE = "test-package";
+//		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(null);
+//		ExtendedModelMap model = new ExtendedModelMap();
+//		standardRegistryController.getUml(TEST_PACKAGE, model);
+//	}
 
 	@Test
 	public void testGetPackage() throws Exception

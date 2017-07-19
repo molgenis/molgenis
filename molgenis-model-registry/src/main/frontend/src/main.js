@@ -16,6 +16,7 @@ sync(store, router)
 
 /* eslint-disable no-new */
 new Vue({
+  // determine in which div you want to load the VUE-application
   el: '#app',
   store,
   router,

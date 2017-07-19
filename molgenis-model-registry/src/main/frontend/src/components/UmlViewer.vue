@@ -1,14 +1,12 @@
 <template>
-  <div id="sample">
     <!-- read out graph so we can watch it -->
-    <div id="graph" ref="graphDiv" v-if="umlData"></div>
-  </div>
+    <div id="graph-container" ref="graphDiv" v-if="umlData"></div>
 </template>
 
 <style lang="scss">
   @import "~variables";
   @import "~mixins";
-  #graph {
+  #graph-container {
     border: solid 1px black;
     width: 100%;
     height: 1000px;
@@ -25,6 +23,11 @@
     updated () {
       const graphDiv = this.$refs.graphDiv
       newGraph(graphDiv, this.umlData)
+    },
+    data () {
+      return {
+        message: 'Hello 2'
+      }
     },
     computed: {
       ...mapGetters(['umlData'])

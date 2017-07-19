@@ -40,8 +40,8 @@ describe('getters', () => {
                   'isIdAttribute': 'false',
                   'notnullable': 'false',
                   'type': 'string'
-                 }
-               ]
+                }
+              ]
             }, {
               'id': 'sys_ImportRun',
               'name': 'Import',
@@ -157,7 +157,7 @@ describe('getters', () => {
             items: [
               {name: 'Static content: String', iskey: true, figure: 'Cubel', color: 'yellow'}
             ]
-          },
+          }
         ],
         linkData: [
           // {from: 'Products', to: 'Suppliers', text: '0..N', toText: '1'},

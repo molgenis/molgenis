@@ -235,13 +235,13 @@
             $('#paper-holder').css("overflow", "auto");
         });
 
-        $(document).on('click', '#uml-tab', function () {
-            showSpinner();
-            setTimeout(function () {
-                $.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
-                hideSpinner();
-            }, 500);
-        });
+        // $(document).on('click', '#uml-tab', function () {
+        //     showSpinner();
+        //     setTimeout(function () {
+        //         $.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
+        //         hideSpinner();
+        //     }, 500);
+        // });
 
         countTemplate = Handlebars.compile($("#count-template").html());
         modelTemplate = Handlebars.compile($("#model-template").html());
