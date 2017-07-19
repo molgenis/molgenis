@@ -14,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -43,8 +42,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 	public boolean isGranted(EntityIdentity entityIdentity, Permission permission)
 	{
 		Acl acl = readDomainAcl(entityIdentity);
-		List<org.springframework.security.acls.model.Permission> domainPermissions = toDomainPermissions(
-				expandPermissions(permission));
+		List<org.springframework.security.acls.model.Permission> domainPermissions = singletonList(
+				toDomainPermission(permission));
 		List<Sid> sids = getCurrentUserSids();
 		try
 		{
@@ -181,25 +180,6 @@ public class EntityAclManagerImpl implements EntityAclManager
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return sidRetrievalStrategy.getSids(authentication);
-	}
-
-	private static List<Permission> expandPermissions(Permission permission)
-	{
-		switch (permission)
-		{
-			case NONE:
-				return singletonList(Permission.NONE);
-			case COUNT:
-				return Arrays.asList(Permission.COUNT, Permission.READ, Permission.WRITE, Permission.WRITEMETA);
-			case READ:
-				return Arrays.asList(Permission.READ, Permission.WRITE, Permission.WRITEMETA);
-			case WRITE:
-				return Arrays.asList(Permission.WRITE, Permission.WRITEMETA);
-			case WRITEMETA:
-				return singletonList(Permission.WRITEMETA);
-			default:
-				throw new RuntimeException(String.format("Unknown permission '%s'", permission.toString()));
-		}
 	}
 
 	private ObjectIdentity toObjectIdentity(Entity entity)
