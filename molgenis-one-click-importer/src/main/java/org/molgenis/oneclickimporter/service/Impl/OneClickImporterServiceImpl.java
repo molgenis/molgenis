@@ -21,6 +21,8 @@ import static org.apache.poi.util.LocaleUtil.*;
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
 {
+	private static String CSV_SEPARATOR = ",";
+
 	@Override
 	public DataCollection buildDataCollection(String dataCollectionName, Sheet sheet)
 	{
@@ -33,18 +35,58 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return DataCollection.create(dataCollectionName, columns, numberOfRows);
 	}
 
+	@Override
+	public DataCollection buildDataCollection(String dataCollectionName, List<String> lines)
+	{
+		List<Column> columns = newArrayList();
+
+		String[] headers = lines.get(0).split(CSV_SEPARATOR);
+		lines.remove(0); // Remove the header
+
+		int columnIndex = 0;
+		for (String header : headers)
+		{
+			columns.add(createColumnFromLine(header, columnIndex, lines));
+			columnIndex++;
+		}
+
+		return DataCollection.create(dataCollectionName, columns, lines.size());
+	}
+
 	private Column createColumnFromCell(Sheet sheet, Cell cell)
 	{
 		return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
-				getColumnData(sheet, cell.getColumnIndex()));
+				getColumnDataFromSheet(sheet, cell.getColumnIndex()));
 	}
 
-	private List<Object> getColumnData(Sheet sheet, int columnIndex)
+	private Column createColumnFromLine(String header, int columnIndex, List<String> lines)
+	{
+		return Column.create(header, columnIndex, getColumnDataFromLines(lines, columnIndex));
+	}
+
+	private List<Object> getColumnDataFromSheet(Sheet sheet, int columnIndex)
 	{
 		List<Object> dataValues = newLinkedList();
 		sheet.rowIterator().forEachRemaining(row -> dataValues.add(getCellValue(row.getCell(columnIndex))));
 		dataValues.remove(0); // Remove the header value
 		return dataValues;
+	}
+
+	private List<Object> getColumnDataFromLines(List<String> lines, int columnIndex)
+	{
+		List<Object> dataValues = newLinkedList();
+		lines.forEach(line ->
+		{
+			String[] lineParts = line.split(CSV_SEPARATOR);
+			dataValues.add(getPartValue(lineParts[columnIndex]));
+		});
+		return dataValues;
+	}
+
+	private Object getPartValue(String part)
+	{
+		// TODO Cast part to whatever type might suit it best
+		return part;
 	}
 
 	/**

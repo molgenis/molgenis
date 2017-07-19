@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadLinesFromFile;
@@ -20,7 +21,8 @@ public class OneClickImporterServiceTest
 	private OneClickImporterService oneClickImporterService = new OneClickImporterServiceImpl();
 
 	@Test
-	public void testBuildDataSheetWithSimpleValidFile() throws IOException, InvalidFormatException, URISyntaxException
+	public void testBuildDataCollectionWithSimpleValidExcelFile()
+			throws IOException, InvalidFormatException, URISyntaxException
 	{
 		Sheet sheet = loadSheetFromFile(OneClickImporterServiceTest.class, "/simple-valid.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollection("simple-valid", sheet);
@@ -31,6 +33,20 @@ public class OneClickImporterServiceTest
 
 		DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2), 4);
 
+		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testBuildDataCollectionWithSimpleValidCsvFile() throws IOException, URISyntaxException
+	{
+		List<String> lines = loadLinesFromFile(OneClickImporterServiceTest.class, "/simple-valid.csv");
+		DataCollection actual = oneClickImporterService.buildDataCollection("simple-valid", lines);
+
+		Column c1 = Column.create("name", 0, newArrayList("Mark", "Connor", "Fleur", "Dennis"));
+		Column c2 = Column.create("superpower", 1,
+				newArrayList("arrow functions", "Oldschool syntax", "Lambda Magician", "Root access"));
+
+		DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2), 4);
 		assertEquals(actual, expected);
 	}
 
