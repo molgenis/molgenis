@@ -1,5 +1,5 @@
 // @flow
-import type { ACL, GrantedAuthoritySid, State } from './utils/flow.types'
+import type { ACL, EntityType, GrantedAuthoritySid, State } from './utils/flow.types'
 
 export const TOGGLE_SID = '__TOGGLE_SID__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'

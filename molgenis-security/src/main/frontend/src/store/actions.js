@@ -1,8 +1,6 @@
 import { get } from '@molgenis/molgenis-api-client'
-import { SET_ENTITY_TYPES, SET_SIDS } from './mutations'
+import { SET_ACLS, SET_ENTITY_TYPES, SET_FILTER, SET_SIDS } from './mutations'
 import { debounce } from 'lodash'
-
-import { SET_ACLS, SET_FILTER } from './mutations'
 
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_SIDS = '__GET_SIDS__'
