@@ -4,6 +4,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +31,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -73,8 +77,9 @@ public class OneClickImporterController extends MolgenisPluginController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/upload", method = POST)
-	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile)
+	@RequestMapping(value = "/upload", method = POST, produces = APPLICATION_JSON_VALUE)
+	public OneClickImportResponse importFile(HttpServletResponse response, @RequestParam(value = "file") MultipartFile multipartFile)
+
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
 		String filename = multipartFile.getOriginalFilename();
@@ -100,7 +105,13 @@ public class OneClickImporterController extends MolgenisPluginController
 					String.format("File with extension: %s is not a valid one-click importer file", fileExtension));
 		}
 
-		return entityService.createEntityType(dataCollection).getId();
+		EntityType dataTable = entityService.createEntityType(dataCollection);
+
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
+		response.setStatus(HttpServletResponse.SC_CREATED);
+		response.setHeader("Location", builder.build().toUriString() + "/" + dataTable.getId());
+
+		return new OneClickImportResponse(dataTable.getId(), file.getName());
 	}
 
 	@ResponseBody

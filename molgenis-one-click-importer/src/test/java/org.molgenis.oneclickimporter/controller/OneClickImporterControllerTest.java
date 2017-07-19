@@ -2,6 +2,7 @@ package org.molgenis.oneclickimporter.controller;
 
 import com.google.common.io.Resources;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.hamcrest.core.StringEndsWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.i18n.LanguageService;
@@ -75,7 +76,8 @@ public class OneClickImporterControllerTest
 		initMocks(this);
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings, excelService, csvService, oneClickImporterService, entityService, fileStore);
+				languageService, appSettings, excelService, csvService, oneClickImporterService, entityService,
+				fileStore);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");
@@ -109,6 +111,8 @@ public class OneClickImporterControllerTest
 		EntityType table = mock(EntityType.class);
 		String tableId = "generated_table_id";
 		File file = mock(File.class);
+		String fileName = "file-name";
+		when(file.getName()).thenReturn(fileName);
 		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
 		when(excelService.buildExcelSheetFromFile(file)).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
@@ -116,7 +120,10 @@ public class OneClickImporterControllerTest
 		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isOk());
+			   .andExpect(status().isCreated())
+			   .andExpect(header().string("Location", StringEndsWith.endsWith(tableId)))
+			   .andExpect(jsonPath("$.entityId").value(tableId))
+			   .andExpect(jsonPath("$.baseFileName").value(fileName));
 
 		verify(oneClickImporterService).buildDataCollection("simple-valid", sheet);
 	}
@@ -132,6 +139,8 @@ public class OneClickImporterControllerTest
 		EntityType table = mock(EntityType.class);
 		String tableId = "generated_table_id";
 		File file = mock(File.class);
+		String fileName = "file-name";
+		when(file.getName()).thenReturn(fileName);
 		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
@@ -139,7 +148,10 @@ public class OneClickImporterControllerTest
 		when(table.getId()).thenReturn(tableId);
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isOk());
+			   .andExpect(status().isCreated())
+			   .andExpect(header().string("Location", StringEndsWith.endsWith(tableId)))
+			   .andExpect(jsonPath("$.entityId").value(tableId))
+			   .andExpect(jsonPath("$.baseFileName").value(fileName));
 
 		verify(oneClickImporterService, Mockito.times(1)).buildDataCollection("simple-valid", sheet);
 
