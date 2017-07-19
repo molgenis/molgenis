@@ -9,7 +9,7 @@
     <tr>
       <th></th>
       <th></th>
-      <th>{{'GRANTED' | i18n}}</th>
+      <th>{{'GRANTING' | i18n}}</th>
       <th v-for="permission in permissions">{{permission | capitalizeFirstLetter}}</th>
     </tr>
     </thead>
