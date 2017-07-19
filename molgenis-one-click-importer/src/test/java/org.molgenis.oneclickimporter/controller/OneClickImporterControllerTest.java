@@ -108,6 +108,8 @@ public class OneClickImporterControllerTest
 		EntityType table = mock(EntityType.class);
 		String tableId = "genrated_table_id";
 		File file = mock(File.class);
+		String fileName = "file-name";
+		when(file.getName()).thenReturn(fileName);
 		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
 		when(excelService.buildExcelSheetFromFile(file)).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
@@ -116,7 +118,9 @@ public class OneClickImporterControllerTest
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 				.andExpect(status().isCreated())
-				.andExpect(header().string("Location", endsWith(tableId)));
+				.andExpect(header().string("Location", endsWith(tableId)))
+				.andExpect(jsonPath("$.entityId").value(tableId))
+				.andExpect(jsonPath("$.baseFileName").value(fileName));
 
 		verify(oneClickImporterService).buildDataCollection("simple-valid", sheet);
 	}
@@ -132,6 +136,8 @@ public class OneClickImporterControllerTest
 		EntityType table = mock(EntityType.class);
 		String tableId = "genrated_table_id";
 		File file = mock(File.class);
+		String fileName = "file-name";
+		when(file.getName()).thenReturn(fileName);
 		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
 		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
 		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
@@ -141,7 +147,9 @@ public class OneClickImporterControllerTest
 
 		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
 				.andExpect(status().isCreated())
-				.andExpect(header().string("Location", endsWith(tableId)));
+				.andExpect(header().string("Location", endsWith(tableId)))
+				.andExpect(jsonPath("$.entityId").value(tableId))
+				.andExpect(jsonPath("$.baseFileName").value(fileName));
 
 		verify(oneClickImporterService, Mockito.times(1)).buildDataCollection("simple-valid", sheet);
 

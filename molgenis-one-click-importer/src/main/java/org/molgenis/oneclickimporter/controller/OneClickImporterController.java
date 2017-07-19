@@ -29,6 +29,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -72,8 +73,8 @@ public class OneClickImporterController extends MolgenisPluginController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/upload", method = POST)
-	public void importFile(HttpServletResponse response, @RequestParam(value = "file") MultipartFile multipartFile)
+	@RequestMapping(value = "/upload", method = POST, produces = APPLICATION_JSON_VALUE)
+	public OneClickImportResponse importFile(HttpServletResponse response, @RequestParam(value = "file") MultipartFile multipartFile)
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
 		String filename = multipartFile.getOriginalFilename();
@@ -99,6 +100,8 @@ public class OneClickImporterController extends MolgenisPluginController
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
 		response.setStatus(HttpServletResponse.SC_CREATED);
 		response.setHeader("Location", builder.build().toUriString() + "/" + dataTable.getId());
+
+		return new OneClickImportResponse(dataTable.getId(), file.getName());
 	}
 
 	@ResponseBody
