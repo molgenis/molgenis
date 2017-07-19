@@ -91,6 +91,10 @@ public class EntityAclManagerImpl implements EntityAclManager
 		Sid owner = toSid(entityAcl.getOwner());
 		acl.setOwner(owner);
 
+		for (int aceIndex = acl.getEntries().size() - 1; aceIndex >= 0; aceIndex--)
+		{
+			acl.deleteAce(aceIndex);
+		}
 		insertAclAces(entityAcl.getEntries(), acl);
 
 		aclService.updateAcl(acl);
@@ -257,7 +261,10 @@ public class EntityAclManagerImpl implements EntityAclManager
 		CumulativePermission result = new CumulativePermission();
 		for (Permission permission : permissions)
 		{
-			result.set(toDomainPermission(permission));
+			if (permission != null) // GSON serializes unknown enum values to null
+			{
+				result.set(toDomainPermission(permission));
+			}
 		}
 		return result;
 	}
