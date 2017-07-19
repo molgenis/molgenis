@@ -26,7 +26,7 @@ Vue.use(i18n, {
   callback () {
     /* eslint-disable no-new */
     new Vue({
-      el: '#app',
+      el: '#molgenis-one-click-importer',
       store,
       router,
       template: '<App />',
