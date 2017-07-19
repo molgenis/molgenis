@@ -55,7 +55,6 @@ public class PackageMetadata extends SystemEntityType
 				.setRefEntity(entityTypeMetadata).setLabel("Entity types");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
 
-		setEntityLevelSecurity(true);
 		setEntityLevelSecurityInheritance(parentAttr);
 	}
 

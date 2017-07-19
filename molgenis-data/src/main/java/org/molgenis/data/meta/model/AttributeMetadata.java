@@ -134,7 +134,6 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Validation expression");
 		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true).setLabel("Default value");
 
-		setEntityLevelSecurity(true);
 		setEntityLevelSecurityInheritance(entityAttribute);
 	}
 

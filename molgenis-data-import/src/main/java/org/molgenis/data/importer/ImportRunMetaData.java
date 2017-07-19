@@ -51,7 +51,5 @@ public class ImportRunMetaData extends SystemEntityType
 		addAttribute(NOTIFY).setDataType(BOOL)
 							.setNillable(true)
 							.setDescription("Boolean to indicate whether or not to send an email on job completion");
-
-		setEntityLevelSecurity(true);
 	}
 }

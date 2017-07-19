@@ -75,7 +75,6 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(ENTITY_LEVEL_SECURITY_INHERITANCE).setDataType(STRING)
 				.setLabel("Entity-level security inheritance"); // FIXME how to make this into a XREF?
 
-		setEntityLevelSecurity(true);
 		setEntityLevelSecurityInheritance(packageAttr);
 	}
 

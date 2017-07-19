@@ -70,7 +70,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 					@Override
 					public GrantedAuthority apply(Authority authority)
 					{
-						return new SimpleGrantedAuthority("ROLE_" + authority.getRole().getId());
+						return new SimpleGrantedAuthority(authority.getRole().getId());
 					}
 				}) : null;
 
@@ -82,7 +82,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 					@Override
 					public GrantedAuthority apply(GroupAuthority groupAuthority)
 					{
-						return new SimpleGrantedAuthority("ROLE_" + groupAuthority.getRole().getId());
+						return new SimpleGrantedAuthority(groupAuthority.getRole().getId());
 					}
 				}) : null;
 
