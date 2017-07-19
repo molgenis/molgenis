@@ -175,8 +175,6 @@
         for (var track in genomeTracks) {
             settings.sources.push(genomeTracks[track]);
         }
-        settings.registry = 'https://www.dasregistry.org/das/sources';
-        settings.prefix = 'https://www.biodalliance.org/release-0.13/';
         genomeBrowser = new Browser(settings);
         // highlight region specified with viewStart and viewEnd
         if (showHighlight === true) {
