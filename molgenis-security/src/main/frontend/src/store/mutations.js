@@ -5,6 +5,7 @@ export const SET_SELECTED_SID = '__SET_SELECTED_SID__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
 export const SET_FILTER = '__SET_FILTER__'
 export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
+export const SET_SIDS = '__SET_SIDS__'
 
 export default {
   [SET_SELECTED_SID] (state: State, sid: GrantedAuthoritySid) {
@@ -18,5 +19,8 @@ export default {
   },
   [SET_ENTITY_TYPES] (state: State, entityTypes: Array<EntityType>) {
     state.entityTypes = entityTypes
+  },
+  [SET_SIDS] (state: State, sids: Array<GrantedAuthoritySid>) {
+    state.sids = sids
   }
 }

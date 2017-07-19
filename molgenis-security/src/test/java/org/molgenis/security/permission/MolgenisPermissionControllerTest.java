@@ -1,5 +1,6 @@
 package org.molgenis.security.permission;
 
+import org.molgenis.data.DataService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.testng.annotations.BeforeMethod;
@@ -20,13 +21,14 @@ public class MolgenisPermissionControllerTest
 	public void setUpBeforeMethod()
 	{
 		molgenisPermissionService = mock(MolgenisPermissionService.class);
-		molgenisPermissionController = new MolgenisPermissionController(molgenisPermissionService);
+		molgenisPermissionController = new MolgenisPermissionController(molgenisPermissionService,
+				mock(DataService.class));
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void MolgenisPermissionController()
 	{
-		new MolgenisPermissionController(null);
+		new MolgenisPermissionController(null, null);
 	}
 
 	@Test

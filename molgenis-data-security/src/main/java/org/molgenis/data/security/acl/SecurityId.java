@@ -4,6 +4,8 @@ import com.google.auto.value.AutoValue;
 
 import javax.annotation.Nullable;
 
+import static java.util.Objects.requireNonNull;
+
 @AutoValue
 public abstract class SecurityId
 {
@@ -13,12 +15,15 @@ public abstract class SecurityId
 	@Nullable
 	public abstract String getAuthority();
 
-	public static SecurityId create(String newUsername, String newAuthority)
+	public static SecurityId createForUsername(String newUsername)
 	{
-		if ((newUsername == null && newAuthority == null) || (newUsername != null && newAuthority != null))
-		{
-			throw new IllegalArgumentException("Either username or authority must be non-null");
-		}
-		return new AutoValue_SecurityId(newUsername, newAuthority);
+		requireNonNull(newUsername);
+		return new AutoValue_SecurityId(newUsername, null);
+	}
+
+	public static SecurityId createForAuthority(String newAuthority)
+	{
+		requireNonNull(newAuthority);
+		return new AutoValue_SecurityId(null, newAuthority);
 	}
 }

@@ -70,7 +70,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 		List<EntityAce> entityAces;
 		if (!currentUserIsSuOrSystem())
 		{
-			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername(), null);
+			SecurityId securityId = SecurityId.createForUsername(SecurityUtils.getCurrentUsername());
 			EntityAce entityAce = EntityAce.create(Permission.WRITE, securityId, true);
 			entityAces = singletonList(entityAce);
 		}
@@ -263,12 +263,12 @@ public class EntityAclManagerImpl implements EntityAclManager
 		if (sid instanceof PrincipalSid)
 		{
 			String principal = ((PrincipalSid) sid).getPrincipal();
-			return SecurityId.create(principal, null);
+			return SecurityId.createForUsername(principal);
 		}
 		if (sid instanceof GrantedAuthoritySid)
 		{
 			String grantedAuthority = ((GrantedAuthoritySid) sid).getGrantedAuthority();
-			return SecurityId.create(null, grantedAuthority);
+			return SecurityId.createForAuthority(grantedAuthority);
 		}
 		throw new IllegalArgumentException(String.format("Unknown Sid type '%s'", sid.getClass().getSimpleName()));
 	}
