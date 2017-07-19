@@ -12,9 +12,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.Integer.parseInt;
 import static java.time.ZoneOffset.UTC;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
 import static org.apache.poi.util.LocaleUtil.*;
 
@@ -85,7 +89,21 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 
 	private Object getPartValue(String part)
 	{
-		// TODO Cast part to whatever type might suit it best
+		if (isNullOrEmpty(part))
+		{
+			return null;
+		}
+
+		if (part.equalsIgnoreCase("true") || part.equalsIgnoreCase("false"))
+		{
+			return parseBoolean(part);
+		}
+
+		if (isNumeric(part)) // This might not work for negative integers
+		{
+			return parseInt(part);
+		}
+
 		return part;
 	}
 
