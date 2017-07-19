@@ -1,105 +1,163 @@
 import getters from 'store/getters'
 
 describe('getters', () => {
-  describe('graph', () => {
+  describe('umlData', () => {
     it('should aggregate the variants in the state', () => {
       const state = {
-        '__entityTypeId': 'sys_md_Package',
-        'id': 'sys',
-        'label': 'System',
-        'description': 'Package containing all system entities',
-        'children': [
-          {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_idx',
-            '__labelValue': 'Index'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_job',
-            '__labelValue': 'Jobs'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_mail',
-            '__labelValue': 'Mail'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_map',
-            '__labelValue': 'Mapper'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_md',
-            '__labelValue': 'Meta'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_ont',
-            '__labelValue': 'Ontology'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_scr',
-            '__labelValue': 'Script'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_sec',
-            '__labelValue': 'Security'
-          }, {
-            '__entityTypeId': 'sys_md_Package',
-            '__idValue': 'sys_set',
-            '__labelValue': 'Settings'
-          }
-        ],
-        'entityTypes': [
-          {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_App',
-            '__labelValue': 'App'
-          }, {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_FileMeta',
-            '__labelValue': 'File metadata'
-          }, {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_FreemarkerTemplate',
-            '__labelValue': 'Freemarker template'
-          }, {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_ImportRun',
-            '__labelValue': 'Import'
-          }, {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_Language',
-            '__labelValue': 'Language'
-          }, {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_L10nString',
-            '__labelValue': 'Localization'
-          }, {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_Questionnaire',
-            '__labelValue': 'Questionnaire'
-          }, {
-            '__entityTypeId': 'sys_md_EntityType',
-            '__idValue': 'sys_StaticContent',
-            '__labelValue': 'Static content'
-          }
-        ],
-        'tags': []
+        'umlData': {
+          'entityTypes': [
+            {
+              'id': 'sys_App',
+              'name': 'App',
+              'attributes': [
+                {
+                  'id': 'app',
+                  'label': 'Application',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                }
+              ]
+            }, {
+              'id': 'sys_FileMeta',
+              'name': 'File metadata',
+              'attributes': [
+                {
+                  'id': 'filemetadata',
+                  'label': 'Filemeta',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                }
+              ]
+            }, {
+              'id': 'sys_FreemarkerTemplate',
+              'name': 'Freemarker template',
+              'attributes': [
+                {
+                  'id': 'freemarker',
+                  'label': 'Freemarker',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                 }
+               ]
+            }, {
+              'id': 'sys_ImportRun',
+              'name': 'Import',
+              'attributes': [
+                {
+                  'id': 'importrun',
+                  'label': 'Import',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                }
+              ]
+            }, {
+              'id': 'sys_Language',
+              'name': 'Language',
+              'attributes': [
+                {
+                  'id': 'language',
+                  'label': 'Language',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                }
+              ]
+            }, {
+              'id': 'sys_L10nString',
+              'name': 'Localization',
+              'attributes': [
+                {
+                  'id': 'local',
+                  'label': 'Localization',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                }
+              ]
+            }, {
+              'id': 'sys_Questionnaire',
+              'name': 'Questionnaire',
+              'attributes': [
+                {
+                  'id': 'questionnaire',
+                  'label': 'Questionnaire',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                }
+              ]
+            }, {
+              'id': 'sys_StaticContent',
+              'name': 'Static content',
+              'attributes': [
+                {
+                  'id': 'static',
+                  'label': 'Static content',
+                  'isIdAttribute': 'false',
+                  'notnullable': 'false',
+                  'type': 'string'
+                }
+              ]
+            }
+          ]
+        }
       }
-      const result = getters.graph(state)
+      const result = getters.umlData(state)
       console.log(JSON.stringify(result, null, 2))
       const expected = {
         nodeData: [
           {
-            key: 'sys_md_EntityType',
+            key: 'sys_App',
             items: [
-              {name: 'App', iskey: false, figure: 'Decision', color: 'blue'},
-              {name: 'File metadata', iskey: false, figure: 'Decision', color: 'blue'},
-              {name: 'Freemarker template', iskey: false, figure: 'Decision', color: 'blue'},
-              {name: 'Import', iskey: false, figure: 'Decision', color: 'blue'},
-              {name: 'Language', iskey: false, figure: 'Decision', color: 'blue'},
-              {name: 'Localization', iskey: false, figure: 'Decision', color: 'blue'},
-              {name: 'Questionnaire', iskey: false, figure: 'Decision', color: 'blue'},
-              {name: 'Static content', iskey: false, figure: 'Decision', color: 'blue'}]
-          }
+              {name: 'Application: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
+          {
+            key: 'sys_FileMeta',
+            items: [
+              {name: 'Filemeta: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
+          {
+            key: 'sys_FreemarkerTemplate',
+            items: [
+              {name: 'Freemarker: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
+          {
+            key: 'sys_ImportRun',
+            items: [
+              {name: 'Import: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
+          {
+            key: 'sys_Language',
+            items: [
+              {name: 'Language: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
+          {
+            key: 'sys_L10nString',
+            items: [
+              {name: 'Localization: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
+          {
+            key: 'sys_Questionnaire',
+            items: [
+              {name: 'Questionnaire: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
+          {
+            key: 'sys_StaticContent',
+            items: [
+              {name: 'Static content: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+            ]
+          },
         ],
         linkData: [
           // {from: 'Products', to: 'Suppliers', text: '0..N', toText: '1'},

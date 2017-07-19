@@ -37,8 +37,9 @@ public class ModelRegistryController extends MolgenisPluginController
 {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ModelRegistryController.class);
-
-	public static final String ID = "model-registry";
+//  namechange of route to model-registry is planned for 6.0.0
+//	public static final String ID = "model-registry";
+	public static final String ID = "standardsregistry";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String VIEW_NAME = "view-model-registry";

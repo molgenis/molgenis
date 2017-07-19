@@ -1,4 +1,4 @@
-import api from '@molgenis/molgenis-api-client/dist/main.bundle'
+import api from '@molgenis/molgenis-api-client'
 import { SET_UMLDATA } from './mutations'
 
 export const GET_UMLDATA = '__GET_UMLDATA__'

@@ -6,7 +6,6 @@
 
 <@header css js/>
 <#-- Search box and search results -->
-$ajax
 <div id="standards-registry-search">
     <div class="row">
         <div class="col-md-4">
