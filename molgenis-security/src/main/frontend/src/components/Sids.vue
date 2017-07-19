@@ -2,8 +2,8 @@
   <ul class="list-group">
     <li v-for="sid in sids"
         class="list-group-item"
-        :class="{'active': selectedSids.includes(sid)}"
-        @click="toggleSid(sid)">
+        :class="{'active': selectedSid === sid.authority}"
+        @click="selectSid(sid)">
       {{ sid.authority }}
     </li>
   </ul>
@@ -17,10 +17,10 @@
       'sids': {
         type: Array
       },
-      'selectedSids': {
-        type: Array
+      'selectedSid': {
+        type: String
       },
-      'toggleSid': {
+      'selectSid': {
         type: Function
       }
     }

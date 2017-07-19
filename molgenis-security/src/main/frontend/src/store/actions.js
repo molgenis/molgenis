@@ -1,5 +1,5 @@
 import { get } from '@molgenis/molgenis-api-client'
-import { SET_ACLS, SET_ENTITY_TYPES, SET_FILTER, SET_SIDS } from './mutations'
+import { SET_ENTITY_TYPES, SET_FILTER, SET_ROWS, SET_SIDS } from './mutations'
 import { debounce } from 'lodash'
 
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
@@ -36,7 +36,7 @@ export default {
       url += `&filter=${encodeURIComponent(filter)}`
     }
     get(url, {}).then(response => {
-      commit(SET_ACLS, response)
+      commit(SET_ROWS, response)
     }, error => {
       console.log(error)
     })
