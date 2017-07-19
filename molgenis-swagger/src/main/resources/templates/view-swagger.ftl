@@ -35,10 +35,9 @@ paths:
           required: true
           description: ID of the entity type for which the ACLs are retrieved
         - name: pageSize
-          type: int
+          type: integer
           in: query
           required: false
-          defaultValue: 10
           description: amount of entities to retrieve ACLs for
         - name: filter
           type: string
@@ -50,6 +49,22 @@ paths:
           description: MOLGENIS token
           schema:
             $ref: '#/definitions/ACLs'
+  /permission/acl:
+    put:
+      tags:
+        - Security
+      summary: Update a single ACL.
+      description: Will update a single ACL if you are admin
+      parameters:
+        - name: acl
+          schema:
+            $ref: '#/definitions/CopyEntityRequest'
+          in: body
+          required: true
+          description: new version of the acl
+      responses:
+        204:
+          description: ACL successfully updated
   /scripts/{name}/start:
     get:
       tags:
@@ -527,28 +542,42 @@ definitions:
           type: string
         entityLabel:
           type: string
-        owner:
-          type: object
-          properties:
-            username: string
-        aces:
+        acls:
           type: array
           items:
-            type: object
-            properties:
-              granted:
-                type: boolean
-              permissions:
-                type: array
-                items:
-                  type: string
-              sid:
-                type: object
-                properties:
-                  username:
-                    type: string
-                  autority:
-                    type: string
+            $ref: '#/definitions/ACL'
+  ACL:
+    type: object
+    properties:
+      owner:
+        type: object
+        properties:
+          username:
+            type: string
+      aces:
+        type: array
+        items:
+          $ref: '#/definitions/ACE'
+  ACE:
+    type: object
+    properties:
+      granted:
+        type: boolean
+      permissions:
+        type: array
+        items:
+          type: string
+      sid:
+        type: object
+        schema:
+          $ref: '#/definitions/SID'
+  SID:
+    type: object
+    properties:
+      username:
+        type: string
+      autority:
+        type: string
   CopyEntityRequest:
     type: object
     properties:
