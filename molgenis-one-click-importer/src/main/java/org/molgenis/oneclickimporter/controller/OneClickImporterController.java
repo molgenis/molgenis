@@ -91,7 +91,7 @@ public class OneClickImporterController extends MolgenisPluginController
 					String.format("File with extension: %s is not a valid one-click importer file", fileExtension));
 		}
 
-		return entityService.createEntityType(dataCollection);
+		return entityService.createEntityType(dataCollection).getId();
 	}
 
 	@ResponseBody

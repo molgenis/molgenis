@@ -80,6 +80,7 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		EntityType table = mock(EntityType.class);
 		when(entityTypeFactory.create()).thenReturn(table);
 		when(idGenerator.generateId()).thenReturn(generatedId);
+		when(table.getId()).thenReturn(generatedId);
 
 		Attribute idAttr = mock(Attribute.class);
 		//row.getEntityType().getAttribute(column.getName()).getDataType()
@@ -105,8 +106,8 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		when(row3.getEntityType()).thenReturn(table);
 		when(entityManager.create(table, NO_POPULATE)).thenReturn(row1, row2, row3);
 
-		String entityTypeId = entityService.createEntityType(dataCollection);
-		assertEquals(entityTypeId, generatedId);
+		EntityType entityType = entityService.createEntityType(dataCollection);
+		assertEquals(entityType.getId(), generatedId);
 
 		verify(table).setPackage(defaultPackage);
 		verify(table).setId(generatedId);

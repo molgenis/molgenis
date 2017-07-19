@@ -11,5 +11,5 @@ public interface EntityService
 	 * @param dataCollection
 	 * @return the ID of the newly created {@link EntityType}
 	 */
-	String createEntityType(DataCollection dataCollection);
+	EntityType createEntityType(DataCollection dataCollection);
 }

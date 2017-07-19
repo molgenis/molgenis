@@ -63,7 +63,7 @@ public class EntityServiceImpl implements EntityService
 	}
 
 	@Override
-	public String createEntityType(DataCollection dataCollection)
+	public EntityType createEntityType(DataCollection dataCollection)
 	{
 		String entityTypeId = idGenerator.generateId();
 
@@ -95,7 +95,7 @@ public class EntityServiceImpl implements EntityService
 		}
 		dataService.add(entityType.getId(), rows.stream());
 
-		return entityTypeId;
+		return entityType;
 	}
 
 	private void setRowValueForAttribute(Entity row, int index, Column column)
