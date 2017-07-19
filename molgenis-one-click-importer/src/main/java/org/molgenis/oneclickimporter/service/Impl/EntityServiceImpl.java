@@ -3,6 +3,8 @@ package org.molgenis.oneclickimporter.service.Impl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -16,6 +18,7 @@ import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -85,15 +88,67 @@ public class EntityServiceImpl implements EntityService
 		{
 			Entity row = entityManager.create(entityType, NO_POPULATE);
 			row.setIdValue(idGenerator.generateId());
-			final int finalRowIndex = rowIndex.getAndIncrement();
-			dataCollection.getColumns()
-						  .forEach(column -> row.set(column.getName(), column.getDataValues().get(finalRowIndex)));
+			int index = rowIndex.getAndIncrement();
+			dataCollection.getColumns().forEach(column -> setRowValueForAttribute(row, index, column));
 
 			rows.add(row);
 		}
 		dataService.add(entityType.getId(), rows.stream());
 
 		return entityTypeId;
+	}
+
+	private void setRowValueForAttribute(Entity row, int index, Column column)
+	{
+		AttributeType columnType = row.getEntityType().getAttribute(column.getName()).getDataType();
+		row.set(column.getName(), castValueToAttributeType(column.getDataValues().get(index), columnType));
+	}
+
+	private Object castValueToAttributeType(Object value, AttributeType type)
+	{
+		switch (type)
+		{
+			case STRING:
+				if (!(value instanceof String))
+				{
+					value = (String) value;
+				}
+				break;
+			case INT:
+				if (!(value instanceof Integer))
+				{
+					value = Integer.valueOf(value.toString());
+				}
+				break;
+			case DECIMAL:
+				if (!(value instanceof Double))
+				{
+					value = Double.valueOf(value.toString());
+				}
+				break;
+			case LONG:
+				if (!(value instanceof Long))
+				{
+					value = Long.valueOf(value.toString());
+				}
+				break;
+			case BOOL:
+				if (!(value instanceof Boolean))
+				{
+					value = Boolean.valueOf(value.toString());
+				}
+				break;
+			case DATE:
+				if (!(value instanceof LocalDate))
+				{
+					value = LocalDate.parse(value.toString());
+				}
+				break;
+			default:
+				throw new MolgenisDataException("[" + type + "] is not supported during metadata guessing");
+
+		}
+		return value;
 	}
 
 	private Attribute createIdAttribute()

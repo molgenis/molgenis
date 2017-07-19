@@ -26,6 +26,12 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 		while (currentRowIndex < rowCount && !guessCompleted)
 		{
 			Object value = dataValues.get(currentRowIndex);
+			if (value == null)
+			{
+				guess = STRING;
+				break;
+			}
+
 			AttributeType basicType = getBasicAttributeType(value);
 
 			guess = getCommonType(guess, basicType);
