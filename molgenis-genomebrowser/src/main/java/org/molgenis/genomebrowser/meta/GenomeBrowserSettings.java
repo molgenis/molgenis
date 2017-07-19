@@ -36,6 +36,16 @@ public class GenomeBrowserSettings extends StaticEntity
 		set(GenomeBrowserSettingsMetadata.IDENTIFIER, identifier);
 	}
 
+	public String getLabel()
+	{
+		return getString(GenomeBrowserSettingsMetadata.LABEL);
+	}
+
+	public void setLabel(String label)
+	{
+		set(GenomeBrowserSettingsMetadata.LABEL, label);
+	}
+
 	public Attribute getLabelAttr()
 	{
 		return getEntity(GenomeBrowserSettingsMetadata.LABEL_ATTR, Attribute.class);

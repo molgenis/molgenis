@@ -34,14 +34,17 @@ public class GenomeBrowserAttributesMetadata extends SystemEntityType
 	{
 		setLabel("Genome Browser Attributes");
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier").setAuto(false).setNillable(false);
-		addAttribute(DEFAULT).setDataType(AttributeType.BOOL).setNillable(false);
+		addAttribute(DEFAULT).setDataType(AttributeType.BOOL).setNillable(false).setLabel("Default configuration");
 		addAttribute(ORDER).setDataType(AttributeType.INT)
 						   .setVisibleExpression("$('" + DEFAULT + "').eq(true).value()")
-						   .setUnique(true);
-		addAttribute(POS).setDataType(AttributeType.STRING).setNillable(false);
-		addAttribute(CHROM).setDataType(AttributeType.STRING).setNillable(false);
-		addAttribute(REF).setDataType(AttributeType.STRING);
-		addAttribute(ALT).setDataType(AttributeType.STRING);
-		addAttribute(STOP).setDataType(AttributeType.STRING);
+						   .setUnique(true)
+						   .setLabel("Order")
+						   .setDescription(
+								   "The order in which the attributes of an entity are matched to these configurations, first match wins");
+		addAttribute(POS).setDataType(AttributeType.STRING).setNillable(false).setLabel("Position attribute name");
+		addAttribute(CHROM).setDataType(AttributeType.STRING).setNillable(false).setLabel("Chromosome attribute name");
+		addAttribute(REF).setDataType(AttributeType.STRING).setLabel("Reference allele attribute name");
+		addAttribute(ALT).setDataType(AttributeType.STRING).setLabel("Alternative allele attribute name");
+		addAttribute(STOP).setDataType(AttributeType.STRING).setLabel("Stop position attribute name");
 	}
 }
