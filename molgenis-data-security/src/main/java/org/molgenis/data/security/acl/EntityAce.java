@@ -1,11 +1,13 @@
 package org.molgenis.data.security.acl;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.gson.AutoGson;
 import org.molgenis.security.core.Permission;
 
 import java.util.Set;
 
 @AutoValue
+@AutoGson(autoValueClass = AutoValue_EntityAce.class)
 public abstract class EntityAce
 {
 	public abstract Set<Permission> getPermissions();

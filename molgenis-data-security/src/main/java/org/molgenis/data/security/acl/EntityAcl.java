@@ -1,11 +1,13 @@
 package org.molgenis.data.security.acl;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.gson.AutoGson;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 @AutoValue
+@AutoGson(autoValueClass = AutoValue_EntityAcl.class)
 public abstract class EntityAcl
 {
 	public abstract EntityIdentity getEntityIdentity();
@@ -20,8 +22,11 @@ public abstract class EntityAcl
 	public static EntityAcl create(EntityIdentity newEntityIdentity, SecurityId newOwner, EntityAcl newParent,
 			List<EntityAce> newEntries)
 	{
-		return builder().setEntityIdentity(newEntityIdentity).setOwner(newOwner).setParent(newParent)
-				.setEntries(newEntries).build();
+		return builder().setEntityIdentity(newEntityIdentity)
+						.setOwner(newOwner)
+						.setParent(newParent)
+						.setEntries(newEntries)
+						.build();
 	}
 
 	public abstract Builder toBuilder();
@@ -44,6 +49,5 @@ public abstract class EntityAcl
 
 		public abstract EntityAcl build();
 	}
-
 
 }
