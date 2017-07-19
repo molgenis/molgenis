@@ -178,6 +178,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 																  .fetch(new Fetch().field(ID))
 																  .findAll()
 																  .map(Attribute::getEntity)
+																  .filter(anEntityType -> !anEntityType.isAbstract())
 																  .collect(
 																		  toMap(anEntityType -> anEntityType.getIdValue()
 																											.toString(),
