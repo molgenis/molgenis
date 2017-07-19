@@ -26,23 +26,23 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 		while (currentRowIndex < rowCount && !guessCompleted)
 		{
 			Object value = dataValues.get(currentRowIndex);
-			if (value == null)
-			{
-				break;
-			}
-
 			AttributeType basicType = getBasicAttributeType(value);
 
 			guess = getCommonType(guess, basicType);
 			guess = getEnrichedType(guess, value);
 
-			if (guess.equals(STRING) || guess.equals(TEXT))
+			// If a guess is TEXT, there is no other type option suitable
+			if (TEXT.equals(guess))
 			{
 				guessCompleted = true;
 			}
 			currentRowIndex++;
 		}
 
+		if (guess == null)
+		{
+			guess = STRING;
+		}
 		return guess;
 	}
 
@@ -52,6 +52,11 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 	 */
 	private AttributeType getEnrichedType(AttributeType guess, Object value)
 	{
+		if (value == null)
+		{
+			return guess;
+		}
+
 		if (guess.equals(STRING))
 		{
 			String stringValue = value.toString();
@@ -79,6 +84,21 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 	 */
 	private AttributeType getCommonType(AttributeType existingGuess, AttributeType newGuess)
 	{
+		if (existingGuess == null && newGuess == null)
+		{
+			return null;
+		}
+
+		if (existingGuess == null)
+		{
+			return newGuess;
+		}
+
+		if (newGuess == null)
+		{
+			return existingGuess;
+		}
+
 		if (existingGuess.equals(newGuess))
 		{
 			return existingGuess;
@@ -145,8 +165,9 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 	{
 		if (value == null)
 		{
-			return STRING;
+			return null;
 		}
+
 		if (value instanceof Integer)
 		{
 			return INT;
