@@ -113,32 +113,6 @@ public class EntityServiceImpl implements EntityService
 
 		switch (type)
 		{
-			case STRING:
-				break;
-			case INT:
-				if (!(value instanceof Integer))
-				{
-					value = Integer.valueOf(value.toString());
-				}
-				break;
-			case DECIMAL:
-				if (!(value instanceof Double))
-				{
-					value = Double.valueOf(value.toString());
-				}
-				break;
-			case LONG:
-				if (!(value instanceof Long))
-				{
-					value = Long.valueOf(value.toString());
-				}
-				break;
-			case BOOL:
-				if (!(value instanceof Boolean))
-				{
-					value = Boolean.valueOf(value.toString());
-				}
-				break;
 			case DATE:
 				if (!(value instanceof LocalDate))
 				{
