@@ -77,7 +77,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		List<Object> dataValues = newLinkedList();
 		lines.forEach(line ->
 		{
-			String[] lineParts = line.split(CSV_SEPARATOR);
+			String[] lineParts = line.split(CSV_SEPARATOR, -1);
 			dataValues.add(getPartValue(lineParts[columnIndex]));
 		});
 		return dataValues;
