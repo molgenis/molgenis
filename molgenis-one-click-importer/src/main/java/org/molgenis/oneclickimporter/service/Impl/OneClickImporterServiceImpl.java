@@ -34,9 +34,8 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 
 		Row headerRow = sheet.getRow(0);
 		headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
-		int numberOfRows = columns.get(0).getDataValues().size();
 
-		return DataCollection.create(dataCollectionName, columns, numberOfRows);
+		return DataCollection.create(dataCollectionName, columns);
 	}
 
 	@Override
@@ -54,7 +53,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			columnIndex++;
 		}
 
-		return DataCollection.create(dataCollectionName, columns, lines.size());
+		return DataCollection.create(dataCollectionName, columns);
 	}
 
 	private Column createColumnFromCell(Sheet sheet, Cell cell)

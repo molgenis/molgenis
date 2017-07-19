@@ -74,7 +74,7 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		List<Object> superPowers = Arrays.asList("Arrow functions", "Cookies", "Knots");
 		List<Column> columns = Arrays.asList(Column.create("user name", 0, userNames),
 				Column.create("super power", 1, superPowers));
-		DataCollection dataCollection = DataCollection.create(tableName, columns, 3);
+		DataCollection dataCollection = DataCollection.create(tableName, columns);
 
 		String generatedId = "id_0";
 		EntityType table = mock(EntityType.class);

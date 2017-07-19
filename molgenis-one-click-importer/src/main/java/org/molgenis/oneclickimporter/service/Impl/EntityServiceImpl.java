@@ -87,7 +87,7 @@ public class EntityServiceImpl implements EntityService
 
 		AtomicInteger rowIndex = new AtomicInteger(0);
 		List<Entity> rows = newArrayList();
-		while (rowIndex.get() < dataCollection.getNumberOfRows())
+		while (rowIndex.get() < dataCollection.getColumns().get(0).getDataValues().size())
 		{
 			Entity row = entityManager.create(entityType, NO_POPULATE);
 			row.setIdValue(idGenerator.generateId());
