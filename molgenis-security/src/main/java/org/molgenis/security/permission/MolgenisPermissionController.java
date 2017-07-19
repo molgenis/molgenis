@@ -11,6 +11,7 @@ import org.molgenis.data.security.acl.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,6 +75,7 @@ public class MolgenisPermissionController
 	}
 
 	@RequestMapping(value = "/acl", method = PUT)
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
 	public void save(@RequestBody EntityAcl acl)
 	{
 		entityAclManager.updateAcl(acl);
