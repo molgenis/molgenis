@@ -38,7 +38,5 @@ public class QuestionnaireMetaData extends SystemEntityType
 			enumOptions.add(questionnaireStatus.toString());
 		}
 		addAttribute(ATTR_STATUS).setDataType(ENUM).setEnumOptions(enumOptions).setVisible(false).setNillable(false);
-
-		setEntityLevelSecurity(true);
 	}
 }

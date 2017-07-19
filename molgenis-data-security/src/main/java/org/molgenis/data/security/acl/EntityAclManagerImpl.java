@@ -7,6 +7,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
@@ -28,6 +30,8 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
 @Service
 public class EntityAclManagerImpl implements EntityAclManager
 {
+	private static final Logger LOG = LoggerFactory.getLogger(EntityAclManagerImpl.class);
+
 	private final AclService aclService;
 	private final SidRetrievalStrategy sidRetrievalStrategy;
 	private final DataService dataService;
@@ -67,6 +71,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	@Override
 	public EntityAcl createAcl(Entity entity)
 	{
+		LOG.info("Create ACL {} {}", entity.getEntityType().getId(), entity.getIdValue().toString());
 		List<EntityAce> entityAces;
 		if (!currentUserIsSuOrSystem())
 		{

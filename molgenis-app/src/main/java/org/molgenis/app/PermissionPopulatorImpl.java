@@ -10,13 +10,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.bootstrap.populate.UsersGroupsAuthoritiesPopulatorImpl.ROLE_USER_ID;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
@@ -38,6 +33,11 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 		SecurityId roleUserSecurityId = SecurityId.create(null, ROLE_USER_ID);
 		EntityAce roleUserReadAce = EntityAce.create(READ, roleUserSecurityId, true);
 
+		// allow user role to see system package
+		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
+		entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
+		entityAclManager.updateAcl(entityTypeAcl);
+
 		// allow anonymous user and user role to see the home plugin
 		EntityAcl homePluginAcl = entityAclManager.readAcl(EntityIdentity.create(PLUGIN, HomeController.ID));
 		EntityAce homePluginAnonymousAce = EntityAce.create(READ, SecurityId.create(ANONYMOUS_USERNAME, null), true);
@@ -52,14 +52,5 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 												   .setEntries(singletonList(userAccountPluginUserAce))
 												   .build();
 		entityAclManager.updateAcl(userAccountPluginAcl);
-
-		asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META).forEach(
-				entityTypeId ->
-				{
-					EntityAcl entityTypeAcl = entityAclManager.readAcl(
-							EntityIdentity.create(ENTITY_TYPE_META_DATA, entityTypeId));
-					entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
-					entityAclManager.updateAcl(entityTypeAcl);
-				});
 	}
 }

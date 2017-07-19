@@ -27,7 +27,6 @@ public class PluginMetadata extends SystemEntityType
 	public void init()
 	{
 		setLabel("Plugin");
-		setEntityLevelSecurity(true);
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setUnique(true).setLabel("Label");
