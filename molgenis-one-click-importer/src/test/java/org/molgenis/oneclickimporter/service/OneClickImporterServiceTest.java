@@ -141,5 +141,4 @@ public class OneClickImporterServiceTest
 		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5), 10);
 		assertEquals(actual, expected);
 	}
-
 }

@@ -18,7 +18,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.parseInt;
 import static java.time.ZoneOffset.UTC;
-import static org.apache.commons.lang3.StringUtils.isNumeric;
+import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
 import static org.apache.poi.util.LocaleUtil.*;
 
@@ -99,7 +99,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			return parseBoolean(part);
 		}
 
-		if (isNumeric(part)) // This might not work for negative integers
+		if (isNumber(part))
 		{
 			return parseInt(part);
 		}
