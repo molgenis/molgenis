@@ -50,8 +50,9 @@ public class SortGenerator implements QueryPartGenerator
 
 				String sortField = getSortField(sortAttr);
 				SortOrder sortOrder = sortDirection == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
-				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder)
-						.sortMode(SortMode.MIN);
+				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField)
+														   .order(sortOrder)
+														   .sortMode(SortMode.MIN);
 				searchRequestBuilder.addSort(sortBuilder);
 			}
 		}

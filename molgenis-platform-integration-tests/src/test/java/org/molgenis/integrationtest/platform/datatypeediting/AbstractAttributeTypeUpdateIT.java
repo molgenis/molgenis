@@ -108,8 +108,10 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 		referenceEntityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		Attribute mainIdAttribute = attributeFactory.create().setName(mainId).setIdAttribute(true);
-		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute)
-				.setNillable(false);
+		Attribute mainAttributeAttribute = attributeFactory.create()
+														   .setDataType(type)
+														   .setName(mainAttribute)
+														   .setNillable(false);
 
 		if (referencingTypes.contains(type))
 		{
@@ -121,8 +123,10 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 		}
 
 		Attribute refIdAttribute = attributeFactory.create().setName(refId).setDataType(refIdType).setIdAttribute(true);
-		Attribute refLabelAttribute = attributeFactory.create().setName(refLabel).setLabelAttribute(true)
-				.setNillable(false);
+		Attribute refLabelAttribute = attributeFactory.create()
+													  .setName(refLabel)
+													  .setLabelAttribute(true)
+													  .setNillable(false);
 
 		entityType.addAttributes(newArrayList(mainIdAttribute, mainAttributeAttribute));
 		referenceEntityType.addAttributes(newArrayList(refIdAttribute, refLabelAttribute));

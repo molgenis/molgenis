@@ -106,10 +106,9 @@ public class PermissionManagerController extends MolgenisPluginController
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
 
-			if (value.equalsIgnoreCase(Permission.READ.toString()) || value
-					.equalsIgnoreCase(Permission.COUNT.toString()) || value
-					.equalsIgnoreCase(Permission.WRITE.toString()) || value
-					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString()) || value.equalsIgnoreCase(
+					Permission.COUNT.toString()) || value.equalsIgnoreCase(Permission.WRITE.toString())
+					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				// FIXME use EntityAclService
 				//				GroupAuthority authority = groupAuthorityFactory.create();

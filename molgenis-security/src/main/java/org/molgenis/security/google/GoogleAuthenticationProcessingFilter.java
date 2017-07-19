@@ -117,8 +117,8 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private GoogleIdToken verify(String idTokenString) throws GeneralSecurityException, IOException
 	{
 		List<String> audience = Collections.singletonList(appSettings.getGoogleAppClientId());
-		GoogleIdTokenVerifier googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(googlePublicKeysManager)
-				.setAudience(audience).build();
+		GoogleIdTokenVerifier googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(
+				googlePublicKeysManager).setAudience(audience).build();
 		return googleIdTokenVerifier.verify(idTokenString);
 	}
 
@@ -158,9 +158,9 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 					// create new user
 					String username = email;
 					String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME) ? payload.get(PROFILE_KEY_GIVEN_NAME)
-							.toString() : null;
-					String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME) ? payload
-							.get(PROFILE_KEY_FAMILY_NAME).toString() : null;
+																							.toString() : null;
+					String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME) ? payload.get(
+							PROFILE_KEY_FAMILY_NAME).toString() : null;
 					user = createMolgenisUser(username, email, givenName, familyName, principal);
 				}
 			}

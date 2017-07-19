@@ -71,20 +71,24 @@ public class RestControllerIT
 		ValidatableResponse response;
 
 		response = getWithoutToken("sys_FreemarkerTemplate");
-		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
+		response.statusCode(UNAUTHORIZED)
+				.body("errors.message[0]",
+						equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
 
 		response = getWithoutToken("sys_scr_ScriptType");
-		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [COUNT] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
+		response.statusCode(UNAUTHORIZED)
+				.body("errors.message[0]",
+						equalTo("No [COUNT] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
 
 		response = getWithoutToken("sys_sec_UserAuthority");
-		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [COUNT] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
+		response.statusCode(UNAUTHORIZED)
+				.body("errors.message[0]",
+						equalTo("No [COUNT] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 
 		response = getWithoutToken("sys_sec_GroupAuthority");
-		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+		response.statusCode(UNAUTHORIZED)
+				.body("errors.message[0]",
+						equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
 	}
 
 	@Test
@@ -98,62 +102,128 @@ public class RestControllerIT
 	public void getWithoutReadPermissionIsNotAllowed()
 	{
 		ValidatableResponse response = getWithToken("sys_sec_UserAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [READ] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
+		response.statusCode(UNAUTHORIZED)
+				.body("errors.message[0]",
+						equalTo("No [READ] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 	}
 
 	@Test
 	public void getWithoutCountPermissionIsNotAllowed()
 	{
 		ValidatableResponse response = getWithToken("sys_sec_GroupAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+		response.statusCode(UNAUTHORIZED)
+				.body("errors.message[0]",
+						equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
 	}
 
 	@Test
 	public void deleteNonExistingEntity()
 	{
-		given().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.delete(PATH + "sys_FileMeta" + "/non-existing-entity_id").then().log().all().statusCode(NOT_FOUND)
-				.body("errors.message[0]", equalTo("Unknown [File metadata] with id [non-existing-entity_id]"));
+		given().log()
+			   .uri()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .delete(PATH + "sys_FileMeta" + "/non-existing-entity_id")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(NOT_FOUND)
+			   .body("errors.message[0]", equalTo("Unknown [File metadata] with id [non-existing-entity_id]"));
 	}
 
 	@Test
 	public void deleteWithoutWritePermissionFails()
 	{
-		given().log().method().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.delete(PATH + "sys_scr_ScriptType/R").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
+		given().log()
+			   .method()
+			   .log()
+			   .uri()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .delete(PATH + "sys_scr_ScriptType/R")
+			   .then()
+			   .statusCode(UNAUTHORIZED)
+			   .body("errors.message[0]",
+					   equalTo("No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
 
-		given().log().method().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.delete(PATH + "sys_sec_UserAuthority").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
+		given().log()
+			   .method()
+			   .log()
+			   .uri()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .delete(PATH + "sys_sec_UserAuthority")
+			   .then()
+			   .statusCode(UNAUTHORIZED)
+			   .body("errors.message[0]",
+					   equalTo("No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 
-		given().log().method().log().uri().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.delete(PATH + "sys_sec_GroupAuthority").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [WRITE] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+		given().log()
+			   .method()
+			   .log()
+			   .uri()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .delete(PATH + "sys_sec_GroupAuthority")
+			   .then()
+			   .statusCode(UNAUTHORIZED)
+			   .body("errors.message[0]",
+					   equalTo("No [WRITE] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
 	}
 
 	@Test
 	public void logoutWithoutTokenFails()
 	{
-		given().log().uri().log().method().when().post(PATH + "logout").then().statusCode(BAD_REQUEST).log().all()
-				.body("errors.message[0]", equalTo("Missing token in header"));
+		given().log()
+			   .uri()
+			   .log()
+			   .method()
+			   .when()
+			   .post(PATH + "logout")
+			   .then()
+			   .statusCode(BAD_REQUEST)
+			   .log()
+			   .all()
+			   .body("errors.message[0]", equalTo("Missing token in header"));
 	}
 
 	@Test
 	public void logoutWithToken()
 	{
-		given().log().uri().log().method().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post(PATH + "logout")
-				.then().statusCode(OKE).log().all();
+		given().log()
+			   .uri()
+			   .log()
+			   .method()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .post(PATH + "logout")
+			   .then()
+			   .statusCode(OKE)
+			   .log()
+			   .all();
 
-		given().log().uri().log().method().header(X_MOLGENIS_TOKEN, this.testUserToken).when()
-				.get(PATH + "sys_FreemarkerTemplate").then().statusCode(UNAUTHORIZED).body("errors.message[0]",
-				equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
+		given().log()
+			   .uri()
+			   .log()
+			   .method()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .get(PATH + "sys_FreemarkerTemplate")
+			   .then()
+			   .statusCode(UNAUTHORIZED)
+			   .body("errors.message[0]",
+					   equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
 
-		given().log().uri().log().method().when().get(PATH + "sys_FreemarkerTemplate").then().statusCode(UNAUTHORIZED)
-				.body("errors.message[0]",
-						equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
+		given().log()
+			   .uri()
+			   .log()
+			   .method()
+			   .when()
+			   .get(PATH + "sys_FreemarkerTemplate")
+			   .then()
+			   .statusCode(UNAUTHORIZED)
+			   .body("errors.message[0]",
+					   equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
 
 		// clean up after test
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
@@ -166,8 +236,13 @@ public class RestControllerIT
 
 	private ValidatableResponse getWithToken(String requestedEntity, String token)
 	{
-		return given().log().all().header(X_MOLGENIS_TOKEN, token).contentType(APPLICATION_JSON).when()
-				.get(PATH + requestedEntity).then();
+		return given().log()
+					  .all()
+					  .header(X_MOLGENIS_TOKEN, token)
+					  .contentType(APPLICATION_JSON)
+					  .when()
+					  .get(PATH + requestedEntity)
+					  .then();
 
 	}
 

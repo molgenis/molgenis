@@ -26,8 +26,8 @@ public class ExplainServiceHelperTest
 	@Test
 	public void discoverMatchedQueries() throws JsonSyntaxException, IOException
 	{
-		Explanation explanation = new Gson()
-				.fromJson(ResourceUtils.getString("explain_api_example.json"), Explanation.class);
+		Explanation explanation = new Gson().fromJson(ResourceUtils.getString("explain_api_example.json"),
+				Explanation.class);
 		Set<String> discoverMatchedQueries = explainServiceHelper.findMatchedWords(explanation);
 		assertEquals(discoverMatchedQueries.size(), 2);
 		assertTrue(discoverMatchedQueries.contains("high blood"));
@@ -40,8 +40,8 @@ public class ExplainServiceHelperTest
 		assertEquals(
 				explainServiceHelper.getMatchedWord("weight(label:blood in 20697) [PerFieldSimilarity], result of:"),
 				"blood");
-		assertEquals(explainServiceHelper
-				.getMatchedWord("weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"), "blood");
+		assertEquals(explainServiceHelper.getMatchedWord(
+				"weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"), "blood");
 	}
 
 	@Test

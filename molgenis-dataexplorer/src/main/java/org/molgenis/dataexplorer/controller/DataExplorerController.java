@@ -117,9 +117,10 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		StringBuilder message = new StringBuilder("");
 
-		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
-				.filter(entityType -> !entityType.isAbstract())
-				.collect(toMap(EntityType::getId, entityType -> entityType));
+		Map<String, EntityType> entitiesMeta = dataService.getMeta()
+														  .getEntityTypes()
+														  .filter(entityType -> !entityType.isAbstract())
+														  .collect(toMap(EntityType::getId, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
@@ -203,7 +204,7 @@ public class DataExplorerController extends MolgenisPluginController
 				}
 				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
 						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
-								.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
+										 .sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
 				model.addAttribute("annotationRun", annotationRun);
 				model.addAttribute("entityTypeId", entityTypeId);
 				break;
@@ -216,8 +217,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService
-				.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
+		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService.getCapabilities(
+				entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
 	/**
@@ -285,8 +286,8 @@ public class DataExplorerController extends MolgenisPluginController
 						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
 						if (modEntitiesReportName != null)
 						{
-							modulesConfig
-									.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
+							modulesConfig.add(
+									new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
 						}
 					}
 					break;
@@ -339,8 +340,8 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			case DOWNLOAD_TYPE_CSV:
 				response.setContentType("text/csv");
-				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss")
-						.format(new Date()) + ".csv";
+				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(
+						new Date()) + ".csv";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();
@@ -348,8 +349,8 @@ public class DataExplorerController extends MolgenisPluginController
 				break;
 			case DOWNLOAD_TYPE_XLSX:
 				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss")
-						.format(new Date()) + ".xlsx";
+				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(
+						new Date()) + ".xlsx";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();

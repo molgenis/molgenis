@@ -87,8 +87,8 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 			if (pubMedTFEntity != null)
 			{
 				// FIXME remove reference to getApplicationContext
-				TermFrequencyMetaData termFrequencyEntityType = getApplicationContext()
-						.getBean(TermFrequencyMetaData.class);
+				TermFrequencyMetaData termFrequencyEntityType = getApplicationContext().getBean(
+						TermFrequencyMetaData.class);
 				Entity mapEntity = new DynamicEntity(termFrequencyEntityType);
 				mapEntity.set(TERM, ontologyTermSynonym);
 				mapEntity.set(FREQUENCY, pubMedTFEntity.getFrequency());

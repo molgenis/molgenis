@@ -131,8 +131,8 @@ class RestControllerV2
 	}
 
 	@Autowired
-	public RestControllerV2(DataService dataService, PermissionService permissionService,
-			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService,
+	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
+			LanguageService languageService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -203,8 +203,8 @@ class RestControllerV2
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
-		Fetch fetch = AttributeFilterToFetchConverter
-				.convert(attributeFilter, entityType, languageService.getCurrentUserLanguageCode());
+		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityType,
+				languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityTypeId, id, fetch);
 		if (entity == null)
@@ -322,15 +322,18 @@ class RestControllerV2
 
 		try
 		{
-			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
-					.collect(toList());
+			final List<Entity> entities = request.getEntities()
+												 .stream()
+												 .map(e -> this.restService.toEntity(meta, e))
+												 .collect(toList());
 			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
 			final List<String> ids = new ArrayList<>();
 
 			// Add all entities
 			if (ATTRIBUTE_META_DATA.equals(entityTypeId))
 			{
-				entities.stream().map(attribute -> (Attribute) attribute)
+				entities.stream()
+						.map(attribute -> (Attribute) attribute)
 						.forEach(attribute -> dataService.getMeta().addAttribute(attribute));
 			}
 			else
@@ -344,8 +347,9 @@ class RestControllerV2
 
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
-						Href.concatEntityHref(RestControllerV2.BASE_URI, entityTypeId, id)));
+				responseBody.getResources()
+							.add(new AutoValue_ResourcesResponseV2(
+									Href.concatEntityHref(RestControllerV2.BASE_URI, entityTypeId, id)));
 			});
 
 			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityTypeId,
@@ -385,8 +389,8 @@ class RestControllerV2
 		NameValidator.validateEntityName(request.getNewEntityName());
 
 		// Check if the entity already exists
-		String newFullName = EntityTypeUtils
-				.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
+		String newFullName = EntityTypeUtils.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(),
+				request.getNewEntityName());
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
@@ -396,7 +400,7 @@ class RestControllerV2
 
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
-				.contains(RepositoryCapability.WRITABLE);
+												  .contains(RepositoryCapability.WRITABLE);
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityTypeId);
 
 		// Copy
@@ -438,13 +442,15 @@ class RestControllerV2
 
 		try
 		{
-			List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
-					.collect(toList());
+			List<Entity> entities = request.getEntities()
+										   .stream()
+										   .map(e -> this.restService.toEntity(meta, e))
+										   .collect(toList());
 
 			// update all entities
 			this.dataService.update(entityTypeId, entities.stream());
-			entities.forEach(entity -> restService
-					.updateMappedByEntities(entity, dataService.findOneById(entityTypeId, entity.getIdValue())));
+			entities.forEach(entity -> restService.updateMappedByEntities(entity,
+					dataService.findOneById(entityTypeId, entity.getIdValue())));
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 		catch (Exception e)
@@ -486,8 +492,11 @@ class RestControllerV2
 				throw createMolgenisDataAccessExceptionReadOnlyAttribute(entityTypeId, attributeName);
 			}
 
-			final List<Entity> entities = request.getEntities().stream().filter(e -> e.size() == 2)
-					.map(e -> this.restService.toEntity(meta, e)).collect(toList());
+			final List<Entity> entities = request.getEntities()
+												 .stream()
+												 .filter(e -> e.size() == 2)
+												 .map(e -> this.restService.toEntity(meta, e))
+												 .collect(toList());
 			if (entities.size() != request.getEntities().size())
 			{
 				throw createMolgenisDataExceptionIdentifierAndValue();
@@ -577,8 +586,12 @@ class RestControllerV2
 	@ResponseStatus(CREATED)
 	public void registerMissingResourceStrings(@PathVariable String namespace, HttpServletRequest request)
 	{
-		Set<String> messageIDs = request.getParameterMap().entrySet().stream().map(Map.Entry::getKey)
-				.filter(id -> !id.equals(TIME_PARAM_NAME)).collect(toSet());
+		Set<String> messageIDs = request.getParameterMap()
+										.entrySet()
+										.stream()
+										.map(Map.Entry::getKey)
+										.filter(id -> !id.equals(TIME_PARAM_NAME))
+										.collect(toSet());
 		localizationService.addMissingMessageIDs(namespace, messageIDs);
 	}
 
@@ -686,8 +699,8 @@ class RestControllerV2
 
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
-		Fetch fetch = AttributeFilterToFetchConverter
-				.convert(request.getAttrs(), meta, languageService.getCurrentUserLanguageCode());
+		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta,
+				languageService.getCurrentUserLanguageCode());
 		if (fetch != null)
 		{
 			q.fetch(fetch);

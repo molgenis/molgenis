@@ -43,7 +43,8 @@ public class MatchingTaskContentMetaData extends SystemEntityType
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true);
 		addAttribute(SCORE).setDataType(DECIMAL).setDescription("Score of the match").setNillable(true);
-		addAttribute(VALIDATED).setDataType(BOOL).setDescription("Indication if the match was validated")
-				.setNillable(false);
+		addAttribute(VALIDATED).setDataType(BOOL)
+							   .setDescription("Indication if the match was validated")
+							   .setNillable(false);
 	}
 }

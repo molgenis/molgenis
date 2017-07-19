@@ -54,9 +54,9 @@ public class AnnotationServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		assertEquals(annotationService.getAnnotatorsByMetaData(Config.metaData).size(), 2);
 		assertTrue(annotationService.getAnnotatorsByMetaData(Config.metaData)
-				.contains(annotationService.getAnnotatorByName("annotator2")));
+									.contains(annotationService.getAnnotatorByName("annotator2")));
 		assertTrue(annotationService.getAnnotatorsByMetaData(Config.metaData)
-				.contains(annotationService.getAnnotatorByName("annotator3")));
+									.contains(annotationService.getAnnotatorByName("annotator3")));
 	}
 
 	@Configuration

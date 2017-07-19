@@ -136,8 +136,8 @@ public class ImportWriter
 			Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
 			for (EntityType entityType : entities)
 			{
-				EntityType existing = dataService
-						.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
+				EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(),
+						EntityType.class);
 				if (existing != null)
 				{
 					existingEntityTypeMap.put(entityType.getId(), entityType);
@@ -145,12 +145,16 @@ public class ImportWriter
 			}
 
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
-					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getId()))
-					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
+																	 .filter(entityType -> !existingEntityTypeMap.containsKey(
+																			 entityType.getId()))
+																	 .collect(collectingAndThen(toList(),
+																			 ImmutableList::copyOf));
 
 			ImmutableCollection<EntityType> existingEntityTypes = entities.stream()
-					.filter(entityType -> existingEntityTypeMap.containsKey(entityType.getId()))
-					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
+																		  .filter(entityType -> existingEntityTypeMap.containsKey(
+																				  entityType.getId()))
+																		  .collect(collectingAndThen(toList(),
+																				  ImmutableList::copyOf));
 
 			return new GroupedEntityTypes(newEntityTypes, existingEntityTypes);
 		});
@@ -223,15 +227,18 @@ public class ImportWriter
 			String name = entityType.getId();
 
 			// Languages and i18nstrings are already done
-			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(L10N_STRING) && dataService
-					.hasRepository(name))
+			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(L10N_STRING) && dataService.hasRepository(
+					name))
 			{
 				Repository<Entity> repository = dataService.getRepository(name);
 				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getId());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getId().toLowerCase()
-						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getId()
+																					 .toLowerCase()
+																					 .startsWith(
+																							 defaultPackage.toLowerCase()
+																									 + PACKAGE_SEPARATOR))
 				{
 					emxEntityRepo = source.getRepository(entityType.getId().substring(defaultPackage.length() + 1));
 				}
@@ -240,8 +247,8 @@ public class ImportWriter
 				if (emxEntityRepo != null)
 				{
 					// transforms entities so that they match the entity meta data of the output repository
-					Iterable<Entity> entities = Iterables
-							.transform(emxEntityRepo, emxEntity -> toEntity(entityType, emxEntity));
+					Iterable<Entity> entities = Iterables.transform(emxEntityRepo,
+							emxEntity -> toEntity(entityType, emxEntity));
 					int count = update(repository, entities, dbAction);
 					report.addEntityCount(name, count);
 				}
@@ -336,8 +343,8 @@ public class ImportWriter
 									else
 									{
 										EntityType xrefEntity = attr.getRefEntity();
-										Object entityId = DataConverter
-												.convert(emxValueItem, xrefEntity.getIdAttribute());
+										Object entityId = DataConverter.convert(emxValueItem,
+												xrefEntity.getIdAttribute());
 										entityValue = entityManager.getReference(xrefEntity, entityId);
 									}
 									mrefEntities.add(entityValue);
@@ -422,8 +429,9 @@ public class ImportWriter
 
 	private static Fetch createEntityTypeWithAttributesFetch()
 	{
-		return new Fetch().field(EntityTypeMetadata.PACKAGE).field(EntityTypeMetadata.ATTRIBUTES,
-				new Fetch().field(AttributeMetadata.ID).field(AttributeMetadata.NAME));
+		return new Fetch().field(EntityTypeMetadata.PACKAGE)
+						  .field(EntityTypeMetadata.ATTRIBUTES,
+								  new Fetch().field(AttributeMetadata.ID).field(AttributeMetadata.NAME));
 	}
 
 	/**

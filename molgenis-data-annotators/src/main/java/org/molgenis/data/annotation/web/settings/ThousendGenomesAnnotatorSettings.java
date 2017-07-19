@@ -35,9 +35,10 @@ public class ThousendGenomesAnnotatorSettings extends DefaultSettingsEntity
 			super.init();
 			setLabel("1000 Genomes annotator settings");
 			addAttribute(CHROMOSOMES).setLabel("Chromosomes")
-					.setDefaultValue("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
+									 .setDefaultValue("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
 			addAttribute(FILEPATTERN).setLabel("Filepattern")
-					.setDefaultValue("ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
+									 .setDefaultValue(
+											 "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
 			addAttribute(ROOT_DIRECTORY).setLabel("Root directory");
 			addAttribute(OVERRIDE_CHROMOSOME_FILES).setLabel("Override chromosome file");
 		}

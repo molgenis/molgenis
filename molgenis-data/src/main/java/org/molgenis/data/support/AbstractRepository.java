@@ -108,7 +108,7 @@ public abstract class AbstractRepository implements Repository<Entity>
 		Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), FIND_ALL_BATCH_SIZE);
 		Iterable<List<Object>> iterable = () -> batches;
 		return StreamSupport.stream(iterable.spliterator(), false)
-				.flatMap(batch -> StreamSupport.stream(findAllBatched(batch, fetch).spliterator(), false));
+							.flatMap(batch -> StreamSupport.stream(findAllBatched(batch, fetch).spliterator(), false));
 	}
 
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)

@@ -89,9 +89,11 @@ public class SourceToEntityConverter
 							Iterable<Map<String, Object>> sourceRefEntities = (Iterable<Map<String, Object>>) sourceValue;
 							EntityType refEntity = attr.getRefEntity();
 							String refIdAttrName = refEntity.getIdAttribute().getName();
-							Iterable<Object> sourceRefEntityIds = () -> StreamSupport
-									.stream(sourceRefEntities.spliterator(), false)
-									.map(sourceRefEntity -> sourceRefEntity.get(refIdAttrName)).iterator();
+							Iterable<Object> sourceRefEntityIds = () -> StreamSupport.stream(
+									sourceRefEntities.spliterator(), false)
+																					 .map(sourceRefEntity -> sourceRefEntity
+																							 .get(refIdAttrName))
+																					 .iterator();
 							entityValue = entityManager.getReferences(refEntity, sourceRefEntityIds);
 						}
 						else

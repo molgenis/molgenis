@@ -92,9 +92,8 @@ public class SnpEffRunner
 			PeekingIterator<Entity> peekingSourceIterator = Iterators.peekingIterator(source);
 			EntityType sourceEMD = peekingSourceIterator.peek().getEntityType();
 
-			List<String> params = Arrays
-					.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
-							"-spliceSiteSize", "5");
+			List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
+					"-canon", "-ud", "0", "-spliceSiteSize", "5");
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
 			VcfRepository repo = new VcfRepository(outputVcf, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName(), vcfAttributes,
@@ -169,8 +168,8 @@ public class SnpEffRunner
 		if (snpEffResultIterator.hasNext())
 		{
 			Entity entityCandidate = snpEffResultIterator.peek();
-			if (chromosome.equals(entityCandidate.getString(VcfAttributes.CHROM)) && position == entityCandidate
-					.getInt(VcfAttributes.POS) && entityCandidate.getString(SnpEffRunner.ANN) != null)
+			if (chromosome.equals(entityCandidate.getString(VcfAttributes.CHROM)) && position == entityCandidate.getInt(
+					VcfAttributes.POS) && entityCandidate.getString(SnpEffRunner.ANN) != null)
 			{
 				snpEffResultIterator.next();
 				return entityCandidate;
@@ -313,20 +312,26 @@ public class SnpEffRunner
 	 */
 	public EntityType getTargetEntityType(EntityType sourceEntityType)
 	{
-		EntityType entityType = entityTypeFactory.create().setId(sourceEntityType.getId() + ENTITY_NAME_SUFFIX)
-				.setLabel(sourceEntityType.getId() + "_" + ENTITY_NAME_SUFFIX)
-				.setPackage(sourceEntityType.getPackage());
+		EntityType entityType = entityTypeFactory.create()
+												 .setId(sourceEntityType.getId() + ENTITY_NAME_SUFFIX)
+												 .setLabel(sourceEntityType.getId() + "_" + ENTITY_NAME_SUFFIX)
+												 .setPackage(sourceEntityType.getPackage());
 		entityType.setBackend(sourceEntityType.getBackend());
-		Attribute id = attributeFactory.create().setName(EffectsMetaData.ID).setAuto(true).setVisible(false)
-				.setIdAttribute(true);
+		Attribute id = attributeFactory.create()
+									   .setName(EffectsMetaData.ID)
+									   .setAuto(true)
+									   .setVisible(false)
+									   .setIdAttribute(true);
 		entityType.addAttribute(id);
 		for (Attribute attr : effectsMetaData.getOrderedAttributes())
 		{
 			entityType.addAttribute(attr);
 		}
-		entityType.addAttribute(
-				attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
-						.setRefEntity(sourceEntityType));
+		entityType.addAttribute(attributeFactory.create()
+												.setName(EffectsMetaData.VARIANT)
+												.setNillable(false)
+												.setDataType(XREF)
+												.setRefEntity(sourceEntityType));
 		return entityType;
 	}
 }

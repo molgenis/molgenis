@@ -121,7 +121,8 @@ public class JobScheduler
 
 			// Schedule with 'cron' trigger
 			Trigger trigger = newTrigger().withIdentity(id, SCHEDULED_JOB_GROUP)
-					.withSchedule(cronSchedule(cronExpression)).build();
+										  .withSchedule(cronSchedule(cronExpression))
+										  .build();
 			schedule(scheduledJob, trigger);
 
 			LOG.info("Scheduled Job '{}' with trigger '{}'", name, trigger);
@@ -157,7 +158,8 @@ public class JobScheduler
 		JobDataMap jobDataMap = new JobDataMap();
 		jobDataMap.put(SCHEDULED_JOB_ID, scheduledJob.getIdValue());
 		JobDetail job = newJob(MolgenisQuartzJob.class).withIdentity(scheduledJob.getId(), SCHEDULED_JOB_GROUP)
-				.usingJobData(jobDataMap).build();
+													   .usingJobData(jobDataMap)
+													   .build();
 		quartzScheduler.scheduleJob(job, trigger);
 	}
 

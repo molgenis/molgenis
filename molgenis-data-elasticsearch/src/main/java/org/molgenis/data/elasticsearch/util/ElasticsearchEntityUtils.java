@@ -33,7 +33,7 @@ public class ElasticsearchEntityUtils
 	static Iterable<Object> toEntityIds(Iterable<String> elasticsearchIds)
 	{
 		return stream(elasticsearchIds.spliterator(), false).map(ElasticsearchEntityUtils::toEntityId)
-				.collect(toList());
+															.collect(toList());
 	}
 
 	public static String toElasticsearchId(Entity entity, EntityType entityType)

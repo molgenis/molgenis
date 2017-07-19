@@ -74,14 +74,21 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		String refIdAttributeName = "xid";
 		refEntityType.addAttribute(attrFactory.create().setName(refIdAttributeName), ROLE_ID);
 		refEntityType.addAttribute(attrFactory.create().setName(refBoolAttributeName).setDataType(BOOL));
-		refEntityType.addAttribute(attrFactory.create().setName(refCategoricalAttributeName).setDataType(CATEGORICAL)
-				.setRefEntity(refEntityType).setNillable(true));
+		refEntityType.addAttribute(attrFactory.create()
+											  .setName(refCategoricalAttributeName)
+											  .setDataType(CATEGORICAL)
+											  .setRefEntity(refEntityType)
+											  .setNillable(true));
 		Attribute attrCompound = attrFactory.create().setName(refCompoundAttributeName).setDataType(COMPOUND);
-		Attribute compoundPart0Attribute = attrFactory.create().setName(refCompoundPart0AttributeName)
-				.setDataType(STRING).setParent(attrCompound);
+		Attribute compoundPart0Attribute = attrFactory.create()
+													  .setName(refCompoundPart0AttributeName)
+													  .setDataType(STRING)
+													  .setParent(attrCompound);
 		String refCompoundPart1AttributeName = "xcompoundpart1";
-		Attribute compoundPart1Attribute = attrFactory.create().setName(refCompoundPart1AttributeName)
-				.setDataType(STRING).setParent(attrCompound);
+		Attribute compoundPart1Attribute = attrFactory.create()
+													  .setName(refCompoundPart1AttributeName)
+													  .setDataType(STRING)
+													  .setParent(attrCompound);
 		refEntityType.addAttribute(attrCompound);
 		refEntityType.addAttribute(compoundPart0Attribute);
 		refEntityType.addAttribute(compoundPart1Attribute);
@@ -91,8 +98,10 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		String refEmailAttributeName = "xemail";
 		refEntityType.addAttribute(attrFactory.create().setName(refEmailAttributeName).setDataType(EMAIL));
 		String refEnumAttributeName = "xenum";
-		refEntityType.addAttribute(attrFactory.create().setName(refEnumAttributeName).setDataType(ENUM)
-				.setEnumOptions(Arrays.asList("enum0", "enum1", "enum2")));
+		refEntityType.addAttribute(attrFactory.create()
+											  .setName(refEnumAttributeName)
+											  .setDataType(ENUM)
+											  .setEnumOptions(Arrays.asList("enum0", "enum1", "enum2")));
 		String refHtmlAttributeName = "xhtml";
 		refEntityType.addAttribute(attrFactory.create().setName(refHtmlAttributeName).setDataType(HTML));
 		String refHyperlinkAttributeName = "xhyperlink";
@@ -100,32 +109,39 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		refEntityType.addAttribute(attrFactory.create().setName(refIntAttributeName).setDataType(INT));
 		refEntityType.addAttribute(attrFactory.create().setName(refLongAttributeName).setDataType(LONG));
 		String refMrefAttributeName = "xmref";
-		refEntityType.addAttribute(
-				attrFactory.create().setName(refMrefAttributeName).setDataType(MREF).setRefEntity(refEntityType)
-						.setNillable(true));
+		refEntityType.addAttribute(attrFactory.create()
+											  .setName(refMrefAttributeName)
+											  .setDataType(MREF)
+											  .setRefEntity(refEntityType)
+											  .setNillable(true));
 		String refScriptAttributeName = "xscript";
 		refEntityType.addAttribute(attrFactory.create().setName(refScriptAttributeName).setDataType(SCRIPT));
 		refEntityType.addAttribute(attrFactory.create().setName(refStringAttributeName).setDataType(STRING));
 		String refTextAttributeName = "xtext";
 		refEntityType.addAttribute(attrFactory.create().setName(refTextAttributeName).setDataType(TEXT));
 		String refXrefAttributeName = "xxref";
-		refEntityType.addAttribute(
-				attrFactory.create().setName(refXrefAttributeName).setDataType(XREF).setRefEntity(refEntityType)
-						.setNillable(true));
+		refEntityType.addAttribute(attrFactory.create()
+											  .setName(refXrefAttributeName)
+											  .setDataType(XREF)
+											  .setRefEntity(refEntityType)
+											  .setNillable(true));
 
 		EntityType emd = entityTypeFactory.create("entity");
 		String idAttributeName = "id";
 		emd.addAttribute(attrFactory.create().setName(idAttributeName), ROLE_ID);
 		emd.addAttribute(attrFactory.create().setName(stringAttributeName).setUnique(true), ROLE_LABEL);
 		String mrefAttributeName = "mref";
-		emd.addAttribute(attrFactory.create().setName(mrefAttributeName).setDataType(MREF).setNillable(true)
-				.setRefEntity(refEntityType));
+		emd.addAttribute(attrFactory.create()
+									.setName(mrefAttributeName)
+									.setDataType(MREF)
+									.setNillable(true)
+									.setRefEntity(refEntityType));
 
 		this.entityType = emd;
 
 		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
-		when(documentIdGenerator.generateId(any(Attribute.class)))
-				.thenAnswer(invocation -> ((Attribute) invocation.getArguments()[0]).getName());
+		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
+				invocation -> ((Attribute) invocation.getArguments()[0]).getName());
 		queryGenerator = new QueryGenerator(documentIdGenerator);
 	}
 
@@ -252,9 +268,10 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT, QueryBuilders
-				.matchQuery(PREFIX + refCompoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
-				.analyzer(DEFAULT_ANALYZER), ScoreMode.Avg);
+		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT, QueryBuilders.matchQuery(
+				PREFIX + refCompoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
+																							.analyzer(DEFAULT_ANALYZER),
+				ScoreMode.Avg);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -379,8 +396,13 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		Boolean booleanValue = Boolean.TRUE;
 		String stringValue = "str";
 		Integer intValue = 1;
-		Query<Entity> q = new QueryImpl<>().eq(PREFIX + refBoolAttributeName, booleanValue).or().nest()
-				.eq(stringAttributeName, stringValue).and().eq(PREFIX + refIntAttributeName, intValue).unnest();
+		Query<Entity> q = new QueryImpl<>().eq(PREFIX + refBoolAttributeName, booleanValue)
+										   .or()
+										   .nest()
+										   .eq(stringAttributeName, stringValue)
+										   .and()
+										   .eq(PREFIX + refIntAttributeName, intValue)
+										   .unnest();
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -392,8 +414,10 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		QueryBuilder intQuery = constantScoreQuery(
 				nestedQuery(REF_ENTITY_ATT, termQuery(PREFIX + refIntAttributeName, intValue), ScoreMode.Avg));
 		BoolQueryBuilder stringIntQuery = QueryBuilders.boolQuery().must(stringQuery).must(intQuery);
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().should(booleanQuery).should(stringIntQuery)
-				.minimumShouldMatch(1);
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+												  .should(booleanQuery)
+												  .should(stringIntQuery)
+												  .minimumShouldMatch(1);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -404,8 +428,13 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		Boolean booleanValue = Boolean.TRUE;
 		String stringValue = "str";
 		Integer intValue = 1;
-		Query<Entity> q = new QueryImpl<>().eq(PREFIX + refBoolAttributeName, booleanValue).and().not()
-				.eq(stringAttributeName, stringValue).and().not().eq(PREFIX + refIntAttributeName, intValue);
+		Query<Entity> q = new QueryImpl<>().eq(PREFIX + refBoolAttributeName, booleanValue)
+										   .and()
+										   .not()
+										   .eq(stringAttributeName, stringValue)
+										   .and()
+										   .not()
+										   .eq(PREFIX + refIntAttributeName, intValue);
 		queryGenerator.generate(searchRequestBuilder, q, entityType);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -416,8 +445,10 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 				termQuery(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
 		QueryBuilder intQuery = constantScoreQuery(
 				nestedQuery(REF_ENTITY_ATT, termQuery(PREFIX + refIntAttributeName, intValue), ScoreMode.Avg));
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().must(booleanQuery).mustNot(stringQuery)
-				.mustNot(intQuery);
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+												  .must(booleanQuery)
+												  .mustNot(stringQuery)
+												  .mustNot(intQuery);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 

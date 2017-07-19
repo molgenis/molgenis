@@ -91,7 +91,7 @@ public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 	public void iterator() throws IOException, ServiceException
 	{
 		when(spreadsheetService.getFeed(any(URL.class), (Class<IFeed>) any(Class.class))).thenReturn(cellFeed)
-				.thenReturn(listFeed);
+																						 .thenReturn(listFeed);
 		Iterator<Entity> it = spreadsheetRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity entity = it.next();

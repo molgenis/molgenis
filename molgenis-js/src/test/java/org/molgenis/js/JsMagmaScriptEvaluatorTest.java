@@ -132,8 +132,8 @@ public class JsMagmaScriptEvaluatorTest
 	@Test
 	public void mapNull()
 	{
-		Object result = jsMagmaScriptEvaluator
-				.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()", new DynamicEntity(personGenderEntityType));
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()",
+				new DynamicEntity(personGenderEntityType));
 		assertEquals(result.toString(), "B3");
 	}
 
@@ -213,8 +213,8 @@ public class JsMagmaScriptEvaluatorTest
 		Entity entity4 = new DynamicEntity(personAgeEntityType);
 		entity4.set("age", 47);
 
-		Object result4 = jsMagmaScriptEvaluator
-				.eval("var age_variable=new newValue(45);age_variable.group([18, 35, 56]).value();", entity4);
+		Object result4 = jsMagmaScriptEvaluator.eval(
+				"var age_variable=new newValue(45);age_variable.group([18, 35, 56]).value();", entity4);
 		assertEquals(result4.toString(), "35-56");
 	}
 
@@ -224,41 +224,37 @@ public class JsMagmaScriptEvaluatorTest
 		Entity entity1 = new DynamicEntity(personAgeEntityType);
 		entity1.set("age", 29);
 
-		Object result1 = jsMagmaScriptEvaluator
-				.eval("$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
-						entity1);
+		Object result1 = jsMagmaScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity1);
 		assertEquals(result1.toString(), "1");
 
 		Entity entity2 = new DynamicEntity(personAgeEntityType);
 		entity2.set("age", 17);
 
-		Object result2 = jsMagmaScriptEvaluator
-				.eval("$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
-						entity2);
+		Object result2 = jsMagmaScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity2);
 		assertEquals(result2.toString(), "0");
 
 		Entity entity3 = new DynamicEntity(personAgeEntityType);
 		entity3.set("age", 40);
 
-		Object result3 = jsMagmaScriptEvaluator
-				.eval("$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
-						entity3);
+		Object result3 = jsMagmaScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity3);
 		assertEquals(result3.toString(), "2");
 
 		Entity entity4 = new DynamicEntity(personAgeEntityType);
 		entity4.set("age", 70);
 
-		Object result4 = jsMagmaScriptEvaluator
-				.eval("$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
-						entity4);
+		Object result4 = jsMagmaScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity4);
 		assertEquals(result4.toString(), "3");
 
 		Entity entity5 = new DynamicEntity(personAgeEntityType);
 		entity5.set("age", 999);
 
-		Object result5 = jsMagmaScriptEvaluator
-				.eval("$('age').group([18, 35, 56], [999]).map({'-18':0,'18-35':1,'35-56':2,'56+':3,'999':'9'}).value();",
-						entity5);
+		Object result5 = jsMagmaScriptEvaluator.eval(
+				"$('age').group([18, 35, 56], [999]).map({'-18':0,'18-35':1,'35-56':2,'56+':3,'999':'9'}).value();",
+				entity5);
 		assertEquals(result5.toString(), "9");
 	}
 
@@ -278,9 +274,9 @@ public class JsMagmaScriptEvaluatorTest
 		entity0.set("FOOD59A1", 7);
 		entity0.set("FOOD60A1", 6);
 
-		Object result1 = jsMagmaScriptEvaluator
-				.eval("var SUM_WEIGHT = new newValue(0);SUM_WEIGHT.plus($('FOOD59A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.plus($('FOOD60A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.group([0,1,2,6,7]).map({\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\", \"7+\" : \"1\"},null,null).value();",
-						entity0);
+		Object result1 = jsMagmaScriptEvaluator.eval(
+				"var SUM_WEIGHT = new newValue(0);SUM_WEIGHT.plus($('FOOD59A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.plus($('FOOD60A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.group([0,1,2,6,7]).map({\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\", \"7+\" : \"1\"},null,null).value();",
+				entity0);
 
 		assertEquals(result1.toString(), "1");
 	}

@@ -33,8 +33,8 @@ public class ResourcesImpl implements Resources
 	public boolean hasRepository(String entityTypeId)
 	{
 		getResources();
-		return dataService.hasRepository(entityTypeId) || (resources.containsKey(entityTypeId) && resources
-				.get(entityTypeId).isAvailable());
+		return dataService.hasRepository(entityTypeId) || (resources.containsKey(entityTypeId) && resources.get(
+				entityTypeId).isAvailable());
 	}
 
 	@Override
@@ -73,8 +73,10 @@ public class ResourcesImpl implements Resources
 	{
 		if (resources == null)
 		{
-			this.resources = applicationContext.getBeansOfType(Resource.class).values().stream()
-					.collect(toMap(Resource::getName, r -> r));
+			this.resources = applicationContext.getBeansOfType(Resource.class)
+											   .values()
+											   .stream()
+											   .collect(toMap(Resource::getName, r -> r));
 		}
 	}
 }

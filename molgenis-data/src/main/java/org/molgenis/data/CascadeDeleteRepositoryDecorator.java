@@ -152,14 +152,14 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 
 	private Stream<Attribute> getCascadeDeleteAttributes()
 	{
-		return asStream(getEntityType().getAtomicAttributes())
-				.filter(attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
+		return asStream(getEntityType().getAtomicAttributes()).filter(
+				attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
 	}
 
 	private boolean hasCascadeDeleteAttributes()
 	{
-		return asStream(getEntityType().getAtomicAttributes())
-				.anyMatch(attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
+		return asStream(getEntityType().getAtomicAttributes()).anyMatch(
+				attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
 	}
 
 }

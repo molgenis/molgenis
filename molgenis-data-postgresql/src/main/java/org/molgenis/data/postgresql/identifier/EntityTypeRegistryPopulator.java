@@ -23,7 +23,9 @@ public class EntityTypeRegistryPopulator
 
 	public void populate()
 	{
-		dataService.query(ENTITY_TYPE_META_DATA, EntityType.class).eq(BACKEND, POSTGRESQL).findAll()
-				.forEach(entityTypeRegistry::registerEntityType);
+		dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
+				   .eq(BACKEND, POSTGRESQL)
+				   .findAll()
+				   .forEach(entityTypeRegistry::registerEntityType);
 	}
 }

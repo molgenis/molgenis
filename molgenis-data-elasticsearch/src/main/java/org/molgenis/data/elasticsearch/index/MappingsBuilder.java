@@ -101,15 +101,23 @@ public class MappingsBuilder
 				jsonBuilder.field("type", "date").field("format", "date");
 				// not-analyzed field for aggregation
 				// note: the norms settings defaults to false for not_analyzed fields
-				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
-						.field("index", true).endObject().endObject();
+				jsonBuilder.startObject("fields")
+						   .startObject(FIELD_NOT_ANALYZED)
+						   .field("type", "keyword")
+						   .field("index", true)
+						   .endObject()
+						   .endObject();
 				break;
 			case DATE_TIME:
 				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
 				// not-analyzed field for aggregation
 				// note: the norms settings defaults to false for not_analyzed fields
-				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
-						.field("index", true).endObject().endObject();
+				jsonBuilder.startObject("fields")
+						   .startObject(FIELD_NOT_ANALYZED)
+						   .field("type", "keyword")
+						   .field("index", true)
+						   .endObject()
+						   .endObject();
 				break;
 			case DECIMAL:
 				jsonBuilder.field("type", "double");
@@ -132,13 +140,18 @@ public class MappingsBuilder
 				jsonBuilder.field("norms", true);
 				// not-analyzed field for sorting and wildcard queries
 				// note: the norms settings defaults to false for not_analyzed fields
-				XContentBuilder fieldsObject = jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED)
-						.field("type", "keyword").field("index", true).endObject();
+				XContentBuilder fieldsObject = jsonBuilder.startObject("fields")
+														  .startObject(FIELD_NOT_ANALYZED)
+														  .field("type", "keyword")
+														  .field("index", true)
+														  .endObject();
 				if (enableNgramAnalyzer)
 				{
 					// add ngram analyzer (not applied to nested documents)
-					fieldsObject.startObject(FIELD_NGRAM_ANALYZED).field("type", "text")
-							.field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER).endObject();
+					fieldsObject.startObject(FIELD_NGRAM_ANALYZED)
+								.field("type", "text")
+								.field("analyzer", ElasticsearchIndexCreator.NGRAM_ANALYZER)
+								.endObject();
 				}
 				fieldsObject.endObject();
 				break;
@@ -149,8 +162,12 @@ public class MappingsBuilder
 				jsonBuilder.field("norms", true);
 				// not-analyzed field for sorting and wildcard queries
 				// note: the norms settings defaults to false for not_analyzed fields
-				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "keyword")
-						.field("index", true).endObject().endObject();
+				jsonBuilder.startObject("fields")
+						   .startObject(FIELD_NOT_ANALYZED)
+						   .field("type", "keyword")
+						   .field("index", true)
+						   .endObject()
+						   .endObject();
 				break;
 			default:
 				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));

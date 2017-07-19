@@ -66,8 +66,8 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		assertEquals(actualRule.toString(), expectedQueryRuleToString);
 
 		List<String> createdTargetAttributeQueries2 = singletonList("(Height) [stand^~]");
-		QueryRule actualRule2 = semanticSearchServiceHelper
-				.createDisMaxQueryRuleForTerms(createdTargetAttributeQueries2);
+		QueryRule actualRule2 = semanticSearchServiceHelper.createDisMaxQueryRuleForTerms(
+				createdTargetAttributeQueries2);
 		String expectedQueryRuleToString2 = "DIS_MAX ('label' FUZZY_MATCH '\\(Height\\) \\[stand^\\~\\]', 'description' FUZZY_MATCH '\\(Height\\) \\[stand^\\~\\]')";
 		assertEquals(actualRule2.getOperator(), QueryRule.Operator.DIS_MAX);
 		assertEquals(actualRule2.toString(), expectedQueryRuleToString2);
@@ -78,8 +78,8 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 	{
 		String multiOntologyTermIri = "http://www.molgenis.org/1,http://www.molgenis.org/2";
 		OntologyTerm ontologyTerm_1 = OntologyTerm.create("http://www.molgenis.org/1", "molgenis label in the gcc");
-		OntologyTerm ontologyTerm_2 = OntologyTerm
-				.create("http://www.molgenis.org/2", "molgenis label 2 in the genetics", singletonList("label 2"));
+		OntologyTerm ontologyTerm_2 = OntologyTerm.create("http://www.molgenis.org/2",
+				"molgenis label 2 in the genetics", singletonList("label 2"));
 		when(ontologyService.getOntologyTerm(ontologyTerm_1.getIRI())).thenReturn(ontologyTerm_1);
 		when(ontologyService.getOntologyTerm(ontologyTerm_2.getIRI())).thenReturn(ontologyTerm_2);
 
@@ -100,35 +100,32 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		targetAttribute_2.setLabel("Height");
 
 		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.create();
-		OntologyTerm ontologyTerm1 = OntologyTerm
-				.create("http://onto/standingheight", "Standing height", "Description is not used",
-						singletonList("body_length"));
-		OntologyTerm ontologyTerm2 = OntologyTerm
-				.create("http://onto/sittingheight", "Sitting height", "Description is not used",
-						singletonList("sitting_length"));
-		OntologyTerm ontologyTerm3 = OntologyTerm
-				.create("http://onto/height", "Height", "Description is not used", singletonList("sature"));
+		OntologyTerm ontologyTerm1 = OntologyTerm.create("http://onto/standingheight", "Standing height",
+				"Description is not used", singletonList("body_length"));
+		OntologyTerm ontologyTerm2 = OntologyTerm.create("http://onto/sittingheight", "Sitting height",
+				"Description is not used", singletonList("sitting_length"));
+		OntologyTerm ontologyTerm3 = OntologyTerm.create("http://onto/height", "Height", "Description is not used",
+				singletonList("sature"));
 
 		tags.put(Relation.isAssociatedWith, ontologyTerm1);
 		tags.put(Relation.isRealizationOf, ontologyTerm2);
 		tags.put(Relation.isDefinedBy, ontologyTerm3);
 
 		// Case 1
-		QueryRule actualTargetAttributeQueryTerms_1 = semanticSearchServiceHelper
-				.createDisMaxQueryRuleForAttribute(Sets.newLinkedHashSet(asList("targetAttribute 1", "Height")),
-						tags.values());
+		QueryRule actualTargetAttributeQueryTerms_1 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
+				Sets.newLinkedHashSet(asList("targetAttribute 1", "Height")), tags.values());
 		String expecteddisMaxQueryRuleToString_1 = "DIS_MAX ('label' FUZZY_MATCH '1 targetattribute', 'description' FUZZY_MATCH '1 targetattribute', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height', 'label' FUZZY_MATCH 'length body', 'description' FUZZY_MATCH 'length body', 'label' FUZZY_MATCH 'standing height', 'description' FUZZY_MATCH 'standing height', 'label' FUZZY_MATCH 'length sitting', 'description' FUZZY_MATCH 'length sitting', 'label' FUZZY_MATCH 'sitting height', 'description' FUZZY_MATCH 'sitting height', 'label' FUZZY_MATCH 'sature', 'description' FUZZY_MATCH 'sature', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height')";
 		assertEquals(actualTargetAttributeQueryTerms_1.toString(), expecteddisMaxQueryRuleToString_1);
 
 		// Case 2
-		QueryRule expecteddisMaxQueryRuleToString_2 = semanticSearchServiceHelper
-				.createDisMaxQueryRuleForAttribute(Sets.newHashSet("Height"), tags.values());
+		QueryRule expecteddisMaxQueryRuleToString_2 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
+				Sets.newHashSet("Height"), tags.values());
 		String expectedTargetAttributeQueryTermsToString_2 = "DIS_MAX ('label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height', 'label' FUZZY_MATCH 'length body', 'description' FUZZY_MATCH 'length body', 'label' FUZZY_MATCH 'standing height', 'description' FUZZY_MATCH 'standing height', 'label' FUZZY_MATCH 'length sitting', 'description' FUZZY_MATCH 'length sitting', 'label' FUZZY_MATCH 'sitting height', 'description' FUZZY_MATCH 'sitting height', 'label' FUZZY_MATCH 'sature', 'description' FUZZY_MATCH 'sature', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height')";
 		assertEquals(expecteddisMaxQueryRuleToString_2.toString(), expectedTargetAttributeQueryTermsToString_2);
 
 		// Case 3
-		QueryRule expecteddisMaxQueryRuleToString_3 = semanticSearchServiceHelper
-				.createDisMaxQueryRuleForAttribute(Sets.newHashSet("targetAttribute 3"), tags.values());
+		QueryRule expecteddisMaxQueryRuleToString_3 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
+				Sets.newHashSet("targetAttribute 3"), tags.values());
 		String expectedTargetAttributeQueryTermsToString_3 = "DIS_MAX ('label' FUZZY_MATCH '3 targetattribute', 'description' FUZZY_MATCH '3 targetattribute', 'label' FUZZY_MATCH 'length body', 'description' FUZZY_MATCH 'length body', 'label' FUZZY_MATCH 'standing height', 'description' FUZZY_MATCH 'standing height', 'label' FUZZY_MATCH 'length sitting', 'description' FUZZY_MATCH 'length sitting', 'label' FUZZY_MATCH 'sitting height', 'description' FUZZY_MATCH 'sitting height', 'label' FUZZY_MATCH 'sature', 'description' FUZZY_MATCH 'sature', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height')";
 		assertEquals(expecteddisMaxQueryRuleToString_3.toString(), expectedTargetAttributeQueryTermsToString_3);
 	}
@@ -137,18 +134,17 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 	public void testCollectQueryTermsFromOntologyTerm()
 	{
 		// Case 1
-		OntologyTerm ontologyTerm1 = OntologyTerm
-				.create("http://onto/standingheight", "Standing height", "Description is not used",
-						singletonList("body_length"));
+		OntologyTerm ontologyTerm1 = OntologyTerm.create("http://onto/standingheight", "Standing height",
+				"Description is not used", singletonList("body_length"));
 		List<String> actual_1 = semanticSearchServiceHelper.parseOntologyTermQueries(ontologyTerm1);
 		assertEquals(actual_1, asList("length body", "standing height"));
 
 		// Case 2
-		OntologyTerm ontologyTerm2 = OntologyTerm
-				.create("http://onto/standingheight", "height", "Description is not used", emptyList());
+		OntologyTerm ontologyTerm2 = OntologyTerm.create("http://onto/standingheight", "height",
+				"Description is not used", emptyList());
 
-		OntologyTerm ontologyTerm3 = OntologyTerm
-				.create("http://onto/standingheight-children", "length", singletonList("body_length"));
+		OntologyTerm ontologyTerm3 = OntologyTerm.create("http://onto/standingheight-children", "length",
+				singletonList("body_length"));
 
 		when(ontologyService.getChildren(ontologyTerm2)).thenReturn(singletonList(ontologyTerm3));
 
@@ -165,9 +161,8 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		EntityType sourceEntityType = entityTypeFactory.create("sourceEntityType");
 		Entity entityTypeEntity = mock(Entity.class);
 
-		when(dataService
-				.findOne(ENTITY_TYPE_META_DATA, new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId())))
-				.thenReturn(entityTypeEntity);
+		when(dataService.findOne(ENTITY_TYPE_META_DATA,
+				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()))).thenReturn(entityTypeEntity);
 
 		Attribute attributeEntity1 = attrMetaFactory.create();
 		attributeEntity1.setIdentifier("1");
@@ -175,8 +170,8 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		Attribute attributeEntity2 = attrMetaFactory.create();
 		attributeEntity2.setIdentifier("2");
 		attributeEntity2.setDataType(STRING);
-		when(entityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES))
-				.thenReturn(asList(attributeEntity1, attributeEntity2));
+		when(entityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES)).thenReturn(
+				asList(attributeEntity1, attributeEntity2));
 
 		List<String> expactedAttributeIdentifiers = asList("1", "2");
 		assertEquals(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType),

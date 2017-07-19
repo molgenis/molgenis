@@ -157,8 +157,8 @@ public class ElasticsearchService implements SearchService
 	{
 		String documentType = getIndexName(entityType);
 
-		Stream<IndexRequest> indexRequestStream = entityStream
-				.flatMap(entity -> createIndexRequestStreamForEntity(entity, entityType, documentType, addReferences));
+		Stream<IndexRequest> indexRequestStream = entityStream.flatMap(
+				entity -> createIndexRequestStreamForEntity(entity, entityType, documentType, addReferences));
 
 		AtomicLongMap<String> counts = elasticsearchFacade.index(indexRequestStream, true);
 		return counts.get(documentType);
@@ -206,12 +206,11 @@ public class ElasticsearchService implements SearchService
 
 			// Get actual entities from the dataservice, skipping the ones that no longer exist and
 			// fetching all of their attributes in one go
-			referringEntitiesStream = dataService
-					.findAll(refEntityType.getId(), referringEntitiesStream.map(Entity::getIdValue),
-							createFetchForReindexing(refEntityType));
+			referringEntitiesStream = dataService.findAll(refEntityType.getId(),
+					referringEntitiesStream.map(Entity::getIdValue), createFetchForReindexing(refEntityType));
 
-			references = concat(references, referringEntitiesStream
-					.map(referencingEntity -> createIndexRequestForEntity(referencingEntity, refEntityType,
+			references = concat(references, referringEntitiesStream.map(
+					referencingEntity -> createIndexRequestForEntity(referencingEntity, refEntityType,
 							documentIdGenerator.generateId(refEntityType))));
 		}
 		return references;
@@ -309,8 +308,9 @@ public class ElasticsearchService implements SearchService
 	public void delete(Stream<? extends Entity> entities, EntityType entityType)
 	{
 		Stream<Object> entityIds = entities.map(Entity::getIdValue);
-		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(
-				batchEntityIds -> deleteById(toElasticsearchIds(batchEntityIds.stream()), entityType));
+		Iterators.partition(entityIds.iterator(), BATCH_SIZE)
+				 .forEachRemaining(
+						 batchEntityIds -> deleteById(toElasticsearchIds(batchEntityIds.stream()), entityType));
 	}
 
 	@Override
@@ -349,15 +349,14 @@ public class ElasticsearchService implements SearchService
 
 	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityType entityType)
 	{
-		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
-				.buildSearchRequest(searchRequestBuilder, SearchType.QUERY_THEN_FETCH, entityType, query, null, null,
-						null);
+		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator.buildSearchRequest(
+				searchRequestBuilder, SearchType.QUERY_THEN_FETCH, entityType, query, null, null, null);
 
 		String indexName = getIndexName(entityType);
-		return elasticsearchFacade
-				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), indexName, indexName)
-				.map(idString -> convert(idString, entityType.getIdAttribute()))
-				.map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject));
+		return elasticsearchFacade.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), indexName,
+				indexName)
+								  .map(idString -> convert(idString, entityType.getIdAttribute()))
+								  .map(idObject -> elasticsearchEntityFactory.getReference(entityType, idObject));
 	}
 
 	@Override

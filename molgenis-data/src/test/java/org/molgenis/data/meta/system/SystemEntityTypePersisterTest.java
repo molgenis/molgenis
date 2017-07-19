@@ -94,8 +94,8 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);
 		when(systemEntityTypeRegistry.hasSystemEntityType("refEntity")).thenReturn(true);
 
-		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class))
-				.thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
+		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(
+				Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
 		systemEntityTypePersister.removeNonExistingSystemEntityTypes();
 		verify(metaDataService).deleteEntityType(newArrayList(refRemovedMeta, removedMeta));
 	}
@@ -108,8 +108,8 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenAnswer(invocation -> Stream.empty());
 
-		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
-				.thenAnswer(invocation -> Stream.empty());
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class))).thenAnswer(
+				invocation -> Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(invocation -> Stream.empty());
 
 		String packageId0 = "packageId0";
@@ -139,8 +139,8 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 		when(attr.setDataType(any())).thenReturn(attr);
 		when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)).thenAnswer(invocation -> Stream.empty());
 
-		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class)))
-				.thenAnswer(invocation -> Stream.empty());
+		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), objectIdCaptor.capture(), eq(EntityType.class))).thenAnswer(
+				invocation -> Stream.empty());
 		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(invocation -> Stream.empty());
 
 		String packageId0 = "packageId0";

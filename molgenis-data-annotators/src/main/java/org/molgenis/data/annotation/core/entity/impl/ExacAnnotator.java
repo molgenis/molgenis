@@ -112,9 +112,9 @@ public class ExacAnnotator implements AnnotatorConfig
 			@Override
 			protected Object getResourceAttributeValue(Attribute attr, Entity sourceEntity)
 			{
-				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : EXAC_AC_HOM
-						.equals(attr.getName()) ? EXAC_AC_HOM_ResourceAttributeName : EXAC_AC_HET
-						.equals(attr.getName()) ? EXAC_AC_HET_ResourceAttributeName : attr.getName();
+				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : EXAC_AC_HOM.equals(
+						attr.getName()) ? EXAC_AC_HOM_ResourceAttributeName : EXAC_AC_HET.equals(
+						attr.getName()) ? EXAC_AC_HET_ResourceAttributeName : attr.getName();
 				return sourceEntity.get(attrName);
 			}
 		};
@@ -130,20 +130,29 @@ public class ExacAnnotator implements AnnotatorConfig
 
 	public static Attribute getExacAcHetAttr(AttributeFactory attributeFactory)
 	{
-		return attributeFactory.create().setName(EXAC_AC_HET).setDataType(STRING)
-				.setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
+		return attributeFactory.create()
+							   .setName(EXAC_AC_HET)
+							   .setDataType(STRING)
+							   .setDescription("The ExAC heterozygous genotype count")
+							   .setLabel(EXAC_AC_HET_LABEL);
 	}
 
 	public static Attribute getExacAcHomAttr(AttributeFactory attributeFactory)
 	{
-		return attributeFactory.create().setName(EXAC_AC_HOM).setDataType(STRING)
-				.setDescription("The ExAC homozygous alternative genotype count").setLabel(EXAC_AC_HOM_LABEL);
+		return attributeFactory.create()
+							   .setName(EXAC_AC_HOM)
+							   .setDataType(STRING)
+							   .setDescription("The ExAC homozygous alternative genotype count")
+							   .setLabel(EXAC_AC_HOM_LABEL);
 	}
 
 	public static Attribute getExacAFAttr(AttributeFactory attributeFactory)
 	{
-		return attributeFactory.create().setName(EXAC_AF).setDataType(STRING)
-				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
+		return attributeFactory.create()
+							   .setName(EXAC_AF)
+							   .setDataType(STRING)
+							   .setDescription("The ExAC allele frequency")
+							   .setLabel(EXAC_AF_LABEL);
 	}
 
 	@Bean

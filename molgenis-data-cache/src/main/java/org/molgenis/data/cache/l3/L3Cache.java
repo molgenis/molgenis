@@ -78,8 +78,10 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 	private LoadingCache<Query<Entity>, List<Object>> createQueryCache(Repository<Entity> repository)
 	{
 		LOG.trace("Creating Query cache for repository {}", repository.getName());
-		return CaffeinatedGuava.build(Caffeine.newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_QUERY)
-				.expireAfterAccess(10, MINUTES), createCacheLoader(repository));
+		return CaffeinatedGuava.build(Caffeine.newBuilder()
+											  .recordStats()
+											  .maximumSize(MAX_CACHE_SIZE_PER_QUERY)
+											  .expireAfterAccess(10, MINUTES), createCacheLoader(repository));
 	}
 
 	/**
@@ -102,8 +104,9 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 			public List<Object> load(@Nonnull Query<Entity> query)
 			{
 				LOG.trace("Loading identifiers from repository {} for query {}", repositoryName, query);
-				return repository.findAll(new QueryImpl<>(query).fetch(idAttributeFetch)).map(Entity::getIdValue)
-						.collect(toList());
+				return repository.findAll(new QueryImpl<>(query).fetch(idAttributeFetch))
+								 .map(Entity::getIdValue)
+								 .collect(toList());
 			}
 		};
 	}

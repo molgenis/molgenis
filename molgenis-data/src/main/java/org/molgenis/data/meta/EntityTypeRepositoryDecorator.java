@@ -140,20 +140,27 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void addAndRemoveAttributesInBackend(EntityType entityType)
 	{
 		EntityType existingEntityType = decoratedRepo.findOneById(entityType.getIdValue());
-		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getName, Function.identity()));
-		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
-				.collect(toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> attrsMap = stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
+				toMap(Attribute::getName, Function.identity()));
+		Map<String, Attribute> existingAttrsMap = stream(existingEntityType.getOwnAllAttributes().spliterator(),
+				false).collect(toMap(Attribute::getName, Function.identity()));
 		dataService.getMeta().getConcreteChildren(entityType).forEach(concreteEntityType ->
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
 			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getIdValue());
 			// add added attributes in backend
-			difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream().map(attrsMap::get)
-					.forEach(addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
+			difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream()
+																	.map(attrsMap::get)
+																	.forEach(addedAttribute -> backend.addAttribute(
+																			concreteExistingEntityType,
+																			addedAttribute));
 			// remove removed attributes in backend
-			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream().map(existingAttrsMap::get)
-					.forEach(removedAttribute -> backend.deleteAttribute(concreteExistingEntityType, removedAttribute));
+			difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream()
+																	.map(existingAttrsMap::get)
+																	.forEach(
+																			removedAttribute -> backend.deleteAttribute(
+																					concreteExistingEntityType,
+																					removedAttribute));
 		});
 	}
 
@@ -175,9 +182,10 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void deleteEntityAttributes(EntityType entityType)
 	{
 		Iterable<Attribute> rootAttrs = entityType.getOwnAttributes();
-		Stream<Attribute> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
-				attrEntity -> StreamSupport
-						.stream(new AttributeTreeTraverser().preOrderTraversal(attrEntity).spliterator(), false));
+		Stream<Attribute> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false)
+												  .flatMap(attrEntity -> StreamSupport.stream(
+														  new AttributeTreeTraverser().preOrderTraversal(attrEntity)
+																					  .spliterator(), false));
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
 	}
 

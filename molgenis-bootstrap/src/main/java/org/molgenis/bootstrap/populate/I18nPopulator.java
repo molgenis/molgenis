@@ -58,20 +58,21 @@ public class I18nPopulator
 	 */
 	public void populateLanguages()
 	{
-		dataService.add(LANGUAGE, languageFactory
-				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
-		dataService
-				.add(LANGUAGE, languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("pt", new Locale("pt").getDisplayName(new Locale("pt")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("es", new Locale("es").getDisplayName(new Locale("es")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("de", new Locale("de").getDisplayName(new Locale("de")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("it", new Locale("it").getDisplayName(new Locale("it")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
+		dataService.add(LANGUAGE,
+				languageFactory.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME,
+						true));
+		dataService.add(LANGUAGE,
+				languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
+		dataService.add(LANGUAGE,
+				languageFactory.create("pt", new Locale("pt").getDisplayName(new Locale("pt")), false));
+		dataService.add(LANGUAGE,
+				languageFactory.create("es", new Locale("es").getDisplayName(new Locale("es")), false));
+		dataService.add(LANGUAGE,
+				languageFactory.create("de", new Locale("de").getDisplayName(new Locale("de")), false));
+		dataService.add(LANGUAGE,
+				languageFactory.create("it", new Locale("it").getDisplayName(new Locale("it")), false));
+		dataService.add(LANGUAGE,
+				languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
 		dataService.add(LANGUAGE, languageFactory.create("xx", "My language", false));
 	}
 }

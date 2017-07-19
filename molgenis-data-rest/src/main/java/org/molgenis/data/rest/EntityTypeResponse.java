@@ -118,8 +118,8 @@ public class EntityTypeResponse
 		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
 		{
 			Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
-			this.lookupAttributes = lookupAttributes != null ? Lists
-					.newArrayList(Iterables.transform(lookupAttributes, new Function<Attribute, String>()
+			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
+					Iterables.transform(lookupAttributes, new Function<Attribute, String>()
 					{
 						@Override
 						public String apply(Attribute attribute)

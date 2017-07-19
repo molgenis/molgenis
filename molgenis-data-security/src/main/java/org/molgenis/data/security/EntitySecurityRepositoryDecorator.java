@@ -201,7 +201,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(q);
 		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
 		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset)
-				.filter(this::currentUserCanReadEntity);
+														 .filter(this::currentUserCanReadEntity);
 		if (q.getOffset() > 0)
 		{
 			entityStream = entityStream.skip(q.getOffset());
@@ -238,7 +238,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		if (attributeY == null)
 		{
 			Map<Object, Long> countMap = entityStream.map(entity -> entity.get(attributeX.getName()))
-					.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+													 .collect(Collectors.groupingBy(Function.identity(),
+															 Collectors.counting()));
 
 			xLabels = newArrayList(countMap.keySet());
 			yLabels = emptyList();
@@ -246,9 +247,10 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		}
 		else
 		{
-			Map<Pair<Object, Object>, Long> countMap = entityStream
-					.map(entity -> new Pair<>(entity.get(attributeX.getName()), entity.get(attributeY.getName())))
-					.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+			Map<Pair<Object, Object>, Long> countMap = entityStream.map(
+					entity -> new Pair<>(entity.get(attributeX.getName()), entity.get(attributeY.getName())))
+																   .collect(Collectors.groupingBy(Function.identity(),
+																		   Collectors.counting()));
 
 			xLabels = newArrayList(countMap.keySet().stream().map(Pair::getA).collect(toSet()));
 			yLabels = newArrayList(countMap.keySet().stream().map(Pair::getB).collect(toSet()));
@@ -358,7 +360,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		public void filter(List<Entity> entities)
 		{
 			Stream<Entity> filteredEntities = entities.stream()
-					.filter(entitySecurityRepositoryDecorator::currentUserCanReadEntity);
+													  .filter(entitySecurityRepositoryDecorator::currentUserCanReadEntity);
 			consumer.accept(filteredEntities.collect(toList()));
 		}
 	}

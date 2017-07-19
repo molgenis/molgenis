@@ -79,9 +79,8 @@ import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGR
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		PermissionServiceImpl.class, MolgenisRoleHierarchy.class,
-		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class,
-		OntologyConfig.class })
+		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
+		MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class, OntologyConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);

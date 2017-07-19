@@ -73,7 +73,8 @@ public class SystemEntityTypePersister
 
 		// collect meta entity meta
 		List<EntityType> metaEntityTypeList = systemEntityTypeRegistry.getSystemEntityTypes()
-				.filter(metadataService::isMetaEntityType).collect(toList());
+																	  .filter(metadataService::isMetaEntityType)
+																	  .collect(toList());
 		List<EntityType> resolvedEntityTypeList = entityTypeDependencyResolver.resolve(metaEntityTypeList);
 
 		resolvedEntityTypeList.forEach(metaEntityType ->
@@ -92,7 +93,9 @@ public class SystemEntityTypePersister
 	{
 		// get all system entities
 		List<EntityType> removedSystemEntityMetas = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-				.filter(SystemEntityTypePersister::isSystemEntity).filter(this::isNotExists).collect(toList());
+															   .filter(SystemEntityTypePersister::isSystemEntity)
+															   .filter(this::isNotExists)
+															   .collect(toList());
 
 		dataService.getMeta().deleteEntityType(removedSystemEntityMetas);
 	}
@@ -100,7 +103,8 @@ public class SystemEntityTypePersister
 	private void removeNonExistingSystemPackages()
 	{
 		Stream<Package> systemPackages = dataService.findAll(PACKAGE, Package.class)
-				.filter(SystemEntityTypePersister::isSystemPackage).filter(this::isNotExists);
+													.filter(SystemEntityTypePersister::isSystemPackage)
+													.filter(this::isNotExists);
 
 		dataService.delete(PACKAGE, systemPackages);
 	}
@@ -137,7 +141,7 @@ public class SystemEntityTypePersister
 	private void injectExistingPackageIdentifiers(List<Package> systemPackages)
 	{
 		Map<String, Package> existingPackageMap = dataService.findAll(PACKAGE, Package.class)
-				.collect(toMap(Package::getId, pack -> pack));
+															 .collect(toMap(Package::getId, pack -> pack));
 
 		systemPackages.forEach(pack ->
 		{
@@ -158,7 +162,8 @@ public class SystemEntityTypePersister
 	private void injectExistingEntityTypeAttributeIdentifiers(List<EntityType> entityTypes)
 	{
 		Map<String, EntityType> existingEntityTypeMap = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-				.collect(toMap(EntityType::getId, entityType -> entityType));
+																   .collect(toMap(EntityType::getId,
+																		   entityType -> entityType));
 
 		entityTypes.forEach(entityType ->
 		{

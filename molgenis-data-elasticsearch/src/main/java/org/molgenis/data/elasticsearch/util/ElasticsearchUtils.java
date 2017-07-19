@@ -106,8 +106,12 @@ public class ElasticsearchUtils
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [{}] ...", jsonBuilder.string());
 
-		PutMappingResponse response = client.admin().indices().preparePutMapping(index).setType(type)
-				.setSource(jsonBuilder).get();
+		PutMappingResponse response = client.admin()
+											.indices()
+											.preparePutMapping(index)
+											.setType(type)
+											.setSource(jsonBuilder)
+											.get();
 
 		if (!response.isAcknowledged())
 		{
@@ -140,7 +144,8 @@ public class ElasticsearchUtils
 		if (searchResponse.getFailedShards() > 0)
 		{
 			throw new ElasticsearchException("Search failed:\n" + Arrays.stream(searchResponse.getShardFailures())
-					.map(ShardSearchFailure::toString).collect(joining("\n")));
+																		.map(ShardSearchFailure::toString)
+																		.collect(joining("\n")));
 		}
 		long count = searchResponse.getHits().getTotalHits();
 		long ms = searchResponse.getTookInMillis();
@@ -231,10 +236,13 @@ public class ElasticsearchUtils
 				originalSearchResponse.getTookInMillis());
 
 		Stream<SearchResponse> infiniteResponses = Stream.iterate(originalSearchResponse,
-				searchResponse -> client.prepareSearchScroll(searchResponse.getScrollId()).setScroll(SCROLL_KEEP_ALIVE)
-						.execute().actionGet());
+				searchResponse -> client.prepareSearchScroll(searchResponse.getScrollId())
+										.setScroll(SCROLL_KEEP_ALIVE)
+										.execute()
+										.actionGet());
 		return StreamUtils.takeWhile(infiniteResponses, searchResponse -> searchResponse.getHits().getHits().length > 0)
-				.flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits())).map(SearchHit::getId);
+						  .flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits()))
+						  .map(SearchHit::getId);
 	}
 
 	private SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type,

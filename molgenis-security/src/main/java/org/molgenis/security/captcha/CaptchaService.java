@@ -27,8 +27,12 @@ public class CaptchaService
 	 */
 	public BufferedImage createCaptcha(int width, int height)
 	{
-		Captcha captcha = new Captcha.Builder(width, height).addText().addBackground(new GradiatedBackgroundProducer())
-				.gimp().addNoise().addBorder().build();
+		Captcha captcha = new Captcha.Builder(width, height).addText()
+															.addBackground(new GradiatedBackgroundProducer())
+															.gimp()
+															.addNoise()
+															.addBorder()
+															.build();
 		session.setAttribute(Captcha.NAME, captcha);
 		return captcha.getImage();
 	}

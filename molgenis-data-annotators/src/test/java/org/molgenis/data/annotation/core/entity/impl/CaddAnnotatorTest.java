@@ -269,8 +269,8 @@ public class CaddAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity caddAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(CaddAnnotatorSettings.Meta.CADD_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
+			when(settings.getString(CaddAnnotatorSettings.Meta.CADD_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
 			return settings;
 		}
 

@@ -20,8 +20,11 @@ public abstract class EntityAcl
 	public static EntityAcl create(EntityIdentity newEntityIdentity, SecurityId newOwner, EntityAcl newParent,
 			List<EntityAce> newEntries)
 	{
-		return builder().setEntityIdentity(newEntityIdentity).setOwner(newOwner).setParent(newParent)
-				.setEntries(newEntries).build();
+		return builder().setEntityIdentity(newEntityIdentity)
+						.setOwner(newOwner)
+						.setParent(newParent)
+						.setEntries(newEntries)
+						.build();
 	}
 
 	public abstract Builder toBuilder();
@@ -44,6 +47,5 @@ public abstract class EntityAcl
 
 		public abstract EntityAcl build();
 	}
-
 
 }

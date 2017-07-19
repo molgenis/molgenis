@@ -39,8 +39,8 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule
 		boolean ruleApplied =
 				StringUtils.isNotBlank(matchedTermForTargetLabel) && StringUtils.isNotBlank(matchedTermForSourceLabel);
 
-		Quality<Double> quality = NumericQuality
-				.create(createNumericQualityIndicator(matchedTermForTargetLabel, matchedTermForSourceLabel));
+		Quality<Double> quality = NumericQuality.create(
+				createNumericQualityIndicator(matchedTermForTargetLabel, matchedTermForSourceLabel));
 
 		return CategoryMatchQuality.create(ruleApplied, quality, targetCategory, sourceCategory);
 	}
@@ -62,8 +62,10 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule
 
 	protected Set<String> split(String label)
 	{
-		return Sets.newHashSet(TERM_SPLITTER.split(label.toLowerCase())).stream().map(this::removeIllegalChars)
-				.collect(Collectors.toSet());
+		return Sets.newHashSet(TERM_SPLITTER.split(label.toLowerCase()))
+				   .stream()
+				   .map(this::removeIllegalChars)
+				   .collect(Collectors.toSet());
 	}
 
 	protected String removeIllegalChars(String string)

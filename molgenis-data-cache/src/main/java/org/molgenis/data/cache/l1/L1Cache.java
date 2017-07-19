@@ -51,8 +51,8 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 	private CombinedEntityCache createCache()
 	{
-		Cache<EntityKey, Optional<Map<String, Object>>> cache = CaffeinatedGuava
-				.build(Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).recordStats());
+		Cache<EntityKey, Optional<Map<String, Object>>> cache = CaffeinatedGuava.build(
+				Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).recordStats());
 		return new CombinedEntityCache(entityHydration, cache);
 	}
 

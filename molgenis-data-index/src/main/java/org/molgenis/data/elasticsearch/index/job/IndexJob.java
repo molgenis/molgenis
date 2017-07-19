@@ -51,8 +51,8 @@ class IndexJob extends NontransactionalJob<Void>
 	public Void call(Progress progress)
 	{
 		requireNonNull(progress);
-		IndexActionGroup indexActionGroup = dataService
-				.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class);
+		IndexActionGroup indexActionGroup = dataService.findOneById(INDEX_ACTION_GROUP, transactionId,
+				IndexActionGroup.class);
 		if (indexActionGroup != null && indexActionGroup.getCount() > 0)
 		{
 			progress.setProgressMax(indexActionGroup.getCount());
@@ -74,9 +74,8 @@ class IndexJob extends NontransactionalJob<Void>
 	 */
 	private void performIndexActions(Progress progress)
 	{
-		List<IndexAction> indexActions = dataService
-				.findAll(INDEX_ACTION, createQueryGetAllIndexActions(transactionId), IndexAction.class)
-				.collect(toList());
+		List<IndexAction> indexActions = dataService.findAll(INDEX_ACTION, createQueryGetAllIndexActions(transactionId),
+				IndexAction.class).collect(toList());
 		try
 		{
 			boolean success = true;

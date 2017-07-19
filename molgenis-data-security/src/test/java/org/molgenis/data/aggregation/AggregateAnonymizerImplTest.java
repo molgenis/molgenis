@@ -23,8 +23,8 @@ public class AggregateAnonymizerImplTest
 
 		List<Object> xLabels = Arrays.asList("x1", "x2", "x3");
 		List<Object> yLabels = Arrays.asList("y1", "y2", "y3");
-		AnonymizedAggregateResult result = new AggregateAnonymizerImpl()
-				.anonymize(new AggregateResult(matrix, xLabels, yLabels), threshold);
+		AnonymizedAggregateResult result = new AggregateAnonymizerImpl().anonymize(
+				new AggregateResult(matrix, xLabels, yLabels), threshold);
 
 		List<List<Long>> expectedMatrix = Lists.newArrayList();
 		expectedMatrix.add(Arrays.asList(11l, AGGREGATE_ANONYMIZATION_VALUE, 90l, AGGREGATE_ANONYMIZATION_VALUE,
