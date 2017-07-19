@@ -22,6 +22,34 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /permission/acls:
+    get:
+      tags:
+        - Security
+      summary: Retrieve ACLs.
+      description: Will retrieve all ACLs for an EntityTypeId
+      parameters:
+        - name: entityTypeId
+          type: string
+          in: query
+          required: true
+          description: ID of the entity type for which the ACLs are retrieved
+        - name: pageSize
+          type: int
+          in: query
+          required: false
+          defaultValue: 10
+          description: amount of entities to retrieve ACLs for
+        - name: filter
+          type: string
+          in: query
+          required: false
+          description: string to filter on
+      responses:
+        200:
+          description: MOLGENIS token
+          schema:
+            $ref: '#/definitions/ACLs'
   /scripts/{name}/start:
     get:
       tags:
@@ -490,6 +518,37 @@ paths:
               type: string
               format: uri
 definitions:
+  ACLs:
+    type: array
+    items:
+      type: object
+      properties:
+        entityId:
+          type: string
+        entityLabel:
+          type: string
+        owner:
+          type: object
+          properties:
+            username: string
+        aces:
+          type: array
+          items:
+            type: object
+            properties:
+              granted:
+                type: boolean
+              permissions:
+                type: array
+                items:
+                  type: string
+              sid:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  autority:
+                    type: string
   CopyEntityRequest:
     type: object
     properties:

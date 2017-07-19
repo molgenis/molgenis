@@ -1,34 +1,51 @@
 package org.molgenis.security.permission;
 
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class MolgenisPermissionControllerTest
 {
-
+	@Mock
 	private MolgenisPermissionService molgenisPermissionService;
+	@Mock
+	private EntityAclService entityAclService;
+	@Mock
+	private LanguageService languageService;
+	@Mock
+	private DataService dataService;
 	private MolgenisPermissionController molgenisPermissionController;
 
-	@BeforeMethod
-	public void setUpBeforeMethod()
+	@BeforeClass
+	public void beforeClass()
 	{
-		molgenisPermissionService = mock(MolgenisPermissionService.class);
-		molgenisPermissionController = new MolgenisPermissionController(molgenisPermissionService,
-				mock(DataService.class));
+		initMocks(this);
+		molgenisPermissionController = new MolgenisPermissionController(molgenisPermissionService, entityAclService,
+				languageService, dataService);
+	}
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		reset(molgenisPermissionService, entityAclService, languageService, dataService);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void MolgenisPermissionController()
 	{
-		new MolgenisPermissionController(null, null);
+		new MolgenisPermissionController(null, null, null, null);
 	}
 
 	@Test

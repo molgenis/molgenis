@@ -27,6 +27,9 @@ module.exports = {
       },
       '/plugin/permissionmanager': {
         target: 'http://localhost:8080'
+      },
+      '/permission': {
+        target: 'http://localhost:8080'
       }
     },
     cssSourceMap: false
