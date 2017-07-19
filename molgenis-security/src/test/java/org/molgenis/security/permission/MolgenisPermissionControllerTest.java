@@ -1,15 +1,17 @@
 package org.molgenis.security.permission;
 
+import com.google.common.collect.ImmutableSet;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.security.acl.EntityAclService;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.acl.*;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -26,6 +28,8 @@ public class MolgenisPermissionControllerTest
 	private LanguageService languageService;
 	@Mock
 	private DataService dataService;
+	@Mock
+	private EntityAclManager entityAclManager;
 	private MolgenisPermissionController molgenisPermissionController;
 
 	@BeforeClass
@@ -33,19 +37,19 @@ public class MolgenisPermissionControllerTest
 	{
 		initMocks(this);
 		molgenisPermissionController = new MolgenisPermissionController(molgenisPermissionService, entityAclService,
-				languageService, dataService);
+				entityAclManager, languageService, dataService);
 	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		reset(molgenisPermissionService, entityAclService, languageService, dataService);
+		reset(molgenisPermissionService, entityAclService, entityAclManager, languageService, dataService);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void MolgenisPermissionController()
 	{
-		new MolgenisPermissionController(null, null, null, null);
+		new MolgenisPermissionController(null, null, null, null, null);
 	}
 
 	@Test
@@ -78,5 +82,17 @@ public class MolgenisPermissionControllerTest
 		String entityTypeId = "entity";
 		when(molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITE)).thenReturn(false);
 		assertFalse(molgenisPermissionController.hasWritePermission(entityTypeId));
+	}
+
+	@Test
+	public void testSave()
+	{
+		EntityIdentity homePluginId = EntityIdentity.create("sys_Plugin", "home");
+		SecurityId owner = SecurityId.createForUsername("henk");
+		SecurityId role = SecurityId.createForAuthority("ROLE_abcde");
+		ImmutableSet<Permission> permissions = ImmutableSet.of(Permission.WRITE, Permission.READ);
+		EntityAce entityAce = EntityAce.create(permissions, role, true);
+		EntityAcl entityAcl = EntityAcl.create(homePluginId, owner, null, singletonList(entityAce));
+		molgenisPermissionController.save(entityAcl);
 	}
 }
