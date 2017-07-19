@@ -3,7 +3,6 @@ package org.molgenis.oneclickimporter.service.Impl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
@@ -77,7 +76,11 @@ public class EntityServiceImpl implements EntityService
 		entityType.addAttribute(createIdAttribute(), ROLE_ID);
 
 		// Add all other columns the dataTable
-		dataCollection.getColumns().forEach(column -> entityType.addAttribute(createAttribute(column)));
+		dataCollection.getColumns().forEach(column ->
+		{
+			Attribute attribute = createAttribute(column);
+			entityType.addAttribute(attribute);
+		});
 
 		// Store the dataTable (metadata only)
 		metaDataService.addEntityType(entityType);
@@ -100,11 +103,16 @@ public class EntityServiceImpl implements EntityService
 
 	private void setRowValueForAttribute(Entity row, int index, Column column)
 	{
-		AttributeType columnType = row.getEntityType().getAttribute(column.getName()).getDataType();
-		row.set(column.getName(), castValueToAttributeType(column.getDataValues().get(index), columnType));
+		String attributeName = asValidAttributeName(column.getName());
+		Object dataValue = column.getDataValues().get(index);
+
+		EntityType rowType = row.getEntityType();
+		Attribute attribute = rowType.getAttribute(attributeName);
+
+		row.set(attributeName, castValueAsAttributeType(dataValue, attribute.getDataType()));
 	}
 
-	private Object castValueToAttributeType(Object value, AttributeType type)
+	private Object castValueAsAttributeType(Object value, AttributeType type)
 	{
 		if (value == null)
 		{
@@ -120,7 +128,7 @@ public class EntityServiceImpl implements EntityService
 				}
 				break;
 			default:
-				throw new MolgenisDataException("[" + type + "] is not supported during metadata guessing");
+				break;
 
 		}
 		return value;
@@ -139,8 +147,14 @@ public class EntityServiceImpl implements EntityService
 	private Attribute createAttribute(Column column)
 	{
 		Attribute attribute = attributeFactory.create();
-		attribute.setName(column.getName());
+		attribute.setName(asValidAttributeName(column.getName()));
+		attribute.setLabel(column.getName());
 		attribute.setDataType(attributeTypeService.guessAttributeType(column.getDataValues()));
 		return attribute;
+	}
+
+	private String asValidAttributeName(String columnName)
+	{
+		return columnName.replace(" ", "_");
 	}
 }

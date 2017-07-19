@@ -93,8 +93,8 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		when(idAttr.setVisible(anyBoolean())).thenReturn(idAttr);
 		when(idAttr.setAuto(anyBoolean())).thenReturn(idAttr);
 		when(idAttr.setIdAttribute(anyBoolean())).thenReturn(idAttr);
-		when(table.getAttribute("user name")).thenReturn(nameAttr);
-		when(table.getAttribute("super power")).thenReturn(powerAttr);
+		when(table.getAttribute("user_name")).thenReturn(nameAttr);
+		when(table.getAttribute("super_power")).thenReturn(powerAttr);
 
 		MetaDataService meta = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(meta);
