@@ -106,13 +106,14 @@ public class EntityServiceImpl implements EntityService
 
 	private Object castValueToAttributeType(Object value, AttributeType type)
 	{
+		if (value == null)
+		{
+			return value;
+		}
+
 		switch (type)
 		{
 			case STRING:
-				if (!(value instanceof String))
-				{
-					value = (String) value;
-				}
 				break;
 			case INT:
 				if (!(value instanceof Integer))

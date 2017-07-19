@@ -28,7 +28,6 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 			Object value = dataValues.get(currentRowIndex);
 			if (value == null)
 			{
-				guess = STRING;
 				break;
 			}
 
