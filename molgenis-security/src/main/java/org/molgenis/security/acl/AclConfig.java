@@ -38,6 +38,7 @@ import java.sql.Statement;
 public class AclConfig extends GlobalMethodSecurityConfiguration
 {
 
+	public static final String ROLE_ACL_ADMIN = "ROLE_ACL_ADMIN";
 	private static final String SQL_CREATE_TABLE_ACL_SID =
 			"create table if not exists acl_sid(\n" + "id bigserial not null primary key,\n"
 					+ "principal boolean not null,\n" + "sid varchar(100) not null,\n"
@@ -105,7 +106,7 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 
 	private LookupStrategy lookupStrategy()
 	{
-		return new AclLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
+		return new AclLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), permissionGrantingStrategy());
 	}
 
 	@Bean
@@ -119,10 +120,11 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 		return new BitMaskPermissionGrantingStrategy(auditLogger());
 	}
 
+
 	private AclAuthorizationStrategy aclAuthorizationStrategy()
 	{
-		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ACL_ADMIN"),
-				new SimpleGrantedAuthority("ROLE_ACL_ADMIN"), new SimpleGrantedAuthority("ROLE_ACL_ADMIN")); // TODO ROLE_SU/ROLE_SYSTEM?
+		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority(ROLE_ACL_ADMIN),
+				new SimpleGrantedAuthority(ROLE_ACL_ADMIN), new SimpleGrantedAuthority(ROLE_ACL_ADMIN));
 	}
 
 	@Bean

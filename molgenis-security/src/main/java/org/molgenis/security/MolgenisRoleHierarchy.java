@@ -7,6 +7,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.molgenis.security.acl.AclConfig.ROLE_ACL_ADMIN;
+import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 public class MolgenisRoleHierarchy implements RoleHierarchy
@@ -53,6 +55,10 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 			{
 				String entity = authority.getAuthority().substring(AUTHORITY_PLUGIN_READ_PREFIX.length());
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + entity));
+			}
+			else if (authority.getAuthority().equals(ROLE_SYSTEM) || authority.getAuthority().equals(AUTHORITY_SU))
+			{
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(ROLE_ACL_ADMIN));
 			}
 
 			hierarchicalAuthorities.add(authority);
