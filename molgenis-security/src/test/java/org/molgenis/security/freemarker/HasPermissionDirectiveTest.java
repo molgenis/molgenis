@@ -3,8 +3,8 @@ package org.molgenis.security.freemarker;
 import com.google.common.collect.Maps;
 import freemarker.core.Environment;
 import freemarker.template.*;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,14 +20,14 @@ import static org.testng.Assert.assertEquals;
 public class HasPermissionDirectiveTest
 {
 	private HasPermissionDirective directive;
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService molgenisPermissionService;
 	private StringWriter envWriter;
 	private Template fakeTemplate;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		molgenisPermissionService = mock(MolgenisPermissionService.class);
+		molgenisPermissionService = mock(PermissionService.class);
 		directive = new HasPermissionDirective(molgenisPermissionService);
 		envWriter = new StringWriter();
 		fakeTemplate = Template
@@ -37,7 +37,7 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithPermission() throws TemplateException, IOException
 	{
-		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.COUNT)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntityType("entity", Permission.COUNT)).thenReturn(true);
 
 		Map<String, Object> params = Maps.newHashMap();
 		params.put("entityTypeId", "entity");
@@ -60,7 +60,7 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithoutPermission() throws TemplateException, IOException
 	{
-		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.WRITE)).thenReturn(false);
+		when(molgenisPermissionService.hasPermissionOnEntityType("entity", Permission.WRITE)).thenReturn(false);
 
 		Map<String, Object> params = Maps.newHashMap();
 		params.put("entityTypeId", "entity");

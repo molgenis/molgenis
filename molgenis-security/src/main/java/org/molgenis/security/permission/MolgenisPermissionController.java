@@ -1,20 +1,16 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.auth.Role;
-import org.molgenis.data.DataService;
-import org.molgenis.data.security.acl.SecurityId;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.molgenis.auth.Role;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.acl.EntityAce;
-import org.molgenis.data.security.acl.EntityAcl;
-import org.molgenis.data.security.acl.EntityAclService;
-import org.molgenis.data.security.acl.EntityIdentity;
+import org.molgenis.data.security.acl.*;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,14 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Collection;
-
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.RoleMetadata.ROLE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.molgenis.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.QueryRule.Operator.SEARCH;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -38,14 +33,14 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RequestMapping("/permission")
 public class MolgenisPermissionController
 {
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 	private final EntityAclService entityAclService;
 	private final DataService dataService;
 	private final LanguageService languageService;
 
 	@Autowired
-	public MolgenisPermissionController(MolgenisPermissionService molgenisPermissionService,
-			EntityAclService entityAclService, LanguageService languageService, DataService dataService)
+	public MolgenisPermissionController(PermissionService molgenisPermissionService, EntityAclService entityAclService,
+			LanguageService languageService, DataService dataService)
 	{
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.entityAclService = requireNonNull(entityAclService);
@@ -57,7 +52,7 @@ public class MolgenisPermissionController
 	@ResponseBody
 	public boolean hasReadPermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntity(entityTypeId,
+		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId,
 				org.molgenis.security.core.Permission.READ);
 	}
 
@@ -65,7 +60,7 @@ public class MolgenisPermissionController
 	@ResponseBody
 	public boolean hasWritePermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntity(entityTypeId,
+		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId,
 				org.molgenis.security.core.Permission.WRITE);
 	}
 
@@ -121,6 +116,5 @@ public class MolgenisPermissionController
 		return ImmutableMap.of("granted", ace.isGranting(), "permissions", permissions.build(), "sid",
 				ace.getSecurityId());
 	}
-
 
 }

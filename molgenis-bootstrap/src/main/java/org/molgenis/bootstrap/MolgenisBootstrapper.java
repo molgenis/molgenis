@@ -57,8 +57,8 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
 	}
 
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{

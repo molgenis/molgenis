@@ -2,8 +2,8 @@ package org.molgenis.security.permission;
 
 import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.data.security.acl.EntityIdentity;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -12,11 +12,11 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
 import static org.molgenis.ui.PluginMetadata.PLUGIN;
 
 @Component
-public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
+public class PermissionServiceImpl implements PermissionService
 {
 	private final EntityAclService entityAclService;
 
-	MolgenisPermissionServiceImpl(EntityAclService entityAclService)
+	PermissionServiceImpl(EntityAclService entityAclService)
 	{
 		this.entityAclService = requireNonNull(entityAclService);
 	}
@@ -28,12 +28,13 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 	}
 
 	@Override
-	public boolean hasPermissionOnEntity(String entityTypeId, Permission permission)
+	public boolean hasPermissionOnEntityType(String entityTypeId, Permission permission)
 	{
 		return hasPermissionOnEntity(ENTITY_TYPE_META_DATA, entityTypeId, permission);
 	}
 
-	private boolean hasPermissionOnEntity(String entityTypeId, Object entityId, Permission permission)
+	@Override
+	public boolean hasPermissionOnEntity(String entityTypeId, Object entityId, Permission permission)
 	{
 		boolean hasPermission;
 		if (currentUserIsSuOrSystem())

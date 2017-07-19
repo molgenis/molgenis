@@ -11,8 +11,8 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 
 import java.util.*;
 
@@ -38,7 +38,7 @@ public class EntityTypeResponse
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponse(EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
+	public EntityTypeResponse(EntityType meta, PermissionService permissionService, DataService dataService,
 			LanguageService languageService)
 	{
 		this(meta, null, null, permissionService, dataService, languageService);
@@ -50,7 +50,7 @@ public class EntityTypeResponse
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
-			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
+			PermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
@@ -137,8 +137,9 @@ public class EntityTypeResponse
 		else this.isAbstract = null;
 
 		this.writable =
-				permissionService.hasPermissionOnEntity(name, Permission.WRITE) && dataService.getCapabilities(name)
-						.contains(RepositoryCapability.WRITABLE);
+				permissionService.hasPermissionOnEntityType(name, Permission.WRITE) && dataService.getCapabilities(name)
+																								  .contains(
+																										  RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

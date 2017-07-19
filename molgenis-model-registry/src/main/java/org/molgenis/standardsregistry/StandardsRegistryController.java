@@ -16,8 +16,8 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +47,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final MetaDataService metaDataService;
 	private final DataService dataService;
 	private final MetaDataSearchService metaDataSearchService;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			MolgenisPermissionService molgenisPermissionService,
+			PermissionService molgenisPermissionService,
 			TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
@@ -139,7 +139,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 							String entityTypeId = entity.getName();
 
 							// Check read permission
-							if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
+							if (!molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.READ))
 								return false;
 
 							// Check has data

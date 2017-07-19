@@ -5,11 +5,8 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.acl.EntityAclService;
-import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.molgenis.security.core.PermissionService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,12 +20,13 @@ import static java.util.stream.Collectors.toList;
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
 	private final Repository<Attribute> decoratedRepo;
-	private final EntityAclService entityAclService;
+	private final PermissionService permissionService;
 
-	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo, EntityAclService entityAclService)
+	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo,
+			PermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
-		this.entityAclService = requireNonNull(entityAclService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -90,12 +88,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	private Attribute toPermittedAttribute(Attribute attribute)
 	{
-		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem()
-				&& SecurityContextHolder.getContext().getAuthentication() != null) // FIXME remove authentication check
+		if (attribute != null)
 		{
-			EntityIdentity entityIdentity = EntityIdentity.create(attribute.getEntityType().getId(),
-					attribute.getIdValue());
-			if (entityAclService.isGranted(entityIdentity, Permission.READ))
+			String entityTypeId = attribute.getEntityType().getId();
+			Object entityId = attribute.getIdValue();
+			if (!permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.READ))
 			{
 				attribute.setReadOnly(true);
 			}

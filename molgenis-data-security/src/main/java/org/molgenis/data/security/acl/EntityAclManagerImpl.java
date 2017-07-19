@@ -286,11 +286,11 @@ public class EntityAclManagerImpl implements EntityAclManager
 	{
 		switch (permission)
 		{
+			case COUNT: // FIXME treat COUNT differently from READ
 			case READ:
 				return BasePermission.READ;
 			case WRITE:
 				return BasePermission.WRITE;
-			case COUNT:
 			case NONE:
 				throw new IllegalArgumentException(String.format("Illegal permission '%s'", permission.toString()));
 			case WRITEMETA:

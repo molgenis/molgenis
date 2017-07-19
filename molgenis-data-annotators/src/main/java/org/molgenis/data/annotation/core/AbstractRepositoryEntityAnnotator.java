@@ -19,8 +19,8 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 	}
 
 	@Override
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable, boolean updateMode)
 	{
 		Iterator<Entity> source = sourceIterable.iterator();

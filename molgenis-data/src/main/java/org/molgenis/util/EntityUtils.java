@@ -294,6 +294,21 @@ public class EntityUtils
 		{
 			if (!tags.get(i).getId().equals(otherTags.get(i).getId())) return false;
 		}
+
+		// compare entity level security
+		if (!Objects.equals(entityType.isEntityLevelSecurity(), otherEntityType.isEntityLevelSecurity())) return false;
+
+		// compare entity level security inheritance attribute
+		Attribute entityLevelSecurityInheritanceAttribute = entityType.getEntityLevelSecurityInheritance();
+		Attribute otherEntityLevelSecurityInheritanceAttribute = otherEntityType.getEntityLevelSecurityInheritance();
+		if (entityLevelSecurityInheritanceAttribute == null && otherEntityLevelSecurityInheritanceAttribute != null)
+			return false;
+		if (entityLevelSecurityInheritanceAttribute != null && otherEntityLevelSecurityInheritanceAttribute == null)
+			return false;
+		if (entityLevelSecurityInheritanceAttribute != null && otherEntityLevelSecurityInheritanceAttribute != null
+				&& !Objects.equals(entityLevelSecurityInheritanceAttribute.getIdentifier(),
+				otherEntityLevelSecurityInheritanceAttribute.getIdentifier())) return false;
+
 		return true;
 
 		// FIXME add RLS attribute checks

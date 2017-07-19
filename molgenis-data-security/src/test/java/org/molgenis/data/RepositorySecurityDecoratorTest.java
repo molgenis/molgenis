@@ -40,7 +40,7 @@ public class RepositorySecurityDecoratorTest
 		when(decoratedRepository.getName()).thenReturn(entityTypeId);
 		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		when(entityType.getId()).thenReturn("entityID");
-		repositorySecurityDecorator = new RepositorySecurityDecorator(decoratedRepository);
+		repositorySecurityDecorator = new RepositorySecurityDecorator(decoratedRepository, null);
 	}
 
 	@Test

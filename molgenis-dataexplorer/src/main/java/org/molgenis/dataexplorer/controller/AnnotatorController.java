@@ -10,8 +10,8 @@ import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionFactory;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class AnnotatorController
 	public static final String URI = "/annotators";
 	private final DataService dataService;
 	private final AnnotationService annotationService;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 	private final UserAccountService userAccountService;
 	private final AnnotationJobFactory annotationJobFactory;
 	private final ExecutorService taskExecutor;
@@ -50,7 +50,7 @@ public class AnnotatorController
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
-			MolgenisPermissionService molgenisPermissionService, UserAccountService userAccountService,
+			PermissionService molgenisPermissionService, UserAccountService userAccountService,
 			AnnotationJobFactory annotationJobFactory, ExecutorService taskExecutor,
 			AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{
@@ -138,7 +138,7 @@ public class AnnotatorController
 
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
-						molgenisPermissionService.hasPermissionOnEntity(settingsEntityName, Permission.WRITE));
+						molgenisPermissionService.hasPermissionOnEntityType(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}

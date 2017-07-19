@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.auth.RoleMetadata.ROLE;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
@@ -20,12 +22,14 @@ import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoritiesPopulator
 {
 	private static final String USERNAME_ADMIN = "admin";
+	public static final String ROLE_USER_ID = "user";
+	private static final String ROLE_USER_LABEL = "User";
 
 	private final DataService dataService;
 	private final UserFactory userFactory;
 	private final GroupFactory groupFactory;
-	private final UserAuthorityFactory userAuthorityFactory;
 	private final GroupAuthorityFactory groupAuthorityFactory;
+	private final RoleFactory roleFactory;
 
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -36,18 +40,18 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 
 	@Autowired
 	UsersGroupsAuthoritiesPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory,
-			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory)
+			GroupAuthorityFactory groupAuthorityFactory, RoleFactory roleFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);
 		this.groupFactory = requireNonNull(groupFactory);
-		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
+		this.roleFactory = requireNonNull(roleFactory);
 	}
 
 	@Override
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	public void populate()
 	{
 		if (adminPassword == null)
@@ -74,40 +78,23 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setChangePassword(false);
 
-		// set anonymous role for anonymous user
-		// FIXME use EntityAclService
-		//		UserAuthority anonymousAuthority = userAuthorityFactory.create();
-		//		anonymousAuthority.setUser(anonymousUser);
-		//		anonymousAuthority.setRole(AUTHORITY_ANONYMOUS);
-
 		// create all users group
 		Group allUsersGroup = groupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 
-		// FIXME use EntityAclService
-		//		// allow all users to update their profile
-		//		GroupAuthority usersGroupUserAccountAuthority = groupAuthorityFactory.create();
-		//		usersGroupUserAccountAuthority.setGroup(allUsersGroup);
-		//		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + UserAccountController.ID);
-		//
-		//		// allow all users to read meta data entities
-		//		List<String> entityTypeIds = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
-		//				L10N_STRING, FILE_META, OWNED);
-		//		Stream<GroupAuthority> entityGroupAuthorities = entityTypeIds.stream().map(entityTypeId ->
-		//		{
-		//			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
-		//			usersGroupAuthority.setGroup(allUsersGroup);
-		//			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityTypeId);
-		//			return usersGroupAuthority;
-		//		});
+		// create user role
+		Role userRole = roleFactory.create(ROLE_USER_ID);
+		userRole.setLabel(ROLE_USER_LABEL);
+
+		// assign group authority for all users group with user role
+		GroupAuthority usersGroupUserAuthority = groupAuthorityFactory.create();
+		usersGroupUserAuthority.setGroup(allUsersGroup);
+		usersGroupUserAuthority.setRole(userRole);
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
-		// FIXME use EntityAclService
-		//		dataService.add(USER_AUTHORITY, anonymousAuthority);
 		dataService.add(GROUP, allUsersGroup);
-		// FIXME use EntityAclService
-		//		dataService
-		//				.add(GROUP_AUTHORITY, Stream.concat(Stream.of(usersGroupUserAccountAuthority), entityGroupAuthorities));
+		dataService.add(ROLE, userRole);
+		dataService.add(GROUP_AUTHORITY, usersGroupUserAuthority);
 	}
 }
