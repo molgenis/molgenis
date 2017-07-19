@@ -97,8 +97,10 @@ public class OneClickImporterServiceTest
 		DataCollection actual = oneClickImporterService.buildDataCollection("valid-with-dates", sheet);
 
 		Column c1 = Column.create("dates", 0,
-				newArrayList("2018-01-03T00:00", "2018-01-04T00:00", "2018-01-05T00:00", "2018-01-06T00:00",
-						"2018-01-07T00:00"));
+				newArrayList("Wed Jan 03 00:00:00 CET 2018", "Thu Jan 04 00:00:00 CET 2018",
+						"Fri Jan 05 00:00:00 CET 2018", "Sat Jan 06 00:00:00 CET 2018",
+						"Sun Jan 07 00:00:00 CET 2018"));
+		
 		Column c2 = Column.create("event", 1,
 				newArrayList("being cool day", "bike day", "sleep day", "bye bye day", "work day"));
 

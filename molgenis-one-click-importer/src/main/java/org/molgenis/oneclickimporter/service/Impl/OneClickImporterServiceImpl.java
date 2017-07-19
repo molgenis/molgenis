@@ -8,7 +8,6 @@ import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -17,10 +16,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.parseInt;
-import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
-import static org.apache.poi.util.LocaleUtil.*;
 
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
@@ -127,16 +124,8 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			case NUMERIC:
 				if (isCellDateFormatted(cell))
 				{
-					try
-					{
-						setUserTimeZone(TIMEZONE_UTC);
-						Date dateCellValue = cell.getDateCellValue();
-						value = formatUTCDateAsLocalDateTime(dateCellValue);
-					}
-					finally
-					{
-						resetUserTimeZone();
-					}
+					Date dateCellValue = cell.getDateCellValue();
+					value = dateCellValue.toString();
 				}
 				else
 				{
@@ -180,21 +169,6 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 				value = null;
 				break;
 		}
-		return value;
-	}
-
-	/**
-	 * Formats parsed Date as LocalDateTime string at zone UTC to express that we don't know the timezone.
-	 *
-	 * @param javaDate Parsed Date representing start of day in UTC
-	 * @return Formatted {@link LocalDateTime} string of the java.util.Date
-	 */
-	private String formatUTCDateAsLocalDateTime(Date javaDate)
-	{
-		String value;// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
-		LocalDateTime localDateTime = javaDate.toInstant().atZone(UTC).toLocalDateTime();
-		// And format to string
-		value = localDateTime.toString();
 		return value;
 	}
 }

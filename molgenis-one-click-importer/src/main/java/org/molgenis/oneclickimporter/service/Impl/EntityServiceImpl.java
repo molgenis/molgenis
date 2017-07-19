@@ -18,6 +18,7 @@ import org.molgenis.oneclickimporter.service.EntityService;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -124,7 +125,16 @@ public class EntityServiceImpl implements EntityService
 			case DATE:
 				if (!(value instanceof LocalDate))
 				{
-					value = LocalDate.parse(value.toString());
+					try
+					{
+						// TODO use regex to validate format instead of catching error
+						value = LocalDate.parse(value.toString());
+					}
+					catch (DateTimeParseException e)
+					{
+						// If date can not be parsed, return value as is
+						break;
+					}
 				}
 				break;
 			default:
