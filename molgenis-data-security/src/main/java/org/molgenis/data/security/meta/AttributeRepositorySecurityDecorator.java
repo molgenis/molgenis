@@ -92,7 +92,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		{
 			String entityTypeId = attribute.getEntityType().getId();
 			Object entityId = attribute.getIdValue();
-			if (permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.READ))
+			if (!permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.READ))
 			{
 				attribute.setReadOnly(true);
 			}
