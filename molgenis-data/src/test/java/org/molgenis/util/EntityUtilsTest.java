@@ -69,6 +69,15 @@ public class EntityUtilsTest
 		when(otherExtendsEntityType.getExtends()).thenReturn(mock(EntityType.class));
 		dataList.add(new Object[] { entityType, otherExtendsEntityType, false });
 
+		EntityType otherEntityLevelSecurityEntityType = createEqualsEntityType();
+		when(otherEntityLevelSecurityEntityType.isEntityLevelSecurity()).thenReturn(true);
+		dataList.add(new Object[] { entityType, otherEntityLevelSecurityEntityType, false });
+
+		EntityType otherEntityLevelSecurityInheritanceEntityType = createEqualsEntityType();
+		when(otherEntityLevelSecurityInheritanceEntityType.getEntityLevelSecurityInheritance()).thenReturn(
+				mock(Attribute.class));
+		dataList.add(new Object[] { entityType, otherEntityLevelSecurityInheritanceEntityType, false });
+
 		return dataList.iterator();
 	}
 
@@ -86,6 +95,8 @@ public class EntityUtilsTest
 		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
 		when(entityType.getTags()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(null);
+		when(entityType.isEntityLevelSecurity()).thenReturn(false);
+		when(entityType.getEntityLevelSecurityInheritance()).thenReturn(null);
 		return entityType;
 	}
 
