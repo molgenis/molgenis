@@ -116,7 +116,7 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 
 	private PermissionGrantingStrategy permissionGrantingStrategy()
 	{
-		return new DefaultPermissionGrantingStrategy(auditLogger());
+		return new BitMaskPermissionGrantingStrategy(auditLogger());
 	}
 
 	private AclAuthorizationStrategy aclAuthorizationStrategy()
