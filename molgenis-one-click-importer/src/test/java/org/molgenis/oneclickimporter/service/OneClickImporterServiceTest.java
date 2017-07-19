@@ -1,21 +1,18 @@
 package org.molgenis.oneclickimporter.service;
 
-import com.google.common.io.Resources;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.Impl.ExcelServiceImpl;
 import org.molgenis.oneclickimporter.service.Impl.OneClickImporterServiceImpl;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadLinesFromFile;
+import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadSheetFromFile;
 import static org.testng.Assert.assertEquals;
 
 public class OneClickImporterServiceTest
@@ -25,7 +22,7 @@ public class OneClickImporterServiceTest
 	@Test
 	public void testBuildDataSheetWithSimpleValidFile() throws IOException, InvalidFormatException, URISyntaxException
 	{
-		Sheet sheet = loadTestFile("/simple-valid.xlsx");
+		Sheet sheet = loadSheetFromFile(OneClickImporterServiceTest.class, "/simple-valid.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollection("simple-valid", sheet);
 
 		Column c1 = Column.create("name", 0, newArrayList("Mark", "Connor", "Fleur", "Dennis"));
@@ -40,7 +37,7 @@ public class OneClickImporterServiceTest
 	@Test
 	public void testBuildDataSheetWithValidFormulaFile() throws IOException, InvalidFormatException, URISyntaxException
 	{
-		Sheet sheet = loadTestFile("/valid-with-formula.xlsx");
+		Sheet sheet = loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-formula.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollection("valid-with-formula", sheet);
 
 		Column c1 = Column.create("name", 0, newArrayList("Mark", "Mariska"));
@@ -55,7 +52,7 @@ public class OneClickImporterServiceTest
 	public void testBuildDataSheetBuildsColumnsOfEqualLength()
 			throws IOException, InvalidFormatException, URISyntaxException
 	{
-		Sheet sheet = loadTestFile("/valid-with-blank-values.xlsx");
+		Sheet sheet = loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-blank-values.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollection("valid-with-blank-values", sheet);
 
 		Column c1 = Column.create("name", 0, newArrayList("Mark", "Bart", "Tommy", "Sido", "Connor", null));
@@ -72,7 +69,7 @@ public class OneClickImporterServiceTest
 	@Test
 	public void testBuildDataSheetWithComplexFile() throws IOException, InvalidFormatException, URISyntaxException
 	{
-		Sheet sheet = loadTestFile("/complex-valid.xlsx");
+		Sheet sheet = loadSheetFromFile(OneClickImporterServiceTest.class, "/complex-valid.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollection("complex-valid", sheet);
 
 		Column c1 = Column.create("first name", 0,
@@ -94,7 +91,7 @@ public class OneClickImporterServiceTest
 	@Test
 	public void testBuildDataSheetWithDates() throws IOException, InvalidFormatException, URISyntaxException
 	{
-		Sheet sheet = loadTestFile("/valid-with-dates.xlsx");
+		Sheet sheet = loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-dates.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollection("valid-with-dates", sheet);
 
 		Column c1 = Column.create("dates", 0,
@@ -105,14 +102,5 @@ public class OneClickImporterServiceTest
 
 		DataCollection expected = DataCollection.create("valid-with-dates", newArrayList(c1, c2), 5);
 		assertEquals(actual, expected);
-	}
-
-	private Sheet loadTestFile(String fileName) throws IOException, InvalidFormatException, URISyntaxException
-	{
-		URL resourceUrl = Resources.getResource(OneClickImporterServiceTest.class, fileName);
-		File file = new File(new URI(resourceUrl.toString()).getPath());
-
-		ExcelService excelService = new ExcelServiceImpl();
-		return excelService.buildExcelSheetFromFile(file);
 	}
 }
