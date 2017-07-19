@@ -5,7 +5,6 @@ import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static org.molgenis.data.meta.AttributeType.*;
@@ -65,15 +64,9 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 				return TEXT;
 			}
 
-			try
+			if (canValueBeUsedAsDate(value))
 			{
-				// If parseInstant() succeeds, return DATE
-				MolgenisDateFormat.parseInstant(stringValue);
 				return DATE;
-			}
-			catch (DateTimeParseException e)
-			{
-				return guess;
 			}
 		}
 		return guess;
@@ -188,5 +181,18 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 		{
 			return STRING;
 		}
+	}
+
+	private Boolean canValueBeUsedAsDate(Object value)
+	{
+		try
+		{
+			MolgenisDateFormat.parseLocalDate(value.toString());
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+		return true;
 	}
 }

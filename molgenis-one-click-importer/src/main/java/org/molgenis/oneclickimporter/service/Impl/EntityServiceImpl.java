@@ -17,15 +17,15 @@ import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 
 @Component
 public class EntityServiceImpl implements EntityService
@@ -120,26 +120,11 @@ public class EntityServiceImpl implements EntityService
 			return value;
 		}
 
-		switch (type)
+		if (type.equals(DATE))
 		{
-			case DATE:
-				if (!(value instanceof LocalDate))
-				{
-					try
-					{
-						// TODO use regex to validate format instead of catching error
-						value = LocalDate.parse(value.toString());
-					}
-					catch (DateTimeParseException e)
-					{
-						// If date can not be parsed, return value as is
-						break;
-					}
-				}
-				break;
-			default:
-				break;
-
+			// this will always succeed because type enrichment checked
+			// if its possible to parse local date already
+			value = parseLocalDate(value.toString());
 		}
 		return value;
 	}
