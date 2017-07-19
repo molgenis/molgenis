@@ -5,5 +5,11 @@ import org.molgenis.oneclickimporter.model.DataCollection;
 
 public interface EntityService
 {
-	EntityType createEntity(DataCollection dataCollection);
+	/**
+	 * Create an {@link EntityType} from a {@link DataCollection}
+	 *
+	 * @param dataCollection
+	 * @return the ID of the newly created {@link EntityType}
+	 */
+	EntityType createEntityType(DataCollection dataCollection);
 }

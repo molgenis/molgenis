@@ -1,11 +1,9 @@
 package org.molgenis.oneclickimporter.service;
 
-
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -26,6 +24,8 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 
 public class EntityServiceImplTest extends AbstractMockitoTest
@@ -47,10 +47,13 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	private DataService dataService;
 
 	@Mock
+	private MetaDataService metaDataService;
+
+	@Mock
 	private EntityManager entityManager;
 
 	@Mock
-	private OneClickImporterService oneClickImporterService;
+	private AttributeTypeService attributeTypeService;
 
 	private EntityService entityService;
 
@@ -58,11 +61,10 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	public void setup()
 	{
 		this.entityService = new EntityServiceImpl(defaultPackage, entityTypeFactory, attributeFactory, idGenerator,
-				dataService, entityManager, oneClickImporterService);
+				dataService, metaDataService, entityManager, attributeTypeService);
 
-		when(oneClickImporterService.guessAttributeType(any())).thenReturn(AttributeType.STRING);
+		when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
 	}
-
 
 	@Test
 	public void testCreateEntity() throws Exception
@@ -70,37 +72,42 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		String tableName = "super-powers";
 		List<Object> userNames = Arrays.asList("Mark", "Mariska", "Bart");
 		List<Object> superPowers = Arrays.asList("Arrow functions", "Cookies", "Knots");
-		List<Column> columns = Arrays.asList(
-				Column.create("user name", 0, userNames),
-				Column.create("super power", 1, superPowers)
-		);
-		DataCollection dataCollection = DataCollection.create(tableName, columns);
+		List<Column> columns = Arrays.asList(Column.create("user name", 0, userNames),
+				Column.create("super power", 1, superPowers));
+		DataCollection dataCollection = DataCollection.create(tableName, columns, 3);
 
 		String generatedId = "id_0";
 		EntityType table = mock(EntityType.class);
 		when(entityTypeFactory.create()).thenReturn(table);
 		when(idGenerator.generateId()).thenReturn(generatedId);
+		when(table.getId()).thenReturn(generatedId);
 
 		Attribute idAttr = mock(Attribute.class);
+		//row.getEntityType().getAttribute(column.getName()).getDataType()
 		Attribute nameAttr = mock(Attribute.class);
+		when(nameAttr.getDataType()).thenReturn(STRING);
 		Attribute powerAttr = mock(Attribute.class);
+		when(powerAttr.getDataType()).thenReturn(STRING);
 		when(attributeFactory.create()).thenReturn(idAttr, nameAttr, powerAttr);
 		when(idAttr.setName(anyString())).thenReturn(idAttr);
 		when(idAttr.setVisible(anyBoolean())).thenReturn(idAttr);
 		when(idAttr.setAuto(anyBoolean())).thenReturn(idAttr);
 		when(idAttr.setIdAttribute(anyBoolean())).thenReturn(idAttr);
+		when(table.getAttribute("user_name")).thenReturn(nameAttr);
+		when(table.getAttribute("super_power")).thenReturn(powerAttr);
 
 		MetaDataService meta = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(meta);
-
 		Entity row1 = mock(Entity.class);
+		when(row1.getEntityType()).thenReturn(table);
 		Entity row2 = mock(Entity.class);
+		when(row2.getEntityType()).thenReturn(table);
 		Entity row3 = mock(Entity.class);
-		when(entityManager.create(table, EntityManager.CreationMode.NO_POPULATE))
-				.thenReturn(row1, row2, row3);
+		when(row3.getEntityType()).thenReturn(table);
+		when(entityManager.create(table, NO_POPULATE)).thenReturn(row1, row2, row3);
 
-		EntityType dataTable = entityService.createEntity(dataCollection);
-		assertEquals(dataTable, table);
+		EntityType entityType = entityService.createEntityType(dataCollection);
+		assertEquals(entityType.getId(), generatedId);
 
 		verify(table).setPackage(defaultPackage);
 		verify(table).setId(generatedId);

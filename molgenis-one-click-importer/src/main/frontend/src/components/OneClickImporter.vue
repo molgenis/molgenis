@@ -55,7 +55,7 @@
     },
     methods: {
       onComplete (file, response) {
-        this.responses.push({url: '/menu/main/dataexplorer?entity=' + response, filename: file.upload.filename})
+        this.responses.push({url: '/menu/main/dataexplorer?entity=' + response.entityId, filename: response.baseFileName})
         this.message = null
       },
       onDuplicate (file) {

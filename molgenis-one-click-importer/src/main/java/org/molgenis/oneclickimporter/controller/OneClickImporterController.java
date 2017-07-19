@@ -9,6 +9,7 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
+import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
@@ -19,14 +20,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -42,18 +47,20 @@ public class OneClickImporterController extends MolgenisPluginController
 	private AppSettings appSettings;
 	private OneClickImporterService oneClickImporterService;
 	private ExcelService excelService;
+	private CsvService csvService;
 	private EntityService entityService;
 	private FileStore fileStore;
 
 	public OneClickImporterController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings, ExcelService excelService, OneClickImporterService oneClickImporterService,
-			EntityService entityService, FileStore fileStore)
+			AppSettings appSettings, ExcelService excelService, CsvService csvService,
+			OneClickImporterService oneClickImporterService, EntityService entityService, FileStore fileStore)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.languageService = requireNonNull(languageService);
 		this.appSettings = requireNonNull(appSettings);
 		this.excelService = requireNonNull(excelService);
+		this.csvService = requireNonNull(csvService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 		this.entityService = requireNonNull(entityService);
 		this.fileStore = requireNonNull(fileStore);
@@ -70,8 +77,9 @@ public class OneClickImporterController extends MolgenisPluginController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/upload", method = POST)
-	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile)
+	@RequestMapping(value = "/upload", method = POST, produces = APPLICATION_JSON_VALUE)
+	public OneClickImportResponse importFile(HttpServletResponse response, @RequestParam(value = "file") MultipartFile multipartFile)
+
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
 		String filename = multipartFile.getOriginalFilename();
@@ -86,14 +94,24 @@ public class OneClickImporterController extends MolgenisPluginController
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
 			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
 		}
+		else if (fileExtension.equals("csv"))
+		{
+			List<String> lines = csvService.buildLinesFromFile(file);
+			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, lines);
+		}
 		else
 		{
 			throw new UnknownFileTypeException(
 					String.format("File with extension: %s is not a valid one-click importer file", fileExtension));
 		}
 
-		EntityType dataTable = entityService.createEntity(dataCollection);
-		return dataTable.getId();
+		EntityType dataTable = entityService.createEntityType(dataCollection);
+
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
+		response.setStatus(HttpServletResponse.SC_CREATED);
+		response.setHeader("Location", builder.build().toUriString() + "/" + dataTable.getId());
+
+		return new OneClickImportResponse(dataTable.getId(), file.getName());
 	}
 
 	@ResponseBody
