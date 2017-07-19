@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.model.DataCollection;
+import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
@@ -57,6 +58,9 @@ public class OneClickImporterControllerTest
 	private ExcelService excelService;
 
 	@Mock
+	private CsvService csvService;
+
+	@Mock
 	private OneClickImporterService oneClickImporterService;
 
 	@Mock
@@ -71,7 +75,7 @@ public class OneClickImporterControllerTest
 		initMocks(this);
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings, excelService, oneClickImporterService, entityService, fileStore);
+				languageService, appSettings, excelService, csvService, oneClickImporterService, entityService, fileStore);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");

@@ -8,6 +8,7 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
+import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -41,18 +43,20 @@ public class OneClickImporterController extends MolgenisPluginController
 	private AppSettings appSettings;
 	private OneClickImporterService oneClickImporterService;
 	private ExcelService excelService;
+	private CsvService csvService;
 	private EntityService entityService;
 	private FileStore fileStore;
 
 	public OneClickImporterController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings, ExcelService excelService, OneClickImporterService oneClickImporterService,
-			EntityService entityService, FileStore fileStore)
+			AppSettings appSettings, ExcelService excelService, CsvService csvService,
+			OneClickImporterService oneClickImporterService, EntityService entityService, FileStore fileStore)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.languageService = requireNonNull(languageService);
 		this.appSettings = requireNonNull(appSettings);
 		this.excelService = requireNonNull(excelService);
+		this.csvService = requireNonNull(csvService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 		this.entityService = requireNonNull(entityService);
 		this.fileStore = requireNonNull(fileStore);
@@ -84,6 +88,11 @@ public class OneClickImporterController extends MolgenisPluginController
 		{
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
 			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
+		}
+		else if (fileExtension.equals("csv"))
+		{
+			List<String> lines = csvService.buildLinesFromFile(file);
+			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, lines);
 		}
 		else
 		{
