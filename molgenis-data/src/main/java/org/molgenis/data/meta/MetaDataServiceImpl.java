@@ -595,6 +595,20 @@ public class MetaDataServiceImpl implements MetaDataService
 		return repoCollectionRegistry.hasRepositoryCollection(backendName);
 	}
 
+	private boolean isMetaEntityType(String entityTypeId)
+	{
+		switch (entityTypeId)
+		{
+			case ENTITY_TYPE_META_DATA:
+			case ATTRIBUTE_META_DATA:
+			case TAG:
+			case PACKAGE:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	@Override
 	public Stream<EntityType> getConcreteChildren(EntityType entityType)
 	{

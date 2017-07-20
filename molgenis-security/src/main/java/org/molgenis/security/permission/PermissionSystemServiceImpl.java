@@ -54,9 +54,7 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 		//		});
 	}
 
-		//
-
-	private void giveUserEntityPermissionsAsSystem(SecurityContext securityContext, Collection<EntityType> entityTypes)
+	//	private void giveUserEntityPermissionsAsSystem(SecurityContext securityContext, Collection<EntityType> entityTypes)
 	//{
 	//	Collection<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(entityTypes);
 	//	updateUserAuthorities(securityContext, grantedAuthorities);

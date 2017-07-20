@@ -16,7 +16,7 @@ public class PermissionServiceImpl implements PermissionService
 {
 	private final EntityAclService entityAclService;
 
-	PermissionServiceImpl(EntityAclService entityAclService)
+	public PermissionServiceImpl(EntityAclService entityAclService)
 	{
 		this.entityAclService = requireNonNull(entityAclService);
 	}

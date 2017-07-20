@@ -276,7 +276,7 @@ public class RestService
 			fileEntity.setFilename(multipartFile.getOriginalFilename());
 			fileEntity.setContentType(multipartFile.getContentType());
 			fileEntity.setSize(multipartFile.getSize());
-			ServletUriComponentsBuildercurrentRequest = servletUriComponentsBuilderFactory.fromCurrentRequest();
+			ServletUriComponentsBuilder currentRequest = servletUriComponentsBuilderFactory.fromCurrentRequest();
 					UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + id).replaceQuery(null).build();
 				fileEntity.setUrl(downloadUri.toUriString());
 			dataService.add(FILE_META, fileEntity);

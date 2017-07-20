@@ -1,23 +1,16 @@
 package org.molgenis.ui.controller;
 
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionManagerService;
-import org.molgenis.security.permission.PermissionManagerServiceImpl;
-import org.molgenis.security.permission.Permissions;
-import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.admin.permission.PermissionManagerController;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,11 +28,11 @@ public class StaticContentServiceImpl implements StaticContentService
 	private final DataService dataService;
 	private final StaticContentFactory staticContentFactory;
 
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 
 	@Autowired
 	public StaticContentServiceImpl(DataService dataService, StaticContentFactory staticContentFactory,
-			MolgenisPermissionService molgenisPermissionService)
+			PermissionService molgenisPermissionService)
 	{
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.dataService = requireNonNull(dataService);
@@ -77,7 +70,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return SecurityUtils.currentUserIsAuthenticated() && molgenisPermissionService.hasPermissionOnPlugin(pluginId, Permission.WRITE);
+		return SecurityUtils.currentUserIsAuthenticated() && molgenisPermissionService.hasPermissionOnPlugin(pluginId,
+				Permission.WRITE);
 	}
 
 	@Override
@@ -88,8 +82,10 @@ public class StaticContentServiceImpl implements StaticContentService
 		return staticContent != null ? staticContent.getContent() : null;
 	}
 
-	public void checkPermissions(String pluginId){
-		if(!this.isCurrentUserCanEdit(pluginId)){
+	public void checkPermissions(String pluginId)
+	{
+		if (!this.isCurrentUserCanEdit(pluginId))
+		{
 			throw new MolgenisDataAccessException("No write permissions on static content page");
 		}
 	}

@@ -191,10 +191,10 @@ public class ElasticsearchService implements SearchService, IndexService
 
 	public Explanation explain(EntityType entityType, Object entityId, Query<Entity> q)
 	{
-		Indexindex= contentGenerators.createIndex( entityType                        );
-	 Document document = contentGenerators.createDocument(entityId);
-	 QueryBuilder query = contentGenerators.createQuery(q, entityType);
-		return clientFacade.explain(SearchHit.create(document.getId(),  index .getName()), query);
+		Index index = contentGenerators.createIndex(entityType);
+		Document document = contentGenerators.createDocument(entityId);
+		QueryBuilder query = contentGenerators.createQuery(q, entityType);
+		return clientFacade.explain(SearchHit.create(document.getId(), index.getName()), query);
 	}
 
 	@Override
@@ -243,16 +243,14 @@ public class ElasticsearchService implements SearchService, IndexService
 	@Override
 	public void deleteAll(EntityType entityType, Stream<Object> entityIds)
 	{
-		 entityIds .forEach(entityId -> deleteById( entityType, entityId));
+		entityIds.forEach(entityId -> deleteById(entityType, entityId));
 	}
 
 	@Override
 	public void delete(EntityType entityType, Stream<? extends Entity> entities)
 	{
-		 Stream<Object> entityIds = entities
-				.map(Entity::getIdValue);
+		Stream<Object> entityIds = entities.map(Entity::getIdValue);
 		Iterators.partition(entityIds.iterator(), BATCH_SIZE)
-		.forEachRemaining(batchEntityIds -> deleteAll(entityType,
-				batchEntityIds.stream()));
+				 .forEachRemaining(batchEntityIds -> deleteAll(entityType, batchEntityIds.stream()));
 	}
 }
