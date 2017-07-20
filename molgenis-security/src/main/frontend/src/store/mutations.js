@@ -30,7 +30,11 @@ export default {
     }
     console.log(aceIndex, acl)
     const ace: ACE = acl.entries[aceIndex]
-    ace[permission] = !ace[permission]
+    if (ace.permissions.includes(permission)) {
+      ace.permissions = ace.permissions.filter(p => p !== permission)
+    } else {
+      ace.permissions.push(permission)
+    }
   },
   [SET_ROWS] (state: State, rows: Array<Row>) {
     state.rows = rows
