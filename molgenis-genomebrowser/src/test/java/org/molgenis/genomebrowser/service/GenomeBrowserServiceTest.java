@@ -50,13 +50,14 @@ public class GenomeBrowserServiceTest
 	@Test
 	public void testGetReferenceTracks()
 	{
-		GenomeBrowserTrack reference = new GenomeBrowserTrack("ref_id", "ref_label", null, null, null, null, null, null,
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", null, null, null, null, null,
+				null,
 				null, null, null);
 		GenomeBrowserAttributes genomeBrowserAttributes = getGenomeBrowserAttributes("postion", "chrom", "normal",
 				"mutant");
 
 		EntityType molgenisEntity = mock(EntityType.class);
-		GenomeBrowserTrack track = new GenomeBrowserTrack("id", "entityLabel", molgenisEntity,
+		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity,
 				GenomeBrowserSettings.TrackType.VARIANT, Collections.singletonList(reference),
 				GenomeBrowserSettings.MolgenisReferenceMode.CONFIGURED, genomeBrowserAttributes, "alert(\"test\")",
 				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
@@ -70,13 +71,14 @@ public class GenomeBrowserServiceTest
 	@Test
 	public void testGetReferenceTracksAll()
 	{
-		GenomeBrowserTrack reference = new GenomeBrowserTrack("ref_id", "ref_label", null, null, null, null, null, null,
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", null, null, null, null, null,
+				null,
 				null, null, null);
 		GenomeBrowserAttributes genomeBrowserAttributes = getGenomeBrowserAttributes("postion", "chrom", "normal",
 				"mutant");
 
 		EntityType molgenisEntity = mock(EntityType.class);
-		GenomeBrowserTrack track = new GenomeBrowserTrack("id", "entityLabel", molgenisEntity,
+		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity,
 				GenomeBrowserSettings.TrackType.VARIANT, Collections.singletonList(reference),
 				GenomeBrowserSettings.MolgenisReferenceMode.ALL, genomeBrowserAttributes, "alert(\"test\")",
 				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
@@ -114,11 +116,11 @@ public class GenomeBrowserServiceTest
 		Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
 		assertEquals(result.size(), 2);
 		assertEquals(result.get("type2"),
-				new GenomeBrowserTrack("type2", "refLabel", type2, GenomeBrowserSettings.TrackType.VARIANT,
+				GenomeBrowserTrack.create("type2", "refLabel", type2, GenomeBrowserSettings.TrackType.VARIANT,
 						Collections.emptyList(), GenomeBrowserSettings.MolgenisReferenceMode.ALL, attrs1, null, null,
 						null, null));
 		assertEquals(result.get("type1"),
-				new GenomeBrowserTrack("type1", "refLabel", type1, GenomeBrowserSettings.TrackType.VARIANT,
+				GenomeBrowserTrack.create("type1", "refLabel", type1, GenomeBrowserSettings.TrackType.VARIANT,
 						Collections.emptyList(), GenomeBrowserSettings.MolgenisReferenceMode.ALL, attrs2, null, null,
 						null, null));
 	}
@@ -126,13 +128,14 @@ public class GenomeBrowserServiceTest
 	@Test
 	public void testGetReferenceTracksNone()
 	{
-		GenomeBrowserTrack reference = new GenomeBrowserTrack("ref_id", "ref_label", null, null, null, null, null, null,
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", null, null, null, null, null,
+				null,
 				null, null, null);
 		GenomeBrowserAttributes genomeBrowserAttributes = getGenomeBrowserAttributes("postion", "chrom", "normal",
 				"mutant");
 
 		EntityType molgenisEntity = mock(EntityType.class);
-		GenomeBrowserTrack track = new GenomeBrowserTrack("id", "entityLabel", molgenisEntity,
+		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity,
 				GenomeBrowserSettings.TrackType.VARIANT, Collections.singletonList(reference),
 				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, "alert(\"test\")",
 				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
@@ -143,26 +146,7 @@ public class GenomeBrowserServiceTest
 		verify(dataService, never()).getMeta();
 	}
 
-	@Test
-	public void testToTrack() throws Exception
-	{
-		GenomeBrowserTrack reference = new GenomeBrowserTrack("ref_id", "ref_label", null, null, null, null, null, null,
-				null, null, null);
-		GenomeBrowserAttributes genomeBrowserAttributes = getGenomeBrowserAttributes("postion", "chrom", "normal",
-				"mutant");
-
-		EntityType molgenisEntity = mock(EntityType.class);
-		GenomeBrowserTrack track = new GenomeBrowserTrack("id", "entityLabel", molgenisEntity,
-				GenomeBrowserSettings.TrackType.VARIANT, Collections.singletonList(reference),
-				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, "alert(\"test\")",
-				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
-
-		String expected = "{\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"postion\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"label_attr\":\"entityLabel\",\"tier_type\":\"molgenis\",\"uri\":\"http://localhost:8080/api/v2/null?id\",\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"]}";
-
-		assertEquals(genomeBrowserService.toTrackJson(track).toString(), expected);
-	}
-
-	private GenomeBrowserAttributes getGenomeBrowserAttributes(String pos, String chrom, String ref, String alt)
+	public static GenomeBrowserAttributes getGenomeBrowserAttributes(String pos, String chrom, String ref, String alt)
 	{
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);

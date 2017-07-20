@@ -320,18 +320,17 @@ public class DataExplorerController extends MolgenisPluginController
 	 *
 	 * @return
 	 */
-	private List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entitySettings)
+	private List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks)
 	{
-		Map<String, GenomeBrowserTrack> allSettings = new HashMap<>();
-		allSettings.putAll(entitySettings);
-		for (GenomeBrowserTrack track : entitySettings.values())
+		Map<String, GenomeBrowserTrack> allTracks = new HashMap<>();
+		allTracks.putAll(entityTracks);
+		for (GenomeBrowserTrack track : entityTracks.values())
 		{
-			allSettings.putAll(genomeBrowserService.getReferenceTracks(track));
+			allTracks.putAll(genomeBrowserService.getReferenceTracks(track));
 		}
-		return allSettings.values()
-						  .stream()
-						  .map(config -> genomeBrowserService.toTrackJson(config))
-						  .collect(Collectors.toList());
+		return allTracks.values()
+						.stream().map(track -> track.toTrackJson())
+						.collect(Collectors.toList());
 	}
 
 	@RequestMapping(value = "/download", method = POST)

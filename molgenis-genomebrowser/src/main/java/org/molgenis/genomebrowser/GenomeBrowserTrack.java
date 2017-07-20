@@ -1,159 +1,120 @@
 package org.molgenis.genomebrowser;
 
+import com.google.auto.value.AutoValue;
+
+import javax.annotation.Nullable;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 
 import java.util.stream.Collectors;
 
-public final class GenomeBrowserTrack
+@AutoValue
+public abstract class GenomeBrowserTrack
 {
-	public final String id;
-	public final String labelAttr;
-	public final EntityType entity;
-	public final GenomeBrowserSettings.TrackType trackType;
-	public final Iterable<GenomeBrowserTrack> molgenisReferenceTracks;
-	public final GenomeBrowserSettings.MolgenisReferenceMode molgenisReferenceMode;
-	public final GenomeBrowserAttributes genomeBrowserAttrs;
-	public final String actions;
-	public final String attrs;
-	public final String scoreAttr;
-	public final String exonKey;
-
-	public GenomeBrowserTrack(String id, String labelAttr, EntityType entity, GenomeBrowserSettings.TrackType trackType,
-			Iterable<GenomeBrowserTrack> molgenisReferenceTracks,
+	public static GenomeBrowserTrack create(String id, String labelAttr, EntityType entity,
+			GenomeBrowserSettings.TrackType trackType, Iterable<GenomeBrowserTrack> molgenisReferenceTracks,
 			GenomeBrowserSettings.MolgenisReferenceMode molgenisReferenceMode,
 			GenomeBrowserAttributes genomeBrowserAttrs, String actions, String attrs, String scoreAttr, String exonKey)
 	{
-		this.id = id;
-		this.labelAttr = labelAttr;
-		this.entity = entity;
-		this.trackType = trackType;
-		this.molgenisReferenceTracks = molgenisReferenceTracks;
-		this.molgenisReferenceMode = molgenisReferenceMode;
-		this.genomeBrowserAttrs = genomeBrowserAttrs;
-		this.actions = actions;
-		this.attrs = attrs;
-		this.scoreAttr = scoreAttr;
-		this.exonKey = exonKey;
+		return new AutoValue_GenomeBrowserTrack(id, labelAttr, entity, trackType, molgenisReferenceTracks,
+				molgenisReferenceMode, genomeBrowserAttrs, actions, attrs, scoreAttr, exonKey);
 	}
 
-	public GenomeBrowserTrack(GenomeBrowserSettings settings)
+	public static GenomeBrowserTrack create(GenomeBrowserSettings settings)
 	{
-		this.id = settings.getIdentifier();
-		this.labelAttr = settings.getLabelAttr().getName();
-		this.entity = settings.getEntity();
-		this.trackType = settings.getTrackType();
-		this.molgenisReferenceTracks = settings.getMolgenisReferenceTracks().collect(Collectors.toList());
-		this.molgenisReferenceMode = settings.getMolgenisReferenceMode();
-		this.genomeBrowserAttrs = settings.getGenomeBrowserAttrs();
-		this.actions = settings.getActions();
-		this.attrs = settings.getAttrs();
-		this.scoreAttr = settings.getScoreAttr();
-		this.exonKey = settings.getExonKey();
-	}
-
-	@Override
-	public boolean equals(Object o)
-	{
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		GenomeBrowserTrack that = (GenomeBrowserTrack) o;
-
-		if (!id.equals(that.id)) return false;
-		if (!labelAttr.equals(that.labelAttr)) return false;
-		if (!entity.equals(that.entity)) return false;
-		if (trackType != that.trackType) return false;
-		if (molgenisReferenceTracks != null ? !molgenisReferenceTracks.equals(that.molgenisReferenceTracks) :
-				that.molgenisReferenceTracks != null) return false;
-		if (molgenisReferenceMode != that.molgenisReferenceMode) return false;
-		if (!genomeBrowserAttrs.equals(that.genomeBrowserAttrs)) return false;
-		if (actions != null ? !actions.equals(that.actions) : that.actions != null) return false;
-		if (attrs != null ? !attrs.equals(that.attrs) : that.attrs != null) return false;
-		if (scoreAttr != null ? !scoreAttr.equals(that.scoreAttr) : that.scoreAttr != null) return false;
-		return exonKey != null ? exonKey.equals(that.exonKey) : that.exonKey == null;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		int result = id.hashCode();
-		result = 31 * result + labelAttr.hashCode();
-		result = 31 * result + entity.hashCode();
-		result = 31 * result + trackType.hashCode();
-		result = 31 * result + (molgenisReferenceTracks != null ? molgenisReferenceTracks.hashCode() : 0);
-		result = 31 * result + molgenisReferenceMode.hashCode();
-		result = 31 * result + genomeBrowserAttrs.hashCode();
-		result = 31 * result + (actions != null ? actions.hashCode() : 0);
-		result = 31 * result + (attrs != null ? attrs.hashCode() : 0);
-		result = 31 * result + (scoreAttr != null ? scoreAttr.hashCode() : 0);
-		result = 31 * result + (exonKey != null ? exonKey.hashCode() : 0);
-		return result;
+		return new AutoValue_GenomeBrowserTrack(settings.getIdentifier(), settings.getLabelAttr().getName(),
+				settings.getEntity(), settings.getTrackType(),
+				settings.getMolgenisReferenceTracks().collect(Collectors.toList()), settings.getMolgenisReferenceMode(),
+				settings.getGenomeBrowserAttrs(), settings.getActions(), settings.getAttrs(), settings.getScoreAttr(),
+				settings.getExonKey());
 	}
 
 	@Override
 	public String toString()
 	{
-		return "GenomeBrowserTrack{" + "id='" + id + '\'' + ", labelAttr='" + labelAttr + '\'' + ", entity=" + entity
-				+ ", trackType=" + trackType + ", molgenisReferenceTracks=" + molgenisReferenceTracks
-				+ ", molgenisReferenceMode=" + molgenisReferenceMode + ", genomeBrowserAttrs=" + genomeBrowserAttrs
-				+ ", actions='" + actions + '\'' + ", attrs='" + attrs + '\'' + ", scoreAttr='" + scoreAttr + '\''
-				+ ", exonKey='" + exonKey + '\'' + '}';
+		return "GenomeBrowserTrack{" + "id='" + getId() + '\'' + ", labelAttr='" + getLabelAttr() + '\'' + ", entity="
+				+ getEntity() + ", trackType=" + getTrackType() + ", molgenisReferenceTracks="
+				+ getMolgenisReferenceTracks() + ", molgenisReferenceMode=" + getMolgenisReferenceMode()
+				+ ", genomeBrowserAttrs=" + getGenomeBrowserAttrs() + ", actions='" + getActions() + '\'' + ", attrs='"
+				+ getAttrs() + '\'' + ", scoreAttr='" + getScoreAttr() + '\'' + ", exonKey='" + getExonKey() + '\''
+				+ '}';
 	}
 
-	public String getId()
+	public abstract String getId();
+
+	public abstract String getLabelAttr();
+
+	public abstract EntityType getEntity();
+
+	public abstract GenomeBrowserSettings.TrackType getTrackType();
+
+	@Nullable
+	public abstract Iterable<GenomeBrowserTrack> getMolgenisReferenceTracks();
+
+	public abstract GenomeBrowserSettings.MolgenisReferenceMode getMolgenisReferenceMode();
+
+	public abstract GenomeBrowserAttributes getGenomeBrowserAttrs();
+
+	@Nullable
+	public abstract String getActions();
+
+	@Nullable
+	public abstract String getAttrs();
+
+	@Nullable
+	public abstract String getScoreAttr();
+
+	@Nullable
+	public abstract String getExonKey();
+
+	public JSONObject toTrackJson()
 	{
-		return id;
+		JSONObject json = new JSONObject();
+		json.put("name", getEntity().getLabel());
+		json.put("uri", "http://localhost:8080/api/v2/" + getEntity().getId() + "?" + getId());
+		json.put("tier_type", "molgenis");
+		json.put("genome_attrs", getGenomeBrowserAttrsJSON(getGenomeBrowserAttrs()));
+		if (getLabelAttr() != null) json.put("label_attr", getLabelAttr());
+		if (getAttrs() != null) json.put("attrs", getAttrsJSON(getAttrs()));
+		if (getActions() != null) json.put("actions", getActions());
+		if (getTrackType() != null) json.put("track_type", getTrackType());
+		if (getScoreAttr() != null) json.put("score_attr", getScoreAttr());
+		if (getExonKey() != null) json.put("exon_key", getExonKey());
+		return json;
 	}
 
-	public String getLabelAttr()
+	private JSONObject getGenomeBrowserAttrsJSON(GenomeBrowserAttributes genomeBrowserAttrs)
 	{
-		return labelAttr;
+		JSONObject genomeAttrsJSON = new JSONObject();
+		genomeAttrsJSON.put("chr", genomeBrowserAttrs.getChrom());
+		genomeAttrsJSON.put("pos", genomeBrowserAttrs.getPos());
+		if (genomeBrowserAttrs.getRef() != null)
+		{
+			genomeAttrsJSON.put("ref", genomeBrowserAttrs.getRef());
+		}
+		if (genomeBrowserAttrs.getAlt() != null)
+		{
+			genomeAttrsJSON.put("alt", genomeBrowserAttrs.getAlt());
+		}
+		if (genomeBrowserAttrs.getStop() != null)
+		{
+			genomeAttrsJSON.put("stop", genomeBrowserAttrs.getStop());
+		}
+		return genomeAttrsJSON;
 	}
 
-	public EntityType getEntity()
+	private JSONArray getAttrsJSON(String attrsString)
 	{
-		return entity;
-	}
-
-	public GenomeBrowserSettings.TrackType getTrackType()
-	{
-		return trackType;
-	}
-
-	public Iterable<GenomeBrowserTrack> getMolgenisReferenceTracks()
-	{
-		return molgenisReferenceTracks;
-	}
-
-	public GenomeBrowserSettings.MolgenisReferenceMode getMolgenisReferenceMode()
-	{
-		return molgenisReferenceMode;
-	}
-
-	public GenomeBrowserAttributes getGenomeBrowserAttrs()
-	{
-		return genomeBrowserAttrs;
-	}
-
-	public String getActions()
-	{
-		return actions;
-	}
-
-	public String getAttrs()
-	{
-		return attrs;
-	}
-
-	public String getScoreAttr()
-	{
-		return scoreAttr;
-	}
-
-	public String getExonKey()
-	{
-		return exonKey;
+		JSONArray attrsArray = new JSONArray();
+		String[] attrs = attrsString.split(",");
+		for (String attr : attrs)
+		{
+			attrsArray.put(attr);
+		}
+		return attrsArray;
 	}
 }

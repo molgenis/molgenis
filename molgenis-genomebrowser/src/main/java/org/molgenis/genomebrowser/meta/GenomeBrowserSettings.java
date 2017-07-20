@@ -80,7 +80,7 @@ public class GenomeBrowserSettings extends StaticEntity
 	public Stream<GenomeBrowserTrack> getMolgenisReferenceTracks()
 	{
 		return StreamSupport.stream(getEntities(GenomeBrowserSettingsMetadata.MOLGENIS_REFERENCE_TRACKS,
-				GenomeBrowserSettings.class).spliterator(), false).map(GenomeBrowserTrack::new);
+				GenomeBrowserSettings.class).spliterator(), false).map(settings -> GenomeBrowserTrack.create(settings));
 	}
 
 	public void setMolgenisReferenceTracks(GenomeBrowserSettings molgenisReferenceTracks)

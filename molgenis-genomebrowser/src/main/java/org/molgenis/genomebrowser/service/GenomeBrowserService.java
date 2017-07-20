@@ -50,7 +50,7 @@ public class GenomeBrowserService
 				new QueryImpl<GenomeBrowserSettings>().eq(GenomeBrowserSettingsMetadata.ENTITY,
 						entityType.getIdValue()), GenomeBrowserSettings.class)
 				   .forEach(referenceSettings -> settings.put(referenceSettings.getIdentifier(),
-						   new GenomeBrowserTrack(referenceSettings)));
+						   GenomeBrowserTrack.create(referenceSettings)));
 
 		if (settings.isEmpty())
 		{
@@ -103,23 +103,6 @@ public class GenomeBrowserService
 		return result;
 	}
 
-	public JSONObject toTrackJson(GenomeBrowserTrack genomeBrowserTrack)
-	{
-		JSONObject json = new JSONObject();
-		json.put("name", genomeBrowserTrack.getEntity().getLabel());
-		json.put("uri", "http://localhost:8080/api/v2/" + genomeBrowserTrack.getEntity().getId() + "?"
-				+ genomeBrowserTrack.getId());
-		json.put("tier_type", "molgenis");
-		json.put("genome_attrs", getGenomeBrowserAttrsJSON(genomeBrowserTrack.getGenomeBrowserAttrs()));
-		if (genomeBrowserTrack.getLabelAttr() != null) json.put("label_attr", genomeBrowserTrack.getLabelAttr());
-		if (genomeBrowserTrack.getAttrs() != null) json.put("attrs", getAttrsJSON(genomeBrowserTrack.getAttrs()));
-		if (genomeBrowserTrack.getActions() != null) json.put("actions", genomeBrowserTrack.getActions());
-		if (genomeBrowserTrack.getTrackType() != null) json.put("track_type", genomeBrowserTrack.getTrackType());
-		if (genomeBrowserTrack.getScoreAttr() != null) json.put("score_attr", genomeBrowserTrack.getScoreAttr());
-		if (genomeBrowserTrack.getExonKey() != null) json.put("exon_key", genomeBrowserTrack.getExonKey());
-		return json;
-	}
-
 	private Stream<GenomeBrowserAttributes> getDefaultGenomeBrowserAttributes()
 	{
 		return dataService.findAll(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES,
@@ -149,40 +132,8 @@ public class GenomeBrowserService
 	private GenomeBrowserTrack getDefaultGenomeBrowserSettingsEntity(EntityType entityType,
 			GenomeBrowserAttributes attrs)
 	{
-		return new GenomeBrowserTrack(entityType.getIdValue().toString(), entityType.getLabelAttribute().getName(),
+		return GenomeBrowserTrack.create(entityType.getIdValue().toString(), entityType.getLabelAttribute().getName(),
 				entityType, GenomeBrowserSettings.TrackType.VARIANT, Collections.emptyList(),
 				GenomeBrowserSettings.MolgenisReferenceMode.ALL, attrs, null, null, null, null);
 	}
-
-	private JSONObject getGenomeBrowserAttrsJSON(GenomeBrowserAttributes genomeBrowserAttrs)
-	{
-		JSONObject genomeAttrsJSON = new JSONObject();
-		genomeAttrsJSON.put("chr", genomeBrowserAttrs.getChrom());
-		genomeAttrsJSON.put("pos", genomeBrowserAttrs.getPos());
-		if (genomeBrowserAttrs.getRef() != null)
-		{
-			genomeAttrsJSON.put("ref", genomeBrowserAttrs.getRef());
-		}
-		if (genomeBrowserAttrs.getAlt() != null)
-		{
-			genomeAttrsJSON.put("alt", genomeBrowserAttrs.getAlt());
-		}
-		if (genomeBrowserAttrs.getStop() != null)
-		{
-			genomeAttrsJSON.put("stop", genomeBrowserAttrs.getStop());
-		}
-		return genomeAttrsJSON;
-	}
-
-	private JSONArray getAttrsJSON(String attrsString)
-	{
-		JSONArray attrsArray = new JSONArray();
-		String[] attrs = attrsString.split(",");
-		for (String attr : attrs)
-		{
-			attrsArray.put(attr);
-		}
-		return attrsArray;
-	}
-
 }
