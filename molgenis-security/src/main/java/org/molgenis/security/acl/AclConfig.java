@@ -4,7 +4,7 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.security.acl.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.support.NoOpCache;
+import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -14,7 +14,6 @@ import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.*;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
-import org.springframework.security.acls.model.AclCache;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;
 import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -97,9 +96,12 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 		}
 	}
 
-	private AclCache aclCache()
+	@Autowired
+	private AclCache aclCache;
+
+	private org.springframework.security.acls.model.AclCache aclCache()
 	{
-		return new SpringCacheBasedAclCache(new NoOpCache("aclCache"), permissionGrantingStrategy(),
+		return new SpringCacheBasedAclCache(new TransactionAwareCacheDecorator(aclCache), permissionGrantingStrategy(),
 				aclAuthorizationStrategy());
 	}
 
@@ -118,7 +120,6 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 	{
 		return new BitMaskPermissionGrantingStrategy(auditLogger());
 	}
-
 
 	private AclAuthorizationStrategy aclAuthorizationStrategy()
 	{
