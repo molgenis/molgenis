@@ -56,12 +56,6 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	}
 
 	@Override
-	public boolean isAuthorized()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
 		return Lists.newArrayList(Iterables.filter(

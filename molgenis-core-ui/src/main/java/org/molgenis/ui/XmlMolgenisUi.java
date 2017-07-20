@@ -1,6 +1,5 @@
 package org.molgenis.ui;
 
-import org.molgenis.security.core.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -14,20 +13,17 @@ import static java.util.Objects.requireNonNull;
 public class XmlMolgenisUi implements MolgenisUi
 {
 	private final Molgenis molgenisUi;
-	private final PermissionService molgenisPermissionService;
 
 	@Autowired
-	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, PermissionService molgenisPermissionService)
-			throws IOException
+	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader) throws IOException
 	{
 		this.molgenisUi = requireNonNull(xmlMolgenisUiLoader).load();
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 	}
 
 	@Override
 	public MolgenisUiMenu getMenu()
 	{
-		return new XmlMolgenisUiMenu(molgenisUi.getMenu(), molgenisPermissionService);
+		return new XmlMolgenisUiMenu(molgenisUi.getMenu());
 	}
 
 	@Override
