@@ -46,7 +46,7 @@ public class MolgenisClient
 		{
 			headers.set("x-molgenis-token", token);
 		}
-		return new HttpEntity<T>(body, headers);
+		return new HttpEntity<>(body, headers);
 	}
 
 	/**
@@ -75,8 +75,8 @@ public class MolgenisClient
 	 */
 	public LoginResponse login(String uid, String pwd)
 	{
-		ResponseEntity<LoginResponse> result = template
-				.postForEntity("{apiHref}/login", LoginRequest.create(uid, pwd), LoginResponse.class, apiHref);
+		ResponseEntity<LoginResponse> result = template.postForEntity("{apiHref}/login", LoginRequest.create(uid, pwd),
+				LoginResponse.class, apiHref);
 		if (result.getStatusCode() == OK)
 		{
 			return result.getBody();
@@ -116,9 +116,8 @@ public class MolgenisClient
 	{
 		Map<String, Object> query = of("q",
 				singletonList(of("field", attributeName, "operator", "EQUALS", "value", value)));
-		ResponseEntity<QueryResponse> response = template
-				.exchange("{apiHref}/{entityTypeId}?_method=GET", POST, createHttpEntity(token, query),
-						QueryResponse.class, apiHref, entityTypeId);
+		ResponseEntity<QueryResponse> response = template.exchange("{apiHref}/{entityTypeId}?_method=GET", POST,
+				createHttpEntity(token, query), QueryResponse.class, apiHref, entityTypeId);
 		return response.getBody();
 	}
 
@@ -154,17 +153,15 @@ public class MolgenisClient
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> get(String token, String entityTypeId, Object id)
 	{
-		ResponseEntity<Map> responseEntity = template
-				.exchange("{apiHref}/{entityTypeId}/{id}", GET, createHttpEntity(token), Map.class, apiHref,
-						entityTypeId, id);
+		ResponseEntity<Map> responseEntity = template.exchange("{apiHref}/{entityTypeId}/{id}", GET,
+				createHttpEntity(token), Map.class, apiHref, entityTypeId, id);
 		return responseEntity.getBody();
 	}
 
 	public QueryResponse get(String token, String entityTypeId)
 	{
-		ResponseEntity<QueryResponse> responseEntity = template
-				.exchange("{apiHref}/{entityTypeId}", GET, createHttpEntity(token), QueryResponse.class, apiHref,
-						entityTypeId);
+		ResponseEntity<QueryResponse> responseEntity = template.exchange("{apiHref}/{entityTypeId}", GET,
+				createHttpEntity(token), QueryResponse.class, apiHref, entityTypeId);
 		return responseEntity.getBody();
 	}
 

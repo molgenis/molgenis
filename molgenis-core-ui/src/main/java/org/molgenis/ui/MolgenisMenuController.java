@@ -66,7 +66,7 @@ public class MolgenisMenuController
 		}
 		String pluginId = activeItem.getId();
 
-		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
+		String contextUri = URI + '/' + menuId + '/' + pluginId;
 		model.addAttribute(KEY_CONTEXT_URL, contextUri);
 		model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
 		model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
@@ -83,7 +83,7 @@ public class MolgenisMenuController
 		MolgenisUiMenuItem activeItem = menu.getActiveItem();
 		String pluginId = activeItem != null ? activeItem.getId() : VoidPluginController.ID;
 
-		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
+		String contextUri = URI + '/' + menuId + '/' + pluginId;
 		model.addAttribute(KEY_CONTEXT_URL, contextUri);
 		model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
 		model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
@@ -94,7 +94,7 @@ public class MolgenisMenuController
 	public String forwardMenuPlugin(HttpServletRequest request, @Valid @NotNull @PathVariable String menuId,
 			@Valid @NotNull @PathVariable String pluginId, Model model)
 	{
-		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
+		String contextUri = URI + '/' + menuId + '/' + pluginId;
 		String mappingUri = (String) (request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 		String remainder = mappingUri.substring(contextUri.length());
 

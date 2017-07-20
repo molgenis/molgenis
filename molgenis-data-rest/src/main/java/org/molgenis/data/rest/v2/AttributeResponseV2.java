@@ -1,7 +1,5 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
@@ -13,7 +11,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
 
@@ -50,10 +48,8 @@ class AttributeResponseV2
 	 * @param entityType
 	 * @param attr
 	 * @param fetch             set of lowercase attribute names to include in response
-	 * @param permissionService
 	 */
-	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
+	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -69,7 +65,7 @@ class AttributeResponseV2
 		EntityType refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, dataService,
 					languageService);
 		}
 		else
@@ -86,36 +82,34 @@ class AttributeResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists
-					.newArrayList(Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, attr1 ->
 					{
-						@Override
-						public AttributeResponseV2 apply(Attribute attr)
-						{
+
 							Fetch subAttrFetch;
 							if (fetch != null)
 							{
-								if (attr.getDataType() == AttributeType.COMPOUND)
+								if (attr1.getDataType() == AttributeType.COMPOUND)
 								{
 									subAttrFetch = fetch;
 								}
 								else
 								{
-									subAttrFetch = fetch.getFetch(attr);
+									subAttrFetch = fetch.getFetch(attr1);
 								}
 							}
-							else if (EntityTypeUtils.isReferenceType(attr))
+							else if (EntityTypeUtils.isReferenceType(attr1))
 							{
-								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
+								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
 										languageService.getCurrentUserLanguageCode());
 							}
 							else
 							{
 								subAttrFetch = null;
 							}
-							return new AttributeResponseV2(entityParentName, entityType, attr, subAttrFetch,
-									permissionService, dataService, languageService);
-						}
+							return new AttributeResponseV2(entityParentName, entityType, attr1, subAttrFetch,
+									 dataService, languageService);
+
 					}));
 		}
 		else
@@ -141,14 +135,7 @@ class AttributeResponseV2
 	{
 		if (fetch != null)
 		{
-			return Iterables.filter(attrs, new Predicate<Attribute>()
-			{
-				@Override
-				public boolean apply(Attribute attr)
-				{
-					return filterAttributeRec(fetch, attr);
-				}
-			});
+			return Iterables.filter(attrs, attr -> filterAttributeRec(fetch, attr));
 		}
 		else
 		{

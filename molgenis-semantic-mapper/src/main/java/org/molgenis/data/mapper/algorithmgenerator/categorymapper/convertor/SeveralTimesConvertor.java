@@ -26,7 +26,7 @@ public class SeveralTimesConvertor extends AmountConvertor
 	public boolean matchCriteria(String description)
 	{
 		String lowerCase = description.toLowerCase();
-		return CRITERIA.stream().anyMatch(keyWord -> lowerCase.contains(keyWord));
+		return CRITERIA.stream().anyMatch(lowerCase::contains);
 	}
 
 	AmountWrapper getInternalAmount(String description)
@@ -34,9 +34,9 @@ public class SeveralTimesConvertor extends AmountConvertor
 		Unit<?> unit = CategoryMapperUtil.findDurationUnit(description);
 		if (unit != null && unit.isCompatible(STANDARD_PER_WEEK_UNIT))
 		{
-			return AmountWrapper
-					.create(Amount.rangeOf((double) 3, NonSI.DAY.inverse().getConverterTo(unit).convert(1) - 1, unit)
-							.to(STANDARD_PER_WEEK_UNIT), false);
+			return AmountWrapper.create(
+					Amount.rangeOf((double) 3, NonSI.DAY.inverse().getConverterTo(unit).convert(1) - 1, unit)
+						  .to(STANDARD_PER_WEEK_UNIT), false);
 		}
 		return null;
 	}

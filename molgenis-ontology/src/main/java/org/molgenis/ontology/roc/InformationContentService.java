@@ -37,48 +37,91 @@ public class InformationContentService
 	private static final String SINGLE_WHITESPACE = " ";
 
 	private final LoadingCache<String, Long> CACHED_TOTAL_WORD_COUNT = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, Long>()
-			{
-				@Override
-				public Long load(String ontologyIri)
-				{
-					Entity ontologyEntity = dataService
-							.findOne(ONTOLOGY, new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
-					if (ontologyEntity != null)
-					{
-						return dataService.count(ONTOLOGY_TERM,
-								new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
-					}
-					return (long) 0;
-				}
-			});
+																				   .maximumSize(Integer.MAX_VALUE)
+																				   .expireAfterWrite(1, TimeUnit.DAYS)
+																				   .build(new CacheLoader<String, Long>()
+																				   {
+																					   @Override
+																					   public Long load(
+																							   String ontologyIri)
+																					   {
+																						   Entity ontologyEntity = dataService
+																								   .findOne(ONTOLOGY,
+																										   new QueryImpl<>()
+																												   .eq(OntologyMetaData.ONTOLOGY_IRI,
+																														   ontologyIri));
+																						   if (ontologyEntity != null)
+																						   {
+																							   return dataService.count(
+																									   ONTOLOGY_TERM,
+																									   new QueryImpl<>()
+																											   .eq(OntologyTermMetaData.ONTOLOGY,
+																													   ontologyEntity));
+																						   }
+																						   return (long) 0;
+																					   }
+																				   });
 	private final LoadingCache<OntologyWord, Double> CACHED_INVERSE_DOCUMENT_FREQ = CacheBuilder.newBuilder()
-			.maximumSize(Integer.MAX_VALUE).expireAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<OntologyWord, Double>()
-			{
-				public Double load(OntologyWord key) throws ExecutionException
-				{
-					String ontologyIri = key.getOntologyIri();
-					Entity ontologyEntity = dataService
-							.findOne(ONTOLOGY, new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
-					if (ontologyEntity != null)
-					{
-						QueryRule queryRule = new QueryRule(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH,
-										key.getWord())));
-						queryRule.setOperator(Operator.DIS_MAX);
-						QueryRule finalQuery = new QueryRule(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
-								new QueryRule(Operator.AND), queryRule));
-						long wordCount = dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery));
-						Long total = CACHED_TOTAL_WORD_COUNT.get(ontologyIri);
-						BigDecimal idfValue = new BigDecimal(
-								total == null ? 0 : (1 + Math.log((double) total / (wordCount + 1))));
-						return idfValue.doubleValue();
-					}
-					return (double) 0;
-				}
-			});
+																								.maximumSize(
+																										Integer.MAX_VALUE)
+																								.expireAfterWrite(1,
+																										TimeUnit.DAYS)
+																								.build(new CacheLoader<OntologyWord, Double>()
+																								{
+																									public Double load(
+																											OntologyWord key)
+																											throws
+																											ExecutionException
+																									{
+																										String ontologyIri = key
+																												.getOntologyIri();
+																										Entity ontologyEntity = dataService
+																												.findOne(
+																														ONTOLOGY,
+																														new QueryImpl<>()
+																																.eq(OntologyMetaData.ONTOLOGY_IRI,
+																																		ontologyIri));
+																										if (ontologyEntity
+																												!= null)
+																										{
+																											QueryRule queryRule = new QueryRule(
+																													Arrays.asList(
+																															new QueryRule(
+																																	OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+																																	Operator.FUZZY_MATCH,
+																																	key.getWord())));
+																											queryRule.setOperator(
+																													Operator.DIS_MAX);
+																											QueryRule finalQuery = new QueryRule(
+																													Arrays.asList(
+																															new QueryRule(
+																																	OntologyTermMetaData.ONTOLOGY,
+																																	Operator.EQUALS,
+																																	ontologyEntity),
+																															new QueryRule(
+																																	Operator.AND),
+																															queryRule));
+																											long wordCount = dataService
+																													.count(ONTOLOGY_TERM,
+																															new QueryImpl<>(
+																																	finalQuery));
+																											Long total = CACHED_TOTAL_WORD_COUNT
+																													.get(ontologyIri);
+																											BigDecimal idfValue = new BigDecimal(
+																													total
+																															== null ? 0 : (
+																															1
+																																	+ Math
+																																	.log((double) total
+																																			/ (
+																																			wordCount
+																																					+ 1))));
+																											return idfValue
+																													.doubleValue();
+																										}
+																										return (double) 0;
+																									}
+																								});
 
 	private final DataService dataService;
 
@@ -95,10 +138,14 @@ public class InformationContentService
 
 		if (wordIDFMap.size() > 0)
 		{
-			double averageIDFValue = wordIDFMap.values().stream().mapToDouble(Double::doubleValue).average()
-					.getAsDouble();
-			double queryStringLength = StringUtils.join(createStemmedWordSet(queryString), SINGLE_WHITESPACE).trim()
-					.length();
+			double averageIDFValue = wordIDFMap.values()
+											   .stream()
+											   .mapToDouble(Double::doubleValue)
+											   .average()
+											   .getAsDouble();
+			double queryStringLength = StringUtils.join(createStemmedWordSet(queryString), SINGLE_WHITESPACE)
+												  .trim()
+												  .length();
 			double totalContribution = 0;
 			double totalDenominator = 0;
 
@@ -156,9 +203,12 @@ public class InformationContentService
 
 	public Set<String> createStemmedWordSet(String queryString)
 	{
-		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR)).stream()
-				.filter(term -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(term)).map(Stemmer::stem)
-				.filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR))
+									  .stream()
+									  .filter(term -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(term))
+									  .map(Stemmer::stem)
+									  .filter(StringUtils::isNotBlank)
+									  .collect(Collectors.toSet());
 		return Sets.newHashSet(uniqueTerms);
 	}
 }

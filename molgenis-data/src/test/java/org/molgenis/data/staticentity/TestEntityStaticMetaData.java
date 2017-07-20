@@ -40,14 +40,19 @@ public class TestEntityStaticMetaData extends SystemEntityType
 		setPackage(testPackage);
 		addAttribute(EntityTestHarness.ATTR_ID, ROLE_ID).setAuto(true);
 		addAttribute(EntityTestHarness.ATTR_STRING, ROLE_LABEL).setNillable(false);
-		addAttribute(EntityTestHarness.ATTR_BOOL).setDataType(BOOL).setAggregatable(true).setNillable(false)
-				.setDefaultValue(valueOf(true));
+		addAttribute(EntityTestHarness.ATTR_BOOL).setDataType(BOOL)
+												 .setAggregatable(true)
+												 .setNillable(false)
+												 .setDefaultValue(valueOf(true));
 		addAttribute(EntityTestHarness.ATTR_CATEGORICAL).setDataType(CATEGORICAL)
-				.setRefEntity(testRefEntityStaticMetaData);
+														.setRefEntity(testRefEntityStaticMetaData);
 		addAttribute(EntityTestHarness.ATTR_CATEGORICAL_MREF).setDataType(CATEGORICAL_MREF)
-				.setRefEntity(testRefEntityStaticMetaData);
-		addAttribute(EntityTestHarness.ATTR_ENUM).setDataType(ENUM).setEnumOptions(asList("option1", "option2"))
-				.setAggregatable(true).setNillable(false).setDefaultValue("option1");
+															 .setRefEntity(testRefEntityStaticMetaData);
+		addAttribute(EntityTestHarness.ATTR_ENUM).setDataType(ENUM)
+												 .setEnumOptions(asList("option1", "option2"))
+												 .setAggregatable(true)
+												 .setNillable(false)
+												 .setDefaultValue("option1");
 		addAttribute(EntityTestHarness.ATTR_DATE).setDataType(DATE);
 		addAttribute(EntityTestHarness.ATTR_DATETIME).setDataType(DATE_TIME);
 		addAttribute(EntityTestHarness.ATTR_EMAIL).setDataType(EMAIL);
@@ -55,8 +60,10 @@ public class TestEntityStaticMetaData extends SystemEntityType
 		addAttribute(EntityTestHarness.ATTR_HTML).setDataType(HTML);
 		addAttribute(EntityTestHarness.ATTR_HYPERLINK).setDataType(HYPERLINK);
 		addAttribute(EntityTestHarness.ATTR_LONG).setDataType(LONG);
-		addAttribute(EntityTestHarness.ATTR_INT).setDataType(INT).setAggregatable(true).setNillable(false)
-				.setDefaultValue(valueOf(1));
+		addAttribute(EntityTestHarness.ATTR_INT).setDataType(INT)
+												.setAggregatable(true)
+												.setNillable(false)
+												.setDefaultValue(valueOf(1));
 		addAttribute(EntityTestHarness.ATTR_SCRIPT).setDataType(SCRIPT);
 		addAttribute(EntityTestHarness.ATTR_XREF).setDataType(XREF).setRefEntity(testRefEntityStaticMetaData);
 		addAttribute(EntityTestHarness.ATTR_MREF).setDataType(MREF).setRefEntity(testRefEntityStaticMetaData);

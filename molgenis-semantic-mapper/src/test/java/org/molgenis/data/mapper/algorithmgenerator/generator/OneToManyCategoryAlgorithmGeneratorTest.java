@@ -2,8 +2,6 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import com.google.common.collect.Lists;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -60,8 +58,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		targetRefEntityType.addAttribute(targetCodeAttribute, ROLE_ID);
 		targetRefEntityType.addAttribute(targetLabelAttribute, ROLE_LABEL);
 
-		targetAttribute = attrMetaFactory.create().setName("Current Consumption Frequency of Potatoes")
-				.setDataType(CATEGORICAL);
+		targetAttribute = attrMetaFactory.create()
+										 .setName("Current Consumption Frequency of Potatoes")
+										 .setDataType(CATEGORICAL);
 		targetAttribute.setRefEntity(targetRefEntityType);
 
 		Entity targetEntity1 = new DynamicEntity(targetRefEntityType, of("code", 1, "label", "Almost daily + daily"));
@@ -71,14 +70,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 				of("code", 4, "label", "Never + fewer than once a week"));
 		Entity targetEntity5 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(targetRefEntityType.getId())).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5);
-			}
-		});
+		Mockito.when(dataService.findAll(targetRefEntityType.getId())).thenAnswer(
+				invocation -> Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
 		targetEntityType = entityTypeFactory.create("target");
 		targetEntityType.addAttribute(targetAttribute);
@@ -98,16 +91,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity6 = new DynamicEntity(targetRefEntityType, of("code", 6, "label", "4-5 days per week"));
 		Entity sourceEntity7 = new DynamicEntity(targetRefEntityType, of("code", 7, "label", "6-7 days per week"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType.getId())).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream
-						.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
-								sourceEntity7);
-			}
-		});
+		Mockito.when(dataService.findAll(sourceRefEntityType.getId())).thenAnswer(
+				invocation -> Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
+						sourceEntity6, sourceEntity7));
 
 		EntityType sourceRefEntityType1 = createEntityType("Mitchelstown_POTATO_REF");
 
@@ -127,15 +113,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity15 = new DynamicEntity(targetRefEntityType, of("code", 8, "label", "4-5 per day"));
 		Entity sourceEntity16 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "6+ per day"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType1.getId())).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
-						sourceEntity13, sourceEntity14, sourceEntity15, sourceEntity16);
-			}
-		});
+		Mockito.when(dataService.findAll(sourceRefEntityType1.getId())).thenAnswer(
+				invocation -> Stream.of(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
+						sourceEntity13, sourceEntity14, sourceEntity15, sourceEntity16));
 
 		EntityType sourceRefEntityType2 = createEntityType("Mitchelstown_Stroke_REF");
 
@@ -147,14 +127,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		Entity sourceEntity18 = new DynamicEntity(targetRefEntityType, of("code", 2, "label", "no"));
 		Entity sourceEntity19 = new DynamicEntity(targetRefEntityType, of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityType2.getId())).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(sourceEntity17, sourceEntity18, sourceEntity19);
-			}
-		});
+		Mockito.when(dataService.findAll(sourceRefEntityType2.getId())).thenAnswer(
+				invocation -> Stream.of(sourceEntity17, sourceEntity18, sourceEntity19));
 
 		sourceEntityType = entityTypeFactory.create("source");
 		sourceEntityType.addAttributes(Lists.newArrayList(sourceAttribute, sourceAttribute1, sourceAttribute2));
@@ -174,17 +148,16 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	@Test
 	public void testIsSuitable()
 	{
-		Assert.assertTrue(categoryAlgorithmGenerator
-				.isSuitable(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1)));
+		Assert.assertTrue(categoryAlgorithmGenerator.isSuitable(targetAttribute,
+				Arrays.asList(sourceAttribute, sourceAttribute1)));
 	}
 
 	@Test
 	public void testGenerate()
 	{
 		String expected = "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull().value() && $('MESHED_POTATO_1').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
-		String generateMultipleAttributes = categoryAlgorithmGenerator
-				.generate(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1), targetEntityType,
-						sourceEntityType);
+		String generateMultipleAttributes = categoryAlgorithmGenerator.generate(targetAttribute,
+				Arrays.asList(sourceAttribute, sourceAttribute1), targetEntityType, sourceEntityType);
 		Assert.assertEquals(generateMultipleAttributes, expected);
 	}
 
@@ -214,8 +187,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	@Test
 	public void testSuitableForGeneratingWeightedMap()
 	{
-		Assert.assertTrue(categoryAlgorithmGenerator
-				.suitableForGeneratingWeightedMap(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1)));
+		Assert.assertTrue(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttribute,
+				Arrays.asList(sourceAttribute, sourceAttribute1)));
 
 		Assert.assertFalse(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttribute,
 				Arrays.asList(sourceAttribute, sourceAttribute1, sourceAttribute2)));
@@ -225,18 +198,17 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	public void testHomogenousGenerator()
 	{
 		String expectedAlgorithm = "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull().value() && $('MESHED_POTATO_1').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
-		Assert.assertEquals(categoryAlgorithmGenerator
-				.generate(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1), targetEntityType,
-						sourceEntityType), expectedAlgorithm);
+		Assert.assertEquals(
+				categoryAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1),
+						targetEntityType, sourceEntityType), expectedAlgorithm);
 	}
 
 	@Test
 	public void testHeterogenousGenerator()
 	{
 		String expectedAlgorithm = "$('MESHED_POTATO_1').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"3\",\"4\":\"2\",\"5\":\"2\",\"6\":\"1\",\"7\":\"1\",\"8\":\"1\",\"9\":\"1\"}, null, null).value();$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\"}, null, null).value();$('Stroke').map({\"1\":\"2\",\"2\":\"4\",\"9\":\"9\"}, null, null).value();";
-		String actual = categoryAlgorithmGenerator
-				.generate(targetAttribute, Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2),
-						targetEntityType, sourceEntityType);
+		String actual = categoryAlgorithmGenerator.generate(targetAttribute,
+				Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2), targetEntityType, sourceEntityType);
 		Assert.assertEquals(actual, expectedAlgorithm);
 	}
 

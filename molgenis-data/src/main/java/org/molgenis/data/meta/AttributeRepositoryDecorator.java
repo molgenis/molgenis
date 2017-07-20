@@ -61,8 +61,9 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 			{
 				if (null != e.getParent())
 				{
-					dataService.getMeta().getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)
-							.update(e.setParent(null));
+					dataService.getMeta()
+							   .getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)
+							   .update(e.setParent(null));
 				}
 			});
 		}
@@ -110,7 +111,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	{
 		MetaDataService meta = dataService.getMeta();
 		meta.getConcreteChildren(attr.getEntity())
-				.forEach(entityType -> meta.getBackend(entityType).updateAttribute(entityType, attr, updatedAttr));
+			.forEach(entityType -> meta.getBackend(entityType).updateAttribute(entityType, attr, updatedAttr));
 	}
 
 	private void updateBackend(Attribute attr)

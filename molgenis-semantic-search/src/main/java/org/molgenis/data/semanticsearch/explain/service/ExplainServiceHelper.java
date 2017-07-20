@@ -60,7 +60,7 @@ public class ExplainServiceHelper
 	 */
 	public Set<String> findMatchedWords(Explanation explanation)
 	{
-		Set<String> words = new HashSet<String>();
+		Set<String> words = new HashSet<>();
 		String description = explanation.getDescription();
 		if (description.startsWith(Options.SUM_OF.toString()) || description.startsWith(Options.PRODUCT_OF.toString()))
 		{
@@ -78,14 +78,11 @@ public class ExplainServiceHelper
 		}
 		else if (description.startsWith(Options.MAX_OF.toString()))
 		{
-			Explanation maxExplanation = Lists.newArrayList(explanation.getDetails()).stream()
-					.max(new Comparator<Explanation>()
-					{
-						public int compare(Explanation explanation1, Explanation explanation2)
-						{
-							return Float.compare(explanation1.getValue(), explanation2.getValue());
-						}
-					}).get();
+			Explanation maxExplanation = Lists.newArrayList(explanation.getDetails())
+											  .stream()
+											  .max((explanation1, explanation2) -> Float.compare(explanation1.getValue(),
+													  explanation2.getValue()))
+											  .get();
 
 			words.addAll(findMatchedWords(maxExplanation));
 		}
@@ -98,8 +95,10 @@ public class ExplainServiceHelper
 
 	public String extractMatchedWords(Explanation[] explanations)
 	{
-		List<String> collect = Lists.newArrayList(explanations).stream()
-				.map(explanation -> getMatchedWord(explanation.getDescription())).collect(Collectors.toList());
+		List<String> collect = Lists.newArrayList(explanations)
+									.stream()
+									.map(explanation -> getMatchedWord(explanation.getDescription()))
+									.collect(Collectors.toList());
 		return StringUtils.join(collect, ' ');
 	}
 
@@ -118,15 +117,15 @@ public class ExplainServiceHelper
 	 */
 	public Map<String, Double> findMatchQueries(String matchedWordsString, Map<String, String> collectExpandedQueryMap)
 	{
-		Map<String, Double> qualifiedQueries = new HashMap<String, Double>();
+		Map<String, Double> qualifiedQueries = new HashMap<>();
 		Set<String> matchedWords = splitIntoTerms(matchedWordsString);
 		for (Entry<String, String> entry : collectExpandedQueryMap.entrySet())
 		{
 			Set<String> wordsInQuery = splitIntoTerms(entry.getKey());
 			if (wordsInQuery.containsAll(matchedWords))
 			{
-				qualifiedQueries
-						.put(entry.getKey(), NGramDistanceAlgorithm.stringMatching(matchedWordsString, entry.getKey()));
+				qualifiedQueries.put(entry.getKey(),
+						NGramDistanceAlgorithm.stringMatching(matchedWordsString, entry.getKey()));
 			}
 		}
 		return qualifiedQueries;
@@ -149,7 +148,9 @@ public class ExplainServiceHelper
 
 	Set<String> splitIntoTerms(String description)
 	{
-		return FluentIterable.from(termSplitter.split(description)).transform(String::toLowerCase)
-				.filter(w -> !StringUtils.isEmpty(w)).toSet();
+		return FluentIterable.from(termSplitter.split(description))
+							 .transform(String::toLowerCase)
+							 .filter(w -> !StringUtils.isEmpty(w))
+							 .toSet();
 	}
 }

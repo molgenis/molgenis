@@ -42,7 +42,7 @@ public class AttributeFilterToFetchConverter
 		if (attrFilter.isIncludeAllAttrs())
 		{
 			entityType.getAtomicAttributes()
-					.forEach(attr -> fetch.field(attr.getName(), createDefaultAttributeFetch(attr, languageCode)));
+					  .forEach(attr -> fetch.field(attr.getName(), createDefaultAttributeFetch(attr, languageCode)));
 		}
 
 		if (attrFilter.isIncludeIdAttr())
@@ -96,10 +96,7 @@ public class AttributeFilterToFetchConverter
 				else
 				{
 					// include all compound attribute parts
-					attr.getChildren().forEach(attrPart ->
-					{
-						createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode);
-					});
+					attr.getChildren().forEach(attrPart -> createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode));
 				}
 				break;
 			}

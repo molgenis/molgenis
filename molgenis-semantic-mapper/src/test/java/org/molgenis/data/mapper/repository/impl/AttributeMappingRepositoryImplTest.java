@@ -69,8 +69,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		List<Attribute> sourceAttributes = newArrayList();
 
 		List<AttributeMapping> attributeMappings = newArrayList();
-		attributeMappings
-				.add(new AttributeMapping("attributeMappingID", targetAttribute, "algorithm", sourceAttributes));
+		attributeMappings.add(
+				new AttributeMapping("attributeMappingID", targetAttribute, "algorithm", sourceAttributes));
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
@@ -85,8 +85,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		EntityType targetEntityType = entityTypeFactory.create("target");
 		targetEntityType.addAttribute(targetAttribute);
 
-		assertEquals(attributeMappingRepository
-				.getAttributeMappings(attributeMappingEntities, sourceEntityType, targetEntityType), attributeMappings);
+		assertEquals(attributeMappingRepository.getAttributeMappings(attributeMappingEntities, sourceEntityType,
+				targetEntityType), attributeMappings);
 	}
 
 	@Test

@@ -34,8 +34,8 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	public Stream<AlgorithmTemplate> find(Map<Attribute, ExplainedAttribute> attrMatches)
 	{
 		// get all algorithm templates
-		Stream<Script> jsScripts = dataService
-				.findAll(SCRIPT, new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class);
+		Stream<Script> jsScripts = dataService.findAll(SCRIPT,
+				new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
 		return jsScripts.flatMap(script -> toAlgorithmTemplate(script, attrMatches));
@@ -69,9 +69,15 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	private Attribute mapParamToAttribute(ScriptParameter param, Map<Attribute, ExplainedAttribute> attrMatches)
 	{
 
-		return attrMatches.entrySet().stream().filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())
-				.filter(entry -> StreamSupport.stream(entry.getValue().getExplainedQueryStrings().spliterator(), false)
-						.allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
-				.map(entry -> entry.getKey()).findFirst().orElse(null);
+		return attrMatches.entrySet()
+						  .stream()
+						  .filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())
+						  .filter(entry -> StreamSupport.stream(
+								  entry.getValue().getExplainedQueryStrings().spliterator(), false)
+														.allMatch(explain -> explain.getTagName()
+																					.equalsIgnoreCase(param.getName())))
+						  .map(Map.Entry::getKey)
+						  .findFirst()
+						  .orElse(null);
 	}
 }

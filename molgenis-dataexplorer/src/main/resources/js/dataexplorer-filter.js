@@ -776,25 +776,34 @@
                     }
 
                     if (values.length > 1) {
-                        var nestedRule = {
-                            operator: 'NESTED',
-                            nestedRules: []
-                        };
-
-                        $.each(values, function (index, value) {
-                            if (index > 0) {
-                                nestedRule.nestedRules.push({
-                                    operator: operator || 'OR'
-                                });
-                            }
-
-                            nestedRule.nestedRules.push({
+                        operator = operator && operator !== 'undefined' ? operator : 'OR'
+                        if (attrOperator === 'EQUALS' && operator === 'OR') {
+                            rule = {
                                 field: queryRuleField,
-                                operator: attrOperator,
-                                value: value
+                                operator: 'IN',
+                                value: values
+                            };
+                        } else {
+                            var nestedRule = {
+                                operator: 'NESTED',
+                                nestedRules: []
+                            };
+
+                            $.each(values, function (index, value) {
+                                if (index > 0) {
+                                    nestedRule.nestedRules.push({
+                                        operator: operator
+                                    });
+                                }
+
+                                nestedRule.nestedRules.push({
+                                    field: queryRuleField,
+                                    operator: attrOperator,
+                                    value: value
+                                });
                             });
-                        });
-                        rule = nestedRule;
+                            rule = nestedRule;
+                        }
                     } else {
                         rule = {
                             field: queryRuleField,

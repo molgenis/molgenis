@@ -39,10 +39,12 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 		if ((authentication != null) && authentication.isAuthenticated() && !authentication.getName()
-				.equals(ANONYMOUS_USERNAME) && !httpRequest.getRequestURI().toLowerCase()
-				.endsWith(CHANGE_PASSWORD_URI.toLowerCase()) && !httpRequest.getRequestURI().toLowerCase()
-				.startsWith("/img/") && !httpRequest.getRequestURI().toLowerCase().startsWith("/css/") && !httpRequest
-				.getRequestURI().toLowerCase().startsWith("/js/"))
+																						   .equals(ANONYMOUS_USERNAME)
+				&& !httpRequest.getRequestURI().toLowerCase().endsWith(CHANGE_PASSWORD_URI.toLowerCase())
+				&& !httpRequest.getRequestURI().toLowerCase().startsWith("/img/") && !httpRequest.getRequestURI()
+																								 .toLowerCase()
+																								 .startsWith("/css/")
+				&& !httpRequest.getRequestURI().toLowerCase().startsWith("/js/"))
 		{
 			User user = userService.getUser(authentication.getName());
 			if (user == null)
@@ -50,7 +52,7 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean
 				throw new RuntimeException("Unknown username [" + authentication.getName() + "]");
 			}
 
-			if (user.isChangePassword() != null && user.isChangePassword().booleanValue())
+			if (user.isChangePassword() != null && user.isChangePassword())
 			{
 				redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
 				return;

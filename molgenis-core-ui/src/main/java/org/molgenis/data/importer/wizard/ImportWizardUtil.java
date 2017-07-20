@@ -15,10 +15,21 @@ public class ImportWizardUtil
 		// convert input to database action
 		DatabaseAction dbAction;
 
-		if (actionStr.equals("add")) dbAction = DatabaseAction.ADD;
-		else if (actionStr.equals("add_update")) dbAction = DatabaseAction.ADD_UPDATE_EXISTING;
-		else if (actionStr.equals("update")) dbAction = DatabaseAction.UPDATE;
-		else dbAction = null;
+		switch (actionStr)
+		{
+			case "add":
+				dbAction = DatabaseAction.ADD;
+				break;
+			case "add_update":
+				dbAction = DatabaseAction.ADD_UPDATE_EXISTING;
+				break;
+			case "update":
+				dbAction = DatabaseAction.UPDATE;
+				break;
+			default:
+				dbAction = null;
+				break;
+		}
 
 		return dbAction;
 	}
@@ -39,8 +50,8 @@ public class ImportWizardUtil
 		if (!(wizard instanceof ImportWizard))
 		{
 			throw new RuntimeException(
-					"Wizard must be of type '" + ImportWizard.class.getSimpleName() + "' instead of '" + wizard
-							.getClass().getSimpleName() + "'");
+					"Wizard must be of type '" + ImportWizard.class.getSimpleName() + "' instead of '"
+							+ wizard.getClass().getSimpleName() + "'");
 		}
 	}
 }

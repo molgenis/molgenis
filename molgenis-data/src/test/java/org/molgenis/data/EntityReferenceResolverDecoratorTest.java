@@ -17,7 +17,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
@@ -189,8 +188,8 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		when(decoratedRepo.findAll(entityIds)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityType, entities, null))
-				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
+		when(entityManager.resolveReferences(entityType, entities, null)).thenReturn(
+				Stream.of(entity0WithRefs, entity1WithRefs));
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
 	}
@@ -208,8 +207,8 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityType, entities, fetch))
-				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
+		when(entityManager.resolveReferences(entityType, entities, fetch)).thenReturn(
+				Stream.of(entity0WithRefs, entity1WithRefs));
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
 	}
@@ -225,8 +224,8 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		List<Entity> entitiesWithRefs = Arrays.asList(entity0WithRefs, entity1WithRefs);
 
-		when(entityManager.resolveReferences(eq(entityType), streamArgumentCaptor.capture(), eq(fetch)))
-				.thenReturn(entitiesWithRefs.stream());
+		when(entityManager.resolveReferences(eq(entityType), streamArgumentCaptor.capture(), eq(fetch))).thenReturn(
+				entitiesWithRefs.stream());
 
 		// the test
 		entityReferenceResolverDecorator.forEachBatched(fetch, consumer, 123);
@@ -288,7 +287,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void findOneObjectFetch()
 	{
-		Object id = Integer.valueOf(1);
+		Object id = 1;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
@@ -300,7 +299,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void findOneObjectFetchNull()
 	{
-		Object id = Integer.valueOf(1);
+		Object id = 1;
 		entityReferenceResolverDecorator.findOneById(id, null);
 		verify(decoratedRepo, times(1)).findOneById(id, null);
 		verifyZeroInteractions(entityManager);
@@ -333,7 +332,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void iterator()
 	{
-		QueryImpl<Entity> q = new QueryImpl<Entity>();
+		QueryImpl<Entity> q = new QueryImpl<>();
 		Stream<Entity> entities = Stream.of(mock(Entity.class));
 		when(decoratedRepo.findAll(q)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityType, entities, null)).thenReturn(entities);
@@ -364,7 +363,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0);
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepo).update(captor.capture());
 		entityReferenceResolverDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));

@@ -131,9 +131,11 @@ public class Tag extends StaticEntity
 			Tag that = (Tag) o;
 			return (this.getId().equals(that.getId())) && ((this.getObjectIri() == null) ? (that.getObjectIri()
 					== null) : this.getObjectIri().equals(that.getObjectIri())) && (this.getLabel()
-					.equals(that.getLabel())) && (this.getRelationIri().equals(that.getRelationIri())) && (this
-					.getRelationLabel().equals(that.getRelationLabel())) && ((this.getCodeSystem() == null) ? (
-					that.getCodeSystem() == null) : this.getCodeSystem().equals(that.getCodeSystem()));
+																						.equals(that.getLabel()))
+					&& (this.getRelationIri().equals(that.getRelationIri())) && (this.getRelationLabel()
+																					 .equals(that.getRelationLabel()))
+					&& ((this.getCodeSystem() == null) ? (that.getCodeSystem() == null) : this.getCodeSystem()
+																							  .equals(that.getCodeSystem()));
 		}
 		return false;
 	}

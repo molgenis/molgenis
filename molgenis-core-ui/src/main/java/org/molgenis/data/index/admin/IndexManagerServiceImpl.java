@@ -1,14 +1,14 @@
 package org.molgenis.data.index.admin;
 
 import org.molgenis.data.*;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexService;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -20,14 +20,14 @@ import static java.util.Objects.requireNonNull;
 public class IndexManagerServiceImpl implements IndexManagerService
 {
 	private final DataService dataService;
-	private final SearchService searchService;
+	private final IndexService indexService;
 
 	@Autowired
 	public IndexManagerServiceImpl(DataService dataService,
-			@SuppressWarnings("SpringJavaAutowiringInspection") SearchService searchService)
+			@SuppressWarnings("SpringJavaAutowiringInspection") IndexService indexService)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.searchService = requireNonNull(searchService);
+		this.indexService = requireNonNull(indexService);
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class IndexManagerServiceImpl implements IndexManagerService
 		});
 
 		// sort indexed repos by entity label
-		Collections.sort(indexedEntityTypeList, (e1, e2) -> e1.getLabel().compareTo(e2.getLabel()));
+		indexedEntityTypeList.sort(Comparator.comparing(EntityType::getLabel));
 		return indexedEntityTypeList;
 	}
 
@@ -59,6 +59,6 @@ public class IndexManagerServiceImpl implements IndexManagerService
 		{
 			throw new MolgenisDataAccessException("Repository [" + entityTypeId + "] is not an indexed repository");
 		}
-		searchService.rebuildIndex(repository);
+		indexService.rebuildIndex(repository);
 	}
 }

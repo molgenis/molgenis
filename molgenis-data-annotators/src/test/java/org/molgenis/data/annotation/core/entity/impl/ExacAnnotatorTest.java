@@ -103,8 +103,8 @@ public class ExacAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity exacAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(ExacAnnotatorSettings.Meta.EXAC_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/exac/exac_test_set.vcf.gz").getPath());
+			when(settings.getString(ExacAnnotatorSettings.Meta.EXAC_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/exac/exac_test_set.vcf.gz").getPath());
 			return settings;
 		}
 

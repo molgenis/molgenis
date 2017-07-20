@@ -28,7 +28,7 @@ public class MappingProject
 		this.identifier = null;
 		this.name = name;
 		this.owner = owner;
-		this.mappingTargets = new LinkedHashMap<String, MappingTarget>();
+		this.mappingTargets = new LinkedHashMap<>();
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class MappingProject
 		this.identifier = identifier;
 		this.name = name;
 		this.owner = owner;
-		this.mappingTargets = new LinkedHashMap<String, MappingTarget>();
+		this.mappingTargets = new LinkedHashMap<>();
 		for (MappingTarget mappingTarget : mappingTargets)
 		{
 			if (mappingTarget != null)

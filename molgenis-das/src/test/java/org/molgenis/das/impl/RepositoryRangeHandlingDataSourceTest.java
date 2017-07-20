@@ -1,8 +1,6 @@
 package org.molgenis.das.impl;
 
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -79,16 +77,16 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		propertyType.setValue("type");
 		when(dataSourceConfig.getDataSourceProperties()).thenReturn(Collections.singletonMap("type", propertyType));
 		source.init(null, null, dataSourceConfig);
-		Map<URL, String> linkout = new HashMap<URL, String>();
+		Map<URL, String> linkout = new HashMap<>();
 		linkout.put(new URL("http://www.molgenis.org/"), "Link");
 
-		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
+		List<DasTarget> dasTarget = new ArrayList<>();
 		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "description"));
-		List<String> notes = new ArrayList<String>();
+		List<String> notes = new ArrayList<>();
 		notes.add("track:dataset");
 		notes.add("source:MOLGENIS");
 
-		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
+		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, 0d,
 				ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout, dasTarget, new ArrayList<>(),
 				null);
 
@@ -110,7 +108,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 
 		DynamicEntity entity = new DynamicEntity(emd);
 
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("STOP", 1000);
 		map.put("linkout", "http://www.molgenis.org/");
 		map.put("NAME", "mutation name");
@@ -124,29 +122,22 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 
 		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
-		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<DynamicEntity>>()
-		{
-			@Override
-			public Stream<DynamicEntity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(entity);
-			}
-		});
+		when(dataService.findAll("dataset", q)).thenAnswer(invocation -> Stream.of(entity));
 
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityType()))
-				.thenReturn("CHROM");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, entity.getEntityType()))
-				.thenReturn("POS");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, entity.getEntityType()))
-				.thenReturn("STOP");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_IDENTIFIER, entity.getEntityType()))
-				.thenReturn("ID");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_DESCRIPTION, entity.getEntityType()))
-				.thenReturn("INFO");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_NAME, entity.getEntityType()))
-				.thenReturn("NAME");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_LINKOUT, entity.getEntityType()))
-				.thenReturn("linkout");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityType())).thenReturn(
+				"CHROM");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, entity.getEntityType())).thenReturn(
+				"POS");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, entity.getEntityType())).thenReturn(
+				"STOP");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_IDENTIFIER,
+				entity.getEntityType())).thenReturn("ID");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_DESCRIPTION,
+				entity.getEntityType())).thenReturn("INFO");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_NAME, entity.getEntityType())).thenReturn(
+				"NAME");
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_LINKOUT,
+				entity.getEntityType())).thenReturn("linkout");
 
 	}
 
@@ -170,20 +161,30 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{
-		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next()
-						.getFeatureLabel(),
-				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next()
-						.getFeatureLabel());
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100)
+						   .getFeatures()
+						   .iterator()
+						   .next()
+						   .getFeatureLabel(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures()
+																				 .iterator()
+																				 .next()
+																				 .getFeatureLabel());
 	}
 
 	@Test
 	public void getFeaturesId() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{
-		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next()
-						.getFeatureId(),
-				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next()
-						.getFeatureId());
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100)
+						   .getFeatures()
+						   .iterator()
+						   .next()
+						   .getFeatureId(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures()
+																				 .iterator()
+																				 .next()
+																				 .getFeatureId());
 	}
 
 	@Test

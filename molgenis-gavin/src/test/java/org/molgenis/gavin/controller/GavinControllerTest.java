@@ -97,6 +97,8 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	public void testAnnotateFile() throws Exception
 	{
 		MultipartFile vcf = mock(MultipartFile.class);
+		InputStream inputStream = mock(InputStream.class);
+		when(vcf.getInputStream()).thenReturn(inputStream);
 		GavinJob job = mock(GavinJob.class);
 		File inputFile = mock(File.class);
 		File parentDir = mock(File.class);
@@ -121,8 +123,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 
 		verify(fileStore).createDirectory("gavin-app");
 		verify(fileStore).createDirectory("gavin-app" + separator + "ABCDE");
-		verify(fileStore).writeToFile(Mockito.any(InputStream.class),
-				Mockito.eq("gavin-app" + separator + "ABCDE" + separator + "input.tsv"));
+		verify(fileStore).writeToFile(inputStream, "gavin-app" + separator + "ABCDE" + separator + "input.tsv");
 
 		verify(executorService).submit(job);
 		GavinJobExecution jobExecution = captor.getValue();
@@ -134,14 +135,14 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 	public void testResult() throws Exception
 	{
 		GavinJobExecution gavinJobExecution = mock(GavinJobExecution.class);
-		File resultFile = File
-				.createTempFile("gavin", ".vcf", new File(ResourceUtils.getFile(getClass(), "/").getPath()));
+		File resultFile = File.createTempFile("gavin", ".vcf",
+				new File(ResourceUtils.getFile(getClass(), "/").getPath()));
 		resultFile.deleteOnExit();
 
 		when(gavinJobExecution.getFilename()).thenReturn("annotate-file");
 		when(gavinJobFactory.findGavinJobExecution("ABCDE")).thenReturn(gavinJobExecution);
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
-				.thenReturn(resultFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf")).thenReturn(
+				resultFile);
 
 		HttpServletResponse response = mock(HttpServletResponse.class);
 

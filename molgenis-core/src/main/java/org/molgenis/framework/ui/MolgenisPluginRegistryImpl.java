@@ -1,6 +1,5 @@
 package org.molgenis.framework.ui;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 
 	public MolgenisPluginRegistryImpl()
 	{
-		pluginFactories = new ArrayList<MolgenisPluginFactory>();
+		pluginFactories = new ArrayList<>();
 	}
 
 	@Override
@@ -24,14 +23,7 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 		{
 			throw new IllegalArgumentException(MolgenisPlugin.class.getSimpleName() + " cannot be null");
 		}
-		pluginFactories.add(new MolgenisPluginFactory()
-		{
-			@Override
-			public Iterator<MolgenisPlugin> iterator()
-			{
-				return Collections.singleton(molgenisPlugin).iterator();
-			}
-		});
+		pluginFactories.add(() -> Collections.singleton(molgenisPlugin).iterator());
 	}
 
 	@Override
@@ -53,13 +45,12 @@ public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 	@Override
 	public MolgenisPlugin getPlugin(final String id)
 	{
-		return Iterables.find(this, new Predicate<MolgenisPlugin>()
-		{
-			@Override
-			public boolean apply(MolgenisPlugin molgenisPlugin)
-			{
-				return molgenisPlugin.getId().equals(id);
-			}
-		}, null);
+		return Iterables.find(this, molgenisPlugin -> molgenisPlugin.getId().equals(id), null);
+	}
+
+	@Override
+	public Iterable<MolgenisPlugin> getPlugins()
+	{
+		return this;
 	}
 }

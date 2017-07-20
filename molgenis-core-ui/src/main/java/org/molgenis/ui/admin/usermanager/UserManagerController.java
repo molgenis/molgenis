@@ -66,8 +66,8 @@ public class UserManagerController extends MolgenisPluginController
 			activationResponse.setSuccess(true);
 		}
 		else throw new RuntimeException(
-					"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: " + activation
-							.getType());
+					"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: "
+							+ activation.getType());
 
 		return activationResponse;
 	}
@@ -187,8 +187,8 @@ public class UserManagerController extends MolgenisPluginController
 			}
 			else if (!groupMembership.getMember())
 			{
-				this.pluginUserManagerService
-						.removeUserFromGroup(groupMembership.getGroupId(), groupMembership.getUserId());
+				this.pluginUserManagerService.removeUserFromGroup(groupMembership.getGroupId(),
+						groupMembership.getUserId());
 			}
 
 			groupMembershipResponse.setSuccess(true);

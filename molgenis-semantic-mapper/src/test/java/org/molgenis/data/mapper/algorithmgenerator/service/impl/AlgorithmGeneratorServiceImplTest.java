@@ -68,8 +68,8 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
-				.thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
+		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl")).thenReturn(
+				Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
 	}
 
 	@Test
@@ -93,9 +93,9 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		sourceEntityType.addAttribute(heightSourceAttribute);
 		sourceEntityType.addAttribute(weightSourceAttribute);
 
-		Map<Attribute, ExplainedAttribute> sourceAttributes = ImmutableMap.of(heightSourceAttribute, ExplainedAttribute
-						.create(heightSourceAttribute,
-								singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
+		Map<Attribute, ExplainedAttribute> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
+				ExplainedAttribute.create(heightSourceAttribute,
+						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
 				weightSourceAttribute, ExplainedAttribute.create(heightSourceAttribute,
 						Collections.singletonList(ExplainedQueryString.create("weight", "weight", "weight", 100)),
 						true));
@@ -108,11 +108,11 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		when(script.getParameters()).thenReturn(asList(heightParameter, weightParameter));
 		when(script.getContent()).thenReturn("$('weight').div($('height').pow(2)).value()");
 
-		when(dataService.findAll(SCRIPT, new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class))
-				.thenReturn(Stream.of(script));
+		when(dataService.findAll(SCRIPT, new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME),
+				Script.class)).thenReturn(Stream.of(script));
 
-		GeneratedAlgorithm generate = algorithmGeneratorService
-				.generate(targetBMIAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+		GeneratedAlgorithm generate = algorithmGeneratorService.generate(targetBMIAttribute, sourceAttributes,
+				targetEntityType, sourceEntityType);
 
 		assertEquals(generate.getAlgorithm(), "$('sourceWeight').div($('sourceHeight').div(100.0).pow(2)).value()");
 		assertEquals(generate.getAlgorithmState(), AttributeMapping.AlgorithmState.GENERATED_HIGH);
@@ -133,8 +133,8 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		sourceAttribute.setLabel("body length in cm");
 		sourceEntityType.addAttribute(sourceAttribute);
 
-		String actualAlgorithm = algorithmGeneratorService
-				.generate(targetAttribute, Lists.newArrayList(sourceAttribute), targetEntityType, sourceEntityType);
+		String actualAlgorithm = algorithmGeneratorService.generate(targetAttribute,
+				Lists.newArrayList(sourceAttribute), targetEntityType, sourceEntityType);
 
 		String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
 

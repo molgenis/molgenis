@@ -6,8 +6,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.controller.DirectoryController;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import java.net.URI;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -31,7 +31,7 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 	@Mock
 	private RestTemplate restTemplate;
 	@Mock
-	private MolgenisPermissionService permissions;
+	private PermissionService permissions;
 	@Mock
 	private EntityType entityType;
 
@@ -55,8 +55,8 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 		when(directorySettings.getPassword()).thenReturn("password");
 		when(directorySettings.getNegotiatorURL()).thenReturn("http://directory.com/postHere");
 
-		when(restTemplate.postForLocation(eq("http://directory.com/postHere"), queryCaptor.capture()))
-				.thenReturn(URI.create("http://directory.com/request/1280"));
+		when(restTemplate.postForLocation(eq("http://directory.com/postHere"), queryCaptor.capture())).thenReturn(
+				URI.create("http://directory.com/request/1280"));
 
 		assertEquals(controller.exportToNegotiator(query), "http://directory.com/request/1280");
 

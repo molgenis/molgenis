@@ -82,8 +82,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match")
-	public String match(@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "inputTerms", required = true) String inputTerms,
+	public String match(@RequestParam(value = "selectOntologies") String ontologyIri,
+			@RequestParam(value = "inputTerms") String inputTerms,
 			HttpServletRequest httpServletRequest, Model model) throws UnsupportedEncodingException, IOException
 	{
 		String fileName = httpServletRequest.getSession().getId() + "_input.txt";
@@ -95,8 +95,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload")
-	public String upload(@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "file", required = true) Part file, HttpServletRequest httpServletRequest,
+	public String upload(@RequestParam(value = "selectOntologies") String ontologyIri,
+			@RequestParam(value = "file") Part file, HttpServletRequest httpServletRequest,
 			Model model) throws UnsupportedEncodingException, IOException
 	{
 
@@ -115,7 +115,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	{
 		Object filePath = httpServletRequest.getSession().getAttribute("filePath");
 		Object ontologyIriObject = httpServletRequest.getSession().getAttribute("ontologyIri");
-		List<Map<String, Object>> responseResults = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> responseResults = new ArrayList<>();
 		if (filePath != null && ontologyIriObject != null)
 		{
 			File uploadFile = new File(filePath.toString());
@@ -200,13 +200,14 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private List<String> createDownloadTableHeaders(SortaCsvRepository csvRepository)
 	{
 		List<String> inputAttributeNames = FluentIterable.from(csvRepository.getEntityType().getAtomicAttributes())
-				.transform(Attribute::getName)
-				.filter(attrName -> !StringUtils.equalsIgnoreCase(attrName, SortaCsvRepository.ALLOWED_IDENTIFIER))
-				.toList();
+														 .transform(Attribute::getName)
+														 .filter(attrName -> !StringUtils.equalsIgnoreCase(attrName,
+																 SortaCsvRepository.ALLOWED_IDENTIFIER))
+														 .toList();
 
-		List<String> columnHeaders = new ArrayList<String>(inputAttributeNames);
-		columnHeaders.addAll(Arrays
-				.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE,
+		List<String> columnHeaders = new ArrayList<>(inputAttributeNames);
+		columnHeaders.addAll(
+				Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE,
 						COMBINED_SCORE));
 		return columnHeaders;
 	}
@@ -251,8 +252,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private boolean validateUserInputHeader(Repository<Entity> repository)
 	{
 		return Iterables.any(repository.getEntityType().getAtomicAttributes(),
-				attr -> StringUtils.isNotEmpty(attr.getName()) && StringUtils
-						.equalsIgnoreCase(attr.getName(), SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
+				attr -> StringUtils.isNotEmpty(attr.getName()) && StringUtils.equalsIgnoreCase(attr.getName(),
+						SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
 	}
 
 	private boolean validateUserInputContent(SortaCsvRepository csvRepository)

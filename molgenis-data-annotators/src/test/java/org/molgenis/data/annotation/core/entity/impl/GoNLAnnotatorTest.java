@@ -69,12 +69,18 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		emd.addAttribute(vcfAttributes.getPosAttribute());
 		emd.addAttribute(vcfAttributes.getRefAttribute());
 		emd.addAttribute(vcfAttributes.getAltAttribute());
-		emd.addAttribute(attributeFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
-				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
-				.setLabel(GONL_AF_LABEL));
-		emd.addAttribute(attributeFactory.create().setName(GONL_GENOME_GTC).setDataType(STRING).setDescription(
-				"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
-				.setLabel(GONL_GTC_LABEL));
+		emd.addAttribute(attributeFactory.create()
+										 .setName(GONL_GENOME_AF)
+										 .setDataType(STRING)
+										 .setDescription(
+												 "The allele frequency for variants seen in the population used for the GoNL project")
+										 .setLabel(GONL_AF_LABEL));
+		emd.addAttribute(attributeFactory.create()
+										 .setName(GONL_GENOME_GTC)
+										 .setDataType(STRING)
+										 .setDescription(
+												 "GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
+										 .setLabel(GONL_GTC_LABEL));
 
 	}
 
@@ -360,12 +366,12 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity goNLAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY))
-					.thenReturn(ResourceUtils.getFile(getClass(), GONL_TEST_ROOT_DIRECTORY).getPath());
+			when(settings.getString(GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY)).thenReturn(
+					ResourceUtils.getFile(getClass(), GONL_TEST_ROOT_DIRECTORY).getPath());
 			when(settings.getString(GoNLAnnotatorSettings.Meta.CHROMOSOMES)).thenReturn(GONL_TEST_CHROMOSOMES);
 			when(settings.getString(GoNLAnnotatorSettings.Meta.FILEPATTERN)).thenReturn(GONL_TEST_PATTERN);
-			when(settings.getString(GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES))
-					.thenReturn(GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
+			when(settings.getString(GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES)).thenReturn(
+					GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
 
 			return settings;
 		}

@@ -33,18 +33,18 @@ public abstract class CategoryMapping<S, T>
 
 	public static <S, T> CategoryMapping<S, T> create(String sourceAttributeName, Map<S, T> map)
 	{
-		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, null, true, null, true);
+		return new AutoValue_CategoryMapping<>(sourceAttributeName, map, null, true, null, true);
 	}
 
 	public static <S, T> CategoryMapping<S, T> create(String sourceAttributeName, Map<S, T> map, T defaultValue)
 	{
-		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, defaultValue, false, null, true);
+		return new AutoValue_CategoryMapping<>(sourceAttributeName, map, defaultValue, false, null, true);
 	}
 
 	public static <S, T> CategoryMapping<S, T> create(String sourceAttributeName, Map<S, T> map, T defaultValue,
 			T nullValue)
 	{
-		return new AutoValue_CategoryMapping<S, T>(sourceAttributeName, map, defaultValue, false, nullValue, false);
+		return new AutoValue_CategoryMapping<>(sourceAttributeName, map, defaultValue, false, nullValue, false);
 	}
 
 	public String getAlgorithm()
@@ -89,18 +89,18 @@ public abstract class CategoryMapping<S, T>
 		String defaultValueString = m.group("default");
 		if (defaultValueString == null)
 		{
-			return CategoryMapping.<S, T>create(attr, map);
+			return CategoryMapping.create(attr, map);
 		}
 		T defaultValue = gson.fromJson(defaultValueString, tType);
 		String nullValueString = m.group("null");
 		if (nullValueString == null)
 		{
-			return CategoryMapping.<S, T>create(attr, map, defaultValue);
+			return CategoryMapping.create(attr, map, defaultValue);
 		}
 		else
 		{
 			T nullValueJson = gson.fromJson(nullValueString, tType);
-			return CategoryMapping.<S, T>create(attr, map, defaultValue, nullValueJson);
+			return CategoryMapping.create(attr, map, defaultValue, nullValueJson);
 		}
 	}
 }

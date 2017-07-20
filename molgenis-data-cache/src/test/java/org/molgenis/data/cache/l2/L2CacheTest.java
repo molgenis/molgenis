@@ -4,8 +4,6 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
@@ -33,8 +31,6 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
@@ -75,20 +71,14 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 2);
 		testEntities = entityTestHarness.createTestEntities(emd, 4, refEntities).collect(toList());
 
-		when(entityManager.create(emd, NO_POPULATE)).thenAnswer(new Answer<Entity>()
-		{
-			@Override
-			public Entity answer(InvocationOnMock invocation) throws Throwable
-			{
-				return new EntityWithComputedAttributes(new DynamicEntity(emd));
-			}
-		});
+		when(entityManager.create(emd, NO_POPULATE)).thenAnswer(
+				invocation -> new EntityWithComputedAttributes(new DynamicEntity(emd)));
 		when(entityManager.getReference(any(EntityType.class), eq("0"))).thenReturn(refEntities.get(0));
 		when(entityManager.getReference(any(EntityType.class), eq("1"))).thenReturn(refEntities.get(1));
-		when(entityManager.getReferences(any(EntityType.class), eq(newArrayList("0"))))
-				.thenReturn(newArrayList(refEntities.get(0)));
-		when(entityManager.getReferences(any(EntityType.class), eq(newArrayList("1"))))
-				.thenReturn(newArrayList(refEntities.get(1)));
+		when(entityManager.getReferences(any(EntityType.class), eq(newArrayList("0")))).thenReturn(
+				newArrayList(refEntities.get(0)));
+		when(entityManager.getReferences(any(EntityType.class), eq(newArrayList("1")))).thenReturn(
+				newArrayList(refEntities.get(1)));
 	}
 
 	@BeforeMethod
@@ -188,8 +178,8 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = UncheckedExecutionException.class)
 	public void testGetStringIdLoaderThrowsException()
 	{
-		when(repository.findOneById("2"))
-				.thenThrow(new MolgenisDataException("Table is missing for entity TestEntity"));
+		when(repository.findOneById("2")).thenThrow(
+				new MolgenisDataException("Table is missing for entity TestEntity"));
 		l2Cache.get(repository, "2");
 	}
 
@@ -197,8 +187,8 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = UncheckedExecutionException.class)
 	public void testGetBatchIdLoaderThrowsException()
 	{
-		when(repository.findAll(any(Stream.class)))
-				.thenThrow(new MolgenisDataException("Table is missing for entity TestEntity"));
+		when(repository.findAll(any(Stream.class))).thenThrow(
+				new MolgenisDataException("Table is missing for entity TestEntity"));
 		l2Cache.getBatch(repository, newArrayList("1", "2"));
 	}
 

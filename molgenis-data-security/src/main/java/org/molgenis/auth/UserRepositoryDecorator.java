@@ -11,11 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
 public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 {
@@ -46,7 +43,6 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	{
 		encodePassword(entity);
 		decoratedRepository.add(entity);
-		addSuperuserAuthority(entity);
 	}
 
 	@Override
@@ -54,7 +50,6 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	{
 		updatePassword(entity);
 		decoratedRepository.update(entity);
-		updateSuperuserAuthority(entity);
 	}
 
 	@Override
@@ -67,8 +62,6 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 
 			Integer batchCount = decoratedRepository.add(users.stream());
 			count.addAndGet(batchCount);
-
-			users.forEach(this::addSuperuserAuthority);
 		});
 		return count.get();
 	}
@@ -103,45 +96,6 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 		String password = user.getPassword();
 		String encodedPassword = passwordEncoder.encode(password);
 		user.setPassword(encodedPassword);
-	}
-
-	private void addSuperuserAuthority(User user)
-	{
-		Boolean isSuperuser = user.isSuperuser();
-		if (isSuperuser != null && isSuperuser)
-		{
-			UserAuthority userAuthority = userAuthorityFactory.create();
-			userAuthority.setUser(user);
-			userAuthority.setRole(AUTHORITY_SU);
-
-			dataService.add(USER_AUTHORITY, userAuthority);
-		}
-	}
-
-	private void updateSuperuserAuthority(User user)
-	{
-		UserAuthority suAuthority = dataService
-				.findOne(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(USER, user).and().eq(ROLE, AUTHORITY_SU),
-						UserAuthority.class);
-
-		Boolean isSuperuser = user.isSuperuser();
-		if (isSuperuser != null && isSuperuser)
-		{
-			if (suAuthority == null)
-			{
-				UserAuthority userAuthority = userAuthorityFactory.create();
-				userAuthority.setUser(user);
-				userAuthority.setRole(AUTHORITY_SU);
-				dataService.add(USER_AUTHORITY, userAuthority);
-			}
-		}
-		else
-		{
-			if (suAuthority != null)
-			{
-				dataService.deleteById(USER_AUTHORITY, suAuthority.getId());
-			}
-		}
 	}
 
 	@Override
@@ -182,14 +136,12 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 
 	private void deleteUserAuthoritiesAndGroupMember(User user)
 	{
-		Stream<UserAuthority> userAuthorities = dataService
-				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-						UserAuthority.class);
+		Stream<UserAuthority> userAuthorities = dataService.findAll(USER_AUTHORITY,
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user), UserAuthority.class);
 		dataService.delete(USER_AUTHORITY, userAuthorities);
 
-		Stream<GroupMember> groupMembers = dataService
-				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-						GroupMember.class);
+		Stream<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class);
 		dataService.delete(GROUP_MEMBER, groupMembers);
 	}
 

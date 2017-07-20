@@ -39,27 +39,26 @@ public class DataExplorerDownloadHandler
 
 	public void writeToExcel(DataRequest dataRequest, OutputStream outputStream) throws IOException
 	{
-		ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX);
 		String entityTypeId = dataRequest.getEntityName();
 
 		QueryImpl<Entity> query = dataRequest.getQuery();
 		ExcelSheetWriter excelSheetWriter = null;
-		try
+		try (ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX))
 		{
 			EntityType entityType = dataService.getEntityType(entityTypeId);
-			final Set<String> attributeNames = new LinkedHashSet<String>(dataRequest.getAttributeNames());
+			final Set<String> attributeNames = new LinkedHashSet<>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 
 			switch (dataRequest.getColNames())
 			{
 				case ATTRIBUTE_LABELS:
-					excelSheetWriter = excelWriter
-							.createWritable(entityTypeId, attributes, AttributeWriteMode.ATTRIBUTE_LABELS);
+					excelSheetWriter = excelWriter.createWritable(entityTypeId, attributes,
+							AttributeWriteMode.ATTRIBUTE_LABELS);
 					break;
 				case ATTRIBUTE_NAMES:
-					excelSheetWriter = excelWriter
-							.createWritable(entityTypeId, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
+					excelSheetWriter = excelWriter.createWritable(entityTypeId, attributes,
+							AttributeWriteMode.ATTRIBUTE_NAMES);
 					break;
 			}
 			switch (dataRequest.getEntityValues())
@@ -76,10 +75,6 @@ public class DataExplorerDownloadHandler
 
 			excelSheetWriter.add(dataService.findAll(entityTypeId, query));
 			excelSheetWriter.close();
-		}
-		finally
-		{
-			excelWriter.close();
 		}
 	}
 
@@ -108,7 +103,7 @@ public class DataExplorerDownloadHandler
 		try
 		{
 			EntityType entityType = dataService.getEntityType(entityTypeId);
-			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
+			final Set<String> attributeNames = new HashSet<>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityType.getAtomicAttributes(),
 					attribute -> attributeNames.contains(attribute.getName()));
 

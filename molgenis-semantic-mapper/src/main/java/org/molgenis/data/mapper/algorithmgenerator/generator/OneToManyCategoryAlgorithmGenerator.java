@@ -30,7 +30,9 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 	public boolean isSuitable(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream()
-				.allMatch(this::isXrefOrCategorialDataType)) && sourceAttributes.size() > 1;
+																			   .allMatch(
+																					   this::isXrefOrCategorialDataType))
+				&& sourceAttributes.size() > 1;
 	}
 
 	@Override
@@ -43,14 +45,15 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		if (suitableForGeneratingWeightedMap(targetAttribute, sourceAttributes))
 		{
 			stringBuilder.append(createAlgorithmNullCheckIfStatement(sourceAttributes))
-					.append(createAlgorithmElseBlock(targetAttribute, sourceAttributes));
+						 .append(createAlgorithmElseBlock(targetAttribute, sourceAttributes));
 		}
 		else
 		{
 			for (Attribute sourceAttribute : sourceAttributes)
 			{
-				stringBuilder.append(oneToOneCategoryAlgorithmGenerator
-						.generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType, sourceEntityType));
+				stringBuilder.append(
+						oneToOneCategoryAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute),
+								targetEntityType, sourceEntityType));
 			}
 		}
 
@@ -84,8 +87,10 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		if (sourceAttributes.size() > 0)
 		{
 			stringBuilder.append("var SUM_WEIGHT;\n").append("if(");
-			sourceAttributes.stream().forEach(attribute -> stringBuilder.append("$('").append(attribute.getName())
-					.append("').isNull().value() && "));
+			sourceAttributes.stream()
+							.forEach(attribute -> stringBuilder.append("$('")
+															   .append(attribute.getName())
+															   .append("').isNull().value() && "));
 			stringBuilder.delete(stringBuilder.length() - 4, stringBuilder.length());
 			stringBuilder.append("){\n").append("\tSUM_WEIGHT = new newValue();\n").append("\tSUM_WEIGHT.value();\n}");
 		}
@@ -94,10 +99,11 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 
 	boolean suitableForGeneratingWeightedMap(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
-		boolean isTargetSuitable = oneToOneCategoryAlgorithmGenerator
-				.isFrequencyCategory(convertToCategory(targetAttribute));
-		boolean areSourcesSuitable = sourceAttributes.stream().map(this::convertToCategory)
-				.allMatch(oneToOneCategoryAlgorithmGenerator::isFrequencyCategory);
+		boolean isTargetSuitable = oneToOneCategoryAlgorithmGenerator.isFrequencyCategory(
+				convertToCategory(targetAttribute));
+		boolean areSourcesSuitable = sourceAttributes.stream()
+													 .map(this::convertToCategory)
+													 .allMatch(oneToOneCategoryAlgorithmGenerator::isFrequencyCategory);
 		return isTargetSuitable && areSourcesSuitable;
 	}
 
@@ -117,8 +123,11 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 
 				double estimatedValue = amountWrapper.getAmount().getEstimatedValue();
 
-				stringBuilder.append("\"").append(sourceCategory.getCode()).append("\":")
-						.append(DECIMAL_FORMAT.format(estimatedValue)).append(",");
+				stringBuilder.append("\"")
+							 .append(sourceCategory.getCode())
+							 .append("\":")
+							 .append(DECIMAL_FORMAT.format(estimatedValue))
+							 .append(",");
 			}
 		}
 
@@ -136,16 +145,11 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		StringBuilder stringBuilder = new StringBuilder();
 
 		List<Category> sortedCategories = convertToCategory(attribute).stream()
-				.filter(category -> category.getAmountWrapper() != null).collect(Collectors.toList());
+																	  .filter(category -> category.getAmountWrapper()
+																			  != null)
+																	  .collect(Collectors.toList());
 
-		Collections.sort(sortedCategories, new Comparator<Category>()
-		{
-			public int compare(Category o1, Category o2)
-			{
-				return Double.compare(o1.getAmountWrapper().getAmount().getEstimatedValue(),
-						o2.getAmountWrapper().getAmount().getEstimatedValue());
-			}
-		});
+		sortedCategories.sort(Comparator.comparingDouble(o -> o.getAmountWrapper().getAmount().getEstimatedValue()));
 
 		List<Integer> sortedRangValues = getRangedValues(sortedCategories);
 
@@ -164,8 +168,11 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 
 			for (Entry<String, Category> entry : categoryRangeBoundMap.entrySet())
 			{
-				stringBuilder.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue().getCode())
-						.append("\",");
+				stringBuilder.append("\"")
+							 .append(entry.getKey())
+							 .append("\":\"")
+							 .append(entry.getValue().getCode())
+							 .append("\",");
 			}
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
 			stringBuilder.append("}, null, null).value();");
@@ -248,13 +255,13 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 
 	int parseAmountMinimumValue(Category category)
 	{
-		return (int) Double
-				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMinimumValue()));
+		return (int) Double.parseDouble(
+				DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMinimumValue()));
 	}
 
 	int parseAmountMaximumValue(Category category)
 	{
-		return (int) Double
-				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMaximumValue()));
+		return (int) Double.parseDouble(
+				DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMaximumValue()));
 	}
 }

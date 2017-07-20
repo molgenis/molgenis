@@ -85,10 +85,8 @@ class EntityCollectionRequestV2
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder();
-		builder.append("EntityCollectionRequestV2 [q=").append(q).append(", aggs=").append(aggs).append(", sort=")
-				.append(sort).append(", attrs=").append(attrs).append(", start=").append(start).append(", num=")
-				.append(num).append("]");
-		return builder.toString();
+		String builder = "EntityCollectionRequestV2 [q=" + q + ", aggs=" + aggs + ", sort=" + sort + ", attrs=" + attrs
+				+ ", start=" + start + ", num=" + num + "]";
+		return builder;
 	}
 }

@@ -2,7 +2,7 @@ package org.molgenis.bootstrap;
 
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
-import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
+import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
@@ -57,8 +57,8 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
 	}
 
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{

@@ -1,14 +1,6 @@
 package org.molgenis.data.vcf.importer;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.mockito.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
@@ -32,8 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.testng.Assert.*;
@@ -125,15 +115,11 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(dataService.hasRepository(entityTypeId0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
 		when(metaDataService.createRepository(argThat(eqName(entityType0)))).thenReturn(outRepo0);
-		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
+		when(outRepo0.add(any(Stream.class))).thenAnswer(invocation ->
 		{
-			@Override
-			public Integer answer(InvocationOnMock invocation) throws Throwable
-			{
-				Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
-				List<Entity> entityList = entities.collect(Collectors.toList());
-				return entityList.size();
-			}
+			Stream<Entity> entities1 = (Stream<Entity>) invocation.getArguments()[0];
+			List<Entity> entityList = entities1.collect(Collectors.toList());
+			return entityList.size();
 		});
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
@@ -226,15 +212,11 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(dataService.hasRepository(entityTypeId0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
 		when(metaDataService.createRepository(argThat(eqName(entityType0)))).thenReturn(outRepo0);
-		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
+		when(outRepo0.add(any(Stream.class))).thenAnswer(invocation ->
 		{
-			@Override
-			public Integer answer(InvocationOnMock invocation) throws Throwable
-			{
-				Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
-				List<Entity> entityList = entities.collect(Collectors.toList());
-				return entityList.size();
-			}
+			Stream<Entity> entities1 = (Stream<Entity>) invocation.getArguments()[0];
+			List<Entity> entityList = entities1.collect(Collectors.toList());
+			return entityList.size();
 		});
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
@@ -427,7 +409,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
 		assertTrue(entitiesValidationReport.valid());
 		assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
-		Map<String, List<String>> importableFields = new HashMap<String, List<String>>();
+		Map<String, List<String>> importableFields = new HashMap<>();
 		importableFields.put(entityTypeId0, singletonList(VcfAttributes.SAMPLES));
 		importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
 		assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);
@@ -492,7 +474,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
 		assertFalse(entitiesValidationReport.valid());
 		assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
-		Map<String, List<String>> importableFields = new HashMap<String, List<String>>();
+		Map<String, List<String>> importableFields = new HashMap<>();
 		importableFields.put(entityTypeId0, singletonList(VcfAttributes.SAMPLES));
 		importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
 		assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);
@@ -527,25 +509,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		assertFalse(vcfImporterService.canImport(new File("file.xls"), source));
 	}
 
-	private static Matcher<EntityType> eqName(EntityType expectedEntityType)
+	private static ArgumentMatcher<EntityType> eqName(EntityType expectedEntityType)
 	{
-		return new BaseMatcher<EntityType>()
-		{
-			@Override
-			public boolean matches(Object item)
-			{
-				if (!(item instanceof EntityType))
-				{
-					return false;
-				}
-				return ((EntityType) item).getId().equals(expectedEntityType.getId());
-			}
-
-			@Override
-			public void describeTo(Description description)
-			{
-				description.appendText("is EntityType with same name");
-			}
-		};
+		return item -> item != null && item.getId().equals(expectedEntityType.getId());
 	}
 }

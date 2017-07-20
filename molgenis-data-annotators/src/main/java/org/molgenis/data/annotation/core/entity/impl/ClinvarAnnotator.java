@@ -131,13 +131,19 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = new ArrayList<>();
 
-		Attribute clinvar_clnsig = attributeFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING).setDescription(
-				"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
-				.setLabel(CLINVAR_CLNSIG_LABEL);
+		Attribute clinvar_clnsig = attributeFactory.create()
+												   .setName(CLINVAR_CLNSIG)
+												   .setDataType(STRING)
+												   .setDescription(
+														   "Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
+												   .setLabel(CLINVAR_CLNSIG_LABEL);
 
-		Attribute clinvar_clnalle = attributeFactory.create().setName(CLINVAR_CLNALLE).setDataType(STRING)
-				.setDescription("Value representing the clinical significanct according to ClinVar")
-				.setLabel(CLINVAR_CLNALLE_LABEL);
+		Attribute clinvar_clnalle = attributeFactory.create()
+													.setName(CLINVAR_CLNALLE)
+													.setDataType(STRING)
+													.setDescription(
+															"Value representing the clinical significanct according to ClinVar")
+													.setLabel(CLINVAR_CLNALLE_LABEL);
 
 		attributes.add(clinvar_clnsig);
 		attributes.add(clinvar_clnalle);

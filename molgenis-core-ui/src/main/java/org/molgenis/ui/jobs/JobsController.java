@@ -79,20 +79,21 @@ public class JobsController extends MolgenisPluginController
 	{
 		final List<Entity> jobs = new ArrayList<>();
 
-		Instant weekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
+		Instant weekAgo = Instant.now().minus(7, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
 		User currentUser = userAccountService.getCurrentUser();
 
-		dataService.getMeta().getEntityTypes()
-				.filter(e -> e.getExtends() != null && e.getExtends().getId().equals(jobMetaDataMetaData.getId()))
-				.forEach(e ->
-				{
-					Query<Entity> q = dataService.query(e.getId()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
-					if (!currentUser.isSuperuser())
-					{
-						q.and().eq(USER, currentUser.getUsername());
-					}
-					dataService.findAll(e.getId(), q).forEach(jobs::add);
-				});
+		dataService.getMeta()
+				   .getEntityTypes()
+				   .filter(e -> e.getExtends() != null && e.getExtends().getId().equals(jobMetaDataMetaData.getId()))
+				   .forEach(e ->
+				   {
+					   Query<Entity> q = dataService.query(e.getId()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
+					   if (!currentUser.isSuperuser())
+					   {
+						   q.and().eq(USER, currentUser.getUsername());
+					   }
+					   dataService.findAll(e.getId(), q).forEach(jobs::add);
+				   });
 
 		jobs.sort((job1, job2) -> job2.getInstant(SUBMISSION_DATE).compareTo(job1.getInstant(SUBMISSION_DATE)));
 		if (jobs.size() > MAX_JOBS_TO_RETURN)

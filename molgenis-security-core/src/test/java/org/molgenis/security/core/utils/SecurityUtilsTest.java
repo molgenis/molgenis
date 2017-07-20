@@ -41,17 +41,17 @@ public class SecurityUtilsTest
 		reset(authentication);
 
 		GrantedAuthority authority1 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn("authority1")
-				.getMock();
+																					   .getMock();
 		GrantedAuthority authority2 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn("authority2")
-				.getMock();
+																					   .getMock();
 		userDetails = mock(UserDetails.class);
 		when(userDetails.getUsername()).thenReturn("username");
 		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities())
-				.thenReturn(Arrays.<GrantedAuthority>asList(authority1, authority2));
+		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
+				Arrays.asList(authority1, authority2));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities())
-				.thenReturn(Arrays.<GrantedAuthority>asList(authority1, authority2));
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
+				Arrays.asList(authority1, authority2));
 	}
 
 	@AfterClass
@@ -80,9 +80,9 @@ public class SecurityUtilsTest
 	{
 		when(authentication.isAuthenticated()).thenReturn(true);
 		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_ANONYMOUS)
-				.getMock();
-		when((Collection<GrantedAuthority>) authentication.getAuthorities())
-				.thenReturn(Collections.<GrantedAuthority>singletonList(authoritySu));
+																						.getMock();
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
+				Collections.singletonList(authoritySu));
 		assertFalse(SecurityUtils.currentUserIsAuthenticated());
 	}
 
@@ -98,9 +98,9 @@ public class SecurityUtilsTest
 	public void currentUserIsSu_true()
 	{
 		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_SU)
-				.getMock();
-		when((Collection<GrantedAuthority>) authentication.getAuthorities())
-				.thenReturn(Collections.<GrantedAuthority>singletonList(authoritySu));
+																						.getMock();
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
+				Collections.singletonList(authoritySu));
 		assertTrue(SecurityUtils.currentUserIsSu());
 		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}
@@ -110,9 +110,9 @@ public class SecurityUtilsTest
 	public void currentUserIsSystemTrue() throws Exception
 	{
 		GrantedAuthority authoritySystem = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(ROLE_SYSTEM)
-				.getMock();
-		when((Collection<GrantedAuthority>) authentication.getAuthorities())
-				.thenReturn(Collections.<GrantedAuthority>singletonList(authoritySystem));
+																							.getMock();
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
+				Collections.singletonList(authoritySystem));
 		assertTrue(SecurityUtils.currentUserIsSystem());
 		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}
@@ -154,9 +154,8 @@ public class SecurityUtilsTest
 	public void getEntityAuthorities()
 	{
 		List<String> authorities = SecurityUtils.getEntityAuthorities("test");
-		List<String> expected = Arrays
-				.asList("ROLE_ENTITY_READ_test", "ROLE_ENTITY_WRITE_test", "ROLE_ENTITY_COUNT_test",
-						"ROLE_ENTITY_NONE_test", "ROLE_ENTITY_WRITEMETA_test");
+		List<String> expected = Arrays.asList("ROLE_ENTITY_READ_test", "ROLE_ENTITY_WRITE_test",
+				"ROLE_ENTITY_COUNT_test", "ROLE_ENTITY_NONE_test", "ROLE_ENTITY_WRITEMETA_test");
 
 		Assert.assertEqualsNoOrder(authorities.toArray(), expected.toArray());
 	}

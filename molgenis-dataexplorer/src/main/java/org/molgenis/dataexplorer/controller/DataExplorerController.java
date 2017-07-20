@@ -11,14 +11,15 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.service.GenomeBrowserService;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -39,12 +40,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
+import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.util.EntityUtils.getTypedValue;
@@ -83,7 +89,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService molgenisPermissionService;
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
@@ -117,9 +123,10 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		StringBuilder message = new StringBuilder("");
 
-		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
-				.filter(entityType -> !entityType.isAbstract())
-				.collect(toMap(EntityType::getId, entityType -> entityType));
+		Map<String, EntityType> entitiesMeta = dataService.getMeta()
+														  .getEntityTypes()
+														  .filter(entityType -> !entityType.isAbstract())
+														  .collect(toMap(EntityType::getId, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
@@ -154,7 +161,7 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
 		boolean hasEntityPermission = molgenisPermissionService
-				.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
+				.hasPermissionOnEntityType(selectedEntityName, Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -195,7 +202,7 @@ public class DataExplorerController extends MolgenisPluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITEMETA))
+				if (!molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
 					throw new MolgenisDataAccessException(
 							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
@@ -203,7 +210,7 @@ public class DataExplorerController extends MolgenisPluginController
 				}
 				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
 						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
-								.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
+										 .sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
 				model.addAttribute("annotationRun", annotationRun);
 				model.addAttribute("entityTypeId", entityTypeId);
 				break;
@@ -216,8 +223,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ) && dataService
-				.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
+		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService.getCapabilities(
+				entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
 	/**
@@ -243,9 +250,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, WRITE)) pluginPermission = WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ)) pluginPermission = READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.COUNT))
+		if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, WRITE)) pluginPermission = WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ)) pluginPermission = READ;
+		else if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
@@ -285,8 +292,8 @@ public class DataExplorerController extends MolgenisPluginController
 						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
 						if (modEntitiesReportName != null)
 						{
-							modulesConfig
-									.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
+							modulesConfig.add(
+									new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
 						}
 					}
 					break;
@@ -310,8 +317,8 @@ public class DataExplorerController extends MolgenisPluginController
 		Map<String, String> genomeEntities = new HashMap<>();
 		genomeBrowserService.getGenomeBrowserEntities().forEach(entityType ->
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), WRITE);
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntityType(entityType.getId(), READ);
+			boolean canWrite = molgenisPermissionService.hasPermissionOnEntityType(entityType.getId(), WRITE);
 			if (canRead || canWrite)
 			{
 				genomeEntities.put(entityType.getId(), entityType.getLabel());
@@ -332,15 +339,14 @@ public class DataExplorerController extends MolgenisPluginController
 		LOG.info("Download request: [" + dataRequestStr + "]");
 		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
-		String fileName;
+		final String fileName = getDownloadFilename(dataRequest.getEntityName(), LocalDateTime.now(),
+				dataRequest.getDownloadType());
 		ServletOutputStream outputStream;
 
 		switch (dataRequest.getDownloadType())
 		{
 			case DOWNLOAD_TYPE_CSV:
 				response.setContentType("text/csv");
-				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss")
-						.format(new Date()) + ".csv";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();
@@ -348,14 +354,18 @@ public class DataExplorerController extends MolgenisPluginController
 				break;
 			case DOWNLOAD_TYPE_XLSX:
 				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss")
-						.format(new Date()) + ".xlsx";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();
 				download.writeToExcel(dataRequest, outputStream);
 				break;
 		}
+	}
+
+	public String getDownloadFilename(String entityTypeId, LocalDateTime localDateTime, DownloadType downloadType)
+	{
+		String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss"));
+		return String.format("%s_%s.%s", entityTypeId, timestamp, downloadType == DOWNLOAD_TYPE_CSV ? "csv" : "xlsx");
 	}
 
 	@RequestMapping(value = "/galaxy/export", method = POST)

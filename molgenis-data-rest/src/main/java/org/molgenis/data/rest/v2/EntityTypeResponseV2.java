@@ -1,6 +1,5 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
@@ -11,8 +10,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 
 import java.util.List;
 
@@ -41,18 +38,16 @@ class EntityTypeResponseV2
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponseV2(EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+	public EntityTypeResponseV2(EntityType meta, DataService dataService, LanguageService languageService)
 	{
-		this(meta, null, permissionService, dataService, languageService);
+		this(meta, null, dataService, languageService);
 	}
 
 	/**
 	 * @param meta
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityTypeResponseV2(EntityType meta, Fetch fetch, MolgenisPermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+	public EntityTypeResponseV2(EntityType meta, Fetch fetch, DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
@@ -87,8 +82,7 @@ class EntityTypeResponseV2
 			{
 				subAttrFetch = null;
 			}
-			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService,
-					languageService);
+			return new AttributeResponseV2(name, meta, attr, subAttrFetch, dataService, languageService);
 		}));
 
 		languageCode = languageService.getCurrentUserLanguageCode();
@@ -100,21 +94,12 @@ class EntityTypeResponseV2
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null ? Lists
-				.newArrayList(Iterables.transform(lookupAttributes, new Function<Attribute, String>()
-				{
-					@Override
-					public String apply(Attribute attribute)
-					{
-						return attribute.getName();
-					}
-				})) : null;
+		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
+				Iterables.transform(lookupAttributes, Attribute::getName)) : null;
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable =
-				permissionService.hasPermissionOnEntity(name, Permission.WRITE) && dataService.getCapabilities(name)
-						.contains(RepositoryCapability.WRITABLE);
+		this.writable = !meta.isReadOnly() && dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

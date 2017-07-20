@@ -41,13 +41,14 @@ public class AmazonBucketConfig
 				final String jobExecutionID = amazonBucketJobExecution.getIdentifier();
 				final String bucket = amazonBucketJobExecution.getBucket();
 				final String key = amazonBucketJobExecution.getKey();
+				final String extension = amazonBucketJobExecution.getExtension();
 				final String accessKey = amazonBucketJobExecution.getAccessKey();
 				final String secretKey = amazonBucketJobExecution.getSecretKey();
 				final String region = amazonBucketJobExecution.getRegion();
 				final boolean isExpression = amazonBucketJobExecution.isExpression();
-				return progress -> ingester
-						.ingest(jobExecutionID, targetEntityId, bucket, key, accessKey, secretKey, region, isExpression,
-								progress);
+				return progress -> ingester.ingest(jobExecutionID, targetEntityId, bucket, key, extension, accessKey,
+						secretKey,
+						region, isExpression, progress);
 			}
 		};
 	}
@@ -64,7 +65,8 @@ public class AmazonBucketConfig
 						+ "'key': {'type': 'string', 'description': 'Expression to match the file key'}, 'accessKey': { 'type': 'string', "
 						+ "'description': 'the access key to be used to login to the amazon bucket'},'secretKey': {'type': 'string', "
 						+ "'description': 'the secretkey to be used to login to the amazon bucket'},'expression': {'type': 'boolean', "
-						+ "'description': 'Is the key an expression or an exact match'},'region': {'type': 'string', "
+						+ "'description': 'Is the key an expression or an exact match'},'extension': {'type': 'string', "
+						+ "'description': 'Optional extension of the file, is not part of the key in the bucket'},'region': {'type': 'string', "
 						+ "'description': 'The region where the amazon bucket is located'},'targetEntityId': {'type': 'string', "
 						+ "'description': 'Target EntityType ID'}},"
 						+ "'required': ['bucket','key','accessKey','secretKey','expression','region']}");

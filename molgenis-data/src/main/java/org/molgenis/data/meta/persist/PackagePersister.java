@@ -35,7 +35,7 @@ public class PackagePersister
 	public void upsertPackages(Stream<Package> packages)
 	{
 		Iterator<List<Package>> partitions = Iterators.partition(packages.iterator(), BATCH_SIZE);
-		partitions.forEachRemaining(packageBatch -> upsertPackages(packageBatch));
+		partitions.forEachRemaining(this::upsertPackages);
 	}
 
 	private void upsertPackages(Collection<Package> packages)

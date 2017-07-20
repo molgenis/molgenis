@@ -14,7 +14,7 @@ import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.converter.RdfConverter;
@@ -72,7 +72,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private AppSettings appSettings;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService molgenisPermissionService;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
@@ -95,13 +95,17 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			cachePeriod = 31536000; // a year
 		}
-		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/")
+		registry.addResourceHandler(PATTERN_CSS)
+				.addResourceLocations("/css/", "classpath:/css/")
 				.setCachePeriod(cachePeriod);
-		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/")
+		registry.addResourceHandler(PATTERN_IMG)
+				.addResourceLocations("/img/", "classpath:/img/")
 				.setCachePeriod(cachePeriod);
-		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/")
+		registry.addResourceHandler(PATTERN_JS)
+				.addResourceLocations("/js/", "classpath:/js/")
 				.setCachePeriod(cachePeriod);
-		registry.addResourceHandler(PATTERN_FONTS).addResourceLocations("/fonts/", "classpath:/fonts/")
+		registry.addResourceHandler(PATTERN_FONTS)
+				.addResourceLocations("/fonts/", "classpath:/fonts/")
 				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
@@ -110,8 +114,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		FileStore fileStore = fileStore();
 		registry.addResourceHandler("/" + PATH_SEGMENT_APPS + "/**")
 				.addResourceLocations("file:///" + fileStore.getStorageDir() + '/' + FILE_STORE_PLUGIN_APPS_PATH + '/');
-		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/")
-				.setCachePeriod(3600).resourceChain(true);
+		registry.addResourceHandler("/webjars/**")
+				.addResourceLocations("classpath:/META-INF/resources/webjars/")
+				.setCachePeriod(3600)
+				.resourceChain(true);
 		// see https://github.com/spring-projects/spring-boot/issues/4403 for why the resourceChain needs to be explicitly added.
 	}
 

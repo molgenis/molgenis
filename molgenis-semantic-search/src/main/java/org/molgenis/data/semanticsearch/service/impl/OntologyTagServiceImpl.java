@@ -79,7 +79,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		Attribute attribute = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityType.getId(), attribute.getName());
-		List<Entity> tags = new ArrayList<Entity>();
+		List<Entity> tags = new ArrayList<>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
 			SemanticTag<Attribute, OntologyTerm, Ontology> tag = asTag(attribute, tagEntity);
@@ -134,7 +134,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public void addAttributeTag(EntityType entityType, SemanticTag<Attribute, OntologyTerm, Ontology> tag)
 	{
 		Entity entity = findAttributeEntity(entityType.getId(), tag.getSubject().getName());
-		List<Entity> tags = new ArrayList<Entity>();
+		List<Entity> tags = new ArrayList<>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
 			tags.add(tagEntity);
@@ -247,14 +247,15 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		EntityType entityEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entity, EntityType.class);
 		Iterable<Attribute> attributes = entityEntity.getOwnAllAttributes();
 		entityEntity.set(ATTRIBUTES, StreamSupport.stream(attributes.spliterator(), false)
-				.map(att -> att.getName().equals(attribute) ? attributeEntity : att).collect(Collectors.toList()));
+												  .map(att -> att.getName().equals(attribute) ? attributeEntity : att)
+												  .collect(Collectors.toList()));
 		dataService.update(ENTITY_TYPE_META_DATA, entityEntity);
 	}
 
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
 	{
-		return ontologyTermIRI.equals(e.getString(TagMetadata.OBJECT_IRI)) && relationIRI
-				.equals(e.getString(TagMetadata.RELATION_IRI));
+		return ontologyTermIRI.equals(e.getString(TagMetadata.OBJECT_IRI)) && relationIRI.equals(
+				e.getString(TagMetadata.RELATION_IRI));
 	}
 
 	@RunAsSystem
@@ -262,15 +263,15 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		EntityType entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
 
-		Optional<Attribute> result = stream(entityTypeEntity.getAttributes().spliterator(), false)
-				.filter(att -> attributeName.equals(att.getName())).findFirst();
+		Optional<Attribute> result = stream(entityTypeEntity.getAttributes().spliterator(), false).filter(
+				att -> attributeName.equals(att.getName())).findFirst();
 
 		if (!result.isPresent() && entityTypeEntity.getExtends() != null)
 		{
 			return findAttributeEntity(entityTypeEntity.getExtends().getId(), attributeName);
 		}
 
-		return result.isPresent() ? result.get() : null;
+		return result.orElse(null);
 	}
 
 	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,
@@ -284,8 +285,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		{
 			return null;
 		}
-		return new SemanticTag<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
-				ontology);
+		return new SemanticTag<>(identifier, subjectType, relation, ontologyTerm, ontology);
 	}
 
 	private static Relation asRelation(Entity tagEntity)

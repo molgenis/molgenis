@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.repository.impl;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -69,14 +68,8 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	public List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
 			EntityType sourceEntityType, EntityType targetEntityType)
 	{
-		return Lists.transform(attributeMappingEntities, new Function<Entity, AttributeMapping>()
-		{
-			@Override
-			public AttributeMapping apply(Entity attributeMappingEntity)
-			{
-				return toAttributeMapping(attributeMappingEntity, sourceEntityType, targetEntityType);
-			}
-		});
+		return Lists.transform(attributeMappingEntities,
+				attributeMappingEntity -> toAttributeMapping(attributeMappingEntity, sourceEntityType, targetEntityType));
 
 	}
 
@@ -120,9 +113,10 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		attributeMappingEntity.set(TARGET_ATTRIBUTE,
 				attributeMapping.getTargetAttribute() != null ? attributeMapping.getTargetAttribute().getName() : null);
 		attributeMappingEntity.set(ALGORITHM, attributeMapping.getAlgorithm());
-		attributeMappingEntity.set(SOURCE_ATTRIBUTES,
-				attributeMapping.getSourceAttributes().stream().map(Attribute::getName)
-						.collect(Collectors.joining(",")));
+		attributeMappingEntity.set(SOURCE_ATTRIBUTES, attributeMapping.getSourceAttributes()
+																	  .stream()
+																	  .map(Attribute::getName)
+																	  .collect(Collectors.joining(",")));
 		attributeMappingEntity.set(ALGORITHM_STATE, attributeMapping.getAlgorithmState().toString());
 		return attributeMappingEntity;
 	}

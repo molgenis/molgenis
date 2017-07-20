@@ -116,8 +116,8 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void executeScheduledJob() throws Exception
 	{
-		when(dataService.findOneById(SCHEDULED_JOB, "aaaacw67ejuwq7wron3yjriaae", ScheduledJob.class))
-				.thenReturn(scheduledJob);
+		when(dataService.findOneById(SCHEDULED_JOB, "aaaacw67ejuwq7wron3yjriaae", ScheduledJob.class)).thenReturn(
+				scheduledJob);
 		when(entityManager.create(jobExecutionType, EntityManager.CreationMode.POPULATE)).thenReturn(jobExecution);
 
 		when(jobFactory.createJob(jobExecution)).thenReturn(job);
@@ -164,7 +164,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		jobExecutor.submit(jobExecution);
 
 		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
-		verify(executorService).submit(jobCaptor.capture());
+		verify(executorService).execute(jobCaptor.capture());
 
 		jobCaptor.getValue().run();
 		verify(job).call(any(Progress.class));

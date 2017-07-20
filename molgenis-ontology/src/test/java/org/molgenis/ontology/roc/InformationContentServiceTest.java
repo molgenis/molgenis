@@ -41,8 +41,8 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 	@Test
 	public void createStemmedWordSet()
 	{
-		Set<String> actualStemmedWordSet = informationContentService
-				.createStemmedWordSet("hearing-impairment_eye ball");
+		Set<String> actualStemmedWordSet = informationContentService.createStemmedWordSet(
+				"hearing-impairment_eye ball");
 		Set<String> expectedStemmedWordSet = Sets.newHashSet("hear", "impair", "ey", "ball");
 
 		Assert.assertEquals(actualStemmedWordSet.size(), expectedStemmedWordSet.size());
@@ -56,11 +56,11 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 
 		Ontology ontology = ontologyFactory.create();
 		ontology.setOntologyIri(ontologyIri);
-		when(dataService.findOne(ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri)))
-				.thenReturn(ontology);
+		when(dataService.findOne(ONTOLOGY,
+				new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontology);
 
-		when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontology)))
-				.thenReturn((long) 100);
+		when(dataService.count(ONTOLOGY_TERM,
+				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontology))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
 				singletonList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
@@ -78,8 +78,8 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 						new QueryRule(Operator.AND), queryRule2));
 		when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery2))).thenReturn((long) 10);
 
-		Map<String, Double> expectedWordIDF = informationContentService
-				.createWordIDF("hearing impairment", ontologyIri);
+		Map<String, Double> expectedWordIDF = informationContentService.createWordIDF("hearing impairment",
+				ontologyIri);
 
 		Assert.assertEquals(expectedWordIDF.get("hear").intValue(), 2);
 		Assert.assertEquals(expectedWordIDF.get("impair").intValue(), 3);
@@ -93,11 +93,11 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 		Entity ontologyEntity = ontologyFactory.create();
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
 
-		when(dataService.findOne(ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri)))
-				.thenReturn(ontologyEntity);
+		when(dataService.findOne(ONTOLOGY,
+				new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
-		when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
-				.thenReturn((long) 100);
+		when(dataService.count(ONTOLOGY_TERM,
+				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
 				singletonList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
@@ -115,8 +115,8 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 						new QueryRule(Operator.AND), queryRule2));
 		when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery2))).thenReturn((long) 10);
 
-		Map<String, Double> redistributedNGramScore = informationContentService
-				.redistributedNGramScore("hearing impairment", ontologyIri);
+		Map<String, Double> redistributedNGramScore = informationContentService.redistributedNGramScore(
+				"hearing impairment", ontologyIri);
 		Assert.assertEquals(redistributedNGramScore.get("hear").intValue(), -7);
 		Assert.assertEquals(redistributedNGramScore.get("impair").intValue(), 7);
 	}

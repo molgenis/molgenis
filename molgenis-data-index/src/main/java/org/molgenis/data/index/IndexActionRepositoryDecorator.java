@@ -144,8 +144,9 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 		getEntityType().getMappedByAttributes().forEach(mappedByAttr ->
 		{
 			EntityType mappedByAttrRefEntity = mappedByAttr.getRefEntity();
-			entity.getEntities(mappedByAttr.getName()).forEach(refEntity -> indexActionRegisterService
-					.register(mappedByAttrRefEntity, refEntity.getIdValue().toString()));
+			entity.getEntities(mappedByAttr.getName())
+				  .forEach(refEntity -> indexActionRegisterService.register(mappedByAttrRefEntity,
+						  refEntity.getIdValue().toString()));
 		});
 
 		getEntityType().getInversedByAttributes().forEach(inversedByAttr ->

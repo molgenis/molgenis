@@ -60,7 +60,7 @@ public class AttributeMapping
 	{
 		this.identifier = null;
 		this.targetAttribute = target;
-		this.sourceAttributes = Lists.<Attribute>newArrayList();
+		this.sourceAttributes = Lists.newArrayList();
 		this.algorithm = null;
 		this.algorithmState = null;
 	}

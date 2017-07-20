@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.Objects.requireNonNull;
@@ -78,8 +79,8 @@ public class JobExecutor
 
 	private JobExecution createJobExecution(ScheduledJob scheduledJob)
 	{
-		JobExecution jobExecution = (JobExecution) entityManager
-				.create(scheduledJob.getType().getJobExecutionType(), POPULATE);
+		JobExecution jobExecution = (JobExecution) entityManager.create(scheduledJob.getType().getJobExecutionType(),
+				POPULATE);
 		writePropertyValues(jobExecution, getPropertyValues(scheduledJob.getParameters()));
 		jobExecution.setFailureEmail(scheduledJob.getFailureEmail());
 		jobExecution.setSuccessEmail(scheduledJob.getSuccessEmail());
@@ -94,10 +95,23 @@ public class JobExecutor
 	 * @param jobExecution the {@link JobExecution} to save and submit.
 	 */
 	@RunAsSystem
-	public void submit(JobExecution jobExecution)
+	public CompletableFuture<Void> submit(JobExecution jobExecution)
+	{
+		return submit(jobExecution, executorService);
+	}
+
+	/**
+	 * Saves execution in the current thread, then creates a Job and submits that for asynchronous execution to a
+	 * specific ExecutorService.
+	 *
+	 * @param jobExecution    the {@link JobExecution} to save and submit.
+	 * @param executorService the ExecutorService to run the submitted job on
+	 */
+	@RunAsSystem
+	public CompletableFuture<Void> submit(JobExecution jobExecution, ExecutorService executorService)
 	{
 		Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
-		executorService.submit(() -> runJob(jobExecution, molgenisJob));
+		return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
 	}
 
 	private Job saveExecutionAndCreateJob(JobExecution jobExecution)

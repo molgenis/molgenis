@@ -61,9 +61,12 @@ public class TabixVcfRepository extends VcfRepository
 	 */
 	private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
 	{
-		return q.getRules().stream()
+		return q.getRules()
+				.stream()
 				.filter(rule -> attributeName.equals(rule.getField()) && rule.getOperator() == Operator.EQUALS)
-				.findFirst().get().getValue();
+				.findFirst()
+				.get()
+				.getValue();
 	}
 
 	@Override
@@ -71,14 +74,14 @@ public class TabixVcfRepository extends VcfRepository
 	{
 		Object posValue = getFirstEqualsValueFor(VcfAttributes.POS, q);
 		Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
-		List<Entity> result = new ArrayList<Entity>();
+		List<Entity> result = new ArrayList<>();
 
 		// if one of both required attributes is null, skip the query and return an empty list
 		if (posValue != null && chromValue != null)
 		{
 			int posIntValue = Integer.parseInt(posValue.toString());
 			String chromStringValue = chromValue.toString();
-			result = query(chromStringValue, Integer.valueOf(posIntValue), Integer.valueOf(posIntValue));
+			result = query(chromStringValue, posIntValue, posIntValue);
 		}
 		return result.stream();
 	}
@@ -97,8 +100,11 @@ public class TabixVcfRepository extends VcfRepository
 		try
 		{
 			Collection<String> lines = getLines(tabixReader.query(queryString));
-			return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
-					.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+			return lines.stream()
+						.map(line -> line.split("\t"))
+						.map(vcfToEntitySupplier.get()::toEntity)
+						.filter(entity -> positionMatches(entity, posFrom, posTo))
+						.collect(Collectors.toList());
 		}
 		catch (NullPointerException e)
 		{
@@ -147,7 +153,7 @@ public class TabixVcfRepository extends VcfRepository
 	protected Collection<String> getLines(
 			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator)
 	{
-		Builder<String> builder = ImmutableList.<String>builder();
+		Builder<String> builder = ImmutableList.builder();
 		if (iterator != null)
 		{
 			try

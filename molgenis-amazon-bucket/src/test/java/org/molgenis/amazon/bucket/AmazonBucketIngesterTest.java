@@ -29,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
@@ -66,18 +65,17 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 	@Test
 	public void ingest() throws FileNotFoundException
 	{
-		Map<String, Integer> imported = new HashMap<String, Integer>();
+		Map<String, Integer> imported = new HashMap<>();
 		imported.put("test", 1);
 		when(report.getNrImportedEntitiesMap()).thenReturn(imported);
-		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f))
-				.thenReturn(fileRepositoryCollectionMock);
+		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(
+				fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService("test_data_only.xlsx")).thenReturn(importServiceMock);
 		when(importServiceMock.doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT))).thenReturn(report);
 		when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
-		amazonBucketIngester
-				.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", "test", "test", "region1", true,
-						progress);
+		amazonBucketIngester.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", null, "test", "test",
+				"region1", true, progress);
 		verify(importServiceFactoryMock).getImportService("test_data_only.xlsx");
 		verify(importServiceMock).doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT));
 	}
@@ -131,7 +129,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 				File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
 				when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
 				when(amazonBucketClient
-						.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"), eq(true)))
+						.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"), any(),eq(true), any()))
 						.thenReturn(file);
 			}
 			catch (Exception e)

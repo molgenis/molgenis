@@ -50,9 +50,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	private Entity findAttributeEntity(EntityType entityType, String attributeName)
 	{
 		Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId());
-		Optional<Entity> result = stream(entityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false)
-				.filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME))).findFirst();
-		return result.isPresent() ? result.get() : null;
+		Optional<Entity> result = stream(entityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
+				att -> attributeName.equals(att.getString(AttributeMetadata.NAME))).findFirst();
+		return result.orElse(null);
 	}
 
 	private Entity findEntity(EntityType emd)
@@ -66,7 +66,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	{
 		Attribute attribute = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityType, attribute.getName());
-		List<Entity> tags = new ArrayList<Entity>();
+		List<Entity> tags = new ArrayList<>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
 			SemanticTag<Attribute, LabeledResource, LabeledResource> tag = SemanticTag.asTag(attribute, tagEntity);
@@ -84,9 +84,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Multimap<Relation, LabeledResource> getTagsForAttribute(EntityType entityType, Attribute attribute)
 	{
 		Entity entity = findAttributeEntity(entityType, attribute.getName());
-		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource>create();
+		if (entity == null) return ArrayListMultimap.create();
 
-		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource>create();
+		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.create();
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
 			SemanticTag<Attribute, LabeledResource, LabeledResource> tag = SemanticTag.asTag(attribute, tagEntity);
@@ -99,7 +99,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	@RunAsSystem
 	public Iterable<SemanticTag<EntityType, LabeledResource, LabeledResource>> getTagsForEntity(EntityType entityType)
 	{
-		List<SemanticTag<EntityType, LabeledResource, LabeledResource>> result = new ArrayList<SemanticTag<EntityType, LabeledResource, LabeledResource>>();
+		List<SemanticTag<EntityType, LabeledResource, LabeledResource>> result = new ArrayList<>();
 		Entity entity = findEntity(entityType);
 		if (entity == null)
 		{
@@ -119,7 +119,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public void addAttributeTag(EntityType entityType, SemanticTag<Attribute, LabeledResource, LabeledResource> tag)
 	{
 		Entity entity = findAttributeEntity(entityType, tag.getSubject().getName());
-		List<Entity> tags = new ArrayList<Entity>();
+		List<Entity> tags = new ArrayList<>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
 			tags.add(tagEntity);
@@ -137,7 +137,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		{
 			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getId() + "]");
 		}
-		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.<SemanticTag<EntityType, LabeledResource, LabeledResource>>copyOf(
+		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.copyOf(
 				getTagsForEntity(tag.getSubject()));
 		if (existingTags.contains(tag))
 		{
@@ -145,7 +145,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 			return;
 		}
 
-		ImmutableList.Builder<Entity> builder = ImmutableList.<Entity>builder();
+		ImmutableList.Builder<Entity> builder = ImmutableList.builder();
 		builder.addAll(entity.getEntities(EntityTypeMetadata.TAGS));
 		builder.add(getTagEntity(tag));
 		entity.set(EntityTypeMetadata.TAGS, builder.build());

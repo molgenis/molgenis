@@ -1,7 +1,6 @@
 package org.molgenis.auth;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -62,7 +61,7 @@ public class UserRepositoryDecoratorTest
 		userRepositoryDecorator.add(user);
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(user);
-		verify(userAuthorityRepository, times(0)).add(Matchers.any(UserAuthority.class));
+		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -77,7 +76,7 @@ public class UserRepositoryDecoratorTest
 		when(user1.getPassword()).thenReturn(password);
 		when(user1.isSuperuser()).thenReturn(false);
 
-		when(decoratedRepository.add(Matchers.any(Stream.class))).thenAnswer(invocation ->
+		when(decoratedRepository.add(any(Stream.class))).thenAnswer(invocation ->
 		{
 			Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
 			List<Entity> entitiesList = entities.collect(toList());
@@ -85,7 +84,7 @@ public class UserRepositoryDecoratorTest
 		});
 		Assert.assertEquals(userRepositoryDecorator.add(Stream.of(user0, user1)), Integer.valueOf(2));
 		verify(passwordEncoder, times(2)).encode(password);
-		verify(userAuthorityRepository, times(0)).add(Matchers.any(UserAuthority.class));
+		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
 	}
 
 	@Test
@@ -199,7 +198,7 @@ public class UserRepositoryDecoratorTest
 		when(user.getPassword()).thenReturn("password");
 
 		Stream<User> entities = Stream.of(user);
-		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
@@ -223,7 +222,7 @@ public class UserRepositoryDecoratorTest
 		when(user.getPassword()).thenReturn("currentPasswordHash");
 
 		Stream<User> entities = Stream.of(user);
-		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));

@@ -112,7 +112,7 @@ public class MappingServiceImpl implements MappingService
 			}
 
 			if (mappingProjectRepository.getMappingProjects(new QueryImpl<>().eq(NAME, clonedMappingProjectName))
-					.isEmpty())
+										.isEmpty())
 			{
 				break;
 			}
@@ -250,8 +250,10 @@ public class MappingServiceImpl implements MappingService
 
 	public Stream<EntityType> getCompatibleEntityTypes(EntityType target)
 	{
-		return dataService.getMeta().getEntityTypes().filter(candidate -> !candidate.isAbstract())
-				.filter(isCompatible(target));
+		return dataService.getMeta()
+						  .getEntityTypes()
+						  .filter(candidate -> !candidate.isAbstract())
+						  .filter(isCompatible(target));
 	}
 
 	private Predicate<EntityType> isCompatible(EntityType target)
@@ -285,7 +287,8 @@ public class MappingServiceImpl implements MappingService
 	{
 		Map<String, Attribute> targetRepositoryAttributeMap = newHashMap();
 		targetRepositoryEntityType.getAtomicAttributes()
-				.forEach(attribute -> targetRepositoryAttributeMap.put(attribute.getName(), attribute));
+								  .forEach(attribute -> targetRepositoryAttributeMap.put(attribute.getName(),
+										  attribute));
 
 		for (Attribute mappingTargetAttribute : mappingTargetEntityType.getAtomicAttributes())
 		{
@@ -327,8 +330,10 @@ public class MappingServiceImpl implements MappingService
 	private long applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
 			Progress progress)
 	{
-		return mappingTarget.getEntityMappings().stream()
-				.mapToLong(sourceMapping -> applyMappingToRepo(sourceMapping, targetRepo, progress)).sum();
+		return mappingTarget.getEntityMappings()
+							.stream()
+							.mapToLong(sourceMapping -> applyMappingToRepo(sourceMapping, targetRepo, progress))
+							.sum();
 	}
 
 	long applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
@@ -337,9 +342,10 @@ public class MappingServiceImpl implements MappingService
 		AtomicLong counter = new AtomicLong();
 
 		boolean canAdd = targetRepo.count() == 0;
-		dataService.getRepository(sourceMapping.getName()).forEachBatched(
-				entities -> processBatch(sourceMapping, targetRepo, progress, counter, canAdd, entities),
-				MAPPING_BATCH_SIZE);
+		dataService.getRepository(sourceMapping.getName())
+				   .forEachBatched(
+						   entities -> processBatch(sourceMapping, targetRepo, progress, counter, canAdd, entities),
+						   MAPPING_BATCH_SIZE);
 
 		progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
 		return counter.get();
@@ -363,8 +369,9 @@ public class MappingServiceImpl implements MappingService
 
 	private List<Entity> mapEntities(EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities)
 	{
-		return entities.stream().map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData))
-				.collect(toList());
+		return entities.stream()
+					   .map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData))
+					   .collect(toList());
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)
@@ -376,9 +383,9 @@ public class MappingServiceImpl implements MappingService
 			target.set(SOURCE, sourceMapping.getName());
 		}
 
-		sourceMapping.getAttributeMappings().forEach(
-				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
-						sourceMapping.getSourceEntityType()));
+		sourceMapping.getAttributeMappings()
+					 .forEach(attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
+							 sourceMapping.getSourceEntityType()));
 		return target;
 	}
 

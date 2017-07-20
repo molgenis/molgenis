@@ -32,7 +32,7 @@ public class HighchartSeriesUtil
 	 */
 	public List<Series> parseToXYDataSeriesList(List<XYDataSerie> xYDataSeries)
 	{
-		List<Series> series = new ArrayList<Series>();
+		List<Series> series = new ArrayList<>();
 		for (XYDataSerie xYDataSerie : xYDataSeries)
 		{
 			series.add(parsexYDataSerieToSeries(xYDataSerie));
@@ -49,7 +49,7 @@ public class HighchartSeriesUtil
 	 */
 	public List<Series> parseToBoxPlotSeriesList(List<BoxPlotSerie> boxPlotSeries)
 	{
-		List<Series> series = new ArrayList<Series>();
+		List<Series> series = new ArrayList<>();
 		for (BoxPlotSerie boxPlotSerie : boxPlotSeries)
 		{
 			series.add(parseBoxPlotSerieToSeries(boxPlotSerie));
@@ -72,8 +72,8 @@ public class HighchartSeriesUtil
 				xYDataSerie.getAttributeYFieldTypeEnum()));
 
 		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType()) && (
-				AttributeType.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || AttributeType.DATE_TIME
-						.equals(xYDataSerie.getAttributeXFieldTypeEnum())))
+				AttributeType.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || AttributeType.DATE_TIME.equals(
+						xYDataSerie.getAttributeXFieldTypeEnum())))
 		{
 			series.setLineWidth(0);
 			series.setMarker(new Marker(true, 4));
@@ -92,7 +92,7 @@ public class HighchartSeriesUtil
 	{
 		Series series = new Series();
 		series.setName(boxPlotSerie.getName());
-		series.setData(new ArrayList<Object>(boxPlotSerie.getData()));
+		series.setData(new ArrayList<>(boxPlotSerie.getData()));
 		return series;
 	}
 
@@ -107,10 +107,10 @@ public class HighchartSeriesUtil
 	public List<Object> parseXYDataToList(List<XYData> xydata, AttributeType xValueFieldTypeEnum,
 			AttributeType yValueFieldTypeEnum)
 	{
-		List<Object> data = new ArrayList<Object>();
+		List<Object> data = new ArrayList<>();
 		for (XYData xYData : xydata)
 		{
-			List<Object> list = new ArrayList<Object>();
+			List<Object> list = new ArrayList<>();
 			list.add(convertValue(xValueFieldTypeEnum, xYData.getXvalue()));
 			list.add(convertValue(yValueFieldTypeEnum, xYData.getYvalue()));
 			data.add(list);

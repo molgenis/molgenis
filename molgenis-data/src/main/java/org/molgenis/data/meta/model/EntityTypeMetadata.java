@@ -38,6 +38,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String BACKEND = "backend";
 	public static final String IS_ENTITY_LEVEL_SECURITY = "isEntityLevelSecurity";
 	public static final String ENTITY_LEVEL_SECURITY_INHERITANCE = "entityLevelSecurityInheritance";
+	public static final String INDEXING_DEPTH = "indexingDepth";
 
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
@@ -58,24 +59,47 @@ public class EntityTypeMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		Attribute packageAttr = addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetadata)
-				.setLabel("Package");
+		Attribute packageAttr = addAttribute(PACKAGE).setDataType(XREF)
+													 .setRefEntity(packageMetadata)
+													 .setLabel("Package");
 		Attribute refAttr = attributeMetadata.getAttribute(AttributeMetadata.ENTITY);
-		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY).setRefEntity(attributeMetadata).setMappedBy(refAttr)
-				.setOrderBy(new Sort(SEQUENCE_NR)).setNillable(true).setLabel("Attributes");
-		addAttribute(IS_ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
-				.setReadOnly(true).setDefaultValue(FALSE.toString());
+		addAttribute(ATTRIBUTES).setDataType(ONE_TO_MANY)
+								.setRefEntity(attributeMetadata)
+								.setMappedBy(refAttr)
+								.setOrderBy(new Sort(SEQUENCE_NR))
+								.setNillable(true)
+								.setLabel("Attributes");
+		addAttribute(IS_ABSTRACT).setDataType(BOOL)
+								 .setNillable(false)
+								 .setReadOnly(true)
+								 .setLabel("Abstract")
+								 .setReadOnly(true)
+								 .setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
-		addAttribute(BACKEND).setDataType(ENUM).setEnumOptions(backendEnumOptions).setNillable(false).setReadOnly(true)
-				.setDefaultValue(defaultBackend).setLabel("Backend").setDescription("Backend data store");
-		addAttribute(IS_ENTITY_LEVEL_SECURITY).setDataType(BOOL).setNillable(false).setLabel("Entity-level security")
-				.setDefaultValue(FALSE.toString());
+		addAttribute(BACKEND).setDataType(ENUM)
+							 .setEnumOptions(backendEnumOptions)
+							 .setNillable(false)
+							 .setReadOnly(true)
+							 .setDefaultValue(defaultBackend)
+							 .setLabel("Backend")
+							 .setDescription("Backend data store");
+		addAttribute(INDEXING_DEPTH).setDataType(INT)
+									.setLabel("Indexing depth")
+									.setDescription(
+											"1 = index attributes and referenced entities (default) 2 = index attributes, referenced entities and entities referenced by referenced entities")
+									.setNillable(false)
+									.setDefaultValue(String.valueOf(1))
+									.setRangeMin(1L);
+		addAttribute(IS_ENTITY_LEVEL_SECURITY).setDataType(BOOL)
+											  .setNillable(false)
+											  .setLabel("Entity-level security")
+											  .setDefaultValue(FALSE.toString());
 		addAttribute(ENTITY_LEVEL_SECURITY_INHERITANCE).setDataType(STRING)
-				.setLabel("Entity-level security inheritance"); // FIXME how to make this into a XREF?
+													   .setLabel(
+															   "Entity-level security inheritance"); // FIXME how to make this into a XREF?
 
-		setEntityLevelSecurity(true);
 		setEntityLevelSecurityInheritance(packageAttr);
 	}
 

@@ -52,7 +52,6 @@ public class ImportRunService
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setUsername(userName); // required and visible
-		importRun.setOwner(userName); // not required and not visible
 		importRun.setNotify(notify);
 		dataService.add(IMPORT_RUN, importRun);
 

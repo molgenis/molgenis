@@ -58,7 +58,7 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 		}
 
 		ImmutableMap<String, EntityType> entityMap = parser.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT)
-				.getEntityMap();
+														   .getEntityMap();
 		if (!entityMap.containsKey(id))
 		{
 			throw new RuntimeException("Entity [" + id + "] is not found. Entities found: " + entityMap.keySet());
@@ -66,9 +66,9 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 
 		EntityType metaData = entityMap.get(id);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(metaData);
-		inMemoryRepository.add(StreamSupport.stream(Spliterators
-						.spliteratorUnknownSize(repositoryCollection.getRepository(name).iterator(), Spliterator.ORDERED),
-				false));
+		inMemoryRepository.add(StreamSupport.stream(
+				Spliterators.spliteratorUnknownSize(repositoryCollection.getRepository(name).iterator(),
+						Spliterator.ORDERED), false));
 		return inMemoryRepository;
 	}
 }

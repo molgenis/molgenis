@@ -56,15 +56,15 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 
 		// ontology repository collection is not spring managed, see FileRepositoryCollectionFactory
 		File file = ResourceUtils.getFile("small_test_data_NGtest.owl.zip");
-		OntologyRepositoryCollection ontologyRepoCollection = BeanUtils
-				.instantiateClass(OntologyRepositoryCollection.class.getConstructor(File.class), file);
-		autowireCapableBeanFactory
-				.autowireBeanProperties(ontologyRepoCollection, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
+		OntologyRepositoryCollection ontologyRepoCollection = BeanUtils.instantiateClass(
+				OntologyRepositoryCollection.class.getConstructor(File.class), file);
+		autowireCapableBeanFactory.autowireBeanProperties(ontologyRepoCollection,
+				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 		ontologyRepoCollection.init();
 
 		ontologyRepository = ontologyRepoCollection.getRepository(ONTOLOGY);
-		ontologyTermDynamicAnnotationRepository = ontologyRepoCollection
-				.getRepository(ONTOLOGY_TERM_DYNAMIC_ANNOTATION);
+		ontologyTermDynamicAnnotationRepository = ontologyRepoCollection.getRepository(
+				ONTOLOGY_TERM_DYNAMIC_ANNOTATION);
 		ontologyTermNodePathRepository = ontologyRepoCollection.getRepository(ONTOLOGY_TERM_NODE_PATH);
 		ontologyTermSynonymRepository = ontologyRepoCollection.getRepository(ONTOLOGY_TERM_SYNONYM);
 		ontologyTermRepository = ontologyRepoCollection.getRepository(ONTOLOGY_TERM);
@@ -360,7 +360,8 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 	private static List<String> getMrefAttributeList(Entity entity, String attributeName, String refEntityAttributeName)
 	{
 		return StreamSupport.stream(entity.getEntities(attributeName).spliterator(), false)
-				.map(e -> e.getString(refEntityAttributeName)).collect(Collectors.toList());
+							.map(e -> e.getString(refEntityAttributeName))
+							.collect(Collectors.toList());
 	}
 
 	@Configuration

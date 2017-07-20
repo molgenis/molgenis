@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -276,8 +276,8 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity clinvarAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getPath());
+			when(settings.getString(ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getPath());
 			return settings;
 		}
 

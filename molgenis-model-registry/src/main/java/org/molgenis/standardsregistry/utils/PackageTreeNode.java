@@ -78,7 +78,7 @@ public class PackageTreeNode
 	{
 		if (children == null)
 		{
-			children = new ArrayList<PackageTreeNode>();
+			children = new ArrayList<>();
 		}
 
 		children.add(child);

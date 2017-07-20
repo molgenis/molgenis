@@ -151,8 +151,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	{
 		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT))
 		{
-			List<Attribute> requiredValueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
+			List<Attribute> requiredValueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(),
+					false).filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
 
 			validationResource.setRequiredValueAttrs(requiredValueAttrs);
 		}
@@ -165,17 +165,17 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
 			// get reference attrs
-			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(toList());
+			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false).filter(
+					attr -> isReferenceType(attr) && attr.getExpression() == null).collect(toList());
 		}
 		else
 		{
 			// validate cross-repository collection reference constraints. the decorated repository takes care of
 			// validating other reference constraints
 			String backend = dataService.getMeta().getBackend(getEntityType()).getName();
-			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend,
-							attr)).collect(toList());
+			refAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false).filter(
+					attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend, attr))
+																						 .collect(toList());
 		}
 
 		// get referenced entity ids
@@ -192,8 +192,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 					refEntityIds = new HugeSet<>();
 					refEntitiesIds.put(refEntityName, refEntityIds);
 
-					Query<Entity> q = new QueryImpl<>()
-							.fetch(new Fetch().field(refEntityType.getIdAttribute().getName()));
+					Query<Entity> q = new QueryImpl<>().fetch(
+							new Fetch().field(refEntityType.getIdAttribute().getName()));
 					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext(); )
 					{
 						refEntityIds.add(it.next().getIdValue());
@@ -221,8 +221,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		if (!getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT))
 		{
 			// get unique attributes
-			List<Attribute> uniqueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
+			List<Attribute> uniqueAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false).filter(
+					attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
 
 			// get existing values for each attributes
 			if (!uniqueAttrs.isEmpty())
@@ -237,22 +237,19 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				});
 
 				Query<Entity> q = new QueryImpl<>().fetch(fetch);
-				decoratedRepository.findAll(q).forEach(entity ->
+				decoratedRepository.findAll(q).forEach(entity -> uniqueAttrs.forEach(uniqueAttr ->
 				{
-					uniqueAttrs.forEach(uniqueAttr ->
+					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
+					Object attrValue = entity.get(uniqueAttr.getName());
+					if (attrValue != null)
 					{
-						HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
-						Object attrValue = entity.get(uniqueAttr.getName());
-						if (attrValue != null)
+						if (isSingleReferenceType(uniqueAttr))
 						{
-							if (isSingleReferenceType(uniqueAttr))
-							{
-								attrValue = ((Entity) attrValue).getIdValue();
-							}
-							uniqueAttrValues.put(attrValue, entity.getIdValue());
+							attrValue = ((Entity) attrValue).getIdValue();
 						}
-					});
-				});
+						uniqueAttrValues.put(attrValue, entity.getIdValue());
+					}
+				}));
 
 				validationResource.setUniqueAttrsValues(uniqueAttrsValues);
 			}
@@ -266,9 +263,11 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		if (!getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT))
 		{
 			String idAttrName = getEntityType().getIdAttribute().getName();
-			List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr
-							.getName().equals(idAttrName)).collect(toList());
+			List<Attribute> readonlyAttrs = stream(getEntityType().getAtomicAttributes().spliterator(), false).filter(
+					attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.isMappedBy() && !attr.getName()
+																											.equals(idAttrName))
+																											  .collect(
+																													  toList());
 
 			validationResource.setReadonlyAttrs(readonlyAttrs);
 		}
@@ -279,8 +278,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		validationResource.getRequiredValueAttrs().forEach(nonNillableAttr ->
 		{
 			Object value = entity.get(nonNillableAttr.getName());
-			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity
-					.getEntities(nonNillableAttr.getName()).iterator().hasNext()))
+			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity.getEntities(
+					nonNillableAttr.getName()).iterator().hasNext()))
 			{
 				ConstraintViolation constraintViolation = new ConstraintViolation(
 						format("The attribute '%s' of entity '%s' can not be null.", nonNillableAttr.getName(),
@@ -296,10 +295,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
 		if (attrViolations != null && !attrViolations.isEmpty())
 		{
-			attrViolations.forEach(attrViolation ->
-			{
-				validationResource.addViolation(attrViolation);
-			});
+			attrViolations.forEach(validationResource::addViolation);
 		}
 	}
 
@@ -317,16 +313,15 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				}
 
 				HugeMap<Object, Object> uniqueAttrValues = validationResource.getUniqueAttrsValues()
-						.get(uniqueAttr.getName());
+																			 .get(uniqueAttr.getName());
 				Object existingEntityId = uniqueAttrValues.get(attrValue);
 				if ((validationMode == ValidationMode.ADD && existingEntityId != null) || (
-						validationMode == ValidationMode.UPDATE && existingEntityId != null && !existingEntityId
-								.equals(entity.getIdValue())))
+						validationMode == ValidationMode.UPDATE && existingEntityId != null && !existingEntityId.equals(
+								entity.getIdValue())))
 				{
 					ConstraintViolation constraintViolation = new ConstraintViolation(
 							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
-									uniqueAttr.getName(), getName()), uniqueAttr,
-							Long.valueOf(validationResource.getRow()));
+									uniqueAttr.getName(), getName()), uniqueAttr, (long) validationResource.getRow());
 					validationResource.addViolation(constraintViolation);
 				}
 				else
@@ -372,7 +367,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 								DataConverter.toString(refEntity.getIdValue()), refAttr.getName(), getName());
 
 						ConstraintViolation constraintViolation = new ConstraintViolation(message, refAttr,
-								Long.valueOf(validationResource.getRow()));
+								(long) validationResource.getRow());
 						validationResource.addViolation(constraintViolation);
 					}
 				}
@@ -415,17 +410,17 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			else if (isMultipleReferenceType(readonlyAttr))
 			{
 				value = stream(entity.getEntities(readonlyAttr.getName()).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList());
+																							   .collect(toList());
 
-				existingValue = stream(entityToUpdate.getEntities(readonlyAttr.getName()).spliterator(), false)
-						.map(Entity::getIdValue).collect(toList());
+				existingValue = stream(entityToUpdate.getEntities(readonlyAttr.getName()).spliterator(), false).map(
+						Entity::getIdValue).collect(toList());
 			}
 
 			if (value != null && existingValue != null && !value.equals(existingValue))
 			{
 				validationResource.addViolation(new ConstraintViolation(
 						format("The attribute '%s' of entity '%s' can not be changed it is readonly.",
-								readonlyAttr.getName(), getName()), Long.valueOf(validationResource.getRow())));
+								readonlyAttr.getName(), getName()), (long) validationResource.getRow()));
 			}
 		});
 	}

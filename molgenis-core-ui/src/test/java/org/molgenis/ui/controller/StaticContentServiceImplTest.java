@@ -1,8 +1,14 @@
 package org.molgenis.ui.controller;
 
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.populate.EntityPopulator;
+import org.molgenis.data.security.acl.EntityAclService;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.permission.PermissionServiceImpl;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
@@ -36,45 +42,61 @@ import static org.testng.Assert.*;
 @ContextConfiguration
 public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTests
 {
+	private final String pluginId = "home";
+
 	@Autowired
 	private StaticContentService staticContentService;
 
 	@Test
 	public void getContent()
 	{
-		assertEquals(this.staticContentService.getContent("home"), "<p>Welcome to Molgenis!</p>");
+		assertEquals(this.staticContentService.getContent(pluginId), "<p>Welcome to Molgenis!</p>");
 	}
 
 	@Test
 	public void isCurrentUserCanEdit_SuperUser()
 	{
 		this.setSecurityContextSuperUser();
-		assertTrue(this.staticContentService.isCurrentUserCanEdit());
+		assertTrue(this.staticContentService.isCurrentUserCanEdit(pluginId));
 	}
 
 	@Test
-	public void isCurrentUserCanEdit_NonSuperUser()
+	public void isCurrentUserCanEdit_NonSuperUserWithoutPermissions()
 	{
-		this.setSecurityContextNonSuperUser();
-		assertFalse(this.staticContentService.isCurrentUserCanEdit());
+		this.setSecurityContextNonSuperUser(false);
+		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
+	}
+
+	@Test
+	public void isCurrentUserCanEdit_NonSuperUserWithPermissions()
+	{
+		this.setSecurityContextNonSuperUser(true);
+		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
 	}
 
 	@Test
 	public void isCurrentUserCanEdit_AnonymousUsers()
 	{
 		this.setSecurityContextAnonymousUsers();
-		assertFalse(this.staticContentService.isCurrentUserCanEdit());
+		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permissions on static content page")
+	public void checkPermissions_withoutPermissions()
+	{
+		this.setSecurityContextNonSuperUser(false);
+		this.staticContentService.checkPermissions(pluginId);
 	}
 
 	@Test
 	public void submitContent()
 	{
-		assertTrue(this.staticContentService.submitContent("home", "<p>Welcome to Molgenis!</p>"));
+		assertTrue(this.staticContentService.submitContent(pluginId, "<p>Welcome to Molgenis!</p>"));
 	}
 
 	private void setSecurityContextSuperUser()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 
 		Authentication authentication = mock(Authentication.class);
@@ -83,25 +105,28 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 
 		when(authentication.isAuthenticated()).thenReturn(true);
 		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn(SecurityUtils.AUTHORITY_SU)
-				.getMock();
+																			 .getMock();
 		when(authentication.getPrincipal()).thenReturn(userDetails);
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
-	private void setSecurityContextNonSuperUser()
+	private void setSecurityContextNonSuperUser(Boolean hasPermissions)
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME"),
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "HOME"));
 
 		Authentication authentication = mock(Authentication.class);
+		PermissionService permissions = mock(PermissionService.class);
 
 		doReturn(authorities).when(authentication).getAuthorities();
 
 		when(authentication.isAuthenticated()).thenReturn(true);
 		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn("user").getMock();
 		when(authentication.getPrincipal()).thenReturn(userDetails);
+
+		when(permissions.hasPermissionOnPlugin("home", Permission.WRITE)).thenReturn(hasPermissions);
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
@@ -111,8 +136,8 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		Authentication authentication = mock(Authentication.class);
 
 		when(authentication.isAuthenticated()).thenReturn(false);
-		UserDetails userDetails = when(mock(UserDetails.class).getUsername())
-				.thenReturn(SecurityUtils.ANONYMOUS_USERNAME).getMock();
+		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn(
+				SecurityUtils.ANONYMOUS_USERNAME).getMock();
 		when(authentication.getPrincipal()).thenReturn(userDetails);
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -124,6 +149,12 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	public static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
+		public PermissionService molgenisPermissionService()
+		{
+			return new PermissionServiceImpl(mock(EntityAclService.class));
+		}
+
+		@Bean
 		public StaticContentFactory staticContentFactory()
 		{
 			return new StaticContentFactory(mock(StaticContentMeta.class), mock(EntityPopulator.class));
@@ -132,15 +163,15 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentService staticContentService()
 		{
-			return new StaticContentServiceImpl(dataService(), staticContentFactory());
+			return new StaticContentServiceImpl(dataService(), staticContentFactory(), molgenisPermissionService());
 		}
 
 		@Bean
 		public DataService dataService()
 		{
 			DataService dataService = mock(DataService.class);
-			StaticContent staticContent = when(mock(StaticContent.class).getContent())
-					.thenReturn("<p>Welcome to Molgenis!</p>").getMock();
+			StaticContent staticContent = when(mock(StaticContent.class).getContent()).thenReturn(
+					"<p>Welcome to Molgenis!</p>").getMock();
 			when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
 			return dataService;
 		}

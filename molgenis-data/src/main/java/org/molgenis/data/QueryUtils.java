@@ -52,8 +52,8 @@ public class QueryUtils
 
 	public static boolean containsComputedAttribute(Sort sort, EntityType entityType)
 	{
-		return ((sort != null) && !stream(sort.spliterator(), false)
-				.allMatch(order -> !entityType.getAttribute(order.getAttr()).hasExpression()));
+		return ((sort != null) && stream(sort.spliterator(), false).anyMatch(
+				order -> entityType.getAttribute(order.getAttr()).hasExpression()));
 	}
 
 	public static boolean containsComputedAttribute(Iterable<QueryRule> rules, EntityType entityType)

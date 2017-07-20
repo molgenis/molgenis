@@ -52,10 +52,4 @@ public class MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenuItem
 	{
 		throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public boolean isAuthorized()
-	{
-		throw new UnsupportedOperationException();
-	}
 }

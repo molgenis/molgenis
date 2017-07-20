@@ -26,7 +26,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
@@ -70,8 +70,8 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 	{
 		Entity synonymEntity1 = mock(Entity.class);
 		when(synonymEntity1.get(OntologyTermSynonymMetaData.ID)).thenReturn("synonym-1");
-		when(synonymEntity1.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR))
-				.thenReturn("Weight Reduction Diet");
+		when(synonymEntity1.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR)).thenReturn(
+				"Weight Reduction Diet");
 
 		Entity synonymEntity2 = mock(Entity.class);
 		when(synonymEntity2.get(OntologyTermSynonymMetaData.ID)).thenReturn("synonym-2");
@@ -86,8 +86,8 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(ontologyTermEntity1.get(ONTOLOGY)).thenReturn("34");
 		when(ontologyTermEntity1.getString(ONTOLOGY_TERM_IRI)).thenReturn("http://www.test.nl/iri/1");
 		when(ontologyTermEntity1.getString(ONTOLOGY_TERM_NAME)).thenReturn("Diet, Reducing");
-		when(ontologyTermEntity1.get(ONTOLOGY_TERM_SYNONYM))
-				.thenReturn(asList(synonymEntity1, synonymEntity2, synonymEntity3));
+		when(ontologyTermEntity1.get(ONTOLOGY_TERM_SYNONYM)).thenReturn(
+				asList(synonymEntity1, synonymEntity2, synonymEntity3));
 
 		Entity synonymEntity4 = mock(Entity.class);
 		when(synonymEntity4.get(OntologyTermSynonymMetaData.ID)).thenReturn("synonym-4");
@@ -101,12 +101,12 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(ontologyTermEntity2.get(ONTOLOGY_TERM_SYNONYM)).thenReturn(singletonList(synonymEntity4));
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
-		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture()))
-				.thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
+		ArgumentCaptor<Query<Entity>> queryCaptor = forClass(Query.class);
+		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture())).thenReturn(
+				Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
-		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository
-				.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
+		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"),
+				of("weight"), 100);
 
 		assertEquals(exactOntologyTerms, singletonList(
 				OntologyTerm.create("http://www.test.nl/iri/2", "Weight", null, singletonList("Weight"))));
@@ -116,11 +116,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 	public void testFindOntologyTerms()
 	{
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<Entity>> queryCaptor = forClass(Query.class);
 		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture())).thenReturn(Stream.of(ontologyTermEntity));
 
-		List<OntologyTerm> terms = ontologyTermRepository
-				.findOntologyTerms(asList("1", "2"), of("term1", "term2", "term3"), 100);
+		List<OntologyTerm> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
+				of("term1", "term2", "term3"), 100);
 
 		assertEquals(terms, singletonList(
 				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", null, singletonList("Ontology term"))));
@@ -158,11 +158,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(
 				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, QueryRule.Operator.FUZZY_MATCH,
-						"\"0[0].1[1]\"")).and().eq(ONTOLOGY, ontologyEntity)))
-				.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
+						"\"0[0].1[1]\"")).and().eq(ONTOLOGY, ontologyEntity))).thenReturn(
+				Stream.of(ontologyTerm_2, ontologyTerm_3));
 
-		List<OntologyTerm> childOntologyTermsByNodePath = ontologyTermRepository
-				.getChildOntologyTermsByNodePath(ontologyEntity, nodePathEntity_1);
+		List<OntologyTerm> childOntologyTermsByNodePath = ontologyTermRepository.getChildOntologyTermsByNodePath(
+				ontologyEntity, nodePathEntity_1);
 
 		assertEquals(childOntologyTermsByNodePath.size(), 2);
 		assertEquals(childOntologyTermsByNodePath.get(0),
@@ -193,8 +193,8 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetOntologyTerm()
 	{
-		when(dataService.findOne(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, "http://www.test.nl/iri")))
-				.thenReturn(ontologyTermEntity);
+		when(dataService.findOne(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, "http://www.test.nl/iri"))).thenReturn(
+				ontologyTermEntity);
 
 		String[] iris = { "http://www.test.nl/iri" };
 

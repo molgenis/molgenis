@@ -55,8 +55,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	private static final String ID = "pathways";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private static final Pattern EFFECT_PATTERN = Pattern
-			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
+	private static final Pattern EFFECT_PATTERN = Pattern.compile(
+			"([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
 	private static final String HOMO_SAPIENS = "Homo sapiens";
 	public static final String EFFECT_ATTRIBUTE_NAME = "EFF";
@@ -94,7 +94,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private List<EntityType> getVCFEntities()
 	{
 		return stream(dataService.getEntityTypeIds().spliterator(), false).map(dataService::getEntityType)
-				.filter(this::hasEffectAttribute).collect(toList());
+																		  .filter(this::hasEffectAttribute)
+																		  .collect(toList());
 	}
 
 	/**
@@ -164,12 +165,15 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private Map<String, Impact> getGenesForVcf(String selectedVcf)
 	{
-		return stream(dataService.getRepository(selectedVcf).spliterator(), false)
-				.map(entity -> entity.getString(EFFECT_ATTRIBUTE_NAME))
-				.filter(eff -> !StringUtils.isEmpty(getGeneFromEffect(eff))).collect(
-						groupingBy(WikiPathwaysController::getGeneFromEffect,
-								reducing(Impact.NONE, WikiPathwaysController::getImpactFromEffect,
-										maxBy((i1, i2) -> i1.compareTo(i2)))));
+		return stream(dataService.getRepository(selectedVcf).spliterator(), false).map(
+				entity -> entity.getString(EFFECT_ATTRIBUTE_NAME))
+																				  .filter(eff -> !StringUtils.isEmpty(
+																						  getGeneFromEffect(eff)))
+																				  .collect(groupingBy(
+																						  WikiPathwaysController::getGeneFromEffect,
+																						  reducing(Impact.NONE,
+																								  WikiPathwaysController::getImpactFromEffect,
+																								  maxBy(Enum::compareTo))));
 	}
 
 	/**
@@ -180,8 +184,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	private static Impact getImpactFromEffect(String eff)
 	{
-		return eff.contains("HIGH") ? Impact.HIGH : eff.contains("MODERATE") ? Impact.MODERATE : eff
-				.contains("LOW") ? Impact.LOW : Impact.NONE;
+		return eff.contains("HIGH") ? Impact.HIGH : eff.contains("MODERATE") ? Impact.MODERATE : eff.contains(
+				"LOW") ? Impact.LOW : Impact.NONE;
 	}
 
 	/**
@@ -215,8 +219,11 @@ public class WikiPathwaysController extends MolgenisPluginController
 	public Collection<Pathway> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
 			throws ExecutionException
 	{
-		return getGenesForVcf(selectedVcf).keySet().stream().map(this::getPathwaysForGene).flatMap(Collection::stream)
-				.collect(toCollection(LinkedHashSet::new));
+		return getGenesForVcf(selectedVcf).keySet()
+										  .stream()
+										  .map(this::getPathwaysForGene)
+										  .flatMap(Collection::stream)
+										  .collect(toCollection(LinkedHashSet::new));
 	}
 
 	/**
@@ -265,9 +272,9 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 */
 	Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException, SAXException
 	{
-		return streamDataNodes(gpml).filter(node -> !node.getAttribute("GraphId").isEmpty()).collect(
-				toArrayListMultimap(node -> getGeneSymbol(node.getAttribute("TextLabel")),
-						node -> node.getAttribute("GraphId")));
+		return streamDataNodes(gpml).filter(node -> !node.getAttribute("GraphId").isEmpty())
+									.collect(toArrayListMultimap(node -> getGeneSymbol(node.getAttribute("TextLabel")),
+											node -> node.getAttribute("GraphId")));
 	}
 
 	/**
@@ -329,7 +336,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private String getColoredPathway(String selectedVcf, String pathwayId, Multimap<String, String> graphIdsPerGene)
 			throws ExecutionException
 	{
-		Map<String, Impact> impactPerGraphId = new HashMap<String, Impact>();
+		Map<String, Impact> impactPerGraphId = new HashMap<>();
 		getGenesForVcf(selectedVcf).forEach(
 				(gene, impact) -> graphIdsPerGene.get(gene).forEach(graphId -> impactPerGraphId.put(graphId, impact)));
 

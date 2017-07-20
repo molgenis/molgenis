@@ -34,10 +34,19 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	}
 
 	@Test
-	public void deleteEntityType()
+	public void deleteRepository()
 	{
 		indexActionRepositoryCollectionDecorator.deleteRepository(entityType);
 		verify(decoratedRepositoryCollection).deleteRepository(entityType);
+		verify(indexActionRegisterService).register(entityType, null);
+	}
+
+	@Test
+	public void updateRepository()
+	{
+		EntityType entityType2 = mock(EntityType.class);
+		indexActionRepositoryCollectionDecorator.updateRepository(entityType, entityType2);
+		verify(decoratedRepositoryCollection).updateRepository(entityType, entityType2);
 		verify(indexActionRegisterService).register(entityType, null);
 	}
 

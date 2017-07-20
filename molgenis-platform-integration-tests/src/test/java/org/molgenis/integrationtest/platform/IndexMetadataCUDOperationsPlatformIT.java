@@ -4,8 +4,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -29,15 +30,17 @@ public class IndexMetadataCUDOperationsPlatformIT
 			EntityType entityTypeDynamic, MetaDataService metaDataService)
 	{
 		Query<Entity> q1 = new QueryImpl<>();
-		q1.eq(EntityTypeMetadata.ID, entityTypeStatic.getId()).and()
-				.eq(EntityTypeMetadata.PACKAGE, entityTypeStatic.getPackage());
-		assertEquals(searchService.count(q1, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		q1.eq(EntityTypeMetadata.ID, entityTypeStatic.getId())
+		  .and()
+		  .eq(EntityTypeMetadata.PACKAGE, entityTypeStatic.getPackage());
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q1),
 				1);
 
 		Query<Entity> q2 = new QueryImpl<>();
-		q2.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId()).and()
-				.eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
-		assertEquals(searchService.count(q2, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		q2.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId())
+		  .and()
+		  .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q2),
 				1);
 	}
 
@@ -45,48 +48,44 @@ public class IndexMetadataCUDOperationsPlatformIT
 	 * Test delete only for dynamic entity metadata
 	 * static entity metadata cannot be deleted
 	 */
-	public static void testIndexDeleteMetaData(SearchService searchService, DataService dataService,
-			EntityType entityTypeDynamic, MetaDataService metaDataService, IndexService indexService)
+	public static void testIndexDeleteMetaData(ElasticsearchService searchService, DataService dataService,
+			EntityType entityTypeDynamic, MetaDataService metaDataService, IndexJobScheduler indexService)
 	{
 
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId()).and()
-				.eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
-		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		q.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId())
+		 .and()
+		 .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
 				1);
 
 		// 2. delete sys_test_TypeTestDynamic metadata and wait on index
-		runAsSystem(() ->
-		{
-			dataService.getMeta().deleteEntityType(entityTypeDynamic.getId());
-		});
+		runAsSystem(() -> dataService.getMeta().deleteEntityType(entityTypeDynamic.getId()));
 		PlatformIT.waitForIndexToBeStable(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA),
 				indexService, LOG);
 		waitForWorkToBeFinished(indexService, LOG);
 
 		// 3. verify that mapping is removed
-		assertFalse(searchService.hasMapping(entityTypeDynamic));
+		assertFalse(searchService.hasIndex(entityTypeDynamic));
 
 		// Reset context
-		RunAsSystemProxy.runAsSystem(() ->
-		{
-			metaDataService.addEntityType(entityTypeDynamic);
-		});
+		RunAsSystemProxy.runAsSystem(() -> metaDataService.addEntityType(entityTypeDynamic));
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
 	/**
 	 * Test metadata Updating an attribute
 	 */
-	public static void testIndexUpdateMetaDataUpdateAttribute(SearchService searchService, EntityType entityTypeDynamic,
-			MetaDataService metaDataService, IndexService indexService)
+	public static void testIndexUpdateMetaDataUpdateAttribute(ElasticsearchService searchService,
+			EntityType entityTypeDynamic, MetaDataService metaDataService, IndexJobScheduler indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId()).and()
-				.eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
-		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		q.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId())
+		 .and()
+		 .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
 				1);
 
 		// 2. change dataType value of ATTR_EMAIL
@@ -95,12 +94,9 @@ public class IndexMetadataCUDOperationsPlatformIT
 		Object toUpdateAttributeId = toUpdateAttribute.getIdValue();
 
 		// 3. Preform update
-		runAsSystem(() ->
-		{
-			metaDataService.updateEntityType(entityTypeDynamic);
-		});
+		runAsSystem(() -> metaDataService.updateEntityType(entityTypeDynamic));
 		waitForWorkToBeFinished(indexService, LOG);
-		assertTrue(searchService.hasMapping(entityTypeDynamic));
+		assertTrue(searchService.hasIndex(entityTypeDynamic));
 
 		// Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
@@ -108,7 +104,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		q2.eq(AttributeMetadata.ID, toUpdateAttributeId);
 		q2.and();
 		q2.eq(AttributeMetadata.TYPE, getValueString(STRING));
-		assertEquals(searchService.count(q2, emdActual), 1);
+		assertEquals(searchService.count(emdActual, q2), 1);
 
 		// Reset context
 		toUpdateAttribute.setDataType(EMAIL);
@@ -124,12 +120,12 @@ public class IndexMetadataCUDOperationsPlatformIT
 	 * Test metadata removing an attribute
 	 */
 	public static void testIndexUpdateMetaDataRemoveAttribute(EntityType emd, String attributeName,
-			SearchService searchService, MetaDataService metaDataService, IndexService indexService)
+			ElasticsearchService searchService, MetaDataService metaDataService, IndexJobScheduler indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(EntityTypeMetadata.ID, emd.getId()).and().eq(EntityTypeMetadata.PACKAGE, emd.getPackage());
-		assertEquals(searchService.count(q, metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+		assertEquals(searchService.count(metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
 				1);
 
 		// 2. remove attribute
@@ -137,25 +133,19 @@ public class IndexMetadataCUDOperationsPlatformIT
 		emd.removeAttribute(toRemoveAttribute);
 
 		// 3. Preform update
-		runAsSystem(() ->
-		{
-			metaDataService.updateEntityType(emd);
-		});
+		runAsSystem(() -> metaDataService.updateEntityType(emd));
 		waitForWorkToBeFinished(indexService, LOG);
-		assertTrue(searchService.hasMapping(emd));
+		assertTrue(searchService.hasIndex(emd));
 
 		// 4. Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
 		EntityType emdActual = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
 		q2.eq(AttributeMetadata.ID, toRemoveAttribute.getIdValue());
-		assertEquals(searchService.count(q2, emdActual), 0);
+		assertEquals(searchService.count(emdActual, q2), 0);
 
 		// Reset context
 		emd.addAttribute(toRemoveAttribute);
-		runAsSystem(() ->
-		{
-			metaDataService.updateEntityType(emd);
-		});
+		runAsSystem(() -> metaDataService.updateEntityType(emd));
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 }

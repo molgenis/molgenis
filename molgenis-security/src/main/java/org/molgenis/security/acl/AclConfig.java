@@ -15,6 +15,7 @@ import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.AclCache;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;
+import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -120,7 +121,14 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 	private AclAuthorizationStrategy aclAuthorizationStrategy()
 	{
 		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ACL_ADMIN"),
-				new SimpleGrantedAuthority("ROLE_ACL_ADMIN"), new SimpleGrantedAuthority("ROLE_ACL_ADMIN"));
+				new SimpleGrantedAuthority("ROLE_ACL_ADMIN"),
+				new SimpleGrantedAuthority("ROLE_ACL_ADMIN")); // TODO ROLE_SU/ROLE_SYSTEM?
+	}
+
+	@Bean
+	SidRetrievalStrategy sidRetrievalStrategy()
+	{
+		return new SidRetrievalStrategyImpl();
 	}
 
 	@Bean
@@ -132,6 +140,7 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 		return service;
 	}
 
+	// TODO kan weg, want we gebruiken ze niet? of wel voor apis, plugins, system entities etc.
 	@Override
 	protected MethodSecurityExpressionHandler createExpressionHandler()
 	{

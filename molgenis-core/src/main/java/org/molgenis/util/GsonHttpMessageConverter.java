@@ -18,7 +18,6 @@ package org.molgenis.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,14 +138,6 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 				return this.gson.fromJson(json, clazz);
 			}
 		}
-		catch (JsonSyntaxException ex)
-		{
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
-		}
-		catch (JsonIOException ex)
-		{
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
-		}
 		catch (JsonParseException ex)
 		{
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
@@ -236,8 +227,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	{
 		try
 		{
-			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-					.getRequest();
+			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 			return request.getParameter("callback");
 		}
 		catch (IllegalStateException ex)

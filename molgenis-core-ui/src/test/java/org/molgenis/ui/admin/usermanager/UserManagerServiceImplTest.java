@@ -1,7 +1,5 @@
 package org.molgenis.ui.admin.usermanager;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -239,24 +237,10 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
 
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
-				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
-		{
-			@Override
-			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(groupMember);
-			}
-		});
+				GroupMember.class)).thenAnswer(invocation -> Stream.of(groupMember));
 
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group22),
-				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
-		{
-			@Override
-			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(groupMember);
-			}
-		});
+				GroupMember.class)).thenAnswer(invocation -> Stream.of(groupMember));
 
 		List<UserViewData> users = this.userManagerService.getUsersMemberInGroup("22");
 		assertEquals(users.size(), 1);
@@ -285,9 +269,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
 
-		when(dataService
-				.findAll(GroupMemberMetaData.USER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
-						GroupMember.class)).thenReturn(Stream.of(groupMember));
+		when(dataService.findAll(GroupMemberMetaData.USER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1), GroupMember.class)).thenReturn(
+				Stream.of(groupMember));
 		when(dataService.findAll(GroupMetaData.GROUP, Group.class)).thenReturn(Stream.of(group22, group33, group44));
 
 		groupMember = mock(GroupMember.class);
@@ -332,8 +316,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
 		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
 
-		Query<GroupMember> q = new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1).and()
-				.eq(GroupMemberMetaData.GROUP, group22);
+		Query<GroupMember> q = new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1)
+														   .and()
+														   .eq(GroupMemberMetaData.GROUP, group22);
 
 		when(dataService.findAll(GROUP_MEMBER, q, GroupMember.class)).thenReturn(Stream.of(groupMember));
 
@@ -349,18 +334,18 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private void setSecurityContextSuperUser()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(null, null, authorities));
+							 .setAuthentication(new UsernamePasswordAuthenticationToken(null, null, authorities));
 	}
 
 	private void setSecurityContextNonSuperUserWrite()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "USERMANAGER"),
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "USERMANAGER"));
 		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(null, null, authorities));
+							 .setAuthentication(new UsernamePasswordAuthenticationToken(null, null, authorities));
 	}
 }

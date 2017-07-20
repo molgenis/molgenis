@@ -57,8 +57,8 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		EntityType targetEntityType;
 		try
 		{
-			targetEntityType = dataService
-					.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE));
+			targetEntityType = dataService.getEntityType(
+					entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE));
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -69,8 +69,8 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		EntityType sourceEntityType;
 		try
 		{
-			sourceEntityType = dataService
-					.getEntityType(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE));
+			sourceEntityType = dataService.getEntityType(
+					entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE));
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -78,10 +78,10 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			sourceEntityType = null;
 		}
 
-		List<Entity> attributeMappingEntities = Lists.<Entity>newArrayList(
+		List<Entity> attributeMappingEntities = Lists.newArrayList(
 				entityMappingEntity.getEntities(EntityMappingMetaData.ATTRIBUTE_MAPPINGS));
-		List<AttributeMapping> attributeMappings = attributeMappingRepository
-				.getAttributeMappings(attributeMappingEntities, sourceEntityType, targetEntityType);
+		List<AttributeMapping> attributeMappings = attributeMappingRepository.getAttributeMappings(
+				attributeMappingEntities, sourceEntityType, targetEntityType);
 
 		return new EntityMapping(identifier, sourceEntityType, targetEntityType, attributeMappings);
 	}

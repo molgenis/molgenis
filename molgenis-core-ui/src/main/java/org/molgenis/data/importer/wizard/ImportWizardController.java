@@ -1,15 +1,11 @@
 package org.molgenis.data.importer.wizard;
 
-import org.molgenis.auth.*;
+import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.Href;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -21,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -38,20 +32,16 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.importer.wizard.ImportWizardController.URI;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.security.core.Permission.*;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 @Controller
@@ -160,32 +150,10 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseBody
 	public Permissions getGroupEntityClassPermissions(@PathVariable String groupId, WebRequest webRequest)
 	{
-		boolean allowed = false;
-		for (Group group : userAccountService.getCurrentUserGroups())
-		{
-			if (group.getId().equals(groupId))
-			{
-				allowed = true;
-			}
-		}
-		if (!allowed && !userAccountService.getCurrentUser().isSuperuser())
-		{
-			throw new RuntimeException("Current user does not belong to the requested group.");
-		}
-		String entitiesString = webRequest.getParameter("entityIds");
-		List<String> entityTypeIds = Arrays.asList(entitiesString.split(","));
-		Stream<Object> entityIds = entityTypeIds.stream().map(entityTypeId -> (Object) entityTypeId);
-		List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityIds,
-				new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
-				.collect(Collectors.toList());
-
-		Group group = dataService.findOneById(GROUP, groupId, Group.class);
-		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
-		List<Authority> groupPermissions = getGroupPermissions(group);
-		Permissions permissions = createPermissions(groupPermissions, entityTypes);
-		permissions.setGroupId(groupId);
+		// FIXME getGroupEntityClassPermissions
+		Permissions permissions = new Permissions();
+		permissions.setEntityIds(Collections.emptyMap());
 		return permissions;
-
 	}
 
 	@RequestMapping(value = "/add/entityclass/group", method = RequestMethod.POST)
@@ -193,176 +161,8 @@ public class ImportWizardController extends AbstractWizardController
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
 
-		dataService.getEntityTypeIds().forEach(entityClassId ->
-		{
-			GroupAuthority authority = getGroupAuthority(groupId, entityClassId.toString());
-
-			boolean newGroupAuthority;
-			if (authority == null)
-			{
-				newGroupAuthority = true;
-				authority = groupAuthorityFactory.create();
-			}
-			else
-			{
-				newGroupAuthority = false;
-			}
-
-			String param = "radio-" + entityClassId;
-			String value = webRequest.getParameter(param);
-			if (value != null && (
-					SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId)
-							|| userAccountService.getCurrentUser().isSuperuser()))
-			{
-				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
-						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
-				{
-					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
-					authority
-							.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);
-					if (newGroupAuthority)
-					{
-						authority.setId(UUID.randomUUID().toString());
-						dataService.add(GROUP_AUTHORITY, authority);
-					}
-					else
-					{
-						dataService.update(GROUP_AUTHORITY, authority);
-					}
-				}
-				else if (value.equalsIgnoreCase(NONE.toString()))
-				{
-					if (authority.getId() != null)
-					{
-						dataService.deleteById(GROUP_AUTHORITY, authority.getId());
-					}
-				}
-				else
-				{
-					throw new RuntimeException(
-							"Unknown value: " + value + " for permission on entity: " + entityClassId);
-				}
-			}
-			else
-			{
-				if (value != null) throw new MolgenisDataAccessException(
-						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
-			}
-		});
-	}
-
-	private List<Authority> getGroupPermissions(Group group)
-	{
-		return dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group),
-						GroupAuthority.class).collect(Collectors.toList());
-	}
-
-	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<EntityType> entityTypes)
-	{
-		Permissions permissions = new Permissions();
-
-		if (entityTypes != null)
-		{
-			Map<String, String> entityClassMap = new TreeMap<>();
-			for (EntityType entityType : entityTypes)
-			{
-				entityClassMap.put(entityType.getId(), entityType.getId());
-			}
-			permissions.setEntityIds(entityClassMap);
-		}
-
-		for (Authority authority : entityAuthorities)
-		{
-
-			// add permissions for authorities that match prefix
-			if (authority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
-			{
-				Permission permission = new Permission();
-
-				String authorityType = getAuthorityType(authority.getRole());
-				String authorityPluginId = getAuthorityEntityId(authority.getRole());
-				permission.setType(authorityType);
-				if (authority instanceof GroupAuthority)
-				{
-					permission.setGroup(((GroupAuthority) authority).getGroup().getName());
-					permissions.addGroupPermission(authorityPluginId, permission);
-				}
-			}
-
-			// add permissions for inherited authorities from authority that match prefix
-			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
-			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper
-					.mapAuthorities(Collections.singletonList(grantedAuthority));
-			hierarchyAuthorities.remove(grantedAuthority);
-
-			for (GrantedAuthority hierarchyAuthority : hierarchyAuthorities)
-			{
-				if (hierarchyAuthority.getAuthority().startsWith(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
-				{
-					String authorityPluginId = getAuthorityEntityId(hierarchyAuthority.getAuthority());
-
-					Permission hierarchyPermission = new Permission();
-					hierarchyPermission.setType(getAuthorityType(hierarchyAuthority.getAuthority()));
-					permissions.addHierarchyPermission(authorityPluginId, hierarchyPermission);
-				}
-			}
-		}
-
-		permissions.sort();
-
-		return permissions;
-	}
-
-	/**
-	 * Returns a group authority based on group and entity class identifier.
-	 *
-	 * @param groupId       group identifier
-	 * @param entityClassId entity class identifier
-	 * @return existing group authority or <code>null</code> if no matching group authority exists.
-	 */
-	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
-	{
-		Stream<GroupAuthority> stream = dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId),
-						GroupAuthority.class);
-		GroupAuthority existingGroupAuthority = null;
-		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
-		{
-			GroupAuthority groupAuthority = it.next();
-			String entity = "";
-			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX) || groupAuthority
-					.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
-			{
-				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
-			}
-			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX))
-			{
-				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX.length());
-			}
-			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX))
-			{
-				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX.length());
-			}
-			if (entity.equals(entityClassId))
-			{
-				existingGroupAuthority = groupAuthority;
-			}
-		}
-		return existingGroupAuthority;
-
-	}
-
-	private String getAuthorityEntityId(String role)
-	{
-		role = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
-		return role.substring(role.indexOf('_') + 1).toLowerCase();
-	}
-
-	private String getAuthorityType(String role)
-	{
-		role = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
-		return role.substring(0, role.indexOf('_')).toLowerCase();
+		// FIXME addGroupEntityClassPermissions
+					throw new UnsupportedOperationException("addGroupEntityClassPermissions not implemented");
 	}
 
 	/**
@@ -385,8 +185,9 @@ public class ImportWizardController extends AbstractWizardController
 			File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
 			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
 			{
-				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
-						.body(MessageFormat.format("Package [{0}] does not exist.", packageId));
+				return ResponseEntity.badRequest()
+									 .contentType(TEXT_PLAIN)
+									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
 			if (packageId == null) packageId = PACKAGE_DEFAULT;
 			importRun = importFile(request, tmpFile, action, notify, packageId);
@@ -428,8 +229,9 @@ public class ImportWizardController extends AbstractWizardController
 
 			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
 			{
-				return ResponseEntity.badRequest().contentType(TEXT_PLAIN)
-						.body(MessageFormat.format("Package [{0}] does not exist.", packageId));
+				return ResponseEntity.badRequest()
+									 .contentType(TEXT_PLAIN)
+									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
 			if (packageId == null) packageId = PACKAGE_DEFAULT;
 
@@ -461,8 +263,8 @@ public class ImportWizardController extends AbstractWizardController
 	private String getFilename(String originalFileName, String entityTypeId)
 	{
 		String filename;
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(originalFileName, importServiceFactory.getSupportedFileExtensions());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(originalFileName,
+				importServiceFactory.getSupportedFileExtensions());
 		if (entityTypeId == null)
 		{
 			filename = originalFileName;
@@ -486,8 +288,8 @@ public class ImportWizardController extends AbstractWizardController
 					"A repository with name " + getBaseName(file.getName()) + " already exists");
 		}
 		ImportService importService = importServiceFactory.getImportService(file.getName());
-		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-				.createFileRepositoryCollection(file);
+		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+				file);
 
 		importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
 		asyncImportJobs.execute(
@@ -509,8 +311,8 @@ public class ImportWizardController extends AbstractWizardController
 			catch (IllegalArgumentException e)
 			{
 				throw new IllegalArgumentException(
-						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays
-								.toString(DatabaseAction.values())));
+						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays.toString(
+								DatabaseAction.values())));
 			}
 		}
 		return databaseAction;

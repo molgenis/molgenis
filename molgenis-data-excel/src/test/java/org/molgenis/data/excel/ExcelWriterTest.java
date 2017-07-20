@@ -131,14 +131,9 @@ public class ExcelWriterTest extends AbstractMolgenisSpringTest
 	public void createSheet() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
-		try
+		try (ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory))
 		{
 			assertNotNull(excelWriter.createWritable("sheet", null));
-		}
-		finally
-		{
-			excelWriter.close();
 		}
 	}
 
@@ -146,14 +141,9 @@ public class ExcelWriterTest extends AbstractMolgenisSpringTest
 	public void createSheet_null() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
-		try
+		try (ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory))
 		{
 			assertNotNull(excelWriter.createWritable(null, null));
-		}
-		finally
-		{
-			excelWriter.close();
 		}
 	}
 }

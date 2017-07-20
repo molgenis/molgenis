@@ -86,14 +86,30 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 
 		Attribute infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
 
-		Attribute infoNS = attrMetaFactory.create().setName("NS").setDataType(INT)
-				.setDescription("Number of Samples With Data").setAggregatable(true).setParent(infoMetaData);
-		Attribute infoDF = attrMetaFactory.create().setName("DF").setDataType(BOOL).setDescription("Flag field")
-				.setAggregatable(true).setParent(infoMetaData);
-		Attribute infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL).setDescription("Flag field 2")
-				.setAggregatable(true).setParent(infoMetaData);
-		Attribute infoChar2 = attrMetaFactory.create().setName("CHAR").setDataType(STRING).setDescription("char field")
-				.setAggregatable(true).setParent(infoMetaData);
+		Attribute infoNS = attrMetaFactory.create()
+										  .setName("NS")
+										  .setDataType(INT)
+										  .setDescription("Number of Samples With Data")
+										  .setAggregatable(true)
+										  .setParent(infoMetaData);
+		Attribute infoDF = attrMetaFactory.create()
+										  .setName("DF")
+										  .setDataType(BOOL)
+										  .setDescription("Flag field")
+										  .setAggregatable(true)
+										  .setParent(infoMetaData);
+		Attribute infoDF2 = attrMetaFactory.create()
+										   .setName("DF2")
+										   .setDataType(BOOL)
+										   .setDescription("Flag field 2")
+										   .setAggregatable(true)
+										   .setParent(infoMetaData);
+		Attribute infoChar2 = attrMetaFactory.create()
+											 .setName("CHAR")
+											 .setDataType(STRING)
+											 .setDescription("char field")
+											 .setAggregatable(true)
+											 .setParent(infoMetaData);
 
 		expectedEntityType.addAttribute(infoNS);
 		expectedEntityType.addAttribute(infoDF);

@@ -6,10 +6,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Iterators.partition;
@@ -93,7 +90,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 			Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
 			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream)
-					.filter(e -> e != null);
+																						 .filter(Objects::nonNull);
 		}
 		return delegate().findAll(ids);
 	}
@@ -109,11 +106,12 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		String entityId = getEntityType().getId();
 		EntityType entityType = getEntityType();
-		List<Object> missingIds = batch.stream().filter(id -> l1Cache.get(entityId, id, entityType) == null)
-				.collect(toList());
+		List<Object> missingIds = batch.stream()
+									   .filter(id -> l1Cache.get(entityId, id, entityType) == null)
+									   .collect(toList());
 
 		Map<Object, Entity> missingEntities = delegate().findAll(missingIds.stream())
-				.collect(toMap(Entity::getIdValue, e -> e));
+														.collect(toMap(Entity::getIdValue, e -> e));
 
 		return Lists.transform(batch, id ->
 		{
@@ -210,11 +208,15 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	private void evictBiDiReferencedEntities(Entity entity)
 	{
 		Stream<EntityKey> backreffingEntities = getEntityType().getMappedByAttributes()
-				.flatMap(mappedByAttr -> stream(entity.getEntities(mappedByAttr.getName()).spliterator(), false))
-				.map(EntityKey::create);
+															   .flatMap(mappedByAttr -> stream(
+																	   entity.getEntities(mappedByAttr.getName())
+																			 .spliterator(), false))
+															   .map(EntityKey::create);
 		Stream<EntityKey> manyToOneEntities = getEntityType().getInversedByAttributes()
-				.map(inversedByAttr -> entity.getEntity(inversedByAttr.getName()))
-				.filter(refEntity -> refEntity != null).map(EntityKey::create);
+															 .map(inversedByAttr -> entity.getEntity(
+																	 inversedByAttr.getName()))
+															 .filter(Objects::nonNull)
+															 .map(EntityKey::create);
 
 		l1Cache.evict(Stream.concat(backreffingEntities, manyToOneEntities));
 	}

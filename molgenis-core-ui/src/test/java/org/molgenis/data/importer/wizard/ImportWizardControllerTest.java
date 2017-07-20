@@ -20,9 +20,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.PermissionManagerServiceImpl;
-import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +31,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.request.WebRequest;
@@ -53,22 +48,14 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.testng.Assert.assertEquals;
 
@@ -176,37 +163,25 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOneById(GROUP, "ID", Group.class)).thenReturn(group1);
-		when(dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
-						GroupAuthority.class))
-				.thenAnswer(invocation -> Stream.of(authority1, authority2, authority3, authority4));
+		when(dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
+				GroupAuthority.class)).thenAnswer(
+				invocation -> Stream.of(authority1, authority2, authority3, authority4));
 
 		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
-				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)), eq(EntityType.class)))
-				.thenAnswer(invocation -> Stream.of(entityType, entityType));
+				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)),
+				eq(EntityType.class))).thenAnswer(invocation -> Stream.of(entityType, entityType));
 
-		when(dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
-						GroupAuthority.class))
-				.thenAnswer(invocation -> Stream.of(authority1, authority2, authority3, authority4));
+		when(dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
+				GroupAuthority.class)).thenAnswer(
+				invocation -> Stream.of(authority1, authority2, authority3, authority4));
 
-		when(dataService.getEntityTypeIds())
-				.thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
+		when(dataService.getEntityTypeIds()).thenReturn(
+				Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		Authentication authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		GrantedAuthority grantedAuthority1 = new SimpleGrantedAuthority(authority1.getRole());
-		GrantedAuthority grantedAuthority2 = new SimpleGrantedAuthority(authority2.getRole());
-		GrantedAuthority grantedAuthority3 = new SimpleGrantedAuthority(authority3.getRole());
-		GrantedAuthority grantedAuthority4 = new SimpleGrantedAuthority(authority4.getRole());
-		UserDetails userDetails = mock(UserDetails.class);
-		when(userDetails.getUsername()).thenReturn("username");
-		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities())
-				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
-		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities())
-				.thenReturn(asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 
 		date = Instant.parse("2016-01-01T12:34:28.123Z");
 
@@ -221,78 +196,29 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getGroupEntityClassPermissionsTest()
 	{
-		Permissions permissions = controller.getGroupEntityClassPermissions("ID", webRequest);
-		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
-
-		Permission permission = new Permission();
-		permission.setType("writemeta");
-		permission.setGroup("TestGroup");
-		assertEquals(groupPermissions.get("entity1"), singletonList(permission));
-		assertEquals(groupPermissions.get("entity2"), singletonList(permission));
-		assertEquals(groupPermissions.get("entity3"), singletonList(permission));
-		assertEquals(groupPermissions.get("entity4"), singletonList(permission));
-
-		assertEquals(groupPermissions.size(), 4);
+		// FIXME see ImportWizardController
+		throw new UnsupportedOperationException();
 	}
 
 	@Test
 	public void addGroupEntityClassPermissionsTest()
 	{
-		User user = mock(User.class);
-		when(user.isSuperuser()).thenReturn(false);
-		when(userAccountService.getCurrentUser()).thenReturn(user);
-
-		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity4");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(COUNT.toString());
-		when(webRequest.getParameter("radio-entity4")).thenReturn(WRITE.toString());
-
-		GroupAuthority authority = groupAuthorityFactory.create();
-		authority.setGroup(dataService.findOneById(GROUP, "ID", Group.class));
-		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3");
-
-		controller.addGroupEntityClassPermissions("ID", webRequest);
-
-		verify(dataService, times(2)).update(eq(GROUP_AUTHORITY), any(GroupAuthority.class));
+		// FIXME see ImportWizardController
+		throw new UnsupportedOperationException();
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void addGroupEntityClassPermissionsTestNoPermission()
 	{
-		User user = mock(User.class);
-		when(user.isSuperuser()).thenReturn(false);
-		when(userAccountService.getCurrentUser()).thenReturn(user);
-
-		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(WRITE.toString());
-		controller.addGroupEntityClassPermissions("ID", webRequest);
+		// FIXME see ImportWizardController
+		throw new UnsupportedOperationException();
 	}
 
-	@Test()
+	@Test
 	public void addGroupEntityClassPermissionsTestNoPermissionSU()
 	{
-		User user = mock(User.class);
-		when(user.isSuperuser()).thenReturn(true);
-		when(userAccountService.getCurrentUser()).thenReturn(user);
-
-		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(WRITE.toString());
-
-		controller.addGroupEntityClassPermissions("ID", webRequest);
-
-		verify(dataService).update(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_entity3");
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
-				dataService.findOneById(GROUP, "ID", Group.class));
-
-		verify(dataService).add(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_entity5");
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
-				dataService.findOneById(GROUP, "ID", Group.class));
+		// FIXME see ImportWizardController
+		throw new UnsupportedOperationException();
 	}
 
 	@Test
@@ -314,7 +240,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -345,7 +270,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -377,7 +301,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		importRun.setStartDate(date);
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
-		importRun.setOwner("Harry");
 		importRun.setNotify(false);
 		when(importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false)).thenReturn(importRun);
 
@@ -418,7 +341,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper(), null); // FIXME replace null
+			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper());
 		}
 
 		@Bean

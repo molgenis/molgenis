@@ -1,7 +1,6 @@
 package org.molgenis.ui;
 
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,21 +14,17 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 {
 	private final MenuType menuType;
 	private final MolgenisUiMenu parentMenu;
-	private final MolgenisPermissionService molgenisPermissionService;
 
-	public XmlMolgenisUiMenu(MenuType menuType, MolgenisPermissionService molgenisPermissionService)
+	public XmlMolgenisUiMenu(MenuType menuType)
 	{
-		this(menuType, null, molgenisPermissionService);
+		this(menuType, null);
 	}
 
-	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu,
-			MolgenisPermissionService molgenisPermissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu)
 	{
 		if (menuType == null) throw new IllegalArgumentException("menu type is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.menuType = menuType;
 		this.parentMenu = parentMenu;
-		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Override
@@ -58,24 +53,13 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	}
 
 	@Override
-	public boolean isAuthorized()
-	{
-		for (Object menuItem : menuType.getMenuOrPlugin())
-		{
-			MolgenisUiMenuItem pluginMenuItem = toMenuItem(menuItem);
-			if (pluginMenuItem.isAuthorized()) return true;
-		}
-		return false;
-	}
-
-	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		List<MolgenisUiMenuItem> pluginMenuItems = new ArrayList<MolgenisUiMenuItem>();
+		List<MolgenisUiMenuItem> pluginMenuItems = new ArrayList<>();
 		for (Object menuItem : menuType.getMenuOrPlugin())
 		{
 			MolgenisUiMenuItem pluginMenuItem = toMenuItem(menuItem);
-			if (pluginMenuItem.isAuthorized()) pluginMenuItems.add(pluginMenuItem);
+			pluginMenuItems.add(pluginMenuItem);
 		}
 		return pluginMenuItems;
 	}
@@ -97,7 +81,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 		for (Object menuItem : menuType.getMenuOrPlugin())
 		{
 			MolgenisUiMenuItem pluginMenuItem = toMenuItem(menuItem);
-			if (pluginMenuItem.getType() != MolgenisUiMenuItemType.MENU && pluginMenuItem.isAuthorized())
+			if (pluginMenuItem.getType() != MolgenisUiMenuItemType.MENU)
 			{
 				activeMenuItem = pluginMenuItem;
 				break;
@@ -116,8 +100,8 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	@Override
 	public List<MolgenisUiMenu> getBreadcrumb()
 	{
-		if (parentMenu == null) return Collections.<MolgenisUiMenu>singletonList(this);
-		List<MolgenisUiMenu> breadcrumb = new ArrayList<MolgenisUiMenu>();
+		if (parentMenu == null) return Collections.singletonList(this);
+		List<MolgenisUiMenu> breadcrumb = new ArrayList<>();
 		for (MolgenisUiMenu menu = this; menu != null; menu = menu.getParentMenu())
 			breadcrumb.add(menu);
 		return Lists.reverse(breadcrumb);
@@ -127,11 +111,11 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	{
 		if (menuItem instanceof MenuType)
 		{
-			return new XmlMolgenisUiMenu((MenuType) menuItem, this, molgenisPermissionService);
+			return new XmlMolgenisUiMenu((MenuType) menuItem, this);
 		}
 		else if (menuItem instanceof PluginType)
 		{
-			return new XmlMolgenisUiPlugin((PluginType) menuItem, this, molgenisPermissionService);
+			return new XmlMolgenisUiPlugin((PluginType) menuItem, this);
 		}
 		else throw new RuntimeException("unknown menu item type");
 	}

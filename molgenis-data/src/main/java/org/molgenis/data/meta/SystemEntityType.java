@@ -80,6 +80,7 @@ public abstract class SystemEntityType extends EntityType
 		super.init(new BootstrapEntity(entityTypeMetadata));
 		setId(entityTypeId);
 		setDefaultValues();
+		setEntityLevelSecurity(true);
 		init();
 	}
 

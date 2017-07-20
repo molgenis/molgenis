@@ -1,14 +1,11 @@
 package org.molgenis.questionnaires;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.security.owned.OwnedEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -24,13 +21,9 @@ public class QuestionnaireMetaData extends SystemEntityType
 
 	public static final String ATTR_STATUS = "status";
 
-	private final OwnedEntityType ownedEntityType;
-
-	@Autowired
-	QuestionnaireMetaData(OwnedEntityType ownedEntityType)
+	QuestionnaireMetaData()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.ownedEntityType = requireNonNull(ownedEntityType);
 	}
 
 	@Override
@@ -38,7 +31,6 @@ public class QuestionnaireMetaData extends SystemEntityType
 	{
 		setLabel("Questionnaire");
 		setAbstract(true);
-		setExtends(ownedEntityType);
 
 		List<String> enumOptions = new ArrayList<>();
 		for (QuestionnaireStatus questionnaireStatus : QuestionnaireStatus.values())

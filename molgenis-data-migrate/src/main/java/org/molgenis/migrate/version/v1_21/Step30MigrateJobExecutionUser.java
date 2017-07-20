@@ -74,8 +74,8 @@ public class Step30MigrateJobExecutionUser extends MolgenisUpgrade
 		String attributeId = jdbcTemplate.queryForObject(
 				"SELECT a.identifier FROM entities_attributes ea JOIN attributes a ON ea.attributes = a.identifier WHERE ea.fullName = '"
 						+ entityFullName + "' AND a.name='" + attributeName + "'", String.class);
-		jdbcTemplate
-				.update("UPDATE attributes SET dataType = '" + newDataType + "', refEntity = NULL WHERE identifier = '"
+		jdbcTemplate.update(
+				"UPDATE attributes SET dataType = '" + newDataType + "', refEntity = NULL WHERE identifier = '"
 						+ attributeId + "'");
 	}
 

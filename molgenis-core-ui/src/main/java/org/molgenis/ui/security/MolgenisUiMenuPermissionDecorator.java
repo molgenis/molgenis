@@ -1,11 +1,9 @@
 package org.molgenis.ui.security;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
@@ -15,10 +13,9 @@ import java.util.List;
 public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 {
 	private final MolgenisUiMenu molgenisUiMenu;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 
-	public MolgenisUiMenuPermissionDecorator(MolgenisUiMenu molgenisUiMenu,
-			MolgenisPermissionService molgenisPermissionService)
+	public MolgenisUiMenuPermissionDecorator(MolgenisUiMenu molgenisUiMenu, PermissionService molgenisPermissionService)
 	{
 		if (molgenisUiMenu == null) throw new IllegalArgumentException("menu is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
@@ -57,66 +54,36 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	}
 
 	@Override
-	public boolean isAuthorized()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		return Lists.newArrayList(Iterables.filter(Iterables
-				.transform(molgenisUiMenu.getItems(), new Function<MolgenisUiMenuItem, MolgenisUiMenuItem>()
+		return Lists.newArrayList(Iterables.filter(
+				Iterables.transform(molgenisUiMenu.getItems(), molgenisUiMenuItem ->
 				{
-					@Override
-					public MolgenisUiMenuItem apply(MolgenisUiMenuItem molgenisUiMenuItem)
+					switch (molgenisUiMenuItem.getType())
 					{
-						switch (molgenisUiMenuItem.getType())
-						{
-							case MENU:
-								return new MolgenisUiMenuPermissionDecorator((MolgenisUiMenu) molgenisUiMenuItem,
-										molgenisPermissionService);
-							case PLUGIN:
-								return molgenisUiMenuItem;
-							default:
-								throw new RuntimeException(
-										"Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
-						}
+						case MENU:
+							return new MolgenisUiMenuPermissionDecorator((MolgenisUiMenu) molgenisUiMenuItem,
+									molgenisPermissionService);
+						case PLUGIN:
+							return molgenisUiMenuItem;
+						default:
+							throw new RuntimeException(
+									"Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
 					}
-				}), new Predicate<MolgenisUiMenuItem>()
-		{
-			@Override
-			public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
-			{
-				return hasPermission(molgenisUiMenuItem);
-			}
-		}));
+				}), this::hasPermission));
 	}
 
 	@Override
 	public boolean containsItem(final String itemId)
 	{
-		return Iterables.any(molgenisUiMenu.getItems(), new Predicate<MolgenisUiMenuItem>()
-		{
-			@Override
-			public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
-			{
-				return molgenisUiMenuItem.getId().equals(itemId) && hasPermission(molgenisUiMenuItem);
-			}
-		});
+		return Iterables.any(molgenisUiMenu.getItems(),
+				molgenisUiMenuItem -> molgenisUiMenuItem.getId().equals(itemId) && hasPermission(molgenisUiMenuItem));
 	}
 
 	@Override
 	public MolgenisUiMenuItem getActiveItem()
 	{
-		return Iterables.find(molgenisUiMenu.getItems(), new Predicate<MolgenisUiMenuItem>()
-		{
-			@Override
-			public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
-			{
-				return molgenisUiMenuItem.getType() != MolgenisUiMenuItemType.MENU && hasPermission(molgenisUiMenuItem);
-			}
-		}, null);
+		return Iterables.find(molgenisUiMenu.getItems(), molgenisUiMenuItem -> molgenisUiMenuItem.getType() != MolgenisUiMenuItemType.MENU && hasPermission(molgenisUiMenuItem), null);
 	}
 
 	@Override

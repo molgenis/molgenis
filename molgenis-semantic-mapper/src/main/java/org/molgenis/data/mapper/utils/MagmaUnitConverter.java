@@ -35,13 +35,15 @@ public class MagmaUnitConverter
 
 						if (estimatedValue1 > estimatedValue2)
 						{
-							conversionScript.append(".times(").append(value1.divide(value2).getEstimatedValue())
-									.append(")");
+							conversionScript.append(".times(")
+											.append(value1.divide(value2).getEstimatedValue())
+											.append(")");
 						}
 						else
 						{
-							conversionScript.append(".div(").append(value2.divide(value1).getEstimatedValue())
-									.append(")");
+							conversionScript.append(".div(")
+											.append(value2.divide(value1).getEstimatedValue())
+											.append(")");
 						}
 					}
 
@@ -58,7 +60,7 @@ public class MagmaUnitConverter
 
 	Set<String> findCompositeUnitNames(String unitName)
 	{
-		Set<String> newUnitNames = new HashSet<String>();
+		Set<String> newUnitNames = new HashSet<>();
 
 		if (StringUtils.isNotBlank(unitName))
 		{
@@ -66,8 +68,11 @@ public class MagmaUnitConverter
 
 			if (unitName.contains("/"))
 			{
-				newUnitNames.addAll(Arrays.asList(unitName.split("/")).stream().map(UnitHelper::superscriptToNumber)
-						.map(unit -> unit.replaceAll("\\d+", "")).collect(Collectors.toSet()));
+				newUnitNames.addAll(Arrays.asList(unitName.split("/"))
+										  .stream()
+										  .map(UnitHelper::superscriptToNumber)
+										  .map(unit -> unit.replaceAll("\\d+", ""))
+										  .collect(Collectors.toSet()));
 			}
 		}
 		return newUnitNames;

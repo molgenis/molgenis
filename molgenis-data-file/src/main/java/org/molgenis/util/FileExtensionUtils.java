@@ -9,7 +9,7 @@ public class FileExtensionUtils
 	public static String findExtensionFromPossibilities(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();
-		List<String> possibleExtensions = new ArrayList<String>();
+		List<String> possibleExtensions = new ArrayList<>();
 		for (String extention : fileExtensions)
 		{
 			if (name.endsWith('.' + extention))

@@ -39,7 +39,7 @@ public class LazyEntityTest
 		dataService = mock(DataService.class);
 		entity = mock(Entity.class);
 		when(dataService.findOneById(ENTITY_NAME, id)).thenReturn(entity);
-		id = Integer.valueOf(1);
+		id = 1;
 		lazyEntity = new LazyEntity(entityType, dataService, id);
 	}
 
@@ -91,7 +91,7 @@ public class LazyEntityTest
 	public void getDouble()
 	{
 		String attrName = "attr";
-		Double value = Double.valueOf(0);
+		Double value = 0d;
 		when(entity.getDouble(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getDouble(attrName));
 		assertEquals(value, lazyEntity.getDouble(attrName));
@@ -160,7 +160,7 @@ public class LazyEntityTest
 	public void getInt()
 	{
 		String attrName = "attr";
-		Integer value = Integer.valueOf(0);
+		Integer value = 0;
 		when(entity.getInt(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getInt(attrName));
 		assertEquals(value, lazyEntity.getInt(attrName));
@@ -195,7 +195,7 @@ public class LazyEntityTest
 	public void getLong()
 	{
 		String attrName = "attr";
-		Long value = Long.valueOf(0l);
+		Long value = 0L;
 		when(entity.getLong(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getLong(attrName));
 		assertEquals(value, lazyEntity.getLong(attrName));

@@ -12,7 +12,9 @@ public class Chart extends BasicChart
 
 	public Chart()
 	{
-		this.setMarginBottom(MARGIN_BOTTOM).setMarginLeft(MARGIN_LEFT).setMarginRight(MARGIN_RIGHT)
-				.setMarginTop(MARGIN_TOP);
+		this.setMarginBottom(MARGIN_BOTTOM)
+			.setMarginLeft(MARGIN_LEFT)
+			.setMarginRight(MARGIN_RIGHT)
+			.setMarginTop(MARGIN_TOP);
 	}
 }

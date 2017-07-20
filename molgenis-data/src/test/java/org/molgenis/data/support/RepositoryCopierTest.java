@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
@@ -92,6 +91,7 @@ public class RepositoryCopierTest extends AbstractMockitoTest
 	{
 		EntityType entityTypeMeta = mock(EntityType.class);
 		Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
 		Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
 		Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
@@ -104,6 +104,7 @@ public class RepositoryCopierTest extends AbstractMockitoTest
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.EXTENDS)).thenReturn(xrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.TAGS)).thenReturn(mrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.INDEXING_DEPTH)).thenReturn(intAttr);
 		return entityTypeMeta;
 	}
 }

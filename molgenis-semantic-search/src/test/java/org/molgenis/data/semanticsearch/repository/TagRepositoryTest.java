@@ -19,9 +19,6 @@ import org.testng.annotations.Test;
 
 import java.util.UUID;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.TagMetadata.*;
 import static org.testng.Assert.assertTrue;
@@ -68,8 +65,8 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		when(q.findOne()).thenReturn(null);
 		when(dataService.query(TAG, Tag.class)).thenReturn(q);
 
-		assertTrue(EntityUtils.equals(tagRepository
-				.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
+		assertTrue(EntityUtils.equals(
+				tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 						"http://edamontology.org"), tag));
 
 		verify(dataService, times(1)).add(eq(TAG), any(Tag.class));
@@ -96,8 +93,8 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		when(q.findOne()).thenReturn(tag);
 		when(dataService.query(TAG, Tag.class)).thenReturn(q);
 
-		assertTrue(EntityUtils.equals(tagRepository
-				.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
+		assertTrue(EntityUtils.equals(
+				tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 						"http://edamontology.org"), tag));
 	}
 

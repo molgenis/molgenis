@@ -91,11 +91,15 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 		authorMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		authorMetaData.addAttribute(attributeFactory.create().setName("name"));
-		Attribute authorAttribute = attributeFactory.create().setName("author").setDataType(XREF)
-				.setRefEntity(authorMetaData);
-		authorMetaData.addAttribute(
-				attributeFactory.create().setName("books").setDataType(ONE_TO_MANY).setMappedBy(authorAttribute)
-						.setRefEntity(bookMetaData));
+		Attribute authorAttribute = attributeFactory.create()
+													.setName("author")
+													.setDataType(XREF)
+													.setRefEntity(authorMetaData);
+		authorMetaData.addAttribute(attributeFactory.create()
+													.setName("books")
+													.setDataType(ONE_TO_MANY)
+													.setMappedBy(authorAttribute)
+													.setRefEntity(bookMetaData));
 		bookMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		bookMetaData.addAttribute(attributeFactory.create().setName("title"));
 		bookMetaData.addAttribute(authorAttribute);
@@ -249,11 +253,13 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAllByStreamOfIdsEntityNotPresentInCache()
 	{
+		when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(null);
+		when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(null);
 		when(authorRepository.findAll(entityIdsCaptor.capture())).thenReturn(Stream.of(author, author2));
 
 		List<Entity> actual = l1CacheRepositoryDecorator.findAll(Stream.of(authorID, authorID2))
-				.collect(Collectors.toList());
-		assertEquals(asList(author, author2), actual);
+														.collect(Collectors.toList());
+		assertEquals(actual, asList(author, author2));
 
 		List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
 		assertEquals(ids, asList(authorID, authorID2));
@@ -263,15 +269,16 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void testFindAllByStreamOfIdsOneCachedOneMissing()
 	{
 		when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(of(author));
+		when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(null);
 
 		when(authorRepository.findAll(entityIdsCaptor.capture())).thenReturn(Stream.of(author2));
 
 		List<Entity> actual = l1CacheRepositoryDecorator.findAll(Stream.of(authorID, authorID2))
-				.collect(Collectors.toList());
-		assertEquals(asList(author, author2), actual);
+														.collect(Collectors.toList());
 
 		List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
 		assertEquals(ids, Collections.singletonList(authorID2));
+		assertEquals(actual, asList(author, author2));
 	}
 
 	@Configuration

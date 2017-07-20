@@ -18,8 +18,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.HugeSet;
@@ -54,7 +54,7 @@ public class ImportWriter
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService molgenisPermissionService;
 	private final EntityManager entityManager;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
@@ -67,7 +67,7 @@ public class ImportWriter
 	 * @param entityTypeDependencyResolver entity type dependency resolver
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			MolgenisPermissionService molgenisPermissionService, EntityManager entityManager,
+			PermissionService molgenisPermissionService, EntityManager entityManager,
 			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -117,7 +117,7 @@ public class ImportWriter
 	private void validateEntityTypePermission(EntityType entityType)
 	{
 		String entityTypeName = entityType.getId();
-		if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeName, Permission.READ))
+		if (!molgenisPermissionService.hasPermissionOnEntityType(entityTypeName, Permission.READ))
 		{
 			throw new MolgenisValidationException(
 					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));
@@ -133,11 +133,11 @@ public class ImportWriter
 	{
 		return runAsSystem(() ->
 		{
-			Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+			Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 			for (EntityType entityType : entities)
 			{
-				EntityType existing = dataService
-						.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
+				EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(),
+						EntityType.class);
 				if (existing != null)
 				{
 					existingEntityTypeMap.put(entityType.getId(), entityType);
@@ -145,12 +145,16 @@ public class ImportWriter
 			}
 
 			ImmutableCollection<EntityType> newEntityTypes = entities.stream()
-					.filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getId()))
-					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
+																	 .filter(entityType -> !existingEntityTypeMap.containsKey(
+																			 entityType.getId()))
+																	 .collect(collectingAndThen(toList(),
+																			 ImmutableList::copyOf));
 
 			ImmutableCollection<EntityType> existingEntityTypes = entities.stream()
-					.filter(entityType -> existingEntityTypeMap.containsKey(entityType.getId()))
-					.collect(collectingAndThen(toList(), ImmutableList::copyOf));
+																		  .filter(entityType -> existingEntityTypeMap.containsKey(
+																				  entityType.getId()))
+																		  .collect(collectingAndThen(toList(),
+																				  ImmutableList::copyOf));
 
 			return new GroupedEntityTypes(newEntityTypes, existingEntityTypes);
 		});
@@ -223,15 +227,18 @@ public class ImportWriter
 			String name = entityType.getId();
 
 			// Languages and i18nstrings are already done
-			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(L10N_STRING) && dataService
-					.hasRepository(name))
+			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(L10N_STRING) && dataService.hasRepository(
+					name))
 			{
 				Repository<Entity> repository = dataService.getRepository(name);
 				Repository<Entity> emxEntityRepo = source.getRepository(entityType.getId());
 
 				// Try without default package
-				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getId().toLowerCase()
-						.startsWith(defaultPackage.toLowerCase() + PACKAGE_SEPARATOR))
+				if ((emxEntityRepo == null) && (defaultPackage != null) && entityType.getId()
+																					 .toLowerCase()
+																					 .startsWith(
+																							 defaultPackage.toLowerCase()
+																									 + PACKAGE_SEPARATOR))
 				{
 					emxEntityRepo = source.getRepository(entityType.getId().substring(defaultPackage.length() + 1));
 				}
@@ -240,8 +247,8 @@ public class ImportWriter
 				if (emxEntityRepo != null)
 				{
 					// transforms entities so that they match the entity meta data of the output repository
-					Iterable<Entity> entities = Iterables
-							.transform(emxEntityRepo, emxEntity -> toEntity(entityType, emxEntity));
+					Iterable<Entity> entities = Iterables.transform(emxEntityRepo,
+							emxEntity -> toEntity(entityType, emxEntity));
 					int count = update(repository, entities, dbAction);
 					report.addEntityCount(name, count);
 				}
@@ -336,8 +343,8 @@ public class ImportWriter
 									else
 									{
 										EntityType xrefEntity = attr.getRefEntity();
-										Object entityId = DataConverter
-												.convert(emxValueItem, xrefEntity.getIdAttribute());
+										Object entityId = DataConverter.convert(emxValueItem,
+												xrefEntity.getIdAttribute());
 										entityValue = entityManager.getReference(xrefEntity, entityId);
 									}
 									mrefEntities.add(entityValue);
@@ -387,7 +394,7 @@ public class ImportWriter
 
 		ImmutableCollection<EntityType> updatedEntityTypes = groupedEntityTypes.getUpdatedEntityTypes();
 
-		Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+		Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 		for (EntityType entityType : updatedEntityTypes)
 		{
 			EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
@@ -415,13 +422,16 @@ public class ImportWriter
 
 		// add or update entity types
 		List<EntityType> entityTypes = newArrayList(concat(updatedEntityTypes, groupedEntityTypes.getNewEntityTypes()));
-		runAsSystem(() -> dataService.getMeta().upsertEntityTypes(entityTypes));
+
+		// user is not allowed to
+		dataService.getMeta().upsertEntityTypes(entityTypes);
 	}
 
 	private static Fetch createEntityTypeWithAttributesFetch()
 	{
-		return new Fetch().field(EntityTypeMetadata.PACKAGE).field(EntityTypeMetadata.ATTRIBUTES,
-				new Fetch().field(AttributeMetadata.ID).field(AttributeMetadata.NAME));
+		return new Fetch().field(EntityTypeMetadata.PACKAGE)
+						  .field(EntityTypeMetadata.ATTRIBUTES,
+								  new Fetch().field(AttributeMetadata.ID).field(AttributeMetadata.NAME));
 	}
 
 	/**
@@ -455,12 +465,6 @@ public class ImportWriter
 	{
 		if (entities == null) return 0;
 
-		if (!molgenisPermissionService.hasPermissionOnEntity(repo.getName(), Permission.WRITE))
-		{
-			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
-					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
-		}
-
 		int count = 0;
 		switch (dbAction)
 		{
@@ -476,10 +480,8 @@ public class ImportWriter
 					int batchSize = 1000;
 					List<E> newEntities = newArrayList();
 
-					Iterator<E> it = entities.iterator();
-					while (it.hasNext())
+					for (E entity : entities)
 					{
-						E entity = it.next();
 						count++;
 						Object id = entity.get(idAttributeName);
 						if (!existingIds.contains(id))
@@ -516,10 +518,8 @@ public class ImportWriter
 					List<E> newEntities = new ArrayList<>(batchSize);
 					List<Integer> newEntitiesRowIndex = new ArrayList<>(batchSize);
 
-					Iterator<E> it = entities.iterator();
-					while (it.hasNext())
+					for (E entity : entities)
 					{
-						E entity = it.next();
 						count++;
 						Object id = entity.get(idAttributeName);
 						if (existingIds.contains(id))

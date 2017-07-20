@@ -12,5 +12,5 @@ public interface AmazonBucketClient
 	AmazonS3 getClient(String accessKey, String secretKey, String region);
 
 	File downloadFile(AmazonS3 s3Client, FileStore fileStore, String jobIdentifier, String bucketName, String keyName,
-			boolean isExpression) throws IOException, AmazonClientException;
+			String extension, boolean isExpression, String targetEntityType) throws IOException, AmazonClientException;
 }

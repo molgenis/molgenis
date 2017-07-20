@@ -1,23 +1,18 @@
 package org.molgenis.security.permission;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -28,14 +23,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 @Service
 public class PermissionManagerServiceImpl implements PermissionManagerService
@@ -43,11 +36,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private final DataService dataService;
 	private final MolgenisPluginRegistry molgenisPluginRegistry;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-	private final MutableAclService mutableAclService;
 
 	@Autowired
 	public PermissionManagerServiceImpl(DataService dataService, MolgenisPluginRegistry molgenisPluginRegistry,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper, MutableAclService mutableAclService)
+			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (molgenisPluginRegistry == null) throw new IllegalArgumentException("Molgenis plugin registry is null");
@@ -55,7 +47,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		this.dataService = dataService;
 		this.molgenisPluginRegistry = molgenisPluginRegistry;
 		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
-		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
 	@Override
@@ -85,7 +76,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<Object> getEntityClassIds()
 	{
-		return dataService.findAll(ENTITY_TYPE_META_DATA).map(entity -> entity.getIdValue()).collect(toList());
+		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+						  .map(Entity::getIdValue)
+						  .collect(toList());
 	}
 
 	@Override
@@ -149,20 +142,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		if (user == null) throw new RuntimeException("unknown user id [" + userId + "]");
 		List<Authority> userPermissions = getUserPermissions(user, authorityPrefix);
 
-		List<GroupMember> groupMembers = dataService
-				.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-						GroupMember.class).collect(toList());
+		List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
-			List<Group> groups = Lists.transform(groupMembers, new Function<GroupMember, Group>()
-			{
-				@Override
-				public Group apply(GroupMember molgenisGroupMember)
-				{
-					return molgenisGroupMember.getGroup();
-				}
-			});
+			List<Group> groups = Lists.transform(groupMembers, GroupMember::getGroup);
 			List<Authority> groupAuthorities = getGroupPermissions(groups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 		}
@@ -216,54 +201,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional
 	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, String userId)
 	{
-		RunAsSystemProxy.runAsSystem(() ->
-		{
-			User user = dataService.findOneById(USER, userId, User.class);
-			Sid sid = new PrincipalSid(user.getUsername());
-
-			pluginAuthorities.forEach(userAuthority ->
-			{
-				String role = userAuthority.getRole();
-				// ROLE_ENTITY_WRITE_sys_set_dataexplorer --> WRITE_sys_set_dataexplorer
-				String permissionAndEntityTypeIdStr = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
-				int idx = permissionAndEntityTypeIdStr.indexOf('_');
-				String permissionStr = permissionAndEntityTypeIdStr.substring(0, idx);
-				String entityTypeIdStr = permissionAndEntityTypeIdStr.substring(idx + 1);
-
-				org.springframework.security.acls.model.Permission basePermission;
-				switch (permissionStr)
-				{
-					case "READ":
-						basePermission = BasePermission.READ;
-						break;
-					case "WRITE":
-						basePermission = BasePermission.WRITE;
-						break;
-					default:
-						throw new UnsupportedOperationException("FIXME unsupported permission " + permissionStr);
-				}
-				ObjectIdentity objectIdentity = new ObjectIdentityImpl(ENTITY_TYPE_META_DATA, entityTypeIdStr);
-				Acl acl = mutableAclService.readAclById(objectIdentity);
-				if (!(acl instanceof MutableAcl))
-				{
-					throw new RuntimeException("ACL is not a MutableAcl");
-				}
-				MutableAcl mutableAcl = (MutableAcl) acl;
-				List<AccessControlEntry> accessControlEntries = mutableAcl.getEntries();
-
-				for (int i = 0; i < accessControlEntries.size(); ++i)
-				{
-					AccessControlEntry accessControlEntry = accessControlEntries.get(i);
-					if (accessControlEntry.getSid().equals(sid))
-					{
-						mutableAcl.deleteAce(i);
-					}
-				}
-
-				mutableAcl.insertAce(acl.getEntries().size(), basePermission, sid, true);
-				mutableAclService.updateAcl(mutableAcl);
-			});
-		});
+		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 	}
 
 	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, String userId, String authorityType)
@@ -286,14 +224,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<Authority> getUserPermissions(User user, final String authorityPrefix)
 	{
-		Stream<UserAuthority> authorities = dataService
-				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-						UserAuthority.class);
+		Stream<UserAuthority> authorities = dataService.findAll(USER_AUTHORITY,
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user), UserAuthority.class);
 
 		return authorities.filter(authority ->
-		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-		}).collect(toList());
+				authorityPrefix != null ? authority.getRole().getId().startsWith(authorityPrefix) : true).collect(toList());
 	}
 
 	private List<Authority> getGroupPermissions(Group group)
@@ -313,64 +248,57 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<Authority> getGroupPermissions(List<Group> groups, final String authorityPrefix)
 	{
-		Stream<GroupAuthority> authorities = dataService
-				.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups),
-						GroupAuthority.class);
+		Stream<GroupAuthority> authorities = dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups), GroupAuthority.class);
 
 		return authorities.filter(authority ->
-		{
-			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-		}).collect(toList());
+				authorityPrefix != null ? authority.getRole().getId().startsWith(authorityPrefix) : true).collect(toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)
 	{
 		Permissions permissions = new Permissions();
-		if (authorityPrefix.equals(SecurityUtils.AUTHORITY_PLUGIN_PREFIX))
+		switch (authorityPrefix)
 		{
-			List<MolgenisPlugin> plugins = this.getPlugins();
-			if (plugins != null)
-			{
-				Collections.sort(plugins, new Comparator<MolgenisPlugin>()
+			case SecurityUtils.AUTHORITY_PLUGIN_PREFIX:
+				List<MolgenisPlugin> plugins = this.getPlugins();
+				if (plugins != null)
 				{
-					@Override
-					public int compare(MolgenisPlugin o1, MolgenisPlugin o2)
-					{
-						return o1.getName().compareTo(o2.getName());
-					}
-				});
-				Map<String, String> pluginMap = new LinkedHashMap<String, String>();
-				for (MolgenisPlugin plugin : plugins)
-					pluginMap.put(plugin.getId(), plugin.getName());
-				permissions.setEntityIds(pluginMap);
-			}
+					plugins.sort(Comparator.comparing(MolgenisPlugin::getName));
+					Map<String, String> pluginMap = new LinkedHashMap<>();
+					for (MolgenisPlugin plugin : plugins)
+						pluginMap.put(plugin.getId(), plugin.getName());
+					permissions.setEntityIds(pluginMap);
+				}
+				break;
+			case SecurityUtils.AUTHORITY_ENTITY_PREFIX:
+				List<Object> entityClassIds = this.getEntityClassIds();
+				List<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+						entityClassIds.stream(),
+						new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
+														  .collect(Collectors.toList());
+				if (entityClassIds != null)
+				{
+					Map<String, String> entityClassMap = new TreeMap<>();
+					for (EntityType entityType : entityTypes)
+						entityClassMap.put(entityType.getId(), entityType.getId());
+					permissions.setEntityIds(entityClassMap);
+				}
+				break;
+			default:
+				throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 		}
-		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
-		{
-			List<Object> entityClassIds = this.getEntityClassIds();
-			List<EntityType> entityTypes = dataService.findAll(ENTITY_TYPE_META_DATA, entityClassIds.stream(),
-					new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE), EntityType.class)
-					.collect(Collectors.toList());
-			if (entityClassIds != null)
-			{
-				Map<String, String> entityClassMap = new TreeMap<String, String>();
-				for (EntityType entityType : entityTypes)
-					entityClassMap.put(entityType.getId(), entityType.getId());
-				permissions.setEntityIds(entityClassMap);
-			}
-		}
-		else throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 
 		for (Authority authority : entityAuthorities)
 		{
 
 			// add permissions for authorities that match prefix
-			if (authority.getRole().startsWith(authorityPrefix))
+			if (authority.getRole().getId().startsWith(authorityPrefix))
 			{
 				Permission permission = new Permission();
 
-				String authorityType = getAuthorityType(authority.getRole(), authorityPrefix);
-				String authorityPluginId = getAuthorityEntityId(authority.getRole(), authorityPrefix);
+				String authorityType = getAuthorityType(authority.getRole().getId(), authorityPrefix);
+				String authorityPluginId = getAuthorityEntityId(authority.getRole().getId(), authorityPrefix);
 				permission.setType(authorityType);
 				if (authority instanceof GroupAuthority)
 				{
@@ -384,9 +312,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			}
 
 			// add permissions for inherited authorities from authority that match prefix
-			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
-			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper
-					.mapAuthorities(Collections.singletonList(grantedAuthority));
+			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole().getId());
+			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper.mapAuthorities(
+					Collections.singletonList(grantedAuthority));
 			hierarchyAuthorities.remove(grantedAuthority);
 
 			for (GrantedAuthority hierarchyAuthority : hierarchyAuthorities)

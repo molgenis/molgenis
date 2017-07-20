@@ -171,10 +171,7 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 		super.doCleanupAfterCompletion(molgenisTransaction.getDataSourceTransaction());
 		TransactionSynchronizationManager.unbindResourceIfPossible(TRANSACTION_ID_RESOURCE_NAME);
 
-		transactionListeners.forEach(j ->
-		{
-			j.doCleanupAfterCompletion(molgenisTransaction.getId());
-		});
+		transactionListeners.forEach(j -> j.doCleanupAfterCompletion(molgenisTransaction.getId()));
 	}
 
 	@Override
@@ -193,11 +190,10 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 
 	private MolgenisDataException translateTransactionException(TransactionException transactionException)
 	{
-		for (TransactionExceptionTranslator transactionExceptionTranslator : transactionExceptionTranslatorRegistry
-				.getTransactionExceptionTranslators())
+		for (TransactionExceptionTranslator transactionExceptionTranslator : transactionExceptionTranslatorRegistry.getTransactionExceptionTranslators())
 		{
-			MolgenisDataException molgenisDataException = transactionExceptionTranslator
-					.doTranslate(transactionException);
+			MolgenisDataException molgenisDataException = transactionExceptionTranslator.doTranslate(
+					transactionException);
 			if (molgenisDataException != null)
 			{
 				return molgenisDataException;

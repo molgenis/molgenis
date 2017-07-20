@@ -29,8 +29,9 @@ public class RepositoryCollectionRegistry
 
 	public Stream<RepositoryCollection> getRepositoryCollections()
 	{
-		return repoCollectionMap.values().stream()
-				.map(repoCollectionDecoratorFactory::createDecoratedRepositoryCollection);
+		return repoCollectionMap.values()
+								.stream()
+								.map(repoCollectionDecoratorFactory::createDecoratedRepositoryCollection);
 	}
 
 	public void addRepositoryCollection(RepositoryCollection repoCollection)
@@ -41,8 +42,8 @@ public class RepositoryCollectionRegistry
 	public RepositoryCollection getRepositoryCollection(String name)
 	{
 		RepositoryCollection repoCollection = repoCollectionMap.get(name);
-		return repoCollection != null ? repoCollectionDecoratorFactory
-				.createDecoratedRepositoryCollection(repoCollection) : null;
+		return repoCollection != null ? repoCollectionDecoratorFactory.createDecoratedRepositoryCollection(
+				repoCollection) : null;
 	}
 
 	public boolean hasRepositoryCollection(String name)

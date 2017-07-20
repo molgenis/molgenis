@@ -15,8 +15,8 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.GsonConfig;
@@ -33,9 +33,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
+import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_XLSX;
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
@@ -80,7 +83,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Mock
 	LanguageService languageService;
 	@Mock
-	MolgenisPermissionService molgenisPermissionService = mock(MolgenisPermissionService.class);
+	PermissionService molgenisPermissionService = mock(PermissionService.class);
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
@@ -88,8 +91,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
-		when(molgenisPermissionService.hasPermissionOnEntity("yes", Permission.WRITEMETA)).thenReturn(true);
-		when(molgenisPermissionService.hasPermissionOnEntity("no", Permission.WRITEMETA)).thenReturn(false);
+		when(molgenisPermissionService.hasPermissionOnEntityType("yes", Permission.WRITEMETA)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntityType("no", Permission.WRITEMETA)).thenReturn(false);
 
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
@@ -138,8 +141,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void testViewEntityDetailsById() throws Exception
 	{
-		when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl"))
-				.thenReturn(mock(Template.class));
+		when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl")).thenReturn(
+				mock(Template.class));
 
 		String actual = controller.viewEntityDetailsById(entityTypeId, entityId, model);
 		String expected = "view-standalone-report";
@@ -157,5 +160,21 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(dataService.getEntityType(entityTypeId)).thenReturn(null);
 		controller.viewEntityDetailsById(entityTypeId, entityId, model);
 		verifyNoMoreInteractions(model);
+	}
+
+	@Test
+	public void testGetDownloadFilenameCsv()
+	{
+		assertEquals(
+				controller.getDownloadFilename("it_emx_datatypes_TypeTest", LocalDateTime.parse("2017-07-04T14:14:33"),
+						DOWNLOAD_TYPE_CSV), "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.csv");
+	}
+
+	@Test
+	public void testGetDownloadFilenameXlsx()
+	{
+		assertEquals(
+				controller.getDownloadFilename("it_emx_datatypes_TypeTest", LocalDateTime.parse("2017-07-04T14:14:33"),
+						DOWNLOAD_TYPE_XLSX), "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.xlsx");
 	}
 }

@@ -5,17 +5,9 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.acl.AclService;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.Acl;
-import org.springframework.security.acls.model.NotFoundException;
-import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Sid;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -24,17 +16,20 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
+/**
+ * Attribute repository decorator that marks attributes as read-only for the current user based on permissions.
+ */
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
 	private final Repository<Attribute> decoratedRepo;
-	private final AclService aclService;
+	private final PermissionService permissionService;
 
-	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo, AclService aclService)
+	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo,
+			PermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
-		this.aclService = requireNonNull(aclService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -96,21 +91,13 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	private Attribute toPermittedAttribute(Attribute attribute)
 	{
-		if (attribute != null && !SecurityUtils.currentUserIsSuOrSystem())
+		if (attribute != null)
 		{
-			ObjectIdentity objectIdentity = new ObjectIdentityImpl(ATTRIBUTE_META_DATA, attribute.getIdentifier());
-			Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-			Acl acl = aclService.readAclById(objectIdentity, Collections.singletonList(sid));
-			try
+			String entityTypeId = attribute.getEntityType().getId();
+			Object entityId = attribute.getIdValue();
+			if (!permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.WRITE))
 			{
-				if (acl.isGranted(Collections.singletonList(BasePermission.READ), Collections.singletonList(sid), true))
-				{
-					attribute.setReadOnly(true);
-				}
-			}
-			catch (NotFoundException e)
-			{
-				return attribute;
+				attribute.setReadOnly(true);
 			}
 		}
 		return attribute;
@@ -131,7 +118,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		public void map(List<Attribute> attributes)
 		{
 			Stream<Attribute> filteredEntities = attributes.stream()
-					.map(attributeRepositorySecurityDecorator::toPermittedAttribute);
+														   .map(attributeRepositorySecurityDecorator::toPermittedAttribute);
 			consumer.accept(filteredEntities.collect(toList()));
 		}
 	}

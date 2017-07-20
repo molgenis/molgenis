@@ -9,7 +9,6 @@ import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +23,7 @@ public class ImportServiceFactory
 	void addImportService(ImportService importService)
 	{
 		importServices.add(importService);
-		Collections.sort(importServices, OrderComparator.INSTANCE);
+		importServices.sort(OrderComparator.INSTANCE);
 	}
 
 	/**
@@ -46,8 +45,8 @@ public class ImportServiceFactory
 			}
 		});
 
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(file.getName(), importServicesMappedToExtensions.keySet());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				importServicesMappedToExtensions.keySet());
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
@@ -67,8 +66,8 @@ public class ImportServiceFactory
 			}
 		}
 
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(fileName, importServicesMappedToExtensions.keySet());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(fileName,
+				importServicesMappedToExtensions.keySet());
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
@@ -79,7 +78,8 @@ public class ImportServiceFactory
 
 	public Set<String> getSupportedFileExtensions()
 	{
-		return importServices.stream().flatMap(importService -> importService.getSupportedFileExtensions().stream())
-				.collect(toSet());
+		return importServices.stream()
+							 .flatMap(importService -> importService.getSupportedFileExtensions().stream())
+							 .collect(toSet());
 	}
 }

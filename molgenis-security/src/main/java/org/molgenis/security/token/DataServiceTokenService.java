@@ -40,21 +40,6 @@ public class DataServiceTokenService implements TokenService
 	}
 
 	/**
-	 * Find a user by a security token
-	 *
-	 * @param token security token
-	 * @return the user or null if not found or token is expired
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	@RunAsSystem
-	public UserDetails findUserByToken(String token) throws UnknownTokenException
-	{
-		Token molgenisToken = getMolgenisToken(token);
-		return userDetailsService.loadUserByUsername(molgenisToken.getUser().getUsername());
-	}
-
-	/**
 	 * Generates a token and associates it with a user.
 	 * <p>
 	 * Token expires in 2 hours
@@ -64,8 +49,8 @@ public class DataServiceTokenService implements TokenService
 	 * @return token
 	 */
 	@Override
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	public String generateAndStoreToken(String username, String description)
 	{
 		User user = dataService.query(USER, User.class).eq(USERNAME, username).findOne();
@@ -86,9 +71,24 @@ public class DataServiceTokenService implements TokenService
 		return token;
 	}
 
+	/**
+	 * Find a user by a security token
+	 *
+	 * @param token security token
+	 * @return the user or null if not found or token is expired
+	 */
 	@Override
-	@Transactional
 	@RunAsSystem
+	@Transactional(readOnly = true)
+	public UserDetails findUserByToken(String token) throws UnknownTokenException
+	{
+		Token molgenisToken = getMolgenisToken(token);
+		return userDetailsService.loadUserByUsername(molgenisToken.getUser().getUsername());
+	}
+
+	@Override
+	@RunAsSystem
+	@Transactional
 	public void removeToken(String token) throws UnknownTokenException
 	{
 		Token molgenisToken = getMolgenisToken(token);

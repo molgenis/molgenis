@@ -3,7 +3,7 @@ package org.molgenis.security.freemarker;
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateException;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import java.io.IOException;
 public class NotHasPermissionDirective extends PermissionDirective
 {
 
-	public NotHasPermissionDirective(MolgenisPermissionService molgenisPermissionService)
+	public NotHasPermissionDirective(PermissionService molgenisPermissionService)
 	{
 		super(molgenisPermissionService);
 	}

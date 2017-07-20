@@ -53,7 +53,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	public Attribute attributeAlt;
 	public Attribute attributeCantAnnotateChrom;
 
-	public ArrayList<Entity> input = new ArrayList<Entity>();
+	public ArrayList<Entity> input = new ArrayList<>();
 	public Entity entity;
 	public Entity entity1;
 	public Entity entity2;
@@ -104,8 +104,11 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
 		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
 		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(FILTER).setDataType(STRING));
-		metaDataCanAnnotate.addAttribute(attributeFactory.create().setName(EFFECT).setDataType(STRING).setDescription(
-				"EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'"));
+		metaDataCanAnnotate.addAttribute(attributeFactory.create()
+														 .setName(EFFECT)
+														 .setDataType(STRING)
+														 .setDescription(
+																 "EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'"));
 		Attribute INFO = attributeFactory.create().setName("INFO").setDataType(COMPOUND);
 		Attribute AC = attributeFactory.create().setName("AC").setDataType(STRING).setParent(INFO);
 		Attribute AN = attributeFactory.create().setName("AN").setDataType(STRING).setParent(INFO);
@@ -122,8 +125,8 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 
 		annotatedEntityType.addAttribute(attributeFactory.create().setName(ID).setDataType(STRING));
 		annotatedEntityType.addAttribute(attributeFactory.create().setName(QUAL).setDataType(STRING));
-		annotatedEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING))
-				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
+		annotatedEntityType.addAttribute((attributeFactory.create().setName(FILTER).setDataType(STRING)).setDescription(
+				"Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
 		Attribute annoAttr = attributeFactory.create().setName("ANNO").setDataType(STRING).setParent(INFO);
 		annotatedEntityType.addAttribute(INFO);
 		annotatedEntityType.addAttribute(AC);
@@ -169,27 +172,27 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		entities.add(entity3);
 
 		expectedEffectsEntityType = entityTypeFactory.create("EFFECTannotations");
-		expectedEffectsEntityType
-				.addAttribute(attributeFactory.create().setName("identifier").setDataType(STRING), ROLE_ID);
+		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("identifier").setDataType(STRING),
+				ROLE_ID);
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Alt_Allele").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Gene_Name").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Annotation").setDataType(STRING));
-		expectedEffectsEntityType
-				.addAttribute(attributeFactory.create().setName("Putative_impact").setDataType(STRING));
+		expectedEffectsEntityType.addAttribute(
+				attributeFactory.create().setName("Putative_impact").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Gene_ID").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Feature_type").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Feature_ID").setDataType(STRING));
-		expectedEffectsEntityType
-				.addAttribute(attributeFactory.create().setName("Transcript_biotype").setDataType(STRING));
+		expectedEffectsEntityType.addAttribute(
+				attributeFactory.create().setName("Transcript_biotype").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Rank_total").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("HGVS_c").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("HGVS_p").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("cDNA_position").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("CDS_position").setDataType(STRING));
-		expectedEffectsEntityType
-				.addAttribute(attributeFactory.create().setName("Protein_position").setDataType(STRING));
-		expectedEffectsEntityType
-				.addAttribute(attributeFactory.create().setName("Distance_to_feature").setDataType(STRING));
+		expectedEffectsEntityType.addAttribute(
+				attributeFactory.create().setName("Protein_position").setDataType(STRING));
+		expectedEffectsEntityType.addAttribute(
+				attributeFactory.create().setName("Distance_to_feature").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(attributeFactory.create().setName("Errors").setDataType(STRING));
 		expectedEffectsEntityType.addAttribute(
 				attributeFactory.create().setName("VARIANT").setDataType(XREF).setRefEntity(metaDataCanAnnotate));

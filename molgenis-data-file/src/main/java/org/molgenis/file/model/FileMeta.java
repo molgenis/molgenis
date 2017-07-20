@@ -2,11 +2,11 @@ package org.molgenis.file.model;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.owned.OwnedEntity;
+import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.file.model.FileMetaMetaData.*;
 
-public class FileMeta extends OwnedEntity
+public class FileMeta extends StaticEntity
 {
 	public FileMeta(Entity entity)
 	{

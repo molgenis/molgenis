@@ -30,7 +30,8 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	public Iterator<Repository<Entity>> iterator()
 	{
 		return StreamSupport.stream(spliteratorUnknownSize(decoratedRepositoryCollection.iterator(), ORDERED), false)
-				.map(repositoryDecoratorFactory::createDecoratedRepository).iterator();
+							.map(repositoryDecoratorFactory::createDecoratedRepository)
+							.iterator();
 	}
 
 	@Override
@@ -48,8 +49,8 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		return repositoryDecoratorFactory
-				.createDecoratedRepository(decoratedRepositoryCollection.createRepository(entityType));
+		return repositoryDecoratorFactory.createDecoratedRepository(
+				decoratedRepositoryCollection.createRepository(entityType));
 	}
 
 	@Override
@@ -88,6 +89,12 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	public void deleteRepository(EntityType entityType)
 	{
 		decoratedRepositoryCollection.deleteRepository(entityType);
+	}
+
+	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		decoratedRepositoryCollection.updateRepository(entityType, updatedEntityType);
 	}
 
 	@Override

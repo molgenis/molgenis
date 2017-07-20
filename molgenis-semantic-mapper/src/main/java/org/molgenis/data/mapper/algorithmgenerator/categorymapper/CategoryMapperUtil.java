@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
 
 public class CategoryMapperUtil
 {
-	private static final List<AmountConvertor> CONVERTORS = Lists
-			.newArrayList(new DailyAmountConvertor(), new SeveralTimesConvertor(), new NumberAmountConvertor());
+	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
+			new SeveralTimesConvertor(), new NumberAmountConvertor());
 
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+\\.?\\d*");
 	private static final String NON_LETTER_REGEX = "[^a-zA-Z0-9]";
@@ -28,16 +28,15 @@ public class CategoryMapperUtil
 
 	static
 	{
-		DURATION_UNITS = Arrays
-				.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(), NonSI.DAY.inverse(),
-						NonSI.WEEK.inverse(), NonSI.MONTH.inverse(), NonSI.YEAR.inverse());
+		DURATION_UNITS = Arrays.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(),
+				NonSI.DAY.inverse(), NonSI.WEEK.inverse(), NonSI.MONTH.inverse(), NonSI.YEAR.inverse());
 	}
 
 	private static final Set<String> POSITIVE_ADJECTIVES;
 
 	static
 	{
-		POSITIVE_ADJECTIVES = new HashSet<String>();
+		POSITIVE_ADJECTIVES = new HashSet<>();
 		POSITIVE_ADJECTIVES.add("almost");
 	}
 
@@ -45,7 +44,7 @@ public class CategoryMapperUtil
 
 	static
 	{
-		NEGATIVE_ADJECTIVES = new HashSet<String>();
+		NEGATIVE_ADJECTIVES = new HashSet<>();
 		NEGATIVE_ADJECTIVES.add("never");
 		NEGATIVE_ADJECTIVES.add("less");
 		NEGATIVE_ADJECTIVES.add("fewer");
@@ -56,7 +55,7 @@ public class CategoryMapperUtil
 
 	static
 	{
-		WORD_TO_NUMBER_MAP = new HashMap<String, Integer>();
+		WORD_TO_NUMBER_MAP = new HashMap<>();
 		WORD_TO_NUMBER_MAP.put("one", 1);
 		WORD_TO_NUMBER_MAP.put("two", 2);
 		WORD_TO_NUMBER_MAP.put("three", 3);
@@ -75,7 +74,7 @@ public class CategoryMapperUtil
 	public static boolean containNegativeAdjectives(String description)
 	{
 		String lowerCase = description.toLowerCase();
-		return NEGATIVE_ADJECTIVES.stream().anyMatch(adj -> lowerCase.contains(adj));
+		return NEGATIVE_ADJECTIVES.stream().anyMatch(lowerCase::contains);
 	}
 
 	public static Unit<?> getMoreSpecificUnit(Unit<?> unit)
@@ -126,7 +125,7 @@ public class CategoryMapperUtil
 	{
 		Set<String> tokens = Sets.newHashSet(description.toLowerCase().split(NON_LETTER_REGEX));
 
-		List<Unit<?>> candidateUnits = new ArrayList<Unit<?>>();
+		List<Unit<?>> candidateUnits = new ArrayList<>();
 
 		for (Unit<?> unit : DURATION_UNITS)
 		{
@@ -141,19 +140,16 @@ public class CategoryMapperUtil
 
 	public static Unit<?> getMostGeneralUnit(List<Unit<?>> candidateUnits)
 	{
-		Collections.sort(candidateUnits, new Comparator<Unit<?>>()
+		candidateUnits.sort((o1, o2) ->
 		{
-			public int compare(Unit<?> o1, Unit<?> o2)
+			UnitConverter converterTo = o1.inverse().getConverterTo(o2.inverse());
+			if (converterTo.convert(1) > 1)
 			{
-				UnitConverter converterTo = o1.inverse().getConverterTo(o2.inverse());
-				if (converterTo.convert(1) > 1)
-				{
-					return -1;
-				}
-				else
-				{
-					return 1;
-				}
+				return -1;
+			}
+			else
+			{
+				return 1;
 			}
 		});
 
@@ -162,7 +158,7 @@ public class CategoryMapperUtil
 
 	public static List<Double> extractNumbers(String description)
 	{
-		List<Double> extractedNumbers = new ArrayList<Double>();
+		List<Double> extractedNumbers = new ArrayList<>();
 		String lowerCasedDesc = description.toLowerCase();
 		Matcher mather = NUMBER_PATTERN.matcher(lowerCasedDesc);
 		while (mather.find())
@@ -175,7 +171,7 @@ public class CategoryMapperUtil
 	public static boolean containsNegativeAdjectives(String description)
 	{
 		String lowerCasedDesc = description.toLowerCase();
-		return NEGATIVE_ADJECTIVES.stream().anyMatch(adj -> lowerCasedDesc.contains(adj));
+		return NEGATIVE_ADJECTIVES.stream().anyMatch(lowerCasedDesc::contains);
 	}
 
 	public static boolean isAmountRanged(Amount<?> amount)

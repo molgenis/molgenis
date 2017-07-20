@@ -6,8 +6,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -28,6 +28,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static org.molgenis.apps.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
+import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -42,14 +43,13 @@ public class AppsController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String VIEW_NAME = "view-apps";
-	private static final String API_URI = "/api/";
 
 	private final DataService dataService;
 	private final FileStore fileStore;
-	private final MolgenisPermissionService permissionService;
+	private final PermissionService permissionService;
 
 	@Autowired
-	public AppsController(DataService dataService, FileStore fileStore, MolgenisPermissionService permissionService)
+	public AppsController(DataService dataService, FileStore fileStore, PermissionService permissionService)
 	{
 		super(URI);
 
@@ -71,7 +71,7 @@ public class AppsController extends MolgenisPluginController
 		Query<App> query = dataService.query(APP, App.class);
 		query.sort().on(AppMetaData.NAME);
 		Stream<App> apps = query.findAll();
-		if (!permissionService.hasPermissionOnEntity(APP, Permission.WRITE))
+		if (!permissionService.hasPermissionOnEntityType(APP, Permission.WRITE))
 		{
 			apps = apps.filter(App::isActive);
 		}
@@ -96,9 +96,15 @@ public class AppsController extends MolgenisPluginController
 		}
 
 		model.addAttribute("app", toAppInfoDto(app));
-
-		FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
-		return htmlTemplate.getNameWithoutExtension();
+		if (app.getUseFreemarkerTemplate())
+		{
+			FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
+			return htmlTemplate.getNameWithoutExtension();
+		}
+		else
+		{
+			return "redirect:/" + FILE_STORE_PLUGIN_APPS_PATH + "/" + app.getId() + "/index.html";
+		}
 	}
 
 	@Transactional
@@ -159,8 +165,13 @@ public class AppsController extends MolgenisPluginController
 			iconHref = null;
 		}
 
-		return AppInfoDto.builder().setId(app.getId()).setName(app.getName()).setDescription(app.getDescription())
-				.setActive(app.isActive()).setIconHref(iconHref).build();
+		return AppInfoDto.builder()
+						 .setId(app.getId())
+						 .setName(app.getName())
+						 .setDescription(app.getDescription())
+						 .setActive(app.isActive())
+						 .setIconHref(iconHref)
+						 .build();
 	}
 
 	@ExceptionHandler(AppsException.class)

@@ -49,15 +49,10 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
 
-		CsvWriter csvWriter = new CsvWriter(new StringWriter());
-		try
+		try (CsvWriter csvWriter = new CsvWriter(new StringWriter()))
 		{
 			csvWriter.addCellProcessor(processor);
 			csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
-		}
-		finally
-		{
-			csvWriter.close();
 		}
 		verify(processor).process("col1");
 		verify(processor).process("col2");
@@ -72,16 +67,11 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 		entity.set("col1", "val1");
 		entity.set("col2", "val2");
 
-		CsvWriter csvWriter = new CsvWriter(new StringWriter());
-		try
+		try (CsvWriter csvWriter = new CsvWriter(new StringWriter()))
 		{
 			csvWriter.addCellProcessor(processor);
 			csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
 			csvWriter.add(entity);
-		}
-		finally
-		{
-			csvWriter.close();
 		}
 		verify(processor).process("val1");
 		verify(processor).process("val2");
@@ -91,8 +81,7 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 	public void add() throws IOException
 	{
 		StringWriter strWriter = new StringWriter();
-		CsvWriter csvWriter = new CsvWriter(strWriter);
-		try
+		try (CsvWriter csvWriter = new CsvWriter(strWriter))
 		{
 			csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
 			Entity entity = new DynamicEntity(entityType);
@@ -101,18 +90,13 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 			csvWriter.add(entity);
 			assertEquals(strWriter.toString(), "\"col1\",\"col2\"\n\"val1\",\"val2\"\n");
 		}
-		finally
-		{
-			csvWriter.close();
-		}
 	}
 
 	@Test
 	public void testLabels() throws IOException
 	{
 		StringWriter strWriter = new StringWriter();
-		CsvWriter csvWriter = new CsvWriter(strWriter);
-		try
+		try (CsvWriter csvWriter = new CsvWriter(strWriter))
 		{
 			csvWriter.writeAttributes(Arrays.asList("col1", "col2"), Arrays.asList("label1", "label2"));
 			Entity entity = new DynamicEntity(entityType);
@@ -120,10 +104,6 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 			entity.set("col2", "val2");
 			csvWriter.add(entity);
 			assertEquals(strWriter.toString(), "\"label1\",\"label2\"\n\"val1\",\"val2\"\n");
-		}
-		finally
-		{
-			csvWriter.close();
 		}
 	}
 

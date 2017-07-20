@@ -23,26 +23,32 @@ public class RepositoryPopulator
 	private final DataService dataService;
 	private final UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator;
 	private final SystemEntityPopulator systemEntityPopulator;
+	private final PluginPopulator pluginPopulator;
 	private final SettingsPopulator settingsPopulator;
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
+	private final PermissionPopulator permissionPopulator;
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
-			SystemEntityPopulator systemEntityPopulator, SettingsPopulator settingsPopulator,
-			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator)
+			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
+			SettingsPopulator settingsPopulator, I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
+			PermissionPopulator permissionPopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
 		this.systemEntityPopulator = requireNonNull(systemEntityPopulator);
+		this.pluginPopulator = requireNonNull(pluginPopulator);
 		this.settingsPopulator = requireNonNull(settingsPopulator);
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
+		this.permissionPopulator = requireNonNull(permissionPopulator);
 	}
 
 	public void populate(ContextRefreshedEvent event)
 	{
-		if (!isDatabasePopulated())
+		boolean databasePopulated = isDatabasePopulated();
+		if (!databasePopulated)
 		{
 			LOG.trace("Populating database with users, groups and authorities ...");
 			usersGroupsAuthoritiesPopulator.populate();
@@ -58,6 +64,10 @@ public class RepositoryPopulator
 			LOG.trace("Populated database with application entities");
 		}
 
+		LOG.trace("Populating plugin entities ...");
+		pluginPopulator.populate();
+		LOG.trace("Populated plugin entities");
+
 		LOG.trace("Populating settings entities ...");
 		settingsPopulator.initialize(event);
 		LOG.trace("Populated settings entities");
@@ -69,6 +79,13 @@ public class RepositoryPopulator
 		LOG.trace("Populating script type entities ...");
 		scriptTypePopulator.populate();
 		LOG.trace("Populated script type entities");
+
+		if (!databasePopulated)
+		{
+			LOG.trace("Populating database permissions ...");
+			permissionPopulator.populate();
+			LOG.trace("Populated database with permissions");
+		}
 	}
 
 	private boolean isDatabasePopulated()

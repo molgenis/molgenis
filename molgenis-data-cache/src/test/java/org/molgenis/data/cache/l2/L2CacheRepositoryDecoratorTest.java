@@ -22,8 +22,8 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -118,8 +118,8 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "3"))).thenReturn(false);
 
 		Stream<Object> ids = Lists.<Object>newArrayList("0", "1", "2", "3").stream();
-		when(l2Cache.getBatch(eq(decoratedRepository), cacheIdCaptor.capture()))
-				.thenReturn(newArrayList(entities.get(3)));
+		when(l2Cache.getBatch(eq(decoratedRepository), cacheIdCaptor.capture())).thenReturn(
+				newArrayList(entities.get(3)));
 		when(decoratedRepository.findAll(repoIdCaptor.capture())).thenReturn(of(entities.get(1)));
 
 		List<Entity> retrievedEntities = l2CacheRepositoryDecorator.findAll(ids).collect(toList());
