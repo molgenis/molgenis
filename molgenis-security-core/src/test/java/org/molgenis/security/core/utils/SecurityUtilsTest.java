@@ -48,10 +48,10 @@ public class SecurityUtilsTest
 		when(userDetails.getUsername()).thenReturn("username");
 		when(userDetails.getPassword()).thenReturn("encoded-password");
 		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority>asList(authority1, authority2));
+				Arrays.asList(authority1, authority2));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
 		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority>asList(authority1, authority2));
+				Arrays.asList(authority1, authority2));
 	}
 
 	@AfterClass
@@ -82,7 +82,7 @@ public class SecurityUtilsTest
 		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_ANONYMOUS)
 																						.getMock();
 		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Collections.<GrantedAuthority>singletonList(authoritySu));
+				Collections.singletonList(authoritySu));
 		assertFalse(SecurityUtils.currentUserIsAuthenticated());
 	}
 
@@ -100,7 +100,7 @@ public class SecurityUtilsTest
 		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_SU)
 																						.getMock();
 		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Collections.<GrantedAuthority>singletonList(authoritySu));
+				Collections.singletonList(authoritySu));
 		assertTrue(SecurityUtils.currentUserIsSu());
 		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}
@@ -112,7 +112,7 @@ public class SecurityUtilsTest
 		GrantedAuthority authoritySystem = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(ROLE_SYSTEM)
 																							.getMock();
 		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Collections.<GrantedAuthority>singletonList(authoritySystem));
+				Collections.singletonList(authoritySystem));
 		assertTrue(SecurityUtils.currentUserIsSystem());
 		assertTrue(SecurityUtils.currentUserIsSuOrSystem());
 	}

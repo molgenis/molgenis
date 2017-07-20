@@ -101,7 +101,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		Sort sort = new Sort().on(attributeNameXaxis).on(attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityTypeId, repo, queryRules, sort);
 
-		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
+		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<>();
 		for (Entity entity : iterable)
 		{
 			String splitValue = createSplitKey(entity, split);
@@ -119,7 +119,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			xYDataSeriesMap.get(splitValue).addData(new XYData(x, y));
 		}
 
-		List<XYDataSerie> series = new ArrayList<XYDataSerie>();
+		List<XYDataSerie> series = new ArrayList<>();
 		for (Entry<String, XYDataSerie> serie : xYDataSeriesMap.entrySet())
 		{
 			series.add(serie.getValue());
@@ -215,7 +215,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		xYDataSerie.setType(MolgenisSerieType.SCATTER);
 		xYDataSerie.setName("Outliers");
 
-		List<String> categories = new ArrayList<String>();
+		List<String> categories = new ArrayList<>();
 
 		int count = 0;
 		for (Entry<String, List<Double>> entry : boxPlotDataListMap.entrySet())
@@ -229,8 +229,8 @@ public class ChartDataServiceImpl implements ChartDataService
 			double highBorder = step + data[3];
 			double lowBorder = data[1] - step;
 
-			List<XYData> outlierList = new ArrayList<XYData>();
-			List<Double> normalList = new ArrayList<Double>();
+			List<XYData> outlierList = new ArrayList<>();
+			List<Double> normalList = new ArrayList<>();
 			for (Double o : list)
 			{
 				if (null != o)
@@ -270,7 +270,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	private Map<String, List<Double>> getBoxPlotDataListMap(EntityType entityType, Iterable<Entity> iterable,
 			String attributeName, String split)
 	{
-		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
+		Map<String, List<Double>> boxPlotDataListMap = new HashMap<>();
 		final boolean splitList = StringUtils.isNotBlank(split);
 
 		if (splitList)
@@ -280,7 +280,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				String key = createSplitKey(entity, split);
 				if (!boxPlotDataListMap.containsKey(key))
 				{
-					boxPlotDataListMap.put(key, new ArrayList<Double>());
+					boxPlotDataListMap.put(key, new ArrayList<>());
 				}
 				boxPlotDataListMap.get(key).add(entity.getDouble(attributeName));
 			}
@@ -288,7 +288,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		else
 		{
 			String key = entityType.getAttribute(attributeName).getLabel();
-			List<Double> list = new ArrayList<Double>();
+			List<Double> list = new ArrayList<>();
 			for (Entity entity : iterable)
 			{
 				list.add(entity.getDouble(attributeName));
@@ -315,11 +315,11 @@ public class ChartDataServiceImpl implements ChartDataService
 		final Query<Entity> q;
 		if (queryRules == null)
 		{
-			q = new QueryImpl<Entity>();
+			q = new QueryImpl<>();
 		}
 		else
 		{
-			q = new QueryImpl<Entity>(queryRules);
+			q = new QueryImpl<>(queryRules);
 		}
 
 		if (null != sort)
@@ -327,15 +327,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			q.sort(sort);
 		}
 
-		return new Iterable<Entity>()
-		{
-
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return repo.findAll(q).iterator();
-			}
-		};
+		return () -> repo.findAll(q).iterator();
 	}
 
 	/**
@@ -382,26 +374,19 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		if (queryRules != null && !queryRules.isEmpty())
 		{
-			QueryImpl<Entity> q = new QueryImpl<Entity>();
+			QueryImpl<Entity> q = new QueryImpl<>();
 			for (QueryRule queryRule : queryRules)
 			{
 				q.addRule(queryRule);
 			}
 
 			final Iterable<Entity> AllEntitiesIterable = iterable;
-			iterable = new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return ((Repository<Entity>) AllEntitiesIterable).findAll(q).iterator();
-				}
-			};
+			iterable = () -> ((Repository<Entity>) AllEntitiesIterable).findAll(q).iterator();
 		}
 
-		List<Target> rowTargets = new ArrayList<Target>();
-		List<Target> columnTargets = new ArrayList<Target>();
-		List<List<Number>> values = new ArrayList<List<Number>>();
+		List<Target> rowTargets = new ArrayList<>();
+		List<Target> columnTargets = new ArrayList<>();
+		List<List<Number>> values = new ArrayList<>();
 
 		for (String columnTargetName : attributeNamesXaxis)
 		{
@@ -414,7 +399,7 @@ public class ChartDataServiceImpl implements ChartDataService
 					entity.getString(attributeNameYaxis) != null ? entity.getString(attributeNameYaxis) : "";
 			rowTargets.add(new Target(rowTargetName));
 
-			List<Number> rowValues = new ArrayList<Number>();
+			List<Number> rowValues = new ArrayList<>();
 			for (String attr : attributeNamesXaxis)
 			{
 				rowValues.add(entity.getDouble(attr));

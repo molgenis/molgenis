@@ -17,7 +17,7 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 	public Collection<? extends GrantedAuthority> getReachableGrantedAuthorities(
 			Collection<? extends GrantedAuthority> authorities)
 	{
-		Collection<GrantedAuthority> hierarchicalAuthorities = new ArrayList<GrantedAuthority>();
+		Collection<GrantedAuthority> hierarchicalAuthorities = new ArrayList<>();
 		for (GrantedAuthority authority : authorities)
 		{
 			if (authority.getAuthority().startsWith(AUTHORITY_ENTITY_WRITEMETA_PREFIX))

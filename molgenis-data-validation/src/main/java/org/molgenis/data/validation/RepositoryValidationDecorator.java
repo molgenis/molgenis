@@ -237,22 +237,19 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				});
 
 				Query<Entity> q = new QueryImpl<>().fetch(fetch);
-				decoratedRepository.findAll(q).forEach(entity ->
+				decoratedRepository.findAll(q).forEach(entity -> uniqueAttrs.forEach(uniqueAttr ->
 				{
-					uniqueAttrs.forEach(uniqueAttr ->
+					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
+					Object attrValue = entity.get(uniqueAttr.getName());
+					if (attrValue != null)
 					{
-						HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
-						Object attrValue = entity.get(uniqueAttr.getName());
-						if (attrValue != null)
+						if (isSingleReferenceType(uniqueAttr))
 						{
-							if (isSingleReferenceType(uniqueAttr))
-							{
-								attrValue = ((Entity) attrValue).getIdValue();
-							}
-							uniqueAttrValues.put(attrValue, entity.getIdValue());
+							attrValue = ((Entity) attrValue).getIdValue();
 						}
-					});
-				});
+						uniqueAttrValues.put(attrValue, entity.getIdValue());
+					}
+				}));
 
 				validationResource.setUniqueAttrsValues(uniqueAttrsValues);
 			}
@@ -298,10 +295,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
 		if (attrViolations != null && !attrViolations.isEmpty())
 		{
-			attrViolations.forEach(attrViolation ->
-			{
-				validationResource.addViolation(attrViolation);
-			});
+			attrViolations.forEach(validationResource::addViolation);
 		}
 	}
 
@@ -327,8 +321,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				{
 					ConstraintViolation constraintViolation = new ConstraintViolation(
 							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
-									uniqueAttr.getName(), getName()), uniqueAttr,
-							Long.valueOf(validationResource.getRow()));
+									uniqueAttr.getName(), getName()), uniqueAttr, (long) validationResource.getRow());
 					validationResource.addViolation(constraintViolation);
 				}
 				else
@@ -374,7 +367,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 								DataConverter.toString(refEntity.getIdValue()), refAttr.getName(), getName());
 
 						ConstraintViolation constraintViolation = new ConstraintViolation(message, refAttr,
-								Long.valueOf(validationResource.getRow()));
+								(long) validationResource.getRow());
 						validationResource.addViolation(constraintViolation);
 					}
 				}
@@ -427,7 +420,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			{
 				validationResource.addViolation(new ConstraintViolation(
 						format("The attribute '%s' of entity '%s' can not be changed it is readonly.",
-								readonlyAttr.getName(), getName()), Long.valueOf(validationResource.getRow())));
+								readonlyAttr.getName(), getName()), (long) validationResource.getRow()));
 			}
 		});
 	}

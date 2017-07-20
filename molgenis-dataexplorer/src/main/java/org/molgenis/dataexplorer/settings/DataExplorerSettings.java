@@ -291,7 +291,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public boolean getModAggregates()
 	{
 		Boolean value = getBoolean(Meta.MOD_AGGREGATES);
-		return value != null ? value.booleanValue() : false;
+		return value != null ? value : false;
 	}
 
 	public void setModAggregates(boolean modAggregates)
@@ -302,7 +302,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public boolean getModAnnotators()
 	{
 		Boolean value = getBoolean(Meta.MOD_ANNOTATORS);
-		return value != null ? value.booleanValue() : false;
+		return value != null ? value : false;
 	}
 
 	public void setModAnnotators(boolean modAnnotators)
@@ -313,7 +313,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public boolean getModCharts()
 	{
 		Boolean value = getBoolean(Meta.MOD_CHARTS);
-		return value != null ? value.booleanValue() : false;
+		return value != null ? value : false;
 	}
 
 	public void setModCharts(boolean modCharts)
@@ -450,7 +450,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public boolean getGenomeBrowser()
 	{
 		Boolean value = getBoolean(Meta.DATA_GENOME_BROWSER);
-		return value != null ? value.booleanValue() : false;
+		return value != null ? value : false;
 	}
 
 	public void setGenomeBrowser(boolean genomeBrowser)
@@ -542,7 +542,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		String entityReportsStr = getEntityReports();
 		if (entityReportsStr != null)
 		{
-			Map<String, String> entityReports = new LinkedHashMap<String, String>();
+			Map<String, String> entityReports = new LinkedHashMap<>();
 			for (String entityReport : entityReportsStr.split(","))
 			{
 				String[] tokens = entityReport.split(":");

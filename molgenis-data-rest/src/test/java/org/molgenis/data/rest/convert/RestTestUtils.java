@@ -49,7 +49,7 @@ public class RestTestUtils
 
 	public enum Permission
 	{
-		READ, WRITE, COUNT, NONE, WRITEMETA;
+		READ, WRITE, COUNT, NONE, WRITEMETA
 	}
 
 	/**

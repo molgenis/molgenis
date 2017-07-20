@@ -133,7 +133,7 @@ public class ImportWriter
 	{
 		return runAsSystem(() ->
 		{
-			Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+			Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 			for (EntityType entityType : entities)
 			{
 				EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(),
@@ -394,7 +394,7 @@ public class ImportWriter
 
 		ImmutableCollection<EntityType> updatedEntityTypes = groupedEntityTypes.getUpdatedEntityTypes();
 
-		Map<String, EntityType> existingEntityTypeMap = new HashMap<String, EntityType>();
+		Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 		for (EntityType entityType : updatedEntityTypes)
 		{
 			EntityType existing = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class);
@@ -480,10 +480,8 @@ public class ImportWriter
 					int batchSize = 1000;
 					List<E> newEntities = newArrayList();
 
-					Iterator<E> it = entities.iterator();
-					while (it.hasNext())
+					for (E entity : entities)
 					{
-						E entity = it.next();
 						count++;
 						Object id = entity.get(idAttributeName);
 						if (!existingIds.contains(id))
@@ -520,10 +518,8 @@ public class ImportWriter
 					List<E> newEntities = new ArrayList<>(batchSize);
 					List<Integer> newEntitiesRowIndex = new ArrayList<>(batchSize);
 
-					Iterator<E> it = entities.iterator();
-					while (it.hasNext())
+					for (E entity : entities)
 					{
-						E entity = it.next();
 						count++;
 						Object id = entity.get(idAttributeName);
 						if (existingIds.contains(id))

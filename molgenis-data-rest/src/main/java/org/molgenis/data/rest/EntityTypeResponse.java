@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -11,7 +10,6 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 
 import java.util.*;
@@ -38,10 +36,10 @@ public class EntityTypeResponse
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponse(EntityType meta, PermissionService permissionService, DataService dataService,
+	public EntityTypeResponse(EntityType meta, DataService dataService,
 			LanguageService languageService)
 	{
-		this(meta, null, null, permissionService, dataService, languageService);
+		this(meta, null, null, dataService, languageService);
 	}
 
 	/**
@@ -49,8 +47,7 @@ public class EntityTypeResponse
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet, DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
@@ -77,7 +74,7 @@ public class EntityTypeResponse
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
-			this.attributes = new LinkedHashMap<String, Object>();
+			this.attributes = new LinkedHashMap<>();
 			//the newArraylist is a fix for concurrency trouble
 			//FIXME properly fix this by making metadata immutable
 			for (Attribute attr : Lists.newArrayList(meta.getAttributes()))
@@ -88,8 +85,7 @@ public class EntityTypeResponse
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeResponse(name, meta, attr, subAttributesSet,
-								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
-								permissionService, dataService, languageService));
+								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")), dataService, languageService));
 					}
 					else
 					{
@@ -119,14 +115,7 @@ public class EntityTypeResponse
 		{
 			Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
 			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
-					Iterables.transform(lookupAttributes, new Function<Attribute, String>()
-					{
-						@Override
-						public String apply(Attribute attribute)
-						{
-							return attribute.getName();
-						}
-					})) : null;
+					Iterables.transform(lookupAttributes, Attribute::getName)) : null;
 		}
 		else this.lookupAttributes = null;
 
@@ -136,9 +125,7 @@ public class EntityTypeResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable =
-				permissionService.hasPermissionOnEntityType(name, Permission.WRITE) && dataService.getCapabilities(name)
-						.contains(RepositoryCapability.WRITABLE);
+		this.writable = !meta.isReadOnly() && dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

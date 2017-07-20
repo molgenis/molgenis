@@ -17,6 +17,9 @@ import java.util.stream.StreamSupport;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Attribute repository decorator that marks attributes as read-only for the current user based on permissions.
+ */
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
 	private final Repository<Attribute> decoratedRepo;
@@ -92,7 +95,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		{
 			String entityTypeId = attribute.getEntityType().getId();
 			Object entityId = attribute.getIdValue();
-			if (!permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.READ))
+			if (!permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.WRITE))
 			{
 				attribute.setReadOnly(true);
 			}

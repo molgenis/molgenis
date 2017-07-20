@@ -5,7 +5,7 @@ import java.util.List;
 
 public class BoxPlotSerie extends MolgenisSerie
 {
-	private List<Double[]> data = new ArrayList<Double[]>();
+	private List<Double[]> data = new ArrayList<>();
 
 	/**
 	 * @return the data

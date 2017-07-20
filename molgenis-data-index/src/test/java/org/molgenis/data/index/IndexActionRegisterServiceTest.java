@@ -66,6 +66,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		TransactionSynchronizationManager.unbindResource(TransactionManager.TRANSACTION_ID_RESOURCE_NAME);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testRegisterCreateSingleEntityNoReferences()
 	{

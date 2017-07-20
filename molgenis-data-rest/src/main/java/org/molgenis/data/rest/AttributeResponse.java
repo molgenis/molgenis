@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
@@ -10,7 +9,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.PermissionService;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,10 +41,10 @@ public class AttributeResponse
 	private String visibleExpression;
 	private String validationExpression;
 
-	public AttributeResponse(String entityParentName, EntityType entityType, Attribute attr,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+	public AttributeResponse(String entityParentName, EntityType entityType, Attribute attr, DataService dataService,
+			LanguageService languageService)
 	{
-		this(entityParentName, entityType, attr, null, null, permissionService, dataService, languageService);
+		this(entityParentName, entityType, attr, null, null, dataService, languageService);
 	}
 
 	/**
@@ -57,8 +55,8 @@ public class AttributeResponse
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public AttributeResponse(final String entityParentName, EntityType entityType, Attribute attr,
-			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet, DataService dataService,
+			LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -112,7 +110,7 @@ public class AttributeResponse
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
 				this.refEntity = refEntity != null ? new EntityTypeResponse(refEntity, subAttributesSet,
-						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService,
+						Collections.singletonMap("attributes".toLowerCase(), null), dataService,
 						languageService) : null;
 			}
 			else
@@ -132,18 +130,16 @@ public class AttributeResponse
 		{
 			Iterable<Attribute> attributeParts = attr.getChildren();
 			this.attributes = attributeParts != null ? Lists.newArrayList(
-					Iterables.transform(attributeParts, new Function<Attribute, Object>()
+					Iterables.transform(attributeParts, attribute ->
 					{
 
-						@Override
-						public Object apply(Attribute attribute)
-						{
+
 							if (attributeExpandsSet != null && attributeExpandsSet.containsKey(
 									"attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 								return new AttributeResponse(entityParentName, entityType, attribute, subAttributesSet,
-										Collections.singletonMap("refEntity".toLowerCase(), null), permissionService,
+										Collections.singletonMap("refEntity".toLowerCase(), null),
 										dataService, languageService);
 							}
 							else
@@ -151,7 +147,7 @@ public class AttributeResponse
 								return Collections.<String, Object>singletonMap("href",
 										Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName,
 												attribute.getName()));
-							}
+
 						}
 					})) : null;
 		}

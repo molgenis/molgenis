@@ -24,7 +24,6 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -58,8 +57,6 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.LanguageService.DEFAULT_LANGUAGE_CODE;
@@ -115,9 +112,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
-
-	@Autowired
-	private PermissionService molgenisPermissionService;
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
@@ -344,11 +338,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		entity.set(attrTextOptionalName, null);
 		entity.set(attrXrefOptionalName, null);
 
-		Query<Entity> q = new QueryImpl<Entity>().offset(0).pageSize(100);
+		Query<Entity> q = new QueryImpl<>().offset(0).pageSize(100);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
-		when(dataService.count(ENTITY_NAME, q)).thenReturn(2l);
+		when(dataService.count(ENTITY_NAME, q)).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
@@ -499,7 +493,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		// have count return a non null value irrespective of query
 		Long countResult = 2L;
-		when(dataService.count(anyString(), anyObject())).thenReturn(countResult);
+		when(dataService.count(anyString(), any())).thenReturn(countResult);
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION).param("num", "0"))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$.items").isEmpty())
@@ -624,9 +618,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
-		// Override mock
-		when(molgenisPermissionService.hasPermissionOnEntityType("entity", Permission.READ)).thenReturn(false);
-
 		String content = "{newEntityName: 'newEntity'}";
 		ResultActions resultActions = mockMvc.perform(
 				post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
@@ -674,7 +665,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(molgenisPermissionService.hasPermissionOnEntityType("entity", Permission.READ)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
@@ -779,7 +769,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesMolgenisValidationException() throws Exception
 	{
 		Exception e = new MolgenisValidationException(
-				Collections.singleton(new ConstraintViolation("Message", Long.valueOf(5L))));
+				Collections.singleton(new ConstraintViolation("Message", 5L)));
 		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
@@ -923,7 +913,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					.andExpect(status().isNoContent());
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
 	}
@@ -1133,12 +1123,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public PermissionService molgenisPermissionService()
-		{
-			return mock(PermissionService.class);
-		}
-
-		@Bean
 		public PermissionSystemService permissionSystemService()
 		{
 			return mock(PermissionSystemService.class);
@@ -1195,7 +1179,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		@Bean
 		public RestControllerV2 restController()
 		{
-			return new RestControllerV2(dataService(), molgenisPermissionService(),
+			return new RestControllerV2(dataService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService(), permissionSystemService(),
 					repositoryCopier(), localizationService());

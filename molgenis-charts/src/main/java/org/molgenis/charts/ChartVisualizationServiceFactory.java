@@ -21,7 +21,7 @@ public class ChartVisualizationServiceFactory
 	@Autowired
 	public ChartVisualizationServiceFactory(HighchartService highchartsService)
 	{
-		chartVisualiationServices = new ArrayList<ChartVisualizationService>();
+		chartVisualiationServices = new ArrayList<>();
 		chartVisualiationServices.add(highchartsService);
 	}
 

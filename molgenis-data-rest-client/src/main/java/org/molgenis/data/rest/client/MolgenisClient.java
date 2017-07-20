@@ -46,7 +46,7 @@ public class MolgenisClient
 		{
 			headers.set("x-molgenis-token", token);
 		}
-		return new HttpEntity<T>(body, headers);
+		return new HttpEntity<>(body, headers);
 	}
 
 	/**

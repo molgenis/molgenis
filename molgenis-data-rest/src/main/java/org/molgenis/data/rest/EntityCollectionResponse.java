@@ -20,11 +20,10 @@ public class EntityCollectionResponse
 	private final List<Map<String, Object>> items;
 
 	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, String href,
-			EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+			EntityType meta, DataService dataService, LanguageService languageService)
 	{
 		this.href = href;
-		this.meta = meta != null ? new EntityTypeResponse(meta, permissionService, dataService, languageService) : null;
+		this.meta = meta != null ? new EntityTypeResponse(meta, dataService, languageService) : null;
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();

@@ -32,14 +32,14 @@ public class ExcelEntityTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		cellProcessors = new ArrayList<CellProcessor>();
+		cellProcessors = new ArrayList<>();
 		row = mock(Row.class);
 
 		cell = mock(Cell.class);
 		when(row.getCell(0)).thenReturn(cell);
 
 		cellProcessors.add(new LowerCaseProcessor());
-		colNamesMap = new LinkedHashMap<String, Integer>();
+		colNamesMap = new LinkedHashMap<>();
 		colNamesMap.put("attr1", 0);
 
 		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, mock(EntityType.class));

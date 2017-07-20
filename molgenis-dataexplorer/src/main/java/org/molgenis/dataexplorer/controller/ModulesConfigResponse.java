@@ -9,7 +9,7 @@ public class ModulesConfigResponse
 
 	public ModulesConfigResponse()
 	{
-		modules = new ArrayList<ModuleConfig>();
+		modules = new ArrayList<>();
 	}
 
 	public void add(ModuleConfig moduleConfig)

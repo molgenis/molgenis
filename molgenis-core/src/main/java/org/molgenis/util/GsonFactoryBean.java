@@ -74,7 +74,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	}
 
 	/**
-	 * Define the date/time format with a {@link SimpleDateFormat}-style pattern. This is a shortcut for setting up a
+	 * Define the date/time format with a {@link java.text.SimpleDateFormat}-style pattern. This is a shortcut for setting up a
 	 * {@code Gson} as follows:
 	 * <p>
 	 * <pre class="code">
@@ -108,7 +108,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 
 	public void registerTypeAdapterFactory(TypeAdapterFactory typeAdapterFactory)
 	{
-		if (typeAdapterFactoryList == null) typeAdapterFactoryList = new ArrayList<TypeAdapterFactory>();
+		if (typeAdapterFactoryList == null) typeAdapterFactoryList = new ArrayList<>();
 		typeAdapterFactoryList.add(typeAdapterFactory);
 	}
 
