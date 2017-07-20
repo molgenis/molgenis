@@ -20,7 +20,7 @@
                      @input.stop="filterChanged($event.target.value)">
             </form>
             <acls :permissions="permissions" :acls="tableRows" :onPermissionClick="onPermissionClick"
-                  :onSave="onSave"></acls>
+                  :onGrantingClick="onGrantingClick"></acls>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@
 
 <script>
   import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
-  import { SELECT_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION } from '../store/mutations'
+  import { SELECT_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING } from '../store/mutations'
   import { GET_ACLS, FILTER_CHANGED, SAVE_ACL } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
@@ -45,12 +45,21 @@
       ...mapMutations({
         selectRole: SELECT_ROLE,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE,
-        onPermissionClick: TOGGLE_PERMISSION
+        togglePermission: TOGGLE_PERMISSION,
+        toggleGranting: TOGGLE_GRANTING
       }),
       ...mapActions({
         filterChanged: FILTER_CHANGED,
-        onSave: SAVE_ACL
-      })
+        save: SAVE_ACL
+      }),
+      onPermissionClick (args) {
+        this.togglePermission(args)
+        this.save(args.rowIndex)
+      },
+      onGrantingClick (args) {
+        this.toggleGranting(args)
+        this.save(args.rowIndex)
+      }
     },
     computed: {
       ...mapState(['roles', 'selectedRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),

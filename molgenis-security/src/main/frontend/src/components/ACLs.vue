@@ -17,15 +17,16 @@
     <tr v-for="(acl, rowIndex) in acls">
       <td>{{acl.entityLabel || acl.entityId}}</td>
       <td>{{acl.owner}}</td>
-      <td v-if="acl.granting" class="text-center"><i class="fa fa-unlock"></i></td>
-      <td v-else class="text-center"><i class="fa fa-lock"></i></td>
+      <td class="text-center" @click="onGrantingClick({rowIndex, aceIndex: acl.aceIndex})">
+        <i v-if="acl.granting" class="fa fa-unlock green"></i>
+        <i class="fa fa-ban red" v-else></i></td>
       <td v-for="permission in permissions" class="text-center">
         <div class="form-check">
           <label class="form-check-label">
             <input class="form-check-input"
                    type="checkbox"
                    :checked="acl[permission]"
-                   @click="onToggle({rowIndex, aceIndex: acl.aceIndex, permission})">
+                   @click="onPermissionClick({rowIndex, aceIndex: acl.aceIndex, permission})">
           </label>
         </div>
       </td>
@@ -41,16 +42,20 @@
       permissions: {type: Array},
       acls: {type: Array},
       onPermissionClick: {type: Function},
-      onSave: {type: Function}
-    },
-    methods: {
-      onToggle ({rowIndex, aceIndex, permission}) {
-        this.onPermissionClick({rowIndex, aceIndex, permission})
-        this.onSave(rowIndex)
-      }
+      onGrantingClick: {type: Function}
     },
     filters: {
       capitalizeFirstLetter (string: string): string { return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() }
     }
   }
 </script>
+
+<style scoped>
+  .red {
+    color: darkred
+  }
+
+  .green {
+    color: forestgreen;
+  }
+</style>
