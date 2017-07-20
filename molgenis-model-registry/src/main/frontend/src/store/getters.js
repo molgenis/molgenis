@@ -53,7 +53,15 @@ const mapNodeData = (entityTypes) => entityTypes.filter(entityType => (!entityTy
 
 const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (entityType.extends && !entityType.isAbstract)).map(entityType => {
   const abstractEntityType = entityTypes.find(aEntityType => (aEntityType.id === entityType.extends.id))
-  linkData.push({from: abstractEntityType.id, to: entityType.id, text: 'isAbstract', toText: '<extends ' + abstractEntityType.id + '>'})
+  if (!abstractEntityType) {
+    linkData.push({
+      from: entityType.extends.id,
+      to: entityType.id,
+      text: 'isAbstract',
+      toText: '<extends ' + entityType.extends.id + '>'
+    })
+    nodeData.push({key: entityType.extends.id, items: []})
+  }
   nodeData.push({key: entityType.id, items: entityType.attributes.map(mapAttributeToNode)})
 })
 
@@ -94,7 +102,9 @@ export default {
 
   umlData: (state: State) => {
     if (state.umlData.entityTypes) {
+      console.log(state.umlData.entityTypes)
       nodeData = mapNodeData(state.umlData.entityTypes)
+      console.log(nodeData)
       mapExtendedNodeData(state.umlData.entityTypes)
       mapLinkData(state.umlData.entityTypes)
       return {
