@@ -50,11 +50,12 @@ public class GenomeBrowserServiceTest
 	@Test
 	public void testGetReferenceTracks()
 	{
-		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", null, null, null, null, null,
-				null,
-				null, null, null);
+		EntityType entity = mock(EntityType.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = getGenomeBrowserAttributes("postion", "chrom", "normal",
 				"mutant");
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", entity,
+				GenomeBrowserSettings.TrackType.VARIANT, null, GenomeBrowserSettings.MolgenisReferenceMode.ALL,
+				genomeBrowserAttributes, null, null, null, null);
 
 		EntityType molgenisEntity = mock(EntityType.class);
 		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity,
@@ -71,11 +72,12 @@ public class GenomeBrowserServiceTest
 	@Test
 	public void testGetReferenceTracksAll()
 	{
-		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", null, null, null, null, null,
-				null,
-				null, null, null);
+		EntityType entity = mock(EntityType.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = getGenomeBrowserAttributes("postion", "chrom", "normal",
 				"mutant");
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", entity,
+				GenomeBrowserSettings.TrackType.VARIANT, null, GenomeBrowserSettings.MolgenisReferenceMode.NONE,
+				genomeBrowserAttributes, null, null, null, null);
 
 		EntityType molgenisEntity = mock(EntityType.class);
 		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity,
@@ -128,11 +130,12 @@ public class GenomeBrowserServiceTest
 	@Test
 	public void testGetReferenceTracksNone()
 	{
-		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", null, null, null, null, null,
-				null,
-				null, null, null);
+		EntityType entity = mock(EntityType.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = getGenomeBrowserAttributes("postion", "chrom", "normal",
 				"mutant");
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", entity,
+				GenomeBrowserSettings.TrackType.VARIANT, null, GenomeBrowserSettings.MolgenisReferenceMode.NONE,
+				genomeBrowserAttributes, null, null, null, null);
 
 		EntityType molgenisEntity = mock(EntityType.class);
 		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity,

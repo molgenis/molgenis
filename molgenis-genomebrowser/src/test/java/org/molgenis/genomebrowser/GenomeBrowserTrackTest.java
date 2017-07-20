@@ -9,24 +9,23 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
 import static org.testng.Assert.*;
 
-/**
- * Created by Bart on 7/20/2017.
- */
 public class GenomeBrowserTrackTest
 {
 	@Test
 	public void testToTrack() throws Exception
 	{
-		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", null, null, null, null, null,
-				null, null, null, null);
+		EntityType entity = mock(EntityType.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = GenomeBrowserServiceTest.getGenomeBrowserAttributes("postion",
 				"chrom", "normal", "mutant");
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", entity, VARIANT, null,
+				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, null, null, null, null);
 
 		EntityType molgenisEntity = mock(EntityType.class);
-		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity,
-				GenomeBrowserSettings.TrackType.VARIANT, Collections.singletonList(reference),
+		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity, VARIANT,
+				Collections.singletonList(reference),
 				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, "alert(\"test\")",
 				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
 
