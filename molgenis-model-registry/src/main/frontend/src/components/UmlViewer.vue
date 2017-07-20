@@ -9,7 +9,8 @@
   </div>
 </template>
 
-<style lang="scss">
+<style scoped src="bootstrap/dist/css/bootstrap.css"></style>
+<style scoped lang="scss">
   @import "~variables";
   @import "~mixins";
 
@@ -25,7 +26,6 @@
   import {newGraph} from './Graph.js'
   import {mapGetters} from 'vuex'
   import {SET_ERROR} from '../store/mutations'
-  import 'bootstrap/dist/css/bootstrap.css'
 
   export default {
     name: 'model-registry-uml-viewer',
