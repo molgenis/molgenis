@@ -54,20 +54,24 @@ describe('getters', () => {
         selectedSid: 'user',
         permissions: ['WRITEMETA', 'WRITE', 'READ']
       }
-      expect(getters.tableRows(state)).to.deep.equal([{
+      const actual = getters.tableRows(state)
+      console.log(actual)
+      expect(actual).to.deep.equal([{
         entityLabel: 'Home',
         owner: 'SYSTEM',
         granting: true,
         WRITEMETA: false,
         WRITE: false,
-        READ: true
+        READ: true,
+        aceIndex: 1
       }, {
         entityLabel: 'Data Explorer',
         owner: 'SYSTEM',
         granting: true,
         WRITEMETA: false,
         WRITE: true,
-        READ: true
+        READ: true,
+        aceIndex: 1
       }])
     })
 
@@ -77,10 +81,13 @@ describe('getters', () => {
         selectedSid: 'admin',
         permissions: ['WRITEMETA', 'WRITE', 'READ']
       }
-      expect(getters.tableRows(state)).to.deep.equal([{
+      const actual = getters.tableRows(state)
+      console.log(actual)
+      expect(actual).to.deep.equal([{
         entityLabel: 'Home',
         owner: 'SYSTEM',
         granting: true,
+        aceIndex: -1,
         WRITEMETA: false,
         WRITE: false,
         READ: false
@@ -88,6 +95,7 @@ describe('getters', () => {
         entityLabel: 'Data Explorer',
         owner: 'SYSTEM',
         granting: true,
+        aceIndex: -1,
         WRITEMETA: false,
         WRITE: false,
         READ: false
