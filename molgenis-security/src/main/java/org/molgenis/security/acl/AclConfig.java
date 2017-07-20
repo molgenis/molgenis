@@ -30,7 +30,6 @@ import java.sql.Statement;
 /**
  * TODO Replace AclCache.NoOpCache with another cache implementation
  * TODO Extract ACL table population to other class
- * TODO Avoid name collisions between ACL table names and entity type table names
  */
 @Import(DatabaseConfig.class)
 @Configuration
