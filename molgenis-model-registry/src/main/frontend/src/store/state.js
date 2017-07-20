@@ -6,9 +6,7 @@ export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 const state: State = {
   error: undefined,
   umlData: {},
-  molgenisPackage: {
-    name: 'sys_md'
-  }
+  molgenisPackage: JSON.parse(INITIAL_STATE.molgenisPackage)
 }
 
 export default state

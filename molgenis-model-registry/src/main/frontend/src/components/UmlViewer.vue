@@ -30,7 +30,6 @@
     name: 'model-registry-uml-viewer',
     updated () {
       const graphDiv = this.$refs.graphDiv
-      console.log(graphDiv)
       newGraph(graphDiv, this.umlData)
     },
     computed: {
