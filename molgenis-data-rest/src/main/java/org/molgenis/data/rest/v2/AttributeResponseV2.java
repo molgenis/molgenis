@@ -50,10 +50,8 @@ class AttributeResponseV2
 	 * @param entityType
 	 * @param attr
 	 * @param fetch             set of lowercase attribute names to include in response
-	 * @param permissionService
 	 */
-	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -69,7 +67,7 @@ class AttributeResponseV2
 		EntityType refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, dataService,
 					languageService);
 		}
 		else
@@ -114,7 +112,7 @@ class AttributeResponseV2
 								subAttrFetch = null;
 							}
 							return new AttributeResponseV2(entityParentName, entityType, attr, subAttrFetch,
-									permissionService, dataService, languageService);
+									dataService, languageService);
 						}
 					}));
 		}

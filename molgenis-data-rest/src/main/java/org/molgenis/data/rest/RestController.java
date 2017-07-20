@@ -20,7 +20,6 @@ import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -91,20 +90,18 @@ public class RestController
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
-	private final PermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
 	private final LanguageService languageService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, PermissionService molgenisPermissionService,
+			AuthenticationManager authenticationManager,
 			MolgenisRSQL molgenisRSQL, RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
 		this.authenticationManager = requireNonNull(authenticationManager);
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 		this.restService = requireNonNull(restService);
 		this.languageService = requireNonNull(languageService);
@@ -146,8 +143,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
-		return new EntityTypeResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService, dataService,
-				languageService);
+		return new EntityTypeResponse(meta, attributeSet, attributeExpandSet, dataService, languageService);
 	}
 
 	/**
@@ -167,8 +163,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
-		return new EntityTypeResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService, dataService,
-				languageService);
+		return new EntityTypeResponse(meta, attributesSet, attributeExpandSet, dataService, languageService);
 	}
 
 	/**
@@ -1068,8 +1063,7 @@ public class RestController
 		}
 		if (attribute != null)
 		{
-			return new AttributeResponse(entityTypeId, meta, attribute, attributeSet, attributeExpandSet,
-					molgenisPermissionService, dataService, languageService);
+			return new AttributeResponse(entityTypeId, meta, attribute, attributeSet, attributeExpandSet, dataService, languageService);
 		}
 		else
 		{
@@ -1131,8 +1125,7 @@ public class RestController
 				}
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
-				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService,
-						dataService, languageService);
+				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, dataService, languageService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1185,8 +1178,7 @@ public class RestController
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
 		}
 
-		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityTypeId, meta,
-				molgenisPermissionService, dataService, languageService);
+		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityTypeId, meta, dataService, languageService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1213,8 +1205,7 @@ public class RestController
 				if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-					entityMap.put(attrName, new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null,
-							molgenisPermissionService, dataService, languageService));
+					entityMap.put(attrName, new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null, dataService, languageService));
 				}
 				else
 				{
@@ -1269,7 +1260,7 @@ public class RestController
 
 				EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 						Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(), attrName),
-						null, molgenisPermissionService, dataService, languageService);
+						null, dataService, languageService);
 
 				entityMap.put(attrName, ecr);
 			}

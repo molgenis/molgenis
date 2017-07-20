@@ -75,7 +75,6 @@ class RestControllerV2
 
 	private final DataService dataService;
 	private final RestService restService;
-	private final PermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
@@ -131,12 +130,11 @@ class RestControllerV2
 	}
 
 	@Autowired
-	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
+	public RestControllerV2(DataService dataService, RestService restService,
 			LanguageService languageService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
 		this.languageService = requireNonNull(languageService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
@@ -392,11 +390,6 @@ class RestControllerV2
 		String newFullName = EntityTypeUtils.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(),
 				request.getNewEntityName());
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
-
-		// Permission
-		boolean readPermission = permissionService
-				.hasPermissionOnEntityType(repositoryToCopyFrom.getName(), Permission.READ);
-		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
 
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
@@ -688,7 +681,7 @@ class RestControllerV2
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeResponseV2(entityTypeId, entity, attribute, null, permissionService, dataService,
+		return new AttributeResponseV2(entityTypeId, entity, attribute, null, dataService,
 				languageService);
 	}
 
@@ -718,10 +711,10 @@ class RestControllerV2
 			}
 			AggregateResult aggs = dataService.aggregate(entityTypeId, aggsQ);
 			AttributeResponseV2 xAttrResponse =
-					xAttr != null ? new AttributeResponseV2(entityTypeId, meta, xAttr, fetch, permissionService,
+					xAttr != null ? new AttributeResponseV2(entityTypeId, meta, xAttr, fetch,
 							dataService, languageService) : null;
 			AttributeResponseV2 yAttrResponse =
-					yAttr != null ? new AttributeResponseV2(entityTypeId, meta, yAttr, fetch, permissionService,
+					yAttr != null ? new AttributeResponseV2(entityTypeId, meta, yAttr, fetch,
 							dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityTypeId);
 		}
@@ -763,8 +756,7 @@ class RestControllerV2
 				nextHref = builder.build(false).toUriString();
 			}
 
-			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityTypeId, meta,
-					permissionService, dataService, languageService, prevHref, nextHref);
+			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityTypeId, meta,dataService, languageService, prevHref, nextHref);
 		}
 	}
 
@@ -797,7 +789,7 @@ class RestControllerV2
 	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData)
 	{
 		responseData.put("_meta",
-				new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, languageService));
+				new EntityTypeResponseV2(entityType, fetch, dataService, languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
