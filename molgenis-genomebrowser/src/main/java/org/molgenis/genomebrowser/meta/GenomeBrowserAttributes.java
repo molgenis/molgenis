@@ -105,8 +105,8 @@ public class GenomeBrowserAttributes extends StaticEntity implements Comparable<
 	public int compareTo(GenomeBrowserAttributes gba)
 	{
 		if (gba.getOrder() == null) return -1;
-		if (gba.getOrder() > this.getOrder()) return 1;
-		else if (gba.getOrder() < this.getOrder()) return -1;
+		if (gba.getOrder() > this.getOrder()) return -1;
+		else if (gba.getOrder() < this.getOrder()) return 1;
 		return 0;
 	}
 }
