@@ -112,11 +112,7 @@ public class GenomeBrowserService
 
 	private boolean isAttributeAvailable(String attributeName, Iterable<String> attributeNames)
 	{
-		if (attributeName == null || Iterables.contains(attributeNames, attributeName))
-		{
-			return true;
-		}
-		return false;
+		return (attributeName == null || Iterables.contains(attributeNames, attributeName))
 	}
 
 	private boolean areAllAttributeAvailable(GenomeBrowserAttributes genomeBrowserAttributes,

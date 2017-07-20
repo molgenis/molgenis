@@ -33,17 +33,6 @@ public abstract class GenomeBrowserTrack
 				settings.getExonKey());
 	}
 
-	@Override
-	public String toString()
-	{
-		return "GenomeBrowserTrack{" + "id='" + getId() + '\'' + ", labelAttr='" + getLabelAttr() + '\'' + ", entity="
-				+ getEntity() + ", trackType=" + getTrackType() + ", molgenisReferenceTracks="
-				+ getMolgenisReferenceTracks() + ", molgenisReferenceMode=" + getMolgenisReferenceMode()
-				+ ", genomeBrowserAttrs=" + getGenomeBrowserAttrs() + ", actions='" + getActions() + '\'' + ", attrs='"
-				+ getAttrs() + '\'' + ", scoreAttr='" + getScoreAttr() + '\'' + ", exonKey='" + getExonKey() + '\''
-				+ '}';
-	}
-
 	public abstract String getId();
 
 	public abstract String getLabelAttr();
