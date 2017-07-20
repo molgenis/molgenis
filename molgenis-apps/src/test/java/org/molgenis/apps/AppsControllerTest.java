@@ -5,11 +5,10 @@ import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.system.core.FreemarkerTemplate;
-import org.molgenis.file.FileStore;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -43,12 +42,6 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Mock
 	private DataService dataService;
 
-	@Mock
-	private FileStore fileStore;
-
-	@Mock
-	private PermissionService permissionService;
-
 	private MockMvc mockMvc;
 
 	@Autowired
@@ -57,7 +50,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		AppsController appsController = new AppsController(dataService, fileStore, permissionService);
+		AppsController appsController = new AppsController(dataService);
 		mockMvc = MockMvcBuilders.standaloneSetup(appsController)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .build();
@@ -66,7 +59,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Test(expectedExceptions = NullPointerException.class)
 	public void AppsController()
 	{
-		new AppsController(null, null, null);
+		new AppsController(null);
 	}
 
 	@DataProvider(name = "testInitProvider")
@@ -91,11 +84,18 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 
 		@SuppressWarnings("unchecked")
 		Query<App> query = mock(Query.class);
-		when(dataService.query(APP, App.class)).thenReturn(query);
 		Sort sort = mock(Sort.class);
 		when(query.sort()).thenReturn(sort);
 		when(query.findAll()).thenReturn(Stream.of(app0, app1));
-		when(permissionService.hasPermissionOnEntityType(APP, Permission.WRITE)).thenReturn(hasWriteAppPermission);
+
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.isReadOnly()).thenReturn(!hasWriteAppPermission);
+
+		@SuppressWarnings("unchecked")
+		Repository<App> repository = mock(Repository.class);
+		when(repository.query()).thenReturn(query);
+		when(repository.getEntityType()).thenReturn(entityType);
+		when(dataService.getRepository(APP, App.class)).thenReturn(repository);
 
 		AppInfoDto appInfoDto0 = AppInfoDto.builder()
 										   .setId("id0")
@@ -155,7 +155,6 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Test
 	public void testViewAppUnknownApp() throws Exception
 	{
-		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
 		mockMvc.perform(get(AppsController.URI + "/id"))
 			   .andExpect(status().isBadRequest())
 			   .andExpect(view().name("forward:/plugin/apps"))
@@ -186,7 +185,6 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Test
 	public void testActivateAppUnknownApp() throws Exception
 	{
-		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
 		mockMvc.perform(post(AppsController.URI + "/id/activate"))
 			   .andExpect(status().isBadRequest())
 			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
@@ -216,7 +214,6 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Test
 	public void testDeactivateAppUnknownApp() throws Exception
 	{
-		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
 		mockMvc.perform(post(AppsController.URI + "/id/deactivate"))
 			   .andExpect(status().isBadRequest())
 			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
