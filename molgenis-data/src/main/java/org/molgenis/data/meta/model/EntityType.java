@@ -732,7 +732,7 @@ public class EntityType extends StaticEntity
 		this.readOnly = readOnly;
 	}
 
-	public boolean getReadOnly() {
+	public boolean isReadOnly() {
 		return this.readOnly;
 	}
 
