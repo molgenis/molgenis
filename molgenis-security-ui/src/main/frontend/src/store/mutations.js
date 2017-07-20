@@ -10,6 +10,29 @@ export const SET_ROLES = '__SET_ROLES__'
 export const TOGGLE_PERMISSION = '__TOGGLE_PERMISSION__'
 export const TOGGLE_GRANTING = '__TOGGLE_GRANTING__'
 
+const toRemove = {
+  WRITEMETA: ['WRITEMETA'],
+  WRITE: ['WRITEMETA', 'WRITE'],
+  READ: ['WRITEMETA', 'WRITE', 'READ'],
+  COUNT: ['WRITEMETA', 'WRITE', 'READ', 'COUNT']
+}
+
+const toSet = {
+  WRITEMETA: ['WRITEMETA', 'WRITE', 'READ', 'COUNT'],
+  WRITE: ['WRITE', 'READ', 'COUNT'],
+  READ: ['READ', 'COUNT'],
+  COUNT: ['COUNT']
+}
+
+function togglePermission (ace, permission) {
+  if (ace.permissions.includes(permission)) {
+    // remove alles wat er links van staat
+    ace.permissions = ace.permissions.filter(p => !toRemove[permission].includes(p))
+  } else {
+    ace.permissions = toSet[permission]
+  }
+}
+
 export default {
   [TOGGLE_PERMISSION] (state: State, payload: { rowIndex: number, aceIndex: number, permission: string }) {
     let {rowIndex, aceIndex, permission} = payload
@@ -28,13 +51,9 @@ export default {
       aceIndex = acl.entries.length - 1
     }
     const ace: ACE = acl.entries[aceIndex]
-    if (ace.permissions.includes(permission)) {
-      ace.permissions = ace.permissions.filter(p => p !== permission)
-      if (ace.permissions.length === 0) {
-        acl.entries = acl.entries.filter(entry => entry !== ace)
-      }
-    } else {
-      ace.permissions.push(permission)
+    togglePermission(ace, permission)
+    if (ace.permissions.length === 0) {
+      acl.entries = acl.entries.filter(entry => entry !== ace)
     }
   },
   [TOGGLE_GRANTING] (state: State, payload: { rowIndex: number, aceIndex: number }) {

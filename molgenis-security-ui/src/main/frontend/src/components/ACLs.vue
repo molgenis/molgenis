@@ -19,7 +19,7 @@
       <td>{{acl.owner}}</td>
       <td class="text-center" @click="onGrantingClick({rowIndex, aceIndex: acl.aceIndex})">
         <i v-if="acl.granting" class="fa fa-unlock green"></i>
-        <i class="fa fa-ban red" v-else></i></td>
+        <i class="fa fa-lock red" v-else></i></td>
       <td v-for="permission in permissions" class="text-center">
         <div class="form-check">
           <label class="form-check-label">

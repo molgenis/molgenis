@@ -51,7 +51,7 @@ export default {
      * Pass options to the fetch like body, method, x-molgenis-token etc...
      * @type {{}}
      */
-    get('/api/v2/sys_md_EntityType?q=isEntityLevelSecurity==true&attrs=id,label,description', {}).then(response => {
+    get('/api/v2/sys_md_EntityType?q=isEntityLevelSecurity==true;isAbstract==false&attrs=id,label,description', {}).then(response => {
       commit(SET_ENTITY_TYPES, response.items)
     }, error => {
       console.log(error)
