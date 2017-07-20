@@ -3,6 +3,7 @@ package org.molgenis.oneclickimporter.service.Impl;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
@@ -22,7 +23,6 @@ import static java.lang.Integer.parseInt;
 import static java.time.ZoneOffset.UTC;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
-import static org.apache.poi.util.LocaleUtil.*;
 
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
@@ -36,9 +36,8 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 
 		Row headerRow = sheet.getRow(0);
 		headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
-		int numberOfRows = columns.get(0).getDataValues().size();
 
-		return DataCollection.create(dataCollectionName, columns, numberOfRows);
+		return DataCollection.create(dataCollectionName, columns);
 	}
 
 	@Override
@@ -56,7 +55,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			columnIndex++;
 		}
 
-		return DataCollection.create(dataCollectionName, columns, lines.size());
+		return DataCollection.create(dataCollectionName, columns);
 	}
 
 	@Override
@@ -65,7 +64,8 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		List<Object> dataValues = column.getDataValues();
 
 		// check for null values
-		if(dataValues.parallelStream().anyMatch(Objects::isNull)) {
+		if (dataValues.parallelStream().anyMatch(Objects::isNull))
+		{
 			return false;
 		}
 
@@ -80,7 +80,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		Object castedValue = value;
 		if (value == null)
 		{
-			return castedValue;
+			return null;
 		}
 
 		switch (type)
@@ -92,38 +92,43 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 				}
 				break;
 			case INT:
-				if(value instanceof Number)
+				if (value instanceof Number)
 				{
 					castedValue = ((Number) value).intValue();
-				} else if (value instanceof String)
+				}
+				else if (value instanceof String)
 				{
 					castedValue = Integer.valueOf((String) value);
 				}
 				break;
 			case LONG:
-				if(value instanceof Number)
+				if (value instanceof Number)
 				{
 					castedValue = ((Number) value).longValue();
-				} else if (value instanceof String)
+				}
+				else if (value instanceof String)
 				{
 					castedValue = Long.valueOf((String) value);
 				}
 				break;
 			case DECIMAL:
-				if(value instanceof Number)
+				if (value instanceof Number)
 				{
 					castedValue = ((Number) value).doubleValue();
-				} else if (value instanceof String)
+				}
+				else if (value instanceof String)
 				{
 					castedValue = Double.valueOf((String) value);
 				}
 				break;
 			case STRING:
 			case TEXT:
-				if(value instanceof String)
+				if (value instanceof String)
 				{
 					castedValue = value;
-				}else {
+				}
+				else
+				{
 					castedValue = value.toString();
 				}
 				break;
@@ -205,13 +210,16 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 				{
 					try
 					{
-						setUserTimeZone(TIMEZONE_UTC);
+						// TODO think about dates
+						// Excel dates are LocalDateTime, stored without timezone.
+						// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
+						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
 						Date dateCellValue = cell.getDateCellValue();
 						value = formatUTCDateAsLocalDateTime(dateCellValue);
 					}
 					finally
 					{
-						resetUserTimeZone();
+						LocaleUtil.resetUserTimeZone();
 					}
 				}
 				else
@@ -229,6 +237,21 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 				value = null;
 				break;
 		}
+		return value;
+	}
+
+	/**
+	 * Formats parsed Date as LocalDateTime string at zone UTC to express that we don't know the timezone.
+	 *
+	 * @param javaDate Parsed Date representing start of day in UTC
+	 * @return Formatted {@link LocalDateTime} string of the java.util.Date
+	 */
+	private static String formatUTCDateAsLocalDateTime(Date javaDate)
+	{
+		String value;// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
+		LocalDateTime localDateTime = javaDate.toInstant().atZone(UTC).toLocalDateTime();
+		// And format to string
+		value = localDateTime.toString();
 		return value;
 	}
 
@@ -256,21 +279,6 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 				value = null;
 				break;
 		}
-		return value;
-	}
-
-	/**
-	 * Formats parsed Date as LocalDateTime string at zone UTC to express that we don't know the timezone.
-	 *
-	 * @param javaDate Parsed Date representing start of day in UTC
-	 * @return Formatted {@link LocalDateTime} string of the java.util.Date
-	 */
-	private String formatUTCDateAsLocalDateTime(Date javaDate)
-	{
-		String value;// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
-		LocalDateTime localDateTime = javaDate.toInstant().atZone(UTC).toLocalDateTime();
-		// And format to string
-		value = localDateTime.toString();
 		return value;
 	}
 }

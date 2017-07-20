@@ -5,7 +5,6 @@ import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static org.molgenis.data.meta.AttributeType.*;
@@ -65,34 +64,28 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 				return TEXT;
 			}
 
-			try
+			if (canValueBeUsedAsDate(value))
 			{
-				// If parseInstant() succeeds, return DATE
-				MolgenisDateFormat.parseInstant(stringValue);
 				return DATE;
 			}
-			catch (DateTimeParseException e)
-			{
-				return guess;
-			}
-		} else if(guess.equals(DECIMAL))
+		}
+		else if (guess.equals(DECIMAL))
 		{
-			if(value instanceof Integer)
+			if (value instanceof Integer)
 			{
-				return  INT;
-			} else if (value instanceof Long)
+				return INT;
+			}
+			else if (value instanceof Long)
 			{
 				Long longValue = (Long) value;
-				return  longValue > Integer.MIN_VALUE && longValue < Integer.MAX_VALUE ? INT : LONG;
-			} else if(value instanceof Double)
+				return longValue > Integer.MIN_VALUE && longValue < Integer.MAX_VALUE ? INT : LONG;
+			}
+			else if (value instanceof Double)
 			{
 				Double doubleValue = (Double) value;
-				return doubleValue == Math.rint(doubleValue)
-						&& doubleValue > Long.MIN_VALUE
+				return doubleValue == Math.rint(doubleValue) && doubleValue > Long.MIN_VALUE
 						&& doubleValue < Long.MAX_VALUE ? LONG : DECIMAL;
 			}
-
-
 		}
 		return guess;
 	}
@@ -206,5 +199,18 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 		{
 			return STRING;
 		}
+	}
+
+	private Boolean canValueBeUsedAsDate(Object value)
+	{
+		try
+		{
+			MolgenisDateFormat.parseLocalDate(value.toString());
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+		return true;
 	}
 }

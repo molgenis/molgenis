@@ -19,7 +19,6 @@ import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -107,7 +106,7 @@ public class EntityServiceImpl implements EntityService
 
 		AtomicInteger rowIndex = new AtomicInteger(0);
 		List<Entity> rows = newArrayList();
-		while (rowIndex.get() < dataCollection.getNumberOfRows())
+		while (rowIndex.get() < dataCollection.getColumns().get(0).getDataValues().size())
 		{
 			Entity row = entityManager.create(entityType, NO_POPULATE);
 			if(useAutoId) {
@@ -135,8 +134,6 @@ public class EntityServiceImpl implements EntityService
 		Object castedValue = oneClickImporterService.castValueAsAttributeType(dataValue, attribute.getDataType());
 		row.set(attributeName, castedValue);
 	}
-
-
 
 	private Attribute createIdAttribute()
 	{

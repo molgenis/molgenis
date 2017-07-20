@@ -35,7 +35,7 @@ public class OneClickImporterServiceTest
 		Column c2 = Column.create("superpower", 1,
 				newArrayList("arrow functions", "Oldschool syntax", "Lambda Magician", "Root access"));
 
-		DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2), 4);
+		DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2));
 
 		assertEquals(actual, expected);
 	}
@@ -49,7 +49,7 @@ public class OneClickImporterServiceTest
 		Column c1 = Column.create("name", 0, newArrayList("Mark", "Mariska"));
 		Column c2 = Column.create("age", 1, newArrayList(26.0, 22.0));
 
-		DataCollection expected = DataCollection.create("valid-with-formula", newArrayList(c1, c2), 2);
+		DataCollection expected = DataCollection.create("valid-with-formula", newArrayList(c1, c2));
 
 		assertEquals(actual, expected);
 	}
@@ -65,7 +65,7 @@ public class OneClickImporterServiceTest
 		Column c2 = Column.create("favorite food", 1,
 				newArrayList("Fries", null, "Vegan food", "Pizza", null, "Spinache"));
 
-		DataCollection expected = DataCollection.create("valid-with-blank-values", newArrayList(c1, c2), 6);
+		DataCollection expected = DataCollection.create("valid-with-blank-values", newArrayList(c1, c2));
 		assertEquals(actual, expected);
 
 		assertEquals(6, c1.getDataValues().size());
@@ -90,7 +90,7 @@ public class OneClickImporterServiceTest
 				newArrayList(true, true, true, true, true, true, true, true, false, false));
 		Column c5 = Column.create("Age", 4, newArrayList(26.0, null, null, null, null, 22.0, 27.0, null, 53.0, 32.0));
 
-		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5), 10);
+		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5));
 		assertEquals(actual, expected);
 	}
 
@@ -103,10 +103,11 @@ public class OneClickImporterServiceTest
 		Column c1 = Column.create("dates", 0,
 				newArrayList("2018-01-03T00:00", "2018-01-04T00:00", "2018-01-05T00:00", "2018-01-06T00:00",
 						"2018-01-07T00:00"));
+
 		Column c2 = Column.create("event", 1,
 				newArrayList("being cool day", "bike day", "sleep day", "bye bye day", "work day"));
 
-		DataCollection expected = DataCollection.create("valid-with-dates", newArrayList(c1, c2), 5);
+		DataCollection expected = DataCollection.create("valid-with-dates", newArrayList(c1, c2));
 		assertEquals(actual, expected);
 	}
 
@@ -120,7 +121,7 @@ public class OneClickImporterServiceTest
 		Column c2 = Column.create("superpower", 1,
 				newArrayList("arrow functions", "Oldschool syntax", "Lambda Magician", "Root access"));
 
-		DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2), 4);
+		DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2));
 		assertEquals(actual, expected);
 	}
 
@@ -142,7 +143,7 @@ public class OneClickImporterServiceTest
 				newArrayList(true, true, true, true, true, true, true, true, false, false));
 		Column c5 = Column.create("Age", 4, newArrayList(26, null, null, null, null, 22, 27, null, 53, 32));
 
-		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5), 10);
+		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5));
 		assertEquals(actual, expected);
 	}
 

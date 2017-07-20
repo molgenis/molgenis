@@ -14,9 +14,14 @@ import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.util.GsonConfig;
+import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -35,16 +40,19 @@ import java.nio.file.Paths;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebAppConfiguration
-public class OneClickImporterControllerTest
+@ContextConfiguration(classes = GsonConfig.class)
+public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringContextTests
 {
 	private static final String CONTENT_TYPE_EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	private MockMvc mockMvc;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Mock
 	private MenuReaderService menuReaderService;
@@ -73,7 +81,7 @@ public class OneClickImporterControllerTest
 	@BeforeMethod
 	public void before()
 	{
-		initMocks(this);
+		initMocks();
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
 				languageService, appSettings, excelService, csvService, oneClickImporterService, entityService,
@@ -84,7 +92,10 @@ public class OneClickImporterControllerTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(languageService.getCurrentUserLanguageCode()).thenReturn("nl");
 		when(appSettings.getLanguageCode()).thenReturn("en");
-		mockMvc = MockMvcBuilders.standaloneSetup(oneClickImporterController).build();
+
+		mockMvc = MockMvcBuilders.standaloneSetup(oneClickImporterController)
+								 .setMessageConverters(gsonHttpMessageConverter)
+								 .build();
 	}
 
 	/**
