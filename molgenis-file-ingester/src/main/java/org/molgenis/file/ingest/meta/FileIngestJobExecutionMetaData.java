@@ -49,8 +49,11 @@ public class FileIngestJobExecutionMetaData extends SystemEntityType
 		setLabel("File ingest job execution");
 		setExtends(jobExecutionMetaData);
 		setPackage(jobPackage);
-		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)
-				.setRefEntity(fileMetaMetaData).setNillable(true);
+		addAttribute(FILE).setLabel("File")
+						  .setDescription("The imported file.")
+						  .setDataType(XREF)
+						  .setRefEntity(fileMetaMetaData)
+						  .setNillable(true);
 		addAttribute(URL).setLabel("Url").setDescription("Url of the file to download.").setNillable(false);
 		addAttribute(LOADER).setDataType(ENUM).setEnumOptions(LOADERS).setLabel("Loader type").setNillable(false);
 		addAttribute(TARGET_ENTITY_ID).setDataType(STRING).setLabel("Target EntityType ID").setNillable(false);

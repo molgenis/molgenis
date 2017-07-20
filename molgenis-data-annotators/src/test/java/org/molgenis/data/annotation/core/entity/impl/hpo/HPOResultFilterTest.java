@@ -66,8 +66,8 @@ public class HPOResultFilterTest extends AbstractMolgenisSpringTest
 		e2.set(HPO_ID_COL_NAME, "id2");
 		e2.set(HPO_TERM_COL_NAME, "term2");
 
-		Optional<Entity> result = filter
-				.filterResults(Arrays.asList(e1, e2), new DynamicEntity(resultEntityType), false);
+		Optional<Entity> result = filter.filterResults(Arrays.asList(e1, e2), new DynamicEntity(resultEntityType),
+				false);
 		assertTrue(result.isPresent());
 		assertEquals(result.get().getString(HPOAnnotator.HPO_IDS), "id1/id2");
 		assertEquals(result.get().getString(HPOAnnotator.HPO_TERMS), "term1/term2");

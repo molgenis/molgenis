@@ -5,7 +5,7 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -38,6 +38,9 @@
                         <goals>
                             <goal>yarn</goal>
                         </goals>
+                        <configuration>
+                            <failOnError>true</failOnError>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>yarn build</id>
@@ -47,6 +50,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <arguments>run build</arguments>
+                            <failOnError>true</failOnError>
                         </configuration>
                     </execution>
                     <execution>
@@ -57,8 +61,7 @@
                         <phase>test</phase>
                         <configuration>
                             <arguments>test</arguments>
-                            <!-- Do not stop the build on JS test failure -->
-                            <maven.test.failure.ignore>true</maven.test.failure.ignore>
+                            <failOnError>true</failOnError>
                         </configuration>
                     </execution>
                 </executions>

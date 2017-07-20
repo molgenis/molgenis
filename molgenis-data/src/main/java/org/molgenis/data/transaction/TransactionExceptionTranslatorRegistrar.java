@@ -30,7 +30,8 @@ public class TransactionExceptionTranslatorRegistrar
 	 */
 	public void register(ApplicationContext applicationContext)
 	{
-		applicationContext.getBeansOfType(TransactionExceptionTranslator.class).values()
-				.forEach(transactionExceptionTranslatorRegistry::register);
+		applicationContext.getBeansOfType(TransactionExceptionTranslator.class)
+						  .values()
+						  .forEach(transactionExceptionTranslatorRegistry::register);
 	}
 }

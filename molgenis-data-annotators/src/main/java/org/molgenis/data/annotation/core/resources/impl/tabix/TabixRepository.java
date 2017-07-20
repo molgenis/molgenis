@@ -109,8 +109,8 @@ public class TabixRepository extends AbstractRepository
 		Builder<Entity> builder = ImmutableList.<Entity>builder();
 		try
 		{
-			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator = reader
-					.query(queryString);
+			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator = reader.query(
+					queryString);
 			if (iterator != null)
 			{
 				String line = iterator.next();

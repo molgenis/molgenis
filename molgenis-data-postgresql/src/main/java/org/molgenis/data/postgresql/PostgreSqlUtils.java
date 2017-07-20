@@ -49,9 +49,9 @@ class PostgreSqlUtils
 			case MREF:
 			case ONE_TO_MANY:
 				Iterable<Entity> entities = entity.getEntities(attrName);
-				return stream(entities.spliterator(), false)
-						.map(mrefEntity -> getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
-						.collect(toList());
+				return stream(entities.spliterator(), false).map(
+						mrefEntity -> getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
+															.collect(toList());
 			case DATE:
 				return entity.getLocalDate(attrName);
 			case DATE_TIME:

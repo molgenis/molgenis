@@ -73,25 +73,25 @@ public class FitConAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = createFitconOutputAttributes();
 
-		AnnotatorInfo fitconInfo = AnnotatorInfo
-				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.EFFECT_PREDICTION, NAME,
-						"Summary: Annotating genetic variants, especially non-coding variants, "
-								+ "for the purpose of identifying pathogenic variants remains a challenge. "
-								+ "Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
-								+ "to annotate both coding and non-coding variants, and has been shown to "
-								+ "outper- form other annotation algorithms. CADD trains a linear kernel support"
-								+ " vector machine (SVM) to dif- ferentiate evolutionarily derived, likely benign,"
-								+ " alleles from simulated, likely deleterious, variants. However, SVMs cannot "
-								+ "capture non-linear relationships among the features, which can limit per- formance. "
-								+ "To address this issue, we have developed FITCON. FITCON uses the same feature set and "
-								+ "training data as CADD to train a deep neural network (DNN). DNNs can capture non-linear"
-								+ " relation- ships among features and are better suited than SVMs for problems with a "
-								+ "large number of samples and features. We exploit Compute Unified Device Architecture-compatible"
-								+ " graphics processing units and deep learning techniques such as dropout and momentum training to"
-								+ " accelerate the DNN train- ing. FITCON achieves about a 19%relative reduction in the error rate and"
-								+ " about a 14%relative increase in the area under the curve (AUC) metric over CADD’s SVMmethodology."
-								+ " All data and source code are available at https://cbcl.ics.uci.edu/ public_data/FITCON/. Contact:",
-						attributes);
+		AnnotatorInfo fitconInfo = AnnotatorInfo.create(AnnotatorInfo.Status.READY,
+				AnnotatorInfo.Type.EFFECT_PREDICTION, NAME,
+				"Summary: Annotating genetic variants, especially non-coding variants, "
+						+ "for the purpose of identifying pathogenic variants remains a challenge. "
+						+ "Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
+						+ "to annotate both coding and non-coding variants, and has been shown to "
+						+ "outper- form other annotation algorithms. CADD trains a linear kernel support"
+						+ " vector machine (SVM) to dif- ferentiate evolutionarily derived, likely benign,"
+						+ " alleles from simulated, likely deleterious, variants. However, SVMs cannot "
+						+ "capture non-linear relationships among the features, which can limit per- formance. "
+						+ "To address this issue, we have developed FITCON. FITCON uses the same feature set and "
+						+ "training data as CADD to train a deep neural network (DNN). DNNs can capture non-linear"
+						+ " relation- ships among features and are better suited than SVMs for problems with a "
+						+ "large number of samples and features. We exploit Compute Unified Device Architecture-compatible"
+						+ " graphics processing units and deep learning techniques such as dropout and momentum training to"
+						+ " accelerate the DNN train- ing. FITCON achieves about a 19%relative reduction in the error rate and"
+						+ " about a 14%relative increase in the area under the curve (AUC) metric over CADD’s SVMmethodology."
+						+ " All data and source code are available at https://cbcl.ics.uci.edu/ public_data/FITCON/. Contact:",
+				attributes);
 		EntityAnnotator entityAnnotator = new AbstractAnnotator(FITCON_TABIX_RESOURCE, fitconInfo,
 				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, vcfAttributes),
 				dataService, resources,
@@ -110,9 +110,12 @@ public class FitConAnnotator implements AnnotatorConfig
 	private List<Attribute> createFitconOutputAttributes()
 	{
 		List<Attribute> attributes = newArrayList();
-		Attribute fitcon_score = attributeFactory.create().setName(FITCON_SCORE).setDataType(STRING)
-				.setDescription("fitness consequence score annotation of genetic variants using Fitcon scoring.")
-				.setLabel(FITCON_SCORE_LABEL);
+		Attribute fitcon_score = attributeFactory.create()
+												 .setName(FITCON_SCORE)
+												 .setDataType(STRING)
+												 .setDescription(
+														 "fitness consequence score annotation of genetic variants using Fitcon scoring.")
+												 .setLabel(FITCON_SCORE_LABEL);
 
 		attributes.add(fitcon_score);
 		return attributes;

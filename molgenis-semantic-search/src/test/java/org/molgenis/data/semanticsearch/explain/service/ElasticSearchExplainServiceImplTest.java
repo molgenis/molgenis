@@ -1,8 +1,7 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
 import org.apache.lucene.search.Explanation;
-import org.elasticsearch.client.Client;
-import org.molgenis.data.elasticsearch.util.DocumentIdGenerator;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,10 +24,8 @@ public class ElasticSearchExplainServiceImplTest
 	public void setup()
 	{
 		explainServiceHelper = new ExplainServiceHelper();
-		Client client = mock(Client.class);
-		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
-		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(client, explainServiceHelper,
-				documentIdGenerator);
+		ElasticsearchService elasticsearchService = mock(ElasticsearchService.class);
+		elasticSearchExplainService = new ElasticSearchExplainServiceImpl(elasticsearchService, explainServiceHelper);
 	}
 
 	@Test
@@ -62,16 +59,18 @@ public class ElasticSearchExplainServiceImplTest
 	@Test
 	public void testDiscoverMatchedQueries()
 	{
-		Explanation explanation_2 = Explanation.match(Float.valueOf("3.6267629"), "sum of:", Explanation
-						.match(Float.valueOf("2.0587344"), "weight(label:high in 328) [PerFieldSimilarity], result of:"),
+		Explanation explanation_2 = Explanation.match(Float.valueOf("3.6267629"), "sum of:",
+				Explanation.match(Float.valueOf("2.0587344"),
+						"weight(label:high in 328) [PerFieldSimilarity], result of:"),
 				Explanation.match(Float.valueOf("1.5680285"),
 						"weight(label:blood in 328) [PerFieldSimilarity], result of:"));
 
-		Explanation explanation_3 = Explanation.match(Float.valueOf("1.754909"), "max of:", Explanation
-				.match(Float.valueOf("1.754909"), "weight(label:medication in 328) [PerFieldSimilarity], result of:"));
+		Explanation explanation_3 = Explanation.match(Float.valueOf("1.754909"), "max of:",
+				Explanation.match(Float.valueOf("1.754909"),
+						"weight(label:medication in 328) [PerFieldSimilarity], result of:"));
 
-		Explanation explanation_1 = Explanation
-				.match(Float.valueOf("5.381672"), "sum of:", explanation_2, explanation_3);
+		Explanation explanation_1 = Explanation.match(Float.valueOf("5.381672"), "sum of:", explanation_2,
+				explanation_3);
 
 		Set<String> actual = explainServiceHelper.findMatchedWords(explanation_1);
 		assertEquals(actual.size(), 2);
@@ -100,14 +99,16 @@ public class ElasticSearchExplainServiceImplTest
 	@Test
 	public void testReverseSearchQueryStrings()
 	{
-		Explanation explanation_2 = Explanation.match(Float.valueOf("3.6267629"), "sum of:", Explanation
-						.match(Float.valueOf("2.0587344"), "weight(label:high in 328) [PerFieldSimilarity], result of:"),
+		Explanation explanation_2 = Explanation.match(Float.valueOf("3.6267629"), "sum of:",
+				Explanation.match(Float.valueOf("2.0587344"),
+						"weight(label:high in 328) [PerFieldSimilarity], result of:"),
 				Explanation.match(Float.valueOf("1.5680285"),
 						"weight(label:blood in 328) [PerFieldSimilarity], result of:"));
-		Explanation explanation_3 = Explanation.match(Float.valueOf("1.754909"), "max of:", Explanation
-				.match(Float.valueOf("1.754909"), "weight(label:medication in 328) [PerFieldSimilarity], result of:"));
-		Explanation explanation_1 = Explanation
-				.match(Float.valueOf("5.381672"), "sum of:", explanation_2, explanation_3);
+		Explanation explanation_3 = Explanation.match(Float.valueOf("1.754909"), "max of:",
+				Explanation.match(Float.valueOf("1.754909"),
+						"weight(label:medication in 328) [PerFieldSimilarity], result of:"));
+		Explanation explanation_1 = Explanation.match(Float.valueOf("5.381672"), "sum of:", explanation_2,
+				explanation_3);
 
 		Map<String, String> expanedQueryMap = new HashMap<>();
 		expanedQueryMap.put("hypertension", "hypertension");
@@ -117,8 +118,8 @@ public class ElasticSearchExplainServiceImplTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService
-				.findQueriesFromExplanation(expanedQueryMap, explanation_1);
+		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.findQueriesFromExplanation(
+				expanedQueryMap, explanation_1);
 
 		Iterator<ExplainedQueryString> iterator = reverseSearchQueryStrings.iterator();
 

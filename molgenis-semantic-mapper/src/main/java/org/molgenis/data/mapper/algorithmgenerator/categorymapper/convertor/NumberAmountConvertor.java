@@ -33,9 +33,9 @@ public class NumberAmountConvertor extends AmountConvertor
 			}
 			else if (extractNumbers.size() > 1)
 			{
-				return AmountWrapper.create(Amount
-						.rangeOf(extractNumbers.get(0), extractNumbers.get(extractNumbers.size() - 1), unit)
-						.to(STANDARD_PER_WEEK_UNIT));
+				return AmountWrapper.create(
+						Amount.rangeOf(extractNumbers.get(0), extractNumbers.get(extractNumbers.size() - 1), unit)
+							  .to(STANDARD_PER_WEEK_UNIT));
 			}
 			else
 			{

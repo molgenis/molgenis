@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import java.util.concurrent.Callable;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.*;
@@ -45,7 +45,7 @@ public class JobTest
 
 	// sneaky trick to capture the authentication the job executes under: Store it in the job result
 	private Answer<Authentication> authenticationAnswer = (call) -> SecurityContextHolder.getContext()
-			.getAuthentication();
+																						 .getAuthentication();
 
 	private TransactionalJob<Authentication> job;
 	private NontransactionalJob<Authentication> jobWithoutTransaction;
@@ -101,8 +101,8 @@ public class JobTest
 	@Test
 	public void testTransactionalJob() throws Exception
 	{
-		when(transactionOperations.execute(actionCaptor.capture()))
-				.thenAnswer((call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
+		when(transactionOperations.execute(actionCaptor.capture())).thenAnswer(
+				(call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
 		when(callable.call()).thenAnswer(authenticationAnswer);
 		Authentication result = job.call();
 
@@ -128,8 +128,8 @@ public class JobTest
 	@Test
 	public void testTransactionalJobFailure() throws Exception
 	{
-		when(transactionOperations.execute(actionCaptor.capture()))
-				.thenAnswer((call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
+		when(transactionOperations.execute(actionCaptor.capture())).thenAnswer(
+				(call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
 		MolgenisDataException mde = new MolgenisDataException();
 		when(callable.call()).thenThrow(mde);
 

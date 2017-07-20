@@ -46,6 +46,11 @@ public class PostgreSqlNameGenerator
 		return quotedIdentifier ? getQuotedIdentifier(identifier) : identifier;
 	}
 
+	static String getJunctionTableName(EntityType entityType, Attribute attr)
+	{
+		return getJunctionTableName(entityType, attr, true);
+	}
+
 	/**
 	 * Returns the junction table name for the given attribute of the given entity
 	 *
@@ -53,12 +58,12 @@ public class PostgreSqlNameGenerator
 	 * @param attr       attribute
 	 * @return PostgreSQL junction table name
 	 */
-	static String getJunctionTableName(EntityType entityType, Attribute attr)
+	public static String getJunctionTableName(EntityType entityType, Attribute attr, boolean quotedIdentifier)
 	{
 		int nrAdditionalChars = 1;
 		String entityPart = generateId(entityType, (MAX_IDENTIFIER_BYTE_LENGTH - nrAdditionalChars) / 2);
 		String attrPart = generateId(attr, (MAX_IDENTIFIER_BYTE_LENGTH - nrAdditionalChars) / 2);
-		return getQuotedIdentifier(entityPart + '_' + attrPart);
+		return quotedIdentifier ? getQuotedIdentifier(entityPart + '_' + attrPart) : entityPart + '_' + attrPart;
 	}
 
 	/**

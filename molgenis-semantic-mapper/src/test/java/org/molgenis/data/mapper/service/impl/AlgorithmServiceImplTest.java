@@ -93,8 +93,8 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 
 		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new NullPointerException());
 
-		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl
-				.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity));
+		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl.applyAlgorithm(attribute, algorithm,
+				Lists.newArrayList(entity));
 		AlgorithmEvaluation eval = result.iterator().next();
 
 		Assert.assertEquals(eval.getErrorMessage(),

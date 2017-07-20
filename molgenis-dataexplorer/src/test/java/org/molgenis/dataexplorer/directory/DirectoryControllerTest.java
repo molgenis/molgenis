@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import java.net.URI;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -55,8 +55,8 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 		when(directorySettings.getPassword()).thenReturn("password");
 		when(directorySettings.getNegotiatorURL()).thenReturn("http://directory.com/postHere");
 
-		when(restTemplate.postForLocation(eq("http://directory.com/postHere"), queryCaptor.capture()))
-				.thenReturn(URI.create("http://directory.com/request/1280"));
+		when(restTemplate.postForLocation(eq("http://directory.com/postHere"), queryCaptor.capture())).thenReturn(
+				URI.create("http://directory.com/request/1280"));
 
 		assertEquals(controller.exportToNegotiator(query), "http://directory.com/request/1280");
 

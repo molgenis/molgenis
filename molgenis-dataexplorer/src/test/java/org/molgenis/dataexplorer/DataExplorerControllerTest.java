@@ -33,9 +33,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
+import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_XLSX;
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
@@ -138,8 +141,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void testViewEntityDetailsById() throws Exception
 	{
-		when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl"))
-				.thenReturn(mock(Template.class));
+		when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl")).thenReturn(
+				mock(Template.class));
 
 		String actual = controller.viewEntityDetailsById(entityTypeId, entityId, model);
 		String expected = "view-standalone-report";
@@ -157,5 +160,21 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(dataService.getEntityType(entityTypeId)).thenReturn(null);
 		controller.viewEntityDetailsById(entityTypeId, entityId, model);
 		verifyNoMoreInteractions(model);
+	}
+
+	@Test
+	public void testGetDownloadFilenameCsv()
+	{
+		assertEquals(
+				controller.getDownloadFilename("it_emx_datatypes_TypeTest", LocalDateTime.parse("2017-07-04T14:14:33"),
+						DOWNLOAD_TYPE_CSV), "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.csv");
+	}
+
+	@Test
+	public void testGetDownloadFilenameXlsx()
+	{
+		assertEquals(
+				controller.getDownloadFilename("it_emx_datatypes_TypeTest", LocalDateTime.parse("2017-07-04T14:14:33"),
+						DOWNLOAD_TYPE_XLSX), "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.xlsx");
 	}
 }

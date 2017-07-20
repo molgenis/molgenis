@@ -72,8 +72,8 @@ public class HighchartSeriesUtil
 				xYDataSerie.getAttributeYFieldTypeEnum()));
 
 		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType()) && (
-				AttributeType.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || AttributeType.DATE_TIME
-						.equals(xYDataSerie.getAttributeXFieldTypeEnum())))
+				AttributeType.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || AttributeType.DATE_TIME.equals(
+						xYDataSerie.getAttributeXFieldTypeEnum())))
 		{
 			series.setLineWidth(0);
 			series.setMarker(new Marker(true, 4));

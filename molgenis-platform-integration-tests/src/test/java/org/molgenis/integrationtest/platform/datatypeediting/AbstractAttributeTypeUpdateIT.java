@@ -4,7 +4,7 @@ import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -40,7 +40,7 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 	private static final String MAIN_ENTITY_ID_VALUE = "1";
 
 	@Autowired
-	IndexService indexService;
+	IndexJobScheduler indexService;
 
 	@Autowired
 	AttributeFactory attributeFactory;
@@ -108,8 +108,10 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 		referenceEntityType.setBackend(PostgreSqlRepositoryCollection.POSTGRESQL);
 
 		Attribute mainIdAttribute = attributeFactory.create().setName(mainId).setIdAttribute(true);
-		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute)
-				.setNillable(false);
+		Attribute mainAttributeAttribute = attributeFactory.create()
+														   .setDataType(type)
+														   .setName(mainAttribute)
+														   .setNillable(false);
 
 		if (referencingTypes.contains(type))
 		{
@@ -121,8 +123,10 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 		}
 
 		Attribute refIdAttribute = attributeFactory.create().setName(refId).setDataType(refIdType).setIdAttribute(true);
-		Attribute refLabelAttribute = attributeFactory.create().setName(refLabel).setLabelAttribute(true)
-				.setNillable(false);
+		Attribute refLabelAttribute = attributeFactory.create()
+													  .setName(refLabel)
+													  .setLabelAttribute(true)
+													  .setNillable(false);
 
 		entityType.addAttributes(newArrayList(mainIdAttribute, mainAttributeAttribute));
 		referenceEntityType.addAttributes(newArrayList(refIdAttribute, refLabelAttribute));

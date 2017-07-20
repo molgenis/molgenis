@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.*;
@@ -110,8 +110,8 @@ public class LocalizationServiceTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testPopulateLocalizationStrings() throws Exception
 	{
-		Query<L10nString> query = new QueryImpl<L10nString>()
-				.in(MSGID, asList("EN_PLUS_NL", "EN_ONLY", "NL_ONLY", "BIOBANK_UTF8")).and().eq(NAMESPACE, "test");
+		Query<L10nString> query = new QueryImpl<L10nString>().in(MSGID,
+				asList("EN_PLUS_NL", "EN_ONLY", "NL_ONLY", "BIOBANK_UTF8")).and().eq(NAMESPACE, "test");
 		when(dataService.findAll(L10N_STRING, query, L10nString.class)).thenReturn(Stream.of(string1, string2));
 
 		when(l10nStringFactory.create()).thenReturn(newString1, newString2);
@@ -137,8 +137,9 @@ public class LocalizationServiceTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAddMissingMessageIDs() throws Exception
 	{
-		Query<L10nString> query = new QueryImpl<L10nString>().in(MSGID, asList("EN_PLUS_NL", "NEW")).and()
-				.eq(NAMESPACE, "test");
+		Query<L10nString> query = new QueryImpl<L10nString>().in(MSGID, asList("EN_PLUS_NL", "NEW"))
+															 .and()
+															 .eq(NAMESPACE, "test");
 		when(dataService.findAll(L10N_STRING, query, L10nString.class)).thenReturn(Stream.of(string1));
 		when(newString1.setNamespace("test")).thenReturn(newString1);
 		when(newString1.setMessageID("NEW")).thenReturn(newString1);

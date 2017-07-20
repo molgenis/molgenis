@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -60,20 +60,25 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		mockMvcHome = MockMvcBuilders.standaloneSetup(homeController).setMessageConverters(gsonHttpMessageConverter)
-				.build();
+		mockMvcHome = MockMvcBuilders.standaloneSetup(homeController)
+									 .setMessageConverters(gsonHttpMessageConverter)
+									 .build();
 
-		mockMvcNews = MockMvcBuilders.standaloneSetup(newsController).setMessageConverters(gsonHttpMessageConverter)
-				.build();
+		mockMvcNews = MockMvcBuilders.standaloneSetup(newsController)
+									 .setMessageConverters(gsonHttpMessageConverter)
+									 .build();
 
 		mockMvcContact = MockMvcBuilders.standaloneSetup(contactController)
-				.setMessageConverters(gsonHttpMessageConverter).build();
+										.setMessageConverters(gsonHttpMessageConverter)
+										.build();
 
 		mockMvcBackground = MockMvcBuilders.standaloneSetup(backgroundController)
-				.setMessageConverters(gsonHttpMessageConverter).build();
+										   .setMessageConverters(gsonHttpMessageConverter)
+										   .build();
 
 		mockMvcReferences = MockMvcBuilders.standaloneSetup(referencesController)
-				.setMessageConverters(gsonHttpMessageConverter).build();
+										   .setMessageConverters(gsonHttpMessageConverter)
+										   .build();
 	}
 
 	@Test
@@ -169,25 +174,29 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	private void initMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
 	{
 		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
-		mockMvc.perform(MockMvcRequestBuilders.get(uri)).andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(view().name("view-staticcontent")).andExpect(model().attributeExists("content"))
-				.andExpect(model().attributeExists("isCurrentUserCanEdit"));
+		mockMvc.perform(MockMvcRequestBuilders.get(uri))
+			   .andExpect(MockMvcResultMatchers.status().isOk())
+			   .andExpect(view().name("view-staticcontent"))
+			   .andExpect(model().attributeExists("content"))
+			   .andExpect(model().attributeExists("isCurrentUserCanEdit"));
 	}
 
 	private void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
 	{
 		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
-		when(this.staticContentService.isCurrentUserCanEdit()).thenReturn(true);
+		when(this.staticContentService.isCurrentUserCanEdit("staticcontent")).thenReturn(true);
 
-		mockMvc.perform(MockMvcRequestBuilders.get(uri + "/edit")).andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(view().name("view-staticcontent-edit")).andExpect(model().attributeExists("content"));
+		mockMvc.perform(MockMvcRequestBuilders.get(uri + "/edit"))
+			   .andExpect(MockMvcResultMatchers.status().isOk())
+			   .andExpect(view().name("view-staticcontent-edit"))
+			   .andExpect(model().attributeExists("content"));
 	}
 
 	@Test
 	public void initNotExistingURI() throws Exception
 	{
 		mockMvcHome.perform(MockMvcRequestBuilders.get(HomeController.URI + "/NotExistingURI"))
-				.andExpect(MockMvcResultMatchers.status().isNotFound());
+				   .andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
 	@Configuration

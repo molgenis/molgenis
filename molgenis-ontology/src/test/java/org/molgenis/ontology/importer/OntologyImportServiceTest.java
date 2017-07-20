@@ -15,7 +15,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
@@ -56,7 +56,8 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 		when(dataService.getRepository(entityTypeId0)).thenReturn(targetRepository0);
 		when(dataService.getRepository(entityTypeId1)).thenReturn(targetRepository1);
 
-		EntityImportReport entityImportReport = ontologyImportService.doImport(repositoryCollection, DatabaseAction.ADD, null);
+		EntityImportReport entityImportReport = ontologyImportService.doImport(repositoryCollection, DatabaseAction.ADD,
+				null);
 
 		assertEquals(entityImportReport.getNewEntities(), emptyList());
 		assertEquals(entityImportReport.getNrImportedEntitiesMap(), of(entityTypeId0, 1, entityTypeId1, 1));

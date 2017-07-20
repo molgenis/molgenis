@@ -130,8 +130,8 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity omimAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(OmimAnnotatorSettings.Meta.OMIM_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/omim/omim.txt").getPath());
+			when(settings.getString(OmimAnnotatorSettings.Meta.OMIM_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/omim/omim.txt").getPath());
 			return settings;
 		}
 

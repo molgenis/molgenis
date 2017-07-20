@@ -8,8 +8,10 @@ import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
-import org.molgenis.data.elasticsearch.config.ElasticsearchConfig;
+import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.jobs.JobConfig;
+import org.molgenis.data.jobs.JobExecutionConfig;
+import org.molgenis.data.jobs.JobFactoryRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -46,15 +48,22 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
+import java.util.Collection;
 
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
+import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
@@ -79,9 +88,8 @@ import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGR
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		PermissionServiceImpl.class, MolgenisRoleHierarchy.class,
-		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class,
-		OntologyConfig.class })
+		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
+		MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
@@ -100,6 +108,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
 	@Autowired
 	private SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
+	@Autowired
+	private JobFactoryRegistrar jobFactoryRegistrar;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
@@ -118,6 +128,17 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	public MailSender mailSender()
 	{
 		return mock(MailSender.class);
+	}
+
+	@Bean
+	public UserDetailsService userDetailsService()
+	{
+		UserDetailsService userDetailsService = mock(UserDetailsService.class);
+		UserDetails adminUserDetails = mock(UserDetails.class);
+		Collection authorities = singleton(new SimpleGrantedAuthority(ROLE_SYSTEM));
+		when(adminUserDetails.getAuthorities()).thenReturn(authorities);
+		when(userDetailsService.loadUserByUsername("admin")).thenReturn(adminUserDetails);
+		return userDetailsService;
 	}
 
 	@Bean
@@ -188,6 +209,10 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.trace("Bootstrapping system entity types ...");
 					systemEntityTypeBootstrapper.bootstrap(event);
 					LOG.debug("Bootstrapped system entity types");
+
+					LOG.trace("Registering job factories ...");
+					jobFactoryRegistrar.register(event);
+					LOG.trace("Registered job factories");
 
 					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
 				});

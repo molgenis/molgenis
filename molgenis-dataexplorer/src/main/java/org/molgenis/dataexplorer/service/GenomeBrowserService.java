@@ -37,16 +37,18 @@ public class GenomeBrowserService
 	 */
 	public Stream<EntityType> getGenomeBrowserEntities()
 	{
-		return dataService.getMeta().getEntityTypes().filter(entityType -> !entityType.isAbstract())
-				.filter(this::isGenomeBrowserEntity);
+		return dataService.getMeta()
+						  .getEntityTypes()
+						  .filter(entityType -> !entityType.isAbstract())
+						  .filter(this::isGenomeBrowserEntity);
 	}
 
 	private boolean isGenomeBrowserEntity(EntityType entityType)
 	{
-		Attribute attributeStartPosition = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityType);
-		Attribute attributeChromosome = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityType);
+		Attribute attributeStartPosition = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
+				GenomicDataSettings.Meta.ATTRS_POS, entityType);
+		Attribute attributeChromosome = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
+				GenomicDataSettings.Meta.ATTRS_CHROM, entityType);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 }

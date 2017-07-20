@@ -1,6 +1,8 @@
 package org.molgenis.navigator;
 
 import org.mockito.Mock;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,12 @@ public class NavigatorControllerTest
 	@Mock
 	private MenuReaderService menuReaderService;
 
+	@Mock
+	private LanguageService languageService;
+
+	@Mock
+	private AppSettings appSettings;
+
 	@BeforeMethod
 	public void before()
 	{
@@ -33,8 +41,11 @@ public class NavigatorControllerTest
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(NavigatorController.NAVIGATOR)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(languageService.getCurrentUserLanguageCode()).thenReturn("AABBCC");
+		when(appSettings.getLanguageCode()).thenReturn("DDEEFF");
 
-		NavigatorController navigatorController = new NavigatorController(menuReaderService);
+		NavigatorController navigatorController = new NavigatorController(menuReaderService, languageService,
+				appSettings);
 		mockMvc = MockMvcBuilders.standaloneSetup(navigatorController).build();
 	}
 
@@ -45,7 +56,10 @@ public class NavigatorControllerTest
 	public void testInit() throws Exception
 	{
 		mockMvc.perform(get(NavigatorController.URI)).andExpect(status().isOk())
-				.andExpect(view().name("view-navigator")).andExpect(model().attribute("baseUrl", "/test/path"));
+				.andExpect(view().name("view-navigator")).andExpect(model().attribute("baseUrl", "/test/path")).
+					   andExpect(model().attribute("lng", "AABBCC"))
+			   .
+					   andExpect(model().attribute("fallbackLng", "DDEEFF"));
 	}
 
 }

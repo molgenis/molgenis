@@ -56,7 +56,7 @@ public class AttributeRepositoryValidationDecoratorTest
 	{
 		Attribute attribute = mock(Attribute.class);
 		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-				.validate(attribute, ValidationMode.UPDATE);
+														.validate(attribute, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(attribute);
 		verify(attributeValidator, times(1)).validate(attribute, ValidationMode.UPDATE);
 	}
@@ -83,7 +83,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		Attribute attribute1 = mock(Attribute.class);
 		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.UPDATE);
 		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-				.validate(attribute1, ValidationMode.UPDATE);
+														.validate(attribute1, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -106,7 +106,7 @@ public class AttributeRepositoryValidationDecoratorTest
 	{
 		Attribute attribute = mock(Attribute.class);
 		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-				.validate(attribute, ValidationMode.ADD);
+														.validate(attribute, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(attribute);
 		verify(attributeValidator, times(1)).validate(attribute, ValidationMode.ADD);
 	}
@@ -133,7 +133,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		Attribute attribute1 = mock(Attribute.class);
 		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.ADD);
 		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-				.validate(attribute1, ValidationMode.ADD);
+														.validate(attribute1, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass((Class) Stream.class);

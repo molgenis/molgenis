@@ -54,25 +54,30 @@ public class PostgreSqlNameGeneratorTest
 	@DataProvider(name = "getJunctionTableNameProvider")
 	public static Iterator<Object[]> getJunctionTableNameProvider()
 	{
-		return newArrayList(new Object[] { "entity", "attr", "\"entity#6844280e_attr\"" },
-				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr",
+		return newArrayList(new Object[] { "entity", "attr", true, "\"entity#6844280e_attr\"" },
+				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3", "attr", true,
 						"\"thisisa_Very_very_very#d9b1efe8_attr\"" },
-				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
+				new Object[] { "entity", "this$is-a_Very_very_very_very_very_very_very_long_attr_nam3", true,
 						"\"entity#6844280e_thisisa_Very_very_very#69363cb7\"" },
 				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
-						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3",
-						"\"thisisa_Very_very_very#d9b1efe8_thisisa_Very_very_very#69363cb7\"" }).iterator();
+						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3", true,
+						"\"thisisa_Very_very_very#d9b1efe8_thisisa_Very_very_very#69363cb7\"" },
+				new Object[] { "this$is-a_Very_very_very_very_very_very_very_long_s1mpl3_nam3",
+						"this$is-a_Very_very_very_very_very_very_very_long_attr_nam3", false,
+						"thisisa_Very_very_very#d9b1efe8_thisisa_Very_very_very#69363cb7" }).iterator();
 	}
 
 	@Test(dataProvider = "getJunctionTableNameProvider")
-	public void testGetJunctionTableName(String entityTypeId, String attrName, String expectedJunctionTableName)
+	public void testGetJunctionTableName(String entityTypeId, String attrName, boolean quotedIdentifiers,
+			String expectedJunctionTableName)
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
 		when(attr.getName()).thenReturn(attrName);
-		assertEquals(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr), expectedJunctionTableName);
+		assertEquals(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr, quotedIdentifiers),
+				expectedJunctionTableName);
 	}
 
 	@DataProvider(name = "getJunctionTableIndexNameProvider")

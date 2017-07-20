@@ -35,7 +35,7 @@ var JobsContainer = React.createClass({
     },
     componentDidMount: function () {
         this.retrieveJobs();
-        this.setInterval(this.retrieveJobs, this.props.interval || 1000);
+        this.setInterval(this.retrieveJobs, this.props.interval || 10000);
         this._notificationSystem = this.refs.notificationSystem;
     },
     render: function () {

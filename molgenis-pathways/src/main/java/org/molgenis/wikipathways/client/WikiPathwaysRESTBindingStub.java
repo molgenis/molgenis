@@ -603,9 +603,10 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	{
 		try
 		{
-			String url = baseUrl + "/saveCurationTag?pwId=" + pwId + "&tagName=" + tagName + "&text=" + URLEncoder
-					.encode(tagText, "UTF-8") + "&revision=" + revision + "&auth=" + auth.getKey() + "&username=" + auth
-					.getUser();
+			String url =
+					baseUrl + "/saveCurationTag?pwId=" + pwId + "&tagName=" + tagName + "&text=" + URLEncoder.encode(
+							tagText, "UTF-8") + "&revision=" + revision + "&auth=" + auth.getKey() + "&username=" + auth
+							.getUser();
 			Document jdomDocument = Utils.connect(url, client);
 			String success = jdomDocument.getRootElement().getChild("success", WSNamespaces.NS1).getValue();
 			if (success.equals("1"))

@@ -64,8 +64,8 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		return Lists.newArrayList(Iterables.filter(Iterables
-				.transform(molgenisUiMenu.getItems(), new Function<MolgenisUiMenuItem, MolgenisUiMenuItem>()
+		return Lists.newArrayList(Iterables.filter(
+				Iterables.transform(molgenisUiMenu.getItems(), new Function<MolgenisUiMenuItem, MolgenisUiMenuItem>()
 				{
 					@Override
 					public MolgenisUiMenuItem apply(MolgenisUiMenuItem molgenisUiMenuItem)
@@ -83,13 +83,13 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 						}
 					}
 				}), new Predicate<MolgenisUiMenuItem>()
-		{
-			@Override
-			public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
-			{
-				return hasPermission(molgenisUiMenuItem);
-			}
-		}));
+				{
+					@Override
+					public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
+					{
+						return hasPermission(molgenisUiMenuItem);
+					}
+				}));
 	}
 
 	@Override

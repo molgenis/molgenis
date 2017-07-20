@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
@@ -91,7 +91,7 @@ public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 	public void iterator() throws IOException, ServiceException
 	{
 		when(spreadsheetService.getFeed(any(URL.class), (Class<IFeed>) any(Class.class))).thenReturn(cellFeed)
-				.thenReturn(listFeed);
+																						 .thenReturn(listFeed);
 		Iterator<Entity> it = spreadsheetRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity entity = it.next();

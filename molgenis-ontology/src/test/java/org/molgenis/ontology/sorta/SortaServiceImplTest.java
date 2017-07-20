@@ -71,11 +71,11 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		ontology.setOntologyIri(ONTOLOGY_IRI);
 
 		// define dataService actions for test one
-		when(dataService.findOne(ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI)))
-				.thenReturn(ontology);
+		when(dataService.findOne(ONTOLOGY,
+				new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI))).thenReturn(ontology);
 
-		when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontology)))
-				.thenReturn((long) 100);
+		when(dataService.count(ONTOLOGY_TERM,
+				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontology))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
 				singletonList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "hear")));
@@ -122,8 +122,8 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		List<QueryRule> finalQueryRules = asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
 				new QueryRule(AND), disMaxRegularQueryRule);
 
-		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(finalQueryRules).pageSize(50)))
-				.thenReturn(Arrays.<Entity>asList(ontologyTerm0, ontologyTerm1).stream());
+		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(finalQueryRules).pageSize(50))).thenReturn(
+				Arrays.<Entity>asList(ontologyTerm0, ontologyTerm1).stream());
 
 		// DataService action for n-gram matching ontology term synonyms
 		QueryRule disMaxNGramQueryRule = new QueryRule(singletonList(
@@ -131,17 +131,19 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		disMaxNGramQueryRule.setOperator(DIS_MAX);
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(
 				asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology), new QueryRule(AND),
-						disMaxNGramQueryRule)).pageSize(10)))
-				.thenReturn(Arrays.<Entity>asList(ontologyTerm0, ontologyTerm1).stream());
+						disMaxNGramQueryRule)).pageSize(10))).thenReturn(
+				Arrays.<Entity>asList(ontologyTerm0, ontologyTerm1).stream());
 
 		// DataService action for querying specific ontology term based on ontologyIRI and ontologyTermIRI
 		when(dataService.findOne(ONTOLOGY_TERM,
-				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '1').and()
-						.eq(OntologyTermMetaData.ONTOLOGY, ontology))).thenReturn(ontologyTerm0);
+				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '1')
+								 .and()
+								 .eq(OntologyTermMetaData.ONTOLOGY, ontology))).thenReturn(ontologyTerm0);
 
 		when(dataService.findOne(ONTOLOGY_TERM,
-				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '2').and()
-						.eq(OntologyTermMetaData.ONTOLOGY, ontology))).thenReturn(ontologyTerm1);
+				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '2')
+								 .and()
+								 .eq(OntologyTermMetaData.ONTOLOGY, ontology))).thenReturn(ontologyTerm1);
 
 		// ########################### TEST TWO ###########################
 
@@ -171,14 +173,14 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 						new QueryRule(OntologyTermDynamicAnnotationMetaData.VALUE, EQUALS, "123456")));
 
 		when(dataService.findAll(ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				new QueryImpl<>(singletonList(annotationQueryRule)).pageSize(Integer.MAX_VALUE)))
-				.thenReturn(Collections.<Entity>singletonList(ontologyTermDynamicAnnotation_3_1).stream());
+				new QueryImpl<>(singletonList(annotationQueryRule)).pageSize(Integer.MAX_VALUE))).thenReturn(
+				Collections.<Entity>singletonList(ontologyTermDynamicAnnotation_3_1).stream());
 
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(
 				asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology), new QueryRule(AND),
 						new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, IN,
-								singletonList(ontologyTermDynamicAnnotation_3_1)))).pageSize(Integer.MAX_VALUE)))
-				.thenReturn(Collections.<Entity>singletonList(ontologyTermEntity_3).stream());
+								singletonList(ontologyTermDynamicAnnotation_3_1)))).pageSize(
+				Integer.MAX_VALUE))).thenReturn(Collections.<Entity>singletonList(ontologyTermEntity_3).stream());
 
 		// DataService action for elasticsearch regular matching ontology term synonyms
 		QueryRule disMaxRegularQueryRule_2 = new QueryRule(
@@ -226,8 +228,8 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(
 				asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology), new QueryRule(AND),
-						disMaxRegularQueryRule_3)).pageSize(50)))
-				.thenReturn(Collections.<Entity>singletonList(ontologyTermEntity_4).stream());
+						disMaxRegularQueryRule_3)).pageSize(50))).thenReturn(
+				Collections.<Entity>singletonList(ontologyTermEntity_4).stream());
 
 		// DataService action for elasticsearch ngram matching ontology term synonyms
 		QueryRule disMaxNGramQueryRule_3 = new QueryRule(singletonList(
@@ -237,8 +239,8 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(
 				asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology), new QueryRule(AND),
-						disMaxNGramQueryRule_3)).pageSize(10)))
-				.thenReturn(Collections.<Entity>singletonList(ontologyTermEntity_4).stream());
+						disMaxNGramQueryRule_3)).pageSize(10))).thenReturn(
+				Collections.<Entity>singletonList(ontologyTermEntity_4).stream());
 	}
 
 	@Test

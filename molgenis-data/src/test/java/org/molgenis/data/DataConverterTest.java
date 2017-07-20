@@ -39,8 +39,8 @@ public class DataConverterTest
 	public static Iterator<Object[]> convertObjectAttributeProvider()
 	{
 		Object object = mock(Object.class);
-		return newArrayList(new Object[] { object, ONE_TO_MANY, object }, new Object[] { object, XREF, object })
-				.iterator();
+		return newArrayList(new Object[] { object, ONE_TO_MANY, object },
+				new Object[] { object, XREF, object }).iterator();
 	}
 
 	@Test(dataProvider = "convertObjectAttributeProvider")

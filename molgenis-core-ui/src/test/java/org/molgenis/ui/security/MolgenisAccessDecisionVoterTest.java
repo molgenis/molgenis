@@ -40,8 +40,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_noPluginNoMenu()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("asdasdsaddas").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"asdasdsaddas").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}
@@ -49,8 +49,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_pluginGranted()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/plugin/plugingranted").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/plugin/plugingranted").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_GRANTED);
 	}
@@ -58,8 +58,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_pluginDenied()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/plugin/plugindenied").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/plugin/plugindenied").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}
@@ -67,8 +67,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginGranted()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugingranted").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugingranted").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_GRANTED);
 	}
@@ -76,8 +76,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginDenied()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugindenied").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugindenied").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}
@@ -85,8 +85,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginSlashGranted()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugingranted/").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugingranted/").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_GRANTED);
 	}
@@ -94,8 +94,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginSlashDenied()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugindenied/").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugindenied/").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}
@@ -103,8 +103,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginWithPathGranted()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugingranted/path").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugingranted/path").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_GRANTED);
 	}
@@ -112,8 +112,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginWithPathDenied()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugindenied/path").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugindenied/path").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}
@@ -121,8 +121,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginWithParamsGranted()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugingranted?key=val").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugingranted?key=val").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_GRANTED);
 	}
@@ -130,8 +130,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuPluginWithParamsDenied()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menuid/plugindenied?key=val").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menuid/plugindenied?key=val").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}
@@ -139,8 +139,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuGranted()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menugranted").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menugranted").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_GRANTED);
 	}
@@ -148,8 +148,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuDenied()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menudenied").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menudenied").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}
@@ -157,8 +157,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuSlashGranted()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menugranted/").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menugranted/").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_GRANTED);
 	}
@@ -166,8 +166,8 @@ public class MolgenisAccessDecisionVoterTest
 	@Test
 	public void vote_menuSlashDenied()
 	{
-		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl())
-				.thenReturn("/menu/menudenied/").getMock();
+		FilterInvocation filterInvocation = when(mock(FilterInvocation.class).getRequestUrl()).thenReturn(
+				"/menu/menudenied/").getMock();
 		MolgenisAccessDecisionVoter voter = new MolgenisAccessDecisionVoter();
 		assertEquals(voter.vote(null, filterInvocation, null), ACCESS_DENIED);
 	}

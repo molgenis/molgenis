@@ -38,17 +38,17 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		// Sanity check
 		if (AttributeType.DECIMAL.equals(attributeXFieldTypeEnum) || AttributeType.INT.equals(attributeXFieldTypeEnum)
-				|| AttributeType.LONG.equals(attributeXFieldTypeEnum) || AttributeType.DATE
-				.equals(attributeXFieldTypeEnum) || AttributeType.DATE_TIME.equals(attributeXFieldTypeEnum)
-				|| AttributeType.DECIMAL.equals(attributeYFieldTypeEnum) || AttributeType.INT
-				.equals(attributeYFieldTypeEnum) || AttributeType.LONG.equals(attributeYFieldTypeEnum)
-				|| AttributeType.DATE.equals(attributeYFieldTypeEnum) || AttributeType.DATE_TIME
-				.equals(attributeYFieldTypeEnum))
+				|| AttributeType.LONG.equals(attributeXFieldTypeEnum) || AttributeType.DATE.equals(
+				attributeXFieldTypeEnum) || AttributeType.DATE_TIME.equals(attributeXFieldTypeEnum)
+				|| AttributeType.DECIMAL.equals(attributeYFieldTypeEnum) || AttributeType.INT.equals(
+				attributeYFieldTypeEnum) || AttributeType.LONG.equals(attributeYFieldTypeEnum)
+				|| AttributeType.DATE.equals(attributeYFieldTypeEnum) || AttributeType.DATE_TIME.equals(
+				attributeYFieldTypeEnum))
 		{
 			if (!StringUtils.isNotBlank(split))
 			{
-				xYDataSeries = Arrays.asList(this
-						.getXYDataSerie(repo, entityTypeId, attributeNameXaxis, attributeNameYaxis,
+				xYDataSeries = Arrays.asList(
+						this.getXYDataSerie(repo, entityTypeId, attributeNameXaxis, attributeNameYaxis,
 								attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
 			}
 			else
@@ -75,8 +75,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		EntityType entityType = repo.getEntityType();
 
 		XYDataSerie serie = new XYDataSerie();
-		serie.setName(entityType.getAttribute(attributeNameXaxis).getLabel() + " vs " + entityType
-				.getAttribute(attributeNameYaxis).getLabel());
+		serie.setName(entityType.getAttribute(attributeNameXaxis).getLabel() + " vs " + entityType.getAttribute(
+				attributeNameYaxis).getLabel());
 		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
 

@@ -174,17 +174,25 @@ public class CGDAnnotator implements AnnotatorConfig
 
 		attributes.add(attributeFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
 		attributes.add(attributeFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
-		attributes.add(attributeFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
-				.setLabel(CONDITION_LABEL));
-		attributes.add(attributeFactory.create().setName(INHERITANCE.getAttributeName()).setDataType(TEXT)
-				.setLabel(INHERITANCE_LABEL));
-		attributes.add(attributeFactory.create().setName(GENERALIZED_INHERITANCE.getAttributeName()).setDataType(TEXT)
-				.setLabel(GENERALIZED_INHERITANCE_LABEL));
-		attributes.add(attributeFactory.create().setName(AGE_GROUP.getAttributeName()).setDataType(TEXT)
-				.setLabel(AGE_GROUP_LABEL));
+		attributes.add(attributeFactory.create()
+									   .setName(CONDITION.getAttributeName())
+									   .setDataType(TEXT)
+									   .setLabel(CONDITION_LABEL));
+		attributes.add(attributeFactory.create()
+									   .setName(INHERITANCE.getAttributeName())
+									   .setDataType(TEXT)
+									   .setLabel(INHERITANCE_LABEL));
+		attributes.add(attributeFactory.create()
+									   .setName(GENERALIZED_INHERITANCE.getAttributeName())
+									   .setDataType(TEXT)
+									   .setLabel(GENERALIZED_INHERITANCE_LABEL));
+		attributes.add(attributeFactory.create()
+									   .setName(AGE_GROUP.getAttributeName())
+									   .setDataType(TEXT)
+									   .setLabel(AGE_GROUP_LABEL));
 		attributes.add(attributeFactory.create().setName(ALLELIC_CONDITIONS.getAttributeName()).setDataType(TEXT));
-		attributes
-				.add(attributeFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName()).setDataType(TEXT));
+		attributes.add(
+				attributeFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName()).setDataType(TEXT));
 		attributes.add(attributeFactory.create().setName(INTERVENTION_CATEGORIES.getAttributeName()).setDataType(TEXT));
 		attributes.add(attributeFactory.create().setName(COMMENTS.getAttributeName()).setDataType(TEXT));
 		attributes.add(attributeFactory.create().setName(INTERVENTION_RATIONALE.getAttributeName()).setDataType(TEXT));

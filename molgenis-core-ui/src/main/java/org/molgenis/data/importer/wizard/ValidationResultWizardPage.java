@@ -80,10 +80,10 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
-				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-						.createFileRepositoryCollection(importWizard.getFile());
-				ImportService importService = importServiceFactory
-						.getImportService(importWizard.getFile(), repositoryCollection);
+				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+						importWizard.getFile());
+				ImportService importService = importServiceFactory.getImportService(importWizard.getFile(),
+						repositoryCollection);
 
 				synchronized (this)
 				{

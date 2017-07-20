@@ -65,20 +65,23 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		List<EntityType> questionnaireMeta = runAsSystem(
 				() -> findQuestionnairesMetaData(dataService).collect(toList()));
 
-		questionnaires = questionnaireMeta.stream().map(EntityType::getId)
-				.filter(name -> currentUserIsSu() || currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name))
-				.map(name ->
-				{
-					// Create entity if not yet exists for current user
-					EntityType entityType = dataService.getMeta().getEntityType(name);
-					Entity entity = findQuestionnaireEntity(name);
-					if (entity == null)
-					{
-						entity = createQuestionnaireEntity(entityType, NOT_STARTED, name);
-					}
+		questionnaires = questionnaireMeta.stream()
+										  .map(EntityType::getId)
+										  .filter(name -> currentUserIsSu() || currentUserHasRole(
+												  AUTHORITY_ENTITY_WRITE_PREFIX + name))
+										  .map(name ->
+										  {
+											  // Create entity if not yet exists for current user
+											  EntityType entityType = dataService.getMeta().getEntityType(name);
+											  Entity entity = findQuestionnaireEntity(name);
+											  if (entity == null)
+											  {
+												  entity = createQuestionnaireEntity(entityType, NOT_STARTED, name);
+											  }
 
-					return toQuestionnaireModel(entity, entityType);
-				}).collect(toList());
+											  return toQuestionnaireModel(entity, entityType);
+										  })
+										  .collect(toList());
 		return questionnaires;
 	}
 

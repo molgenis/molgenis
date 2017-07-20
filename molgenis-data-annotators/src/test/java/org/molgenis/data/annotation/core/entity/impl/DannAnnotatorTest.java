@@ -213,8 +213,8 @@ public class DannAnnotatorTest extends AbstractMolgenisSpringTest
 		public Entity dannAnnotatorSettings()
 		{
 			Entity settings = mock(Entity.class);
-			when(settings.getString(DannAnnotatorSettings.Meta.DANN_LOCATION))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/dann/DANN_test_set.tsv.bgz").getPath());
+			when(settings.getString(DannAnnotatorSettings.Meta.DANN_LOCATION)).thenReturn(
+					ResourceUtils.getFile(getClass(), "/dann/DANN_test_set.tsv.bgz").getPath());
 			return settings;
 		}
 

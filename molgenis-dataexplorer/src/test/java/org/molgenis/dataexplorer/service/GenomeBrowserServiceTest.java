@@ -55,23 +55,18 @@ public class GenomeBrowserServiceTest
 
 		Attribute attribute = mock(Attribute.class);
 
-		when(genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, genomeEntityType))
-				.thenReturn(attribute);
-		when(genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, genomeEntityType))
-				.thenReturn(attribute);
-		when(genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, abtractGenomeEntityType))
-				.thenReturn(attribute);
+		when(genomicDataSettings.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS,
+				genomeEntityType)).thenReturn(attribute);
+		when(genomicDataSettings.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
+				genomeEntityType)).thenReturn(attribute);
+		when(genomicDataSettings.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS,
+				abtractGenomeEntityType)).thenReturn(attribute);
 		when(genomicDataSettings.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				abtractGenomeEntityType)).thenReturn(attribute);
-		when(genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, nonGenomeEntityType))
-				.thenReturn(null);
-		when(genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, nonGenomeEntityType))
-				.thenReturn(null);
+		when(genomicDataSettings.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS,
+				nonGenomeEntityType)).thenReturn(null);
+		when(genomicDataSettings.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
+				nonGenomeEntityType)).thenReturn(null);
 
 		Stream<EntityType> entityTypes = Stream.of(genomeEntityType, abtractGenomeEntityType, nonGenomeEntityType);
 		when(metaDataService.getEntityTypes()).thenReturn(entityTypes);

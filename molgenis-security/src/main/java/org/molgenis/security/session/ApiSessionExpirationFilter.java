@@ -31,8 +31,10 @@ public class ApiSessionExpirationFilter extends GenericFilterBean
 
 		if (!SecurityUtils.currentUserIsAuthenticated() && httpRequest.getRequestURI().startsWith("/api/")
 				&& SecurityUtils.isSessionExpired(httpRequest) && !httpRequest.getRequestURI()
-				.startsWith("/api/v1/login") && !httpRequest.getRequestURI().startsWith("/api/v1/logout")
-				&& !httpRequest.getRequestURI().startsWith("/api/v2/version"))
+																			  .startsWith("/api/v1/login")
+				&& !httpRequest.getRequestURI().startsWith("/api/v1/logout") && !httpRequest.getRequestURI()
+																							.startsWith(
+																									"/api/v2/version"))
 		{
 			// Signal that the 'session expired' message must be shown in the login form
 			httpRequest.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTR, true);

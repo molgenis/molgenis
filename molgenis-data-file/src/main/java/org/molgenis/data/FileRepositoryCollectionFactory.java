@@ -63,8 +63,8 @@ public class FileRepositoryCollectionFactory
 	{
 		Class<? extends FileRepositoryCollection> clazz;
 
-		String extension = FileExtensionUtils
-				.findExtensionFromPossibilities(file.getName(), fileRepositoryCollection.keySet());
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				fileRepositoryCollection.keySet());
 
 		clazz = fileRepositoryCollection.get(extension);
 
@@ -85,8 +85,8 @@ public class FileRepositoryCollectionFactory
 		}
 
 		FileRepositoryCollection fileRepositoryCollection = BeanUtils.instantiateClass(ctor, file);
-		autowireCapableBeanFactory
-				.autowireBeanProperties(fileRepositoryCollection, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
+		autowireCapableBeanFactory.autowireBeanProperties(fileRepositoryCollection,
+				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 		try
 		{
 			fileRepositoryCollection.init();

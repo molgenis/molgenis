@@ -16,8 +16,8 @@ public class NegotiatorQueryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private Gson gson;
 
-	private NegotiatorQuery negotiatorQuery = NegotiatorQuery
-			.createQuery("url", Collections.emptyList(), "humanReadable", null);
+	private NegotiatorQuery negotiatorQuery = NegotiatorQuery.createQuery("url", Collections.emptyList(),
+			"humanReadable", null);
 
 	private String json = "{\"URL\":\"url\",\"collections\":[],\"humanReadable\":\"humanReadable\"}";
 

@@ -31,8 +31,8 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import static java.io.File.separator;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
 import static org.molgenis.gavin.job.input.model.LineType.*;
@@ -104,15 +104,15 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		when(menu.findMenuItemPath(GAVIN_APP)).thenReturn("/menu/plugins/gavin-app");
 
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.tsv")).thenReturn(inputFile);
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-processed-input.vcf"))
-				.thenReturn(processedInputFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-processed-input.vcf")).thenReturn(
+				processedInputFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "error.txt")).thenReturn(errorFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-cadd.vcf")).thenReturn(caddResult);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-exac.vcf")).thenReturn(exacResult);
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-snpeff.vcf"))
-				.thenReturn(snpEffResult);
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
-				.thenReturn(gavinResult);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-snpeff.vcf")).thenReturn(
+				snpEffResult);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf")).thenReturn(
+				gavinResult);
 
 		Iterator<Entity> iterator = Collections.<Entity>emptyList().iterator();
 		when(cadd.annotate(anyObject(), eq(true))).thenReturn(iterator);
@@ -159,15 +159,15 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testRunHappyPathCadd() throws Exception
 	{
-		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
-				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, CADD, CADD));
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(
+				ImmutableMultiset.of(COMMENT, COMMENT, CADD, CADD));
 
 		job.call(progress);
 
 		verify(progress).setProgressMax(5);
 		verify(progress).progress(0, "Preprocessing input file...");
-		verify(progress)
-				.status("Parsed input file. Found 4 lines (2 comments, 0 valid VCF, 2 valid CADD, 0 errors, 0 indels without CADD score, 0 skipped)");
+		verify(progress).status(
+				"Parsed input file. Found 4 lines (2 comments, 0 valid VCF, 2 valid CADD, 0 errors, 0 indels without CADD score, 0 skipped)");
 
 		verify(progress).progress(1, "File already annotated by cadd, skipping cadd annotation.");
 
@@ -188,8 +188,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100,000\\.")
 	public void testSkippedThrowsException() throws Exception
 	{
-		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
-				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, CADD, VCF, SKIPPED));
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(
+				ImmutableMultiset.of(COMMENT, COMMENT, CADD, VCF, SKIPPED));
 
 		job.call(progress);
 	}
@@ -207,8 +207,8 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\. Please use one type only, either VCF or CADD.")
 	public void testMixedInputsThrowsException() throws Exception
 	{
-		when(parser.tryTransform(inputFile, processedInputFile, errorFile))
-				.thenReturn(ImmutableMultiset.of(COMMENT, COMMENT, CADD, VCF));
+		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(
+				ImmutableMultiset.of(COMMENT, COMMENT, CADD, VCF));
 
 		job.call(progress);
 	}

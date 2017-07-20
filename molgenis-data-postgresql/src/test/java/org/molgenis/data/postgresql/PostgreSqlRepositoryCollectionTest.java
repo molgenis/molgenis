@@ -15,6 +15,8 @@ import javax.sql.DataSource;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -732,5 +734,38 @@ public class PostgreSqlRepositoryCollectionTest
 		when(attr.getIdentifier()).thenReturn("attrId");
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		postgreSqlRepoCollection.deleteAttribute(entityType, attr);
+	}
+
+	// Regression test #1 for https://github.com/molgenis/molgenis/issues/6253
+	@Test
+	public void deleteRepositoryWithReadOnlyAttribute()
+	{
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("attrId").getMock();
+		when(attrId.getIdentifier()).thenReturn("attrId");
+		when(attrId.getDataType()).thenReturn(STRING);
+		Attribute attrReadOnly = when(mock(Attribute.class).getName()).thenReturn("attrReadOnly").getMock();
+		when(attrReadOnly.getIdentifier()).thenReturn("attrReadOnly");
+		when(attrReadOnly.isReadOnly()).thenReturn(true);
+		when(attrReadOnly.getDataType()).thenReturn(STRING);
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+		when(entityType.getAtomicAttributes()).thenReturn(asList(attrId, attrReadOnly));
+		postgreSqlRepoCollection.deleteRepository(entityType);
+		verify(jdbcTemplate).execute("DROP TABLE \"entity#6844280e\"");
+		verify(jdbcTemplate).execute("DROP FUNCTION \"validate_update_entity#6844280e\"();");
+		verifyNoMoreInteractions(jdbcTemplate);
+	}
+
+	// Regression test #2 for https://github.com/molgenis/molgenis/issues/6253
+	@Test
+	public void deleteRepositoryWithoutReadOnlyAttribute()
+	{
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("attrId").getMock();
+		when(attrId.getIdentifier()).thenReturn("attrId");
+		when(attrId.getDataType()).thenReturn(STRING);
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attrId));
+		postgreSqlRepoCollection.deleteRepository(entityType);
+		verify(jdbcTemplate).execute("DROP TABLE \"entity#6844280e\"");
+		verifyNoMoreInteractions(jdbcTemplate);
 	}
 }

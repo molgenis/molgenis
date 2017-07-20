@@ -72,7 +72,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		try
 		{
 			feed = spreadsheetService.getFeed(FeedURLFactory.getDefault()
-					.getListFeedUrl(spreadsheetKey, worksheetId, visibility.toString(), "full"), ListFeed.class);
+															.getListFeedUrl(spreadsheetKey, worksheetId,
+																	visibility.toString(), "full"), ListFeed.class);
 		}
 		catch (IOException | ServiceException e)
 		{
@@ -121,7 +122,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			try
 			{
 				URL cellFeedUrl = FeedURLFactory.getDefault()
-						.getCellFeedUrl(spreadsheetKey, worksheetId, visibility.toString(), "full");
+												.getCellFeedUrl(spreadsheetKey, worksheetId, visibility.toString(),
+														"full");
 				cellFeedUrl = new URL(cellFeedUrl.toString() + "?min-row=1&max-row=1");
 				feed = spreadsheetService.getFeed(cellFeedUrl, CellFeed.class);
 			}

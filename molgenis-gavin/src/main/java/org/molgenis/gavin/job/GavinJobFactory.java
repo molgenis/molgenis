@@ -84,7 +84,8 @@ public class GavinJobFactory
 	public List<String> getAnnotatorsWithMissingResources()
 	{
 		return of(cadd, exac, snpEff, gavin).filter(annotator -> !annotator.annotationDataExists())
-				.map(RepositoryAnnotator::getSimpleName).collect(toList());
+											.map(RepositoryAnnotator::getSimpleName)
+											.collect(toList());
 	}
 
 	/**

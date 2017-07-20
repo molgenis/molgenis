@@ -9,6 +9,7 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -105,9 +106,13 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	{
 		try
 		{
-			return getEntityCache(repository).getAll(ids).values().stream().filter(Optional::isPresent)
-					.map(Optional::get).map(e -> entityHydration.hydrate(e, repository.getEntityType()))
-					.collect(Collectors.toList());
+			return getEntityCache(repository).getAll(ids)
+											 .values()
+											 .stream()
+											 .filter(Optional::isPresent)
+											 .map(Optional::get)
+											 .map(e -> entityHydration.hydrate(e, repository.getEntityType()))
+											 .collect(Collectors.toList());
 		}
 		catch (ExecutionException exception)
 		{
@@ -162,8 +167,12 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	 */
 	private LoadingCache<Object, Optional<Map<String, Object>>> createEntityCache(Repository<Entity> repository)
 	{
-		return CaffeinatedGuava.build(Caffeine.newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_ENTITY)
-				.expireAfterAccess(10, MINUTES), createCacheLoader(repository));
+		Caffeine<Object, Object> cacheBuilder =Caffeine.newBuilder().recordStats().expireAfterAccess(10, MINUTES);
+		if (!MetaDataService.isMetaEntityType(repository.getEntityType()))
+		{
+			cacheBuilder.maximumSize(MAX_CACHE_SIZE_PER_ENTITY);
+		}
+		return CaffeinatedGuava.build(cacheBuilder, createCacheLoader(repository));
 	}
 
 	/**
@@ -197,7 +206,8 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 			{
 				Stream<Object> typedIds = stream(ids.spliterator(), false).map(id -> id);
 				Map<Object, Optional<Map<String, Object>>> result = repository.findAll(typedIds)
-						.collect(toMap(Entity::getIdValue, this::dehydrateEntity));
+																			  .collect(toMap(Entity::getIdValue,
+																					  this::dehydrateEntity));
 				for (Object key : ids)
 				{
 					// cache the absence of these entities in the backend as empty values

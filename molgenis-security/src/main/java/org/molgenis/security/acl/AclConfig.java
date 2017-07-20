@@ -122,7 +122,8 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 	private AclAuthorizationStrategy aclAuthorizationStrategy()
 	{
 		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ACL_ADMIN"),
-				new SimpleGrantedAuthority("ROLE_ACL_ADMIN"), new SimpleGrantedAuthority("ROLE_ACL_ADMIN")); // TODO ROLE_SU/ROLE_SYSTEM?
+				new SimpleGrantedAuthority("ROLE_ACL_ADMIN"),
+				new SimpleGrantedAuthority("ROLE_ACL_ADMIN")); // TODO ROLE_SU/ROLE_SYSTEM?
 	}
 
 	@Bean

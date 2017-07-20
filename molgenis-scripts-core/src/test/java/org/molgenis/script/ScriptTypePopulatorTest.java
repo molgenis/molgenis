@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
 import static org.testng.Assert.assertEquals;

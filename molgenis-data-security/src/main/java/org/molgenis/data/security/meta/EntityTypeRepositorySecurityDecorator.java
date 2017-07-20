@@ -436,9 +436,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		void filter(List<EntityType> entityTypes)
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
-															  .filter(entityType -> permissionService.hasPermissionOnEntityType(
-																	  entityType.getId(), READ))
-															  .collect(toList());
+					.filter(entityType -> permissionService.hasPermissionOnEntityType(entityType.getId(), READ))
+					.collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}
 	}

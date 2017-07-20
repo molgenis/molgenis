@@ -86,8 +86,8 @@ class AttributeResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists
-					.newArrayList(Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
 					{
 						@Override
 						public AttributeResponseV2 apply(Attribute attr)

@@ -166,8 +166,8 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
 		when(serviceMock.getColoredPathwayImage("WP1234",
-				ImmutableMap.<String, Impact>of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE)))
-				.thenReturn("<svg>WP1234</svg>");
+				ImmutableMap.<String, Impact>of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn(
+				"<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
 	}
 
@@ -207,10 +207,10 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
-		when(serviceMock.getPathwaysForGene("TUSC2", "Homo sapiens"))
-				.thenReturn(asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2")));
-		when(serviceMock.getPathwaysForGene("IPO4", "Homo sapiens"))
-				.thenReturn(asList(Pathway.create("WP3", "Pathway 3"), Pathway.create("WP4", "Pathway 4")));
+		when(serviceMock.getPathwaysForGene("TUSC2", "Homo sapiens")).thenReturn(
+				asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2")));
+		when(serviceMock.getPathwaysForGene("IPO4", "Homo sapiens")).thenReturn(
+				asList(Pathway.create("WP3", "Pathway 3"), Pathway.create("WP4", "Pathway 4")));
 
 		assertEquals(controller.getListOfPathwayNamesByGenes("VCF"),
 				asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2"),

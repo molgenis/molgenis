@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-amazon-bucket</artifactId>
     <packaging>jar</packaging>
@@ -35,6 +35,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-excel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-csv</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

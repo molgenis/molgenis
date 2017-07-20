@@ -2,13 +2,10 @@ package org.molgenis.data.semanticsearch.service.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import org.apache.lucene.search.Explanation;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
@@ -25,16 +22,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.*;
 
@@ -59,6 +63,21 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private SemanticSearchServiceImpl semanticSearchService;
 
+	@Autowired
+	AttributeMetadata attributeMetadata;
+
+	@Autowired
+	private ElasticSearchExplainService elasticSearchExplainService;
+
+	@Mock
+	private Map<String, String> collectExpandedQueryMap;
+
+	@Mock
+	private Query<Entity> query;
+
+	@Mock
+	private java.util.Set<org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString> explainedQueryStrings;
+
 	private List<String> ontologies;
 
 	private OntologyTerm standingHeight;
@@ -73,34 +92,41 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 
 	private Attribute attribute;
 
+	@BeforeClass
+	public void beforeClass()
+	{
+		initMocks(this);
+	}
+
 	@BeforeMethod
 	public void beforeTest()
 	{
 		ontologies = asList("1", "2");
-		standingHeight = OntologyTerm
-				.create("http://onto/height", "Standing height", asList("Standing height", "length"));
+		standingHeight = OntologyTerm.create("http://onto/height", "Standing height",
+				asList("Standing height", "length"));
 		bodyWeight = OntologyTerm.create("http://onto/bmi", "Body weight", asList("Body weight", "Mass in kilograms"));
 
 		hypertension = OntologyTerm.create("http://onto/hyp", "Hypertension");
 		maternalHypertension = OntologyTerm.create("http://onto/mhyp", "Maternal hypertension");
 		ontologyTerms = asList(standingHeight, bodyWeight, hypertension, maternalHypertension);
-		attribute = attrMetaDataFactory.create().setName("attr1");
+		attribute = attrMetaDataFactory.create("attrID").setName("attr1");
+		reset(elasticSearchExplainService, collectExpandedQueryMap, query);
 	}
 
 	@BeforeMethod
 	public void init()
 	{
 		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(standingHeight))
-				.thenReturn(Sets.newHashSet("Standing height", "Standing height", "length"));
+				.thenReturn(newHashSet("Standing height", "Standing height", "length"));
 
 		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(bodyWeight))
-				.thenReturn(Sets.newHashSet("Body weight", "Body weight", "Mass in kilograms"));
+				.thenReturn(newHashSet("Body weight", "Body weight", "Mass in kilograms"));
 
 		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(hypertension))
-				.thenReturn(Sets.newHashSet("Hypertension"));
+				.thenReturn(newHashSet("Hypertension"));
 
 		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(maternalHypertension))
-				.thenReturn(Sets.newHashSet("Maternal hypertension"));
+				.thenReturn(newHashSet("Maternal hypertension"));
 	}
 
 	@Test
@@ -108,22 +134,22 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		Mockito.reset(ontologyService);
 		attribute.setDescription("History of Hypertension");
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("history", "hypertens"), 100))
-				.thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("history", "hypertens"),
+				100)).thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, null);
+		assertNull(result);
 	}
 
 	@Test
 	public void testDistanceFrom()
 	{
 		Stemmer stemmer = new Stemmer();
-		Assert.assertEquals(semanticSearchService
-						.distanceFrom("Hypertension", ImmutableSet.<String>of("history", "hypertens"), stemmer), .6923, 0.0001,
+		Assert.assertEquals(
+				semanticSearchService.distanceFrom("Hypertension", ImmutableSet.<String>of("history", "hypertens"),
+						stemmer), .6923, 0.0001, "String distance should be equal");
+		Assert.assertEquals(semanticSearchService.distanceFrom("Maternal Hypertension",
+				ImmutableSet.<String>of("history", "hypertens"), stemmer), .5454, 0.0001,
 				"String distance should be equal");
-		Assert.assertEquals(semanticSearchService
-						.distanceFrom("Maternal Hypertension", ImmutableSet.<String>of("history", "hypertens"), stemmer), .5454,
-				0.0001, "String distance should be equal");
 		;
 	}
 
@@ -132,11 +158,10 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height in meters.");
-		when(ontologyService
-				.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "meters"), 100))
-				.thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "meters"),
+				100)).thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, Hit.<OntologyTerm>create(standingHeight, 0.81250f));
+		assertEquals(result, Hit.create(standingHeight, 0.81250f));
 	}
 
 	@Test
@@ -145,51 +170,51 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height (m.)");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "m"), 100))
-				.thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "m"),
+				100)).thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, Hit.<OntologyTerm>create(standingHeight, 0.92857f));
+		assertEquals(result, Hit.create(standingHeight, 0.92857f));
 	}
 
 	@Test
 	public void testIsSingleMatchHighQuality()
 	{
-		List<ExplainedQueryString> explanations1 = asList(
+		List<ExplainedQueryString> explanations1 = singletonList(
 				ExplainedQueryString.create("height", "height", "standing height", 50.0));
-		assertFalse(semanticSearchService
-				.isSingleMatchHighQuality(Sets.newHashSet("height"), Sets.newHashSet("height"), explanations1));
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(newHashSet("height"), newHashSet("height"),
+				explanations1));
 
-		List<ExplainedQueryString> explanations2 = asList(
+		List<ExplainedQueryString> explanations2 = singletonList(
 				ExplainedQueryString.create("body length", "body length", "height", 100));
 
-		assertTrue(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("height in meter"),
-				Sets.newHashSet("height in meter", "height"), explanations2));
+		assertTrue(semanticSearchService.isSingleMatchHighQuality(newHashSet("height in meter"),
+				newHashSet("height in meter", "height"), explanations2));
 
 		List<ExplainedQueryString> explanations3 = asList(
 				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
 				ExplainedQueryString.create("glucose", "blood glucose", "blood glucose", 50));
 
-		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("fasting glucose"),
-				Sets.newHashSet("fasting glucose", "fasting", "blood glucose"), explanations3));
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(newHashSet("fasting glucose"),
+				newHashSet("fasting glucose", "fasting", "blood glucose"), explanations3));
 
-		List<ExplainedQueryString> explanations4 = asList(
+		List<ExplainedQueryString> explanations4 = singletonList(
 				ExplainedQueryString.create("number of", "number of", "number", 100));
 
-		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("number of cigarette smoked"),
-				Sets.newHashSet("number of cigarette smoked", "number of"), explanations4));
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(newHashSet("number of cigarette smoked"),
+				newHashSet("number of cigarette smoked", "number of"), explanations4));
 	}
 
 	@Test
 	public void testIsGoodMatch()
 	{
-		Map<String, Double> matchedTags = new HashMap<String, Double>();
+		Map<String, Double> matchedTags = newHashMap();
 		matchedTags.put("height", 100.0);
 		matchedTags.put("weight", 50.0);
 		assertFalse(semanticSearchService.isGoodMatch(matchedTags, "blood"));
 		assertFalse(semanticSearchService.isGoodMatch(matchedTags, "weight"));
 		assertTrue(semanticSearchService.isGoodMatch(matchedTags, "height"));
 
-		Map<String, Double> matchedTags2 = new HashMap<String, Double>();
+		Map<String, Double> matchedTags2 = newHashMap();
 		matchedTags2.put("fasting", 100.0);
 		matchedTags2.put("glucose", 100.0);
 
@@ -206,7 +231,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType)).thenReturn(attributeIdentifiers);
 
 		// Mock the createDisMaxQueryRule method
-		List<QueryRule> rules = new ArrayList<QueryRule>();
+		List<QueryRule> rules = newArrayList();
 		QueryRule targetQueryRuleLabel = new QueryRule(AttributeMetadata.LABEL, QueryRule.Operator.FUZZY_MATCH,
 				"height");
 		rules.add(targetQueryRuleLabel);
@@ -220,7 +245,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		disMaxQueryRule.setOperator(QueryRule.Operator.DIS_MAX);
 
 		when(semanticSearchServiceHelper
-				.createDisMaxQueryRuleForAttribute(Sets.newHashSet("targetAttribute"), Collections.emptyList()))
+				.createDisMaxQueryRuleForAttribute(newHashSet("targetAttribute"), emptyList()))
 				.thenReturn(disMaxQueryRule);
 
 		Entity entity1 = mock(Entity.class);
@@ -228,8 +253,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(entity1.getString(AttributeMetadata.LABEL)).thenReturn("height");
 		when(entity1.getString(AttributeMetadata.DESCRIPTION)).thenReturn("this is a height measurement in m!");
 
-		List<QueryRule> disMaxQueryRules = Lists
-				.newArrayList(new QueryRule(AttributeMetadata.ID, QueryRule.Operator.IN, attributeIdentifiers),
+		List<QueryRule> disMaxQueryRules = newArrayList(new QueryRule(AttributeMetadata.ID, QueryRule.Operator.IN, attributeIdentifiers),
 						new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
 
 		Attribute attributeHeight = attrMetaDataFactory.create().setName("height_0");
@@ -238,14 +262,14 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		sourceEntityType.addAttribute(attributeWeight);
 
 		// Case 1
-		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules)))
-				.thenReturn(Stream.of(entity1));
+		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules))).thenReturn(
+				Stream.of(entity1));
 
 		Map<Attribute, ExplainedAttribute> termsActual1 = semanticSearchService
-				.findAttributes(sourceEntityType, Sets.newHashSet("targetAttribute"), Collections.emptyList());
+				.findAttributes(sourceEntityType, newHashSet("targetAttribute"), emptyList());
 
-		Map<Attribute, ExplainedAttribute> termsExpected1 = ImmutableMap
-				.of(attributeHeight, ExplainedAttribute.create(attributeHeight));
+		Map<Attribute, ExplainedAttribute> termsExpected1 = ImmutableMap.of(attributeHeight,
+				ExplainedAttribute.create(attributeHeight));
 
 		assertEquals(termsActual1.toString(), termsExpected1.toString());
 
@@ -253,7 +277,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules))).thenReturn(Stream.empty());
 
 		Map<Attribute, ExplainedAttribute> termsActual2 = semanticSearchService
-				.findAttributes(sourceEntityType, Sets.newHashSet("targetAttribute"), Collections.emptyList());
+				.findAttributes(sourceEntityType, newHashSet("targetAttribute"), emptyList());
 
 		Map<Attribute, ExplainedAttribute> termsExpected2 = ImmutableMap.of();
 
@@ -262,10 +286,10 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height (Ångstrøm)");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("standing", "height", "ångstrøm"), 100))
-				.thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("standing", "height", "ångstrøm"),
+				100)).thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, Hit.<OntologyTerm>create(standingHeight, 0.76471f));
+		assertEquals(result, Hit.create(standingHeight, 0.76471f));
 	}
 
 	@Test
@@ -274,10 +298,10 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Mockito.reset(ontologyService);
 		attribute.setDescription("/əˈnædrəməs/");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("əˈnædrəməs"), 100))
-				.thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("əˈnædrəməs"), 100)).thenReturn(
+				ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, null);
+		assertNull(result);
 	}
 
 	@Test
@@ -286,10 +310,24 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Body mass index");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("body", "mass", "index"), 100))
-				.thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("body", "mass", "index"), 100)).thenReturn(
+				ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, null);
+		assertNull(result);
+	}
+
+	@Test
+	public void testConvertAttribute()
+	{
+		when(dataService.getEntityType(ATTRIBUTE_META_DATA)).thenReturn(attributeMetadata);
+		Explanation explanation = Explanation.match(0.3f, "match");
+		when(elasticSearchExplainService.explain(query, attributeMetadata, "attrID")).thenReturn(explanation);
+		when(elasticSearchExplainService.findQueriesFromExplanation(collectExpandedQueryMap, explanation)).thenReturn(
+				explainedQueryStrings);
+
+		assertEquals(
+				semanticSearchService.convertAttributeToExplainedAttribute(attribute, collectExpandedQueryMap, query),
+				explainedQueryStrings);
 	}
 
 	@Configuration
