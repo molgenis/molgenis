@@ -1,5 +1,8 @@
 <template>
-  <div class="col">
+  <div class="container">
+    <div class="page-header">
+      <h1>Permission Manager</h1>
+    </div>
     <div class="row">
       <div class="col col-md-4">
         <h3>{{'ROLE' | i18n}}</h3>
@@ -47,12 +50,12 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
-  import {mapState, mapGetters, mapMutations, mapActions} from 'vuex'
+  import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
   import {
     SELECT_ROLE, CREATE_ROLE,
     CANCEL_CREATE_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING
   } from '../store/mutations'
-  import {GET_ACLS, FILTER_CHANGED, SAVE_ACL, SAVE_CREATE_ROLE} from '../store/actions'
+  import { GET_ACLS, FILTER_CHANGED, SAVE_ACL, SAVE_CREATE_ROLE } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Roles from './Roles'
@@ -117,5 +120,9 @@
 <style scoped>
   button:hover {
     cursor: pointer
+  }
+
+  .container {
+    padding: 25px
   }
 </style>

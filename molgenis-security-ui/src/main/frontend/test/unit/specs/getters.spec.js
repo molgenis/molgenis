@@ -1,4 +1,4 @@
-import getters from "store/getters";
+import getters from 'store/getters'
 
 const rows = [{
   'entity': 'home',

@@ -11,7 +11,7 @@
     "test:watch": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --watch",
     "test:debug": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js -i --watch",
     "lint": "eslint --ext .js,.vue src test/unit/specs",
-    "lint:fix": "eslint --ext .js,.vue src test/unit/specs"
+    "lint:fix": "eslint --fix --ext .js,.vue src test/unit/specs"
   },
   "dependencies": {
     "@molgenis/molgenis-api-client": "^1.1.0",
