@@ -1,5 +1,7 @@
 package org.molgenis.model.registry.model;
 
+import org.molgenis.data.meta.model.Package;
+
 import java.util.List;
 
 /**
@@ -14,6 +16,16 @@ public class PackageResponse
 	private String matchDescription;
 	private List<ModelRegistryEntity> entitiesInPackage;
 	private List<ModelRegistryTag> tags;
+
+	public PackageResponse(Package _package)
+	{
+		this.name = _package.getId();
+		this.label = _package.getLabel();
+		this.description = _package.getDescription();
+//		this.matchDescription = _package.;
+//		this.entitiesInPackage = entitiesInPackage;
+//		this.tags = tags;
+	}
 
 	public PackageResponse(String name, String label, String description, String matchDescription,
 			List<ModelRegistryEntity> entitiesInPackage, List<ModelRegistryTag> tags)

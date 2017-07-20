@@ -3,10 +3,12 @@ package org.molgenis.model.registry;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.model.registry.model.PackageResponse;
 import org.molgenis.model.registry.model.PackageSearchRequest;
 import org.molgenis.model.registry.model.PackageSearchResponse;
@@ -14,6 +16,7 @@ import org.molgenis.model.registry.model.PackageTreeNode;
 import org.molgenis.model.registry.services.MetaDataSearchService;
 import org.molgenis.model.registry.services.TreeNodeService;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,19 +54,31 @@ public class ModelRegistryController extends MolgenisPluginController
 	private final MetaDataService metaDataService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
+	// Needed for VUE implementation
+	private final LanguageService languageService;
+	private final AppSettings appSettings;
+	private final MenuReaderService menuReaderService;
+
 	// Services for model-registry use only
 	private final TreeNodeService treeNodeService;
 	private final MetaDataSearchService metaDataSearchService;
 
+
+
 	@Autowired
 	public ModelRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService,
-			TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService)
+			TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService, LanguageService languageService, AppSettings appSettings, MenuReaderService menuReaderService)
 	{
 		super(URI);
 		this.metaDataService = Objects.requireNonNull(metaDataService);
 		this.metaDataSearchService = Objects.requireNonNull(metaDataSearchService);
 		this.tagService = Objects.requireNonNull(tagService);
 		this.treeNodeService = Objects.requireNonNull(treeNodeService);
+
+		// Needed for VUE implementation
+		this.languageService = Objects.requireNonNull(languageService);
+		this.appSettings = Objects.requireNonNull(appSettings);
+		this.menuReaderService = Objects.requireNonNull(menuReaderService);
 
 	}
 
@@ -143,20 +158,28 @@ public class ModelRegistryController extends MolgenisPluginController
 		return VIEW_NAME_DETAILS;
 	}
 
-//	@RequestMapping(value = "/uml", method = GET)
-//	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
-//	{
-//		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
-//		if (molgenisPackage != null)
-//		{
-//			model.addAttribute("molgenisPackage", molgenisPackage);
-//		}
-//		else
-//		{
-//			throw new MolgenisDataException("Unknown package: [ " + selectedPackageName + " ]");
-//		}
-//		return VIEW_NAME_UML;
-//	}
+	@RequestMapping(value = "/uml", method = GET)
+	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
+	{
+
+		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
+		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
+		model.addAttribute("baseUrl", getBaseUrl());
+
+
+		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
+		if (molgenisPackage != null)
+		{
+			Gson gson = new Gson();
+			PackageResponse response = new PackageResponse(molgenisPackage);
+			model.addAttribute("molgenisPackage", gson.toJson(response));
+		}
+		else
+		{
+			throw new MolgenisDataException("Unknown package: [ " + selectedPackageName + " ]");
+		}
+		return VIEW_NAME_UML;
+	}
 
 	@RequestMapping(value = "/getPackage", method = GET)
 	@ResponseBody
@@ -191,5 +214,10 @@ public class ModelRegistryController extends MolgenisPluginController
 		}
 
 		return Collections.singletonList(treeNodeService.createPackageTreeNode(molgenisPackage));
+	}
+
+	private String getBaseUrl()
+	{
+		return menuReaderService.getMenu().findMenuItemPath(ModelRegistryController.ID);
 	}
 }

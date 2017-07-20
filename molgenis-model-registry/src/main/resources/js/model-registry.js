@@ -6,7 +6,6 @@
     var countTemplate;
     var modelTemplate;
 
-    var scale;
     var nrResultsPerPage = 3;
     var query;
     var pageIndex = 0;
@@ -60,64 +59,6 @@
         }
         container.append(countTemplate({'count': searchResults.total}));
         $('.select2').select2({width: 300});
-    }
-
-    function zoomIn() {
-        scale += 0.1;
-        paper.setDimensions(bbox.width * scale, bbox.height * scale);
-        paper.scale(scale, scale);
-    }
-
-    function zoomOut() {
-        scale -= 0.1;
-        paper.setDimensions(bbox.width * scale, bbox.height * scale);
-        paper.scale(scale, scale);
-    }
-
-    function scaleToMax(widthMax, heightMax) {
-        var widthScale = widthMax / bbox.width;
-        var heightScale = heightMax / bbox.height;
-        var bestScale;
-        paper.setDimensions(widthMax, heightMax);
-        bestScale = (widthScale < heightScale ? widthScale : heightScale);
-        scale = bestScale;
-        paper.scale(bestScale, bestScale);
-    }
-
-    function reset() {
-        $('#uml-tab').click();
-    }
-
-    function scaleToA4Landscape() {
-        var dpix = getDPIx();
-        var dpiy = getDPIy();
-        scaleToMax((11.7 - 2.25) * dpix, (8.27 - 4) * dpiy);
-    }
-
-    function scaleToA4Portrait() {
-        var dpix = getDPIx();
-        var dpiy = getDPIy();
-        scaleToMax((8.27 - 2) * dpix, (11.7 - 3) * dpiy);
-    }
-
-    function scaleToA3Landscape() {
-        var dpix = getDPIx();
-        var dpiy = getDPIy();
-        scaleToMax((16.54 - 3) * dpix, (11.7 - 5) * dpiy);
-    }
-
-    function scaleToA3Portrait() {
-        var dpix = getDPIx();
-        var dpiy = getDPIy();
-        scaleToMax((11.7 - 3) * dpix, (16.54 - 6) * dpiy);
-    }
-
-    function getDPIx() {
-        return document.getElementById('dpi').offsetWidth;
-    }
-
-    function getDPIy() {
-        return document.getElementById('dpi').offsetHeight;
     }
 
     $(function () {
@@ -175,6 +116,7 @@
         });
 
         function showPackageDetails(id) {
+            console.log(id)
             detailsPackageName = id;
 
             $('#standards-registry-details').load(molgenis.getContextUrl() + '/details?package=' + id, function () {
@@ -206,42 +148,24 @@
             }
         });
 
-        $(document).on('click', '#reset', function () {
-            reset();
-        });
-
-        $(document).on('click', '#a4-horizontal', function () {
-            scaleToA4Landscape();
-        });
-
-        $(document).on('click', '#a4-vertical', function () {
-            scaleToA4Portrait();
-        });
-
-        $(document).on('click', '#a3-horizontal', function () {
-            scaleToA3Landscape();
-        });
-
-        $(document).on('click', '#a3-vertical', function () {
-            scaleToA3Portrait();
-        });
 
 
         $(document).on('click', '#print-btn', function () {
             $('#package-doc-container').css('height', '100%').css('width', '21cm').css("overflow", "hidden");
-            $('#paper-holder').css("overflow", "hidden");
+            $('#model-registry-uml-holder').css("overflow", "hidden");
             window.print();
             $('#package-doc-container').css('height', '600px').css("overflow-x", "hidden").css("overflow-y", "auto").css('width', '923px');
-            $('#paper-holder').css("overflow", "auto");
+            $('#model-registry-uml-holder').css("overflow", "auto");
         });
 
-        // $(document).on('click', '#uml-tab', function () {
-        //     showSpinner();
-        //     setTimeout(function () {
-        //         $.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
-        //         hideSpinner();
-        //     }, 500);
-        // });
+        $(document).on('click', '#uml-tab', function () {
+            showSpinner();
+            setTimeout(function () {
+                $('#model-registry-uml').load(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
+                hideSpinner();
+            }, 500);
+
+        });
 
         countTemplate = Handlebars.compile($("#count-template").html());
         modelTemplate = Handlebars.compile($("#model-template").html());
@@ -259,14 +183,6 @@
                 });
             }
         }
-
-        $(document).on('click', '#zoom-in', function () {
-            zoomIn();
-        });
-
-        $(document).on('click', '#zoom-out', function () {
-            zoomOut();
-        });
 
         var data = $("#package-search-results[data-package-search-results]").attr("data-package-search-results");
         if (data) {

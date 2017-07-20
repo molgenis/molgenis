@@ -1,11 +1,12 @@
 <template>
-    <!-- read out graph so we can watch it -->
-    <div id="graph-container" ref="graphDiv" v-if="umlData"></div>
+  <!-- read out graph so we can watch it -->
+  <div id="graph-container" ref="graphDiv" v-if="umlData"></div>
 </template>
 
 <style lang="scss">
   @import "~variables";
   @import "~mixins";
+
   #graph-container {
     border: solid 1px black;
     width: 100%;
@@ -15,19 +16,14 @@
 
 <script>
 
-  import { newGraph } from './Graph.js'
-  import { mapGetters } from 'vuex'
+  import {newGraph} from './Graph.js'
+  import {mapGetters} from 'vuex'
 
   export default {
     name: 'model-registry-uml-viewer',
     updated () {
       const graphDiv = this.$refs.graphDiv
       newGraph(graphDiv, this.umlData)
-    },
-    data () {
-      return {
-        message: 'Hello 2'
-      }
     },
     computed: {
       ...mapGetters(['umlData'])

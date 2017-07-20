@@ -49,11 +49,8 @@
         </div>
     </div>
     <div class="tab-pane" id="uml">
-        <div id="app"></div>
+        <div id="model-registry-uml"></div>
     </div>
 </div>
-<script type=text/javascript src="<@resource_href "/js/model-registry/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/model-registry/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/model-registry/app.js"/>"></script>
 
 

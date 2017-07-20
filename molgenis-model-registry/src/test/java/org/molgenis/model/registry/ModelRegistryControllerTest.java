@@ -5,16 +5,20 @@ import com.google.gson.Gson;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.TestHarnessConfig;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.model.registry.model.*;
 import org.molgenis.model.registry.services.MetaDataSearchService;
 import org.molgenis.model.registry.services.TreeNodeService;
 import org.molgenis.model.registry.utils.ModelRegistryTestHarness;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -243,10 +247,25 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public LanguageService languageService() {
+			return mock(LanguageService.class);
+		}
+
+		@Bean
+		public AppSettings appSettings() {
+			return mock(AppSettings.class);
+		}
+
+		@Bean
+		public MenuReaderService menuReaderService() {
+			return mock(MenuReaderService.class);
+		}
+
+		@Bean
 		public ModelRegistryController standardRegistryController()
 		{
 			return new ModelRegistryController(metaDataService(), metaDataSearchService(), tagService(),
-					treeNodeService());
+					treeNodeService(), languageService(), appSettings(), menuReaderService());
 		}
 
 	}

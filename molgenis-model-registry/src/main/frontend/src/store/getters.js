@@ -97,8 +97,6 @@ export default {
       nodeData = mapNodeData(state.umlData.entityTypes)
       mapExtendedNodeData(state.umlData.entityTypes)
       mapLinkData(state.umlData.entityTypes)
-      console.log(nodeData)
-      console.log(linkData)
       return {
         nodeData: nodeData,
         linkData: linkData
