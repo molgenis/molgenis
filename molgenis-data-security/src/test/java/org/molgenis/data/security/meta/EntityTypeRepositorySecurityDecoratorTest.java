@@ -92,8 +92,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType3.getLabel()).thenReturn(entityTypeId1);
 		when(entityType4.getId()).thenReturn(entityTypeId4);
 		when(entityType4.getLabel()).thenReturn(entityTypeId1);
-		repo = new EntityTypeRepositorySecurityDecorator(decoratedRepo, systemEntityTypeRegistry, permissionService,
-				dataService);
+		repo = new EntityTypeRepositorySecurityDecorator(decoratedRepo, permissionService);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
