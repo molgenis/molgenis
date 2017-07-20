@@ -139,9 +139,10 @@ if (indexActions.isEmpty())
 		}
 
 		LOG.debug("Store index actions for transaction {}", transactionId);
-		dataService.add(INDEX_ACTION_GROUP,
-				indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
-		dataService.add(INDEX_ACTION, indexActions.stream());
+		// FIXME enable index action (group) persisting
+//		dataService.add(INDEX_ACTION_GROUP,
+//				indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
+//		dataService.add(INDEX_ACTION, indexActions.stream());
 	}
 
 	private IndexAction createIndexAction(IndexActionGroup indexActionGroup, Impact key)
