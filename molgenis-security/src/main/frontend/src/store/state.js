@@ -8,9 +8,9 @@ const state: State = {
     username: 'admin'
   },
   selectedSid: null,
-  sids: [{authority: 'USER'}, {authority: 'SU'}],
+  sids: [{authority: 'user'}, {authority: 'SU'}],
   selectedEntityTypeId: null,
-  permissions: ['ADMIN', 'WRITE', 'READ', 'COUNT'],
+  permissions: ['WRITEMETA', 'WRITE', 'READ'],
   filter: null,
   rows: [],
   entityTypes: [
