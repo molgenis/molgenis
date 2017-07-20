@@ -3,6 +3,7 @@ package org.molgenis.oneclickimporter.service.Impl;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.util.LocaleUtil;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
@@ -18,6 +19,8 @@ import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.parseInt;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
+import static org.apache.poi.util.LocaleUtil.TIMEZONE_UTC;
+import static org.apache.poi.util.LocaleUtil.resetUserTimeZone;
 
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
@@ -124,8 +127,10 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			case NUMERIC:
 				if (isCellDateFormatted(cell))
 				{
+					LocaleUtil.setUserTimeZone(TIMEZONE_UTC);
 					Date dateCellValue = cell.getDateCellValue();
 					value = dateCellValue.toString();
+					resetUserTimeZone();
 				}
 				else
 				{
