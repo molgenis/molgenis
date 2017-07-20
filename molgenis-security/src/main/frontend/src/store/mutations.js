@@ -32,6 +32,9 @@ export default {
     const ace: ACE = acl.entries[aceIndex]
     if (ace.permissions.includes(permission)) {
       ace.permissions = ace.permissions.filter(p => p !== permission)
+      if (ace.permissions.length === 0) {
+        acl.entries = acl.entries.filter(entry => entry !== ace)
+      }
     } else {
       ace.permissions.push(permission)
     }

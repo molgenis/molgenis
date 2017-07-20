@@ -29,9 +29,6 @@
           </label>
         </div>
       </td>
-      <!--<td>-->
-      <!--<button class="btn btn-sm" @click="onSave(rowIndex)"><i class="fa fa-save"></i>Save</button>-->
-      <!--</td>-->
     </tr>
     </tbody>
   </table>
