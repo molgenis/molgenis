@@ -69,6 +69,24 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 				return DATE;
 			}
 		}
+		else if (guess.equals(DECIMAL))
+		{
+			if (value instanceof Integer)
+			{
+				return INT;
+			}
+			else if (value instanceof Long)
+			{
+				Long longValue = (Long) value;
+				return longValue > Integer.MIN_VALUE && longValue < Integer.MAX_VALUE ? INT : LONG;
+			}
+			else if (value instanceof Double)
+			{
+				Double doubleValue = (Double) value;
+				return doubleValue == Math.rint(doubleValue) && doubleValue > Long.MIN_VALUE
+						&& doubleValue < Long.MAX_VALUE ? LONG : DECIMAL;
+			}
+		}
 		return guess;
 	}
 

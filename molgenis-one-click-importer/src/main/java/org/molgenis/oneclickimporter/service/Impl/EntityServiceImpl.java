@@ -11,10 +11,12 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
+import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,9 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
-import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 
 @Component
 public class EntityServiceImpl implements EntityService
@@ -48,9 +48,12 @@ public class EntityServiceImpl implements EntityService
 
 	private final AttributeTypeService attributeTypeService;
 
+	private final OneClickImporterService oneClickImporterService;
+
 	public EntityServiceImpl(DefaultPackage defaultPackage, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attributeFactory, IdGenerator idGenerator, DataService dataService,
-			MetaDataService metaDataService, EntityManager entityManager, AttributeTypeService attributeTypeService)
+			MetaDataService metaDataService, EntityManager entityManager, AttributeTypeService attributeTypeService,
+			OneClickImporterService oneClickImporterService)
 	{
 		this.defaultPackage = requireNonNull(defaultPackage);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
@@ -60,6 +63,7 @@ public class EntityServiceImpl implements EntityService
 		this.metaDataService = requireNonNull(metaDataService);
 		this.entityManager = requireNonNull(entityManager);
 		this.attributeTypeService = requireNonNull(attributeTypeService);
+		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 	}
 
 	@Override
@@ -73,14 +77,28 @@ public class EntityServiceImpl implements EntityService
 		entityType.setId(entityTypeId);
 		entityType.setLabel(dataCollection.getName());
 
-		// Create and add an auto id column to the dataTable
-		entityType.addAttribute(createIdAttribute(), ROLE_ID);
+		// Check if first column can be used as id ( has unique values )
+		List<Column> columns = dataCollection.getColumns();
+		Column firstColumn = columns.get(0);
+		final boolean isFirstColumnUnique = oneClickImporterService.hasUniqueValues(firstColumn);
 
-		// Add all other columns the dataTable
-		dataCollection.getColumns().forEach(column ->
+		AttributeType type = attributeTypeService.guessAttributeType(firstColumn.getDataValues());
+		final boolean isValidAttributeType = AttributeUtils.getValidIdAttributeTypes().contains(type);
+		final boolean useAutoId = !isFirstColumnUnique || !isValidAttributeType;
+
+		if(useAutoId) {
+			entityType.addAttribute(createIdAttribute(), ROLE_ID);
+		} else {
+			entityType.addAttribute(createAttribute(firstColumn), ROLE_ID);
+		}
+
+		// Add all columns to the dataTable
+		columns.forEach(column ->
 		{
-			Attribute attribute = createAttribute(column);
-			entityType.addAttribute(attribute);
+			if(useAutoId || column != firstColumn){
+				Attribute attribute = createAttribute(column);
+				entityType.addAttribute(attribute);
+			}
 		});
 
 		// Store the dataTable (metadata only)
@@ -91,9 +109,12 @@ public class EntityServiceImpl implements EntityService
 		while (rowIndex.get() < dataCollection.getColumns().get(0).getDataValues().size())
 		{
 			Entity row = entityManager.create(entityType, NO_POPULATE);
-			row.setIdValue(idGenerator.generateId());
-			int index = rowIndex.getAndIncrement();
-			dataCollection.getColumns().forEach(column -> setRowValueForAttribute(row, index, column));
+			if(useAutoId) {
+				row.setIdValue(idGenerator.generateId());
+			}
+
+			final int index = rowIndex.getAndIncrement();
+			columns.forEach(column -> setRowValueForAttribute(row, index, column));
 
 			rows.add(row);
 		}
@@ -110,23 +131,8 @@ public class EntityServiceImpl implements EntityService
 		EntityType rowType = row.getEntityType();
 		Attribute attribute = rowType.getAttribute(attributeName);
 
-		row.set(attributeName, castValueAsAttributeType(dataValue, attribute.getDataType()));
-	}
-
-	private Object castValueAsAttributeType(Object value, AttributeType type)
-	{
-		if (value == null)
-		{
-			return value;
-		}
-
-		if (type.equals(DATE))
-		{
-			// this will always succeed because type enrichment checked
-			// if its possible to parse local date already
-			value = parseLocalDate(value.toString());
-		}
-		return value;
+		Object castedValue = oneClickImporterService.castValueAsAttributeType(dataValue, attribute.getDataType());
+		row.set(attributeName, castedValue);
 	}
 
 	private Attribute createIdAttribute()
