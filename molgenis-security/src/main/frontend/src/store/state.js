@@ -1,5 +1,5 @@
 // @flow
-import type { State } from './utils/flow.types'
+import type {State} from "./utils/flow.types";
 
 export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 
@@ -9,6 +9,7 @@ const state: State = {
   },
   roles: [],
   selectedRole: null,
+  doCreateRole: false,
   selectedSid: null,
   selectedEntityTypeId: null,
   permissions: ['WRITEMETA', 'WRITE', 'READ'],

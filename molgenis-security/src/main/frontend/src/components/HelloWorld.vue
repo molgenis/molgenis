@@ -1,14 +1,30 @@
 <template>
-  <div class="row">
-    <div class="col">
-      <div class="row">
-        <div class="col col-md-4">
-          <h3>{{'ROLE' | i18n}}</h3>
-          <roles :roles="roles"
-                 :selectedRole="selectedRole"
-                 :selectRole="selectRole"></roles>
+  <div class="col">
+    <div class="row">
+      <div class="col col-md-4">
+        <h3>{{'ROLE' | i18n}}</h3>
+        <roles :roles="roles"
+               :selectedRole="selectedRole"
+               :selectRole="selectRole" :createRole="createRole"></roles>
+      </div>
+      <div class="col col-md-8">
+        <div v-if="doCreateRole">
+          <form v-on:submit="onSaveRole({label: roleLabel, description: roleDescription})">
+            <div class="form-group">
+              <label for="labelInput">Label</label>
+              <input v-model="roleLabel" type="text" class="form-control" id="labelInput" placeholder="Role label"
+                     required>
+              <label for="descriptionInput">Description</label>
+              <input v-model="roleDescription" type="text" class="form-control" id="descriptionInput"
+                     placeholder="Role description">
+            </div>
+            <div class="float-right">
+              <button type="button" class="btn btn-default" @click="cancelCreateRole()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
         </div>
-        <div class="col col-md-8" v-if="selectedRole">
+        <div v-else-if="selectedRole">
           <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
                        selectLabel="" deselectLabel="" :placeholder="'SELECT_AN_ENTITY'|i18n"></multiselect>
@@ -31,9 +47,15 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
-  import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
-  import { SELECT_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION } from '../store/mutations'
-  import { GET_ACLS, FILTER_CHANGED, SAVE_ACL } from '../store/actions'
+  import {mapState, mapGetters, mapMutations, mapActions} from 'vuex'
+  import {
+    SELECT_ROLE,
+    CREATE_ROLE,
+    CANCEL_CREATE_ROLE,
+    SET_SELECTED_ENTITY_TYPE,
+    TOGGLE_PERMISSION
+  } from '../store/mutations'
+  import {GET_ACLS, FILTER_CHANGED, SAVE_ACL, SAVE_CREATE_ROLE} from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Roles from './Roles'
@@ -44,16 +66,25 @@
     methods: {
       ...mapMutations({
         selectRole: SELECT_ROLE,
+        createRole: CREATE_ROLE,
+        cancelCreateRole: CANCEL_CREATE_ROLE,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE,
         onPermissionClick: TOGGLE_PERMISSION
       }),
       ...mapActions({
         filterChanged: FILTER_CHANGED,
-        onSave: SAVE_ACL
+        onSave: SAVE_ACL,
+        onSaveRole: SAVE_CREATE_ROLE
       })
     },
+    data: function () {
+      return {
+        roleLabel: null,
+        roleDescription: null
+      }
+    },
     computed: {
-      ...mapState(['roles', 'selectedRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
+      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
       ...mapGetters(['tableRows']),
       selectedEntityType: {
         get () {
@@ -75,3 +106,9 @@
     }
   }
 </script>
+
+<style scoped>
+  button:hover {
+    cursor: pointer
+  }
+</style>

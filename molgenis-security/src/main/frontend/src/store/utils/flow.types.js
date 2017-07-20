@@ -11,7 +11,7 @@ export type PrincipalSid = {
 export type Sid = GrantedAuthoritySid | PrincipalSid
 
 export type Role = {
-  id: string,
+  id?: string,
   label: string,
   description ?: string
 }
@@ -57,5 +57,6 @@ export type State = {
   selectedEntityTypeId: ?string,
   entityTypes: Array<EntityType>,
   rows: Array<Row>,
-  filter: ?string
+  filter: ?string,
+  doCreateRole: ?boolean
 }
