@@ -10,6 +10,12 @@ export type PrincipalSid = {
 
 export type Sid = GrantedAuthoritySid | PrincipalSid
 
+export type Role = {
+  id: string,
+  label: string,
+  description ?: string
+}
+
 export type EntityType = {
   id: string,
   label?: string,
@@ -44,9 +50,10 @@ export type Row = {
 
 export type State = {
   me: PrincipalSid,
-  sids: Array<GrantedAuthoritySid>,
+  roles: Array<Role>,
   permissions: Array<string>,
   selectedSid: ?string,
+  selectedRole: ?string,
   selectedEntityTypeId: ?string,
   entityTypes: Array<EntityType>,
   rows: Array<Row>,

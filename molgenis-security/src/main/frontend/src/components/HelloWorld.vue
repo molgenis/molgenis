@@ -4,11 +4,11 @@
       <div class="row">
         <div class="col col-md-4">
           <h3>{{'ROLE' | i18n}}</h3>
-          <sids :sids="sids"
-                :selectedSid="selectedSid"
-                :selectSid="selectSid"></sids>
+          <roles :roles="roles"
+                 :selectedRole="selectedRole"
+                 :selectRole="selectRole"></roles>
         </div>
-        <div class="col col-md-8" v-if="selectedSid">
+        <div class="col col-md-8" v-if="selectedRole">
           <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
                        selectLabel="" deselectLabel="" :placeholder="'SELECT_AN_ENTITY'|i18n"></multiselect>
@@ -32,18 +32,18 @@
 
 <script>
   import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
-  import { SELECT_SID, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION } from '../store/mutations'
+  import { SELECT_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION } from '../store/mutations'
   import { GET_ACLS, FILTER_CHANGED, SAVE_ACL } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
-  import Sids from './Sids'
+  import Roles from './Roles'
   import capitalizeFirstLetter from '../filters/capitalizeFirstLetter'
 
   export default {
     name: 'permission-manager',
     methods: {
       ...mapMutations({
-        selectSid: SELECT_SID,
+        selectRole: SELECT_ROLE,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE,
         onPermissionClick: TOGGLE_PERMISSION
       }),
@@ -53,7 +53,7 @@
       })
     },
     computed: {
-      ...mapState(['sids', 'selectedSid', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
+      ...mapState(['roles', 'selectedRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
       ...mapGetters(['tableRows']),
       selectedEntityType: {
         get () {
@@ -67,7 +67,7 @@
     },
     components: {
       Multiselect,
-      Sids,
+      Roles,
       acls: ACLs
     },
     filters: {

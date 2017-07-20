@@ -7,8 +7,9 @@ const state: State = {
   me: {
     username: 'admin'
   },
+  roles: [],
+  selectedRole: null,
   selectedSid: null,
-  sids: [{authority: 'user'}, {authority: 'SU'}],
   selectedEntityTypeId: null,
   permissions: ['WRITEMETA', 'WRITE', 'READ'],
   filter: null,
