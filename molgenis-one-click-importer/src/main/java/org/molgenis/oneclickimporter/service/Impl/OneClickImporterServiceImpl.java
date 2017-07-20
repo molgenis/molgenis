@@ -3,14 +3,16 @@ package org.molgenis.oneclickimporter.service.Impl;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
@@ -55,6 +57,79 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		}
 
 		return DataCollection.create(dataCollectionName, columns, lines.size());
+	}
+
+	@Override
+	public boolean hasUniqueValues(Column column)
+	{
+		List<Object> dataValues = column.getDataValues();
+
+		// check for null values
+		if(dataValues.parallelStream().anyMatch(Objects::isNull)) {
+			return false;
+		}
+
+		List<String> dataAsStrings = dataValues.parallelStream().map(Object::toString).collect(Collectors.toList());
+		Set valueSet = new HashSet<>(dataAsStrings);
+		return valueSet.size() == dataValues.size();
+	}
+
+	@Override
+	public Object castValueAsAttributeType(Object value, AttributeType type)
+	{
+		Object castedValue = value;
+		if (value == null)
+		{
+			return castedValue;
+		}
+
+		switch (type)
+		{
+			case DATE:
+				if (!(value instanceof LocalDate))
+				{
+					castedValue = LocalDate.parse(value.toString());
+				}
+				break;
+			case INT:
+				if(value instanceof Number)
+				{
+					castedValue = ((Number) value).intValue();
+				} else if (value instanceof String)
+				{
+					castedValue = Integer.valueOf((String) value);
+				}
+				break;
+			case LONG:
+				if(value instanceof Number)
+				{
+					castedValue = ((Number) value).longValue();
+				} else if (value instanceof String)
+				{
+					castedValue = Long.valueOf((String) value);
+				}
+				break;
+			case DECIMAL:
+				if(value instanceof Number)
+				{
+					castedValue = ((Number) value).doubleValue();
+				} else if (value instanceof String)
+				{
+					castedValue = Double.valueOf((String) value);
+				}
+				break;
+			case STRING:
+			case TEXT:
+				if(value instanceof String)
+				{
+					castedValue = value;
+				}else {
+					castedValue = value.toString();
+				}
+				break;
+
+		}
+		return castedValue;
 	}
 
 	private Column createColumnFromCell(Sheet sheet, Cell cell)

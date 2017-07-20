@@ -55,13 +55,16 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	@Mock
 	private AttributeTypeService attributeTypeService;
 
+	@Mock
+	private OneClickImporterService oneClickImporterService;
+
 	private EntityService entityService;
 
 	@BeforeMethod
 	public void setup()
 	{
 		this.entityService = new EntityServiceImpl(defaultPackage, entityTypeFactory, attributeFactory, idGenerator,
-				dataService, metaDataService, entityManager, attributeTypeService);
+				dataService, metaDataService, entityManager, attributeTypeService, oneClickImporterService);
 
 		when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
 	}
