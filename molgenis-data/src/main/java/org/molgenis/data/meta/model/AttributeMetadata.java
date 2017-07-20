@@ -86,22 +86,14 @@ public class AttributeMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
-		Attribute entityAttribute = addAttribute(ENTITY).setDataType(XREF)
-														.setRefEntity(entityTypeMeta)
-														.setLabel("Entity")
-														.setNillable(false)
-														.setReadOnly(true);
-		addAttribute(SEQUENCE_NR).setDataType(INT)
-								 .setLabel("Sequence number")
-								 .setDescription("Number that defines order of attributes in a entity")
-								 .setNillable(false);
-		addAttribute(TYPE).setDataType(ENUM)
-						  .setEnumOptions(AttributeType.getOptionsLowercase())
-						  .setNillable(false)
-						  .setLabel("Data type");
-		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL)
-									 .setLabel("ID attribute")
-									 .setValidationExpression(getIdAttributeValidationExpression());
+		Attribute entityAttribute =addAttribute(ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Entity").setNillable(false)
+				.setReadOnly(true);
+		addAttribute(SEQUENCE_NR).setDataType(INT).setLabel("Sequence number")
+				.setDescription("Number that defines order of attributes in a entity").setNillable(false);
+		addAttribute(TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
+				.setLabel("Data type");
+		addAttribute(IS_ID_ATTRIBUTE).setDataType(BOOL).setLabel("ID attribute")
+				.setValidationExpression(getIdAttributeValidationExpression());
 		addAttribute(IS_LABEL_ATTRIBUTE).setDataType(BOOL).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTE_INDEX).setDataType(INT)
 											.setLabel("Lookup attribute index")

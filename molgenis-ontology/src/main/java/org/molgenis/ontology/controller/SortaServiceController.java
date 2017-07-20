@@ -260,8 +260,8 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void tryDeleteRepository(String entityTypeId)
 	{
-		if (dataService.hasRepository(entityTypeId) && molgenisPermissionService.hasPermissionOnEntityType(entityTypeId,
-				Permission.WRITEMETA))
+		if (dataService.hasRepository(entityTypeId) && molgenisPermissionService
+				.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 		{
 			RunAsSystemProxy.runAsSystem(() -> deleteRepository(entityTypeId));
 		}

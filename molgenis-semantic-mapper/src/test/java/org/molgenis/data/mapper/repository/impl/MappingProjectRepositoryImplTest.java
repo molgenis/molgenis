@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;

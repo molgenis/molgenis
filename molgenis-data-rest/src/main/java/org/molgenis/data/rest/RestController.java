@@ -648,7 +648,7 @@ public class RestController
 					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' is readonly");
 		}
 
-		Object value = this.restService.toEntityValue(attr, paramValue);
+		Object value = this.restService.toEntityValue(attr, paramValue, id);
 		entity.set(attributeName, value);
 		dataService.update(entityTypeId, entity);
 	}

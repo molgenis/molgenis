@@ -2,6 +2,7 @@ package org.molgenis.apps.model;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -117,7 +118,6 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	private void addApp(App app)
 	{
 		validateResourceZip(app);
-
 		if (app.isActive())
 		{
 			activateApp(app);
@@ -203,6 +203,19 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 			try
 			{
 				ZipFile zipFile = new ZipFile(fileStoreFile);
+				if (!app.getUseFreemarkerTemplate())
+				{
+					FileHeader fileHeader = zipFile.getFileHeader("index.html");
+					if (fileHeader == null)
+					{
+						LOG.error(
+								"Missing index.html in {} while option Use freemarker template as index.html was set 'No'",
+								app.getName());
+						throw new RuntimeException(
+								format("Missing index.html in %s while option 'Use freemarker template as index.html' was set 'No'",
+										app.getName()));
+					}
+				}
 				//noinspection StringConcatenationMissingWhitespace
 				zipFile.extractAll(
 						fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar

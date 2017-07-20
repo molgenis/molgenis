@@ -1,10 +1,9 @@
 package org.molgenis.integrationtest.platform;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.*;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
+import org.molgenis.data.index.exception.UnknownIndexException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
@@ -29,7 +28,6 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.QueryRule.Operator.*;
-import static org.molgenis.data.index.IndexingMode.ADD;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
@@ -43,7 +41,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityTestHarness testHarness;
 	@Autowired
-	private SearchService searchService;
+	private ElasticsearchService searchService;
 	@Autowired
 	private ElasticSearchExplainService explainService;
 
@@ -54,15 +52,27 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
 		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
 
-		searchService.createMappings(refEntityTypeDynamic);
-		searchService.createMappings(entityTypeDynamic);
+		searchService.createIndex(refEntityTypeDynamic);
+		searchService.createIndex(entityTypeDynamic);
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
-		searchService.delete(entityTypeDynamic);
-		searchService.delete(refEntityTypeDynamic);
+		try
+		{
+			searchService.deleteIndex(entityTypeDynamic);
+		}
+		catch (UnknownIndexException e)
+		{ // silently ignore
+		}
+		try
+		{
+			searchService.deleteIndex(refEntityTypeDynamic);
+		}
+		catch (UnknownIndexException e)
+		{ // silently ignore
+		}
 		searchService.refreshIndex();
 	}
 
@@ -86,15 +96,13 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		}
 		ontologyTerms.get(5).set(ATTR_CATEGORICAL, ontology2);
 
-		searchService.index(ontologyTerms.stream(), entityTypeDynamic, ADD);
+		searchService.index(entityTypeDynamic, ontologyTerms.stream());
 		searchService.refreshIndex();
 
 		Query<Entity> query = new QueryImpl<>(new QueryRule(ATTR_XREF, FUZZY_MATCH, "\"0[0].1[1]\"")).and()
-																									 .eq(ATTR_CATEGORICAL,
-																											 ontology1);
-		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic)
-										.map(Entity::getIdValue)
-										.collect(toList());
+				.eq(ATTR_CATEGORICAL, ontology1);
+		List<Object> ids = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(ids, asList("1", "2", "3", "4"));
 	}
@@ -118,7 +126,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		}
 		attributes.get(5).set(ATTR_CATEGORICAL, ontology2);
 
-		searchService.index(attributes.stream(), entityTypeDynamic, ADD);
+		searchService.index(entityTypeDynamic, attributes.stream());
 		searchService.refreshIndex();
 
 		List<String> queryTerms = asList("hypertension", "disorder vascular hypertensive", "increased pressure blood",
@@ -136,9 +144,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		Query<Entity> query = new QueryImpl<>(
 				asList(new QueryRule(ATTR_ID, IN, attributeIds), new QueryRule(AND), finalDisMaxQuery));
 
-		List<Object> matchingAttributeIDs = searchService.searchAsStream(query, entityTypeDynamic)
-														 .map(Entity::getIdValue)
-														 .collect(toList());
+		List<Object> matchingAttributeIDs = searchService.search( entityTypeDynamic, query).collect(toList());
 		assertEquals(matchingAttributeIDs.get(0), "3");
 		assertEquals(matchingAttributeIDs.get(1), "5");
 		assertFalse(matchingAttributeIDs.contains("1"));
@@ -194,7 +200,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		createAndIndexEntities(2);
 
-		assertEquals(searchService.count(new QueryImpl<>(), entityTypeDynamic), 2);
+		assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityTypeDynamic), 2);
 	}
 
@@ -203,7 +209,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = createAndIndexEntities(1).get(0);
 
-		searchService.delete(entity, entityTypeDynamic);
+		searchService.delete(entityTypeDynamic, entity);
 		searchService.refreshIndex();
 		assertEquals(searchService.count(entityTypeDynamic), 0);
 	}
@@ -213,7 +219,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = createAndIndexEntities(1).get(0);
 
-		searchService.deleteById(entity.getIdValue().toString(), entityTypeDynamic);
+		searchService.deleteById(entityTypeDynamic, entity.getIdValue());
 		searchService.refreshIndex();
 		assertEquals(searchService.count(entityTypeDynamic), 0);
 	}
@@ -223,17 +229,17 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = createAndIndexEntities(2);
 
-		searchService.delete(entities.stream(), entityTypeDynamic);
+		searchService.delete(entityTypeDynamic, entities.stream());
 		searchService.refreshIndex();
 		assertEquals(searchService.count(entityTypeDynamic), 0);
 	}
 
-	@Test(singleThreaded = true)
+	@Test(singleThreaded = true, expectedExceptions = UnknownIndexException.class)
 	public void testDeleteAll()
 	{
 		createAndIndexEntities(5);
 
-		searchService.delete(entityTypeDynamic);
+		searchService.deleteIndex(entityTypeDynamic);
 		searchService.refreshIndex();
 		assertEquals(searchService.count(entityTypeDynamic), 0);
 	}
@@ -241,8 +247,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testFindAllEmpty()
 	{
-		Iterable<Entity> retrieved = searchService.search(new QueryImpl<>(), entityTypeDynamic);
-		assertEquals(Iterables.size(retrieved), 0);
+		long count = searchService.search(entityTypeDynamic, new QueryImpl<>()).count();
+		assertEquals(count, 0L);
 	}
 
 	@Test(singleThreaded = true)
@@ -250,8 +256,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = createAndIndexEntities(5);
 
-		Iterable<Entity> retrieved = searchService.search(new QueryImpl<>(), entityTypeDynamic);
-		assertEquals(Iterables.size(retrieved), entities.size());
+		long count = searchService.search(entityTypeDynamic, new QueryImpl<>()).count();
+		assertEquals(count, entities.size());
 	}
 
 	@Test(singleThreaded = true)
@@ -259,7 +265,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		createAndIndexEntities(3);
 
-		Supplier<Stream<Entity>> retrieved = () -> searchService.searchAsStream(new QueryImpl<>(), entityTypeDynamic);
+		Supplier<Stream<Object>> retrieved = () -> searchService.search(entityTypeDynamic, new QueryImpl<>());
 		assertEquals(retrieved.get().count(), 3);
 	}
 
@@ -292,9 +298,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(3);
 
 		Query<Entity> query = new QueryImpl<>().eq(attrName, value);
-		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic)
-										.map(Entity::getIdValue)
-										.collect(toList());
+		List<Object> ids = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(ids, expectedEntityIds);
 	}
@@ -312,9 +317,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(2);
 
 		Query<Entity> query = new QueryImpl<>().in(ATTR_ID, ids);
-		List<Object> foundIds = searchService.searchAsStream(query, entityTypeDynamic)
-											 .map(Entity::getIdValue)
-											 .collect(toList());
+		List<Object> foundIds = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(foundIds, expectedEntityIds);
 	}
@@ -332,9 +336,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(5);
 
 		Query<Entity> query = new QueryImpl<>().lt(ATTR_INT, value);
-		List<Object> foundIds = searchService.searchAsStream(query, entityTypeDynamic)
-											 .map(Entity::getIdValue)
-											 .collect(toList());
+		List<Object> foundIds = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(foundIds, expectedEntityIds);
 	}
@@ -352,9 +355,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(5);
 
 		Query<Entity> query = new QueryImpl<>().le(ATTR_INT, value);
-		List<Object> foundIds = searchService.searchAsStream(query, entityTypeDynamic)
-											 .map(Entity::getIdValue)
-											 .collect(toList());
+		List<Object> foundIds = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(foundIds, expectedEntityIds);
 	}
@@ -372,9 +374,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(3);
 
 		Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, value);
-		List<Object> foundIds = searchService.searchAsStream(query, entityTypeDynamic)
-											 .map(Entity::getIdValue)
-											 .collect(toList());
+		List<Object> foundIds = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(foundIds, expectedEntityIds);
 	}
@@ -392,9 +393,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(3);
 
 		Query<Entity> query = new QueryImpl<>().ge(ATTR_INT, value);
-		List<Object> foundIds = searchService.searchAsStream(query, entityTypeDynamic)
-											 .map(Entity::getIdValue)
-											 .collect(toList());
+		List<Object> foundIds = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(foundIds, expectedEntityIds);
 	}
@@ -412,9 +412,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(3);
 
 		Query<Entity> nestedQuery = new QueryImpl<>().rng(ATTR_INT, low, high);
-		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic)
-												.map(Entity::getIdValue)
-												.collect(toList());
+		List<Object> foundAsList = searchService.search( entityTypeDynamic, nestedQuery)
+				.collect(toList());
 		assertEquals(foundAsList, expectedEntityIDs);
 	}
 
@@ -431,9 +430,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(2);
 
 		Query<Entity> nestedQuery = new QueryImpl<>().like(ATTR_STRING, likeStr);
-		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic)
-												.map(Entity::getIdValue)
-												.collect(toList());
+		List<Object> foundAsList = searchService.search( entityTypeDynamic, nestedQuery)
+				.collect(toList());
 		assertEquals(foundAsList, expectedEntityIDs);
 	}
 
@@ -450,9 +448,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(3);
 
 		Query<Entity> nestedQuery = new QueryImpl<>().not().eq(ATTR_INT, value);
-		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic)
-												.map(Entity::getIdValue)
-												.collect(toList());
+		List<Object> foundAsList = searchService.search( entityTypeDynamic, nestedQuery)
+				.collect(toList());
 		assertEquals(foundAsList, expectedEntityIDs);
 	}
 
@@ -469,9 +466,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(3);
 
 		Query<Entity> nestedQuery = new QueryImpl<>().eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value);
-		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic)
-												.map(Entity::getIdValue)
-												.collect(toList());
+		List<Object> foundAsList = searchService.search( entityTypeDynamic, nestedQuery)
+				.collect(toList());
 		assertEquals(foundAsList, expectedEntityIDs);
 	}
 
@@ -488,9 +484,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(3);
 
 		Query<Entity> nestedQuery = new QueryImpl<>().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value);
-		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic)
-												.map(Entity::getIdValue)
-												.collect(toList());
+		List<Object> foundAsList = searchService.search( entityTypeDynamic, nestedQuery)
+				.collect(toList());
 		assertEquals(foundAsList, expectedEntityIDs);
 	}
 
@@ -510,16 +505,10 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		createAndIndexEntities(3);
 
-		Query<Entity> nestedQuery = new QueryImpl<>().eq(ATTR_BOOL, boolValue)
-													 .and()
-													 .nest()
-													 .eq(ATTR_STRING, strValue)
-													 .or()
-													 .eq(ATTR_INT, value)
-													 .unnest();
-		List<Object> foundAsList = searchService.searchAsStream(nestedQuery, entityTypeDynamic)
-												.map(Entity::getIdValue)
-												.collect(toList());
+		Query<Entity> nestedQuery = new QueryImpl<>().eq(ATTR_BOOL, boolValue).and().nest().eq(ATTR_STRING, strValue)
+				.or().eq(ATTR_INT, value).unnest();
+		List<Object> foundAsList = searchService.search( entityTypeDynamic, nestedQuery)
+				.collect(toList());
 		assertEquals(foundAsList, expectedEntityIDs);
 	}
 
@@ -536,9 +525,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		createAndIndexEntities(2);
 
 		Query<Entity> query = new QueryImpl<>().search(ATTR_HTML, searchStr);
-		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic)
-										.map(Entity::getIdValue)
-										.collect(toList());
+		List<Object> ids = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(ids, expectedEntityIds);
 	}
@@ -551,13 +539,12 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		entities.get(1).set(ATTR_STRING, "cars in omaha");
 		entities.get(2).set(ATTR_STRING, "multiple carcinomas");
 		entities.get(3).set(ATTR_STRING, "and now for something completely different");
-		searchService.index(entities, entityTypeDynamic, ADD);
+		searchService.index(entityTypeDynamic, entities.stream());
 		searchService.refreshIndex();
 
 		Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "carcinoma");
-		List<Object> foundIds = searchService.searchAsStream(query, entityTypeDynamic)
-											 .map(Entity::getIdValue)
-											 .collect(toList());
+		List<Object> foundIds = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(foundIds, asList("0", "2"));
 	}
@@ -570,13 +557,12 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		entities.get(1).set(ATTR_STRING, "cars in omaha");
 		entities.get(2).set(ATTR_STRING, "multiple carcinomas");
 		entities.get(3).set(ATTR_STRING, "and now for something completely different");
-		searchService.index(entities, entityTypeDynamic, ADD);
+		searchService.index(entityTypeDynamic, entities.stream());
 		searchService.refreshIndex();
 
 		Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "car carcinoma");
-		List<Object> foundIds = searchService.searchAsStream(query, entityTypeDynamic)
-											 .map(Entity::getIdValue)
-											 .collect(toList());
+		List<Object> foundIds = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		assertEquals(foundIds, asList("0", "2", "1"));
 	}
@@ -587,9 +573,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		List<Entity> testEntities = createAndIndexEntities(10);
 
 		Query<Entity> query = new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, Sort.Direction.DESC));
-		Iterable<Entity> result = searchService.search(query, entityTypeDynamic);
-
-		List<Object> ids = Lists.newArrayList(Iterables.transform(result, Entity::getIdValue));
+		List<Object> ids = searchService.search(entityTypeDynamic, query).collect(toList());
 		List<Object> expected = asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
 		assertEquals(ids, expected);
 	}
@@ -600,9 +584,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		List<Entity> testEntities = createAndIndexEntities(10);
 
 		Query<Entity> query = new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, Sort.Direction.DESC));
-		List<Object> ids = searchService.searchAsStream(query, entityTypeDynamic)
-										.map(Entity::getIdValue)
-										.collect(toList());
+		List<Object> ids = searchService.search( entityTypeDynamic, query)
+				.collect(toList());
 
 		List<Object> expected = asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
 		assertEquals(ids, expected);
@@ -613,14 +596,15 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = createAndIndexEntities(1).get(0);
 
-		entity = searchService.findOne(new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()), entityTypeDynamic);
-		assertNotNull(entity);
+		Object entityId = searchService.searchOne(entityTypeDynamic,
+				new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
+		assertNotNull(entityId);
 	}
 
 	private List<Entity> createAndIndexEntities(int count)
 	{
 		List<Entity> entities = createDynamic(count).collect(toList());
-		searchService.index(entities, entityTypeDynamic, ADD);
+		searchService.index(entityTypeDynamic, entities.stream());
 		searchService.refreshIndex();
 		return entities;
 	}
@@ -628,7 +612,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	private Stream<Entity> createDynamic(int count)
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
-		searchService.index(refEntities.stream(), refEntityTypeDynamic, ADD);
+		searchService.index(refEntityTypeDynamic, refEntities.stream());
 		return testHarness.createTestEntities(entityTypeDynamic, count, refEntities);
 	}
 }

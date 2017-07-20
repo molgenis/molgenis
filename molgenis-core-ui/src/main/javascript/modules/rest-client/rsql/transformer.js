@@ -16,7 +16,8 @@ function getRsqlFromConstraint(constraint) {
 }
 
 function getRsqlFromSimpleConstraint(constraint) {
-    return toRsqlValue(constraint.selector) + constraint.comparison + toRsqlValue(constraint.arguments)
+    const rsqlValue = constraint.arguments.constructor === Array ? '(' + constraint.arguments.map(toRsqlValue).join(',') + ')' : toRsqlValue(constraint.arguments)
+    return toRsqlValue(constraint.selector) + constraint.comparison + rsqlValue
 }
 
 function getRsqlFromComplexConstraint(constraint) {
@@ -89,7 +90,11 @@ export function transformModelPart(fieldType, labels, constraint) {
 
 export function getArguments(constraint) {
     if (constraint.arguments) {
-        return new Set([constraint.arguments])
+        if (constraint.arguments.constructor === Array) {
+            return new Set(constraint.arguments)
+        } else {
+            return new Set([constraint.arguments])
+        }
     }
     let result = new Set()
     constraint.operands.map(o => getArguments(o).forEach(a => result.add(a)))
@@ -137,7 +142,7 @@ function toSimpleRef(labels, constraint) {
 export function toComplexLine(labels, group) {
     return {
         'operator': group.operator,
-        'values': (group.operands || [group.arguments]).map(o => {
+        'values': (group.operands || (group.arguments.constructor === Array ? group.arguments : [group.arguments])).map(o => {
             const value = o.arguments || o
             return {'label': labels[value], value}
         })
@@ -161,9 +166,12 @@ function toComplexRefOr(labels, constraint) {
 }
 
 function toComplexRef(labels, constraint) {
-    return {
-        'type': 'COMPLEX_REF',
-        'lines': toComplexRefOr(labels, constraint)
+    return constraint.operator && constraint.operator === 'AND' ? {
+      'type': 'COMPLEX_REF',
+      'lines': toComplexRefAnd(labels, constraint)
+    } : {
+      'type': 'COMPLEX_REF',
+      'lines': toComplexRefOr(labels, constraint)
     }
 }
 

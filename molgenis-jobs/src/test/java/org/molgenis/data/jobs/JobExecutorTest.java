@@ -164,7 +164,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		jobExecutor.submit(jobExecution);
 
 		verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
-		verify(executorService).submit(jobCaptor.capture());
+		verify(executorService).execute(jobCaptor.capture());
 
 		jobCaptor.getValue().run();
 		verify(job).call(any(Progress.class));

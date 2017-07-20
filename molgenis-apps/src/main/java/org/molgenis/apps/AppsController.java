@@ -28,6 +28,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static org.molgenis.apps.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
+import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -42,7 +43,6 @@ public class AppsController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String VIEW_NAME = "view-apps";
-	private static final String API_URI = "/api/";
 
 	private final DataService dataService;
 	private final FileStore fileStore;
@@ -96,9 +96,15 @@ public class AppsController extends MolgenisPluginController
 		}
 
 		model.addAttribute("app", toAppInfoDto(app));
-
-		FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
-		return htmlTemplate.getNameWithoutExtension();
+		if (app.getUseFreemarkerTemplate())
+		{
+			FreemarkerTemplate htmlTemplate = app.getHtmlTemplate();
+			return htmlTemplate.getNameWithoutExtension();
+		}
+		else
+		{
+			return "redirect:/" + FILE_STORE_PLUGIN_APPS_PATH + "/" + app.getId() + "/index.html";
+		}
 	}
 
 	@Transactional

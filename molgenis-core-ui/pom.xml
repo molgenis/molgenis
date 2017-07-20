@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-core-ui</artifactId>
     <packaging>jar</packaging>
@@ -25,8 +25,8 @@
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>v4.2.4</nodeVersion>
-                            <npmVersion>2.14.15</npmVersion>
+                            <nodeVersion>v5.12.0</nodeVersion>
+                            <npmVersion>3.8.6</npmVersion>
                         </configuration>
                     </execution>
                     <execution>

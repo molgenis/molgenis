@@ -6,19 +6,31 @@ dist: trusty
 cache:
   directories:
     - node_modules
-    - $HOME/.m2
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
 services:
   - postgresql
 addons:
   postgresql: '9.6'
+  sonarqube:
+    organization: "molgenis"
+    branches:
+      - master
+    token:
+      secure: "nJy2oSrAcfz/3l7R6OkBl8vXCC2nwr/hpbddCnHphEotkEcfYuOtjRwFbizd2jr+kDehzbZpqxIQazfLHRYQWkrM4ZuP7egoxI/OKMwhZbbjayXd0HOEG0Ry8NicOLGy3qCXwQKXNK4RBwC/TJ165+kbP4vNWoXPl/ChIje4gs6T0Ppt0kBXsqad8uO/gXWbSeYRZ7tM5xTyoRz5MX7iyAQ5+ifjhq9qDPCxlfQfFXjL430TYt0h5+mcjdL41MFTGnz00DEXKGTsISjMHKXibhYlg1uWhfAMP90TN0C3r2KjygLodb9eyN/S1UpQsM7FSrZUYJhgdZsqa2slwH3EfSgBQtx524IYnP11q1rr2X3NjU3qM6PhzAUm64TCqk4Gu4wwLUUtl/PeNOVvy/SdMibzAJL6J7Djf1yjsJ1WrCe6VkAEFXR96BcJDEeEeei09P5ZJctRkupgU8vay/rEgq5LbRbVF6xu//RIcw/+qCUm1t5dhnlRxtS3bCdZFp2a5Q9VYSE84uzG0OQgWJU9c3VdDh1zKc3xQdppEe6CWilMI7ahuSId5jHhiBxAoJJA2XuvF7K3opEnFKETIMEcOAVjXHbjgzAHOXfz58zkmsOXan+xTPDJjiHibeWoINyfepD+pNk/81nDap/xcohWCzSmyGlaa2YpPWwlir5qNzI="
 # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
 sudo: true
+before_install:
+  # Use wrapper script to install fixed maven version
+  - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
+install:
+  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 before_script:
   - sudo sysctl -w vm.max_map_count=262144
 script:
   # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to
   # Travis provides us with a travis user and travis database
-  - travis_wait 30 mvn verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Ddb_user=travis -Ddb_password -Dit_db_name=travis -P!create-it-db
+  - travis_wait 40 mvn verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Ddb_user=travis -Ddb_password -Dit_db_name=travis -P!create-it-db
 notifications:
   slack:
     rooms:

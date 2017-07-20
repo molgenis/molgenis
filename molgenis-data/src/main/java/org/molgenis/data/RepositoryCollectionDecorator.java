@@ -92,6 +92,12 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		decoratedRepositoryCollection.updateRepository(entityType, updatedEntityType);
+	}
+
+	@Override
 	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
 		decoratedRepositoryCollection.addAttribute(entityType, attribute);

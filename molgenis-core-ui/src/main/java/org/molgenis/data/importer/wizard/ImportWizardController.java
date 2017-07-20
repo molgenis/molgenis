@@ -160,8 +160,9 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
+
 		// FIXME addGroupEntityClassPermissions
-		throw new UnsupportedOperationException("addGroupEntityClassPermissions not implemented");
+					throw new UnsupportedOperationException("addGroupEntityClassPermissions not implemented");
 	}
 
 	/**

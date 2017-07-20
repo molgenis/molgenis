@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-data-elasticsearch</artifactId>
 
@@ -61,12 +61,6 @@
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <!-- TODO Remove protonpack once we upgrade to JDK 9 -->
-        <dependency>
-            <groupId>com.codepoetics</groupId>
-            <artifactId>protonpack</artifactId>
-            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

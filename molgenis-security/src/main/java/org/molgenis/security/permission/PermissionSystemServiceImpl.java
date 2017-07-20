@@ -54,51 +54,53 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 		//		});
 	}
 
-	//	private void giveUserEntityPermissionsAsSystem(SecurityContext securityContext, Collection<EntityType> entityTypes)
+		//
+
+	private void giveUserEntityPermissionsAsSystem(SecurityContext securityContext, Collection<EntityType> entityTypes)
+	//{
+	//	Collection<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(entityTypes);
+	//	updateUserAuthorities(securityContext, grantedAuthorities);
+	//	updateSecurityContext(securityContext, grantedAuthorities);
+	//}
+//
+	//private Collection<GrantedAuthority> getGrantedAuthorities(Collection<EntityType> entityTypeStream)
+	//{
+	//	return entityTypeStream.stream().map(this::toGrantedAuthority).collect(toList());
+	//}
+//
+	//private GrantedAuthority toGrantedAuthority(EntityType entityType)
+	//{
+	//	@SuppressWarnings("StringConcatenationMissingWhitespace")
+	//	String role = AUTHORITY_ENTITY_PREFIX + WRITEMETA.toString() + '_' + entityType.getId();
+	//	return new SimpleGrantedAuthority(role);
+	//}
+//
+	//private void updateUserAuthorities(SecurityContext context, Collection<GrantedAuthority> grantedAuthorities)
+	//{
+	//	User user = userService.getUser(SecurityUtils.getUsername(context.getAuthentication()));
+	//	Stream<UserAuthority> userAuthorityStream = grantedAuthorities.stream().map(grantedAuthority ->
 	//	{
-	//		Collection<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(entityTypes);
-	//		updateUserAuthorities(securityContext, grantedAuthorities);
-	//		updateSecurityContext(securityContext, grantedAuthorities);
-	//	}
-	//
-	//	private Collection<GrantedAuthority> getGrantedAuthorities(Collection<EntityType> entityTypeStream)
-	//	{
-	//		return entityTypeStream.stream().map(this::toGrantedAuthority).collect(toList());
-	//	}
-	//
-	//	private GrantedAuthority toGrantedAuthority(EntityType entityType)
-	//	{
-	//		@SuppressWarnings("StringConcatenationMissingWhitespace")
-	//		String role = AUTHORITY_ENTITY_PREFIX + WRITEMETA.toString() + '_' + entityType.getId();
-	//		return new SimpleGrantedAuthority(role);
-	//	}
-	//
-	//	private void updateUserAuthorities(SecurityContext context, Collection<GrantedAuthority> grantedAuthorities)
-	//	{
-	//		User user = userService.getUser(SecurityUtils.getUsername(context.getAuthentication()));
-	//		Stream<UserAuthority> userAuthorityStream = grantedAuthorities.stream().map(grantedAuthority ->
-	//		{
-	//			UserAuthority userAuthority = userAuthorityFactory.create();
-	//			userAuthority.setUser(user);
-	//			userAuthority.setRole(grantedAuthority.getAuthority());
-	//			return userAuthority;
-	//		});
-	//		dataService.add(USER_AUTHORITY, userAuthorityStream);
-	//	}
-	//
-	//	private void updateSecurityContext(SecurityContext context, Collection<? extends GrantedAuthority> authorities)
-	//	{
-	//		Collection<? extends GrantedAuthority> reachableAuthorities = roleHierarchy
-	//				.getReachableGrantedAuthorities(authorities);
-	//
-	//		List<GrantedAuthority> newGrantedAuthorities = Lists.newArrayList(context.getAuthentication().getAuthorities());
-	//		newGrantedAuthorities.addAll(reachableAuthorities);
-	//
-	//		Authentication authentication = context.getAuthentication();
-	//		Object principal = authentication.getPrincipal();
-	//		Object credentials = authentication.getCredentials();
-	//		context.setAuthentication(
-	//				new UsernamePasswordAuthenticationToken(principal, credentials, newGrantedAuthorities));
-	//	}
+	//		UserAuthority userAuthority = userAuthorityFactory.create();
+	//		userAuthority.setUser(user);
+	//		userAuthority.setRole(grantedAuthority.getAuthority());
+	//		return userAuthority;
+	//	});
+	//	dataService.add(USER_AUTHORITY, userAuthorityStream);
+	//}
+//
+	//private void updateSecurityContext(SecurityContext context, Collection<? extends GrantedAuthority> authorities)
+	//{
+	//	Collection<? extends GrantedAuthority> reachableAuthorities = roleHierarchy
+				//.getReachableGrantedAuthorities(authorities);
+//
+	//	List<GrantedAuthority> newGrantedAuthorities = Lists.newArrayList(context.getAuthentication().getAuthorities());
+	//	newGrantedAuthorities.addAll(reachableAuthorities);
+//
+	//	Authentication authentication = context.getAuthentication();
+	//	Object principal = authentication.getPrincipal();
+	//	Object credentials = authentication.getCredentials();
+	//	context.setAuthentication(
+	//			new UsernamePasswordAuthenticationToken(principal, credentials, newGrantedAuthorities));
+	//}
 
 }

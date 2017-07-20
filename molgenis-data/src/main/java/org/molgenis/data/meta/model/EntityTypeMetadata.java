@@ -38,6 +38,7 @@ public class EntityTypeMetadata extends SystemEntityType
 	public static final String BACKEND = "backend";
 	public static final String IS_ENTITY_LEVEL_SECURITY = "isEntityLevelSecurity";
 	public static final String ENTITY_LEVEL_SECURITY_INHERITANCE = "entityLevelSecurityInheritance";
+	public static final String INDEXING_DEPTH = "indexingDepth";
 
 	private List<String> backendEnumOptions;
 	private String defaultBackend;
@@ -84,6 +85,13 @@ public class EntityTypeMetadata extends SystemEntityType
 							 .setDefaultValue(defaultBackend)
 							 .setLabel("Backend")
 							 .setDescription("Backend data store");
+		addAttribute(INDEXING_DEPTH).setDataType(INT)
+									.setLabel("Indexing depth")
+									.setDescription(
+											"1 = index attributes and referenced entities (default) 2 = index attributes, referenced entities and entities referenced by referenced entities")
+									.setNillable(false)
+									.setDefaultValue(String.valueOf(1))
+									.setRangeMin(1L);
 		addAttribute(IS_ENTITY_LEVEL_SECURITY).setDataType(BOOL)
 											  .setNillable(false)
 											  .setLabel("Entity-level security")

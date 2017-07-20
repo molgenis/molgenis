@@ -16,7 +16,7 @@
     <#if googleSignIn>
         <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
     </#if>
-    <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+    <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
     <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
     <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <link rel="stylesheet" href="<@resource_href "/css/${app_settings.bootstrapTheme?html}"/>" type="text/css"
@@ -207,6 +207,7 @@
 
                 <#if authenticated?? && authenticated>
                     <form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
+                        <a id="manual" href="https://molgenis.gitbooks.io/molgenis/content/" target="_blank" class="btn btn-secondary">Manual</a>
                         <button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
                         <script>
                             $("#signout-button").click(function () {

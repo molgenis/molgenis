@@ -116,7 +116,7 @@ public class IndexedRepositoryDecoratorTest
 																.query(q);
 
 		indexedRepositoryDecorator.aggregate(aggregateQuery);
-		verify(searchService).aggregate(aggregateQuery, repositoryEntityType);
+		verify(searchService).aggregate(repositoryEntityType, aggregateQuery);
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class IndexedRepositoryDecoratorTest
 	public void countQueryUnsupported()
 	{
 		indexedRepositoryDecorator.count(unsupportedQuery);
-		verify(searchService).count(unsupportedQuery, repositoryEntityType);
+		verify(searchService).count(repositoryEntityType, unsupportedQuery);
 		verify(decoratedRepo, never()).count(unsupportedQuery);
 	}
 
@@ -199,11 +199,11 @@ public class IndexedRepositoryDecoratorTest
 	public void findOneQueryUnsupported()
 	{
 		Entity entity0 = mock(Entity.class);
-		when(searchService.findOne(unsupportedQuery, repositoryEntityType)).thenReturn(entity0);
+		when(searchService.searchOne(repositoryEntityType, unsupportedQuery)).thenReturn(entity0);
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
-		verify(searchService).findOne(unsupportedQuery, repositoryEntityType);
-		verify(decoratedRepo, never()).findOne(unsupportedQuery);
+		verify(searchService).searchOne(repositoryEntityType, unsupportedQuery);
+		verify(decoratedRepo).findOneById(any(Object.class), isNull());
 	}
 
 	@Test
@@ -296,12 +296,13 @@ public class IndexedRepositoryDecoratorTest
 		verifyZeroInteractions(searchService);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void findAllQueryUnsupported()
 	{
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
-		verify(searchService).searchAsStream(unsupportedQuery, repositoryEntityType);
-		verify(decoratedRepo, never()).findAll(unsupportedQuery);
+		verify(searchService).search(repositoryEntityType, unsupportedQuery);
+		verify(decoratedRepo).findAll(any(Stream.class), isNull());
 	}
 
 	@Test
@@ -367,7 +368,7 @@ public class IndexedRepositoryDecoratorTest
 		when(attr2.hasExpression()).thenReturn(true);
 
 		indexedRepositoryDecorator.count(q);
-		verify(searchService).count(q, repositoryEntityType);
+		verify(searchService).count(repositoryEntityType, q);
 		verify(decoratedRepo, never()).count(q);
 	}
 
@@ -396,7 +397,7 @@ public class IndexedRepositoryDecoratorTest
 		when(sort.spliterator()).thenReturn(newArrayList(o1, o2).spliterator());
 
 		indexedRepositoryDecorator.count(q);
-		verify(searchService).count(q, repositoryEntityType);
+		verify(searchService).count(repositoryEntityType, q);
 		verify(decoratedRepo, never()).count(q);
 	}
 
@@ -418,7 +419,7 @@ public class IndexedRepositoryDecoratorTest
 		when(queryRule.getField()).thenReturn(queryRuleField);
 		when(q.getRules()).thenReturn(singletonList(queryRule));
 		indexedRepositoryDecorator.count(q);
-		verify(searchService).count(q, repositoryEntityType);
+		verify(searchService).count(repositoryEntityType, q);
 		verify(decoratedRepo, never()).count(q);
 	}
 }

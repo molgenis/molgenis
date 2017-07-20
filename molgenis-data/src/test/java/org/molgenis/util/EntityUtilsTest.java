@@ -78,6 +78,10 @@ public class EntityUtilsTest
 				mock(Attribute.class));
 		dataList.add(new Object[] { entityType, otherEntityLevelSecurityInheritanceEntityType, false });
 
+		EntityType otherIndexingDepthEntityType = createEqualsEntityType();
+		when(otherIndexingDepthEntityType.getIndexingDepth()).thenReturn(3);
+		dataList.add(new Object[] { entityType, otherExtendsEntityType, false });
+
 		return dataList.iterator();
 	}
 
@@ -97,6 +101,7 @@ public class EntityUtilsTest
 		when(entityType.getExtends()).thenReturn(null);
 		when(entityType.isEntityLevelSecurity()).thenReturn(false);
 		when(entityType.getEntityLevelSecurityInheritance()).thenReturn(null);
+		when(entityType.getIndexingDepth()).thenReturn(1);
 		return entityType;
 	}
 

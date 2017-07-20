@@ -36,7 +36,7 @@ import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 public class EntityType extends StaticEntity
 {
 	private transient Map<String, Attribute> cachedOwnAttrs;
-	private transient Boolean cachedHasAttrWithExpession;
+	private transient Boolean cachedHasAttrWithExpression;
 
 	public EntityType(Entity entity)
 	{
@@ -633,12 +633,12 @@ public class EntityType extends StaticEntity
 
 	private boolean getCachedHasAttrWithExpession()
 	{
-		if (cachedHasAttrWithExpession == null)
+		if (cachedHasAttrWithExpression == null)
 		{
-			cachedHasAttrWithExpession = stream(getAtomicAttributes().spliterator(), false).anyMatch(
+			cachedHasAttrWithExpression = stream(getAtomicAttributes().spliterator(), false).anyMatch(
 					attr -> attr.getExpression() != null);
 		}
-		return cachedHasAttrWithExpession;
+		return cachedHasAttrWithExpression;
 	}
 
 	public void removeAttribute(Attribute attr)
@@ -690,6 +690,17 @@ public class EntityType extends StaticEntity
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
 		set(TAGS, tag);
+	}
+
+	public EntityType setIndexingDepth(int indexingDepth)
+	{
+		set(INDEXING_DEPTH, indexingDepth);
+		return this;
+	}
+
+	public int getIndexingDepth()
+	{
+		return getInt(INDEXING_DEPTH);
 	}
 
 	public EntityType setEntityLevelSecurity(boolean entityLevelSecurity)
@@ -777,6 +788,7 @@ public class EntityType extends StaticEntity
 	protected void setDefaultValues()
 	{
 		setAbstract(false);
+		setIndexingDepth(1);
 		setEntityLevelSecurity(false);
 	}
 

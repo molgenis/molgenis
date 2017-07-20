@@ -107,7 +107,7 @@
      */
     function createComplexRefFilter(attribute, model) {
         var lines = model.lines
-        lines.push('OR')
+        lines.push(lines[1])
 
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute)
         for (var index = 0; index < lines.length; index += 2) {
@@ -115,7 +115,13 @@
 
             var simpleFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, undefined, undefined)
             $.each(line.values, function () {
-                simpleFilter.getValues().push(this.value)
+                if (this.value.constructor === Array) {
+                    $.each(this.value, function () {
+                        simpleFilter.getValues().push(this)
+                    })
+                } else {
+                    simpleFilter.getValues().push(this.value)
+                }
                 simpleFilter.getLabels().push(this.label)
             })
             simpleFilter.operator = line.operator
@@ -225,7 +231,7 @@
      * Fetches metadata for an attribute from the V1 RestClient
      */
     function getAttribute(entityTypeId, attributeName, restApi) {
-        return restApi.getAsync('/api/v1/' + entityTypeId + '/meta/' + attributeName + '?expand=refEntity')
+        return restApi.getAsync('/api/v1/' + encodeURIComponent(entityTypeId) + '/meta/' + encodeURIComponent(attributeName) + '?expand=refEntity')
     }
 
     /**

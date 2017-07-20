@@ -141,6 +141,12 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		dropTables(entityType);
 	}
 
+	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		//  no actions needed
+	}
+
 	private void dropTables(EntityType entityType)
 	{
 		getJunctionTableAttributes(entityType).forEach(mrefAttr -> dropJunctionTable(entityType, mrefAttr));
@@ -156,16 +162,19 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		jdbcTemplate.execute(sqlDropTable);
 
-		String sqlDropFunctionValidateUpdate = getSqlDropFunctionValidateUpdate(entityType);
-		if (LOG.isDebugEnabled())
+		if (getTableAttributesReadonly(entityType).findAny().isPresent())
 		{
-			LOG.debug("Dropping trigger function for entity [{}]", entityType.getId());
-			if (LOG.isTraceEnabled())
+			String sqlDropFunctionValidateUpdate = getSqlDropFunctionValidateUpdate(entityType);
+			if (LOG.isDebugEnabled())
 			{
-				LOG.trace("SQL: {}", sqlDropFunctionValidateUpdate);
+				LOG.debug("Dropping trigger function for entity [{}]", entityType.getId());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", sqlDropFunctionValidateUpdate);
+				}
 			}
+			jdbcTemplate.execute(sqlDropFunctionValidateUpdate);
 		}
-		jdbcTemplate.execute(sqlDropFunctionValidateUpdate);
 	}
 
 	@Override

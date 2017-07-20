@@ -4,7 +4,7 @@ import freemarker.template.TemplateException;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.config.HttpClientConfig;
-import org.molgenis.data.elasticsearch.config.ElasticsearchConfig;
+import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.freemarker.RepositoryTemplateLoader;

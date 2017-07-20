@@ -114,8 +114,7 @@ class EntityTypeResponseV2
 
 		this.writable =
 				permissionService.hasPermissionOnEntityType(name, Permission.WRITE) && dataService.getCapabilities(name)
-																								  .contains(
-																										  RepositoryCapability.WRITABLE);
+						.contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

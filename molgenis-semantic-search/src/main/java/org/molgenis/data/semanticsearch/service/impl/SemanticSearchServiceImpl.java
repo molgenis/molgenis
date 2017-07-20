@@ -12,7 +12,7 @@ import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.spell.StringDistance;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.MetaDataService;
@@ -103,8 +103,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			Attribute attribute = sourceEntityType.getAttribute(attributeEntity.getString(AttributeMetadata.NAME));
 			if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
-				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
-						sourceEntityType, collectExpanedQueryMap, finalQueryRules);
+				Set<ExplainedQueryString> explanations = convertAttributeToExplainedAttribute(attribute,
+						collectExpanedQueryMap, new QueryImpl<>(finalQueryRules));
 
 				boolean singleMatchHighQuality = isSingleMatchHighQuality(queryTerms,
 						Sets.newHashSet(collectExpanedQueryMap.values()), explanations);
@@ -231,30 +231,22 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	/**
 	 * A helper function to explain each of the matched attributes returned by the explain-API
 	 *
-	 * @param attributeEntity
-	 * @param sourceEntityType
-	 * @param collectExpanedQueryMap
-	 * @param finalQueryRules
-	 * @return
+	 * @param attribute               The attribute found
+	 * @param collectExpandedQueryMap ?
+	 * @param query                   the query used to find the attribute
+	 * @return Set of explained query strings
 	 */
-	public Set<ExplainedQueryString> convertAttributeEntityToExplainedAttribute(Entity attributeEntity,
-			EntityType sourceEntityType, Map<String, String> collectExpanedQueryMap, List<QueryRule> finalQueryRules)
+	public Set<ExplainedQueryString> convertAttributeToExplainedAttribute(Attribute attribute,
+			Map<String, String> collectExpandedQueryMap, Query<Entity> query)
 	{
-		String attributeId = attributeEntity.getString(AttributeMetadata.ID);
-		String attributeName = attributeEntity.getString(AttributeMetadata.NAME);
-		Attribute attribute = sourceEntityType.getAttribute(attributeName);
-		if (attribute == null)
-		{
-			throw new MolgenisDataAccessException(
-					"The attribute : " + attributeName + " does not exsit in EntityType : " + sourceEntityType.getId());
-		}
-		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl<Entity>(finalQueryRules),
-				dataService.getEntityType(ATTRIBUTE_META_DATA), attributeId);
+		EntityType attributeMetaData = dataService.getEntityType(ATTRIBUTE_META_DATA);
+		String attributeID = attribute .getIdentifier();
+		Explanation explanation = elasticSearchExplainService
+				.explain(query, attributeMetaData, attributeID);
+		return elasticSearchExplainService
+				.findQueriesFromExplanation(collectExpandedQueryMap, explanation);
 
-		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService.findQueriesFromExplanation(
-				collectExpanedQueryMap, explanation);
 
-		return detectedQueryStrings;
 	}
 
 	@Override
