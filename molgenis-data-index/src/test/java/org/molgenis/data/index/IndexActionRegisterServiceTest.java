@@ -57,7 +57,8 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	public void beforeMethod()
 	{
 		TransactionSynchronizationManager.bindResource(TransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
-		indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl();
+		indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl(dataService, indexActionFactory,
+				indexActionGroupFactory, new IndexingStrategy());
 	}
 
 	@AfterMethod
