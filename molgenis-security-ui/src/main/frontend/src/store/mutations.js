@@ -1,5 +1,5 @@
 // @flow
-import type { ACE, ACL, EntityType, GrantedAuthoritySid, Role, Row, State } from './utils/flow.types'
+import type {ACE, ACL, EntityType, GrantedAuthoritySid, Role, Row, State} from './utils/flow.types'
 
 export const SELECT_ROLE = '__SELECT_ROLE__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
@@ -9,6 +9,8 @@ export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
 export const SET_ROLES = '__SET_ROLES__'
 export const TOGGLE_PERMISSION = '__TOGGLE_PERMISSION__'
 export const TOGGLE_GRANTING = '__TOGGLE_GRANTING__'
+export const CREATE_ROLE = '__CREATE_ROLE__'
+export const CANCEL_CREATE_ROLE = '__CANCEL_CREATE_ROLE__'
 
 const toRemove = {
   WRITEMETA: ['WRITEMETA'],
@@ -81,6 +83,14 @@ export default {
   [SELECT_ROLE] (state: State, role: string) {
     state.selectedSid = role
     state.selectedRole = role
+    state.doCreateRole = false
+  },
+  [CREATE_ROLE] (state: State) {
+    state.selectedRole = null
+    state.doCreateRole = true
+  },
+  [CANCEL_CREATE_ROLE] (state: State) {
+    state.doCreateRole = false
   },
   [SET_SELECTED_ENTITY_TYPE] (state: State, selectedEntityTypeId: string) {
     state.selectedEntityTypeId = selectedEntityTypeId

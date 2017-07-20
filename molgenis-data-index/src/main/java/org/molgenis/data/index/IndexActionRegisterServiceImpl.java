@@ -118,9 +118,10 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			return;
 		}
 		LOG.debug("Store index actions for transaction {}", transactionId);
-		dataService.add(INDEX_ACTION_GROUP,
-				indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
-		dataService.add(INDEX_ACTION, indexActions1.stream());
+		// FIXME enable index action (group) persisting
+		//		dataService.add(INDEX_ACTION_GROUP,
+		//				indexActionGroupFactory.create(transactionId).setCount(indexActions1.size()));
+		//		dataService.add(INDEX_ACTION, indexActions1.stream());
 	}
 
 	/**

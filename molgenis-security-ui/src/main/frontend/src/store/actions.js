@@ -1,6 +1,6 @@
-import { get, post } from '@molgenis/molgenis-api-client'
-import { SET_ENTITY_TYPES, SET_FILTER, SET_ROLES, SET_ROWS } from './mutations'
-import { debounce } from 'lodash'
+import {get, post} from '@molgenis/molgenis-api-client'
+import {SET_ENTITY_TYPES, SET_FILTER, SET_ROLES, SET_ROWS} from './mutations'
+import {debounce} from 'lodash'
 
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_ROLES = '__GET_SIDS__'
@@ -9,6 +9,7 @@ export const ENTITY_SELECTED = '__ENTITY_SELECTED__'
 export const FILTER_CHANGED = '__FILTER_CHANGED__'
 export const GET_ACLS = '__GET_ACLS__'
 export const SAVE_ACL = '__SAVE_ACL__'
+export const SAVE_CREATE_ROLE = '__SAVE_CREATE_ROLE__'
 
 export default {
   [INITIALIZED] ({dispatch}) {
@@ -28,6 +29,18 @@ export default {
       dispatch(GET_ACLS)
     }
   }, 300),
+  [SAVE_CREATE_ROLE] ({state, dispatch}, role) {
+    post('/api/v2/sys_sec_Role', {
+      body: JSON.stringify({entities: [role]}),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      dispatch(GET_ROLES)
+    }, error => {
+      console.log(error)
+    })
+  },
   [ENTITY_SELECTED] ({dispatch}) {
     dispatch(GET_ACLS)
   },

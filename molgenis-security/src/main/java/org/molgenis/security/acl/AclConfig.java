@@ -3,7 +3,7 @@ package org.molgenis.security.acl;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.security.acl.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.support.NoOpCache;
+import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -13,7 +13,6 @@ import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.*;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
-import org.springframework.security.acls.model.AclCache;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;
 import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -29,7 +28,6 @@ import java.sql.Statement;
 /**
  * TODO Replace AclCache.NoOpCache with another cache implementation
  * TODO Extract ACL table population to other class
- * TODO Avoid name collisions between ACL table names and entity type table names
  */
 @Import(DatabaseConfig.class)
 @Configuration
@@ -97,9 +95,12 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 		}
 	}
 
-	private AclCache aclCache()
+	@Autowired
+	private AclCache aclCache;
+
+	private org.springframework.security.acls.model.AclCache aclCache()
 	{
-		return new SpringCacheBasedAclCache(new NoOpCache("aclCache"), permissionGrantingStrategy(),
+		return new SpringCacheBasedAclCache(new TransactionAwareCacheDecorator(aclCache), permissionGrantingStrategy(),
 				aclAuthorizationStrategy());
 	}
 
