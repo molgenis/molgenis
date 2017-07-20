@@ -111,7 +111,7 @@ public class OneClickImporterController extends MolgenisPluginController
 		response.setStatus(HttpServletResponse.SC_CREATED);
 		response.setHeader("Location", builder.build().toUriString() + "/" + dataTable.getId());
 
-		return new OneClickImportResponse(dataTable.getId(), file.getName());
+		return OneClickImportResponse.create(dataTable.getId(), file.getName());
 	}
 
 	@ResponseBody
