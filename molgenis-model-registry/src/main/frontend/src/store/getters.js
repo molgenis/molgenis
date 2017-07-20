@@ -1,4 +1,4 @@
-import type { State } from 'utils/flow.types'
+import type { State, Node, Link } from 'utils/flow.types'
 
 // xref 1 - 1
 // mref 1 - N
@@ -13,8 +13,8 @@ const types = {
   'onetomany': {nullable: '0...N', notnullable: '1...N'}
 }
 
-let nodeData = []
-let linkData = []
+let nodeData: Array<Node> = []
+let linkData: Array<Link> = []
 
 const mapAttributeToNode = attribute => {
   let figure = 'Cubel'
@@ -52,7 +52,7 @@ const mapNodeData = (entityTypes) => entityTypes.filter(entityType => (!entityTy
 })
 
 const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (entityType.extends && !entityType.isAbstract)).map(entityType => {
-  const abstractEntityType = entityTypes.filter(aEntityType => (aEntityType.id === entityType.extends.id))[0]
+  const abstractEntityType = entityTypes.find(aEntityType => (aEntityType.id === entityType.extends.id))
   linkData.push({from: abstractEntityType.id, to: entityType.id, text: 'isAbstract', toText: '<extends ' + abstractEntityType.id + '>'})
   nodeData.push({key: entityType.id, items: entityType.attributes.map(mapAttributeToNode)})
 })

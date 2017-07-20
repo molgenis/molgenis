@@ -1,4 +1,5 @@
 import 'es6-promise/auto'
+import 'babel-polyfill'
 
 import Vue from 'vue'
 import store from './store'
@@ -14,7 +15,7 @@ import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 import { INITIAL_STATE } from './store/state'
 
 sync(store, router)
-
+console.log(INITIAL_STATE.molgenisPackage)
 Vue.use(i18n, {
   lng: INITIAL_STATE.lng,
   fallbackLng: INITIAL_STATE.fallbackLng,

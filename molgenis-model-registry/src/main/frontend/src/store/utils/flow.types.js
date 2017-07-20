@@ -1,16 +1,16 @@
 // @flow
 export type Node = {
-  name: String,
-  iskey: Bool,
-  figure: String,
-  color: String
+  name: string,
+  iskey: boolean,
+  figure: string,
+  color: string
 }
 
 export type Link = {
-  from: String,
-  to: String,
-  text: String,
-  totext: String
+  from: string,
+  to: string,
+  text: string,
+  totext: string
 }
 
 export type UmlData = {
@@ -19,10 +19,11 @@ export type UmlData = {
 }
 
 export type Package = {
-  name: String
+  name: string
 }
 
 export type State = {
+  error: ?string,
   umlData: any,
   molgenisPackage: Package
 }

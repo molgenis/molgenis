@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author sido
  */
-public class PackageResponse
+public class ModelRegistryPackage
 {
 
 	private String name;
@@ -17,7 +17,7 @@ public class PackageResponse
 	private List<ModelRegistryEntity> entitiesInPackage;
 	private List<ModelRegistryTag> tags;
 
-	public PackageResponse(Package _package)
+	public ModelRegistryPackage(Package _package)
 	{
 		this.name = _package.getId();
 		this.label = _package.getLabel();
@@ -27,7 +27,7 @@ public class PackageResponse
 //		this.tags = tags;
 	}
 
-	public PackageResponse(String name, String label, String description, String matchDescription,
+	public ModelRegistryPackage(String name, String label, String description, String matchDescription,
 			List<ModelRegistryEntity> entitiesInPackage, List<ModelRegistryTag> tags)
 	{
 		this.name = name;

@@ -6,7 +6,6 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
@@ -110,8 +109,9 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		String TEST_PACKAGE = "test-package";
 		Gson gson = new Gson();
 
-		PackageResponse packageResponse = new PackageResponse("test-package-response", "", "", null, null, null);
-		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(packageResponse));
+		ModelRegistryPackage modelRegistryPackage = new ModelRegistryPackage("test-package-response", "", "", null, null, null);
+		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(
+				modelRegistryPackage));
 		when(metaDataSearchService.search(TEST_PACKAGE, 0 ,3)).thenReturn(packageSearchResponse);
 
 		ExtendedModelMap model = new ExtendedModelMap();
@@ -185,8 +185,8 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		List<ModelRegistryTag> tags = Lists.newArrayList(tag);
 		when(metaDataSearchService.getTagsForPackage(molgenisPackge)).thenReturn(tags);
 
-		PackageResponse pacakgeResponse = new PackageResponse(TEST_PACKAGE, "", "", null, entities, tags);
-		PackageResponse response = standardRegistryController.getPackage(TEST_PACKAGE);
+		ModelRegistryPackage pacakgeResponse = new ModelRegistryPackage(TEST_PACKAGE, "", "", null, entities, tags);
+		ModelRegistryPackage response = standardRegistryController.getPackage(TEST_PACKAGE);
 		assertEquals(response.getEntities().get(0).getName(), pacakgeResponse.getEntities().get(0).getName());
 	}
 

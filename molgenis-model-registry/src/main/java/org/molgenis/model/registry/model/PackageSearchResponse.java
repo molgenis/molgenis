@@ -12,9 +12,9 @@ public class PackageSearchResponse
 	private final int offset;
 	private final int num;
 	private final int total;
-	private final List<PackageResponse> packages;
+	private final List<ModelRegistryPackage> packages;
 
-	public PackageSearchResponse(String query, int offset, int num, int total, List<PackageResponse> packages)
+	public PackageSearchResponse(String query, int offset, int num, int total, List<ModelRegistryPackage> packages)
 	{
 		this.query = query;
 		this.offset = offset;
@@ -48,7 +48,7 @@ public class PackageSearchResponse
 	}
 
 	@SuppressWarnings("unused")
-	public List<PackageResponse> getPackages()
+	public List<ModelRegistryPackage> getPackages()
 	{
 		return packages;
 	}

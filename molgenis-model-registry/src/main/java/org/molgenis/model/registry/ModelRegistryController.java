@@ -9,7 +9,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.model.registry.model.PackageResponse;
+import org.molgenis.model.registry.model.ModelRegistryPackage;
 import org.molgenis.model.registry.model.PackageSearchRequest;
 import org.molgenis.model.registry.model.PackageSearchResponse;
 import org.molgenis.model.registry.model.PackageTreeNode;
@@ -113,6 +113,9 @@ public class ModelRegistryController extends MolgenisPluginController
 	}
 
 	/**
+	 *
+	 * <p>Fired when a search is performed</p>
+	 *
 	 * @param packageSearchValue
 	 * @param model
 	 * @return
@@ -158,6 +161,14 @@ public class ModelRegistryController extends MolgenisPluginController
 		return VIEW_NAME_DETAILS;
 	}
 
+	/**
+	 *
+	 * <p>Get uml data for UML-viewer</p>
+	 *
+	 * @param selectedPackageName
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/uml", method = GET)
 	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
 	{
@@ -171,7 +182,7 @@ public class ModelRegistryController extends MolgenisPluginController
 		if (molgenisPackage != null)
 		{
 			Gson gson = new Gson();
-			PackageResponse response = new PackageResponse(molgenisPackage);
+			ModelRegistryPackage response = new ModelRegistryPackage(molgenisPackage);
 			model.addAttribute("molgenisPackage", gson.toJson(response));
 		}
 		else
@@ -183,7 +194,7 @@ public class ModelRegistryController extends MolgenisPluginController
 
 	@RequestMapping(value = "/getPackage", method = GET)
 	@ResponseBody
-	public PackageResponse getPackage(@RequestParam(value = "package") String packageName)
+	public ModelRegistryPackage getPackage(@RequestParam(value = "package") String packageName)
 	{
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null)
@@ -191,14 +202,14 @@ public class ModelRegistryController extends MolgenisPluginController
 			throw new MolgenisDataException("Unknown package: [ " + packageName + " ]");
 		}
 
-		return new PackageResponse(molgenisPackage.getId(), molgenisPackage.getLabel(),
+		return new ModelRegistryPackage(molgenisPackage.getId(), molgenisPackage.getLabel(),
 				molgenisPackage.getDescription(), null,
 				metaDataSearchService.getEntitiesInPackage(molgenisPackage.getId()),
 				metaDataSearchService.getTagsForPackage(molgenisPackage));
 	}
 
 	/**
-	 * <p>PackageTree</p>
+	 * <p>Returns a {@link PackageTreeNode}-collections.</p>
 	 *
 	 * @param packageName
 	 * @return
