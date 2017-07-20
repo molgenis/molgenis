@@ -58,7 +58,7 @@ paths:
       parameters:
         - name: acl
           schema:
-            $ref: '#/definitions/CopyEntityRequest'
+            $ref: '#/definitions/ACL'
           in: body
           required: true
           description: new version of the acl

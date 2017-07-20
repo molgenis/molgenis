@@ -4,22 +4,22 @@
     <tr>
       <th>{{'ROW' | i18n}}</th>
       <th>{{'OWNER' | i18n}}</th>
-      <th :colspan="permissions.length + 1">{{'PERMISSIONS' | i18n}}</th>
+      <th :colspan="permissions.length + 1" class="text-center">{{'PERMISSIONS' | i18n}}</th>
     </tr>
     <tr>
       <th></th>
       <th></th>
-      <th>{{'GRANTING' | i18n}}</th>
-      <th v-for="permission in permissions">{{permission | capitalizeFirstLetter}}</th>
+      <th class="text-center">{{'GRANTING' | i18n}}</th>
+      <th v-for="permission in permissions" class="text-center">{{permission | capitalizeFirstLetter}}</th>
     </tr>
     </thead>
     <tbody>
     <tr v-for="(acl, rowIndex) in acls">
       <td>{{acl.entityLabel || acl.entityId}}</td>
       <td>{{acl.owner}}</td>
-      <td v-if="acl.granting"><i class="fa fa-unlock"></i></td>
-      <td v-else><i class="fa fa-lock"></i></td>
-      <td v-for="permission in permissions">
+      <td v-if="acl.granting" class="text-center"><i class="fa fa-unlock"></i></td>
+      <td v-else class="text-center"><i class="fa fa-lock"></i></td>
+      <td v-for="permission in permissions" class="text-center">
         <div class="form-check">
           <label class="form-check-label">
             <input class="form-check-input"
