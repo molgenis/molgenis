@@ -20,9 +20,10 @@ export default {
         granting: true
       }
       const isGrantedAuthority = (sid: string) => (candidate: ACE) => candidate.securityId.authority && candidate.securityId.authority === sid
+      const aceIndex = entries.findIndex(isGrantedAuthority(selectedSid))
       const ace = entries.find(isGrantedAuthority(selectedSid)) || emptyAce
       const addPermission = (row, permission) => ({...row, [permission]: ace.permissions.includes(permission)})
-      return state.permissions.reduce(addPermission, {entityLabel, owner: username, granting: ace.granting})
+      return state.permissions.reduce(addPermission, {entityLabel, owner: username, granting: ace.granting, aceIndex})
     })
   }
 }
