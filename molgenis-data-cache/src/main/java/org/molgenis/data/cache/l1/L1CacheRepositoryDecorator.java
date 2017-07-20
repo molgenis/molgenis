@@ -86,20 +86,6 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	}
 
 	@Override
-	public Entity findOneById(Object id, Fetch fetch)
-	{
-		if (cacheable)
-		{
-			Optional<Entity> entity = l1Cache.get(getEntityType().getId(), id, getEntityType());
-			if (entity != null)
-			{
-				return entity.orElse(null);
-			}
-		}
-		return super.findOneById(id, fetch);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		if (cacheable)
