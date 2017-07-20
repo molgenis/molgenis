@@ -2,6 +2,7 @@ package org.molgenis.oneclickimporter.service;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.Impl.OneClickImporterServiceImpl;
@@ -9,12 +10,15 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadLinesFromFile;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadSheetFromFile;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class OneClickImporterServiceTest
 {
@@ -140,5 +144,86 @@ public class OneClickImporterServiceTest
 
 		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5), 10);
 		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testIsFirstColumnUnique()
+	{
+		Column column = Column.create("col", 0, Arrays.asList(1, 2, 3));
+		assertTrue(oneClickImporterService.hasUniqueValues(column), "should return true for unique int list");
+
+		column = Column.create("col", 0, Arrays.asList("a", "b", "c"));
+		assertTrue(oneClickImporterService.hasUniqueValues(column), "should return true for unique string list");
+
+		column = Column.create("col", 0, Arrays.asList(1, 2, 1));
+		assertFalse(oneClickImporterService.hasUniqueValues(column),"should return false for non-unique int list");
+
+		column = Column.create("col", 0, Arrays.asList(1, null, 2));
+		assertFalse(oneClickImporterService.hasUniqueValues(column),"should return false a list containing null's ");
+
+		column = Column.create("col", 0, Arrays.asList(1, "1"));
+		assertFalse(oneClickImporterService.hasUniqueValues(column),"should return false if types differ ");
+	}
+
+	@Test
+	public void testCastType()
+	{
+		Object value = 1;
+		AttributeType type = AttributeType.INT;
+		Object casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof Integer);
+
+		value = 1.0;
+		type = AttributeType.INT;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof Integer);
+
+		value = "1";
+		type = AttributeType.INT;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof Integer);
+
+		value = "1";
+		type = AttributeType.STRING;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof String);
+
+		Long myLong = (long) Integer.MAX_VALUE + 1;
+		value = myLong;
+		type = AttributeType.LONG;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof Long);
+
+		Double myDouble = (double) Long.MAX_VALUE + 1;
+		value = myDouble;
+		type = AttributeType.DECIMAL;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof Double);
+
+		value = "1.1";
+		type = AttributeType.DECIMAL;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof Double);
+
+		value = 1.1;
+		type = AttributeType.STRING;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof String);
+
+		value = 1L;
+		type = AttributeType.STRING;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof String);
+
+		value = 1.1D;
+		type = AttributeType.STRING;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof String);
+
+		value = true;
+		type = AttributeType.STRING;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof String);
+
 	}
 }
