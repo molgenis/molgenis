@@ -24,6 +24,8 @@
                         switch (data.node.data.type) {
                             case 'package' :
                                 $('#package-doc-container').scrollTo('#package-' + data.node.key);
+                                // needed by uml viewer
+                                detailsPackageName = data.node.key;
                                 break;
                             case 'entity' :
                                 $('#package-doc-container').scrollTo('#entity-' + data.node.key);
@@ -116,7 +118,6 @@
         });
 
         function showPackageDetails(id) {
-            console.log(id)
             detailsPackageName = id;
 
             $('#standards-registry-details').load(molgenis.getContextUrl() + '/details?package=' + id, function () {

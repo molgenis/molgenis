@@ -18,7 +18,7 @@ sync(store, router)
 Vue.use(i18n, {
   lng: INITIAL_STATE.lng,
   fallbackLng: INITIAL_STATE.fallbackLng,
-  molgenisPackage: INITIAL_STATE.molgenisPackage,
+  molgenisPackage: JSON.parse(INITIAL_STATE.molgenisPackage),
   namespace: 'model-registry-uml-viewer',
   callback () {
     /* eslint-disable no-new */
