@@ -8,7 +8,7 @@ export default {
   [SET_UMLDATA] (state: State, umlData: any) {
     state.umlData = umlData
   },
-  [SET_ERROR] (state: State, error: string) {
-    state.error = error
+  [SET_ERROR] (state: State, errorMessage: string) {
+    state.error = errorMessage
   }
 }
