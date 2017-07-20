@@ -1,6 +1,6 @@
-import {get, post} from "@molgenis/molgenis-api-client";
-import {SET_ENTITY_TYPES, SET_FILTER, SET_ROLES, SET_ROWS} from "./mutations";
-import {debounce} from "lodash";
+import {get, post} from '@molgenis/molgenis-api-client'
+import {SET_ENTITY_TYPES, SET_FILTER, SET_ROLES, SET_ROWS} from './mutations'
+import {debounce} from 'lodash'
 
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_ROLES = '__GET_SIDS__'

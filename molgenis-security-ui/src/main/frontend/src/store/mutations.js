@@ -1,5 +1,5 @@
 // @flow
-import type {ACE, ACL, EntityType, GrantedAuthoritySid, Role, Row, State} from "./utils/flow.types";
+import type {ACE, ACL, EntityType, GrantedAuthoritySid, Role, Row, State} from './utils/flow.types'
 
 export const SELECT_ROLE = '__SELECT_ROLE__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
