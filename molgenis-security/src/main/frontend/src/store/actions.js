@@ -1,4 +1,4 @@
-import { get } from '@molgenis/molgenis-api-client'
+import { get, post } from '@molgenis/molgenis-api-client'
 import { SET_ENTITY_TYPES, SET_FILTER, SET_ROWS, SET_SIDS } from './mutations'
 import { debounce } from 'lodash'
 
@@ -8,6 +8,7 @@ export const INITIALIZED = '__INITIALIZED__'
 export const ENTITY_SELECTED = '__ENTITY_SELECTED__'
 export const FILTER_CHANGED = '__FILTER_CHANGED__'
 export const GET_ACLS = '__GET_ACLS__'
+export const SAVE_ACL = '__SAVE_ACL__'
 
 export default {
   [INITIALIZED] ({dispatch}) {
@@ -41,9 +42,10 @@ export default {
       console.log(error)
     })
   },
-  /**
-   * Example action for retrieving all EntityTypes from the server
-   */
+  [SAVE_ACL] ({state}, aclIndex) {
+    console.log(JSON.stringify(state.rows[aclIndex].acl))
+    post('/permission/acl', {body: JSON.stringify(state.rows[aclIndex].acl), method: 'put'})
+  },
   [GET_ENTITY_TYPES] ({commit}) {
     /**
      * Pass options to the fetch like body, method, x-molgenis-token etc...

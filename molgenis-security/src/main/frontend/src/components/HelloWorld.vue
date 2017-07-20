@@ -19,7 +19,8 @@
               <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n"
                      @input.stop="filterChanged($event.target.value)">
             </form>
-            <acls :permissions="permissions" :acls="tableRows" :onClick="onPermissionClick"></acls>
+            <acls :permissions="permissions" :acls="tableRows" :onPermissionClick="onPermissionClick"
+                  :onSave="onSave"></acls>
           </div>
         </div>
       </div>
@@ -32,7 +33,7 @@
 <script>
   import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
   import { SELECT_SID, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION } from '../store/mutations'
-  import { GET_ACLS, FILTER_CHANGED } from '../store/actions'
+  import { GET_ACLS, FILTER_CHANGED, SAVE_ACL } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Sids from './Sids'
@@ -47,7 +48,8 @@
         onPermissionClick: TOGGLE_PERMISSION
       }),
       ...mapActions({
-        filterChanged: FILTER_CHANGED
+        filterChanged: FILTER_CHANGED,
+        onSave: SAVE_ACL
       })
     },
     computed: {

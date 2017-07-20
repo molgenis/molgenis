@@ -25,7 +25,7 @@
             <input class="form-check-input"
                    type="checkbox"
                    :checked="acl[permission]"
-                   @click="onClick({rowIndex, aceIndex: acl.aceIndex, permission})">
+                   @click="onToggle({rowIndex, aceIndex: acl.aceIndex, permission})">
           </label>
         </div>
       </td>
@@ -40,7 +40,14 @@
     props: {
       permissions: {type: Array},
       acls: {type: Array},
-      onClick: {type: Function}
+      onPermissionClick: {type: Function},
+      onSave: {type: Function}
+    },
+    methods: {
+      onToggle ({rowIndex, aceIndex, permission}) {
+        this.onPermissionClick({rowIndex, aceIndex, permission})
+        this.onSave(rowIndex)
+      }
     },
     filters: {
       capitalizeFirstLetter (string: string): string { return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() }
