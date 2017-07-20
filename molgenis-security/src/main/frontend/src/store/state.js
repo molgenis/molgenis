@@ -7,12 +7,12 @@ const state: State = {
   me: {
     username: 'admin'
   },
-  selectedSids: [],
+  selectedSid: null,
   sids: [{authority: 'USER'}, {authority: 'SU'}],
   selectedEntityTypeId: null,
   permissions: ['ADMIN', 'WRITE', 'READ', 'COUNT'],
   filter: null,
-  acls: [],
+  rows: [],
   entityTypes: [
     {
       '_href': '/api/v2/sys_md_EntityType/sys_Questionnaire',

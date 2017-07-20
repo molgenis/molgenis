@@ -1,24 +1,19 @@
 // @flow
-import type { ACL, GrantedAuthoritySid, State } from './utils/flow.types'
+import type { EntityType, GrantedAuthoritySid, Row, State } from './utils/flow.types'
 
-export const TOGGLE_SID = '__TOGGLE_SID__'
+export const SELECT_SID = '__SELECT_SID__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
 export const SET_FILTER = '__SET_FILTER__'
-export const SET_ACLS = '__SET_ACLS__'
+export const SET_ROWS = '__SET_ACLS__'
 export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
 export const SET_SIDS = '__SET_SIDS__'
 
 export default {
-  [SET_ACLS] (state: State, acls: Array<ACL>) {
-    state.acls = acls
+  [SET_ROWS] (state: State, rows: Array<Row>) {
+    state.rows = rows
   },
-  [TOGGLE_SID] (state: State, sid: GrantedAuthoritySid) {
-    state.selectedSids = [sid]
-    // if (state.selectedSids.includes(sid)) {
-    //   state.selectedSids.splice(state.selectedSids.indexOf(sid), 1)
-    // } else {
-    //   state.selectedSids.push(sid)
-    // }
+  [SELECT_SID] (state: State, sid: GrantedAuthoritySid) {
+    state.selectedSid = sid.authority
   },
   [SET_SELECTED_ENTITY_TYPE] (state: State, selectedEntityTypeId: string) {
     state.selectedEntityTypeId = selectedEntityTypeId

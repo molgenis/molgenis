@@ -5,10 +5,10 @@
         <div class="col col-md-4">
           <h3>{{'ROLE' | i18n}}</h3>
           <sids :sids="sids"
-                :selectedSids="selectedSids"
-                :toggleSid="toggleSid"></sids>
+                :selectedSid="selectedSid"
+                :selectSid="selectSid"></sids>
         </div>
-        <div class="col col-md-8" v-if="selectedSids.length">
+        <div class="col col-md-8" v-if="selectedSid">
           <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
                        selectLabel="" deselectLabel="" :placeholder="'SELECT_AN_ENTITY'|i18n"></multiselect>
@@ -19,7 +19,7 @@
               <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n"
                      @input.stop="filterChanged($event.target.value)">
             </form>
-            <acls :permissions="permissions" :acls="acls"></acls>
+            <acls :permissions="permissions" :acls="tableRows"></acls>
           </div>
         </div>
       </div>
@@ -30,8 +30,8 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
-  import { mapState, mapMutations, mapActions } from 'vuex'
-  import { TOGGLE_SID, SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
+  import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
+  import { SELECT_SID, SET_SELECTED_ENTITY_TYPE } from '../store/mutations'
   import { GET_ACLS, FILTER_CHANGED } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
@@ -42,7 +42,7 @@
     name: 'permission-manager',
     methods: {
       ...mapMutations({
-        toggleSid: TOGGLE_SID,
+        selectSid: SELECT_SID,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE
       }),
       ...mapActions({
@@ -50,7 +50,8 @@
       })
     },
     computed: {
-      ...mapState(['sids', 'selectedSids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
+      ...mapState(['sids', 'selectedSid', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
+      ...mapGetters(['tableRows']),
       selectedEntityType: {
         get () {
           return this.$store.state.selectedEntityType

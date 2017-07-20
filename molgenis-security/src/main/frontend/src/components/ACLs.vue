@@ -9,31 +9,24 @@
     <tr>
       <th></th>
       <th></th>
-      <th>{{'GRANTED' | i18n}}</th>
+      <th>{{'GRANTING' | i18n}}</th>
       <th v-for="permission in permissions">{{permission | capitalizeFirstLetter}}</th>
     </tr>
     </thead>
     <tbody>
-    <template v-for="acl in acls">
-      <tr v-for="(ace, index) in acl.aces">
-        <td>
-          <span v-if="index == 0">{{acl.entityLabel || acl.entityId}}</span>
-        </td>
-        <td>
-          <span v-if="index == 0">{{ index == 0 && acl.owner.username }}</span>
-        </td>
-        <td v-if="ace.granted"><i class="fa fa-check"></i></td>
-        <td v-else><i class="fa fa-ban"></i></td>
-        <td v-for="permission in permissions">
-          <div class="form-check">
-            <label class="form-check-label">
-              <input class="form-check-input" type="checkbox"
-                     :checked="ace.permissions.indexOf(permission) >= 0">
-            </label>
-          </div>
-        </td>
-      </tr>
-    </template>
+    <tr v-for="acl in acls">
+      <td>{{acl.entityLabel || acl.entityId}}</td>
+      <td>{{acl.owner}}</td>
+      <td v-if="acl.granting"><i class="fa fa-unlock"></i></td>
+      <td v-else><i class="fa fa-lock"></i></td>
+      <td v-for="permission in permissions">
+        <div class="form-check">
+          <label class="form-check-label">
+            <input class="form-check-input" type="checkbox" :checked="acl[permission]">
+          </label>
+        </div>
+      </td>
+    </tr>
     </tbody>
   </table>
 </template>
