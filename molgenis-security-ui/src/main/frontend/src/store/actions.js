@@ -45,7 +45,7 @@ export default {
     dispatch(GET_ACLS)
   },
   [GET_ACLS] ({state: {selectedEntityTypeId, filter}, commit}) {
-    let url = `/permission/acls?entityTypeId=${selectedEntityTypeId}&pageSize=10`
+    let url = `/permission/acls?entityTypeId=${selectedEntityTypeId}&pageSize=100`
     if (filter) {
       url += `&filter=${encodeURIComponent(filter)}`
     }
