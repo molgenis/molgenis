@@ -22,7 +22,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.reverse;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -175,20 +174,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			return;
 		}
 
-		List<EntityType> resolvedEntityTypes = reverse(entityTypeDependencyResolver.resolve(entityTypes));
-
-		// 1st pass: remove mappedBy attributes
-		List<EntityType> mappedByEntityTypes = resolvedEntityTypes.stream()
-																  .filter(EntityType::hasMappedByAttributes)
-																  .map(EntityTypeWithoutMappedByAttributes::new)
-																  .collect(toList());
-		if (!mappedByEntityTypes.isEmpty())
-		{
-			dataService.update(ENTITY_TYPE_META_DATA, mappedByEntityTypes.stream());
-		}
-
-		// 2nd pass: delete entities
-		dataService.deleteAll(ENTITY_TYPE_META_DATA, resolvedEntityTypes.stream().map(EntityType::getId));
+		dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
 
 		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
 	}

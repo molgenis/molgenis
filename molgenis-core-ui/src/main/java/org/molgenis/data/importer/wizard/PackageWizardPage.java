@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -89,7 +90,7 @@ public class PackageWizardPage extends AbstractWizardPage
 					List<String> entitiesNotImportable = entitiesImportable.entrySet()
 																		   .stream()
 																		   .filter(entity -> entity.getValue() == false)
-																		   .map(entity -> entity.getKey())
+																		   .map(Map.Entry::getKey)
 																		   .collect(toList());
 
 					if (!entitiesNotImportable.isEmpty()) throw new RuntimeException(
@@ -98,11 +99,7 @@ public class PackageWizardPage extends AbstractWizardPage
 				}
 
 			}
-			catch (RuntimeException e)
-			{
-				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
-			}
-			catch (IOException e)
+			catch (RuntimeException | IOException e)
 			{
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}

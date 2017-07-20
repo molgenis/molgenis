@@ -167,7 +167,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		when(attr1.getEntity()).thenReturn(entityType1);
 		Query<Attribute> q = new QueryImpl<>();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass(Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
 		when(permissionService.hasPermissionOnEntityType(entityType0Name, COUNT)).thenReturn(false);
 		when(permissionService.hasPermissionOnEntityType(entityType1Name, COUNT)).thenReturn(true);
@@ -216,7 +216,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		when(attr1.getEntity()).thenReturn(entityType1);
 		Query<Attribute> q = new QueryImpl<>();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass(Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
 		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(false);
 		when(permissionService.hasPermissionOnEntityType(entityType1Name, READ)).thenReturn(true);
@@ -244,7 +244,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		when(q.getOffset()).thenReturn(1);
 		when(q.getPageSize()).thenReturn(1);
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<Attribute>> queryCaptor = forClass(Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(attr0, attr1));
 		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(false);
 		when(permissionService.hasPermissionOnEntityType(entityType1Name, READ)).thenReturn(true);

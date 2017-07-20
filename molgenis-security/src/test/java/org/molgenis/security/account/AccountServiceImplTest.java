@@ -24,7 +24,6 @@ import org.testng.annotations.Test;
 
 import java.net.URISyntaxException;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.GroupMetaData.NAME;

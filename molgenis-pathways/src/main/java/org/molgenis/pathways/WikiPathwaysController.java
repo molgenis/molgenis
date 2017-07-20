@@ -173,8 +173,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 																						  WikiPathwaysController::getGeneFromEffect,
 																						  reducing(Impact.NONE,
 																								  WikiPathwaysController::getImpactFromEffect,
-																								  maxBy((i1, i2) -> i1.compareTo(
-																										  i2)))));
+																								  maxBy(Enum::compareTo))));
 	}
 
 	/**
@@ -337,7 +336,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	private String getColoredPathway(String selectedVcf, String pathwayId, Multimap<String, String> graphIdsPerGene)
 			throws ExecutionException
 	{
-		Map<String, Impact> impactPerGraphId = new HashMap<String, Impact>();
+		Map<String, Impact> impactPerGraphId = new HashMap<>();
 		getGenesForVcf(selectedVcf).forEach(
 				(gene, impact) -> graphIdsPerGene.get(gene).forEach(graphId -> impactPerGraphId.put(graphId, impact)));
 

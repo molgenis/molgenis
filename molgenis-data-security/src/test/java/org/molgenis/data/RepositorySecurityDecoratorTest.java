@@ -140,7 +140,7 @@ public class RepositorySecurityDecoratorTest
 
 		Entity entity0 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0);
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		repositorySecurityDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(entity0));

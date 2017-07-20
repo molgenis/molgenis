@@ -12,6 +12,7 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
@@ -179,6 +180,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@AfterClass
 	public void tearDown()
 	{
+		entityTypeDynamic = dataService.getEntityType(entityTypeDynamic.getId());
+		refEntityTypeDynamic = dataService.getEntityType(refEntityTypeDynamic.getId());
+		selfXrefEntityType = dataService.getEntityType(selfXrefEntityType.getId());
+
 		runAsSystem(() -> metaDataService.deleteEntityType(
 				asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType)));
 	}
@@ -459,6 +464,43 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.deleteById(PACKAGE, "parent");
 			assertNull(metadataService.getPackage("parent"));
 			assertNull(metadataService.getPackage("parent_sub"));
+			entities.forEach(this::assertNotPresent);
+			refEntities.forEach(this::assertNotPresent);
+		});
+	}
+
+	@Test(singleThreaded = true)
+	public void testDeletePackageWithOneToMany()
+	{
+		runAsSystem(() ->
+		{
+			MetaDataService metadataService = dataService.getMeta();
+
+			Package package_ = packageFactory.create("package_onetomany").setLabel("package");
+			metadataService.upsertPackages(Stream.of(package_));
+
+			EntityType refEntityType = testHarness.createDynamicRefEntityType("entityType_onetomany", package_);
+			EntityType entityType = testHarness.createDynamicTestEntityType("refEntityType_onetomany", package_,
+					refEntityType);
+
+			Attribute oneToManyAttribute = attributeFactory.create("onetomany")
+														   .setName("onetomany")
+														   .setDataType(AttributeType.ONE_TO_MANY)
+														   .setRefEntity(entityType)
+														   .setMappedBy(entityType.getAttribute(ATTR_XREF));
+			refEntityType.addAttribute(oneToManyAttribute);
+
+			metadataService.upsertEntityTypes(asList(refEntityType, entityType));
+
+			List<Entity> entities = createAndAdd(entityType, refEntityType, 5);
+			Set<Entity> refEntities = entities.stream().map(e -> e.getEntity(ATTR_XREF)).collect(toSet());
+			assertPresent(entityType, entities);
+			assertPresent(refEntityType, newArrayList(refEntities));
+
+			dataService.deleteById(PACKAGE, "package_onetomany");
+			assertNull(metadataService.getPackage("package_onetomany"));
+			assertNull(dataService.getEntityType(entityType.getId()));
+			assertNull(dataService.getEntityType(refEntityType.getId()));
 			entities.forEach(this::assertNotPresent);
 			refEntities.forEach(this::assertNotPresent);
 		});

@@ -344,7 +344,7 @@ class RestControllerV2
 				restService.updateMappedByEntities(entity);
 
 				String id = entity.getIdValue().toString();
-				ids.add(id.toString());
+				ids.add(id);
 				responseBody.getResources()
 							.add(new AutoValue_ResourcesResponseV2(
 									Href.concatEntityHref(RestControllerV2.BASE_URI, entityTypeId, id)));

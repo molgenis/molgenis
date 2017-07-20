@@ -117,7 +117,6 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 				System.out.println(attr.getName());
 				break;
 			}
-			;
 		}
 		assertTrue(equal);
 	}

@@ -60,7 +60,7 @@ public class ExplainServiceHelper
 	 */
 	public Set<String> findMatchedWords(Explanation explanation)
 	{
-		Set<String> words = new HashSet<String>();
+		Set<String> words = new HashSet<>();
 		String description = explanation.getDescription();
 		if (description.startsWith(Options.SUM_OF.toString()) || description.startsWith(Options.PRODUCT_OF.toString()))
 		{
@@ -80,14 +80,8 @@ public class ExplainServiceHelper
 		{
 			Explanation maxExplanation = Lists.newArrayList(explanation.getDetails())
 											  .stream()
-											  .max(new Comparator<Explanation>()
-											  {
-												  public int compare(Explanation explanation1, Explanation explanation2)
-												  {
-													  return Float.compare(explanation1.getValue(),
-															  explanation2.getValue());
-												  }
-											  })
+											  .max((explanation1, explanation2) -> Float.compare(explanation1.getValue(),
+													  explanation2.getValue()))
 											  .get();
 
 			words.addAll(findMatchedWords(maxExplanation));
@@ -123,7 +117,7 @@ public class ExplainServiceHelper
 	 */
 	public Map<String, Double> findMatchQueries(String matchedWordsString, Map<String, String> collectExpandedQueryMap)
 	{
-		Map<String, Double> qualifiedQueries = new HashMap<String, Double>();
+		Map<String, Double> qualifiedQueries = new HashMap<>();
 		Set<String> matchedWords = splitIntoTerms(matchedWordsString);
 		for (Entry<String, String> entry : collectExpandedQueryMap.entrySet())
 		{

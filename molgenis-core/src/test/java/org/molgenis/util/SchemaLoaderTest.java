@@ -14,15 +14,10 @@ public class SchemaLoaderTest
 	public void getSchemaFromInputStream() throws IOException
 	{
 		String schemaStr = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></xs:schema>";
-		InputStream bis = new ByteArrayInputStream(schemaStr.getBytes("UTF-8"));
-		try
+		try (InputStream bis = new ByteArrayInputStream(schemaStr.getBytes("UTF-8")))
 		{
 			SchemaLoader schemaLoader = new SchemaLoader(bis);
 			assertNotNull(schemaLoader.getSchema());
-		}
-		finally
-		{
-			bis.close();
 		}
 	}
 

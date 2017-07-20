@@ -106,18 +106,13 @@ public class InMemoryRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			Object id = Integer.valueOf(0);
+			Object id = 0;
 			Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 			inMemoryRepository.add(entity);
 			Fetch fetch = new Fetch();
 			assertEquals(inMemoryRepository.findOneById(id, fetch), entity);
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 
@@ -128,16 +123,11 @@ public class InMemoryRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			Object id = Integer.valueOf(0);
+			Object id = 0;
 			Fetch fetch = new Fetch();
 			assertNull(inMemoryRepository.findOneById(id, fetch));
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 
@@ -148,22 +138,17 @@ public class InMemoryRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
 			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1, "bogus"))
 													  .collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 
@@ -174,12 +159,11 @@ public class InMemoryRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
@@ -187,10 +171,6 @@ public class InMemoryRepositoryTest
 			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1, "bogus"), fetch)
 													  .collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 
@@ -201,21 +181,16 @@ public class InMemoryRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
-			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>()).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<>()).collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 
@@ -226,16 +201,15 @@ public class InMemoryRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get("attr")).thenReturn("a").getMock();
 			when(entity0.get("id")).thenReturn(id0);
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get("attr")).thenReturn("a").getMock();
 			when(entity1.get("id")).thenReturn(id1);
-			Object id2 = Integer.valueOf(2);
+			Object id2 = 2;
 			Entity entity2 = when(mock(Entity.class).get("attr")).thenReturn("b").getMock();
 			when(entity2.get("id")).thenReturn(id2);
 			inMemoryRepository.add(entity0);
@@ -244,14 +218,10 @@ public class InMemoryRepositoryTest
 
 			System.out.println(entity0.get(idAttrName));
 
-			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "a"))
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<>().eq("attr", "a"))
 													  .filter(Objects::nonNull)
 													  .collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 
@@ -259,15 +229,10 @@ public class InMemoryRepositoryTest
 	public void findAllAsStreamQueryWithContent() throws IOException
 	{
 		EntityType entityType = mock(EntityType.class);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "val").and().eq("attr2", "val"))
+			inMemoryRepository.findAll(new QueryImpl<>().eq("attr", "val").and().eq("attr2", "val"))
 							  .collect(Collectors.toList());
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 
@@ -278,12 +243,11 @@ public class InMemoryRepositoryTest
 		EntityType entityType = mock(EntityType.class);
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType);
-		try
+		try (InMemoryRepository inMemoryRepository = new InMemoryRepository(entityType))
 		{
-			Object id0 = Integer.valueOf(0);
+			Object id0 = 0;
 			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
+			Object id1 = 1;
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
@@ -293,10 +257,6 @@ public class InMemoryRepositoryTest
 			Consumer<List<Entity>> consumer = mock(Consumer.class);
 			inMemoryRepository.forEachBatched(fetch, consumer, 1000);
 			verify(consumer).accept(Arrays.asList(entity0, entity1));
-		}
-		finally
-		{
-			inMemoryRepository.close();
 		}
 	}
 }
