@@ -1,5 +1,5 @@
 // @flow
-import type { ACE, EntityType, State } from './utils/flow.types'
+import type {ACE, EntityType, State} from "./utils/flow.types";
 
 export default {
   /**

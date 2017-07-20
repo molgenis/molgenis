@@ -47,10 +47,12 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
-  import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
-  import { SELECT_ROLE,CREATE_ROLE,
-    CANCEL_CREATE_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING } from '../store/mutations'
-  import { GET_ACLS, FILTER_CHANGED, SAVE_ACL , SAVE_CREATE_ROLE} from '../store/actions'
+  import {mapState, mapGetters, mapMutations, mapActions} from 'vuex'
+  import {
+    SELECT_ROLE, CREATE_ROLE,
+    CANCEL_CREATE_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING
+  } from '../store/mutations'
+  import {GET_ACLS, FILTER_CHANGED, SAVE_ACL, SAVE_CREATE_ROLE} from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Roles from './Roles'
