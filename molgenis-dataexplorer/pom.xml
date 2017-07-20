@@ -52,6 +52,11 @@
             <artifactId>molgenis-core-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-genomebrowser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- third party dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>

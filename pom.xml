@@ -235,30 +235,6 @@
                                 </resources>
                             </configuration>
                         </execution>
-                        <!--
-                            Copying the das server config to the war ROOT
-                            the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
-                            its placed in the normal WEB-INF/classes folder
-                        -->
-                        <execution>
-                            <id>copy-resources</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>target/${project.artifactId}-${project.version}</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>src/main/resources/</directory>
-                                        <includes>
-                                            <include>MydasServerConfig.xml</include>
-                                        </includes>
-                                        <filtering>true</filtering>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
                     </executions>
                 </plugin>
                 <!-- specify plugin version -->
@@ -853,7 +829,6 @@
         <module>molgenis-charts</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
-        <module>molgenis-das</module>
         <module>molgenis-data-annotators</module>
         <module>molgenis-data-cache</module>
         <module>molgenis-data-csv</module>
@@ -877,6 +852,7 @@
         <module>molgenis-fair</module>
         <module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
+        <module>molgenis-genomebrowser</module>
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>
         <module>molgenis-metadata-manager</module>
