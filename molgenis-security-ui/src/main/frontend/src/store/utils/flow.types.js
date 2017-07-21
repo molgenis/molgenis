@@ -51,9 +51,10 @@ export type Row = {
 export type State = {
   me: PrincipalSid,
   roles: Array<Role>,
-  permissions: Array<string>,
-  selectedSid: ?string,
   selectedRole: ?string,
+  users: ?Array<string>,
+  groups: ?Array<string>,
+  permissions: Array<string>,
   selectedEntityTypeId: ?string,
   entityTypes: Array<EntityType>,
   rows: Array<Row>,

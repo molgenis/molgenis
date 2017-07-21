@@ -1,5 +1,5 @@
 <template>
-  <table class="table table-sm" v-if="acls.length">
+  <table class="table table-sm table-responsive" v-if="acls.length">
     <thead>
     <tr>
       <th>{{'ROW' | i18n}}</th>

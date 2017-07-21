@@ -1,7 +1,9 @@
 // @flow
-import type {ACE, ACL, EntityType, GrantedAuthoritySid, Role, Row, State} from './utils/flow.types'
+import type { ACE, ACL, EntityType, GrantedAuthoritySid, Role, Row, State } from './utils/flow.types'
 
-export const SELECT_ROLE = '__SELECT_ROLE__'
+export const SET_SELECTED_ROLE = '__SET_SELECTED_ROLE__'
+export const SET_USERS = '__SET_USERS__'
+export const SET_GROUPS = '__SET_GROUPS__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
 export const SET_FILTER = '__SET_FILTER__'
 export const SET_ROWS = '__SET_ACLS__'
@@ -80,10 +82,11 @@ export default {
   [SET_ROWS] (state: State, rows: Array<Row>) {
     state.rows = rows
   },
-  [SELECT_ROLE] (state: State, role: string) {
-    state.selectedSid = role
+  [SET_SELECTED_ROLE] (state: State, role: string) {
     state.selectedRole = role
     state.doCreateRole = false
+    state.users = null
+    state.groups = null
   },
   [CREATE_ROLE] (state: State) {
     state.selectedRole = null
@@ -103,5 +106,11 @@ export default {
   },
   [SET_ROLES] (state: State, roles: Array<Role>) {
     state.roles = roles
+  },
+  [SET_USERS] (state: State, users: Array<string>) {
+    state.users = users
+  },
+  [SET_GROUPS] (state: State, groups: Array<string>) {
+    state.groups = groups
   }
 }

@@ -18,7 +18,7 @@
     </div>
     <div class="row">
       <div class="col-12 mt-2">
-        <button type="button" class="btn btn-success" @click="createRole()">Create New Role</button>
+        <button type="button" class="btn btn-success" @click="createRole()">{{'CREATE_NEW_ROLE' | i18n}}</button>
       </div>
     </div>
   </div>
