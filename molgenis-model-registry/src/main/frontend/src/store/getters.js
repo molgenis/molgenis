@@ -98,7 +98,7 @@ const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (e
     linkData.push({
       from: entityType.extends.id,
       to: entityType.id,
-      text: 'isAbstract',
+      text: '',
       toText: '<extends ' + entityType.extends.id + '>'
     })
   }
