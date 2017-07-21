@@ -49,10 +49,11 @@
           <tr v-for="response in responses">
             <td v-if="response.loading">
               <span>{{response.filename}}</span>
-              <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
+              <i class="fa fa-spinner fa-pulse fa-fw"></i>
             </td>
             <td v-else>
               <a target="_blank" :href="response.url">{{response.filename}}</a>
+              <span class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span>
             </td>
             <td v-if="response.error">
               <span class="error-message">{{response.error}}</span>
@@ -78,6 +79,10 @@
     font-size: smaller;
   }
 
+  .success-check {
+    color: $brand-success
+  }
+
 </style>
 
 <script>
@@ -96,7 +101,6 @@
         this.file = event.target.files[0]
       },
       importFile: function () {
-        console.log(this.file)
         let entity = {filename: this.file.name, loading: true}
         this.responses.push(entity)
 
