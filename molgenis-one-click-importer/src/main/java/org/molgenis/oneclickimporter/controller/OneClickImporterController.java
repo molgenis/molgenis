@@ -25,12 +25,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -119,6 +121,14 @@ public class OneClickImporterController extends MolgenisPluginController
 	@ExceptionHandler({ UnknownFileTypeException.class, IOException.class, InvalidFormatException.class,
 			MolgenisDataException.class })
 	public ErrorMessageResponse handleUnknownEntityException(Exception e)
+	{
+		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+	}
+
+	@ResponseBody
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ExceptionHandler({ DateTimeParseException.class})
+	public ErrorMessageResponse handleInternalServerError(Exception e)
 	{
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
