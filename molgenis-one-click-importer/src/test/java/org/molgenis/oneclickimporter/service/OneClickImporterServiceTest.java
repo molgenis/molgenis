@@ -10,15 +10,15 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadLinesFromFile;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadSheetFromFile;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class OneClickImporterServiceTest
 {
@@ -157,74 +157,78 @@ public class OneClickImporterServiceTest
 		assertTrue(oneClickImporterService.hasUniqueValues(column), "should return true for unique string list");
 
 		column = Column.create("col", 0, Arrays.asList(1, 2, 1));
-		assertFalse(oneClickImporterService.hasUniqueValues(column),"should return false for non-unique int list");
+		assertFalse(oneClickImporterService.hasUniqueValues(column), "should return false for non-unique int list");
 
 		column = Column.create("col", 0, Arrays.asList(1, null, 2));
-		assertFalse(oneClickImporterService.hasUniqueValues(column),"should return false a list containing null's ");
+		assertFalse(oneClickImporterService.hasUniqueValues(column), "should return false a list containing null's ");
 
 		column = Column.create("col", 0, Arrays.asList(1, "1"));
-		assertFalse(oneClickImporterService.hasUniqueValues(column),"should return false if types differ ");
+		assertFalse(oneClickImporterService.hasUniqueValues(column), "should return false if types differ ");
 	}
 
 	@Test
 	public void testCastType()
 	{
 		Object value = 1;
-		AttributeType type = AttributeType.INT;
+		AttributeType type = INT;
 		Object casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof Integer);
 
 		value = 1.0;
-		type = AttributeType.INT;
+		type = INT;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof Integer);
 
 		value = "1";
-		type = AttributeType.INT;
+		type = INT;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof Integer);
 
 		value = "1";
-		type = AttributeType.STRING;
+		type = STRING;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof String);
 
 		Long myLong = (long) Integer.MAX_VALUE + 1;
 		value = myLong;
-		type = AttributeType.LONG;
+		type = LONG;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof Long);
 
 		Double myDouble = (double) Long.MAX_VALUE + 1;
 		value = myDouble;
-		type = AttributeType.DECIMAL;
+		type = DECIMAL;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof Double);
 
 		value = "1.1";
-		type = AttributeType.DECIMAL;
+		type = DECIMAL;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof Double);
 
 		value = 1.1;
-		type = AttributeType.STRING;
+		type = STRING;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof String);
 
 		value = 1L;
-		type = AttributeType.STRING;
+		type = STRING;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof String);
 
 		value = 1.1D;
-		type = AttributeType.STRING;
+		type = STRING;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof String);
 
 		value = true;
-		type = AttributeType.STRING;
+		type = STRING;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof String);
 
+		value = "2018-01-03T00:00";
+		type = DATE;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof LocalDate);
 	}
 }

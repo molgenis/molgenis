@@ -21,6 +21,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.parseInt;
 import static java.time.ZoneOffset.UTC;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
 
@@ -88,7 +89,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			case DATE:
 				if (!(value instanceof LocalDate))
 				{
-					castedValue = LocalDate.parse(value.toString());
+					castedValue = LocalDate.parse(value.toString(), ISO_LOCAL_DATE_TIME);
 				}
 				break;
 			case INT:
