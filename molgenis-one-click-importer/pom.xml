@@ -139,6 +139,11 @@
             <version>2.2.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

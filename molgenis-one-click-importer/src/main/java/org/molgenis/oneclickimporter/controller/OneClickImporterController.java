@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.v2.RestControllerV2;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -110,8 +112,9 @@ public class OneClickImporterController extends MolgenisPluginController
 		EntityType dataTable = entityService.createEntityType(dataCollection);
 
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
+		final String location = builder.replacePath(RestControllerV2.BASE_URI).toUriString() + "/" + dataTable.getId();
 		response.setStatus(HttpServletResponse.SC_CREATED);
-		response.setHeader("Location", builder.build().toUriString() + "/" + dataTable.getId());
+		response.setHeader("Location", location);
 
 		return OneClickImportResponse.create(dataTable.getId(), file.getName());
 	}
