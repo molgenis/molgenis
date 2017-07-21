@@ -105,6 +105,7 @@ export default {
   },
   [SET_SELECTED_ENTITY_TYPE] (state: State, selectedEntityTypeId: string) {
     state.selectedEntityTypeId = selectedEntityTypeId
+    state.filter = ''
   },
   [SET_FILTER] (state: State, filter: string) {
     state.filter = filter
