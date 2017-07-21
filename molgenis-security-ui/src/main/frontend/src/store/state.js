@@ -15,7 +15,7 @@ const state: State = {
   doUpdateRole: false,
   selectedEntityTypeId: null,
   permissions: ['WRITE', 'READ'],
-  filter: null,
+  filter: '',
   rows: [],
   entityTypes: [
     {
