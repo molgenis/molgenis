@@ -3,10 +3,10 @@ import go from 'gojs'
 export function newGraph (targetDiv, graphData) {
   const graphObject = go.GraphObject.make  // for conciseness in defining templates
 
-  const headerFont = 'bold 14px sans-serif'
-  const textFont = 'bold 12px sans-serif'
+  const headerFont = 'bold 11px sans-serif'
+  const textFont = '10px sans-serif'
 
-  const lightGrad = graphObject(go.Brush, 'Linear', {1: '#f2f2f2', 0: '#f2f2f2'})
+  // const lightGrad = graphObject(go.Brush, 'Linear', {1: '#f2f2f2', 0: '#f2f2f2'})
 
   const diagram =
     graphObject(go.Diagram, targetDiv,
@@ -29,9 +29,8 @@ export function newGraph (targetDiv, graphData) {
           stroke: '#333333',
           font: textFont
         },
-        new go.Binding('text', 'name'))
-    )
-  // define the Node template, representing an entity
+        new go.Binding('text', 'name')))
+
   diagram.nodeTemplate =
     graphObject(go.Node, 'Auto',  // the whole node panel
       {
@@ -39,10 +38,9 @@ export function newGraph (targetDiv, graphData) {
         resizable: true,
         layoutConditions: go.Part.LayoutStandard & ~go.Part.LayoutNodeSized,
         fromSpot: go.Spot.AllSides,
-        toSpot: go.Spot.AllSides,
-        isShadowed: true,
-        shadowColor: '#C5C1AA'
+        toSpot: go.Spot.AllSides
       },
+
       new go.Binding('location', 'location').makeTwoWay(),
       // whenever the PanelExpanderButton changes the visible property of the "LIST" panel,
       // clear out any desiredSize set by the ResizingTool.
@@ -52,10 +50,11 @@ export function newGraph (targetDiv, graphData) {
       // define the node's outer shape, which will surround the Table
       graphObject(go.Shape, 'Rectangle',
         {
-          fill: lightGrad,
+          // fill: lightGrad,
           stroke: '#756875',
-          strokeWidth: 3
-        }),
+          strokeWidth: 1
+        },
+        new go.Binding('fill', 'color')),
       graphObject(go.Panel, 'Table',
         {margin: 8, stretch: go.GraphObject.Fill},
         graphObject(go.RowColumnDefinition,
@@ -84,15 +83,33 @@ export function newGraph (targetDiv, graphData) {
             name: 'LIST',
             row: 1,
             padding: 3,
+            margin: 2,
             alignment: go.Spot.TopLeft,
             defaultAlignment: go.Spot.Left,
             stretch: go.GraphObject.Horizontal,
             itemTemplate: itemTempl
           },
           new go.Binding('itemArray', 'items'))
-      )  // end Table Panel
-    )  // end Node
-  // define the Link template, representing a relationship
+      )
+    )
+
+  diagram.groupTemplate =
+    graphObject(go.Group, 'Vertical',
+      graphObject(go.TextBlock,
+        { alignment: go.Spot.Center, font: 'Bold 12pt Sans-Serif' },
+        new go.Binding('text', 'key')),
+      graphObject(go.Panel, 'Auto',
+        graphObject(go.Shape, 'RoundedRectangle',
+          {
+            parameter1: 14
+          },
+          new go.Binding('fill', 'color')
+        ),
+        graphObject(go.Placeholder,
+          {padding: 5})
+      )
+    )
+
   diagram.linkTemplate =
     graphObject(go.Link,  // the whole link panel
       {
@@ -100,13 +117,13 @@ export function newGraph (targetDiv, graphData) {
         layerName: 'Foreground',
         reshapable: true,
         routing: go.Link.AvoidsNodes,
-        corner: 5,
+        corner: 2,
         curve: go.Link.JumpOver
       },
       graphObject(go.Shape,  // the link shape
         {
           stroke: '#303B45',
-          strokeWidth: 2.5
+          strokeWidth: 1
         }),
       graphObject(go.TextBlock,  // the "from" label
         {

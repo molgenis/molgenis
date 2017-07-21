@@ -1,9 +1,16 @@
 // @flow
-export type Node = {
+export type Attribute = {
   name: string,
   iskey: boolean,
   figure: string,
   color: string
+}
+
+export type Node = {
+  key: string,
+  color: string,
+  group: string,
+  items: Array<Attribute>
 }
 
 export type Link = {
