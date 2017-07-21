@@ -1,4 +1,4 @@
-import type { State, Node, Link } from 'utils/flow.types'
+import type {State, Node, Link} from 'utils/flow.types'
 
 // xref 1 - 1
 // mref 1 - N
@@ -44,25 +44,28 @@ const mapAttributeToNode = attribute => {
 
 const capitalize = (string) => (string[0].toUpperCase() + string.slice(1))
 
-const mapNodeData = (entityTypes) => entityTypes.filter(entityType => (!entityType.extends)).map(entityType => {
+const mapNodeData = (entityTypes) => entityTypes.map(entityType => {
   return {
     key: entityType.id,
     items: entityType.attributes.map(mapAttributeToNode)
   }
 })
 
-const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (entityType.extends && !entityType.isAbstract)).map(entityType => {
-  const abstractEntityType = entityTypes.find(aEntityType => (aEntityType.id === entityType.extends.id))
-  if (!abstractEntityType) {
+const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (entityType.extends)).map(entityType => {
+  if (!nodeData.find(node => node.key === entityType.extends.id)) {
+    nodeData.push({key: entityType.extends.id, items: []})
+  }
+  if (!linkData.find(link => (link.from === entityType.extends.id && link.to === entityType.id))) {
     linkData.push({
       from: entityType.extends.id,
       to: entityType.id,
       text: 'isAbstract',
       toText: '<extends ' + entityType.extends.id + '>'
     })
-    nodeData.push({key: entityType.extends.id, items: []})
   }
-  nodeData.push({key: entityType.id, items: entityType.attributes.map(mapAttributeToNode)})
+  if (!nodeData.find(node => node.key === entityType.id)) {
+    nodeData.push({key: entityType.id, items: entityType.attributes.map(mapAttributeToNode)})
+  }
 })
 
 const isRef = (attribute) => types[attribute.type]

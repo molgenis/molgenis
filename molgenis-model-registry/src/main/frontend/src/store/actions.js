@@ -23,7 +23,6 @@ export default {
       .then(umlData => {
         commit(SET_UMLDATA, umlData)
       }, error => {
-        console.log(error)
         commit(SET_ERROR, '[ ' + error.status + ' ] ' + error.statusText)
       })
   }

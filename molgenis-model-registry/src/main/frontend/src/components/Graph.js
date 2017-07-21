@@ -1,8 +1,13 @@
 import go from 'gojs'
 
 export function newGraph (targetDiv, graphData) {
-  // if (window.goSamples) goSamples()  // init for these samples -- you don't need to call this
   const graphObject = go.GraphObject.make  // for conciseness in defining templates
+
+  const headerFont = 'bold 14px sans-serif'
+  const textFont = 'bold 12px sans-serif'
+
+  const lightGrad = graphObject(go.Brush, 'Linear', {1: '#f2f2f2', 0: '#f2f2f2'})
+
   const diagram =
     graphObject(go.Diagram, targetDiv,
       {
@@ -12,11 +17,7 @@ export function newGraph (targetDiv, graphData) {
         layout: graphObject(go.ForceDirectedLayout),
         'undoManager.isEnabled': true
       })
-  // define several shared Brushes
 
-  const lightgrad = graphObject(go.Brush, 'Linear', {1: '#E6E6FA', 0: '#FFFAF0'})
-
-  // the template for each attribute in a node's array of item data
   const itemTempl =
     graphObject(go.Panel, 'Horizontal',
       graphObject(go.Shape,
@@ -26,7 +27,7 @@ export function newGraph (targetDiv, graphData) {
       graphObject(go.TextBlock,
         {
           stroke: '#333333',
-          font: 'bold 14px sans-serif'
+          font: textFont
         },
         new go.Binding('text', 'name'))
     )
@@ -45,11 +46,13 @@ export function newGraph (targetDiv, graphData) {
       new go.Binding('location', 'location').makeTwoWay(),
       // whenever the PanelExpanderButton changes the visible property of the "LIST" panel,
       // clear out any desiredSize set by the ResizingTool.
-      new go.Binding('desiredSize', 'visible', function (v) { return new go.Size(NaN, NaN) }).ofObject('LIST'),
+      new go.Binding('desiredSize', 'visible', function (v) {
+        return new go.Size(NaN, NaN)
+      }).ofObject('LIST'),
       // define the node's outer shape, which will surround the Table
       graphObject(go.Shape, 'Rectangle',
         {
-          fill: lightgrad,
+          fill: lightGrad,
           stroke: '#756875',
           strokeWidth: 3
         }),
@@ -66,7 +69,7 @@ export function newGraph (targetDiv, graphData) {
             row: 0,
             alignment: go.Spot.Center,
             margin: new go.Margin(0, 14, 0, 2),  // leave room for Button
-            font: 'bold 16px sans-serif'
+            font: headerFont
           },
           new go.Binding('text', 'key')),
         // the collapse/expand button
@@ -108,7 +111,7 @@ export function newGraph (targetDiv, graphData) {
       graphObject(go.TextBlock,  // the "from" label
         {
           textAlign: 'center',
-          font: 'bold 14px sans-serif',
+          font: textFont,
           stroke: '#1967B3',
           segmentIndex: 0,
           segmentOffset: new go.Point(NaN, NaN),
@@ -118,7 +121,7 @@ export function newGraph (targetDiv, graphData) {
       graphObject(go.TextBlock,  // the "to" label
         {
           textAlign: 'center',
-          font: 'bold 14px sans-serif',
+          font: textFont,
           stroke: '#1967B3',
           segmentIndex: -1,
           segmentOffset: new go.Point(NaN, NaN),
