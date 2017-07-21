@@ -49,7 +49,7 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 		// allow user role to update profile
 		EntityAcl userAccountPluginAcl = entityAclManager.readAcl(
 				EntityIdentity.create(PLUGIN, UserAccountController.ID));
-		EntityAce userAccountPluginUserAce = EntityAce.create(newHashSet(WRITE), roleUserSecurityId, true);
+		EntityAce userAccountPluginUserAce = EntityAce.create(newHashSet(WRITE, READ), roleUserSecurityId, true);
 		userAccountPluginAcl = userAccountPluginAcl.toBuilder()
 												   .setEntries(singletonList(userAccountPluginUserAce))
 												   .build();

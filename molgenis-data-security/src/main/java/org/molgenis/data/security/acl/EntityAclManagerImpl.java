@@ -69,7 +69,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 		if (!currentUserIsSuOrSystem())
 		{
 			SecurityId securityId = SecurityId.createForUsername(SecurityUtils.getCurrentUsername());
-			EntityAce entityAce = EntityAce.create(ImmutableSet.of(Permission.WRITE), securityId, true);
+			EntityAce entityAce = EntityAce.create(ImmutableSet.of(Permission.WRITE, Permission.READ), securityId, true);
 			entityAces = singletonList(entityAce);
 		}
 		else
