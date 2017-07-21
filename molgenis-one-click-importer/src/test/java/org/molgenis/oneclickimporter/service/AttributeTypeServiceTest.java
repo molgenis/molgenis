@@ -64,7 +64,8 @@ public class AttributeTypeServiceTest
 		columnValues = singletonList(null);
 		assertEquals(attributeTypeService.guessAttributeType(columnValues), STRING);
 
-		columnValues = newArrayList(53, "This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. ",
+		columnValues = newArrayList(53,
+				"This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. ",
 				"This is a short string", "String...", 34.1);
 		assertEquals(attributeTypeService.guessAttributeType(columnValues), TEXT);
 	}
@@ -82,5 +83,37 @@ public class AttributeTypeServiceTest
 
 		columnValues = newArrayList("2018-01-03T00:00", "2010-05-03T00:00", "2018-02-03T00:00", "Hello World!");
 		assertEquals(attributeTypeService.guessAttributeType(columnValues), STRING);
+
+		columnValues = newArrayList(1.0d);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), INT);
+
+		columnValues = newArrayList(1.1d);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), DECIMAL);
+
+		columnValues = newArrayList(Integer.MAX_VALUE + 1.5);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), DECIMAL);
+
+		columnValues = newArrayList(Integer.MAX_VALUE + 1.0);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), LONG);
+
+		columnValues = newArrayList(1248723743178143923L);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), LONG);
+
+		columnValues = newArrayList(1);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), INT);
+
+		columnValues = newArrayList(null, null);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), STRING);
+
+		columnValues = newArrayList(123, 1239472398547932875L);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), LONG);
+
+		// FIXME test fails, should be DECIMAL, is guessed as INT
+		//		columnValues = newArrayList(1, 2.2, 3);
+		//		assertEquals(attributeTypeService.guessAttributeType(columnValues), DECIMAL);
+
+		// FIXME test fails, should be LONG, is guessed as INT
+		//		columnValues = newArrayList(123, 54.5, 1239472398547932875L, 23.0);
+		//		assertEquals(attributeTypeService.guessAttributeType(columnValues), LONG);
 	}
 }

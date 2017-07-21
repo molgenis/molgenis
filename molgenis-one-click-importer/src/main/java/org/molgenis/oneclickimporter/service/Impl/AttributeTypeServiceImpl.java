@@ -83,8 +83,21 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 			else if (value instanceof Double)
 			{
 				Double doubleValue = (Double) value;
-				return doubleValue == Math.rint(doubleValue) && doubleValue > Long.MIN_VALUE
-						&& doubleValue < Long.MAX_VALUE ? LONG : DECIMAL;
+
+				if (doubleValue != Math.rint(doubleValue))
+				{
+					return DECIMAL;
+				}
+
+				if (doubleValue > Integer.MIN_VALUE && doubleValue < Integer.MAX_VALUE)
+				{
+					return INT;
+				}
+
+				if (doubleValue > Long.MIN_VALUE && doubleValue < Long.MAX_VALUE)
+				{
+					return LONG;
+				}
 			}
 		}
 		return guess;

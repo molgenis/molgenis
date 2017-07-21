@@ -4,10 +4,6 @@
       <div class="col">
         <h1>Import your data</h1>
         <hr>
-        <div v-if="error != undefined" class="alert alert-danger" role="alert">
-          <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
-          {{error}}
-        </div>
       </div>
     </div>
 
@@ -19,6 +15,9 @@
           </div>
           <button class="btn btn-primary" type="submit" @click="importFile" :disabled="file === null">Import</button>
         </form>
+        <div class="supported-types">
+          <span class="text-muted"><em>Supported file types: XLSX, XLS, CSV</em></span>
+        </div>
         <br/>
         <!--<dropzone FIXME-->
         <!--id="import-dropzone"-->
@@ -43,30 +42,45 @@
       <div class="col">
         <table class="table">
           <thead>
-          <th>file name</th>
-          <th>View data</th>
+          <th>Uploads</th>
+          <th></th>
           </thead>
           <tbody>
           <tr v-for="response in responses">
-            <td>{{response.filename}}</td>
-            <td><a target="_blank" :href="response.url">View...</a></td>
+            <td v-if="response.loading">
+              <span>{{response.filename}}</span>
+              <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
+            </td>
+            <td v-else>
+              <a target="_blank" :href="response.url">{{response.filename}}</a>
+            </td>
+            <td v-if="response.error">
+              <span class="error-message">{{response.error}}</span>
+            </td>
+            <td v-else></td>
           </tr>
           </tbody>
         </table>
       </div>
     </div>
-
   </div>
 </template>
 
-<style scoped>
-  #alert-container {
-    padding-top: 10px;
+<style lang="scss">
+  @import "~variables";
+
+  .error-message {
+    color: $brand-danger
   }
+
+  .supported-types {
+    padding-top: 1em;
+    font-size: smaller;
+  }
+
 </style>
 
 <script>
-  import Dropzone from 'vue2-dropzone'
   import fetch from 'isomorphic-fetch'
 
   export default {
@@ -74,8 +88,7 @@
     data () {
       return {
         file: null,
-        responses: [],
-        error: null
+        responses: []
       }
     },
     methods: {
@@ -83,6 +96,10 @@
         this.file = event.target.files[0]
       },
       importFile: function () {
+        console.log(this.file)
+        let entity = {filename: this.file.name, loading: true}
+        this.responses.push(entity)
+
         const formData = new FormData()
         formData.append('file', this.file)
 
@@ -92,24 +109,23 @@
           credentials: 'same-origin'
         }
 
-        let self = this
-
         fetch('/plugin/one-click-importer/upload', options).then(response => {
           if (response.headers.get('content-type') === 'application/json') {
             response.json().then(function (json) {
               const feedback = response.ok ? json : json.errors[0].message
               if (response.ok) {
-                self.responses.push({
-                  url: '/menu/main/dataexplorer?entity=' + feedback.entityId,
-                  filename: feedback.baseFileName
-                })
+                entity.filename = feedback.baseFileName
+                entity.loading = false
+                entity.url = '/menu/main/dataexplorer?entity=' + feedback.entityId
               } else {
-                self.error = feedback
+                entity.error = feedback
+                entity.loading = false
               }
             })
           }
         })
         this.$refs.fileInput.value = null
+        this.file = null
       }
 
 //     FIXME onComplete (file, response) {
@@ -128,9 +144,6 @@
 //      previewTemplate () {
 //        return '<div></div>'
 //      }
-    },
-    components: {
-      Dropzone
     }
   }
 </script>
