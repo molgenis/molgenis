@@ -10,6 +10,7 @@ export type Node = {
   key: string,
   color: string,
   group: string,
+  extends: string,
   items: Array<Attribute>
 }
 

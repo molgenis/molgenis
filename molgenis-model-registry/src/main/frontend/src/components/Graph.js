@@ -5,6 +5,7 @@ export function newGraph (targetDiv, graphData) {
 
   const headerFont = 'bold 11px sans-serif'
   const textFont = '10px sans-serif'
+  const extendsFont = 'italic 10px sans-serif'
 
   // const lightGrad = graphObject(go.Brush, 'Linear', {1: '#f2f2f2', 0: '#f2f2f2'})
 
@@ -42,15 +43,11 @@ export function newGraph (targetDiv, graphData) {
       },
 
       new go.Binding('location', 'location').makeTwoWay(),
-      // whenever the PanelExpanderButton changes the visible property of the "LIST" panel,
-      // clear out any desiredSize set by the ResizingTool.
       new go.Binding('desiredSize', 'visible', function (v) {
         return new go.Size(NaN, NaN)
       }).ofObject('LIST'),
-      // define the node's outer shape, which will surround the Table
       graphObject(go.Shape, 'Rectangle',
         {
-          // fill: lightGrad,
           stroke: '#756875',
           strokeWidth: 1
         },
@@ -71,17 +68,26 @@ export function newGraph (targetDiv, graphData) {
             font: headerFont
           },
           new go.Binding('text', 'key')),
-        // the collapse/expand button
+        // expand button
         graphObject('PanelExpanderButton', 'LIST',  // the name of the element whose visibility this button toggles
           {
             row: 0,
             alignment: go.Spot.TopRight
           }),
+        // show extended class
+        graphObject(go.TextBlock,
+          {
+            row: 1,
+            alignment: go.Spot.Center,
+            margin: new go.Margin(0, 14, 0, 2),  // leave room for Button
+            font: extendsFont
+          },
+          new go.Binding('text', 'extends')),
         // the list of Panels, each showing an attribute
         graphObject(go.Panel, 'Vertical',
           {
             name: 'LIST',
-            row: 1,
+            row: 2,
             padding: 3,
             margin: 2,
             alignment: go.Spot.TopLeft,

@@ -69,10 +69,24 @@ const mapNodeData = (entityTypes) => entityTypes.map(entityType => {
   nodeData.push({
     key: entityType.id,
     group: entityType.package.id,
+    extends: isExtendedFrom(entityType),
+    abstract: isAbstract(entityType),
     color: entityTypeColor(entityType),
     items: entityType.attributes.map(mapAttributeToNode)
   })
 })
+
+const isAbstract = (entityType) => {
+  let abstract = ''
+  if (entityType.isAbstract) abstract = 'isAbstract'
+  return abstract
+}
+
+const isExtendedFrom = (entityType) => {
+  let extendedClass = ''
+  if (entityType.extends && entityType.extends.id !== entityType.id) extendedClass = 'extends [ ' + entityType.extends.id + ' ]'
+  return extendedClass
+}
 
 const mapPackageNodeData = (entityTypes) => entityTypes.map(entityType => {
   if (!nodeData.find(node => node.key === entityType.package.id)) {
@@ -99,7 +113,7 @@ const mapExtendedNodeData = (entityTypes) => entityTypes.filter(entityType => (e
       from: entityType.extends.id,
       to: entityType.id,
       text: '',
-      toText: '<extends ' + entityType.extends.id + '>'
+      toText: ''
     })
   }
   if (!nodeData.find(node => node.key === entityType.id)) {
