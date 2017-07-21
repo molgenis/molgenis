@@ -1,7 +1,10 @@
-import {delete_, get, post} from '@molgenis/molgenis-api-client'
-import {SET_ENTITY_TYPES, CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_FILTER, SET_ROLES, SET_ROWS} from './mutations'
+import {delete_,get, post} from '@molgenis/molgenis-api-client'
+import {SET_ENTITY_TYPES,CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_FILTER,SET_GROUPS, SET_ROLES, SET_ROWS,
+  SET_SELECTED_ROLE,
+  SET_USERS} from './mutations'
 import {debounce} from 'lodash'
 
+export const SELECT_ROLE = '__SELECT_ROLE__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_ROLES = '__GET_SIDS__'
 export const INITIALIZED = '__INITIALIZED__'
@@ -21,6 +24,19 @@ export default {
   [GET_ROLES] ({commit}) {
     get('/api/v2/sys_sec_Role', {}).then(response => {
       commit(SET_ROLES, response.items)
+    }, error => {
+      console.log(error)
+    })
+  },
+  [SELECT_ROLE] ({commit}, role) {
+    commit(SET_SELECTED_ROLE, role)
+    get(`/api/v2/sys_sec_UserAuthority?q=role==${role}`, {}).then(response => {
+      commit(SET_USERS, response.items.map(e => e.User.username))
+    }, error => {
+      console.log(error)
+    })
+    get(`/api/v2/sys_sec_GroupAuthority?q=role==${role}`, {}).then(response => {
+      commit(SET_GROUPS, response.items.map(e => e.Group.name))
     }, error => {
       console.log(error)
     })

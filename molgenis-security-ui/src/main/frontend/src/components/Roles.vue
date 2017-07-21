@@ -23,6 +23,11 @@
         </div>
       </div>
     </div>
+    <div class="row">
+      <div class="col-12 mt-2">
+        <button type="button" class="btn btn-success" @click="createRole()">Create New Role</button>
+      </div>
+    </div>
   </div>
 </template>
 

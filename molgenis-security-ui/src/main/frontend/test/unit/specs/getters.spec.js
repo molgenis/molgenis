@@ -51,7 +51,7 @@ describe('getters', () => {
     it('should show the rows matching the SID', () => {
       const state = {
         rows,
-        selectedSid: 'user',
+        selectedRole: 'user',
         permissions: ['WRITEMETA', 'WRITE', 'READ']
       }
       const actual = getters.tableRows(state)
@@ -78,7 +78,7 @@ describe('getters', () => {
     it('should show empty ACEs if no entry exists for the selected SID', () => {
       const state = {
         rows,
-        selectedSid: 'admin',
+        selectedRole: 'admin',
         permissions: ['WRITEMETA', 'WRITE', 'READ']
       }
       const actual = getters.tableRows(state)

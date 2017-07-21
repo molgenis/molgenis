@@ -1,6 +1,6 @@
 <template>
   <div v-if="acls.length">
-  <table class="table table-sm">
+  <table class="table table-sm table-responsive">
     <thead>
     <tr>
       <th>{{'ROW' | i18n}}</th>
