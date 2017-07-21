@@ -3,6 +3,7 @@
     <div class="row">
       <div class="col-12">
         <button type="button" class="btn btn-success" @click="createRole()"><i class="fa fa-plus"></i></button>
+        <button v-if="selectedRole" type="button" class="btn btn-default" @click="updateRole(selectedRole)"><i class="fa fa-pencil"></i></button>
         <button v-if="selectedRole" type="button" class="btn btn-danger" @click="onDeleteRole(selectedRole)"><i class="fa fa-trash"></i></button>
       </div>
     </div>
@@ -42,7 +43,13 @@
       'doCreateRole': {
         type: Boolean
       },
+      'doUpdateRole': {
+        type: Boolean
+      },
       'createRole': {
+        type: Function
+      },
+      'updateRole': {
         type: Function
       },
       'onDeleteRole': {

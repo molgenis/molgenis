@@ -1,5 +1,5 @@
-import {get, post, delete_} from '@molgenis/molgenis-api-client'
-import {SET_ENTITY_TYPES, SET_FILTER, SET_ROLES, SET_ROWS} from './mutations'
+import {delete_, get, post} from '@molgenis/molgenis-api-client'
+import {SET_ENTITY_TYPES, CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_FILTER, SET_ROLES, SET_ROWS} from './mutations'
 import {debounce} from 'lodash'
 
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
@@ -10,6 +10,7 @@ export const FILTER_CHANGED = '__FILTER_CHANGED__'
 export const GET_ACLS = '__GET_ACLS__'
 export const SAVE_ACL = '__SAVE_ACL__'
 export const SAVE_CREATE_ROLE = '__SAVE_CREATE_ROLE__'
+export const UPDATE_ROLE = '__UPDATE_ROLE__'
 export const DELETE_ROLE = '__DELETE_ROLE__'
 
 export default {
@@ -30,13 +31,28 @@ export default {
       dispatch(GET_ACLS)
     }
   }, 300),
-  [SAVE_CREATE_ROLE] ({state, dispatch}, role) {
+  [SAVE_CREATE_ROLE] ({state, commit, dispatch}, role) {
     post('/api/v2/sys_sec_Role', {
       body: JSON.stringify({entities: [role]}),
       headers: {
         'Content-Type': 'application/json'
       }
     }).then(response => {
+      commit(CANCEL_CREATE_ROLE)
+      dispatch(GET_ROLES)
+    }, error => {
+      console.log(error)
+    })
+  },
+  [UPDATE_ROLE] ({state, commit, dispatch}, role) {
+    post('/api/v2/sys_sec_Role/', {
+      body: JSON.stringify({entities: [role]}),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'put'
+    }).then(response => {
+      commit(CANCEL_UPDATE_ROLE)
       dispatch(GET_ROLES)
     }, error => {
       console.log(error)

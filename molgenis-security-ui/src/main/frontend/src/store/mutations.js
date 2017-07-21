@@ -11,6 +11,8 @@ export const TOGGLE_PERMISSION = '__TOGGLE_PERMISSION__'
 export const TOGGLE_GRANTING = '__TOGGLE_GRANTING__'
 export const CREATE_ROLE = '__CREATE_ROLE__'
 export const CANCEL_CREATE_ROLE = '__CANCEL_CREATE_ROLE__'
+export const UPDATE_ROLE = '__UPDATE_ROLE__'
+export const CANCEL_UPDATE_ROLE = '__CANCEL_UPDATE_ROLE__'
 
 const toRemove = {
   WRITEMETA: ['WRITEMETA'],
@@ -91,6 +93,12 @@ export default {
   },
   [CANCEL_CREATE_ROLE] (state: State) {
     state.doCreateRole = false
+  },
+  [UPDATE_ROLE] (state: State) {
+    state.doUpdateRole = true
+  },
+  [CANCEL_UPDATE_ROLE] (state: State) {
+    state.doUpdateRole = false
   },
   [SET_SELECTED_ENTITY_TYPE] (state: State, selectedEntityTypeId: string) {
     state.selectedEntityTypeId = selectedEntityTypeId

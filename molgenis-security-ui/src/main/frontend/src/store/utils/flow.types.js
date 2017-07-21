@@ -58,5 +58,6 @@ export type State = {
   entityTypes: Array<EntityType>,
   rows: Array<Row>,
   filter: ?string,
-  doCreateRole: ?boolean
+  doCreateRole: ?boolean,
+  doUpdateRole: ?boolean
 }

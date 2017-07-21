@@ -10,6 +10,7 @@ const state: State = {
   roles: [],
   selectedRole: null,
   doCreateRole: false,
+  doUpdateRole: false,
   selectedSid: null,
   selectedEntityTypeId: null,
   permissions: ['WRITEMETA', 'WRITE', 'READ', 'COUNT'],
