@@ -57,7 +57,8 @@
 
 <style scoped>
   .red {
-    color: darkred
+    color: darkred;
+    cursor: pointer;
   }
 
   .green {
