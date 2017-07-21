@@ -165,6 +165,18 @@ public class LazyEntity implements Entity
 		getLazyLoadedEntity().set(values);
 	}
 
+	@Override
+	public void setWritable(boolean writable)
+	{
+		getLazyLoadedEntity().setWritable(writable);
+	}
+
+	@Override
+	public boolean isWritable()
+	{
+		return getLazyLoadedEntity().isWritable();
+	}
+
 	private Entity getLazyLoadedEntity()
 	{
 		if (entity == null)

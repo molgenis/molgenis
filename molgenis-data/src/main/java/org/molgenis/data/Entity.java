@@ -117,4 +117,8 @@ public interface Entity extends Serializable
 	 * TODO remove method, move to utility class
 	 */
 	void set(Entity values);
+
+	void setWritable (boolean writable);
+
+	boolean isWritable();
 }

@@ -176,7 +176,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 			return decoratedRepository.findAll(ids);
 		}
 
-		return decoratedRepository.findAll(ids).filter(this::currentUserCanReadEntity);
+		return decoratedRepository.findAll(ids).filter(this::currentUserCanReadEntity).map(this::updateEntityWritable);
 	}
 
 	@Override
@@ -187,7 +187,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 			return decoratedRepository.findAll(ids, fetch);
 		}
 
-		return decoratedRepository.findAll(ids, fetch).filter(this::currentUserCanReadEntity);
+		return decoratedRepository.findAll(ids, fetch).filter(this::currentUserCanReadEntity).map(this::updateEntityWritable);
 	}
 
 	@Override
@@ -201,7 +201,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(q);
 		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
 		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset)
-														 .filter(this::currentUserCanReadEntity);
+														 .filter(this::currentUserCanReadEntity).map(this::updateEntityWritable);
 		if (q.getOffset() > 0)
 		{
 			entityStream = entityStream.skip(q.getOffset());
@@ -272,6 +272,15 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 			});
 		}
 		return new AggregateResult(matrix, xLabels, yLabels);
+	}
+
+	private Entity updateEntityWritable(Entity entity)
+	{
+		if (!currentUserCanAccessEntity(entity, Permission.WRITE))
+		{
+			entity.setWritable(false);
+		}
+		return entity;
 	}
 
 	private boolean currentUserCanReadEntity(Entity entity)

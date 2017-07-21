@@ -162,4 +162,16 @@ public abstract class StaticEntity implements Entity
 	{
 		return entity.toString();
 	}
+
+	@Override
+	public void setWritable(boolean writable)
+	{
+		entity.setWritable(writable);
+	}
+
+	@Override
+	public boolean isWritable()
+	{
+		return entity.isWritable();
+	}
 }
