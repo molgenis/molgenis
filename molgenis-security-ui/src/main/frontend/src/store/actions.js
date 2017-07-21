@@ -21,9 +21,10 @@ export default {
     dispatch(GET_ROLES)
     dispatch(GET_ENTITY_TYPES)
   },
-  [GET_ROLES] ({commit}) {
+  [GET_ROLES] ({commit, dispatch}) {
     get('/api/v2/sys_sec_Role', {}).then(response => {
       commit(SET_ROLES, response.items)
+      dispatch(SELECT_ROLE, response.items[0].id)
     }, error => {
       console.log(error)
     })

@@ -71,6 +71,7 @@
               <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n"
                      @input.stop="filterChanged($event.target.value)">
             </form>
+            <h3 class="pt-3">{{'PERMISSIONS' | i18n}}</h3>
             <acls :permissions="permissions" :acls="tableRows" :onPermissionClick="onPermissionClick"
                   :onGrantingClick="onGrantingClick"></acls>
           </div>
