@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 /**
@@ -184,14 +183,16 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	@Override
 	public void add(Entity entity)
 	{
-		validateCurrentUserCanCreateEntityType();
+		EntityType entityType = decoratedRepository.getEntityType();
+		validateCurrentUserCanCreateEntityType(entityType);
 		decoratedRepository.add(entity);
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		validateCurrentUserCanCreateEntityType();
+		EntityType entityType = decoratedRepository.getEntityType();
+		validateCurrentUserCanCreateEntityType(entityType);
 		return decoratedRepository.add(entities);
 	}
 
@@ -203,14 +204,14 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		return decoratedRepository.aggregate(aggregateQuery);
 	}
 
-	private void validateCurrentUserCanCreateEntityType()
+	private void validateCurrentUserCanCreateEntityType(EntityType entityType)
 	{
 		if (currentUserIsSuOrSystem())
 		{
 			return;
 		}
 
-		boolean granted = permissionService.hasPermissionOnEntityType(ENTITY_TYPE_META_DATA, Permission.WRITE);
+		boolean granted = permissionService.hasPermissionOnEntityType(entityType.getId(), Permission.WRITE);
 		if (!granted)
 		{
 			throw new MolgenisDataAccessException("No permission to create entity types");

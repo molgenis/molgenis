@@ -1,11 +1,13 @@
 package org.molgenis.data.security.acl;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.gson.AutoGson;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 @AutoValue
+@AutoGson(autoValueClass = AutoValue_EntityAcl.class)
 public abstract class EntityAcl
 {
 	public abstract EntityIdentity getEntityIdentity();

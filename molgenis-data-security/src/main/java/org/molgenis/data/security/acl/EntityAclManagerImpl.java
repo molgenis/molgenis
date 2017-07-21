@@ -1,5 +1,6 @@
 package org.molgenis.data.security.acl;
 
+import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -7,17 +8,14 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.domain.GrantedAuthoritySid;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.domain.*;
 import org.springframework.security.acls.model.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -44,8 +42,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 	public boolean isGranted(EntityIdentity entityIdentity, Permission permission)
 	{
 		Acl acl = readDomainAcl(entityIdentity);
-		List<org.springframework.security.acls.model.Permission> domainPermissions = toDomainPermissions(
-				expandPermissions(permission));
+		List<org.springframework.security.acls.model.Permission> domainPermissions = singletonList(
+				toDomainPermission(permission));
 		List<Sid> sids = getCurrentUserSids();
 		try
 		{
@@ -70,8 +68,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 		List<EntityAce> entityAces;
 		if (!currentUserIsSuOrSystem())
 		{
-			SecurityId securityId = SecurityId.create(SecurityUtils.getCurrentUsername(), null);
-			EntityAce entityAce = EntityAce.create(Permission.WRITE, securityId, true);
+			SecurityId securityId = SecurityId.createForUsername(SecurityUtils.getCurrentUsername());
+			EntityAce entityAce = EntityAce.create(ImmutableSet.of(Permission.WRITE, Permission.READ), securityId, true);
 			entityAces = singletonList(entityAce);
 		}
 		else
@@ -93,6 +91,10 @@ public class EntityAclManagerImpl implements EntityAclManager
 		Sid owner = toSid(entityAcl.getOwner());
 		acl.setOwner(owner);
 
+		for (int aceIndex = acl.getEntries().size() - 1; aceIndex >= 0; aceIndex--)
+		{
+			acl.deleteAce(aceIndex);
+		}
 		insertAclAces(entityAcl.getEntries(), acl);
 
 		aclService.updateAcl(acl);
@@ -144,7 +146,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 		{
 			EntityAce entityAce = entityAces.get(i);
 			org.springframework.security.acls.model.Permission permission = toDomainPermission(
-					entityAce.getPermission());
+					entityAce.getPermissions());
 			Sid sid = toSid(entityAce.getSecurityId());
 			acl.insertAce(i, permission, sid, entityAce.isGranting());
 		}
@@ -182,25 +184,6 @@ public class EntityAclManagerImpl implements EntityAclManager
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return sidRetrievalStrategy.getSids(authentication);
-	}
-
-	private static List<Permission> expandPermissions(Permission permission)
-	{
-		switch (permission)
-		{
-			case NONE:
-				return singletonList(Permission.NONE);
-			case COUNT:
-				return Arrays.asList(Permission.COUNT, Permission.READ, Permission.WRITE, Permission.WRITEMETA);
-			case READ:
-				return Arrays.asList(Permission.READ, Permission.WRITE, Permission.WRITEMETA);
-			case WRITE:
-				return Arrays.asList(Permission.WRITE, Permission.WRITEMETA);
-			case WRITEMETA:
-				return singletonList(Permission.WRITEMETA);
-			default:
-				throw new RuntimeException(String.format("Unknown permission '%s'", permission.toString()));
-		}
 	}
 
 	private ObjectIdentity toObjectIdentity(Entity entity)
@@ -253,9 +236,9 @@ public class EntityAclManagerImpl implements EntityAclManager
 
 	private EntityAce toEntry(AccessControlEntry accessControlEntry)
 	{
-		Permission permission = toPermission(accessControlEntry.getPermission());
+		Set<Permission> permissions = toPermission(accessControlEntry.getPermission());
 		SecurityId securityId = toSecurityId(accessControlEntry.getSid());
-		return EntityAce.create(permission, securityId, accessControlEntry.isGranting());
+		return EntityAce.create(permissions, securityId, accessControlEntry.isGranting());
 	}
 
 	private SecurityId toSecurityId(Sid sid)
@@ -263,14 +246,27 @@ public class EntityAclManagerImpl implements EntityAclManager
 		if (sid instanceof PrincipalSid)
 		{
 			String principal = ((PrincipalSid) sid).getPrincipal();
-			return SecurityId.create(principal, null);
+			return SecurityId.createForUsername(principal);
 		}
 		if (sid instanceof GrantedAuthoritySid)
 		{
 			String grantedAuthority = ((GrantedAuthoritySid) sid).getGrantedAuthority();
-			return SecurityId.create(null, grantedAuthority);
+			return SecurityId.createForAuthority(grantedAuthority);
 		}
 		throw new IllegalArgumentException(String.format("Unknown Sid type '%s'", sid.getClass().getSimpleName()));
+	}
+
+	private org.springframework.security.acls.model.Permission toDomainPermission(Set<Permission> permissions)
+	{
+		CumulativePermission result = new CumulativePermission();
+		for (Permission permission : permissions)
+		{
+			if (permission != null) // GSON serializes unknown enum values to null
+			{
+				result.set(toDomainPermission(permission));
+			}
+		}
+		return result;
 	}
 
 	private org.springframework.security.acls.model.Permission toDomainPermission(Permission permission)
@@ -291,26 +287,22 @@ public class EntityAclManagerImpl implements EntityAclManager
 		}
 	}
 
-	private Permission toPermission(org.springframework.security.acls.model.Permission permission)
+	private Set<Permission> toPermission(org.springframework.security.acls.model.Permission permission)
 	{
-		if (!(permission instanceof BasePermission))
+		ImmutableSet.Builder<Permission> result = ImmutableSet.builder();
+		if ((permission.getMask() & BasePermission.READ.getMask()) > 0)
 		{
-			throw new RuntimeException("Permission is not a BasePermission");
+			result.add(Permission.READ);
 		}
-
-		BasePermission basePermission = (BasePermission) permission;
-		if (basePermission == BasePermission.READ)
+		if ((permission.getMask() & BasePermission.WRITE.getMask()) > 0)
 		{
-			return Permission.READ;
+			result.add(Permission.WRITE);
 		}
-		else if (basePermission == BasePermission.WRITE)
+		//TODO still relevant?
+		if ((permission.getMask() & BasePermission.ADMINISTRATION.getMask()) > 0)
 		{
-			return Permission.WRITE;
+			result.add(Permission.WRITEMETA);
 		}
-		else
-		{
-			throw new RuntimeException(
-					String.format("BasePermission '%s' cannot be mapped to Permission", basePermission));
-		}
+		return result.build();
 	}
 }
