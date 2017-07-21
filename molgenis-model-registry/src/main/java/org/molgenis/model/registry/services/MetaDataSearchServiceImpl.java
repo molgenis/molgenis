@@ -48,7 +48,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	@Override
 	public PackageSearchResponse search(String searchQuery, int offSet, int number)
 	{
-		List<ModelRegistryPackage> modelRegistryPackageRespons = Lists.newArrayList();
+		List<ModelRegistryPackage> modelRegistryPackages = Lists.newArrayList();
 
 		List<PackageSearchResultItem> searchResults = findRootPackages(searchQuery);
 		for (PackageSearchResultItem searchResult : searchResults)
@@ -83,25 +83,25 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 
 			ModelRegistryPackage pr = new ModelRegistryPackage(p.getId(), p.getLabel(), p.getDescription(),
 					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
-			modelRegistryPackageRespons.add(pr);
+			modelRegistryPackages.add(pr);
 		}
 
-		int total = modelRegistryPackageRespons.size();
+		int total = modelRegistryPackages.size();
 		if (total > 0)
 		{
-			modelRegistryPackageRespons = modelRegistryPackageRespons.subList(offSet, modelRegistryPackageRespons.size());
+			modelRegistryPackages = modelRegistryPackages.subList(offSet, modelRegistryPackages.size());
 
-			if (modelRegistryPackageRespons.size() > number)
+			if (modelRegistryPackages.size() > number)
 			{
-				modelRegistryPackageRespons = modelRegistryPackageRespons.subList(0, number);
+				modelRegistryPackages = modelRegistryPackages.subList(0, number);
 			}
 		}
 
 		int offset = offSet;
-		int num = number != 0 ? number : modelRegistryPackageRespons.size();
+		int num = number != 0 ? number : modelRegistryPackages.size();
 
 		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total,
-				modelRegistryPackageRespons);
+				modelRegistryPackages);
 
 		return packageSearchResponse;
 	}

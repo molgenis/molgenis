@@ -1,4 +1,4 @@
-package org.molgenis.model.registry;
+package org.molgenis.model.registry.controller;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static org.molgenis.model.registry.ModelRegistryController.URI;
+import static org.molgenis.model.registry.controller.ModelRegistryController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 

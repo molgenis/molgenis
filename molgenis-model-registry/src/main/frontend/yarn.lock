@@ -2,10 +2,11 @@
 # yarn lockfile v1
 
 
-"@molgenis/molgenis-api-client@^1.0.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-1.2.0.tgz#793b36cbeb2d8b651ffc9153b00d81bf8d8c52f7"
+"@molgenis/molgenis-api-client@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.0.1.tgz#84aa266f3f901d204fea88a5e32de689c77fe39e"
   dependencies:
+    babel-runtime "^6.11.6"
     isomorphic-fetch "^2.2.1"
     lodash "^4.17.4"
 
@@ -817,7 +818,7 @@ babel-register@^6.22.0, babel-register@^6.24.1:
     mkdirp "^0.5.1"
     source-map-support "^0.4.2"
 
-babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0:
+babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0:
   version "6.23.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.23.0.tgz#0a9489f144de70efb3ce4300accdb329e2fc543b"
   dependencies:

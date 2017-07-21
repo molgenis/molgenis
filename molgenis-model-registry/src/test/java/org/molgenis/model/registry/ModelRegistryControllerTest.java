@@ -13,6 +13,7 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.model.registry.controller.ModelRegistryController;
 import org.molgenis.model.registry.model.*;
 import org.molgenis.model.registry.services.MetaDataSearchService;
 import org.molgenis.model.registry.services.TreeNodeService;

@@ -38,7 +38,7 @@ const mapAttributeToNode = attribute => {
 const attributeFigure = (attribute) => {
   const attributeFigure = 'Cubel'
   const keyAttributeFigure = 'Decision'
-  const idAttributeFigure = ''
+  const idAttributeFigure = 'Triangle'
   let figure = attributeFigure
   if (isRef(attribute)) {
     figure = keyAttributeFigure
