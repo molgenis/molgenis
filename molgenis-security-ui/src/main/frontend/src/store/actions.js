@@ -1,5 +1,5 @@
-import {delete_,get, post} from '@molgenis/molgenis-api-client'
-import {SET_ENTITY_TYPES,CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_FILTER,SET_GROUPS, SET_ROLES, SET_ROWS,
+import {delete_, get, post} from '@molgenis/molgenis-api-client'
+import {SET_ENTITY_TYPES, CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_FILTER, SET_GROUPS, SET_ROLES, SET_ROWS,
   SET_SELECTED_ROLE,
   SET_USERS} from './mutations'
 import {debounce} from 'lodash'
