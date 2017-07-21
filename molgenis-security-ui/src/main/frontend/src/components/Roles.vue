@@ -2,6 +2,12 @@
   <div>
     <div class="row">
       <div class="col-12">
+        <button type="button" class="btn btn-success" @click="createRole()"><i class="fa fa-plus"></i></button>
+        <button v-if="selectedRole" type="button" class="btn btn-danger" @click="onDeleteRole(selectedRole)"><i class="fa fa-trash"></i></button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 mt-2">
         <div class="list-group">
           <a v-for="role in roles"
              class="list-group-item list-group-item-action flex-column align-items-start"
@@ -14,11 +20,6 @@
             <small v-if="role.description && selectedRole === role.id">{{ role.description }}</small>
           </a>
         </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12 mt-2">
-        <button type="button" class="btn btn-success" @click="createRole()">Create New Role</button>
       </div>
     </div>
   </div>
@@ -42,6 +43,9 @@
         type: Boolean
       },
       'createRole': {
+        type: Function
+      },
+      'onDeleteRole': {
         type: Function
       }
     }

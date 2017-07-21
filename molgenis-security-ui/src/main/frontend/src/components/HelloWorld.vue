@@ -8,7 +8,7 @@
         <h3>{{'ROLE' | i18n}}</h3>
         <roles :roles="roles"
                :selectedRole="selectedRole"
-               :selectRole="selectRole" :createRole="createRole"></roles>
+               :selectRole="selectRole" :createRole="createRole" :onDeleteRole="onDeleteRole"></roles>
       </div>
       <div class="col col-md-8">
         <div v-if="doCreateRole">
@@ -31,8 +31,8 @@
           <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
                        selectLabel="" deselectLabel="" :placeholder="'SELECT_AN_ENTITY'|i18n"></multiselect>
-          <h3>{{'ROWS' | i18n}}</h3>
           <div v-if="selectedEntityTypeId">
+            <h3>{{'ROWS' | i18n}}</h3>
             <form>
               <label for="filter" class="sr-only">{{'FILTER_LABEL' | i18n}}:</label>
               <input type="text" class="form-control" id="filter" :placeholder="'FILTER_LABEL'|i18n"
@@ -55,7 +55,7 @@
     SELECT_ROLE, CREATE_ROLE,
     CANCEL_CREATE_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING
   } from '../store/mutations'
-  import { GET_ACLS, FILTER_CHANGED, SAVE_ACL, SAVE_CREATE_ROLE } from '../store/actions'
+  import { GET_ACLS, FILTER_CHANGED, SAVE_ACL, SAVE_CREATE_ROLE, DELETE_ROLE } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Roles from './Roles'
@@ -76,7 +76,8 @@
         filterChanged: FILTER_CHANGED,
         save: SAVE_ACL,
         onSave: SAVE_ACL,
-        onSaveRole: SAVE_CREATE_ROLE
+        onSaveRole: SAVE_CREATE_ROLE,
+        onDeleteRole: DELETE_ROLE
       }),
       onPermissionClick (args) {
         this.togglePermission(args)

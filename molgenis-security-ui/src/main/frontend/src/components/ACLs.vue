@@ -1,5 +1,6 @@
 <template>
-  <table class="table table-sm" v-if="acls.length">
+  <div v-if="acls.length">
+  <table class="table table-sm">
     <thead>
     <tr>
       <th>{{'ROW' | i18n}}</th>
@@ -33,6 +34,10 @@
     </tr>
     </tbody>
   </table>
+  </div>
+  <div v-else>
+    <p>{{'EMPTY_TABLE' | i18n}}</p>
+  </div>
 </template>
 
 <script>

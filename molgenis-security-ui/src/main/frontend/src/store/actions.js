@@ -1,4 +1,4 @@
-import {get, post} from '@molgenis/molgenis-api-client'
+import {get, post, delete_} from '@molgenis/molgenis-api-client'
 import {SET_ENTITY_TYPES, SET_FILTER, SET_ROLES, SET_ROWS} from './mutations'
 import {debounce} from 'lodash'
 
@@ -10,6 +10,7 @@ export const FILTER_CHANGED = '__FILTER_CHANGED__'
 export const GET_ACLS = '__GET_ACLS__'
 export const SAVE_ACL = '__SAVE_ACL__'
 export const SAVE_CREATE_ROLE = '__SAVE_CREATE_ROLE__'
+export const DELETE_ROLE = '__DELETE_ROLE__'
 
 export default {
   [INITIALIZED] ({dispatch}) {
@@ -36,6 +37,13 @@ export default {
         'Content-Type': 'application/json'
       }
     }).then(response => {
+      dispatch(GET_ROLES)
+    }, error => {
+      console.log(error)
+    })
+  },
+  [DELETE_ROLE] ({state, dispatch}, roleId) {
+    delete_('/api/v2/sys_sec_Role/' + roleId).then(response => {
       dispatch(GET_ROLES)
     }, error => {
       console.log(error)
