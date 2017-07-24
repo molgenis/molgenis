@@ -17,7 +17,6 @@ import org.molgenis.model.registry.services.MetaDataSearchService;
 import org.molgenis.model.registry.services.TreeNodeService;
 import org.molgenis.model.registry.utils.ModelRegistryTestHarness;
 import org.molgenis.ui.menu.Menu;
-import org.molgenis.ui.menu.MenuItemType;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -154,12 +153,11 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	{
 		String TEST_PACKAGE = "test-package";
 
-		ExtendedModelMap model = new ExtendedModelMap();
-		Menu menu = new Menu();
-		menu.setId(ModelRegistryController.ID);
-		menu.setType(MenuItemType.MENU);
+		Menu menu = mock(Menu.class);
+		when(menu.findMenuItemPath(ModelRegistryController.ID)).thenReturn("/test/path");
+		when(menuReaderService.getMenu()).thenReturn(menu);
 
-		when(menuReaderService.getMenu().findMenuItemPath(ModelRegistryController.ID)).thenReturn("/");
+		ExtendedModelMap model = new ExtendedModelMap();
 		String template = modelRegistryController.getUml(TEST_PACKAGE, model);
 		assertEquals(template, "view-model-registry_uml");
 		assertEquals(model.get("molgenisPackage"), TEST_PACKAGE);
@@ -211,7 +209,6 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	@Import(ModelRegistryTestHarness.class)
 	public static class ModelRegistryControllerTestConfig
 	{
-
 		@Bean
 		public MetaDataService metaDataService()
 		{
