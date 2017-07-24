@@ -21,28 +21,70 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 		int rowCount = dataValues.size();
 		int currentRowIndex = 0;
 
-		AttributeType guess = getBasicAttributeType(dataValues.get(0));
+		AttributeType currentGuess = getBasicAttributeType(dataValues.get(0));
+		currentGuess = getEnrichedType(currentGuess, dataValues.get(currentRowIndex));
 		while (currentRowIndex < rowCount && !guessCompleted)
 		{
 			Object value = dataValues.get(currentRowIndex);
 			AttributeType basicType = getBasicAttributeType(value);
 
-			guess = getCommonType(guess, basicType);
-			guess = getEnrichedType(guess, value);
+			AttributeType basicTypeGuess = getCommonType(currentGuess, basicType);
+			AttributeType enrichedTypeGuess = getEnrichedType(basicTypeGuess, value);
+
+			// If the newly found type is not narrower the current type do not update as the value wil not fit
+			// ( for example; as string does not fit into a integer).
+			if(isBroader(enrichedTypeGuess, currentGuess)) {
+				currentGuess = enrichedTypeGuess;
+			}
 
 			// If a guess is TEXT, there is no other type option suitable
-			if (TEXT.equals(guess))
+			if (TEXT.equals(currentGuess))
 			{
 				guessCompleted = true;
 			}
+
 			currentRowIndex++;
 		}
 
-		if (guess == null)
+		if (currentGuess == null)
 		{
-			guess = STRING;
+			currentGuess = STRING;
 		}
-		return guess;
+		return currentGuess;
+	}
+
+	/**
+	 * Check if the new enriched type is broader the the previously found type
+	 * @return
+	 */
+	private boolean isBroader(AttributeType enrichedTypeGuess, AttributeType columnTypeGuess)
+	{
+		if(columnTypeGuess == null && enrichedTypeGuess != null || columnTypeGuess == null) {
+			return true;
+		}
+
+		switch (columnTypeGuess)
+		{
+			case INT:
+				return enrichedTypeGuess.equals(INT) || enrichedTypeGuess.equals(LONG) || enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+
+			case DECIMAL:
+				return enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(DATE) || enrichedTypeGuess.equals(DATE_TIME) || enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+			case LONG:
+				return enrichedTypeGuess.equals(LONG) || enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(DATE) || enrichedTypeGuess.equals(DATE_TIME) || enrichedTypeGuess.equals(STRING)
+						|| enrichedTypeGuess.equals(TEXT);
+			case BOOL:
+				return enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+			case STRING:
+				return enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+			case DATE_TIME:
+				return enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+			case DATE:
+				return enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+			default:
+				return false;
+
+		}
 	}
 
 	/**
