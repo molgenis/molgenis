@@ -2,6 +2,7 @@ package org.molgenis.r;
 
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
+import org.molgenis.script.ScriptUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +33,9 @@ public class RScriptRunner implements ScriptRunner
 	@Override
 	public String runScript(Script script, Map<String, Object> parameters)
 	{
-		String rScript = script.generateScript(parameters);
+		String rScript = ScriptUtils.generateScript(script, parameters);
 		String outputFile = getOutputFile(parameters);
-		String scriptResult = rScriptExecutor.executeScript(rScript, outputFile);
-		return scriptResult;
+		return rScriptExecutor.executeScript(rScript, outputFile);
 	}
 
 	private String getOutputFile(Map<String, Object> parameters)
@@ -47,9 +47,8 @@ public class RScriptRunner implements ScriptRunner
 		}
 		if (!(outputFile instanceof String))
 		{
-			throw new RuntimeException(
-					format("Parameter outputFile is of type [] instead of []", outputFile.getClass().getSimpleName(),
-							String.class.getSimpleName()));
+			throw new RuntimeException(format("Parameter outputFile is of type '%s' instead of '%s'",
+					outputFile.getClass().getSimpleName(), String.class.getSimpleName()));
 		}
 		return (String) outputFile;
 	}

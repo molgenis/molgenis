@@ -6,8 +6,6 @@ import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +22,6 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class RScriptExecutor
 {
-	private static final Logger LOG = LoggerFactory.getLogger(RScriptExecutor.class);
-
 	private final RSettings rSettings;
 
 	@Autowired
