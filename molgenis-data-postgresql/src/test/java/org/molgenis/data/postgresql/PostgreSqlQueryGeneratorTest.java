@@ -711,8 +711,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(attrType);
 		when(attr.isNillable()).thenReturn(nillable);
 		when(attr.getRefEntity()).thenReturn(refEntityType);
-		when(attr.getEnumOptions()).thenReturn(
-				attrType == ENUM ? newArrayList("enum0, enum1") : emptyList());
+		when(attr.getEnumOptions()).thenReturn(attrType == ENUM ? newArrayList("enum0, enum1") : emptyList());
 
 		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr), sql);
 	}

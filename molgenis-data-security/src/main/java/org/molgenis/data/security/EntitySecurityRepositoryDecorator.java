@@ -187,7 +187,9 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 			return decoratedRepository.findAll(ids, fetch);
 		}
 
-		return decoratedRepository.findAll(ids, fetch).filter(this::currentUserCanReadEntity).map(this::updateEntityWritable);
+		return decoratedRepository.findAll(ids, fetch)
+								  .filter(this::currentUserCanReadEntity)
+								  .map(this::updateEntityWritable);
 	}
 
 	@Override
@@ -201,7 +203,8 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(q);
 		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
 		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset)
-														 .filter(this::currentUserCanReadEntity).map(this::updateEntityWritable);
+														 .filter(this::currentUserCanReadEntity)
+														 .map(this::updateEntityWritable);
 		if (q.getOffset() > 0)
 		{
 			entityStream = entityStream.skip(q.getOffset());

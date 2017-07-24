@@ -476,8 +476,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			QueryImpl<EntityType> query = new QueryImpl<>();
 			query.setFetch(entityTypeFetch);
 			query.setPageSize(pageSize);
-			query.setOffset(page * pageSize);dataService.findAll(ENTITY_TYPE_META_DATA, query,EntityType.class)
-				.forEach( entityTypeList::add);
+			query.setOffset(page * pageSize);
+			dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).forEach(entityTypeList::add);
 		}
 		return entityTypeList.stream();
 	}

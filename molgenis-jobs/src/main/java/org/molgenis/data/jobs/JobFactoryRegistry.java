@@ -19,11 +19,11 @@ public class JobFactoryRegistry
 	public JobFactoryRegistry()
 	{
 		jobFactories = new HashMap<>();
-				}
+	}
 
 	public void registerJobFactory(JobFactory jobFactory)
 	{
-		jobFactories.put( resolveTypeArgument(jobFactory.getClass(), JobFactory.class), jobFactory);
+		jobFactories.put(resolveTypeArgument(jobFactory.getClass(), JobFactory.class), jobFactory);
 	}
 
 	public JobFactory getJobFactory(JobExecution jobExecution)

@@ -118,7 +118,7 @@ public interface Entity extends Serializable
 	 */
 	void set(Entity values);
 
-	void setWritable (boolean writable);
+	void setWritable(boolean writable);
 
 	boolean isWritable();
 }

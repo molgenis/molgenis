@@ -102,8 +102,8 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 	private org.springframework.security.acls.model.AclCache aclCache()
 	{
 		// TODO enable cache (seems buggy at the moment)
-//		return new SpringCacheBasedAclCache(new TransactionAwareCacheDecorator(aclCache), permissionGrantingStrategy(),
-//				aclAuthorizationStrategy());
+		//		return new SpringCacheBasedAclCache(new TransactionAwareCacheDecorator(aclCache), permissionGrantingStrategy(),
+		//				aclAuthorizationStrategy());
 		return new SpringCacheBasedAclCache(new NoOpCache("aclCache"), permissionGrantingStrategy(),
 				aclAuthorizationStrategy());
 	}

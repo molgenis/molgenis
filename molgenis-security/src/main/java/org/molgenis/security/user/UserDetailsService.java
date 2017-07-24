@@ -64,14 +64,15 @@ public class UserDetailsService implements org.springframework.security.core.use
 	{
 		// user authorities
 		List<? extends Authority> authorities = getUserAuthorities(user);
-		List<GrantedAuthority> grantedAuthorities =
-				authorities != null ? Lists.transform(authorities,
-						(Function<Authority, GrantedAuthority>) authority -> new SimpleGrantedAuthority(authority.getRole().getId())) : null;
+		List<GrantedAuthority> grantedAuthorities = authorities != null ? Lists.transform(authorities,
+				(Function<Authority, GrantedAuthority>) authority -> new SimpleGrantedAuthority(
+						authority.getRole().getId())) : null;
 
 		// // user group authorities
 		List<GroupAuthority> groupAuthorities = getGroupAuthorities(user);
 		List<GrantedAuthority> grantedGroupAuthorities = groupAuthorities != null ? Lists.transform(groupAuthorities,
-				(Function<GroupAuthority, GrantedAuthority>) groupAuthority -> new SimpleGrantedAuthority(groupAuthority.getRole().getId())) : null;
+				(Function<GroupAuthority, GrantedAuthority>) groupAuthority -> new SimpleGrantedAuthority(
+						groupAuthority.getRole().getId())) : null;
 
 		// union of user and group authorities
 		Set<GrantedAuthority> allGrantedAuthorities = new HashSet<>();

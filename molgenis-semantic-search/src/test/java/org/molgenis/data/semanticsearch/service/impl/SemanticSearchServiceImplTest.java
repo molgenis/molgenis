@@ -116,17 +116,16 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void init()
 	{
-		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(standingHeight))
-				.thenReturn(newHashSet("Standing height", "Standing height", "length"));
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(standingHeight)).thenReturn(
+				newHashSet("Standing height", "Standing height", "length"));
 
-		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(bodyWeight))
-				.thenReturn(newHashSet("Body weight", "Body weight", "Mass in kilograms"));
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(bodyWeight)).thenReturn(
+				newHashSet("Body weight", "Body weight", "Mass in kilograms"));
 
-		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(hypertension))
-				.thenReturn(newHashSet("Hypertension"));
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(hypertension)).thenReturn(newHashSet("Hypertension"));
 
-		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(maternalHypertension))
-				.thenReturn(newHashSet("Maternal hypertension"));
+		when(semanticSearchServiceHelper.getOtLabelAndSynonyms(maternalHypertension)).thenReturn(
+				newHashSet("Maternal hypertension"));
 	}
 
 	@Test
@@ -134,8 +133,8 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		Mockito.reset(ontologyService);
 		attribute.setDescription("History of Hypertension");
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("history", "hypertens"),
-				100)).thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("history", "hypertens"), 100)).thenReturn(
+				ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
 		assertNull(result);
 	}
@@ -145,11 +144,11 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		Stemmer stemmer = new Stemmer();
 		Assert.assertEquals(
-				semanticSearchService.distanceFrom("Hypertension", ImmutableSet.of("history", "hypertens"),
-						stemmer), .6923, 0.0001, "String distance should be equal");
-		Assert.assertEquals(semanticSearchService.distanceFrom("Maternal Hypertension",
-				ImmutableSet.of("history", "hypertens"), stemmer), .5454, 0.0001,
-				"String distance should be equal");
+				semanticSearchService.distanceFrom("Hypertension", ImmutableSet.of("history", "hypertens"), stemmer),
+				.6923, 0.0001, "String distance should be equal");
+		Assert.assertEquals(
+				semanticSearchService.distanceFrom("Maternal Hypertension", ImmutableSet.of("history", "hypertens"),
+						stemmer), .5454, 0.0001, "String distance should be equal");
 	}
 
 	@Test
@@ -169,8 +168,8 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height (m.)");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("standing", "height", "m"),
-				100)).thenReturn(ontologyTerms);
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("standing", "height", "m"), 100)).thenReturn(
+				ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(result, Hit.create(standingHeight, 0.92857f));
 	}
@@ -243,17 +242,17 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		QueryRule disMaxQueryRule = new QueryRule(rules);
 		disMaxQueryRule.setOperator(QueryRule.Operator.DIS_MAX);
 
-		when(semanticSearchServiceHelper
-				.createDisMaxQueryRuleForAttribute(newHashSet("targetAttribute"), emptyList()))
-				.thenReturn(disMaxQueryRule);
+		when(semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(newHashSet("targetAttribute"),
+				emptyList())).thenReturn(disMaxQueryRule);
 
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getString(AttributeMetadata.NAME)).thenReturn("height_0");
 		when(entity1.getString(AttributeMetadata.LABEL)).thenReturn("height");
 		when(entity1.getString(AttributeMetadata.DESCRIPTION)).thenReturn("this is a height measurement in m!");
 
-		List<QueryRule> disMaxQueryRules = newArrayList(new QueryRule(AttributeMetadata.ID, QueryRule.Operator.IN, attributeIdentifiers),
-						new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
+		List<QueryRule> disMaxQueryRules = newArrayList(
+				new QueryRule(AttributeMetadata.ID, QueryRule.Operator.IN, attributeIdentifiers),
+				new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
 
 		Attribute attributeHeight = attrMetaDataFactory.create().setName("height_0");
 		Attribute attributeWeight = attrMetaDataFactory.create().setName("weight_0");
@@ -264,8 +263,8 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules))).thenReturn(
 				Stream.of(entity1));
 
-		Map<Attribute, ExplainedAttribute> termsActual1 = semanticSearchService
-				.findAttributes(sourceEntityType, newHashSet("targetAttribute"), emptyList());
+		Map<Attribute, ExplainedAttribute> termsActual1 = semanticSearchService.findAttributes(sourceEntityType,
+				newHashSet("targetAttribute"), emptyList());
 
 		Map<Attribute, ExplainedAttribute> termsExpected1 = ImmutableMap.of(attributeHeight,
 				ExplainedAttribute.create(attributeHeight));
@@ -275,8 +274,8 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		// Case 2
 		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules))).thenReturn(Stream.empty());
 
-		Map<Attribute, ExplainedAttribute> termsActual2 = semanticSearchService
-				.findAttributes(sourceEntityType, newHashSet("targetAttribute"), emptyList());
+		Map<Attribute, ExplainedAttribute> termsActual2 = semanticSearchService.findAttributes(sourceEntityType,
+				newHashSet("targetAttribute"), emptyList());
 
 		Map<Attribute, ExplainedAttribute> termsExpected2 = ImmutableMap.of();
 

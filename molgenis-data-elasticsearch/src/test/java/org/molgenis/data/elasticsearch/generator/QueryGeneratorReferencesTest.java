@@ -243,11 +243,11 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	{
 		String value = "value";
 		Query<Entity> q = new QueryImpl<>().like(PREFIX + refCompoundPart0AttributeName, value);
-		QueryBuilder query =queryGenerator.createQueryBuilder( q, entityType);
+		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
 
-		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT, QueryBuilders
-				.matchQuery(PREFIX + refCompoundPart0AttributeName + '.' + FIELD_NGRAM_ANALYZED, value)
-				.analyzer(DEFAULT_ANALYZER), ScoreMode.Avg);
+		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT,
+				QueryBuilders.matchQuery(PREFIX + refCompoundPart0AttributeName + '.' + FIELD_NGRAM_ANALYZED, value)
+							 .analyzer(DEFAULT_ANALYZER), ScoreMode.Avg);
 		assertQueryBuilderEquals(query, expectedQuery);
 	}
 

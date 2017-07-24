@@ -783,7 +783,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			// create attribute
 			Attribute attribute = attrMetaFactory.create().setName(attributeName);
 
-			Map<String, EmxAttribute> entitiesMap = attributesMap.computeIfAbsent(entityTypeId, k -> newLinkedHashMap());
+			Map<String, EmxAttribute> entitiesMap = attributesMap.computeIfAbsent(entityTypeId,
+					k -> newLinkedHashMap());
 			entitiesMap.put(attributeName, new EmxAttribute(attribute));
 		}
 

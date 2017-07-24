@@ -25,8 +25,8 @@ public class GenomeBrowserTrackTest
 
 		EntityType molgenisEntity = mock(EntityType.class);
 		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity, VARIANT,
-				Collections.singletonList(reference),
-				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, "alert(\"test\")",
+				Collections.singletonList(reference), GenomeBrowserSettings.MolgenisReferenceMode.NONE,
+				genomeBrowserAttributes, "alert(\"test\")",
 				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
 
 		String expected = "{\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"postion\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"label_attr\":\"entityLabel\",\"tier_type\":\"molgenis\",\"uri\":\"http://localhost:8080/api/v2/null?id\",\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"]}";

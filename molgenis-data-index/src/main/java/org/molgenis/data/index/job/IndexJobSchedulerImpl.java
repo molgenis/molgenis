@@ -67,7 +67,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler
 			indexJobExecution.setUser("admin");
 			indexJobExecution.setIndexActionJobID(transactionId);
 			jobExecutor.submit(indexJobExecution, executorService)
-					.whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
+					   .whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
 		}
 		else
 		{

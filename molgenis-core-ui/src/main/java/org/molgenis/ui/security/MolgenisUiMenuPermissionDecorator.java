@@ -56,21 +56,19 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		return Lists.newArrayList(Iterables.filter(
-				Iterables.transform(molgenisUiMenu.getItems(), molgenisUiMenuItem ->
-				{
-					switch (molgenisUiMenuItem.getType())
-					{
-						case MENU:
-							return new MolgenisUiMenuPermissionDecorator((MolgenisUiMenu) molgenisUiMenuItem,
-									molgenisPermissionService);
-						case PLUGIN:
-							return molgenisUiMenuItem;
-						default:
-							throw new RuntimeException(
-									"Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
-					}
-				}), this::hasPermission));
+		return Lists.newArrayList(Iterables.filter(Iterables.transform(molgenisUiMenu.getItems(), molgenisUiMenuItem ->
+		{
+			switch (molgenisUiMenuItem.getType())
+			{
+				case MENU:
+					return new MolgenisUiMenuPermissionDecorator((MolgenisUiMenu) molgenisUiMenuItem,
+							molgenisPermissionService);
+				case PLUGIN:
+					return molgenisUiMenuItem;
+				default:
+					throw new RuntimeException("Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
+			}
+		}), this::hasPermission));
 	}
 
 	@Override
@@ -83,7 +81,9 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	@Override
 	public MolgenisUiMenuItem getActiveItem()
 	{
-		return Iterables.find(molgenisUiMenu.getItems(), molgenisUiMenuItem -> molgenisUiMenuItem.getType() != MolgenisUiMenuItemType.MENU && hasPermission(molgenisUiMenuItem), null);
+		return Iterables.find(molgenisUiMenu.getItems(),
+				molgenisUiMenuItem -> molgenisUiMenuItem.getType() != MolgenisUiMenuItemType.MENU && hasPermission(
+						molgenisUiMenuItem), null);
 	}
 
 	@Override

@@ -96,8 +96,8 @@ public class RestController
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager,
-			MolgenisRSQL molgenisRSQL, RestService restService, LanguageService languageService)
+			AuthenticationManager authenticationManager, MolgenisRSQL molgenisRSQL, RestService restService,
+			LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -1062,7 +1062,8 @@ public class RestController
 		}
 		if (attribute != null)
 		{
-			return new AttributeResponse(entityTypeId, meta, attribute, attributeSet, attributeExpandSet, dataService, languageService);
+			return new AttributeResponse(entityTypeId, meta, attribute, attributeSet, attributeExpandSet, dataService,
+					languageService);
 		}
 		else
 		{
@@ -1177,7 +1178,8 @@ public class RestController
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
 		}
 
-		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityTypeId, meta, dataService, languageService);
+		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityTypeId, meta, dataService,
+				languageService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1204,7 +1206,9 @@ public class RestController
 				if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-					entityMap.put(attrName, new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null, dataService, languageService));
+					entityMap.put(attrName,
+							new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null, dataService,
+									languageService));
 				}
 				else
 				{
