@@ -727,11 +727,13 @@ public class EntityType extends StaticEntity
 		return attributeName != null ? getAttribute(attributeName) : null;
 	}
 
-	public void setReadOnly(boolean readOnly) {
+	public void setReadOnly(boolean readOnly)
+	{
 		this.readOnly = readOnly;
 	}
 
-	public boolean isReadOnly() {
+	public boolean isReadOnly()
+	{
 		return this.readOnly;
 	}
 

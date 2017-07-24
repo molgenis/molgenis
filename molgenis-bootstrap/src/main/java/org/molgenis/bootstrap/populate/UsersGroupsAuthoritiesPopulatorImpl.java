@@ -94,8 +94,7 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
 		dataService.add(GROUP, allUsersGroup);
-		dataService
-				.add(ROLE, userRole);
+		dataService.add(ROLE, userRole);
 		dataService.add(GROUP_AUTHORITY, usersGroupUserAuthority);
 	}
 }

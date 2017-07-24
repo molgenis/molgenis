@@ -71,10 +71,11 @@ public class AmazonBucketIngester
 			ImportService importService = importServiceFactory.getImportService(file.getName());
 			File renamed = new File(
 					String.format("%s%s%s.%s", file.getParent(), File.separatorChar, targetEntityTypeName, extension));
-			Files.copy(file.toPath(), renamed.toPath(), StandardCopyOption.REPLACE_EXISTING);RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-					.createFileRepositoryCollection(renamed);
-			EntityImportReport report = importService
-					.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING, "base");
+			Files.copy(file.toPath(), renamed.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
+					renamed);
+			EntityImportReport report = importService.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING,
+					"base");
 			progress.status("Download and import from Amazon Bucket done.");
 			progress.progress(3,
 					"Successfully imported " + report.getNrImportedEntitiesMap().keySet().toString() + " entities.");

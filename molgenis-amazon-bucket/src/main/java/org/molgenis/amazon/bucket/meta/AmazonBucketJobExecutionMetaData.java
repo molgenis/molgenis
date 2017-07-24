@@ -66,9 +66,13 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 								.setVisible(false);
 		addAttribute(REGION).setLabel("Region").setDescription("The region of the amazon bucket.").setNillable(false);
 		addAttribute(TARGET_ENTITY_ID).setLabel("Target EntityType ID").setNillable(true);
-		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)
-				.setRefEntity(fileMetaMetaData).setNillable(true);
+		addAttribute(FILE).setLabel("File")
+						  .setDescription("The imported file.")
+						  .setDataType(XREF)
+						  .setRefEntity(fileMetaMetaData)
+						  .setNillable(true);
 		addAttribute(EXTENSION).setLabel("Extension")
-							   .setDescription("Optional extension of the file, is not part of the key in the bucket").setNillable(true);
+							   .setDescription("Optional extension of the file, is not part of the key in the bucket")
+							   .setNillable(true);
 	}
 }

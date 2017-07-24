@@ -42,7 +42,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public Iterator<EntityType> iterator()
 	{
 		Iterable<EntityType> entityTypeIterable = decoratedRepo::iterator;
-		return StreamSupport.stream(entityTypeIterable.spliterator(), false).map(this::toPermittedEntityType).iterator();
+		return StreamSupport.stream(entityTypeIterable.spliterator(), false)
+							.map(this::toPermittedEntityType)
+							.iterator();
 	}
 
 	@Override
@@ -118,7 +120,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		public void map(List<EntityType> entityTypes)
 		{
 			Stream<EntityType> filteredEntities = entityTypes.stream()
-															.map(entityTypeRepositorySecurityDecorator::toPermittedEntityType);
+															 .map(entityTypeRepositorySecurityDecorator::toPermittedEntityType);
 			consumer.accept(filteredEntities.collect(toList()));
 		}
 	}

@@ -129,24 +129,22 @@ public class AttributeResponse
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			Iterable<Attribute> attributeParts = attr.getChildren();
-			this.attributes = attributeParts != null ? Lists.newArrayList(
-					Iterables.transform(attributeParts, attribute ->
+			this.attributes =
+					attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts, attribute ->
 					{
 
-
-							if (attributeExpandsSet != null && attributeExpandsSet.containsKey(
-									"attributes".toLowerCase()))
-							{
-								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-								return new AttributeResponse(entityParentName, entityType, attribute, subAttributesSet,
-										Collections.singletonMap("refEntity".toLowerCase(), null),
-										dataService, languageService);
-							}
-							else
-							{
-								return Collections.<String, Object>singletonMap("href",
-										Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName,
-												attribute.getName()));
+						if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
+						{
+							Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+							return new AttributeResponse(entityParentName, entityType, attribute, subAttributesSet,
+									Collections.singletonMap("refEntity".toLowerCase(), null), dataService,
+									languageService);
+						}
+						else
+						{
+							return Collections.<String, Object>singletonMap("href",
+									Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName,
+											attribute.getName()));
 
 						}
 					})) : null;

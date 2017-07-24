@@ -801,10 +801,10 @@ class PostgreSqlQueryGenerator
 					}
 					else
 					{
-						equalsAttr =entityType.getAttribute(r.getField());
+						equalsAttr = entityType.getAttribute(r.getField());
 					}
 					result.append('.').append(getColumnName(equalsAttr));
-							result.append(" IN (").append(in).append(')');
+					result.append(" IN (").append(in).append(')');
 					break;
 				}
 				case NOT:

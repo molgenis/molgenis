@@ -240,12 +240,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			Map<String, String> collectExpandedQueryMap, Query<Entity> query)
 	{
 		EntityType attributeMetaData = dataService.getEntityType(ATTRIBUTE_META_DATA);
-		String attributeID = attribute .getIdentifier();
-		Explanation explanation = elasticSearchExplainService
-				.explain(query, attributeMetaData, attributeID);
-		return elasticSearchExplainService
-				.findQueriesFromExplanation(collectExpandedQueryMap, explanation);
-
+		String attributeID = attribute.getIdentifier();
+		Explanation explanation = elasticSearchExplainService.explain(query, attributeMetaData, attributeID);
+		return elasticSearchExplainService.findQueriesFromExplanation(collectExpandedQueryMap, explanation);
 
 	}
 

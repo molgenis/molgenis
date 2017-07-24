@@ -80,8 +80,8 @@ public class ExplainServiceHelper
 		{
 			Explanation maxExplanation = Lists.newArrayList(explanation.getDetails())
 											  .stream()
-											  .max((explanation1, explanation2) -> Float.compare(explanation1.getValue(),
-													  explanation2.getValue()))
+											  .max((explanation1, explanation2) -> Float.compare(
+													  explanation1.getValue(), explanation2.getValue()))
 											  .get();
 
 			words.addAll(findMatchedWords(maxExplanation));

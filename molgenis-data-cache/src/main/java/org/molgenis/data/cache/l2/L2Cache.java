@@ -167,7 +167,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	 */
 	private LoadingCache<Object, Optional<Map<String, Object>>> createEntityCache(Repository<Entity> repository)
 	{
-		Caffeine<Object, Object> cacheBuilder =Caffeine.newBuilder().recordStats().expireAfterAccess(10, MINUTES);
+		Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder().recordStats().expireAfterAccess(10, MINUTES);
 		if (!MetaDataService.isMetaEntityType(repository.getEntityType()))
 		{
 			cacheBuilder.maximumSize(MAX_CACHE_SIZE_PER_ENTITY);

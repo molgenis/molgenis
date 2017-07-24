@@ -87,8 +87,7 @@ public class ChartController
 	{
 		Query<Entity> query = request.getQuery();
 		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(),
-				query != null ? query.getRules() : Collections.emptyList(), request.getSplit(),
-				request.getScale());
+				query != null ? query.getRules() : Collections.emptyList(), request.getSplit(), request.getScale());
 
 		chart.setHeight(request.getHeight());
 		chart.setWidth(request.getWidth());

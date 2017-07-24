@@ -297,7 +297,7 @@ public class EntityUtils
 		{
 			if (!tags.get(i).getId().equals(otherTags.get(i).getId())) return false;
 		}
-// compare entity level security
+		// compare entity level security
 		if (!Objects.equals(entityType.isEntityLevelSecurity(), otherEntityType.isEntityLevelSecurity())) return false;
 
 		// compare entity level security inheritance attribute
@@ -309,7 +309,8 @@ public class EntityUtils
 			return false;
 		if (entityLevelSecurityInheritanceAttribute != null && otherEntityLevelSecurityInheritanceAttribute != null
 				&& !Objects.equals(entityLevelSecurityInheritanceAttribute.getIdentifier(),
-				otherEntityLevelSecurityInheritanceAttribute.getIdentifier())) return false;		return entityType.getIndexingDepth() == otherEntityType.getIndexingDepth();// FIXME add RLS attribute checks
+				otherEntityLevelSecurityInheritanceAttribute.getIdentifier())) return false;
+		return entityType.getIndexingDepth() == otherEntityType.getIndexingDepth();// FIXME add RLS attribute checks
 	}
 
 	/**

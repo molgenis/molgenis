@@ -36,8 +36,7 @@ public class EntityTypeResponse
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponse(EntityType meta, DataService dataService,
-			LanguageService languageService)
+	public EntityTypeResponse(EntityType meta, DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, null, dataService, languageService);
 	}
@@ -47,7 +46,8 @@ public class EntityTypeResponse
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet, DataService dataService, LanguageService languageService)
+	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
+			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
@@ -85,7 +85,8 @@ public class EntityTypeResponse
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeResponse(name, meta, attr, subAttributesSet,
-								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")), dataService, languageService));
+								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
+								dataService, languageService));
 					}
 					else
 					{

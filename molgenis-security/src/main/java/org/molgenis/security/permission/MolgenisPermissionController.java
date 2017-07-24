@@ -37,7 +37,6 @@ public class MolgenisPermissionController
 	private final DataService dataService;
 	private final LanguageService languageService;
 
-
 	@Autowired
 	public MolgenisPermissionController(PermissionService molgenisPermissionService, EntityAclService entityAclService,
 			EntityAclManager entityAclManager, LanguageService languageService, DataService dataService)
@@ -53,16 +52,16 @@ public class MolgenisPermissionController
 	@ResponseBody
 	public boolean hasReadPermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		return molgenisPermissionService
-				.hasPermissionOnEntityType(entityTypeId, org.molgenis.security.core.Permission.READ);
+		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId,
+				org.molgenis.security.core.Permission.READ);
 	}
 
 	@RequestMapping(value = "/{entityTypeId}/write", method = GET)
 	@ResponseBody
 	public boolean hasWritePermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		return molgenisPermissionService
-				.hasPermissionOnEntityType(entityTypeId, org.molgenis.security.core.Permission.WRITE);
+		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId,
+				org.molgenis.security.core.Permission.WRITE);
 	}
 
 	@RequestMapping(value = "/sid", method = GET)

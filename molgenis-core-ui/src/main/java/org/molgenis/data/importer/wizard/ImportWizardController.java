@@ -162,7 +162,7 @@ public class ImportWizardController extends AbstractWizardController
 	{
 
 		// FIXME addGroupEntityClassPermissions
-					throw new UnsupportedOperationException("addGroupEntityClassPermissions not implemented");
+		throw new UnsupportedOperationException("addGroupEntityClassPermissions not implemented");
 	}
 
 	/**

@@ -74,20 +74,20 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		//EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(id0).getMock();
 		//String id1 = "entityTypeId1";
 		//EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(id1).getMock();
-//
+		//
 		//User user = mock(User.class);
 		//when(userService.getUser("user")).thenReturn(user);
 		//when(userAuthorityFactory.create()).thenAnswer(invocation -> mock(UserAuthority.class));
-//
+		//
 		//Collection<? extends GrantedAuthority> authorities = asList(
 		//		new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + id0),
 		//		new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + id1));
 		//when(roleHierarchy.getReachableGrantedAuthorities(authorities)).thenAnswer(
 		//		invocation -> asList(new SimpleGrantedAuthority("newAuthority0"),
 		//				new SimpleGrantedAuthority("newAuthority1")));
-//
+		//
 		//permissionSystemService.giveUserWriteMetaPermissions(asList(entityType0, entityType1));
-//
+		//
 		//String prefix = "ROLE_ENTITY";
 		//verify(dataService).add(eq(USER_AUTHORITY), userAuthorityStreamCaptor.capture());
 		//List<UserAuthority> userAuthorities = userAuthorityStreamCaptor.getValue().collect(toList());
@@ -96,9 +96,9 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		//verify(userAuthorities.get(0)).setRole(prefix + "_WRITEMETA_" + id0);
 		//verify(userAuthorities.get(1)).setUser(user);
 		//verify(userAuthorities.get(1)).setRole(prefix + "_WRITEMETA_" + id1);
-//
+		//
 		//Set<String> newAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-				//.map(GrantedAuthority::getAuthority).collect(toSet());
+		//.map(GrantedAuthority::getAuthority).collect(toSet());
 		//assertEquals(newAuthorities, Sets.newHashSet("existingAuthority", "newAuthority0", "newAuthority1"));
 	}
 

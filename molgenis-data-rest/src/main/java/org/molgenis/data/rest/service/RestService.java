@@ -272,14 +272,16 @@ public class RestService
 					throw new MolgenisDataException(e);
 				}
 
-			FileMeta fileEntity = fileMetaFactory.create(id);
-			fileEntity.setFilename(multipartFile.getOriginalFilename());
-			fileEntity.setContentType(multipartFile.getContentType());
-			fileEntity.setSize(multipartFile.getSize());
-			ServletUriComponentsBuilder currentRequest = servletUriComponentsBuilderFactory.fromCurrentRequest();
-					UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + id).replaceQuery(null).build();
+				FileMeta fileEntity = fileMetaFactory.create(id);
+				fileEntity.setFilename(multipartFile.getOriginalFilename());
+				fileEntity.setContentType(multipartFile.getContentType());
+				fileEntity.setSize(multipartFile.getSize());
+				ServletUriComponentsBuilder currentRequest = servletUriComponentsBuilderFactory.fromCurrentRequest();
+				UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + id)
+														  .replaceQuery(null)
+														  .build();
 				fileEntity.setUrl(downloadUri.toUriString());
-			dataService.add(FILE_META, fileEntity);
+				dataService.add(FILE_META, fileEntity);
 
 				value = fileEntity;
 			}

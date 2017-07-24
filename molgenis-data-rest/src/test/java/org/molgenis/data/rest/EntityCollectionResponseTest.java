@@ -36,17 +36,16 @@ public class EntityCollectionResponseTest
 	public void getNextHref()
 	{
 		EntityPager pager = new EntityPager(0, 10, 25L, null);
-		EntityCollectionResponse response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService, languageService);
+		EntityCollectionResponse response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService,
+				languageService);
 		assertEquals(response.getNextHref(), "/test?start=10&num=10");
 
 		pager = new EntityPager(10, 10, 25L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService, languageService);
 		assertEquals(response.getNextHref(), "/test?start=20&num=10");
 
 		pager = new EntityPager(0, 25, 25L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService, languageService);
 		assertNull(response.getNextHref());
 	}
 
@@ -54,17 +53,16 @@ public class EntityCollectionResponseTest
 	public void getPrevHref()
 	{
 		EntityPager pager = new EntityPager(0, 15, 30L, null);
-		EntityCollectionResponse response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService, languageService);
+		EntityCollectionResponse response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService,
+				languageService);
 		assertNull(response.getPrevHref());
 
 		pager = new EntityPager(15, 15, 30L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService, languageService);
 		assertEquals(response.getPrevHref(), "/test?start=0&num=15");
 
 		pager = new EntityPager(30, 15, 30L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, dataService, languageService);
 		assertEquals(response.getPrevHref(), "/test?start=15&num=15");
 	}
 }

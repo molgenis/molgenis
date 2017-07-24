@@ -89,7 +89,8 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
-		MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class })
+		MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class,
+		JobFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);

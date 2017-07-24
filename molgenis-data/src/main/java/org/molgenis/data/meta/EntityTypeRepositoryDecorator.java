@@ -169,8 +169,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
 			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getId());
 
-			addNewAttributesInBackend(attrsMap, existingAttrsMap, backend,concreteExistingEntityType);
-			deleteRemovedAttributesInBackend( attrsMap,existingAttrsMap, backend,concreteExistingEntityType);
+			addNewAttributesInBackend(attrsMap, existingAttrsMap, backend, concreteExistingEntityType);
+			deleteRemovedAttributesInBackend(attrsMap, existingAttrsMap, backend, concreteExistingEntityType);
 		});
 	}
 

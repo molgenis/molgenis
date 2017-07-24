@@ -65,8 +65,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			if (pluginSettings != null)
 			{
 				String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
-				pluginSettingsCanWrite = permissionService
-						.hasPermissionOnEntityType(pluginSettingsEntityName, Permission.WRITE);
+				pluginSettingsCanWrite = permissionService.hasPermissionOnEntityType(pluginSettingsEntityName,
+						Permission.WRITE);
 			}
 			else
 			{

@@ -32,8 +32,8 @@ public class RepositoryPopulator
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
-			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator, SettingsPopulator settingsPopulator,
-			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
+			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
+			SettingsPopulator settingsPopulator, I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
 			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator, PermissionPopulator permissionPopulator)
 	{
 		this.dataService = requireNonNull(dataService);

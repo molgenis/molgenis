@@ -128,9 +128,8 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 			{
 				File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
 				when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
-				when(amazonBucketClient
-						.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"), any(),eq(true), any()))
-						.thenReturn(file);
+				when(amazonBucketClient.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"),
+						any(), eq(true), any())).thenReturn(file);
 			}
 			catch (Exception e)
 			{

@@ -177,7 +177,8 @@ public class SortaServiceImpl implements SortaService
 					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, IN,
 							ontologyTermAnnotationEntities));
 
-			Stream<Entity> ontologyTermEntities = dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(rules).pageSize(Integer.MAX_VALUE));
+			Stream<Entity> ontologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
+					new QueryImpl<>(rules).pageSize(Integer.MAX_VALUE));
 
 			List<Entity> relevantOntologyTermEntities = ontologyTermEntities.map(
 					ontologyTermEntity -> calculateNGromOTAnnotations(inputEntity, ontologyTermEntity))
@@ -290,10 +291,8 @@ public class SortaServiceImpl implements SortaService
 				Entity mapEntity = ontologyTermSynonymFactory.create();
 				mapEntity.set(ontologyTermSynonymEntity);
 				String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(
-						ontologyTermSynonymEntity.getString(
-								OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
-				mapEntity.set(SCORE,
-						NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
+						ontologyTermSynonymEntity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
+				mapEntity.set(SCORE, NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
 				return mapEntity;
 			}).toSortedList((entity_1, entity_2) -> entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE)));
 
