@@ -14,7 +14,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,6 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
  * Registers changes made to an indexed repository that need to be fixed by indexing
@@ -122,27 +120,30 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		}
 		IndexActionGroup indexActionGroup = indexActionsForCurrentTransaction.iterator().next().getIndexActionGroup();
 		Set<Impact> changes = indexActionsForCurrentTransaction.stream()
-	.map(indexAction -> Impact.createSingleEntityImpact(
-indexAction.getEntityTypeId(),
-	indexAction.getEntityId()))
-	 .collect(toSet());
-IndexDependencyModel dependencyModel = new IndexDependencyModel(getEntityTypes());
-		List<IndexAction> indexActions = indexingStrategy.determineImpact(changes, dependencyModel).stream()
-				.filter(key -> !excludedEntities.contains(key.getEntityTypeId())).map(key -> createIndexAction(indexActionGroup, key)).collect(toList());
-if (indexActions.isEmpty())
+															   .map(indexAction -> Impact.createSingleEntityImpact(
+																	   indexAction.getEntityTypeId(),
+																	   indexAction.getEntityId()))
+															   .collect(toSet());
+		IndexDependencyModel dependencyModel = new IndexDependencyModel(getEntityTypes());
+		List<IndexAction> indexActions = indexingStrategy.determineImpact(changes, dependencyModel)
+														 .stream()
+														 .filter(key -> !excludedEntities.contains(
+																 key.getEntityTypeId()))
+														 .map(key -> createIndexAction(indexActionGroup, key))
+														 .collect(toList());
+		if (indexActions.isEmpty())
 		{
-		return;
-				}
-				for (int i = 0; i < indexActions.size(); i++)
+			return;
+		}
+		for (int i = 0; i < indexActions.size(); i++)
 		{
 			indexActions.get(i).setActionOrder(i);
 		}
 
 		LOG.debug("Store index actions for transaction {}", transactionId);
-		// FIXME enable index action (group) persisting
-//		dataService.add(INDEX_ACTION_GROUP,
-//				indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
-//		dataService.add(INDEX_ACTION, indexActions.stream());
+		dataService.add(INDEX_ACTION_GROUP,
+				indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
+		dataService.add(INDEX_ACTION, indexActions.stream());
 	}
 
 	private IndexAction createIndexAction(IndexActionGroup indexActionGroup, Impact key)
@@ -174,9 +175,6 @@ if (indexActions.isEmpty())
 			query.offset(pageNum * ENTITY_FETCH_PAGE_SIZE);
 			dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).forEach(result::add);
 		}
-
-
-
 		return result;
 	}
 
@@ -258,9 +256,7 @@ if (indexActions.isEmpty())
 	 */
 	private EntityKey createEntityKey(IndexAction indexAction)
 	{
-		return EntityKey.create(indexAction.getEntityTypeId(),
-				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(), runAsSystem(
-						() -> dataService.getEntityType(indexAction.getEntityTypeId()).getIdAttribute())) : null);
+		return EntityKey.create(indexAction.getEntityTypeId(), indexAction.getEntityId());
 	}
 
 }

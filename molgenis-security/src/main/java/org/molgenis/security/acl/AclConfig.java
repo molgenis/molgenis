@@ -4,6 +4,7 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.security.acl.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.support.NoOpCache;
+import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -13,7 +14,6 @@ import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.*;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
-import org.springframework.security.acls.model.AclCache;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;
 import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -29,7 +29,6 @@ import java.sql.Statement;
 /**
  * TODO Replace AclCache.NoOpCache with another cache implementation
  * TODO Extract ACL table population to other class
- * TODO Avoid name collisions between ACL table names and entity type table names
  */
 @Import(DatabaseConfig.class)
 @Configuration
@@ -37,31 +36,32 @@ import java.sql.Statement;
 public class AclConfig extends GlobalMethodSecurityConfiguration
 {
 
+	public static final String ROLE_ACL_ADMIN = "ROLE_ACL_ADMIN";
 	private static final String SQL_CREATE_TABLE_ACL_SID =
-			"create table if not exists acl_sid(\n" + "id bigserial not null primary key,\n"
-					+ "principal boolean not null,\n" + "sid varchar(100) not null,\n"
-					+ "constraint unique_uk_1 unique(sid,principal)\n" + ");";
+			"CREATE TABLE IF NOT EXISTS acl_sid(\n" + "id BIGSERIAL NOT NULL PRIMARY KEY,\n"
+					+ "principal BOOLEAN NOT NULL,\n" + "sid VARCHAR(100) NOT NULL,\n"
+					+ "CONSTRAINT unique_uk_1 UNIQUE(sid,principal)\n" + ");";
 	private static final String SQL_CREATE_TABLE_ACL_CLASS =
-			"create table if not exists acl_class(\n" + "id bigserial not null primary key,\n"
-					+ "class varchar(100) not null,\n" + "constraint unique_uk_2 unique(class)\n" + ");";
+			"CREATE TABLE IF NOT EXISTS acl_class(\n" + "id BIGSERIAL NOT NULL PRIMARY KEY,\n"
+					+ "class VARCHAR(100) NOT NULL,\n" + "CONSTRAINT unique_uk_2 UNIQUE(class)\n" + ");";
 
 	// acl_object_identity.object_id_identity
 	private static final String SQL_CREATE_TABLE_ACL_OBJECT_IDENTITY =
-			"create table if not exists acl_object_identity(\n" + "id bigserial primary key,\n"
-					+ "object_id_class bigint not null,\n" + "object_id_identity varchar not null,\n"
-					+ "parent_object bigint,\n" + "owner_sid bigint,\n" + "entries_inheriting boolean not null,\n"
-					+ "constraint unique_uk_3 unique(object_id_class,object_id_identity),\n"
-					+ "constraint foreign_fk_1 foreign key(parent_object)references acl_object_identity(id),\n"
-					+ "constraint foreign_fk_2 foreign key(object_id_class)references acl_class(id),\n"
-					+ "constraint foreign_fk_3 foreign key(owner_sid)references acl_sid(id)\n" + ");";
+			"CREATE TABLE IF NOT EXISTS acl_object_identity(\n" + "id BIGSERIAL PRIMARY KEY,\n"
+					+ "object_id_class BIGINT NOT NULL,\n" + "object_id_identity VARCHAR NOT NULL,\n"
+					+ "parent_object BIGINT,\n" + "owner_sid BIGINT,\n" + "entries_inheriting BOOLEAN NOT NULL,\n"
+					+ "CONSTRAINT unique_uk_3 UNIQUE(object_id_class,object_id_identity),\n"
+					+ "CONSTRAINT foreign_fk_1 FOREIGN KEY(parent_object)REFERENCES acl_object_identity(id),\n"
+					+ "CONSTRAINT foreign_fk_2 FOREIGN KEY(object_id_class)REFERENCES acl_class(id),\n"
+					+ "CONSTRAINT foreign_fk_3 FOREIGN KEY(owner_sid)REFERENCES acl_sid(id)\n" + ");";
 	private static final String SQL_CREATE_TABLE_ACL_ENTRY =
-			"create table if not exists acl_entry(\n" + "id bigserial primary key,\n"
-					+ "acl_object_identity bigint not null,\n" + "ace_order int not null,\n" + "sid bigint not null,\n"
-					+ "mask integer not null,\n" + "granting boolean not null,\n" + "audit_success boolean not null,\n"
-					+ "audit_failure boolean not null,\n"
-					+ "constraint unique_uk_4 unique(acl_object_identity,ace_order),\n"
-					+ "constraint foreign_fk_4 foreign key(acl_object_identity) references acl_object_identity(id),\n"
-					+ "constraint foreign_fk_5 foreign key(sid) references acl_sid(id)\n" + ");";
+			"CREATE TABLE IF NOT EXISTS acl_entry(\n" + "id BIGSERIAL PRIMARY KEY,\n"
+					+ "acl_object_identity BIGINT NOT NULL,\n" + "ace_order INT NOT NULL,\n" + "sid BIGINT NOT NULL,\n"
+					+ "mask INTEGER NOT NULL,\n" + "granting BOOLEAN NOT NULL,\n" + "audit_success BOOLEAN NOT NULL,\n"
+					+ "audit_failure BOOLEAN NOT NULL,\n"
+					+ "CONSTRAINT unique_uk_4 UNIQUE(acl_object_identity,ace_order),\n"
+					+ "CONSTRAINT foreign_fk_4 FOREIGN KEY(acl_object_identity) REFERENCES acl_object_identity(id),\n"
+					+ "CONSTRAINT foreign_fk_5 FOREIGN KEY(sid) REFERENCES acl_sid(id)\n" + ");";
 
 	// Constructor autowiring leads to circular dependency
 	@SuppressWarnings("SpringAutowiredFieldsWarningInspection")
@@ -96,15 +96,21 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 		}
 	}
 
-	private AclCache aclCache()
+	@Autowired
+	private AclCache aclCache;
+
+	private org.springframework.security.acls.model.AclCache aclCache()
 	{
+		// TODO enable cache (seems buggy at the moment)
+//		return new SpringCacheBasedAclCache(new TransactionAwareCacheDecorator(aclCache), permissionGrantingStrategy(),
+//				aclAuthorizationStrategy());
 		return new SpringCacheBasedAclCache(new NoOpCache("aclCache"), permissionGrantingStrategy(),
 				aclAuthorizationStrategy());
 	}
 
 	private LookupStrategy lookupStrategy()
 	{
-		return new AclLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
+		return new AclLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), permissionGrantingStrategy());
 	}
 
 	@Bean
@@ -115,14 +121,13 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 
 	private PermissionGrantingStrategy permissionGrantingStrategy()
 	{
-		return new DefaultPermissionGrantingStrategy(auditLogger());
+		return new BitMaskPermissionGrantingStrategy(auditLogger());
 	}
 
 	private AclAuthorizationStrategy aclAuthorizationStrategy()
 	{
-		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ACL_ADMIN"),
-				new SimpleGrantedAuthority("ROLE_ACL_ADMIN"),
-				new SimpleGrantedAuthority("ROLE_ACL_ADMIN")); // TODO ROLE_SU/ROLE_SYSTEM?
+		return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority(ROLE_ACL_ADMIN),
+				new SimpleGrantedAuthority(ROLE_ACL_ADMIN), new SimpleGrantedAuthority(ROLE_ACL_ADMIN));
 	}
 
 	@Bean

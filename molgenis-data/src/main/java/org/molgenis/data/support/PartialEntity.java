@@ -226,4 +226,16 @@ public class PartialEntity implements Entity
 	{
 		decoratedEntity.set(values);
 	}
+
+	@Override
+	public void setWritable(boolean writable)
+	{
+		decoratedEntity.setWritable(writable);
+	}
+
+	@Override
+	public boolean isWritable()
+	{
+		return decoratedEntity.isWritable();
+	}
 }

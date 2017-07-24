@@ -6,6 +6,7 @@ import org.molgenis.data.security.acl.*;
 import org.molgenis.ui.admin.user.UserAccountController;
 import org.springframework.stereotype.Component;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -30,8 +31,8 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 	@Override
 	public void populate()
 	{
-		SecurityId roleUserSecurityId = SecurityId.create(null, ROLE_USER_ID);
-		EntityAce roleUserReadAce = EntityAce.create(READ, roleUserSecurityId, true);
+		SecurityId roleUserSecurityId = SecurityId.createForAuthority(ROLE_USER_ID);
+		EntityAce roleUserReadAce = EntityAce.create(newHashSet(READ), roleUserSecurityId, true);
 
 		// allow user role to see system package
 		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
@@ -40,14 +41,15 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 
 		// allow anonymous user and user role to see the home plugin
 		EntityAcl homePluginAcl = entityAclManager.readAcl(EntityIdentity.create(PLUGIN, HomeController.ID));
-		EntityAce homePluginAnonymousAce = EntityAce.create(READ, SecurityId.create(ANONYMOUS_USERNAME, null), true);
+		EntityAce homePluginAnonymousAce = EntityAce.create(newHashSet(READ),
+				SecurityId.createForUsername(ANONYMOUS_USERNAME), true);
 		homePluginAcl = homePluginAcl.toBuilder().setEntries(asList(homePluginAnonymousAce, roleUserReadAce)).build();
 		entityAclManager.updateAcl(homePluginAcl);
 
 		// allow user role to update profile
 		EntityAcl userAccountPluginAcl = entityAclManager.readAcl(
 				EntityIdentity.create(PLUGIN, UserAccountController.ID));
-		EntityAce userAccountPluginUserAce = EntityAce.create(WRITE, roleUserSecurityId, true);
+		EntityAce userAccountPluginUserAce = EntityAce.create(newHashSet(WRITE, READ), roleUserSecurityId, true);
 		userAccountPluginAcl = userAccountPluginAcl.toBuilder()
 												   .setEntries(singletonList(userAccountPluginUserAce))
 												   .build();

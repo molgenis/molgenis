@@ -12,7 +12,6 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.Permission;
@@ -72,8 +71,6 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	public AppSettings appSettings;
 	@Mock
 	DataExplorerSettings dataExplorerSettings;
-	@Mock
-	GenomicDataSettings genomicDataSettings;
 	@Mock
 	DataService dataService;
 	@Mock

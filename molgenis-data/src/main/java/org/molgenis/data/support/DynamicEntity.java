@@ -38,6 +38,8 @@ public class DynamicEntity implements Entity
 	 */
 	private final Map<String, Object> values;
 
+	private boolean writable = true;
+
 	/**
 	 * Constructs an entity with the given entity meta data.
 	 *
@@ -187,6 +189,18 @@ public class DynamicEntity implements Entity
 	public void set(Entity values)
 	{
 		values.getAttributeNames().forEach(attrName -> set(attrName, values.get(attrName)));
+	}
+
+	@Override
+	public void setWritable(boolean writable)
+	{
+		this.writable = writable;
+	}
+
+	@Override
+	public boolean isWritable()
+	{
+		return writable;
 	}
 
 	/**
