@@ -1,16 +1,14 @@
 package org.molgenis.oneclickimporter.controller;
 
 import com.google.common.io.Resources;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.hamcrest.core.StringEndsWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
-import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.CsvService;
+import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
+import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
@@ -30,16 +28,14 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -67,9 +63,6 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 	private ExcelService excelService;
 
 	@Mock
-	private CsvService csvService;
-
-	@Mock
 	private OneClickImporterService oneClickImporterService;
 
 	@Mock
@@ -78,20 +71,33 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 	@Mock
 	private FileStore fileStore;
 
+	@Mock
+	private OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory;
+
+	@Mock
+	private JobExecutor jobExecutor;
+
 	@BeforeMethod
 	public void before()
 	{
 		initMocks();
 
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings, excelService, csvService, oneClickImporterService, entityService,
-				fileStore);
+				languageService, appSettings, fileStore, oneClickImportJobExecutionFactory, jobExecutor);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(languageService.getCurrentUserLanguageCode()).thenReturn("nl");
 		when(appSettings.getLanguageCode()).thenReturn("en");
+
+		OneClickImportJobExecution jobExecution = mock(OneClickImportJobExecution.class);
+		when(oneClickImportJobExecutionFactory.create()).thenReturn(jobExecution);
+
+		EntityType oneClickImportJobExecutionEntityType = mock(EntityType.class);
+		when(jobExecution.getEntityType()).thenReturn(oneClickImportJobExecutionEntityType);
+		when(jobExecution.getIdValue()).thenReturn("id_1");
+		when(oneClickImportJobExecutionEntityType.getId()).thenReturn("jobExecutionId");
 
 		mockMvc = MockMvcBuilders.standaloneSetup(oneClickImporterController)
 								 .setMessageConverters(gsonHttpMessageConverter)
@@ -113,73 +119,14 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 	}
 
 	@Test
-	public void testXLSXFileImport() throws Exception
+	public void testUpload() throws Exception
 	{
 		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xlsx", CONTENT_TYPE_EXCEL);
 
-		Sheet sheet = mock(Sheet.class);
-		DataCollection dataCollection = mock(DataCollection.class);
-		EntityType table = mock(EntityType.class);
-		String tableId = "generated_table_id";
-		File file = mock(File.class);
-		String fileName = "file-name";
-		when(file.getName()).thenReturn(fileName);
-		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
-		when(excelService.buildExcelSheetFromFile(file)).thenReturn(sheet);
-		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
-		when(entityService.createEntityType(dataCollection)).thenReturn(table);
-		when(table.getId()).thenReturn(tableId);
-
-		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isCreated())
-			   .andExpect(header().string("Location", StringEndsWith.endsWith(tableId)))
-			   .andExpect(jsonPath("$.entityId").value(tableId))
-			   .andExpect(jsonPath("$.baseFileName").value(fileName));
-
-		verify(oneClickImporterService).buildDataCollection("simple-valid", sheet);
-	}
-
-	@Test
-	public void testXLSFileImport() throws Exception
-	{
-		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xls",
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-		Sheet sheet = mock(Sheet.class);
-		DataCollection dataCollection = mock(DataCollection.class);
-		EntityType table = mock(EntityType.class);
-		String tableId = "generated_table_id";
-		File file = mock(File.class);
-		String fileName = "file-name";
-		when(file.getName()).thenReturn(fileName);
-		when(fileStore.store(any(InputStream.class), anyString())).thenReturn(file);
-		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
-		when(oneClickImporterService.buildDataCollection("simple-valid", sheet)).thenReturn(dataCollection);
-		when(entityService.createEntityType(dataCollection)).thenReturn(table);
-		when(table.getId()).thenReturn(tableId);
-
-		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isCreated())
-			   .andExpect(header().string("Location", StringEndsWith.endsWith(tableId)))
-			   .andExpect(jsonPath("$.entityId").value(tableId))
-			   .andExpect(jsonPath("$.baseFileName").value(fileName));
-
-		verify(oneClickImporterService, Mockito.times(1)).buildDataCollection("simple-valid", sheet);
-
-	}
-
-	@Test
-	public void testUnsupportedFileTypeImport() throws Exception
-	{
-		MockMultipartFile multipartFile = getTestMultipartFile("/unsupported-file-type.nft", "some-unknown-type");
-
-		Sheet sheet = mock(Sheet.class);
-		when(excelService.buildExcelSheetFromFile(any(File.class))).thenReturn(sheet);
-
-		mockMvc.perform(fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isBadRequest());
-
-		Mockito.verifyZeroInteractions(oneClickImporterService);
+		mockMvc.perform(
+				fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
+			   .andExpect(status().isOk())
+			   .andExpect(content().string("\"/api/v2/jobExecutionId/id_1\""));
 	}
 
 	private MockMultipartFile getTestMultipartFile(final String path, final String contentType)
