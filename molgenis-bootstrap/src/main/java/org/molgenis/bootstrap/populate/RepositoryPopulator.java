@@ -27,10 +27,14 @@ public class RepositoryPopulator
 	private final SettingsPopulator settingsPopulator;
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
+	private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
 	private final PermissionPopulator permissionPopulator;
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
+			SystemEntityPopulator systemEntityPopulator, SettingsPopulator settingsPopulator,
+			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
+			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator)
 			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
 			SettingsPopulator settingsPopulator, I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
 			PermissionPopulator permissionPopulator)
@@ -42,6 +46,7 @@ public class RepositoryPopulator
 		this.settingsPopulator = requireNonNull(settingsPopulator);
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
+		this.genomeBrowserAttributesPopulator = requireNonNull(genomeBrowserAttributesPopulator);
 		this.permissionPopulator = requireNonNull(permissionPopulator);
 	}
 
@@ -62,6 +67,10 @@ public class RepositoryPopulator
 			LOG.trace("Populating database with application entities ...");
 			systemEntityPopulator.populate(event);
 			LOG.trace("Populated database with application entities");
+
+			LOG.trace("Populating default genome browser attributes ...");
+			genomeBrowserAttributesPopulator.populate();
+			LOG.trace("Populated default genome browser attributes");
 		}
 
 		LOG.trace("Populating plugin entities ...");
