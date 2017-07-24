@@ -10,7 +10,7 @@ import java.util.List;
  */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ModelRegistrySearchPackage.class)
-public abstract class ModelRegistrySearchPackage
+public abstract class ModelRegistrySearch
 {
 	@SuppressWarnings("unused")
 	public abstract String getQuery();
@@ -27,7 +27,7 @@ public abstract class ModelRegistrySearchPackage
 	@SuppressWarnings("unused")
 	public abstract List<ModelRegistryPackage> getPackages();
 
-	public static ModelRegistrySearchPackage create(String query, int offset, int num, int total, List<ModelRegistryPackage> packages)
+	public static ModelRegistrySearch create(String query, int offset, int num, int total, List<ModelRegistryPackage> packages)
 	{
 		return new AutoValue_ModelRegistrySearchPackage(query, offset, num, total, packages);
 	}

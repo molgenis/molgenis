@@ -47,7 +47,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	@Override
-	public ModelRegistrySearchPackage search(String searchQuery, int offSet, int number)
+	public ModelRegistrySearch search(String searchQuery, int offSet, int number)
 	{
 		List<ModelRegistryPackage> modelRegistryPackages = Lists.newArrayList();
 
@@ -100,7 +100,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		int offset = offSet;
 		int num = number != 0 ? number : modelRegistryPackages.size();
 
-		return ModelRegistrySearchPackage.create(searchQuery, offset, num, total, modelRegistryPackages);
+		return ModelRegistrySearch.create(searchQuery, offset, num, total, modelRegistryPackages);
 	}
 
 	@Override

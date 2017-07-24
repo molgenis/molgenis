@@ -9,7 +9,7 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.model.registry.model.ModelRegistryPackage;
-import org.molgenis.model.registry.model.ModelRegistrySearchPackage;
+import org.molgenis.model.registry.model.ModelRegistrySearch;
 import org.molgenis.model.registry.model.PackageSearchRequest;
 import org.molgenis.model.registry.model.ModelRegistryTreeNode;
 import org.molgenis.model.registry.services.MetaDataSearchService;
@@ -122,7 +122,7 @@ public class ModelRegistryController extends MolgenisPluginController
 	@RequestMapping(value = "/search", method = GET)
 	public String search(@RequestParam("packageSearchValue") String packageSearchValue, Model model)
 	{
-		ModelRegistrySearchPackage modelRegistrySearchPackage = metaDataSearchService.search(packageSearchValue, 0, 3);
+		ModelRegistrySearch modelRegistrySearchPackage = metaDataSearchService.search(packageSearchValue, 0, 3);
 		if (modelRegistrySearchPackage != null)
 		{
 			model.addAttribute("packageSearchResponse", modelRegistrySearchPackage);
@@ -139,7 +139,7 @@ public class ModelRegistryController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/search", method = POST)
 	@ResponseBody
-	public ModelRegistrySearchPackage search(@Valid @RequestBody PackageSearchRequest packageSearchRequest)
+	public ModelRegistrySearch search(@Valid @RequestBody PackageSearchRequest packageSearchRequest)
 	{
 		return metaDataSearchService.search(packageSearchRequest.getQuery(), packageSearchRequest.getOffset(), packageSearchRequest.getNum());
 	}
