@@ -41,8 +41,9 @@ public class OneClickImportJob
 	public EntityType getEntityType(Progress progress, String filename)
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
-		progress.setProgressMax(3);
+		progress.setProgressMax(4);
 
+		progress.progress(0, "Starting import");
 		File file = fileStore.getFile(filename);
 
 		String fileExtension = filename.substring(filename.lastIndexOf('.') + 1);
@@ -51,14 +52,16 @@ public class OneClickImportJob
 		DataCollection dataCollection;
 		if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{
-			progress.progress(0, "Creating dataCollection...");
+			progress.progress(1, "Creating sheet from Excel");
 			Sheet sheet = excelService.buildExcelSheetFromFile(file);
+			progress.progress(2, "Creating dataCollection");
 			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
 		}
 		else if (fileExtension.equals("csv"))
 		{
-			progress.progress(0, "Creating dataCollection...");
+			progress.progress(1, "Reading lines from CSV");
 			List<String> lines = csvService.buildLinesFromFile(file);
+			progress.progress(2, "Creating dataCollection");
 			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, lines);
 		}
 		else
@@ -66,9 +69,10 @@ public class OneClickImportJob
 			throw new UnknownFileTypeException(
 					String.format("File with extension: %s is not a valid one-click importer file", fileExtension));
 		}
-		progress.progress(1, "Inserting into database....");
+
+		progress.progress(3, "Inserting table into database");
 		EntityType entityType = entityService.createEntityType(dataCollection);
-		progress.progress(2, "Datatable created...");
+		progress.progress(4, "Table created");
 
 		return entityType;
 	}

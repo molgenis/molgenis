@@ -19,22 +19,6 @@
           <span class="text-muted"><em>Supported file types: XLSX, XLS, CSV</em></span>
         </div>
         <br/>
-        <!--<dropzone FIXME-->
-        <!--id="import-dropzone"-->
-        <!--url="/plugin/one-click-importer/upload"-->
-        <!--:accepted-filetypes="['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].join(',')"-->
-        <!--:thumbnail-height=100-->
-        <!--:thumbnail-width=200-->
-        <!--:duplicate-check=true-->
-        <!--:use-font-awesome=true-->
-        <!--:showRemoveLink=false-->
-        <!--:preview-template="previewTemplate"-->
-        <!--v-on:vdropzone-success="onComplete"-->
-        <!--v-on:vdropzone-error="onError"-->
-        <!--v-on:duplicate-file="onDuplicate">-->
-
-        <!--<div class="text-center">supported file types: xlsx, xls, csv, tsv</div>-->
-        <!--</dropzone>-->
       </div>
     </div>
 
@@ -48,13 +32,15 @@
           <tbody>
           <tr v-for="response in responses">
             <td v-if="response.loading">
-              <span>{{response.filename}}</span>
+              <span v-if="currentProgressMessage">{{currentProgressMessage}}</span>
               <i class="fa fa-spinner fa-pulse fa-fw"></i>
             </td>
+
             <td v-else>
-              <a target="_blank" :href="response.url">{{response.filename}}</a>
+              <a target="_blank" :href="response.dataexplorerUrl">{{response.filename}}</a>
               <span class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span>
             </td>
+
             <td v-if="response.error">
               <span class="error-message">{{response.error}}</span>
             </td>
@@ -93,14 +79,15 @@
     data () {
       return {
         file: null,
-        responses: []
+        responses: [],
+        currentProgressMessage: null
       }
     },
     methods: {
-      setFile: function (event) {
+      setFile (event) {
         this.file = event.target.files[0]
       },
-      importFile: function () {
+      importFile () {
         let entity = {filename: this.file.name, loading: true}
         this.responses.push(entity)
 
@@ -113,41 +100,50 @@
           credentials: 'same-origin'
         }
 
+        const poller = this.pollJob
+        const self = this
+
         fetch('/plugin/one-click-importer/upload', options).then(response => {
-          if (response.headers.get('content-type') === 'application/json') {
-            response.json().then(function (json) {
-              const feedback = response.ok ? json : json.errors[0].message
-              if (response.ok) {
-                entity.filename = feedback.baseFileName
-                entity.loading = false
-                entity.url = '/menu/main/dataexplorer?entity=' + feedback.entityId
-              } else {
-                entity.error = feedback
-                entity.loading = false
-              }
-            })
-          }
+          self.currentProgressMessage = 'Starting import'
+          response.text().then(poller).then(job => {
+            if (job.status === 'SUCCESS') {
+              entity.dataexplorerUrl = '/plugin/dataexplorer?entity=' + job.entityType
+              entity.loading = false
+
+              self.currentProgressMessage = null
+            } else {
+              entity.error = job.log
+              entity.loading = false
+
+              self.currentProgressMessage = null
+            }
+          })
         })
+
         this.$refs.fileInput.value = null
         this.file = null
-      }
+      },
+      pollJob (jobUrl) {
+        const poller = this.pollJob
+        const self = this
 
-//     FIXME onComplete (file, response) {
-//        this.responses.push({
-//          url: '/menu/main/dataexplorer?entity=' + response.entityId,
-//          filename: response.baseFileName
-//        })
-//        this.message = null
-//      },
-//      onDuplicate (file) {
-//        this.message = 'Can not upload duplicate file [' + file.upload.filename + ']'
-//      },
-//      onError (file) {
-//        this.message = 'Something went wrong when uploading [' + file.upload.filename + ']. Please contact an administrator'
-//      },
-//      previewTemplate () {
-//        return '<div></div>'
-//      }
+        return new Promise((resolve) => {
+          return fetch(jobUrl, {credentials: 'same-origin'}).then(response => {
+            return response.json().then(job => {
+              if (job.status === 'RUNNING' || job.status === 'PENDING') {
+                self.currentProgressMessage = job.progressMessage ? job.progressMessage : self.currentProgressMessage
+
+                setTimeout(function () {
+                  resolve(poller(jobUrl))
+                }, 1000)
+              } else {
+                self.currentProgressMessage = job.progressMessage
+                resolve(job)
+              }
+            })
+          })
+        })
+      }
     }
   }
 </script>
