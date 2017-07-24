@@ -1,5 +1,6 @@
 package org.molgenis.model.registry.services;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -9,7 +10,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.model.registry.model.*;
@@ -20,11 +20,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.stream.Collectors;
 
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+
 
 @Service
 public class MetaDataSearchServiceImpl implements MetaDataSearchService
@@ -46,7 +47,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	@Override
-	public PackageSearchResponse search(String searchQuery, int offSet, int number)
+	public ModelRegistrySearchPackage search(String searchQuery, int offSet, int number)
 	{
 		List<ModelRegistryPackage> modelRegistryPackages = Lists.newArrayList();
 
@@ -58,7 +59,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			List<ModelRegistryEntity> entitiesInPackageFiltered = Lists.newArrayList(
 					entitiesInPackageUnfiltered.stream().filter(entity ->
 					{
-						if (entity.isAbtract())
+						if (entity.isAbstract())
 						{
 							return false;
 						}
@@ -81,9 +82,8 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 						return true;
 					}).collect(Collectors.toList()));
 
-			ModelRegistryPackage pr = new ModelRegistryPackage(p.getId(), p.getLabel(), p.getDescription(),
-					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
-			modelRegistryPackages.add(pr);
+			modelRegistryPackages.add(ModelRegistryPackage.create(p.getId(), p.getLabel(), p.getDescription(),
+					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p)));
 		}
 
 		int total = modelRegistryPackages.size();
@@ -100,47 +100,34 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		int offset = offSet;
 		int num = number != 0 ? number : modelRegistryPackages.size();
 
-		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total,
-				modelRegistryPackages);
-
-		return packageSearchResponse;
+		return ModelRegistrySearchPackage.create(searchQuery, offset, num, total, modelRegistryPackages);
 	}
 
 	@Override
 	public List<ModelRegistryTag> getTagsForPackage(Package p)
 	{
-		List<ModelRegistryTag> tags = Lists.newArrayList();
-
-		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
-		{
-			tags.add(new ModelRegistryTag(tag.getObject().getLabel(), tag.getObject().getIri(),
-					tag.getRelation().toString()));
-		}
-
-		return tags;
+		return ImmutableList.copyOf(stream(tagService.getTagsForPackage(p).spliterator(), false).map(tag -> ModelRegistryTag.create(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation().toString())).iterator());
 	}
 
 	@Override
 	public List<ModelRegistryEntity> getEntitiesInPackage(String packageName)
 	{
-		List<ModelRegistryEntity> entiesForThisPackage = new ArrayList<>();
+		List<ModelRegistryEntity> entriesForThisPackage = new ArrayList<>();
 		Package aPackage = metaDataService.getPackage(packageName);
-		getEntitiesInPackageRec(aPackage, entiesForThisPackage);
-		return entiesForThisPackage;
+		getEntitiesInPackageRec(aPackage, entriesForThisPackage);
+		return entriesForThisPackage;
 	}
 
-	private void getEntitiesInPackageRec(Package aPackage, List<ModelRegistryEntity> entiesForThisPackage)
+	private void getEntitiesInPackageRec(Package pkg, List<ModelRegistryEntity> entriesForThisPackage)
 	{
-		for (EntityType emd : aPackage.getEntityTypes())
-		{
-			entiesForThisPackage.add(new ModelRegistryEntity(emd.getId(), emd.getLabel(), emd.isAbstract()));
-		}
-		Iterable<Package> subPackages = aPackage.getChildren();
+		entriesForThisPackage.addAll(ImmutableList.copyOf(stream(pkg.getEntityTypes().spliterator(), false).map(emd -> ModelRegistryEntity.create(emd.getId(), emd.getLabel(), emd.isAbstract())).iterator()));
+
+		Iterable<Package> subPackages = pkg.getChildren();
 		if (subPackages != null)
 		{
 			for (Package subPackage : subPackages)
 			{
-				getEntitiesInPackageRec(subPackage, entiesForThisPackage);
+				getEntitiesInPackageRec(subPackage, entriesForThisPackage);
 			}
 		}
 	}
@@ -151,10 +138,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 
 		if (StringUtils.isBlank(searchTerm))
 		{
-			for (Package p : metaDataService.getRootPackages())
-			{
-				results.add(new PackageSearchResultItem(p));
-			}
+			results.addAll(ImmutableList.copyOf(stream(metaDataService.getRootPackages().spliterator(), false).map(pkg -> new PackageSearchResultItem(pkg)).iterator()));
 		}
 		else
 		{
@@ -179,7 +163,10 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 				{
 					String matchDesc = "Matched: entity '" + entityType.getString(EntityTypeMetadata.ID) + "'";
 					PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
-					if ((p != null) && !results.contains(item)) results.add(item);
+					if ((p != null) && !results.contains(item))
+					{
+						results.add(item);
+					}
 				}
 			});
 
@@ -189,17 +176,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		}
 
 		// Remove default package
-		ListIterator<PackageSearchResultItem> it = results.listIterator();
-		while (it.hasNext())
-		{
-			PackageSearchResultItem item = it.next();
-			if (item.getPackageFound().getId().equals("default"))
-			{
-				it.remove();
-			}
-		}
-
-		return results;
+		return ImmutableList.copyOf(results.stream().filter(item -> !item.getPackageFound().getId().equalsIgnoreCase("default")).iterator());
 	}
 
 	// Get the root package of an entity

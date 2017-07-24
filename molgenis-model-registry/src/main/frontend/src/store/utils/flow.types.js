@@ -26,12 +26,8 @@ export type UmlData = {
   links: Array<Link>
 }
 
-export type Package = {
-  name: string
-}
-
 export type State = {
   error: ?string,
   umlData: any,
-  molgenisPackage: Package
+  molgenisPackage: string
 }

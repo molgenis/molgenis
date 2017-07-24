@@ -1,7 +1,6 @@
 package org.molgenis.model.registry.controller;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
@@ -10,9 +9,9 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.model.registry.model.ModelRegistryPackage;
+import org.molgenis.model.registry.model.ModelRegistrySearchPackage;
 import org.molgenis.model.registry.model.PackageSearchRequest;
-import org.molgenis.model.registry.model.PackageSearchResponse;
-import org.molgenis.model.registry.model.PackageTreeNode;
+import org.molgenis.model.registry.model.ModelRegistryTreeNode;
 import org.molgenis.model.registry.services.MetaDataSearchService;
 import org.molgenis.model.registry.services.TreeNodeService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -123,11 +122,10 @@ public class ModelRegistryController extends MolgenisPluginController
 	@RequestMapping(value = "/search", method = GET)
 	public String search(@RequestParam("packageSearchValue") String packageSearchValue, Model model)
 	{
-		Gson gson = new Gson();
-		PackageSearchResponse packageSearchResponse = metaDataSearchService.search(packageSearchValue, 0, 3);
-		if (packageSearchResponse != null)
+		ModelRegistrySearchPackage modelRegistrySearchPackage = metaDataSearchService.search(packageSearchValue, 0, 3);
+		if (modelRegistrySearchPackage != null)
 		{
-			model.addAttribute("packageSearchResponse", gson.toJson(packageSearchResponse));
+			model.addAttribute("packageSearchResponse", modelRegistrySearchPackage);
 		}
 
 		return VIEW_NAME;
@@ -141,7 +139,7 @@ public class ModelRegistryController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/search", method = POST)
 	@ResponseBody
-	public PackageSearchResponse search(@Valid @RequestBody PackageSearchRequest packageSearchRequest)
+	public ModelRegistrySearchPackage search(@Valid @RequestBody PackageSearchRequest packageSearchRequest)
 	{
 		return metaDataSearchService.search(packageSearchRequest.getQuery(), packageSearchRequest.getOffset(), packageSearchRequest.getNum());
 	}
@@ -169,7 +167,7 @@ public class ModelRegistryController extends MolgenisPluginController
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping(value = "/uml", method = GET)
+	@RequestMapping(value = "/uml", method = GET, produces = "application/json")
 	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
 	{
 
@@ -177,13 +175,9 @@ public class ModelRegistryController extends MolgenisPluginController
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
 		model.addAttribute("baseUrl", getBaseUrl());
 
-
-		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
-		if (molgenisPackage != null)
+		if (!selectedPackageName.isEmpty())
 		{
-			Gson gson = new Gson();
-			ModelRegistryPackage response = new ModelRegistryPackage(molgenisPackage);
-			model.addAttribute("molgenisPackage", gson.toJson(response));
+			model.addAttribute("molgenisPackage", selectedPackageName);
 		}
 		else
 		{
@@ -202,21 +196,21 @@ public class ModelRegistryController extends MolgenisPluginController
 			throw new MolgenisDataException("Unknown package: [ " + packageName + " ]");
 		}
 
-		return new ModelRegistryPackage(molgenisPackage.getId(), molgenisPackage.getLabel(),
+		return ModelRegistryPackage.create(molgenisPackage.getId(), molgenisPackage.getLabel(),
 				molgenisPackage.getDescription(), null,
 				metaDataSearchService.getEntitiesInPackage(molgenisPackage.getId()),
 				metaDataSearchService.getTagsForPackage(molgenisPackage));
 	}
 
 	/**
-	 * <p>Returns a {@link PackageTreeNode}-collections.</p>
+	 * <p>Returns a {@link ModelRegistryTreeNode}-collections.</p>
 	 *
 	 * @param packageName
 	 * @return
 	 */
 	@RequestMapping(value = "/getTreeData", method = GET)
 	@ResponseBody
-	public Collection<PackageTreeNode> getTree(@RequestParam(value = "package") String packageName)
+	public Collection<ModelRegistryTreeNode> getTree(@RequestParam(value = "package") String packageName)
 	{
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null)
@@ -224,7 +218,7 @@ public class ModelRegistryController extends MolgenisPluginController
 			throw new MolgenisDataException("Unknown package: [ " + packageName + " ]");
 		}
 
-		return Collections.singletonList(treeNodeService.createPackageTreeNode(molgenisPackage));
+		return Collections.singletonList(treeNodeService.createTreeNode(molgenisPackage));
 	}
 
 	private String getBaseUrl()

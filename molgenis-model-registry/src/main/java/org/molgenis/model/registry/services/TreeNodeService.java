@@ -1,7 +1,7 @@
 package org.molgenis.model.registry.services;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.model.registry.model.PackageTreeNode;
+import org.molgenis.model.registry.model.ModelRegistryTreeNode;
 
 /**
  * <p>Service to create treenodes for model registry.</p>
@@ -15,7 +15,7 @@ public interface TreeNodeService
 	 * <p>Builds the node in the packages-tree</p>
 	 *
 	 * @param package_ {@link Package}
-	 * @return {@link PackageTreeNode}
+	 * @return {@link ModelRegistryTreeNode}
 	 */
-	PackageTreeNode createPackageTreeNode(Package package_);
+	ModelRegistryTreeNode createTreeNode(Package package_);
 }

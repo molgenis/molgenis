@@ -14,8 +14,8 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.model.registry.model.ModelRegistrySearchPackage;
 import org.molgenis.model.registry.model.PackageSearchRequest;
-import org.molgenis.model.registry.model.PackageSearchResponse;
 import org.molgenis.model.registry.model.ModelRegistryEntity;
 import org.molgenis.model.registry.model.ModelRegistryTag;
 import org.molgenis.model.registry.utils.ModelRegistryServiceConfig;
@@ -121,7 +121,7 @@ public class MetaDataSearchServiceTest extends AbstractMolgenisSpringTest
 				modelRegistryTestHarness.createSemanticTag(pkg));
 		when(tagService.getTagsForPackage(pkg)).thenReturn(symanticTags);
 
-		PackageSearchResponse response = metaDataSearchService.search(TEST_QUERY, 0, 3);
+		ModelRegistrySearchPackage response = metaDataSearchService.search(TEST_QUERY, 0, 3);
 
 		assertEquals("test-package", response.getPackages().get(0).getName());
 

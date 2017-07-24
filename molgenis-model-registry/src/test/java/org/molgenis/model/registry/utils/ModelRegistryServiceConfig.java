@@ -9,11 +9,12 @@ import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.model.registry.mappers.TreeNodeMapper;
 import org.molgenis.model.registry.services.MetaDataSearchService;
-import org.molgenis.model.registry.services.TreeNodeServiceImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.model.registry.services.MetaDataSearchServiceImpl;
 import org.molgenis.model.registry.services.TreeNodeService;
+import org.molgenis.model.registry.services.TreeNodeServiceImpl;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -57,6 +58,12 @@ public class ModelRegistryServiceConfig
 	}
 
 	@Bean
+	public TreeNodeMapper treeNodeMapper()
+	{
+		return new TreeNodeMapper(tagService());
+	}
+
+	@Bean
 	public MolgenisPermissionService molgenisPermissionService()
 	{
 		return mock(MolgenisPermissionService.class);
@@ -65,14 +72,10 @@ public class ModelRegistryServiceConfig
 	@Bean
 	public MetaDataSearchService metaDataSearchService()
 	{
-		return new MetaDataSearchServiceImpl(dataService(), metaDataService(), tagService(),
-				molgenisPermissionService());
+		return new MetaDataSearchServiceImpl(dataService(), metaDataService(), tagService(), molgenisPermissionService());
 	}
 
 	@Bean
-	public TreeNodeService treeNodeService()
-	{
-		return new TreeNodeServiceImpl(tagService());
-	}
+	public TreeNodeService treeNodeService() { return new TreeNodeServiceImpl(treeNodeMapper()); }
 
 }

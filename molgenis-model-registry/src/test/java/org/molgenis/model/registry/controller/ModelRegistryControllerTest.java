@@ -1,7 +1,6 @@
-package org.molgenis.model.registry;
+package org.molgenis.model.registry.controller;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.TestHarnessConfig;
@@ -13,11 +12,12 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.model.registry.controller.ModelRegistryController;
 import org.molgenis.model.registry.model.*;
 import org.molgenis.model.registry.services.MetaDataSearchService;
 import org.molgenis.model.registry.services.TreeNodeService;
 import org.molgenis.model.registry.utils.ModelRegistryTestHarness;
+import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.menu.MenuItemType;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +27,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.ui.ExtendedModelMap;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -59,20 +58,23 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	private MetaDataSearchService metaDataSearchService;
 
 	@Autowired
+	private MenuReaderService menuReaderService;
+
+	@Autowired
 	private TreeNodeService treeNodeService;
 
 	@Autowired
-	private ModelRegistryController standardRegistryController;
+	private ModelRegistryController modelRegistryController;
 
 	@Test
 	public void testInit() {
 		ExtendedModelMap modelWarning = new ExtendedModelMap();
-		String templateWarning = standardRegistryController.init("true", modelWarning);
+		String templateWarning = modelRegistryController.init("true", modelWarning);
 		assertEquals(templateWarning, "view-model-registry");
 		assertEquals(modelWarning.asMap().get("warningMessage"), "Package not found");
 
 		ExtendedModelMap modelNoWarning = new ExtendedModelMap();
-		String templateNoWarning = standardRegistryController.init("false", modelNoWarning);
+		String templateNoWarning = modelRegistryController.init("false", modelNoWarning);
 		assertEquals(templateNoWarning, "view-model-registry");
 		assertEquals(modelNoWarning.asMap().get("warningMessage"), null);
 
@@ -87,9 +89,9 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		when(metaDataService.getRootPackages()).thenReturn(packages);
 
 		ExtendedModelMap modelDocs = new ExtendedModelMap();
-		String templateDocs = standardRegistryController.getModelDocumentation(modelDocs);
+		String templateDocs = modelRegistryController.getModelDocumentation(modelDocs);
 		assertEquals(templateDocs, "view-model-registry_docs");
-		List<Package> packagesResponse = (ArrayList) modelDocs.asMap().get("packages");
+		List<Package> packagesResponse = (List<Package>) modelDocs.asMap().get("packages");
 		assertEquals(packagesResponse, packages);
 
 		String TEST_SINGLE_PACKAGE = "test-single-package";
@@ -97,7 +99,7 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		when(metaDataService.getPackage(TEST_SINGLE_PACKAGE)).thenReturn(pkg);
 
 		ExtendedModelMap modelDocsMacros = new ExtendedModelMap();
-		String templateDocsMacros = standardRegistryController.getModelDocumentation(TEST_SINGLE_PACKAGE, true, modelDocsMacros);
+		String templateDocsMacros = modelRegistryController.getModelDocumentation(TEST_SINGLE_PACKAGE, true, modelDocsMacros);
 		assertEquals(templateDocsMacros,"view-model-registry_docs-macros");
 		Package pkgResponse = (Package) modelDocsMacros.asMap().get("package");
 		assertEquals(pkgResponse, pkg);
@@ -108,17 +110,15 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	public void testSearch() throws Exception
 	{
 		String TEST_PACKAGE = "test-package";
-		Gson gson = new Gson();
 
-		ModelRegistryPackage modelRegistryPackage = new ModelRegistryPackage("test-package-response", "", "", null, null, null);
-		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(
-				modelRegistryPackage));
+		ModelRegistryPackage modelRegistryPackage = ModelRegistryPackage.create("test-package-response", "", "", null, null, null);
+		ModelRegistrySearchPackage packageSearchResponse = ModelRegistrySearchPackage.create(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(modelRegistryPackage));
 		when(metaDataSearchService.search(TEST_PACKAGE, 0 ,3)).thenReturn(packageSearchResponse);
 
 		ExtendedModelMap model = new ExtendedModelMap();
-		String template = standardRegistryController.search(TEST_PACKAGE, model);
+		String template = modelRegistryController.search(TEST_PACKAGE, model);
 		assertEquals(template, "view-model-registry");
-		assertEquals(model.asMap().get("packageSearchResponse"), gson.toJson(packageSearchResponse));
+		assertEquals(model.asMap().get("packageSearchResponse"), packageSearchResponse);
 
 	}
 
@@ -129,7 +129,7 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		when(metaDataSearchService.search(TEST_PACKAGE, 0, 3)).thenReturn(null);
 
 		ExtendedModelMap model = new ExtendedModelMap();
-		standardRegistryController.search(TEST_PACKAGE, model);
+		modelRegistryController.search(TEST_PACKAGE, model);
 		assertEquals(model.asMap().get("packageSearchResponse"), null);
 	}
 
@@ -143,33 +143,28 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(selectedPackage);
 
 		ExtendedModelMap model = new ExtendedModelMap();
-		String template = standardRegistryController.showView(TEST_PACKAGE, model);
+		String template = modelRegistryController.showView(TEST_PACKAGE, model);
 		assertEquals(template, "view-model-registry_details");
 		assertEquals(model.get("selectedPackageName"), TEST_PACKAGE);
 		assertEquals(model.get("package"), selectedPackage);
 	}
 
-//	@Test
-//	public void testGetUml() throws Exception
-//	{
-//		String TEST_PACKAGE = "test-package";
-//		Package pkg = packageFactory.create(TEST_PACKAGE);
-//		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(pkg);
-//
-//		ExtendedModelMap model = new ExtendedModelMap();
-//		String template = standardRegistryController.getUml(TEST_PACKAGE, model);
-//		assertEquals(template, "view-model-registry_uml");
-//		assertEquals(model.get("molgenisPackage"), pkg);
-//
-//	}
-//
-//	@Test(expectedExceptions = MolgenisDataException.class)
-//	public void testUmlPackageNotFound() {
-//		String TEST_PACKAGE = "test-package";
-//		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(null);
-//		ExtendedModelMap model = new ExtendedModelMap();
-//		standardRegistryController.getUml(TEST_PACKAGE, model);
-//	}
+	@Test
+	public void testGetUml() throws Exception
+	{
+		String TEST_PACKAGE = "test-package";
+
+		ExtendedModelMap model = new ExtendedModelMap();
+		Menu menu = new Menu();
+		menu.setId(ModelRegistryController.ID);
+		menu.setType(MenuItemType.MENU);
+
+		when(menuReaderService.getMenu().findMenuItemPath(ModelRegistryController.ID)).thenReturn("/");
+		String template = modelRegistryController.getUml(TEST_PACKAGE, model);
+		assertEquals(template, "view-model-registry_uml");
+		assertEquals(model.get("molgenisPackage"), TEST_PACKAGE);
+
+	}
 
 	@Test
 	public void testGetPackage() throws Exception
@@ -186,8 +181,8 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		List<ModelRegistryTag> tags = Lists.newArrayList(tag);
 		when(metaDataSearchService.getTagsForPackage(molgenisPackge)).thenReturn(tags);
 
-		ModelRegistryPackage pacakgeResponse = new ModelRegistryPackage(TEST_PACKAGE, "", "", null, entities, tags);
-		ModelRegistryPackage response = standardRegistryController.getPackage(TEST_PACKAGE);
+		ModelRegistryPackage pacakgeResponse = ModelRegistryPackage.create(TEST_PACKAGE, "", "", null, entities, tags);
+		ModelRegistryPackage response = modelRegistryController.getPackage(TEST_PACKAGE);
 		assertEquals(response.getEntities().get(0).getName(), pacakgeResponse.getEntities().get(0).getName());
 	}
 
@@ -195,7 +190,7 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	public void testPackageNotFound() {
 		String TEST_PACKAGE = "test-package";
 		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(null);
-		standardRegistryController.getPackage(TEST_PACKAGE);
+		modelRegistryController.getPackage(TEST_PACKAGE);
 	}
 
 	@Test
@@ -204,11 +199,11 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 
 		String TEST_PACKAGE = "test-package";
 		Package molgenisPackage = packageFactory.create(TEST_PACKAGE);
-		PackageTreeNode treeNode = modelRegistryTestHarness.createPackageTreeNode();
+		ModelRegistryTreeNode treeNode = modelRegistryTestHarness.createPackageTreeNode();
 		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(molgenisPackage);
-		when(treeNodeService.createPackageTreeNode(molgenisPackage)).thenReturn(treeNode);
+		when(treeNodeService.createTreeNode(molgenisPackage)).thenReturn(treeNode);
 
-		Collection<PackageTreeNode> response = standardRegistryController.getTree(TEST_PACKAGE);
+		Collection<ModelRegistryTreeNode> response = modelRegistryController.getTree(TEST_PACKAGE);
 		assertEquals(response, Collections.singletonList(treeNode));
 	}
 
@@ -230,10 +225,7 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public TagService<LabeledResource, LabeledResource> tagService()
-		{
-			return mock(TagService.class);
-		}
+		public TagService<LabeledResource, LabeledResource> tagService() { return mock(TagService.class); }
 
 		@Bean
 		public TreeNodeService treeNodeService()

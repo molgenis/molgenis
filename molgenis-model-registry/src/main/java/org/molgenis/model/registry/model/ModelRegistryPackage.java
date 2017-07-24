@@ -1,75 +1,46 @@
 package org.molgenis.model.registry.model;
 
+import com.google.auto.value.AutoValue;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.gson.AutoGson;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.util.List;
 
 /**
  * @author sido
  */
-public class ModelRegistryPackage
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_ModelRegistryPackage.class)
+public abstract class ModelRegistryPackage
 {
+	@SuppressWarnings("unused")
+	public abstract String getName();
 
-	private String name;
-	private String label;
-	private String description;
-	private String matchDescription;
-	private List<ModelRegistryEntity> entitiesInPackage;
-	private List<ModelRegistryTag> tags;
-
-	public ModelRegistryPackage(Package _package)
-	{
-		this.name = _package.getId();
-		this.label = _package.getLabel();
-		this.description = _package.getDescription();
-//		this.matchDescription = _package.;
-//		this.entitiesInPackage = entitiesInPackage;
-//		this.tags = tags;
-	}
-
-	public ModelRegistryPackage(String name, String label, String description, String matchDescription,
-			List<ModelRegistryEntity> entitiesInPackage, List<ModelRegistryTag> tags)
-	{
-		this.name = name;
-		this.label = label;
-		this.description = description;
-		this.matchDescription = matchDescription;
-		this.entitiesInPackage = entitiesInPackage;
-		this.tags = tags;
-	}
+	@Nullable
+	public abstract String getLabel();
 
 	@SuppressWarnings("unused")
-	public String getName()
-	{
-		return name;
-	}
-
-	public String getLabel()
-	{
-		return label;
-	}
+	@Nullable
+	public abstract String getDescription();
 
 	@SuppressWarnings("unused")
-	public String getDescription()
-	{
-		return description;
-	}
+	@Nullable
+	public abstract String getMatchDescription();
 
 	@SuppressWarnings("unused")
-	public String getMatchDescription()
-	{
-		return matchDescription;
-	}
+	@Nullable
+	public abstract List<ModelRegistryEntity> getEntities();
 
 	@SuppressWarnings("unused")
-	public List<ModelRegistryEntity> getEntities()
+	@Nullable
+	public abstract Iterable<ModelRegistryTag> getTags();
+
+
+	public static ModelRegistryPackage create(String name, String label, String description, String matchDescription, List<ModelRegistryEntity> entitiesInPackage, List<ModelRegistryTag> tags)
 	{
-		return entitiesInPackage;
+		return new AutoValue_ModelRegistryPackage(name, label, description, matchDescription, entitiesInPackage, tags);
 	}
 
-	@SuppressWarnings("unused")
-	public Iterable<ModelRegistryTag> getTags()
-	{
-		return tags;
-	}
 }

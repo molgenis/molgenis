@@ -1,39 +1,27 @@
 package org.molgenis.model.registry.model;
 
+import com.google.auto.value.AutoValue;
+
 /**
  * @author sido
  */
-public class ModelRegistryTag
+@AutoValue
+public abstract class ModelRegistryTag
 {
 
-	private String label;
-	private String relation;
-	private String iri;
-
-	public ModelRegistryTag(String label, String iri, String relation)
-	{
-		super();
-		this.label = label;
-		this.iri = iri;
-		this.relation = relation;
-	}
+	@SuppressWarnings("unused")
+	public abstract String getLabel();
 
 	@SuppressWarnings("unused")
-	public String getLabel()
-	{
-		return label;
-	}
+	public abstract String getIri();
 
 	@SuppressWarnings("unused")
-	public String getIri()
+	public abstract String getRelation();
+
+	public static ModelRegistryTag create(String label, String iri, String relation)
 	{
-		return iri;
+		return new AutoValue_ModelRegistryTag(label, iri, relation);
 	}
 
-	@SuppressWarnings("unused")
-	public String getRelation()
-	{
-		return relation;
-	}
 
 }

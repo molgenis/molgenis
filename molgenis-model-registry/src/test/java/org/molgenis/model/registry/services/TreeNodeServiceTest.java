@@ -12,7 +12,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.model.registry.model.PackageTreeNode;
+import org.molgenis.model.registry.model.ModelRegistryTreeNode;
 import org.molgenis.model.registry.utils.ModelRegistryTestHarness;
 import org.molgenis.model.registry.utils.ModelRegistryServiceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +56,8 @@ public class TreeNodeServiceTest extends AbstractMolgenisSpringTest
 			when(tagService.getTagsForAttribute(pkg.getEntityType(), entityType.getIdAttribute())).thenReturn(tags);
 		});
 
-		PackageTreeNode packageTreeNode = treeNodeService.createPackageTreeNode(pkg);
-		assertEquals(true, packageTreeNode.getTitle().equalsIgnoreCase("test-package"));
+		ModelRegistryTreeNode modelRegistryTreeNode = treeNodeService.createTreeNode(pkg);
+		assertEquals(true, modelRegistryTreeNode.getTitle().equalsIgnoreCase("test-package"));
 	}
 
 	@Test

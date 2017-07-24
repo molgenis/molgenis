@@ -6,7 +6,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.model.registry.model.PackageTreeNode;
+import org.molgenis.model.registry.model.ModelRegistryTreeNode;
 import org.molgenis.model.registry.model.ModelRegistryEntity;
 import org.molgenis.model.registry.model.ModelRegistryTag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class ModelRegistryTestHarness
 	 * @return {@link ModelRegistryEntity}
 	 */
 	public ModelRegistryEntity createStandardRegistryEntity() {
-		ModelRegistryEntity entity = new ModelRegistryEntity("test-entity", "test-description", false);
+		ModelRegistryEntity entity = ModelRegistryEntity.create("test-entity", "test-description", false);
 		return entity;
 	}
 
@@ -44,17 +44,17 @@ public class ModelRegistryTestHarness
 	 * @return {@link ModelRegistryTag}
 	 */
 	public ModelRegistryTag createStandardRegistryTag() {
-		return new ModelRegistryTag("test-tag", "", "");
+		return ModelRegistryTag.create("test-tag", "", "");
 	}
 
 	/**
 	 *
-	 * <p>Create a {@link PackageTreeNode}</p>
+	 * <p>Create a {@link ModelRegistryTreeNode}</p>
 	 *
-	 * @return {@link PackageTreeNode}
+	 * @return {@link ModelRegistryTreeNode}
 	 */
-	public PackageTreeNode createPackageTreeNode() {
-		return new PackageTreeNode("test-package", "", "", "", true, false, null, null);
+	public ModelRegistryTreeNode createPackageTreeNode() {
+		return ModelRegistryTreeNode.create("test-package", "", "", "", true, false, null, null);
 	}
 
 	/**
@@ -68,6 +68,7 @@ public class ModelRegistryTestHarness
 	{
 		EntityType e1 = entityTypeFactory.create(TEST_ENTITY_TYPE_NAME);
 		e1.setLabel("test-label");
+		e1.setDescription("test-description");
 		e1.setAbstract(isAbstract);
 		return e1;
 	}

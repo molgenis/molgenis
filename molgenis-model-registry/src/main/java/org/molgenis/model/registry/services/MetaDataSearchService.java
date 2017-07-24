@@ -1,7 +1,7 @@
 package org.molgenis.model.registry.services;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.model.registry.model.PackageSearchResponse;
+import org.molgenis.model.registry.model.ModelRegistrySearchPackage;
 import org.molgenis.model.registry.model.ModelRegistryEntity;
 import org.molgenis.model.registry.model.ModelRegistryTag;
 
@@ -28,9 +28,9 @@ public interface MetaDataSearchService
 	 * @param offSet
 	 * @param number
 	 *
-	 * @return {@link PackageSearchResponse}
+	 * @return {@link ModelRegistrySearchPackage}
 	 */
-	PackageSearchResponse search(String query, int offSet, int number);
+	ModelRegistrySearchPackage search(String query, int offSet, int number);
 
 	/**
 	 * <p>Return {@link ModelRegistryTag}-list</p>

@@ -1,36 +1,23 @@
 package org.molgenis.model.registry.model;
 
+import com.google.auto.value.AutoValue;
+
 /**
  * @author sido
  */
-public class ModelRegistryEntity
+@AutoValue
+public abstract class ModelRegistryEntity
 {
 
-	private String name;
-	private String label;
-	private boolean abstr;
-
-	public ModelRegistryEntity(String name, String label, boolean abstr)
-	{
-		super();
-		this.name = name;
-		this.label = label;
-		this.abstr = abstr;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
+	public abstract String getName();
 
 	@SuppressWarnings("unused")
-	public String getLabel()
-	{
-		return label;
+	public abstract String getLabel();
+
+	public abstract boolean isAbstract();
+
+	public static ModelRegistryEntity create(String name, String label, boolean abstr) {
+		return new AutoValue_ModelRegistryEntity(name, label, abstr);
 	}
 
-	public boolean isAbtract()
-	{
-		return abstr;
-	}
 }
