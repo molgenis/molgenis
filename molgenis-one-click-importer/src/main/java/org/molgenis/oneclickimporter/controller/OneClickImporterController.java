@@ -13,6 +13,7 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +69,7 @@ public class OneClickImporterController extends MolgenisPluginController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/upload", method = POST)
+	@RequestMapping(value = "/upload", method = POST, produces = MediaType.TEXT_HTML_VALUE)
 	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile)
 
 			throws UnknownFileTypeException, IOException, InvalidFormatException
