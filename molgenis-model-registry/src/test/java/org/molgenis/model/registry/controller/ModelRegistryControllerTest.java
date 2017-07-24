@@ -112,7 +112,7 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		String TEST_PACKAGE = "test-package";
 
 		ModelRegistryPackage modelRegistryPackage = ModelRegistryPackage.create("test-package-response", "", "", null, null, null);
-		ModelRegistrySearchPackage packageSearchResponse = ModelRegistrySearchPackage.create(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(modelRegistryPackage));
+		ModelRegistrySearch packageSearchResponse = ModelRegistrySearch.create(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(modelRegistryPackage));
 		when(metaDataSearchService.search(TEST_PACKAGE, 0 ,3)).thenReturn(packageSearchResponse);
 
 		ExtendedModelMap model = new ExtendedModelMap();
