@@ -18,6 +18,9 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -38,6 +41,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebAppConfiguration
@@ -58,15 +62,6 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 
 	@Mock
 	private AppSettings appSettings;
-
-	@Mock
-	private ExcelService excelService;
-
-	@Mock
-	private OneClickImporterService oneClickImporterService;
-
-	@Mock
-	private EntityService entityService;
 
 	@Mock
 	private FileStore fileStore;
@@ -99,8 +94,11 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 		when(jobExecution.getIdValue()).thenReturn("id_1");
 		when(oneClickImportJobExecutionEntityType.getId()).thenReturn("jobExecutionId");
 
+		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
+		stringConverter.setWriteAcceptCharset(false);
+
 		mockMvc = MockMvcBuilders.standaloneSetup(oneClickImporterController)
-								 .setMessageConverters(gsonHttpMessageConverter)
+								 .setMessageConverters(gsonHttpMessageConverter, stringConverter)
 								 .build();
 	}
 
@@ -124,9 +122,9 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 		MockMultipartFile multipartFile = getTestMultipartFile("/simple-valid.xlsx", CONTENT_TYPE_EXCEL);
 
 		mockMvc.perform(
-				fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile))
-			   .andExpect(status().isOk())
-			   .andExpect(content().string("\"/api/v2/jobExecutionId/id_1\""));
+				fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile).accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(content().string("/api/v2/jobExecutionId/id_1"));
 	}
 
 	private MockMultipartFile getTestMultipartFile(final String path, final String contentType)
