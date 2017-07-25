@@ -108,12 +108,10 @@ public class AttributeTypeServiceTest
 		columnValues = newArrayList(123, 1239472398547932875L);
 		assertEquals(attributeTypeService.guessAttributeType(columnValues), LONG);
 
-		// FIXME test fails, should be DECIMAL, is guessed as INT
-		//		columnValues = newArrayList(1, 2.2, 3);
-		//		assertEquals(attributeTypeService.guessAttributeType(columnValues), DECIMAL);
+		columnValues = newArrayList(1, 2.2, 3);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), DECIMAL);
 
-		// FIXME test fails, should be LONG, is guessed as INT
-		//		columnValues = newArrayList(123, 54.5, 1239472398547932875L, 23.0);
-		//		assertEquals(attributeTypeService.guessAttributeType(columnValues), LONG);
+		columnValues = newArrayList(123, 54, 1239472398547932875L, 23.0);
+		assertEquals(attributeTypeService.guessAttributeType(columnValues), LONG);
 	}
 }
