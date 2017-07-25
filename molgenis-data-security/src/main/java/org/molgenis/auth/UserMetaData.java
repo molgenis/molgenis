@@ -23,6 +23,8 @@ public class UserMetaData extends SystemEntityType
 	public static final String PASSWORD_ = "password_";
 	public static final String EMAIL = "Email";
 	public static final String GOOGLEACCOUNTID = "googleAccountId";
+	public static final String ISUSING2FA = "isUsing2fa";
+	public static final String SECRET2FA = "secret2fa";
 	public static final String ACTIVATIONCODE = "activationCode";
 	public static final String ACTIVE = "active";
 	public static final String CHANGE_PASSWORD = "changePassword";
@@ -121,6 +123,10 @@ public class UserMetaData extends SystemEntityType
 		addAttribute(GOOGLEACCOUNTID).setLabel("Google account ID")
 									 .setDescription(
 											 "An identifier for the user, unique among all Google accounts and never reused.")
+									 .setNillable(true);
+		addAttribute(SECRET2FA).setLabel("2FA-key")
+									 .setDescription(
+											 "Secret key for 2 factor authentication.")
 									 .setNillable(true);
 	}
 }
