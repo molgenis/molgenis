@@ -15,6 +15,8 @@ import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
+import org.molgenis.security.google.TwoFactorAuthenticationProvider;
+import org.molgenis.security.google.TwoFactorWebAuthenticationDetailsSource;
 import org.molgenis.security.session.ApiSessionExpirationFilter;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
@@ -85,6 +87,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Autowired
 	private GroupMemberFactory groupMemberFactory;
 
+	@Autowired
+	private TwoFactorWebAuthenticationDetailsSource twoFactorAuthenticationDetailsSource;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
@@ -116,14 +121,15 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.authenticationProvider(runAsAuthenticationProvider());
 
+		http.authenticationProvider(twoFactorAuthenticationProvider());
+
 		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
 
 		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
-				.authorizeRequests();
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
 		expressionInterceptUrlRegistry
@@ -176,34 +182,50 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.antMatchers('/' + PATH_SEGMENT_APPS + "/**").permitAll()
 
-				.anyRequest().denyAll().and()
-
-				.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
-
-				.formLogin().loginPage("/login").failureUrl("/login?error").and()
-
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
-		{
-			if (req.getSession(false) != null
-					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
-			{
-				req.setAttribute("continueWithUnsupportedBrowser", true);
-			}
-		}).logoutSuccessHandler((req, res, auth) ->
-		{
-			StringBuilder logoutSuccessUrl = new StringBuilder("/");
-			if (req.getAttribute("continueWithUnsupportedBrowser") != null)
-			{
-				logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
-			}
-			SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-			logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
-			logoutSuccessHandler.onLogoutSuccess(req, res, auth);
-		})
-
+				.anyRequest()
+					.denyAll()
 				.and()
 
-				.csrf().disable();
+				.httpBasic()
+					.authenticationEntryPoint(authenticationEntryPoint())
+				.and()
+
+				.formLogin()
+					.loginPage("/login")
+				 	.failureUrl("/login?error")
+					.authenticationDetailsSource(twoFactorAuthenticationDetailsSource)
+				.and()
+
+				.logout()
+					.deleteCookies("JSESSIONID")
+					.addLogoutHandler((req, res, auth) ->
+					{
+						if (req.getSession(false) != null && req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+						{
+							req.setAttribute("continueWithUnsupportedBrowser", true);
+						}
+					})
+
+				.logoutSuccessHandler((req, res, auth) ->
+					{
+						StringBuilder logoutSuccessUrl = new StringBuilder("/");
+						if (req.getAttribute("continueWithUnsupportedBrowser") != null)
+						{
+							logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+						}
+						SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+						logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+						logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+					})
+				.and()
+
+				.csrf()
+					.disable();
+	}
+
+	@Bean
+	public AuthenticationProvider twoFactorAuthenticationProvider() {
+		return new TwoFactorAuthenticationProvider(dataService);
 	}
 
 	@Bean
