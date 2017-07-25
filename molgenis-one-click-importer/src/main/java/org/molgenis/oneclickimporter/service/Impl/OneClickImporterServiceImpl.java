@@ -24,6 +24,8 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
+import static org.apache.poi.util.LocaleUtil.resetUserTimeZone;
+import static org.apache.poi.util.LocaleUtil.setUserTimeZone;
 
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
@@ -31,7 +33,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	private static String CSV_SEPARATOR = ",";
 
 	@Override
-	public List<DataCollection> buildDataCollection(List<Sheet> sheets)
+	public List<DataCollection> buildDataCollectionsFromExcel(List<Sheet> sheets)
 	{
 		List<DataCollection> dataCollections = newArrayList();
 		sheets.forEach(sheet ->
@@ -44,23 +46,23 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return dataCollections;
 	}
 
-	//	@Override
-	//	public DataCollection buildDataCollection(String dataCollectionName, List<String> lines)
-	//	{
-	//		List<Column> columns = newArrayList();
-	//
-	//		String[] headers = lines.get(0).split(CSV_SEPARATOR);
-	//		lines.remove(0); // Remove the header
-	//
-	//		int columnIndex = 0;
-	//		for (String header : headers)
-	//		{
-	//			columns.add(createColumnFromLine(header, columnIndex, lines));
-	//			columnIndex++;
-	//		}
-	//
-	//		return DataCollection.create(dataCollectionName, columns);
-	//	}
+	@Override
+	public DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String> lines)
+	{
+		List<Column> columns = newArrayList();
+
+		String[] headers = lines.get(0).split(CSV_SEPARATOR);
+		lines.remove(0); // Remove the header
+
+		int columnIndex = 0;
+		for (String header : headers)
+		{
+			columns.add(createColumnFromLine(header, columnIndex, lines));
+			columnIndex++;
+		}
+
+		return DataCollection.create(dataCollectionName, columns);
+	}
 
 	@Override
 	public boolean hasUniqueValues(Column column)
@@ -162,6 +164,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 
 	private List<Object> getColumnDataFromLines(List<String> lines, int columnIndex)
 	{
+		// TODO less naive way of splitting line, what if "value, value"?
 		List<Object> dataValues = newLinkedList();
 		lines.forEach(line ->
 		{
@@ -214,16 +217,15 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 				{
 					try
 					{
-						// TODO think about dates
 						// Excel dates are LocalDateTime, stored without timezone.
 						// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
-						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
+						setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
 						Date dateCellValue = cell.getDateCellValue();
 						value = formatUTCDateAsLocalDateTime(dateCellValue);
 					}
 					finally
 					{
-						LocaleUtil.resetUserTimeZone();
+						resetUserTimeZone();
 					}
 				}
 				else

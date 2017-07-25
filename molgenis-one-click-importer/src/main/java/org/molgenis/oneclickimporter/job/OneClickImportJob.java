@@ -22,6 +22,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.util.FileExtensionUtils.findExtensionFromPossibilities;
 import static org.molgenis.util.FileExtensionUtils.getFileNameWithoutExtension;
+import static org.molgenis.util.file.ZipFileUtil.unzip;
 
 @Component
 public class OneClickImportJob
@@ -49,18 +50,35 @@ public class OneClickImportJob
 
 		String fileExtension = findExtensionFromPossibilities(filename, Sets.newHashSet("csv", "xlsx", "zip", "xls"));
 
-		List<DataCollection> dataCollections;
+		List<DataCollection> dataCollections = newArrayList();
 		if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{
 			List<Sheet> sheets = excelService.buildExcelSheetsFromFile(file);
-			dataCollections = oneClickImporterService.buildDataCollection(sheets);
+			dataCollections.addAll(oneClickImporterService.buildDataCollectionsFromExcel(sheets));
 		}
-		//		else if (fileExtension.equals("csv"))
-		//		{
-		//			List<String> lines = csvService.buildLinesFromFile(file);
-		//			progress.progress(2, "Creating dataCollection");
-		//			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, lines);
-		//		}
+		else if (fileExtension.equals("csv"))
+		{
+			List<String> lines = csvService.buildLinesFromFile(file);
+			dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(filename, lines));
+		}
+		else if (fileExtension.equals("zip"))
+		{
+			List<File> filesInZip = unzip(file);
+			for (File fileInZip : filesInZip)
+			{
+				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), Sets.newHashSet("csv"));
+				if (fileInZipExtension != null)
+				{
+					List<String> lines = csvService.buildLinesFromFile(fileInZip);
+					dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(
+							createValidNameFromFileName(fileInZip.getName()), lines));
+				}
+				else
+				{
+					throw new UnknownFileTypeException("Zip file contains files which are not of type CSV");
+				}
+			}
+		}
 		else
 		{
 			throw new UnknownFileTypeException(
@@ -68,7 +86,7 @@ public class OneClickImportJob
 		}
 
 		List<EntityType> entityTypes = newArrayList();
-		String packageName = createValidPackageNameFromFileName(filename);
+		String packageName = createValidNameFromFileName(filename);
 		dataCollections.forEach(
 				dataCollection -> entityTypes.add(entityService.createEntityType(dataCollection, packageName)));
 
@@ -76,7 +94,7 @@ public class OneClickImportJob
 		return entityTypes;
 	}
 
-	private String createValidPackageNameFromFileName(String filename)
+	private String createValidNameFromFileName(String filename)
 	{
 		String packageName = getFileNameWithoutExtension(filename);
 		// TODO regex it up "[^a-zA-Z0-9_#]+"
