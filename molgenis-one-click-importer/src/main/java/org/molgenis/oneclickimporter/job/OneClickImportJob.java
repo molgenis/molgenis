@@ -12,6 +12,7 @@ import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,15 +34,18 @@ public class OneClickImportJob
 	private OneClickImporterService oneClickImporterService;
 	private EntityService entityService;
 	private FileStore fileStore;
+	private PermissionSystemService permissionSystemService;
 
 	public OneClickImportJob(ExcelService excelService, CsvService csvService,
-			OneClickImporterService oneClickImporterService, EntityService entityService, FileStore fileStore)
+			OneClickImporterService oneClickImporterService, EntityService entityService, FileStore fileStore,
+			PermissionSystemService permissionSystemService)
 	{
 		this.excelService = requireNonNull(excelService);
 		this.csvService = requireNonNull(csvService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 		this.entityService = requireNonNull(entityService);
 		this.fileStore = requireNonNull(fileStore);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Transactional
@@ -61,7 +65,8 @@ public class OneClickImportJob
 		else if (fileExtension.equals("csv"))
 		{
 			List<String> lines = csvService.buildLinesFromFile(file);
-			dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(createValidNameFromFileName(filename), lines));
+			dataCollections.add(
+					oneClickImporterService.buildDataCollectionFromCsv(createValidNameFromFileName(filename), lines));
 		}
 		else if (fileExtension.equals("zip"))
 		{
@@ -92,7 +97,7 @@ public class OneClickImportJob
 		dataCollections.forEach(
 				dataCollection -> entityTypes.add(entityService.createEntityType(dataCollection, packageName)));
 
-		// TODO permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
+		permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
 		return entityTypes;
 	}
 
