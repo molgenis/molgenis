@@ -10,11 +10,11 @@ import javax.servlet.http.HttpServletRequest;
  * @author sido
  */
 @Component
-public class TwoFactorWebAuthenticationDetailsSource implements AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails>
+public class Google2FAWebAuthenticationDetailsSource implements AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails>
 {
 
 	@Override
 	public WebAuthenticationDetails buildDetails(HttpServletRequest context) {
-		return new TwoFactorWebAuthenticationDetails(context);
+		return new Google2FAWebAuthenticationDetails(context);
 	}
 }

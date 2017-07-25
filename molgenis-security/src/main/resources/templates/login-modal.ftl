@@ -46,6 +46,12 @@
                         <input id="password-field" type="password" placeholder="Password" class="form-control"
                                name="password" required>
                     </div>
+                    <#if !app_settings.googleSignIn && app_settings.google_2factor_authentication>
+                        <div class="form-group">
+                            <input id="text-field" type="text" placeholder="Code" class="form-control"
+                                   name="code" required>
+                        </div>
+                    </#if>
                     <div class="row">
                         <div class="col-md-4">
                             <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
