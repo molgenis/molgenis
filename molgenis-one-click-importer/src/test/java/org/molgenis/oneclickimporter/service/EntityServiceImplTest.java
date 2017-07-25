@@ -4,12 +4,9 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
@@ -30,10 +27,6 @@ import static org.testng.Assert.assertEquals;
 
 public class EntityServiceImplTest extends AbstractMockitoTest
 {
-
-	@Mock
-	private DefaultPackage defaultPackage;
-
 	@Mock
 	private EntityTypeFactory entityTypeFactory;
 
@@ -58,13 +51,17 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	@Mock
 	private OneClickImporterService oneClickImporterService;
 
+	@Mock
+	private PackageFactory packageFactory;
+
 	private EntityService entityService;
 
 	@BeforeMethod
 	public void setup()
 	{
-		this.entityService = new EntityServiceImpl(defaultPackage, entityTypeFactory, attributeFactory, idGenerator,
-				dataService, metaDataService, entityManager, attributeTypeService, oneClickImporterService);
+		this.entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator,
+				dataService, metaDataService, entityManager, attributeTypeService, oneClickImporterService,
+				packageFactory);
 
 		when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
 	}
@@ -84,6 +81,9 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		when(entityTypeFactory.create()).thenReturn(table);
 		when(idGenerator.generateId()).thenReturn(generatedId);
 		when(table.getId()).thenReturn(generatedId);
+
+		Package package_ = mock(Package.class);
+		when(metaDataService.getPackage("package_")).thenReturn(package_);
 
 		Attribute idAttr = mock(Attribute.class);
 		//row.getEntityType().getAttribute(column.getName()).getDataType()
@@ -109,10 +109,10 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 		when(row3.getEntityType()).thenReturn(table);
 		when(entityManager.create(table, NO_POPULATE)).thenReturn(row1, row2, row3);
 
-		EntityType entityType = entityService.createEntityType(dataCollection);
+		EntityType entityType = entityService.createEntityType(dataCollection, "package_");
 		assertEquals(entityType.getId(), generatedId);
 
-		verify(table).setPackage(defaultPackage);
+		verify(table).setPackage(package_);
 		verify(table).setId(generatedId);
 		verify(table).setLabel(tableName);
 	}

@@ -17,14 +17,14 @@ import java.util.List;
 
 public class OneClickImporterTestUtils
 {
-	public static Sheet loadSheetFromFile(Class<?> clazz, String fileName)
+	public static List<Sheet> loadSheetFromFile(Class<?> clazz, String fileName)
 			throws IOException, InvalidFormatException, URISyntaxException
 	{
 		URL resourceUrl = Resources.getResource(clazz, fileName);
 		File file = new File(new URI(resourceUrl.toString()).getPath());
 
 		ExcelService excelService = new ExcelServiceImpl();
-		return excelService.buildExcelSheetFromFile(file);
+		return excelService.buildExcelSheetsFromFile(file);
 	}
 
 	public static List<String> loadLinesFromFile(Class<?> clazz, String fileName) throws IOException, URISyntaxException

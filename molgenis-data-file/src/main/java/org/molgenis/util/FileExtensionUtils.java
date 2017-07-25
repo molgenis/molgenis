@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+
 public class FileExtensionUtils
 {
 	public static String findExtensionFromPossibilities(String fileName, Set<String> fileExtensions)
@@ -33,5 +35,10 @@ public class FileExtensionUtils
 		}
 
 		return longestExtension;
+	}
+
+	public static String getFileNameWithoutExtension(String filename)
+	{
+		return getBaseName(filename);
 	}
 }

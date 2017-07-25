@@ -10,12 +10,10 @@ import java.util.List;
 public interface OneClickImporterService
 {
 	/**
-	 * Generate {@link DataCollection} from an Excel sheet
-	 *
-	 * @param dataCollectionName
-	 * @param sheet
+	 * Generate {@link DataCollection}s from one or more Excel sheets
+	 * @param sheets
 	 */
-	DataCollection buildDataCollection(String dataCollectionName, Sheet sheet);
+	List<DataCollection> buildDataCollection(List<Sheet> sheets);
 
 	/**
 	 * Generate {@link DataCollection} from a List of file lines
@@ -23,7 +21,7 @@ public interface OneClickImporterService
 	 * @param dataCollectionName
 	 * @param lines
 	 */
-	DataCollection buildDataCollection(String dataCollectionName, List<String> lines);
+	//	List<DataCollection> buildDataCollection(String dataCollectionName, List<String> lines);
 
 	/**
 	 * Test is values are unique within column.
@@ -34,6 +32,7 @@ public interface OneClickImporterService
 	/**
 	 * Cast the given value based in the supplied attribute type.
 	 * The method returns the most specific type that can contain the value
+	 *
 	 * @param value
 	 * @param type
 	 * @return

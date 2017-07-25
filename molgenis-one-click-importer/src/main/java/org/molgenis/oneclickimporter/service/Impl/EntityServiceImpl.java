@@ -4,12 +4,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.oneclickimporter.model.Column;
@@ -32,8 +28,6 @@ public class EntityServiceImpl implements EntityService
 {
 	private static final String ID_ATTR_NAME = "auto_identifier";
 
-	private final DefaultPackage defaultPackage;
-
 	private final EntityTypeFactory entityTypeFactory;
 
 	private final AttributeFactory attributeFactory;
@@ -50,12 +44,13 @@ public class EntityServiceImpl implements EntityService
 
 	private final OneClickImporterService oneClickImporterService;
 
-	public EntityServiceImpl(DefaultPackage defaultPackage, EntityTypeFactory entityTypeFactory,
-			AttributeFactory attributeFactory, IdGenerator idGenerator, DataService dataService,
-			MetaDataService metaDataService, EntityManager entityManager, AttributeTypeService attributeTypeService,
-			OneClickImporterService oneClickImporterService)
+	private final PackageFactory packageFactory;
+
+	public EntityServiceImpl(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
+			IdGenerator idGenerator, DataService dataService, MetaDataService metaDataService,
+			EntityManager entityManager, AttributeTypeService attributeTypeService,
+			OneClickImporterService oneClickImporterService, PackageFactory packageFactory)
 	{
-		this.defaultPackage = requireNonNull(defaultPackage);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
 		this.idGenerator = requireNonNull(idGenerator);
@@ -64,17 +59,29 @@ public class EntityServiceImpl implements EntityService
 		this.entityManager = requireNonNull(entityManager);
 		this.attributeTypeService = requireNonNull(attributeTypeService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
+		this.packageFactory = requireNonNull(packageFactory);
 	}
 
 	@Override
-	public EntityType createEntityType(DataCollection dataCollection)
+	public EntityType createEntityType(DataCollection dataCollection, String packageName)
 	{
 		String entityTypeId = idGenerator.generateId();
 
 		// Create a dataTable
 		EntityType entityType = entityTypeFactory.create();
-		entityType.setPackage(defaultPackage);
+
+		org.molgenis.data.meta.model.Package package_ = metaDataService.getPackage(packageName);
+		if (package_ == null)
+		{
+			package_ = packageFactory.create(packageName);
+			package_.setLabel(packageName);
+			metaDataService.addPackage(package_);
+		}
+
+		entityType.setPackage(package_);
 		entityType.setId(entityTypeId);
+
+		// TODO Query for label, if exists postfix
 		entityType.setLabel(dataCollection.getName());
 
 		// Check if first column can be used as id ( has unique values )
@@ -86,16 +93,20 @@ public class EntityServiceImpl implements EntityService
 		final boolean isValidAttributeType = AttributeUtils.getValidIdAttributeTypes().contains(type);
 		final boolean useAutoId = !isFirstColumnUnique || !isValidAttributeType;
 
-		if(useAutoId) {
+		if (useAutoId)
+		{
 			entityType.addAttribute(createIdAttribute(), ROLE_ID);
-		} else {
+		}
+		else
+		{
 			entityType.addAttribute(createAttribute(firstColumn), ROLE_ID);
 		}
 
 		// Add all columns to the dataTable
 		columns.forEach(column ->
 		{
-			if(useAutoId || column != firstColumn){
+			if (useAutoId || column != firstColumn)
+			{
 				Attribute attribute = createAttribute(column);
 				entityType.addAttribute(attribute);
 			}
@@ -109,7 +120,8 @@ public class EntityServiceImpl implements EntityService
 		while (rowIndex.get() < dataCollection.getColumns().get(0).getDataValues().size())
 		{
 			Entity row = entityManager.create(entityType, NO_POPULATE);
-			if(useAutoId) {
+			if (useAutoId)
+			{
 				row.setIdValue(idGenerator.generateId());
 			}
 

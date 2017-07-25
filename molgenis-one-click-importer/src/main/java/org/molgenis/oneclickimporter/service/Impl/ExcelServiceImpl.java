@@ -9,14 +9,24 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 @Component
 public class ExcelServiceImpl implements ExcelService
 {
 	@Override
-	public Sheet buildExcelSheetFromFile(File file) throws IOException, InvalidFormatException
+	public List<Sheet> buildExcelSheetsFromFile(File file) throws IOException, InvalidFormatException
 	{
 		Workbook workbook = WorkbookFactory.create(file);
-		return workbook.getSheetAt(0);
+		int numberOfSheets = workbook.getNumberOfSheets();
+
+		List<Sheet> sheets = newArrayList();
+		for (int index = 0; index < numberOfSheets; index++)
+		{
+			sheets.add(workbook.getSheetAt(index));
+		}
+		return sheets;
 	}
 }

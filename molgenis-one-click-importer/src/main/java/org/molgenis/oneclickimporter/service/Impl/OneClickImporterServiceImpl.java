@@ -31,33 +31,36 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	private static String CSV_SEPARATOR = ",";
 
 	@Override
-	public DataCollection buildDataCollection(String dataCollectionName, Sheet sheet)
+	public List<DataCollection> buildDataCollection(List<Sheet> sheets)
 	{
-		List<Column> columns = newArrayList();
-
-		Row headerRow = sheet.getRow(0);
-		headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
-
-		return DataCollection.create(dataCollectionName, columns);
-	}
-
-	@Override
-	public DataCollection buildDataCollection(String dataCollectionName, List<String> lines)
-	{
-		List<Column> columns = newArrayList();
-
-		String[] headers = lines.get(0).split(CSV_SEPARATOR);
-		lines.remove(0); // Remove the header
-
-		int columnIndex = 0;
-		for (String header : headers)
+		List<DataCollection> dataCollections = newArrayList();
+		sheets.forEach(sheet ->
 		{
-			columns.add(createColumnFromLine(header, columnIndex, lines));
-			columnIndex++;
-		}
-
-		return DataCollection.create(dataCollectionName, columns);
+			List<Column> columns = newArrayList();
+			Row headerRow = sheet.getRow(0);
+			headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
+			dataCollections.add(DataCollection.create(sheet.getSheetName(), columns));
+		});
+		return dataCollections;
 	}
+
+	//	@Override
+	//	public DataCollection buildDataCollection(String dataCollectionName, List<String> lines)
+	//	{
+	//		List<Column> columns = newArrayList();
+	//
+	//		String[] headers = lines.get(0).split(CSV_SEPARATOR);
+	//		lines.remove(0); // Remove the header
+	//
+	//		int columnIndex = 0;
+	//		for (String header : headers)
+	//		{
+	//			columns.add(createColumnFromLine(header, columnIndex, lines));
+	//			columnIndex++;
+	//		}
+	//
+	//		return DataCollection.create(dataCollectionName, columns);
+	//	}
 
 	@Override
 	public boolean hasUniqueValues(Column column)
