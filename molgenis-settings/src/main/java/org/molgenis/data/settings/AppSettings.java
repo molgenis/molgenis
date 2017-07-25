@@ -205,4 +205,17 @@ public interface AppSettings
 	 * @return Custom JavaScript <script src="..."></script> headers, specified as comma separated list
 	 */
 	String getCustomJavascript();
+
+	/**
+	 * @return If 2-factor authentication is enabled (Google-Authenticator is now implemented)
+	 */
+	boolean is2fa();
+
+	/**
+	 *
+	 * @param enable Enable 2-factor authentication (Google-Authenticator is now implemented)
+	 *
+	 */
+	void set2fa(boolean enable);
+
 }
