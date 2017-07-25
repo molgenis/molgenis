@@ -3,6 +3,9 @@ package org.molgenis.oneclickimporter.service.utils;
 import com.google.common.io.Resources;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
+import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
+import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.Impl.CsvServiceImpl;
@@ -18,7 +21,7 @@ import java.util.List;
 public class OneClickImporterTestUtils
 {
 	public static List<Sheet> loadSheetFromFile(Class<?> clazz, String fileName)
-			throws IOException, InvalidFormatException, URISyntaxException
+			throws IOException, InvalidFormatException, URISyntaxException, NoDataException, EmptySheetException
 	{
 		URL resourceUrl = Resources.getResource(clazz, fileName);
 		File file = new File(new URI(resourceUrl.toString()).getPath());
@@ -27,7 +30,8 @@ public class OneClickImporterTestUtils
 		return excelService.buildExcelSheetsFromFile(file);
 	}
 
-	public static List<String> loadLinesFromFile(Class<?> clazz, String fileName) throws IOException, URISyntaxException
+	public static List<String> loadLinesFromFile(Class<?> clazz, String fileName)
+			throws IOException, URISyntaxException, NoDataException, EmptyFileException
 	{
 		URL resourceUrl = Resources.getResource(clazz, fileName);
 		File file = new File(new URI(resourceUrl.toString()).getPath());

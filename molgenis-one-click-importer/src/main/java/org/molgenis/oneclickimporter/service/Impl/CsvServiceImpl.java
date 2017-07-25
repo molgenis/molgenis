@@ -1,5 +1,7 @@
 package org.molgenis.oneclickimporter.service.Impl;
 
+import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
+import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.service.CsvService;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +16,24 @@ import java.util.stream.Collectors;
 public class CsvServiceImpl implements CsvService
 {
 	@Override
-	public List<String> buildLinesFromFile(File file) throws IOException
+	public List<String> buildLinesFromFile(File file)
+			throws IOException, NoDataException, EmptyFileException
 	{
 		FileReader fileReader = new FileReader(file);
 		BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-		return bufferedReader.lines().collect(Collectors.toList());
+		List<String> lines = bufferedReader.lines().collect(Collectors.toList());
+		if (lines.size() == 0)
+		{
+			throw new EmptyFileException("File [" + file.getName() + "] is empty");
+		}
+		else if (lines.size() == 1)
+		{
+			throw new NoDataException("Header was found, but no data is present in file [" + file.getName() + "]");
+		}
+		else
+		{
+			return lines;
+		}
 	}
 }

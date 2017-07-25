@@ -1,5 +1,8 @@
 package org.molgenis.oneclickimporter.service;
 
+import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
+import org.molgenis.oneclickimporter.exceptions.NoDataException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -12,5 +15,5 @@ public interface CsvService
 	 *
 	 * @param file
 	 */
-	List<String> buildLinesFromFile(File file) throws IOException;
+	List<String> buildLinesFromFile(File file) throws IOException, NoDataException, EmptyFileException;
 }

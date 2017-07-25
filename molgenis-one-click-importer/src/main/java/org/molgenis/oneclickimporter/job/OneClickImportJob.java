@@ -5,6 +5,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.FileStore;
+import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
+import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
+import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.CsvService;
@@ -50,7 +53,8 @@ public class OneClickImportJob
 
 	@Transactional
 	public List<EntityType> getEntityType(Progress progress, String filename)
-			throws UnknownFileTypeException, IOException, InvalidFormatException
+			throws UnknownFileTypeException, IOException, InvalidFormatException, NoDataException, EmptySheetException,
+			EmptyFileException
 	{
 		File file = fileStore.getFile(filename);
 		String fileExtension = findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
@@ -58,9 +62,9 @@ public class OneClickImportJob
 		List<DataCollection> dataCollections = newArrayList();
 		if (fileExtension == null)
 		{
-			throw new UnknownFileTypeException(String.format(
-					"File [%s] does not have a valid extension, supported: [csv, xlsx, zip, xls]",
-					filename));
+			throw new UnknownFileTypeException(
+					String.format("File [%s] does not have a valid extension, supported: [csv, xlsx, zip, xls]",
+							filename));
 		}
 		else if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{

@@ -3,6 +3,9 @@ package org.molgenis.oneclickimporter.service;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
+import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
+import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.Impl.OneClickImporterServiceImpl;
@@ -26,7 +29,7 @@ public class OneClickImporterServiceTest
 
 	@Test
 	public void testBuildDataCollectionWithSimpleValidExcelFile()
-			throws IOException, InvalidFormatException, URISyntaxException
+			throws IOException, InvalidFormatException, URISyntaxException, NoDataException, EmptySheetException
 	{
 		List<Sheet> sheets = loadSheetFromFile(OneClickImporterServiceTest.class, "/simple-valid.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollectionsFromExcel(sheets).get(0);
@@ -41,7 +44,8 @@ public class OneClickImporterServiceTest
 	}
 
 	@Test
-	public void testBuildDataSheetWithValidFormulaFile() throws IOException, InvalidFormatException, URISyntaxException
+	public void testBuildDataSheetWithValidFormulaFile()
+			throws IOException, InvalidFormatException, URISyntaxException, NoDataException, EmptySheetException
 	{
 		List<Sheet> sheets = loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-formula.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollectionsFromExcel(sheets).get(0);
@@ -56,7 +60,7 @@ public class OneClickImporterServiceTest
 
 	@Test
 	public void testBuildDataSheetBuildsColumnsOfEqualLength()
-			throws IOException, InvalidFormatException, URISyntaxException
+			throws IOException, InvalidFormatException, URISyntaxException, NoDataException, EmptySheetException
 	{
 		List<Sheet> sheets = loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-blank-values.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollectionsFromExcel(sheets).get(0);
@@ -73,7 +77,8 @@ public class OneClickImporterServiceTest
 	}
 
 	@Test
-	public void testBuildDataSheetWithComplexFile() throws IOException, InvalidFormatException, URISyntaxException
+	public void testBuildDataSheetWithComplexFile()
+			throws IOException, InvalidFormatException, URISyntaxException, NoDataException, EmptySheetException
 	{
 		List<Sheet> sheets = loadSheetFromFile(OneClickImporterServiceTest.class, "/complex-valid.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollectionsFromExcel(sheets).get(0);
@@ -95,7 +100,8 @@ public class OneClickImporterServiceTest
 	}
 
 	@Test
-	public void testBuildDataSheetWithDates() throws IOException, InvalidFormatException, URISyntaxException
+	public void testBuildDataSheetWithDates()
+			throws IOException, InvalidFormatException, URISyntaxException, NoDataException, EmptySheetException
 	{
 		List<Sheet> sheets = loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-dates.xlsx");
 		DataCollection actual = oneClickImporterService.buildDataCollectionsFromExcel(sheets).get(0);
@@ -112,7 +118,8 @@ public class OneClickImporterServiceTest
 	}
 
 	@Test
-	public void testBuildDataCollectionWithSimpleValidCsvFile() throws IOException, URISyntaxException
+	public void testBuildDataCollectionWithSimpleValidCsvFile()
+			throws IOException, URISyntaxException, NoDataException, EmptyFileException
 	{
 		List<String> lines = loadLinesFromFile(OneClickImporterServiceTest.class, "/simple-valid.csv");
 		DataCollection actual = oneClickImporterService.buildDataCollectionFromCsv("simple-valid", lines);
@@ -126,7 +133,8 @@ public class OneClickImporterServiceTest
 	}
 
 	@Test
-	public void testBuildDataCollectionWithComplexValidCsvFile() throws IOException, URISyntaxException
+	public void testBuildDataCollectionWithComplexValidCsvFile()
+			throws IOException, URISyntaxException, NoDataException, EmptyFileException
 	{
 		List<String> lines = loadLinesFromFile(OneClickImporterServiceTest.class, "/complex-valid.csv");
 		DataCollection actual = oneClickImporterService.buildDataCollectionFromCsv("complex-valid", lines);

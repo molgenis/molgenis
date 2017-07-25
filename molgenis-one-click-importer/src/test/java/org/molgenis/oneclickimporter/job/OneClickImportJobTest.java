@@ -6,6 +6,9 @@ import org.mockito.Mock;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.FileStore;
+import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
+import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
+import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.CsvService;
@@ -56,7 +59,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 
 	@Test
 	public void testGetEntityTypeWithExcel()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException
+			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException, NoDataException,
+			EmptySheetException, EmptyFileException
 	{
 		Progress progress = mock(Progress.class);
 		String filename = "simple-valid.xlsx";
@@ -86,7 +90,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 
 	@Test
 	public void testGetEntityTypeWithCsv()
-			throws UnknownFileTypeException, InvalidFormatException, IOException, URISyntaxException
+			throws UnknownFileTypeException, InvalidFormatException, IOException, URISyntaxException, NoDataException,
+			EmptySheetException, EmptyFileException
 	{
 		Progress progress = mock(Progress.class);
 		String filename = "simple-valid.csv";
@@ -116,7 +121,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 
 	@Test
 	public void testGetEntityTypeWithZip()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException
+			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException, NoDataException,
+			EmptySheetException, EmptyFileException
 	{
 		Progress progress = mock(Progress.class);
 		String filename = "simple-valid.zip";
@@ -193,7 +199,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 
 	@Test(expectedExceptions = UnknownFileTypeException.class, expectedExceptionsMessageRegExp = "Zip file contains files which are not of type CSV")
 	public void testInvalidZipContent()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException
+			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException, NoDataException,
+			EmptySheetException, EmptyFileException
 	{
 		Progress progress = mock(Progress.class);
 		String filename = "unsupported-file-zip.zip";
@@ -209,7 +216,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 
 	@Test(expectedExceptions = UnknownFileTypeException.class, expectedExceptionsMessageRegExp = "Zip file contains files which are not of type CSV")
 	public void testInvalidZipContentWithImage()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException
+			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException, NoDataException,
+			EmptySheetException, EmptyFileException
 	{
 		Progress progress = mock(Progress.class);
 		String filename = "unsupported-file-zip2.zip";
@@ -225,7 +233,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 
 	@Test(expectedExceptions = UnknownFileTypeException.class, expectedExceptionsMessageRegExp = "File \\[unsupported-file-type.nft\\] does not have a valid extension, supported: \\[csv, xlsx, zip, xls\\]")
 	public void testInvalidFileType()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException
+			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException, NoDataException,
+			EmptySheetException, EmptyFileException
 	{
 		Progress progress = mock(Progress.class);
 		String filename = "unsupported-file-type.nft";
