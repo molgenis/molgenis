@@ -9,12 +9,12 @@ public class FileExtensionUtils
 	public static String findExtensionFromPossibilities(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();
-		List<String> possibleExtensions = new ArrayList<String>();
-		for (String extention : fileExtensions)
+		List<String> possibleExtensions = new ArrayList<>();
+		for (String extension : fileExtensions)
 		{
-			if (name.endsWith('.' + extention))
+			if (name.endsWith('.' + extension))
 			{
-				possibleExtensions.add(extention);
+				possibleExtensions.add(extension);
 			}
 		}
 
