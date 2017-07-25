@@ -164,12 +164,11 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 
 	private List<Object> getColumnDataFromLines(List<String> lines, int columnIndex)
 	{
-		// TODO less naive way of splitting line, what if "value, value"?
 		List<Object> dataValues = newLinkedList();
 		lines.forEach(line ->
 		{
-			String[] lineParts = line.split(CSV_SEPARATOR, -1);
-			dataValues.add(getPartValue(lineParts[columnIndex]));
+			String[] tokens = line.split(CSV_SEPARATOR + "(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+			dataValues.add(getPartValue(tokens[columnIndex]));
 		});
 		return dataValues;
 	}
