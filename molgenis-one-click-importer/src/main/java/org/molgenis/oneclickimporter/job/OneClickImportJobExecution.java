@@ -47,4 +47,14 @@ public class OneClickImportJobExecution extends JobExecution
 	{
 		set(ENTITY_TYPES, values);
 	}
+
+	public String getPackage()
+	{
+		return getString(PACKAGE);
+	}
+
+	public void setPackage(String value)
+	{
+		set(PACKAGE, value);
+	}
 }

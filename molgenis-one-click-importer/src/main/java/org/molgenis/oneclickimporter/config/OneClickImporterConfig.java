@@ -41,9 +41,12 @@ public class OneClickImporterConfig
 					List<EntityType> entityTypes = oneClickImportJob.getEntityType(progress, filename);
 					oneClickImportJobExecution.setEntityTypes(entityTypes);
 
+					String packageId = entityTypes.get(0).getPackage().getId();
+					oneClickImportJobExecution.setPackage(packageId);
+
 					String labels = entityTypes.stream()
-											.map(entityType -> entityType.getLabel())
-											.collect(Collectors.joining(","));
+											   .map(entityType -> entityType.getLabel())
+											   .collect(Collectors.joining(","));
 
 					progress.status(format("Created table(s): %s", labels));
 					return entityTypes;

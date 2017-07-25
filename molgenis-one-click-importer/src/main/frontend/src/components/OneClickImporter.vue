@@ -38,13 +38,13 @@
 
             <td v-else>
               <div v-if="!response.error">
-              Imported entities from <strong>{{response.filename}}</strong>:
-              <br/>
+                Imported entities from <strong><a :href="'/menu/main/navigator/' + response.package">{{response.filename}}</a></strong>:
+                <br/> 
 
-              <span v-for="entityType in response.entityTypes">
+                <span v-for="entityType in response.entityTypes">
                 <a target="_blank"
                    :href="'/menu/main/dataexplorer?entity=' + entityType.id">{{entityType.label}}</a> <span
-                class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span> <br>
+                  class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span> <br>
               </span>
               </div>
               <div v-else>
@@ -58,7 +58,9 @@
               </div>
 
               <button v-if="showDetails" class="btn btn-sm btn-secondary" @click="toggleDetails">Hide details</button>
-              <button v-if="!showDetails" class="btn btn-sm btn-secondary float-left" @click="toggleDetails">Show details</button>
+              <button v-if="!showDetails" class="btn btn-sm btn-secondary float-left" @click="toggleDetails">
+                Show details
+              </button>
               <div v-if="showDetails">
                 <hr>
                 <textarea rows="4" cols="50">
@@ -137,6 +139,8 @@
               entity.log = job.log
               entity.loading = false
               entity.message = job.progressMessage
+              entity.package = job.package
+
               self.currentProgressMessage = null
             } else {
               entity.error = job.progressMessage

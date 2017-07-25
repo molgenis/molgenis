@@ -19,6 +19,7 @@ public class OneClickImportJobExecutionMetadata extends SystemEntityType
 
 	public static final String FILE = "file";
 	public static final String ENTITY_TYPES = "entityTypes";
+	public static final String PACKAGE = "package";
 
 	private final EntityTypeMetadata entityTypeMetadata;
 	private final JobExecutionMetaData jobExecutionMetaData;
@@ -48,5 +49,6 @@ public class OneClickImportJobExecutionMetadata extends SystemEntityType
 								  .setDescription("Imported EntityTypes")
 								  .setDataType(MREF)
 								  .setRefEntity(entityTypeMetadata);
+		addAttribute(PACKAGE).setLabel("Package name").setDataType(STRING);
 	}
 }
