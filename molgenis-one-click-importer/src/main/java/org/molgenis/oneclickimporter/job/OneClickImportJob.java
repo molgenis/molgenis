@@ -1,6 +1,5 @@
 package org.molgenis.oneclickimporter.job;
 
-import com.google.common.collect.Sets;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.jobs.Progress;
@@ -21,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.util.FileExtensionUtils.findExtensionFromPossibilities;
 import static org.molgenis.util.FileExtensionUtils.getFileNameWithoutExtension;
@@ -53,11 +53,16 @@ public class OneClickImportJob
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
 		File file = fileStore.getFile(filename);
-
-		String fileExtension = findExtensionFromPossibilities(filename, Sets.newHashSet("csv", "xlsx", "zip", "xls"));
+		String fileExtension = findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
 
 		List<DataCollection> dataCollections = newArrayList();
-		if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
+		if (fileExtension == null)
+		{
+			throw new UnknownFileTypeException(String.format(
+					"File [%s] does not have a valid extension, supported: [csv, xlsx, zip, xls]",
+					filename));
+		}
+		else if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{
 			List<Sheet> sheets = excelService.buildExcelSheetsFromFile(file);
 			dataCollections.addAll(oneClickImporterService.buildDataCollectionsFromExcel(sheets));
@@ -73,7 +78,7 @@ public class OneClickImportJob
 			List<File> filesInZip = unzip(file);
 			for (File fileInZip : filesInZip)
 			{
-				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), Sets.newHashSet("csv"));
+				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), newHashSet("csv"));
 				if (fileInZipExtension != null)
 				{
 					List<String> lines = csvService.buildLinesFromFile(fileInZip);
@@ -85,11 +90,6 @@ public class OneClickImportJob
 					throw new UnknownFileTypeException("Zip file contains files which are not of type CSV");
 				}
 			}
-		}
-		else
-		{
-			throw new UnknownFileTypeException(
-					String.format("File with extension: %s is not a valid one-click importer file", fileExtension));
 		}
 
 		List<EntityType> entityTypes = newArrayList();
