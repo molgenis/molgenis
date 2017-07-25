@@ -59,7 +59,7 @@ public class OneClickImportJob
 		else if (fileExtension.equals("csv"))
 		{
 			List<String> lines = csvService.buildLinesFromFile(file);
-			dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(filename, lines));
+			dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(createValidNameFromFileName(filename), lines));
 		}
 		else if (fileExtension.equals("zip"))
 		{

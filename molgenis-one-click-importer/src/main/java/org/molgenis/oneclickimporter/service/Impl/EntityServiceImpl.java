@@ -8,6 +8,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.AttributeUtils;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.AttributeTypeService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -80,9 +82,7 @@ public class EntityServiceImpl implements EntityService
 
 		entityType.setPackage(package_);
 		entityType.setId(entityTypeId);
-
-		// TODO Query for label, if exists postfix
-		entityType.setLabel(dataCollection.getName());
+		entityType.setLabel(createNonDuplicateLabel(dataCollection.getName()));
 
 		// Check if first column can be used as id ( has unique values )
 		List<Column> columns = dataCollection.getColumns();
@@ -169,5 +169,29 @@ public class EntityServiceImpl implements EntityService
 	private String asValidAttributeName(String columnName)
 	{
 		return columnName.replace(" ", "_");
+	}
+
+	private String createNonDuplicateLabel(String label)
+	{
+		List<String> entityTypeLabels = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+				new QueryImpl<EntityType>().like(EntityTypeMetadata.LABEL, label), EntityType.class)
+												   .map(EntityType::getLabel)
+												   .collect(Collectors.toList());
+
+		if (entityTypeLabels.isEmpty() || !entityTypeLabels.contains(label))
+		{
+			return label;
+		}
+		else
+		{
+			boolean found = true;
+			int index = 0;
+			while (found)
+			{
+				index++;
+				found = entityTypeLabels.contains(label + " (" + index + ")");
+			}
+			return label + " (" + index + ")";
+		}
 	}
 }
