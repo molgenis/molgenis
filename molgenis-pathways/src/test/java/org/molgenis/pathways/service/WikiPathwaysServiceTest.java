@@ -94,10 +94,10 @@ public class WikiPathwaysServiceTest
 				new String[] { Impact.HIGH.getColor(), Impact.MODERATE.getColor() }, "svg")).thenReturn(
 				"<svg>bl\u00ebah</svg>\n".getBytes("UTF-8"));
 		assertEquals(wikiPathwaysService.getColoredPathwayImage("WP1234",
-				ImmutableMap.<String, Impact>of("graphID1", Impact.HIGH, "graphID2", Impact.MODERATE)), svg);
+				ImmutableMap.of("graphID1", Impact.HIGH, "graphID2", Impact.MODERATE)), svg);
 		// test that result gets cached
 		assertEquals(wikiPathwaysService.getColoredPathwayImage("WP1234",
-				ImmutableMap.<String, Impact>of("graphID1", Impact.HIGH, "graphID2", Impact.MODERATE)), svg);
+				ImmutableMap.of("graphID1", Impact.HIGH, "graphID2", Impact.MODERATE)), svg);
 		verify(wikiPathwaysPortType).getColoredPathway("WP1234", "0", new String[] { "graphID1", "graphID2" },
 				new String[] { Impact.HIGH.getColor(), Impact.MODERATE.getColor() }, "svg");
 	}

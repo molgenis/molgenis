@@ -1,6 +1,5 @@
 package org.molgenis.standardsregistry;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -129,25 +128,21 @@ public class StandardsRegistryController extends MolgenisPluginController
 			Package p = searchResult.getPackageFound();
 			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getId());
 			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists.newArrayList(
-					Iterables.filter(entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
+					Iterables.filter(entitiesInPackageUnfiltered, entity ->
 					{
-						@Override
-						public boolean apply(PackageResponse.Entity entity)
-						{
-							if (entity.isAbtract()) return false;
+						if (entity.isAbtract()) return false;
 
-							String entityTypeId = entity.getName();
+						String entityTypeId = entity.getName();
 
-							// Check read permission
-							if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
-								return false;
+						// Check read permission
+						if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
+							return false;
 
-							// Check has data
-							if (!dataService.hasRepository(entityTypeId)
-									|| dataService.count(entityTypeId, new QueryImpl<>()) == 0) return false;
+						// Check has data
+						if (!dataService.hasRepository(entityTypeId)
+								|| dataService.count(entityTypeId, new QueryImpl<>()) == 0) return false;
 
-							return true;
-						}
+						return true;
 					}));
 
 			PackageResponse pr = new PackageResponse(p.getId(), p.getLabel(), p.getDescription(),
@@ -194,7 +189,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/uml", method = GET)
-	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
+	public String getUml(@RequestParam(value = "package") String selectedPackageName, Model model)
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 
@@ -234,11 +229,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		String title = package_.getLabel() != null ? package_.getLabel() : package_.getId();
 		String key = package_.getId();
 		String tooltip = package_.getDescription();
-		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
+		List<PackageTreeNode> result = new ArrayList<>();
 		boolean folder = true;
 		boolean expanded = true;
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("type", "package");
 
 		for (Package subPackage : package_.getChildren())
@@ -259,11 +254,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		String title = emd.getLabel();
 		String key = emd.getId();
 		String tooltip = emd.getDescription();
-		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
+		List<PackageTreeNode> result = new ArrayList<>();
 		boolean folder = true;
 		boolean expanded = false;
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("type", "entity");
 		data.put("href", "/api/v1/" + emd.getId() + "/meta");
 
@@ -280,11 +275,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		String title = amd.getLabel();
 		String key = amd.getName();
 		String tooltip = amd.getDescription();
-		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
+		List<PackageTreeNode> result = new ArrayList<>();
 		boolean folder;
 		boolean expanded = false;
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("type", "attribute");
 		data.put("href", "/api/v1/" + emd.getId() + "/meta/" + amd.getName());
 		data.put("tags", tagService.getTagsForAttribute(emd, amd));
@@ -320,7 +315,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
 	{
-		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<PackageResponse.Entity>();
+		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<>();
 		Package aPackage = metaDataService.getPackage(packageName);
 		getEntitiesInPackageRec(aPackage, entiesForThisPackage);
 		return entiesForThisPackage;

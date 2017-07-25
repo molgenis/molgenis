@@ -34,7 +34,7 @@ class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 
 	public AttributeFilter()
 	{
-		this.attributes = new LinkedHashMap<String, AttributeFilter>();
+		this.attributes = new LinkedHashMap<>();
 	}
 
 	public boolean isIncludeAllAttrs()

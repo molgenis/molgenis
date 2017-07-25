@@ -101,7 +101,7 @@ public class ExcelSheetWriter extends AbstractWritable
 
 	public void addCellProcessor(CellProcessor cellProcessor)
 	{
-		if (cellProcessors == null) cellProcessors = new ArrayList<CellProcessor>();
+		if (cellProcessors == null) cellProcessors = new ArrayList<>();
 		cellProcessors.add(cellProcessor);
 	}
 

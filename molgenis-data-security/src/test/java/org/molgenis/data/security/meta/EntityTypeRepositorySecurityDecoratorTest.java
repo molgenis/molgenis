@@ -34,7 +34,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
@@ -187,7 +186,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		Query<EntityType> q = new QueryImpl<>();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
 		when(permissionService.hasPermissionOnEntity(entityType1Name, COUNT)).thenReturn(true);
@@ -233,7 +232,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
@@ -259,7 +258,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(q.getOffset()).thenReturn(1);
 		when(q.getPageSize()).thenReturn(1);
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
 		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
 		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);

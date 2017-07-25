@@ -39,11 +39,7 @@ public class SchemaLoader implements LSResourceResolver
 
 			schema = schemaFactory.newSchema(new StreamSource(schemaResource.getInputStream()));
 		}
-		catch (SAXException e)
-		{
-			throw new RuntimeException("Could not load schemas", e);
-		}
-		catch (IOException e)
+		catch (SAXException | IOException e)
 		{
 			throw new RuntimeException("Could not load schemas", e);
 		}

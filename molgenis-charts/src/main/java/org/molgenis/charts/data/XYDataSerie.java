@@ -13,7 +13,7 @@ public class XYDataSerie extends MolgenisSerie
 {
 	private AttributeType attributeXFieldTypeEnum;
 	private AttributeType attributeYFieldTypeEnum;
-	private List<XYData> data = new ArrayList<XYData>();
+	private List<XYData> data = new ArrayList<>();
 
 	public XYDataSerie()
 	{

@@ -12,9 +12,9 @@ public class ConstraintViolationTest
 	@Test
 	public void renumberRowIndexRowNumber()
 	{
-		ConstraintViolation constraintViolation = new ConstraintViolation("test", 1l);
+		ConstraintViolation constraintViolation = new ConstraintViolation("test", 1L);
 		constraintViolation.renumberRowIndex(Arrays.asList(3, 2, 1));
-		assertEquals(constraintViolation.getRownr(), Long.valueOf(3l));
+		assertEquals(constraintViolation.getRownr(), Long.valueOf(3L));
 	}
 
 	@Test

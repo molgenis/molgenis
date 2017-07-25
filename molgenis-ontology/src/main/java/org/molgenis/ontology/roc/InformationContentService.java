@@ -47,14 +47,14 @@ public class InformationContentService
 																					   {
 																						   Entity ontologyEntity = dataService
 																								   .findOne(ONTOLOGY,
-																										   new QueryImpl<Entity>()
+																										   new QueryImpl<>()
 																												   .eq(OntologyMetaData.ONTOLOGY_IRI,
 																														   ontologyIri));
 																						   if (ontologyEntity != null)
 																						   {
 																							   return dataService.count(
 																									   ONTOLOGY_TERM,
-																									   new QueryImpl<Entity>()
+																									   new QueryImpl<>()
 																											   .eq(OntologyTermMetaData.ONTOLOGY,
 																													   ontologyEntity));
 																						   }
@@ -78,7 +78,7 @@ public class InformationContentService
 																										Entity ontologyEntity = dataService
 																												.findOne(
 																														ONTOLOGY,
-																														new QueryImpl<Entity>()
+																														new QueryImpl<>()
 																																.eq(OntologyMetaData.ONTOLOGY_IRI,
 																																		ontologyIri));
 																										if (ontologyEntity

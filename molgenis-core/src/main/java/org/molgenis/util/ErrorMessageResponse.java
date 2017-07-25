@@ -26,18 +26,18 @@ public class ErrorMessageResponse
 
 	public List<ErrorMessage> getErrors()
 	{
-		return errors != null ? errors : Collections.<ErrorMessage>emptyList();
+		return errors != null ? errors : Collections.emptyList();
 	}
 
 	public void addErrorMessage(ErrorMessage errorMessage)
 	{
-		if (this.errors == null) errors = new ArrayList<ErrorMessage>();
+		if (this.errors == null) errors = new ArrayList<>();
 		this.errors.add(errorMessage);
 	}
 
 	public void addErrorMessages(List<ErrorMessage> errorMessages)
 	{
-		if (this.errors == null) errors = new ArrayList<ErrorMessage>();
+		if (this.errors == null) errors = new ArrayList<>();
 		this.errors.addAll(errorMessages);
 	}
 

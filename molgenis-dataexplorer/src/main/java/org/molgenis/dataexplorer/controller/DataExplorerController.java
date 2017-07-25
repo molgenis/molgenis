@@ -3,21 +3,22 @@ package org.molgenis.dataexplorer.controller;
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
-import org.molgenis.dataexplorer.service.GenomeBrowserService;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
+import org.molgenis.genomebrowser.GenomeBrowserTrack;
+import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -42,10 +43,8 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
@@ -78,9 +77,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
-
-	@Autowired
-	private GenomicDataSettings genomicDataSettings;
 
 	@Autowired
 	private DirectoryController directoryController;
@@ -184,16 +180,29 @@ public class DataExplorerController extends MolgenisPluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityTypeId,
 			Model model)
 	{
+		EntityType selectedEntityType;
+		Map<String, GenomeBrowserTrack> entityTracks;
 		switch (moduleId)
 		{
 			case MOD_DATA:
-				model.addAttribute("genomicDataSettings", genomicDataSettings);
-				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
+				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
+				//if multiple tracks are available we assume chrom and pos attribute are the same
+				if (!entityTracks.isEmpty())
+				{
+					//FIXME: how to do this cleaner
+					GenomeBrowserTrack track = entityTracks.entrySet().iterator().next().getValue();
+					model.addAttribute("pos_attr", track.getGenomeBrowserAttrs().getPos());
+					model.addAttribute("chrom_attr", track.getGenomeBrowserAttrs().getChrom());
+				}
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 				break;
 			case MOD_ENTITIESREPORT:
-				model.addAttribute("genomicDataSettings", genomicDataSettings);
-				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				//TODO: figure out if we need to knwo pos and chrom attrs here
+				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
+				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 
 				model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
@@ -307,24 +316,21 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
-	 * TODO Improve performance by rewriting to query that returns all genomic entities instead of retrieving all entities and determining which one is genomic
 	 * Get readable genome entities
 	 *
 	 * @return
 	 */
-	private Map<String, String> getGenomeBrowserEntities()
+	private List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks)
 	{
-		Map<String, String> genomeEntities = new HashMap<>();
-		genomeBrowserService.getGenomeBrowserEntities().forEach(entityType ->
+		Map<String, GenomeBrowserTrack> allTracks = new HashMap<>();
+		allTracks.putAll(entityTracks);
+		for (GenomeBrowserTrack track : entityTracks.values())
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), WRITE);
-			if (canRead || canWrite)
-			{
-				genomeEntities.put(entityType.getId(), entityType.getLabel());
-			}
-		});
-		return genomeEntities;
+			allTracks.putAll(genomeBrowserService.getReferenceTracks(track));
+		}
+		return allTracks.values()
+						.stream().map(track -> track.toTrackJson())
+						.collect(Collectors.toList());
 	}
 
 	@RequestMapping(value = "/download", method = POST)

@@ -8,7 +8,7 @@ public class SortaServiceUtil
 {
 	public static List<Map<String, Object>> getEntityAsMap(Iterable<? extends Entity> entities)
 	{
-		List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> docs = new ArrayList<>();
 		for (Entity entity : entities)
 		{
 			docs.add(getEntityAsMap(entity));
@@ -19,13 +19,13 @@ public class SortaServiceUtil
 	public static Map<String, Object> getEntityAsMap(Entity entity)
 	{
 		if (entity == null) return Collections.emptyMap();
-		Map<String, Object> doc = new LinkedHashMap<String, Object>();
+		Map<String, Object> doc = new LinkedHashMap<>();
 		for (String attrName : entity.getAttributeNames())
 		{
 			Object object = entity.get(attrName);
 			if (object instanceof Iterable<?>)
 			{
-				List<Map<String, Object>> refEntities = new ArrayList<Map<String, Object>>();
+				List<Map<String, Object>> refEntities = new ArrayList<>();
 				for (Object refEntity : (Iterable<?>) object)
 				{
 					if (refEntity instanceof Entity)

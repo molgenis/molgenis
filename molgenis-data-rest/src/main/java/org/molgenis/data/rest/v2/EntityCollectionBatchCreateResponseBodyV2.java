@@ -11,7 +11,7 @@ public class EntityCollectionBatchCreateResponseBodyV2
 	 */
 	private String location = "";
 
-	private final List<ResourcesResponseV2> resources = new ArrayList<ResourcesResponseV2>();
+	private final List<ResourcesResponseV2> resources = new ArrayList<>();
 
 	public List<ResourcesResponseV2> getResources()
 	{

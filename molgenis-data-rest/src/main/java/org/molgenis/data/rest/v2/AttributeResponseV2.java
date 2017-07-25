@@ -1,7 +1,5 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
@@ -87,35 +85,31 @@ class AttributeResponseV2
 
 			// create attribute response
 			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
+					Iterables.transform(attrParts, attr1 ->
 					{
-						@Override
-						public AttributeResponseV2 apply(Attribute attr)
+						Fetch subAttrFetch;
+						if (fetch != null)
 						{
-							Fetch subAttrFetch;
-							if (fetch != null)
+							if (attr1.getDataType() == AttributeType.COMPOUND)
 							{
-								if (attr.getDataType() == AttributeType.COMPOUND)
-								{
-									subAttrFetch = fetch;
-								}
-								else
-								{
-									subAttrFetch = fetch.getFetch(attr);
-								}
-							}
-							else if (EntityTypeUtils.isReferenceType(attr))
-							{
-								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
-										languageService.getCurrentUserLanguageCode());
+								subAttrFetch = fetch;
 							}
 							else
 							{
-								subAttrFetch = null;
+								subAttrFetch = fetch.getFetch(attr1);
 							}
-							return new AttributeResponseV2(entityParentName, entityType, attr, subAttrFetch,
-									permissionService, dataService, languageService);
 						}
+						else if (EntityTypeUtils.isReferenceType(attr1))
+						{
+							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
+									languageService.getCurrentUserLanguageCode());
+						}
+						else
+						{
+							subAttrFetch = null;
+						}
+						return new AttributeResponseV2(entityParentName, entityType, attr1, subAttrFetch,
+								permissionService, dataService, languageService);
 					}));
 		}
 		else
@@ -141,14 +135,7 @@ class AttributeResponseV2
 	{
 		if (fetch != null)
 		{
-			return Iterables.filter(attrs, new Predicate<Attribute>()
-			{
-				@Override
-				public boolean apply(Attribute attr)
-				{
-					return filterAttributeRec(fetch, attr);
-				}
-			});
+			return Iterables.filter(attrs, attr -> filterAttributeRec(fetch, attr));
 		}
 		else
 		{

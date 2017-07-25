@@ -127,7 +127,7 @@ public class SecurityUtils
 	 */
 	public static String[] defaultPluginAuthorities(String... pluginIds)
 	{
-		List<String> pluginAuthorities = new ArrayList<String>();
+		List<String> pluginAuthorities = new ArrayList<>();
 		pluginAuthorities.add(AUTHORITY_SU);
 		if (pluginIds != null)
 		{

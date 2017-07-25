@@ -154,12 +154,7 @@ public class OmimRepository extends AbstractRepository
 		entity.set(OMIM_TYPE_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(3), ","));
 		entity.set(OMIM_ENTRY_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(4), ","));
 
-		List<Entity> entities = entitiesByGeneSymbol.get(geneSymbol);
-		if (entities == null)
-		{
-			entities = new ArrayList<>();
-			entitiesByGeneSymbol.put(geneSymbol, entities);
-		}
+		List<Entity> entities = entitiesByGeneSymbol.computeIfAbsent(geneSymbol, k -> new ArrayList<>());
 		entities.add(entity);
 	}
 

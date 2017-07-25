@@ -124,7 +124,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void findAllWithEmptyQuery() throws IOException
 	{
-		Iterator<Entity> it = repo.findAll(new QueryImpl<Entity>()).iterator();
+		Iterator<Entity> it = repo.findAll(new QueryImpl<>()).iterator();
 		assertTrue(EntityUtils.equals(it.next(), entity1));
 		assertTrue(EntityUtils.equals(it.next(), entity4));
 		assertTrue(EntityUtils.equals(it.next(), entity3));
@@ -142,7 +142,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "The only query allowed on this Repository is gene EQUALS")
 	public void findAllWithBadQuery()
 	{
-		repo.findAll(new QueryImpl<Entity>().like(OmimRepository.OMIM_PHENOTYPE_COL_NAME, "test_phenotype"));
+		repo.findAll(new QueryImpl<>().like(OmimRepository.OMIM_PHENOTYPE_COL_NAME, "test_phenotype"));
 	}
 
 	@Configuration

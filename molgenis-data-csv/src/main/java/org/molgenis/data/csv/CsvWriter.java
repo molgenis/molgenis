@@ -84,7 +84,7 @@ public class CsvWriter extends AbstractWritable
 
 	public void addCellProcessor(CellProcessor cellProcessor)
 	{
-		if (cellProcessors == null) cellProcessors = new ArrayList<CellProcessor>();
+		if (cellProcessors == null) cellProcessors = new ArrayList<>();
 		cellProcessors.add(cellProcessor);
 	}
 
@@ -141,7 +141,7 @@ public class CsvWriter extends AbstractWritable
 	{
 		if (cachedAttributeNames == null)
 		{
-			List<String> processedAttributeNames = new ArrayList<String>();
+			List<String> processedAttributeNames = new ArrayList<>();
 			for (String colName : attributeNames)
 			{
 				// process column name

@@ -27,7 +27,7 @@ public class AlgorithmGeneratorHelper
 				attributeNames.add(matcher.group(1));
 			}
 			return attributeNames.stream()
-								 .map(attributeName -> sourceEntityType.getAttribute(attributeName))
+								 .map(sourceEntityType::getAttribute)
 								 .filter(Objects::nonNull)
 								 .collect(Collectors.toSet());
 		}

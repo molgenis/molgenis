@@ -207,7 +207,8 @@
 
                 <#if authenticated?? && authenticated>
                     <form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
-                        <a id="manual" href="https://molgenis.gitbooks.io/molgenis/content/" target="_blank" class="btn btn-secondary">Manual</a>
+                        <a id="manual" href="https://molgenis.gitbooks.io/molgenis/content/" target="_blank"
+                           class="btn btn-secondary">Help</a>
                         <button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
                         <script>
                             $("#signout-button").click(function () {

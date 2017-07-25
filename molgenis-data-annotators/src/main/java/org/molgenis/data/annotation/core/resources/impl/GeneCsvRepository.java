@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 public class GeneCsvRepository extends AbstractRepository
 {
 	private final CsvRepository repository;
-	private final Map<Object, Entity> index = new HashMap<Object, Entity>();
+	private final Map<Object, Entity> index = new HashMap<>();
 	private final String sourceAttributeName;
 	private final String targetAttributeName;
 

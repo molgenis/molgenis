@@ -44,7 +44,7 @@ public class VcfReaderFactoryImpl implements VcfReaderFactory
 			{
 				ZipFile zipFile = new ZipFile(file.getPath());
 				Enumeration<? extends ZipEntry> e = zipFile.entries();
-				ZipEntry entry = (ZipEntry) e.nextElement(); // your only file
+				ZipEntry entry = e.nextElement(); // your only file
 				inputStream = zipFile.getInputStream(entry);
 			}
 			VcfReader reader = new VcfReader(new InputStreamReader(inputStream, UTF_8));

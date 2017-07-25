@@ -171,7 +171,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
 		when(dataService.findOneById(REF_ENTITY_TYPE_NAME, REF_ENTITY_ID)).thenReturn(refEntity);
 		cascadeDeleteRepositoryDecorator.deleteAll();
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepository).delete(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(entity));
 		verify(dataService).delete(REF_ENTITY_TYPE_NAME, refEntity);
@@ -195,7 +195,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
 		when(dataService.findOneById(REF_ENTITY_TYPE_NAME, REF_ENTITY_ID)).thenReturn(refEntity);
 		cascadeDeleteRepositoryDecorator.delete(Stream.of(entity));
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepository).delete(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(entity));
 		verify(dataService).delete(REF_ENTITY_TYPE_NAME, refEntity);
@@ -209,7 +209,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
 		when(dataService.findOneById(REF_ENTITY_TYPE_NAME, REF_ENTITY_ID)).thenReturn(refEntity);
 		cascadeDeleteRepositoryDecorator.delete(Stream.of(entity));
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepository).delete(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(entity));
 		verify(dataService, never()).delete(REF_ENTITY_TYPE_NAME, refEntity);
@@ -225,7 +225,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
 		when(dataService.findOneById(REF_ENTITY_TYPE_NAME, REF_ENTITY_ID)).thenReturn(refEntity);
 		cascadeDeleteRepositoryDecorator.deleteAll(Stream.of(entityId));
-		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepository).deleteAll(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(entityId));
 		verify(dataService).delete(REF_ENTITY_TYPE_NAME, refEntity);
@@ -241,7 +241,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
 		when(dataService.findOneById(REF_ENTITY_TYPE_NAME, REF_ENTITY_ID)).thenReturn(refEntity);
 		cascadeDeleteRepositoryDecorator.deleteAll(Stream.of(entityId));
-		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepository).deleteAll(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(entityId));
 		verify(dataService, never()).delete(REF_ENTITY_TYPE_NAME, refEntity);

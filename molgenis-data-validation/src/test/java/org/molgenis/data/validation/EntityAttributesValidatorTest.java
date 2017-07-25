@@ -37,10 +37,10 @@ public class EntityAttributesValidatorTest
 		when(idAttr.getDataType()).thenReturn(STRING);
 		Attribute intRangeMinAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
 		when(intRangeMinAttr.getDataType()).thenReturn(INT);
-		when(intRangeMinAttr.getRange()).thenReturn(new Range(1l, null));
+		when(intRangeMinAttr.getRange()).thenReturn(new Range(1L, null));
 		Attribute intRangeMaxAttr = when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
 		when(intRangeMaxAttr.getDataType()).thenReturn(INT);
-		when(intRangeMaxAttr.getRange()).thenReturn(new Range(null, 1l));
+		when(intRangeMaxAttr.getRange()).thenReturn(new Range(null, 1L));
 
 		intRangeMinMeta = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(intRangeMinMeta.getIdAttribute()).thenReturn(idAttr);
