@@ -43,35 +43,25 @@ public class Permissions
 
 	public Map<String, List<Permission>> getUserPermissions()
 	{
-		return userPermissionMap != null ? userPermissionMap : Collections.<String, List<Permission>>emptyMap();
+		return userPermissionMap != null ? userPermissionMap : Collections.emptyMap();
 	}
 
 	public void addUserPermission(String pluginId, Permission pluginPermission)
 	{
-		if (userPermissionMap == null) userPermissionMap = new HashMap<String, List<Permission>>();
-		List<Permission> pluginPermissions = userPermissionMap.get(pluginId);
-		if (pluginPermissions == null)
-		{
-			pluginPermissions = new ArrayList<Permission>();
-			userPermissionMap.put(pluginId, pluginPermissions);
-		}
+		if (userPermissionMap == null) userPermissionMap = new HashMap<>();
+		List<Permission> pluginPermissions = userPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
 		pluginPermissions.add(pluginPermission);
 	}
 
 	public Map<String, List<Permission>> getGroupPermissions()
 	{
-		return groupPermissionMap != null ? groupPermissionMap : Collections.<String, List<Permission>>emptyMap();
+		return groupPermissionMap != null ? groupPermissionMap : Collections.emptyMap();
 	}
 
 	public void addGroupPermission(String pluginId, Permission pluginPermission)
 	{
-		if (groupPermissionMap == null) groupPermissionMap = new HashMap<String, List<Permission>>();
-		List<Permission> pluginPermissions = groupPermissionMap.get(pluginId);
-		if (pluginPermissions == null)
-		{
-			pluginPermissions = new ArrayList<Permission>();
-			groupPermissionMap.put(pluginId, pluginPermissions);
-		}
+		if (groupPermissionMap == null) groupPermissionMap = new HashMap<>();
+		List<Permission> pluginPermissions = groupPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
 		pluginPermissions.add(pluginPermission);
 	}
 
@@ -82,13 +72,8 @@ public class Permissions
 
 	public void addHierarchyPermission(String pluginId, Permission pluginPermission)
 	{
-		if (hierarchyPermissionMap == null) hierarchyPermissionMap = new HashMap<String, List<Permission>>();
-		List<Permission> pluginPermissions = hierarchyPermissionMap.get(pluginId);
-		if (pluginPermissions == null)
-		{
-			pluginPermissions = new ArrayList<Permission>();
-			hierarchyPermissionMap.put(pluginId, pluginPermissions);
-		}
+		if (hierarchyPermissionMap == null) hierarchyPermissionMap = new HashMap<>();
+		List<Permission> pluginPermissions = hierarchyPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
 		pluginPermissions.add(pluginPermission);
 	}
 
@@ -100,16 +85,12 @@ public class Permissions
 			{
 				if (pluginPermissions.size() > 1)
 				{
-					Collections.sort(pluginPermissions, new Comparator<Permission>()
+					pluginPermissions.sort((o1, o2) ->
 					{
-						@Override
-						public int compare(Permission o1, Permission o2)
-						{
-							String group1 = o1.getGroup();
-							String group2 = o2.getGroup();
-							if (group1 == null) return group2 == null ? 0 : -1;
-							else return group2 == null ? 1 : group1.compareTo(group2);
-						}
+						String group1 = o1.getGroup();
+						String group2 = o2.getGroup();
+						if (group1 == null) return group2 == null ? 0 : -1;
+						else return group2 == null ? 1 : group1.compareTo(group2);
 					});
 				}
 			}
@@ -120,16 +101,12 @@ public class Permissions
 			{
 				if (pluginPermissions.size() > 1)
 				{
-					Collections.sort(pluginPermissions, new Comparator<Permission>()
+					pluginPermissions.sort((o1, o2) ->
 					{
-						@Override
-						public int compare(Permission o1, Permission o2)
-						{
-							String group1 = o1.getGroup();
-							String group2 = o2.getGroup();
-							if (group1 == null) return group2 == null ? 0 : -1;
-							else return group2 == null ? 1 : group1.compareTo(group2);
-						}
+						String group1 = o1.getGroup();
+						String group2 = o2.getGroup();
+						if (group1 == null) return group2 == null ? 0 : -1;
+						else return group2 == null ? 1 : group1.compareTo(group2);
 					});
 				}
 			}

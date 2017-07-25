@@ -16,7 +16,7 @@ public abstract class Hit<T> implements Comparable<Hit<T>>
 
 	public static <T> Hit<T> create(T result, float score)
 	{
-		return new AutoValue_Hit<T>(result, Math.round(score * 100000));
+		return new AutoValue_Hit<>(result, Math.round(score * 100000));
 	}
 
 	@Override

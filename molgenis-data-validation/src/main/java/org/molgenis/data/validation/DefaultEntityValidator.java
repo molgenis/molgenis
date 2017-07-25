@@ -123,7 +123,7 @@ public class DefaultEntityValidator implements EntityValidator
 				{
 					String entityTypeId = meta.getId();
 
-					long count = dataService.count(entityTypeId, new QueryImpl<Entity>().in(attr.getName(), values));
+					long count = dataService.count(entityTypeId, new QueryImpl<>().in(attr.getName(), values));
 					if (count > 0)
 					{
 						// Go through the list to find the violators
@@ -136,7 +136,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 							Object value = entity.get(attr.getName());
 							Entity existing = dataService.findOne(entityTypeId,
-									new QueryImpl<Entity>().eq(attr.getName(), value));
+									new QueryImpl<>().eq(attr.getName(), value));
 
 							if (existing != null)
 							{

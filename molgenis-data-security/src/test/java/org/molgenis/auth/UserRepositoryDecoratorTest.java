@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
@@ -199,7 +198,7 @@ public class UserRepositoryDecoratorTest
 		when(user.getPassword()).thenReturn("password");
 
 		Stream<User> entities = Stream.of(user);
-		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
@@ -223,7 +222,7 @@ public class UserRepositoryDecoratorTest
 		when(user.getPassword()).thenReturn("currentPasswordHash");
 
 		Stream<User> entities = Stream.of(user);
-		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(decoratedRepository).update(captor.capture());
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));

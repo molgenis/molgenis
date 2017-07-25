@@ -248,7 +248,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	@Override
 	public Map<Attribute, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIds)
 	{
-		Map<Attribute, Hit<OntologyTerm>> result = new LinkedHashMap<Attribute, Hit<OntologyTerm>>();
+		Map<Attribute, Hit<OntologyTerm>> result = new LinkedHashMap<>();
 		EntityType emd = metaDataService.getEntityType(entity);
 		for (Attribute amd : emd.getAtomicAttributes())
 		{
@@ -284,7 +284,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 												 .filter(ontologyTerm -> filterOntologyTerm(
 														 splitIntoTerms(Stemmer.stemAndJoin(searchTerms)), ontologyTerm,
 														 stemmer))
-												 .map(ontolgoyTerm -> Hit.<OntologyTerm>create(ontolgoyTerm,
+												 .map(ontolgoyTerm -> Hit.create(ontolgoyTerm,
 														 bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
 												 .sorted(Ordering.natural().reverse())
 												 .collect(Collectors.toList());
@@ -361,7 +361,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Stemmer stemmer = new Stemmer();
 		Optional<Hit<String>> bestSynonym = ontologyTerm.getSynonyms()
 														.stream()
-														.map(synonym -> Hit.<String>create(synonym,
+														.map(synonym -> Hit.create(synonym,
 																distanceFrom(synonym, searchTerms, stemmer)))
 														.max(Comparator.naturalOrder());
 		return bestSynonym.get();

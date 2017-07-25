@@ -98,7 +98,7 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 				Object value;
 				if (xLabel instanceof Entity)
 				{
-					Map<String, Object> valueMap = new HashMap<String, Object>();
+					Map<String, Object> valueMap = new HashMap<>();
 					Entity entity = (Entity) xLabel;
 					for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 					{

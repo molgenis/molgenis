@@ -32,7 +32,7 @@ public class ZipFileUtil
 	public static List<File> unzip(File file) throws FileNotFoundException, IOException
 	{
 
-		List<File> unzippedFiles = new ArrayList<File>();
+		List<File> unzippedFiles = new ArrayList<>();
 		Enumeration<? extends ZipEntry> entries;
 		ZipFile zipFile = null;
 		try
@@ -41,7 +41,7 @@ public class ZipFileUtil
 			entries = zipFile.entries();
 			while (entries.hasMoreElements())
 			{
-				ZipEntry entry = (ZipEntry) entries.nextElement();
+				ZipEntry entry = entries.nextElement();
 				if (entry.isDirectory())
 				{
 					LOG.info("Extracting directory: " + entry.getName());

@@ -67,7 +67,7 @@ public class ExplainServiceHelperTest
 		QueryRule finalDisMaxQueryRule = new QueryRule(Arrays.asList(shouldQueryRule));
 		finalDisMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		Map<String, String> expanedQueryMap = new HashMap<String, String>();
+		Map<String, String> expanedQueryMap = new HashMap<>();
 		expanedQueryMap.put("hypertension", "hypertension");
 		expanedQueryMap.put("hypertensive disorder", "hypertension");
 		expanedQueryMap.put("high blood pressure", "hypertension");

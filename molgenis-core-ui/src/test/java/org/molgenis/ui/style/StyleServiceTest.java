@@ -1,6 +1,5 @@
 package org.molgenis.ui.style;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.settings.AppSettings;
@@ -14,7 +13,6 @@ import org.testng.annotations.Test;
 
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -42,14 +40,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	public void testGetAvailableStyles()
 	{
 		Set<Style> availableStyles = styleService.getAvailableStyles();
-		assertTrue(Iterables.any(availableStyles, new Predicate<Style>()
-		{
-			@Override
-			public boolean apply(Style style)
-			{
-				return style.getName().equals(THEME_MOLGENIS_NAME);
-			}
-		}));
+		assertTrue(Iterables.any(availableStyles, style -> style.getName().equals(THEME_MOLGENIS_NAME)));
 	}
 
 	@Test

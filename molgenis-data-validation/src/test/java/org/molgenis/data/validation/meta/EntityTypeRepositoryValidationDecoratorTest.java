@@ -65,7 +65,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doNothing().when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}
@@ -79,7 +79,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}
@@ -109,7 +109,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doNothing().when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}
@@ -123,7 +123,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}

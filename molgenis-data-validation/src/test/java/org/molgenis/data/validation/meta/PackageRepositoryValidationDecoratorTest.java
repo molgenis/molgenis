@@ -58,7 +58,7 @@ public class PackageRepositoryValidationDecoratorTest
 		Package package_ = mock(Package.class);
 		packageRepositoryValidationDecorator.add(Stream.of(package_));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).add(packageCaptor.capture());
 		assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
 		verify(packageValidator).validate(package_);
@@ -72,7 +72,7 @@ public class PackageRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.add(Stream.of(package_));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).add(packageCaptor.capture());
 		packageCaptor.getValue().count();
 	}
@@ -100,7 +100,7 @@ public class PackageRepositoryValidationDecoratorTest
 		Package package_ = mock(Package.class);
 		packageRepositoryValidationDecorator.update(Stream.of(package_));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).update(packageCaptor.capture());
 		assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
 		verify(packageValidator).validate(package_);
@@ -114,7 +114,7 @@ public class PackageRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.update(Stream.of(package_));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).update(packageCaptor.capture());
 		packageCaptor.getValue().count();
 	}
@@ -142,7 +142,7 @@ public class PackageRepositoryValidationDecoratorTest
 		Package package_ = mock(Package.class);
 		packageRepositoryValidationDecorator.delete(Stream.of(package_));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).delete(packageCaptor.capture());
 		assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
 		verify(packageValidator).validate(package_);
@@ -156,7 +156,7 @@ public class PackageRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.delete(Stream.of(package_));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).delete(packageCaptor.capture());
 		packageCaptor.getValue().count();
 	}
@@ -210,7 +210,7 @@ public class PackageRepositoryValidationDecoratorTest
 		when(decoratedRepo.findOneById(id)).thenReturn(package_);
 		packageRepositoryValidationDecorator.deleteAll(Stream.of(id));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> packageIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> packageIdCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).deleteAll(packageIdCaptor.capture());
 		packageIdCaptor.getValue().count();
 		verify(packageValidator).validate(package_);
@@ -226,7 +226,7 @@ public class PackageRepositoryValidationDecoratorTest
 		doThrow(mock(MolgenisValidationException.class)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.deleteAll(Stream.of(id));
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> packageIdCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> packageIdCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(decoratedRepo).deleteAll(packageIdCaptor.capture());
 		packageIdCaptor.getValue().count();
 	}

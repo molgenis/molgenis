@@ -238,7 +238,7 @@ public class RestServiceTest
 		restService.updateMappedByEntities(entity);
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).update(eq(refEntityName), captor.capture());
 		List<Entity> refEntities = captor.getValue().collect(toList());
 		assertEquals(refEntities, newArrayList(refEntity0, refEntity1));
@@ -283,7 +283,7 @@ public class RestServiceTest
 		restService.updateMappedByEntities(entity, existingEntity);
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).update(eq(refEntityName), captor.capture());
 		List<Entity> refEntities = captor.getValue().collect(toList());
 		assertEquals(refEntities, newArrayList(refEntity0, refEntity2));

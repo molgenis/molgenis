@@ -58,8 +58,6 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.LanguageService.DEFAULT_LANGUAGE_CODE;
@@ -344,11 +342,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		entity.set(attrTextOptionalName, null);
 		entity.set(attrXrefOptionalName, null);
 
-		Query<Entity> q = new QueryImpl<Entity>().offset(0).pageSize(100);
+		Query<Entity> q = new QueryImpl<>().offset(0).pageSize(100);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
-		when(dataService.count(ENTITY_NAME, q)).thenReturn(2l);
+		when(dataService.count(ENTITY_NAME, q)).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
@@ -499,7 +497,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		// have count return a non null value irrespective of query
 		Long countResult = 2L;
-		when(dataService.count(anyString(), anyObject())).thenReturn(countResult);
+		when(dataService.count(anyString(), any())).thenReturn(countResult);
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION).param("num", "0"))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$.items").isEmpty())
@@ -779,7 +777,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesMolgenisValidationException() throws Exception
 	{
 		Exception e = new MolgenisValidationException(
-				Collections.singleton(new ConstraintViolation("Message", Long.valueOf(5L))));
+				Collections.singleton(new ConstraintViolation("Message", 5L)));
 		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
@@ -923,7 +921,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 					.andExpect(status().isNoContent());
 
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
 	}

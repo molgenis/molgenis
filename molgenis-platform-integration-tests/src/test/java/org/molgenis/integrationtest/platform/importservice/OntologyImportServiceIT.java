@@ -71,7 +71,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 				emptySet());
 
 		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		RunAsSystemProxy.runAsSystem(() -> verifyOboAsSystem());
+		RunAsSystemProxy.runAsSystem(this::verifyOboAsSystem);
 	}
 
 	private void verifyOboAsSystem()
@@ -128,7 +128,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 				emptySet());
 
 		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		RunAsSystemProxy.runAsSystem(() -> verifyOwlAsSystem());
+		RunAsSystemProxy.runAsSystem(this::verifyOwlAsSystem);
 	}
 
 	private void verifyOwlAsSystem()

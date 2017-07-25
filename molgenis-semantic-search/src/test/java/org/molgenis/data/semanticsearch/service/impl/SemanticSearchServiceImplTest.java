@@ -133,7 +133,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		Mockito.reset(ontologyService);
 		attribute.setDescription("History of Hypertension");
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("history", "hypertens"),
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("history", "hypertens"),
 				100)).thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
 		assertNull(result);
@@ -144,12 +144,11 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		Stemmer stemmer = new Stemmer();
 		Assert.assertEquals(
-				semanticSearchService.distanceFrom("Hypertension", ImmutableSet.<String>of("history", "hypertens"),
+				semanticSearchService.distanceFrom("Hypertension", ImmutableSet.of("history", "hypertens"),
 						stemmer), .6923, 0.0001, "String distance should be equal");
 		Assert.assertEquals(semanticSearchService.distanceFrom("Maternal Hypertension",
-				ImmutableSet.<String>of("history", "hypertens"), stemmer), .5454, 0.0001,
+				ImmutableSet.of("history", "hypertens"), stemmer), .5454, 0.0001,
 				"String distance should be equal");
-		;
 	}
 
 	@Test
@@ -157,7 +156,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height in meters.");
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "meters"),
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("standing", "height", "meters"),
 				100)).thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(result, Hit.create(standingHeight, 0.81250f));
@@ -169,7 +168,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height (m.)");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "m"),
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("standing", "height", "m"),
 				100)).thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(result, Hit.create(standingHeight, 0.92857f));
