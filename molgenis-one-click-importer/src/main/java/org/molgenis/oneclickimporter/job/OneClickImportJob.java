@@ -13,6 +13,7 @@ import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class OneClickImportJob
 		this.fileStore = requireNonNull(fileStore);
 	}
 
+	@Transactional
 	public List<EntityType> getEntityType(Progress progress, String filename)
 			throws UnknownFileTypeException, IOException, InvalidFormatException
 	{
