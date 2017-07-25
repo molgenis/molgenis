@@ -99,7 +99,6 @@ public class OneClickImportJob
 	private String createValidNameFromFileName(String filename)
 	{
 		String packageName = getFileNameWithoutExtension(filename);
-		// TODO regex it up "[^a-zA-Z0-9_#]+"
-		return packageName.replace(" ", "_");
+		return packageName.replaceAll("[^a-zA-Z0-9_#]+", "_");
 	}
 }
