@@ -119,14 +119,14 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 											  .setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
 			addAttribute(SIGN_IN_2FA).setDataType(ENUM)
 									 .setNillable(false)
-									 .setDefaultValue("disabled")
+									 .setDefaultValue(TwoFactorAuthenticationSetting.DISABLED.toString())
 									 .setEnumOptions(asList(TwoFactorAuthenticationSetting.DISABLED.toString(),
 											 TwoFactorAuthenticationSetting.ENABLED.toString(),
 											 TwoFactorAuthenticationSetting.ENFORCED.toString()))
 									 .setLabel("Two Factor Authentication")
 									 .setDescription(
-											 "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.")
-									 .setValidationExpression(getSignIn2FAValidationExpression());
+											 "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.");
+			//									 .setValidationExpression(getSignIn2FAValidationExpression());
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
 										  .setNillable(true)
 										  .setLabel("Logo in navigation bar")
