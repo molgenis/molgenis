@@ -58,6 +58,7 @@ public class OneClickImportJob
 		File file = fileStore.getFile(filename);
 		String fileExtension = findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
 
+		progress.status("Preparing import");
 		List<DataCollection> dataCollections = newArrayList();
 		if (fileExtension == null)
 		{
@@ -97,8 +98,11 @@ public class OneClickImportJob
 
 		List<EntityType> entityTypes = newArrayList();
 		String packageName = oneClickImporterNamingService.createValidIdFromFileName(filename);
-		dataCollections.forEach(
-				dataCollection -> entityTypes.add(entityService.createEntityType(dataCollection, packageName)));
+		dataCollections.forEach(dataCollection ->
+		{
+			progress.status("Importing [" + dataCollection.getName() + "] into package [" + packageName + "]");
+			entityTypes.add(entityService.createEntityType(dataCollection, packageName));
+		});
 
 		permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
 		return entityTypes;

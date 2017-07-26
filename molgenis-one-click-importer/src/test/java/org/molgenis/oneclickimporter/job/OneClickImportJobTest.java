@@ -74,6 +74,7 @@ public class OneClickImportJobTest
 		when(excelService.buildExcelSheetsFromFile(file)).thenReturn(sheets);
 
 		DataCollection dataCollection = mock(DataCollection.class);
+		when(dataCollection.getName()).thenReturn("Sheet1");
 		when(oneClickImporterService.buildDataCollectionsFromExcel(sheets)).thenReturn(newArrayList(dataCollection));
 
 		EntityType entityType = mock(EntityType.class);
@@ -84,8 +85,10 @@ public class OneClickImportJobTest
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
+		verify(progress).status("Preparing import");
 		verify(excelService).buildExcelSheetsFromFile(file);
 		verify(oneClickImporterService).buildDataCollectionsFromExcel(sheets);
+		verify(progress).status("Importing [Sheet1] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection, "simple_valid");
 		verify(permissionSystemService).giveUserWriteMetaPermissions(newArrayList(entityType));
 	}
@@ -107,6 +110,7 @@ public class OneClickImportJobTest
 		when(csvService.buildLinesFromFile(file)).thenReturn(lines);
 
 		DataCollection dataCollection = mock(DataCollection.class);
+		when(dataCollection.getName()).thenReturn("file_1");
 		when(oneClickImporterService.buildDataCollectionFromCsv("simple_valid", lines)).thenReturn(dataCollection);
 
 		EntityType entityType = mock(EntityType.class);
@@ -117,8 +121,10 @@ public class OneClickImportJobTest
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
+		verify(progress).status("Preparing import");
 		verify(csvService).buildLinesFromFile(file);
 		verify(oneClickImporterService).buildDataCollectionFromCsv("simple_valid", lines);
+		verify(progress).status("Importing [file_1] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection, "simple_valid");
 		verify(permissionSystemService).giveUserWriteMetaPermissions(newArrayList(entityType));
 	}
@@ -161,15 +167,19 @@ public class OneClickImportJobTest
 		when(csvService.buildLinesFromFile(zipFile4)).thenReturn(lines4);
 
 		DataCollection dataCollection1 = mock(DataCollection.class);
+		when(dataCollection1.getName()).thenReturn("zip_file_1");
 		when(oneClickImporterService.buildDataCollectionFromCsv("zip_file_1", lines1)).thenReturn(dataCollection1);
 
 		DataCollection dataCollection2 = mock(DataCollection.class);
+		when(dataCollection2.getName()).thenReturn("zip_file_2");
 		when(oneClickImporterService.buildDataCollectionFromCsv("zip_file_2", lines2)).thenReturn(dataCollection2);
 
 		DataCollection dataCollection3 = mock(DataCollection.class);
+		when(dataCollection3.getName()).thenReturn("zip_file_3");
 		when(oneClickImporterService.buildDataCollectionFromCsv("zip_file_3", lines3)).thenReturn(dataCollection3);
 
 		DataCollection dataCollection4 = mock(DataCollection.class);
+		when(dataCollection4.getName()).thenReturn("zip_file_4");
 		when(oneClickImporterService.buildDataCollectionFromCsv("zip_file_4", lines4)).thenReturn(dataCollection4);
 
 		EntityType entityType1 = mock(EntityType.class);
@@ -189,6 +199,7 @@ public class OneClickImportJobTest
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
+		verify(progress).status("Preparing import");
 		verify(csvService).buildLinesFromFile(zipFile1);
 		verify(oneClickImporterService).buildDataCollectionFromCsv("zip_file_1", lines1);
 
@@ -201,9 +212,16 @@ public class OneClickImportJobTest
 		verify(csvService).buildLinesFromFile(zipFile4);
 		verify(oneClickImporterService).buildDataCollectionFromCsv("zip_file_4", lines4);
 
+		verify(progress).status("Importing [zip_file_1] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection1, "simple_valid");
+
+		verify(progress).status("Importing [zip_file_2] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection2, "simple_valid");
+
+		verify(progress).status("Importing [zip_file_3] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection3, "simple_valid");
+
+		verify(progress).status("Importing [zip_file_4] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection4, "simple_valid");
 
 		verify(permissionSystemService).giveUserWriteMetaPermissions(
