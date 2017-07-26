@@ -11,9 +11,13 @@
       <div class="col-md-12">
         <form id="upload-form" v-on:submit.prevent class="form-inline">
           <div class="form-group">
-            <input ref="fileInput" id="file-input" type="file" @change="setFile"/>
+            <input
+              id="file-input"
+              ref="fileInput"
+              type="file"
+              accept=".csv, .zip, .xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+              @change="importFile"/>
           </div>
-          <button class="btn btn-primary" type="submit" @click="importFile" :disabled="file === null">Import</button>
         </form>
         <div class="supported-types">
           <span class="text-muted"><em>Supported file types: XLSX, XLS, CSV</em></span>
@@ -24,73 +28,69 @@
 
     <div class="row">
       <div class="col">
-        <table class="table">
-          <thead>
-          <th>Uploads</th>
-          <th></th>
-          </thead>
-          <tbody>
-          <tr v-for="response in responses">
-            <td v-if="response.loading">
-              <span v-if="currentProgressMessage">{{currentProgressMessage}}</span>
-              <i class="fa fa-spinner fa-pulse fa-fw"></i>
-            </td>
+        <h5>Imports</h5>
+        <ul class="imports-list list-unstyled">
 
-            <td v-else>
-              <div v-if="!response.error">
-                Imported entities from <strong><a :href="'/menu/main/navigator/' + response.package">{{response.filename}}</a></strong>:
-                <br/> 
+          <li v-for="upload in uploads" v-bind:key="upload.filename" class="upload-item">
 
-                <span v-for="entityType in response.entityTypes">
-                <a target="_blank"
-                   :href="'/menu/main/dataexplorer?entity=' + entityType.id">{{entityType.label}}</a> <span
-                  class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span> <br>
-              </span>
-              </div>
-              <div v-else>
-                Something went wrong while importing <strong>{{response.filename}}</strong>
-              </div>
-            </td>
+            <div v-show="upload.status === 'LOADING' ">
+              <i class="fa fa-spinner fa-pulse fa-fw "></i> {{upload.filename}}
+            </div>
 
-            <td v-if="response.log">
-              <div v-if="!showDetails">
-                {{response.message}}
-              </div>
+            <div v-show="upload.status === 'ERROR'">
+              <i class="fa fa-times text-danger" ></i> {{upload.filename}}
+              <div class="error-message text-muted"><em>Import failed; {{upload.message}}</em></div>
+            </div>
 
-              <button v-if="showDetails" class="btn btn-sm btn-secondary" @click="toggleDetails">Hide details</button>
-              <button v-if="!showDetails" class="btn btn-sm btn-secondary float-left" @click="toggleDetails">
-                Show details
-              </button>
-              <div v-if="showDetails">
-                <hr>
-                <textarea rows="4" cols="50">
-                  {{response.log}}
-                </textarea>
-              </div>
-            </td>
-            <td v-else></td>
-          </tr>
-          </tbody>
-        </table>
+            <div v-show="upload.status === 'DONE' ">
+              <a target="_blank" :href="'/menu/main/navigator/' + upload.package">
+                <i class="fa fa-folder-open-o" ></i> {{upload.package}}
+              </a>
+
+              <ul class="list-unstyled">
+                <li v-for="table in upload.tables">
+                  <span>
+                    <a target="_blank" :href="'/menu/main/dataexplorer?entity=' + table.id">
+                       <i class="fa fa-list"></i> {{table.label}}
+                    </a>
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+          </li>
+
+        </ul>
       </div>
     </div>
+
   </div>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-
-  .error-message {
-    color: $brand-danger
-  }
+<style>
 
   .supported-types {
     padding-top: 1em;
     font-size: smaller;
   }
 
-  .success-check {
-    color: $brand-success
+  .imports-list {
+    margin-left: 1rem;
+  }
+
+  .list-unstyled .list-unstyled {
+    margin-left: 1rem;
+    padding-top: 0.5rem;
+  }
+
+  .upload-item {
+    padding: 0.5rem 0 1rem;
+  }
+
+  .error-message {
+    margin-left: 1rem;
+    padding-top: 0.5em;
+    font-size: smaller;
   }
 
 </style>
@@ -102,25 +102,23 @@
     name: 'one-click-importer',
     data () {
       return {
-        file: null,
-        responses: [],
-        currentProgressMessage: null,
-        showDetails: false
+        uploads: []
       }
     },
     methods: {
-      toggleDetails () {
-        this.showDetails = !this.showDetails
-      },
-      setFile (event) {
-        this.file = event.target.files[0]
-      },
-      importFile () {
-        let entity = {filename: this.file.name, loading: true}
-        this.responses.push(entity)
+      importFile (event) {
+        const file = event.target.files[0]
+        if (!file) {
+          return
+        }
+        let entity = {
+          filename: file.name,
+          status: 'LOADING'
+        }
+        this.uploads.unshift(entity)
 
         const formData = new FormData()
-        formData.append('file', this.file)
+        formData.append('file', file)
 
         const options = {
           body: formData,
@@ -129,48 +127,36 @@
         }
 
         const poller = this.pollJob
-        const self = this
 
         fetch('/plugin/one-click-importer/upload', options).then(response => {
-          self.currentProgressMessage = 'Starting import'
           response.text().then(poller).then(job => {
             if (job.status === 'SUCCESS') {
-              entity.entityTypes = job.entityTypes
-              entity.log = job.log
-              entity.loading = false
+              entity.tables = job.entityTypes
+              entity.status = 'DONE'
               entity.message = job.progressMessage
-              entity.package = job.package
-
-              self.currentProgressMessage = null
+              entity['package'] = job.package
             } else {
               entity.error = job.progressMessage
               entity.message = job.progressMessage
               entity.log = job.log
-              entity.loading = false
-
-              self.currentProgressMessage = null
+              entity.status = 'ERROR'
             }
           })
         })
 
         this.$refs.fileInput.value = null
-        this.file = null
       },
       pollJob (jobUrl) {
         const poller = this.pollJob
-        const self = this
 
         return new Promise((resolve) => {
           return fetch(jobUrl, {credentials: 'same-origin'}).then(response => {
             return response.json().then(job => {
               if (job.status === 'RUNNING' || job.status === 'PENDING') {
-                self.currentProgressMessage = job.progressMessage ? job.progressMessage : self.currentProgressMessage
-
                 setTimeout(function () {
                   resolve(poller(jobUrl))
                 }, 1000)
               } else {
-                self.currentProgressMessage = job.progressMessage
                 resolve(job)
               }
             })
