@@ -26,7 +26,6 @@ public class SystemRepositoryDecoratorFactoryRegistrar
 		Map<String, SystemRepositoryDecoratorFactory> repositoryDecoratorFactoryMap = ctx.getBeansOfType(
 				SystemRepositoryDecoratorFactory.class);
 		repositoryDecoratorFactoryMap.values()
-									 .forEach((repositoryDecoratorFactory) -> repositoryDecoratorRegistry.addFactory(
-											 repositoryDecoratorFactory));
+									 .forEach(repositoryDecoratorRegistry::addFactory);
 	}
 }

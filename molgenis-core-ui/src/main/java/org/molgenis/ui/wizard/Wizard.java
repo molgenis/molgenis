@@ -11,7 +11,7 @@ public class Wizard implements Serializable
 	private static final String FINISH_BUTTON_ID = "wizard-finish-button";
 	private static final String NEXT_BUTTON_ID = "wizard-next-button";
 	private static final long serialVersionUID = 1L;
-	private final List<WizardPage> pages = new LinkedList<WizardPage>();
+	private final List<WizardPage> pages = new LinkedList<>();
 	private int currentPageIndex = 0;
 
 	public void addPage(WizardPage page)

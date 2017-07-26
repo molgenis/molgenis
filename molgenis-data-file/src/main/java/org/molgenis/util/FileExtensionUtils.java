@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+
 public class FileExtensionUtils
 {
 	public static String findExtensionFromPossibilities(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();
-		List<String> possibleExtensions = new ArrayList<String>();
-		for (String extention : fileExtensions)
+		List<String> possibleExtensions = new ArrayList<>();
+		for (String extension : fileExtensions)
 		{
-			if (name.endsWith('.' + extention))
+			if (name.endsWith('.' + extension))
 			{
-				possibleExtensions.add(extention);
+				possibleExtensions.add(extension);
 			}
 		}
 
@@ -33,5 +35,10 @@ public class FileExtensionUtils
 		}
 
 		return longestExtension;
+	}
+
+	public static String getFileNameWithoutExtension(String filename)
+	{
+		return getBaseName(filename);
 	}
 }

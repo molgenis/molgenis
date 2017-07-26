@@ -9,9 +9,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
-import org.molgenis.oneclickimporter.service.EntityService;
-import org.molgenis.oneclickimporter.service.ExcelService;
-import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -19,7 +16,6 @@ import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,7 +37,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebAppConfiguration
@@ -123,8 +118,8 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 
 		mockMvc.perform(
 				fileUpload(OneClickImporterController.URI + "/upload").file(multipartFile).accept(MediaType.TEXT_HTML))
-				.andExpect(status().isOk())
-				.andExpect(content().string("/api/v2/jobExecutionId/id_1"));
+			   .andExpect(status().isOk())
+			   .andExpect(content().string("/api/v2/jobExecutionId/id_1"));
 	}
 
 	private MockMultipartFile getTestMultipartFile(final String path, final String contentType)

@@ -9,7 +9,6 @@ import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +23,7 @@ public class ImportServiceFactory
 	void addImportService(ImportService importService)
 	{
 		importServices.add(importService);
-		Collections.sort(importServices, OrderComparator.INSTANCE);
+		importServices.sort(OrderComparator.INSTANCE);
 	}
 
 	/**

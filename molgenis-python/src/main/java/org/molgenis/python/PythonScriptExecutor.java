@@ -68,14 +68,7 @@ public class PythonScriptExecutor
 			// Capture the error output
 			final StringBuilder sb = new StringBuilder();
 			PythonStreamHandler errorHandler = new PythonStreamHandler(process.getErrorStream(),
-					new PythonOutputHandler()
-					{
-						@Override
-						public void outputReceived(String output)
-						{
-							sb.append(output).append("\n");
-						}
-					});
+					output -> sb.append(output).append("\n"));
 			errorHandler.start();
 
 			// Capture r output if an Python output handler is defined

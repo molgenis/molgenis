@@ -6,10 +6,12 @@ import org.molgenis.oneclickimporter.model.DataCollection;
 public interface EntityService
 {
 	/**
-	 * Create an {@link EntityType} from a {@link DataCollection}
+	 * Create one {@link EntityType} from a {@link DataCollection}
+	 * Uses file name to find a package. If the package does not exist, it is created
 	 *
 	 * @param dataCollection
-	 * @return the ID of the newly created {@link EntityType}
+	 * @param packageName
+	 * @return a newly created {@link EntityType}
 	 */
-	EntityType createEntityType(DataCollection dataCollection);
+	EntityType createEntityType(DataCollection dataCollection, String packageName);
 }

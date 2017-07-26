@@ -94,7 +94,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 
 	private void setSecurityContextSuperUser()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 
 		Authentication authentication = mock(Authentication.class);
@@ -111,7 +111,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 
 	private void setSecurityContextNonSuperUser(Boolean hasPermissions)
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME"),
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "HOME"));
 

@@ -82,7 +82,7 @@ public class SortaJobExecution extends JobExecution
 
 	public double getThreshold()
 	{
-		return getDouble(THRESHOLD).doubleValue();
+		return getDouble(THRESHOLD);
 	}
 
 	private void setDefaultValues()

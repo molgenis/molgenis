@@ -10,7 +10,6 @@ import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.XYDataChartRequest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
 import org.molgenis.file.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +66,7 @@ public class ChartController
 	{
 		Query<Entity> query = request.getQuery();
 		XYDataChart xYDataChart = chartDataService.getXYDataChart(request.getEntity(), request.getX(), request.getY(),
-				request.getSplit(), query != null ? query.getRules() : Collections.<QueryRule>emptyList());
+				request.getSplit(), query != null ? query.getRules() : Collections.emptyList());
 
 		xYDataChart.setTitle(request.getTitle());
 		xYDataChart.setHeight(request.getHeight());
@@ -88,7 +87,7 @@ public class ChartController
 	{
 		Query<Entity> query = request.getQuery();
 		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(),
-				query != null ? query.getRules() : Collections.<QueryRule>emptyList(), request.getSplit(),
+				query != null ? query.getRules() : Collections.emptyList(), request.getSplit(),
 				request.getScale());
 
 		chart.setHeight(request.getHeight());

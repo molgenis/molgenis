@@ -7,6 +7,7 @@ import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
+import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
@@ -24,29 +25,39 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
+import static org.apache.poi.util.LocaleUtil.resetUserTimeZone;
+import static org.apache.poi.util.LocaleUtil.setUserTimeZone;
 
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
 {
-	private static String CSV_SEPARATOR = ",";
+	private final CsvService csvService;
 
-	@Override
-	public DataCollection buildDataCollection(String dataCollectionName, Sheet sheet)
+	public OneClickImporterServiceImpl(CsvService csvService)
 	{
-		List<Column> columns = newArrayList();
-
-		Row headerRow = sheet.getRow(0);
-		headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
-
-		return DataCollection.create(dataCollectionName, columns);
+		this.csvService = Objects.requireNonNull(csvService);
 	}
 
 	@Override
-	public DataCollection buildDataCollection(String dataCollectionName, List<String> lines)
+	public List<DataCollection> buildDataCollectionsFromExcel(List<Sheet> sheets)
+	{
+		List<DataCollection> dataCollections = newArrayList();
+		sheets.forEach(sheet ->
+		{
+			List<Column> columns = newArrayList();
+			Row headerRow = sheet.getRow(0);
+			headerRow.cellIterator().forEachRemaining(cell -> columns.add(createColumnFromCell(sheet, cell)));
+			dataCollections.add(DataCollection.create(sheet.getSheetName(), columns));
+		});
+		return dataCollections;
+	}
+
+	@Override
+	public DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String> lines)
 	{
 		List<Column> columns = newArrayList();
 
-		String[] headers = lines.get(0).split(CSV_SEPARATOR);
+		String[] headers = csvService.splitLineOnSeparator(lines.get(0));
 		lines.remove(0); // Remove the header
 
 		int columnIndex = 0;
@@ -138,23 +149,9 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return castedValue;
 	}
 
-	private Column createColumnFromCell(Sheet sheet, Cell cell)
-	{
-		return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
-				getColumnDataFromSheet(sheet, cell.getColumnIndex()));
-	}
-
 	private Column createColumnFromLine(String header, int columnIndex, List<String> lines)
 	{
 		return Column.create(header, columnIndex, getColumnDataFromLines(lines, columnIndex));
-	}
-
-	private List<Object> getColumnDataFromSheet(Sheet sheet, int columnIndex)
-	{
-		List<Object> dataValues = newLinkedList();
-		sheet.rowIterator().forEachRemaining(row -> dataValues.add(getCellValue(row.getCell(columnIndex))));
-		dataValues.remove(0); // Remove the header value
-		return dataValues;
 	}
 
 	private List<Object> getColumnDataFromLines(List<String> lines, int columnIndex)
@@ -162,8 +159,8 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		List<Object> dataValues = newLinkedList();
 		lines.forEach(line ->
 		{
-			String[] lineParts = line.split(CSV_SEPARATOR, -1);
-			dataValues.add(getPartValue(lineParts[columnIndex]));
+			String[] tokens = csvService.splitLineOnSeparator(line);
+			dataValues.add(getPartValue(tokens[columnIndex]));
 		});
 		return dataValues;
 	}
@@ -186,6 +183,20 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		}
 
 		return part;
+	}
+
+	private Column createColumnFromCell(Sheet sheet, Cell cell)
+	{
+		return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
+				getColumnDataFromSheet(sheet, cell.getColumnIndex()));
+	}
+
+	private List<Object> getColumnDataFromSheet(Sheet sheet, int columnIndex)
+	{
+		List<Object> dataValues = newLinkedList();
+		sheet.rowIterator().forEachRemaining(row -> dataValues.add(getCellValue(row.getCell(columnIndex))));
+		dataValues.remove(0); // Remove the header value
+		return dataValues;
 	}
 
 	/**
@@ -211,16 +222,15 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 				{
 					try
 					{
-						// TODO think about dates
 						// Excel dates are LocalDateTime, stored without timezone.
 						// Interpret them as UTC to prevent ambiguous DST overlaps which happen in other timezones.
-						LocaleUtil.setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
+						setUserTimeZone(LocaleUtil.TIMEZONE_UTC);
 						Date dateCellValue = cell.getDateCellValue();
 						value = formatUTCDateAsLocalDateTime(dateCellValue);
 					}
 					finally
 					{
-						LocaleUtil.resetUserTimeZone();
+						resetUserTimeZone();
 					}
 				}
 				else

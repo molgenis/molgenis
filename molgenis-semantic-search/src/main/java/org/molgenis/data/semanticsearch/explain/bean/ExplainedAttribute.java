@@ -35,7 +35,7 @@ public abstract class ExplainedAttribute
 
 	private static Map<String, Object> attributeToMap(Attribute attribute)
 	{
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put(AttributeMetadata.NAME, attribute.getName());
 		map.put(AttributeMetadata.LABEL, attribute.getLabel());
 		map.put(AttributeMetadata.DESCRIPTION, attribute.getDescription());

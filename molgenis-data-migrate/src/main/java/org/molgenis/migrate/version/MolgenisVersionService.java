@@ -3,7 +3,6 @@ package org.molgenis.migrate.version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.stereotype.Service;
@@ -13,9 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -73,17 +70,12 @@ public class MolgenisVersionService
 		}
 		try
 		{
-			return (boolean) JdbcUtils.extractDatabaseMetaData(dataSource, new DatabaseMetaDataCallback()
+			return (boolean) JdbcUtils.extractDatabaseMetaData(dataSource, dbmd ->
 			{
-
-				@Override
-				public Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException
-				{
-					ResultSet tables = dbmd.getTables(null, null, "MolgenisUser", new String[] { "TABLE" });
-					boolean resultRow = tables.first();
-					LOG.info("Table MolgenisUser {}found.", resultRow ? "" : "not ");
-					return resultRow;
-				}
+				ResultSet tables = dbmd.getTables(null, null, "MolgenisUser", new String[] { "TABLE" });
+				boolean resultRow = tables.first();
+				LOG.info("Table MolgenisUser {}found.", resultRow ? "" : "not ");
+				return resultRow;
 			});
 		}
 		catch (MetaDataAccessException e)

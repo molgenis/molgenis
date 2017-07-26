@@ -6,10 +6,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Iterators.partition;
@@ -93,7 +90,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 			Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
 			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream)
-																						 .filter(e -> e != null);
+																						 .filter(Objects::nonNull);
 		}
 		return delegate().findAll(ids);
 	}
@@ -218,7 +215,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		Stream<EntityKey> manyToOneEntities = getEntityType().getInversedByAttributes()
 															 .map(inversedByAttr -> entity.getEntity(
 																	 inversedByAttr.getName()))
-															 .filter(refEntity -> refEntity != null)
+															 .filter(Objects::nonNull)
 															 .map(EntityKey::create);
 
 		l1Cache.evict(Stream.concat(backreffingEntities, manyToOneEntities));

@@ -91,7 +91,7 @@ public class HighchartSeriesUtilTest
 		AttributeType yValueFieldTypeEnum = AttributeType.DECIMAL;
 		Double xvalue = Double.valueOf("1.1");
 		Double yvalue = Double.valueOf("2.2");
-		List<XYData> xydata = new ArrayList<XYData>();
+		List<XYData> xydata = new ArrayList<>();
 		xydata.add(new XYData(xvalue, yvalue));
 		List<Object> list = highchartSeriesUtil.parseXYDataToList(xydata, xValueFieldTypeEnum, yValueFieldTypeEnum);
 		assertTrue(list.size() == 1);

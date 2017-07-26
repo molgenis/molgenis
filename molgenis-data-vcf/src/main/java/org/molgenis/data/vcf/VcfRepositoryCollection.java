@@ -121,10 +121,9 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
-		Iterator<String> entityTypeIds = getEntityTypeIds().iterator();
-		while (entityTypeIds.hasNext())
+		for (String s : getEntityTypeIds())
 		{
-			if (entityTypeIds.next().equals(name)) return true;
+			if (s.equals(name)) return true;
 		}
 		return false;
 	}

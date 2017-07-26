@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
 
+import java.util.List;
+
 import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.*;
 
 public class OneClickImportJobExecution extends JobExecution
@@ -36,13 +38,23 @@ public class OneClickImportJobExecution extends JobExecution
 		set(FILE, value);
 	}
 
-	public String getEntityTypeId()
+	public Iterable<EntityType> getEntityTypes()
 	{
-		return getString(ENTITY_TYPE);
+		return getEntities(ENTITY_TYPES, EntityType.class);
 	}
 
-	public void setEntityTypeId(String value)
+	public void setEntityTypes(List<EntityType> values)
 	{
-		set(ENTITY_TYPE, value);
+		set(ENTITY_TYPES, values);
+	}
+
+	public String getPackage()
+	{
+		return getString(PACKAGE);
+	}
+
+	public void setPackage(String value)
+	{
+		set(PACKAGE, value);
 	}
 }

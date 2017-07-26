@@ -320,10 +320,43 @@ Another button, next to the download button, will allow you to send your data to
   
 ![Dataexplorer first screen](../images/dataexplorer/genome_browser.png?raw=true, "dataexplorer/genome_browser")
 
-If a specific entity has a chromosome and position attribute, the genome browser will be shown. The browser used by MOLGENIS is the [Dalliance](http://www.biodalliance.org "Dalliance") genome browser.
-By clicking on a row in the table, the genome browser will zoom on the coordinates of that row.
-A button ('apply filters') is available at the bottom of the genome browser, to filter the table based on the coordinates that are currently shown in the genome browser.
+MOLGENIS provides genome browsing using the[Dalliance](https://www.biodalliance.org/)genome browser.
 
+If the genome browser should be shown at all in a MOLGENIS instance, the browser can be configured via the data explorer settings.
+
+By default entities containing attribute combinations specified in the "GenomeBrowser Attributes" table are shown.
+It is possible to add/remove or update those entities to change which entites should show the genome browser.
+
+It is also possible to add specific configuration for an entity by adding a row in the "GenomeBrowser Settings" table:
+
+**Label**	a human readable label for the configuration.
+
+**Entity**	the entity for which this is the configuration
+
+**Genomic attributes**	reference to the "GenomeBrowser Attributes" row that should be used for this dataset	
+
+**Label Attribute**	the attribute that should be used as a label in dalliance	
+
+**Track type**	the type of track, choice from:
+- VARIANT: tracks are shown in letters (alternative allele), stars (if more than one alternative allele) or dots (indels)
+- EXON: tracks are shown in white(intron) and red(exon) blocks with an label
+- NUMERIC: tracks are shown as a histogram for every row
+
+**Exon/intron key**	keyword to distinguish between exons and introns based on the label value, if the keyword is avaialble we assume it is an exon
+	
+**Score attributes** attribute name of the column containing the value that should be used for a numeric track 	
+
+**Feature popup attributes**   attributes that should be shown in the dalliance feature popup, format: attributename:label,attributename,label	 
+
+**Reference track mode**	 
+If additional molgenis datasets should be shown in the genome browser when this one is selected, possible values: 
+- ALL: all tracks that qualify to be shown in the browser are shown
+- CONFIGURED: additional tracks are configure in the "molgenis_reference_tracks"
+- NONE: no additional molgenis tracks will be shown
+	
+**Reference tracks**	The other tracks that should be shown if this one is selected, this is a reference to other "GenomeBrowser Settings" rows	
+
+**Actions**	Javascript functions to be added to the dalliance feature popup. Actions are executed when the link in the feature popup is clicked. Actions should be provided in an javascrip object with 'label' (which will be used as the link) and 'run', example: *[{label:"action1" run:"alert('action1')"},{label:"action2" run:"alert('action2')"}]*.
 
 ## Try it out
 

@@ -2,7 +2,10 @@ package org.molgenis.dataexplorer.freemarker;
 
 import com.google.common.collect.Maps;
 import freemarker.core.Environment;
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 import org.molgenis.data.DataService;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.ui.MolgenisPlugin;
@@ -12,7 +15,6 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
@@ -52,15 +54,7 @@ public class DataExplorerHyperlinkDirectiveTest
 		params.put("class", "class1 class2");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],
-				new TemplateDirectiveBody()
-				{
-					@Override
-					public void render(Writer out) throws TemplateException, IOException
-					{
-						out.write("explore data");
-					}
-
-				});
+				out -> out.write("explore data"));
 
 		assertEquals(envWriter.toString(),
 				"<a href='/menu/data/dataex?entity=thedataset' class='class1 class2' >explore data</a>");
@@ -77,15 +71,7 @@ public class DataExplorerHyperlinkDirectiveTest
 		params.put("alternativeText", "alt");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],
-				new TemplateDirectiveBody()
-				{
-					@Override
-					public void render(Writer out) throws TemplateException, IOException
-					{
-						out.write("explore data");
-					}
-
-				});
+				out -> out.write("explore data"));
 
 		assertEquals(envWriter.toString(), "alt");
 	}

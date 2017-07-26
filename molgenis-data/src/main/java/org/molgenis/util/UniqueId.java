@@ -18,14 +18,7 @@ public class UniqueId
 			(byte) ((clockSeqAndNode >> 32) & 0xff), (byte) ((clockSeqAndNode >> 24) & 0xff),
 			(byte) ((clockSeqAndNode >> 16) & 0xff), (byte) ((clockSeqAndNode >> 8) & 0xff),
 			(byte) ((clockSeqAndNode) & 0xff), };
-	private final ThreadLocal<ByteBuffer> tlbb = new ThreadLocal<ByteBuffer>()
-	{
-		@Override
-		public ByteBuffer initialValue()
-		{
-			return ByteBuffer.allocate(16);
-		}
-	};
+	private final ThreadLocal<ByteBuffer> tlbb = ThreadLocal.withInitial(() -> ByteBuffer.allocate(16));
 
 	private volatile int seq;
 	private volatile long lastTimestamp;

@@ -23,7 +23,7 @@ public class BatchingIterableTest
 	@DataProvider(name = "iteratorTest")
 	public static Iterator<Object[]> createData1()
 	{
-		List<Object[]> paramList = new ArrayList<Object[]>();
+		List<Object[]> paramList = new ArrayList<>();
 
 		for (int batchSize = 1; batchSize < ITEMS_LIST.size() + 1; ++batchSize)
 		{
@@ -66,9 +66,9 @@ public class BatchingIterableTest
 
 		int expectedValue = offset + 1;
 		int actualNrItems = 0;
-		for (Iterator<Integer> it = iterable.iterator(); it.hasNext(); )
+		for (Integer anIterable : iterable)
 		{
-			int intValue = it.next().intValue();
+			int intValue = anIterable;
 			assertEquals(intValue, expectedValue++);
 			++actualNrItems;
 		}

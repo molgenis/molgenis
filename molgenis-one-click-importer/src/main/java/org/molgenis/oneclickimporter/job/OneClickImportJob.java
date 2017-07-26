@@ -5,71 +5,106 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.FileStore;
+import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
+import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
+import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.CsvService;
-import org.molgenis.oneclickimporter.service.EntityService;
-import org.molgenis.oneclickimporter.service.ExcelService;
-import org.molgenis.oneclickimporter.service.OneClickImporterService;
+import org.molgenis.oneclickimporter.service.*;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.util.FileExtensionUtils.findExtensionFromPossibilities;
+import static org.molgenis.util.file.ZipFileUtil.unzip;
 
 @Component
 public class OneClickImportJob
 {
-	private ExcelService excelService;
-	private CsvService csvService;
-	private OneClickImporterService oneClickImporterService;
-	private EntityService entityService;
-	private FileStore fileStore;
+	private final ExcelService excelService;
+	private final CsvService csvService;
+	private final OneClickImporterService oneClickImporterService;
+	private final OneClickImporterNamingService oneClickImporterNamingService;
+	private final EntityService entityService;
+	private final FileStore fileStore;
+	private final PermissionSystemService permissionSystemService;
 
 	public OneClickImportJob(ExcelService excelService, CsvService csvService,
-			OneClickImporterService oneClickImporterService, EntityService entityService, FileStore fileStore)
+			OneClickImporterService oneClickImporterService,
+			OneClickImporterNamingService oneClickImporterNamingService, EntityService entityService,
+			FileStore fileStore, PermissionSystemService permissionSystemService)
 	{
 		this.excelService = requireNonNull(excelService);
 		this.csvService = requireNonNull(csvService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
+		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
 		this.entityService = requireNonNull(entityService);
 		this.fileStore = requireNonNull(fileStore);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
-	public EntityType getEntityType(Progress progress, String filename)
-			throws UnknownFileTypeException, IOException, InvalidFormatException
+	@Transactional
+	public List<EntityType> getEntityType(Progress progress, String filename)
+			throws UnknownFileTypeException, IOException, InvalidFormatException, NoDataException, EmptySheetException,
+			EmptyFileException
 	{
-		progress.setProgressMax(3);
-
 		File file = fileStore.getFile(filename);
+		String fileExtension = findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
 
-		String fileExtension = filename.substring(filename.lastIndexOf('.') + 1);
-		String dataCollectionName = filename.substring(0, filename.lastIndexOf('.'));
-
-		DataCollection dataCollection;
-		if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
+		progress.status("Preparing import");
+		List<DataCollection> dataCollections = newArrayList();
+		if (fileExtension == null)
 		{
-			progress.progress(0, "Creating dataCollection...");
-			Sheet sheet = excelService.buildExcelSheetFromFile(file);
-			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, sheet);
+			throw new UnknownFileTypeException(
+					String.format("File [%s] does not have a valid extension, supported: [csv, xlsx, zip, xls]",
+							filename));
+		}
+		else if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
+		{
+			List<Sheet> sheets = excelService.buildExcelSheetsFromFile(file);
+			dataCollections.addAll(oneClickImporterService.buildDataCollectionsFromExcel(sheets));
 		}
 		else if (fileExtension.equals("csv"))
 		{
-			progress.progress(0, "Creating dataCollection...");
 			List<String> lines = csvService.buildLinesFromFile(file);
-			dataCollection = oneClickImporterService.buildDataCollection(dataCollectionName, lines);
+			dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(
+					oneClickImporterNamingService.createValidIdFromFileName(filename), lines));
 		}
-		else
+		else if (fileExtension.equals("zip"))
 		{
-			throw new UnknownFileTypeException(
-					String.format("File with extension: %s is not a valid one-click importer file", fileExtension));
+			List<File> filesInZip = unzip(file);
+			for (File fileInZip : filesInZip)
+			{
+				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), newHashSet("csv"));
+				if (fileInZipExtension != null)
+				{
+					List<String> lines = csvService.buildLinesFromFile(fileInZip);
+					dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(
+							oneClickImporterNamingService.createValidIdFromFileName(fileInZip.getName()), lines));
+				}
+				else
+				{
+					throw new UnknownFileTypeException("Zip file contains files which are not of type CSV");
+				}
+			}
 		}
-		progress.progress(1, "Inserting into database....");
-		EntityType entityType = entityService.createEntityType(dataCollection);
-		progress.progress(2, "Datatable created...");
 
-		return entityType;
+		List<EntityType> entityTypes = newArrayList();
+		String packageName = oneClickImporterNamingService.createValidIdFromFileName(filename);
+		dataCollections.forEach(dataCollection ->
+		{
+			progress.status("Importing [" + dataCollection.getName() + "] into package [" + packageName + "]");
+			entityTypes.add(entityService.createEntityType(dataCollection, packageName));
+		});
+
+		permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
+		return entityTypes;
 	}
 }

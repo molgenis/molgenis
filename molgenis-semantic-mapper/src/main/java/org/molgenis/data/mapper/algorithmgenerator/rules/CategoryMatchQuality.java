@@ -23,7 +23,7 @@ public abstract class CategoryMatchQuality<T> implements Comparable<CategoryMatc
 	public static <T> CategoryMatchQuality<T> create(boolean ruleApplied, Quality<T> quality, Category targetCategory,
 			Category sourceCategory)
 	{
-		return new AutoValue_CategoryMatchQuality<T>(ruleApplied, quality, targetCategory, sourceCategory);
+		return new AutoValue_CategoryMatchQuality<>(ruleApplied, quality, targetCategory, sourceCategory);
 	}
 
 	@Override
