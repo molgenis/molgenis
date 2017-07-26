@@ -5,12 +5,14 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationSetting;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 
@@ -40,6 +42,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String SIGNUP_MODERATION = "signup_moderation";
 		private static final String GOOGLE_SIGN_IN = "google_sign_in";
 		private static final String GOOGLE_APP_CLIENT_ID = "google_app_client_id";
+		private static final String SIGN_IN_2FA = "sign_in_2fa";
 		public static final String MENU = "molgenis_menu";
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
@@ -114,6 +117,14 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 											  .setLabel("Google app client ID")
 											  .setDescription("Google app client ID used during Google Sign-In")
 											  .setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
+			addAttribute(SIGN_IN_2FA).setDataType(ENUM)
+									 .setNillable(false)
+									 .setDefaultValue("disabled")
+									 .setEnumOptions(asList(TwoFactorAuthenticationSetting.DISABLED.toString(),
+											 TwoFactorAuthenticationSetting.ENABLED.toString(),
+											 TwoFactorAuthenticationSetting.ENFORCED.toString()))
+									 .setLabel("Two Factor Authentication")
+									 .setDescription("Enable or enforce users to sign in with Google Authenticator");
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
 										  .setNillable(true)
 										  .setLabel("Logo in navigation bar")
@@ -447,6 +458,18 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public String getGoogleAppClientId()
 	{
 		return getString(Meta.GOOGLE_APP_CLIENT_ID);
+	}
+
+	@Override
+	public void setTwoFactorAuthentication(String twoFactorAuthentication)
+	{
+		set(Meta.SIGN_IN_2FA, twoFactorAuthentication);
+	}
+
+	@Override
+	public String getTwoFactorAuthentication()
+	{
+		return getString(Meta.SIGN_IN_2FA);
 	}
 
 	@Override

@@ -215,7 +215,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public Filter twoFactorAuthenticationFilter()
 	{
-		return new TwoFactorAuthenticationFilter();
+		return new TwoFactorAuthenticationFilter(appSettings);
 	}
 
 	@Bean
