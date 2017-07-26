@@ -42,4 +42,14 @@ public class CsvServiceTest
 	{
 		csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/header-without-data.csv"));
 	}
+
+	@Test
+	public void testSplitLineOnSeparator()
+	{
+		String line = "\"hello, world\",\"25\",\"24,6\",\"FALSE\"";
+		String[] actual = csvService.splitLineOnSeparator(line);
+		String[] expected = { "\"hello, world\"", "\"25\"", "\"24,6\"", "\"FALSE\"" };
+
+		assertEquals(actual, expected);
+	}
 }

@@ -10,10 +10,7 @@ import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.CsvService;
-import org.molgenis.oneclickimporter.service.EntityService;
-import org.molgenis.oneclickimporter.service.ExcelService;
-import org.molgenis.oneclickimporter.service.OneClickImporterService;
+import org.molgenis.oneclickimporter.service.*;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,26 +23,28 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.util.FileExtensionUtils.findExtensionFromPossibilities;
-import static org.molgenis.util.FileExtensionUtils.getFileNameWithoutExtension;
 import static org.molgenis.util.file.ZipFileUtil.unzip;
 
 @Component
 public class OneClickImportJob
 {
-	private ExcelService excelService;
-	private CsvService csvService;
-	private OneClickImporterService oneClickImporterService;
-	private EntityService entityService;
-	private FileStore fileStore;
-	private PermissionSystemService permissionSystemService;
+	private final ExcelService excelService;
+	private final CsvService csvService;
+	private final OneClickImporterService oneClickImporterService;
+	private final OneClickImporterNamingService oneClickImporterNamingService;
+	private final EntityService entityService;
+	private final FileStore fileStore;
+	private final PermissionSystemService permissionSystemService;
 
 	public OneClickImportJob(ExcelService excelService, CsvService csvService,
-			OneClickImporterService oneClickImporterService, EntityService entityService, FileStore fileStore,
-			PermissionSystemService permissionSystemService)
+			OneClickImporterService oneClickImporterService,
+			OneClickImporterNamingService oneClickImporterNamingService, EntityService entityService,
+			FileStore fileStore, PermissionSystemService permissionSystemService)
 	{
 		this.excelService = requireNonNull(excelService);
 		this.csvService = requireNonNull(csvService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
+		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
 		this.entityService = requireNonNull(entityService);
 		this.fileStore = requireNonNull(fileStore);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
@@ -74,8 +73,8 @@ public class OneClickImportJob
 		else if (fileExtension.equals("csv"))
 		{
 			List<String> lines = csvService.buildLinesFromFile(file);
-			dataCollections.add(
-					oneClickImporterService.buildDataCollectionFromCsv(createValidNameFromFileName(filename), lines));
+			dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(
+					oneClickImporterNamingService.createValidIdFromFileName(filename), lines));
 		}
 		else if (fileExtension.equals("zip"))
 		{
@@ -87,7 +86,7 @@ public class OneClickImportJob
 				{
 					List<String> lines = csvService.buildLinesFromFile(fileInZip);
 					dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(
-							createValidNameFromFileName(fileInZip.getName()), lines));
+							oneClickImporterNamingService.createValidIdFromFileName(fileInZip.getName()), lines));
 				}
 				else
 				{
@@ -97,17 +96,11 @@ public class OneClickImportJob
 		}
 
 		List<EntityType> entityTypes = newArrayList();
-		String packageName = createValidNameFromFileName(filename);
+		String packageName = oneClickImporterNamingService.createValidIdFromFileName(filename);
 		dataCollections.forEach(
 				dataCollection -> entityTypes.add(entityService.createEntityType(dataCollection, packageName)));
 
 		permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
 		return entityTypes;
-	}
-
-	private String createValidNameFromFileName(String filename)
-	{
-		String packageName = getFileNameWithoutExtension(filename);
-		return packageName.replaceAll("[^a-zA-Z0-9_#]+", "_");
 	}
 }

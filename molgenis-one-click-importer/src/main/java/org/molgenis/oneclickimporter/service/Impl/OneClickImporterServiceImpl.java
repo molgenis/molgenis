@@ -7,6 +7,7 @@ import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
+import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,12 @@ import static org.apache.poi.util.LocaleUtil.setUserTimeZone;
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
 {
-	private static String CSV_SEPARATOR = ",";
+	private final CsvService csvService;
+
+	public OneClickImporterServiceImpl(CsvService csvService)
+	{
+		this.csvService = Objects.requireNonNull(csvService);
+	}
 
 	@Override
 	public List<DataCollection> buildDataCollectionsFromExcel(List<Sheet> sheets)
@@ -51,7 +57,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	{
 		List<Column> columns = newArrayList();
 
-		String[] headers = lines.get(0).split(CSV_SEPARATOR);
+		String[] headers = csvService.splitLineOnSeparator(lines.get(0));
 		lines.remove(0); // Remove the header
 
 		int columnIndex = 0;
@@ -143,23 +149,9 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return castedValue;
 	}
 
-	private Column createColumnFromCell(Sheet sheet, Cell cell)
-	{
-		return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
-				getColumnDataFromSheet(sheet, cell.getColumnIndex()));
-	}
-
 	private Column createColumnFromLine(String header, int columnIndex, List<String> lines)
 	{
 		return Column.create(header, columnIndex, getColumnDataFromLines(lines, columnIndex));
-	}
-
-	private List<Object> getColumnDataFromSheet(Sheet sheet, int columnIndex)
-	{
-		List<Object> dataValues = newLinkedList();
-		sheet.rowIterator().forEachRemaining(row -> dataValues.add(getCellValue(row.getCell(columnIndex))));
-		dataValues.remove(0); // Remove the header value
-		return dataValues;
 	}
 
 	private List<Object> getColumnDataFromLines(List<String> lines, int columnIndex)
@@ -167,7 +159,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		List<Object> dataValues = newLinkedList();
 		lines.forEach(line ->
 		{
-			String[] tokens = line.split(CSV_SEPARATOR + "(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+			String[] tokens = csvService.splitLineOnSeparator(line);
 			dataValues.add(getPartValue(tokens[columnIndex]));
 		});
 		return dataValues;
@@ -191,6 +183,20 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		}
 
 		return part;
+	}
+
+	private Column createColumnFromCell(Sheet sheet, Cell cell)
+	{
+		return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
+				getColumnDataFromSheet(sheet, cell.getColumnIndex()));
+	}
+
+	private List<Object> getColumnDataFromSheet(Sheet sheet, int columnIndex)
+	{
+		List<Object> dataValues = newLinkedList();
+		sheet.rowIterator().forEachRemaining(row -> dataValues.add(getCellValue(row.getCell(columnIndex))));
+		dataValues.remove(0); // Remove the header value
+		return dataValues;
 	}
 
 	/**

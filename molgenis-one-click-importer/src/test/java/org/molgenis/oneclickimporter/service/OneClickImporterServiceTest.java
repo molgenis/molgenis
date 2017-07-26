@@ -2,6 +2,7 @@ package org.molgenis.oneclickimporter.service;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.mockito.Mock;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
@@ -9,6 +10,7 @@ import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.Impl.OneClickImporterServiceImpl;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -18,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadLinesFromFile;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadSheetFromFile;
@@ -25,7 +29,16 @@ import static org.testng.Assert.*;
 
 public class OneClickImporterServiceTest
 {
-	private OneClickImporterService oneClickImporterService = new OneClickImporterServiceImpl();
+	@Mock
+	private CsvService csvService;
+	private OneClickImporterService oneClickImporterService;
+
+	@BeforeClass
+	public void beforeClass()
+	{
+		initMocks(this);
+		oneClickImporterService = new OneClickImporterServiceImpl(csvService);
+	}
 
 	@Test
 	public void testBuildDataCollectionWithSimpleValidExcelFile()
@@ -121,6 +134,23 @@ public class OneClickImporterServiceTest
 	public void testBuildDataCollectionWithSimpleValidCsvFile()
 			throws IOException, URISyntaxException, NoDataException, EmptyFileException
 	{
+		String[] header = { "name", "superpower" };
+		when(csvService.splitLineOnSeparator("name,superpower")).thenReturn(header);
+
+		String[] line1 = { "Mark", "arrow functions" };
+		when(csvService.splitLineOnSeparator("Mark,arrow functions")).thenReturn(line1);
+
+		String[] line2 = { "Connor", "Oldschool syntax" };
+		when(csvService.splitLineOnSeparator("Connor,Oldschool syntax")).thenReturn(line2);
+
+		String[] line3 = { "Fleur", "Lambda Magician" };
+		when(csvService.splitLineOnSeparator("Fleur,Lambda Magician")).thenReturn(line3);
+
+		String[] line4 = { "Dennis", "Root access" };
+		when(csvService.splitLineOnSeparator("Dennis,Root access")).thenReturn(line4);
+
+		oneClickImporterService = new OneClickImporterServiceImpl(csvService);
+
 		List<String> lines = loadLinesFromFile(OneClickImporterServiceTest.class, "/simple-valid.csv");
 		DataCollection actual = oneClickImporterService.buildDataCollectionFromCsv("simple-valid", lines);
 
@@ -136,6 +166,41 @@ public class OneClickImporterServiceTest
 	public void testBuildDataCollectionWithComplexValidCsvFile()
 			throws IOException, URISyntaxException, NoDataException, EmptyFileException
 	{
+		String[] header = { "first name", "last name", "full name", "UMCG employee", "Age" };
+		when(csvService.splitLineOnSeparator("first name,last name,full name,UMCG employee,Age")).thenReturn(header);
+
+		String[] line1 = { "Mark", "de Haan", "Mark de Haan", "TRUE", "26" };
+		when(csvService.splitLineOnSeparator("Mark,de Haan,Mark de Haan,TRUE,26")).thenReturn(line1);
+
+		String[] line2 = { "Fleur", "Kelpin", "Fleur Kelpin", "TRUE", "" };
+		when(csvService.splitLineOnSeparator("Fleur,Kelpin,Fleur Kelpin,TRUE,")).thenReturn(line2);
+
+		String[] line3 = { "Dennis", "Hendriksen", "Dennis Hendriksen", "TRUE", "" };
+		when(csvService.splitLineOnSeparator("Dennis,Hendriksen,Dennis Hendriksen,TRUE,")).thenReturn(line3);
+
+		String[] line4 = { "Bart", "Charbon", "Bart Charbon", "TRUE", "" };
+		when(csvService.splitLineOnSeparator("Bart,Charbon,Bart Charbon,TRUE,")).thenReturn(line4);
+
+		String[] line5 = { "Sido", "Haakma", "Sido Haakma", "TRUE", "" };
+		when(csvService.splitLineOnSeparator("Sido,Haakma,Sido Haakma,TRUE,")).thenReturn(line5);
+
+		String[] line6 = { "Mariska", "Slofstra", "Mariska Slofstra", "TRUE", "22" };
+		when(csvService.splitLineOnSeparator("Mariska,Slofstra,Mariska Slofstra,TRUE,22")).thenReturn(line6);
+
+		String[] line7 = { "Tommy", "de Boer", "Tommy de Boer", "TRUE", "27" };
+		when(csvService.splitLineOnSeparator("Tommy,de Boer,Tommy de Boer,TRUE,27")).thenReturn(line7);
+
+		String[] line8 = { "Connor", "Stroomberg", "Connor Stroomberg", "TRUE", "" };
+		when(csvService.splitLineOnSeparator("Connor,Stroomberg,Connor Stroomberg,TRUE,")).thenReturn(line8);
+
+		String[] line9 = { "Piet", "Klaassen", "Piet Klaassen", "FALSE", "53" };
+		when(csvService.splitLineOnSeparator("Piet,Klaassen,Piet Klaassen,FALSE,53")).thenReturn(line9);
+
+		String[] line10 = { "Jan", "", "", "FALSE", "32" };
+		when(csvService.splitLineOnSeparator("Jan,,,FALSE,32")).thenReturn(line10);
+
+		oneClickImporterService = new OneClickImporterServiceImpl(csvService);
+
 		List<String> lines = loadLinesFromFile(OneClickImporterServiceTest.class, "/complex-valid.csv");
 		DataCollection actual = oneClickImporterService.buildDataCollectionFromCsv("complex-valid", lines);
 

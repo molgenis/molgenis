@@ -8,17 +8,16 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.AttributeUtils;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
+import org.molgenis.oneclickimporter.service.OneClickImporterNamingService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -31,27 +30,21 @@ public class EntityServiceImpl implements EntityService
 	private static final String ID_ATTR_NAME = "auto_identifier";
 
 	private final EntityTypeFactory entityTypeFactory;
-
 	private final AttributeFactory attributeFactory;
-
 	private final IdGenerator idGenerator;
-
 	private final DataService dataService;
-
 	private final MetaDataService metaDataService;
-
 	private final EntityManager entityManager;
-
 	private final AttributeTypeService attributeTypeService;
-
 	private final OneClickImporterService oneClickImporterService;
-
+	private final OneClickImporterNamingService oneClickImporterNamingService;
 	private final PackageFactory packageFactory;
 
 	public EntityServiceImpl(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
 			IdGenerator idGenerator, DataService dataService, MetaDataService metaDataService,
 			EntityManager entityManager, AttributeTypeService attributeTypeService,
-			OneClickImporterService oneClickImporterService, PackageFactory packageFactory)
+			OneClickImporterService oneClickImporterService,
+			OneClickImporterNamingService oneClickImporterNamingService, PackageFactory packageFactory)
 	{
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
@@ -61,6 +54,7 @@ public class EntityServiceImpl implements EntityService
 		this.entityManager = requireNonNull(entityManager);
 		this.attributeTypeService = requireNonNull(attributeTypeService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
+		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
 		this.packageFactory = requireNonNull(packageFactory);
 	}
 
@@ -82,7 +76,7 @@ public class EntityServiceImpl implements EntityService
 
 		entityType.setPackage(package_);
 		entityType.setId(entityTypeId);
-		entityType.setLabel(createNonDuplicateLabel(dataCollection.getName()));
+		entityType.setLabel(oneClickImporterNamingService.getLabelWithPostFix(dataCollection.getName()));
 
 		// Check if first column can be used as id ( has unique values )
 		List<Column> columns = dataCollection.getColumns();
@@ -137,7 +131,7 @@ public class EntityServiceImpl implements EntityService
 
 	private void setRowValueForAttribute(Entity row, int index, Column column)
 	{
-		String attributeName = asValidAttributeName(column.getName());
+		String attributeName = oneClickImporterNamingService.asValidColumnName(column.getName());
 		Object dataValue = column.getDataValues().get(index);
 
 		EntityType rowType = row.getEntityType();
@@ -160,38 +154,9 @@ public class EntityServiceImpl implements EntityService
 	private Attribute createAttribute(Column column)
 	{
 		Attribute attribute = attributeFactory.create();
-		attribute.setName(asValidAttributeName(column.getName()));
+		attribute.setName(oneClickImporterNamingService.asValidColumnName(column.getName()));
 		attribute.setLabel(column.getName());
 		attribute.setDataType(attributeTypeService.guessAttributeType(column.getDataValues()));
 		return attribute;
-	}
-
-	private String asValidAttributeName(String columnName)
-	{
-		return columnName.replace(" ", "_");
-	}
-
-	private String createNonDuplicateLabel(String label)
-	{
-		List<String> entityTypeLabels = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-				new QueryImpl<EntityType>().like(EntityTypeMetadata.LABEL, label), EntityType.class)
-												   .map(EntityType::getLabel)
-												   .collect(Collectors.toList());
-
-		if (entityTypeLabels.isEmpty() || !entityTypeLabels.contains(label))
-		{
-			return label;
-		}
-		else
-		{
-			boolean found = true;
-			int index = 0;
-			while (found)
-			{
-				index++;
-				found = entityTypeLabels.contains(label + " (" + index + ")");
-			}
-			return label + " (" + index + ")";
-		}
 	}
 }

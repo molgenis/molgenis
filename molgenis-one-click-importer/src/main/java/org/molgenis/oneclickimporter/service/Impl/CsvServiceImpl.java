@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 public class CsvServiceImpl implements CsvService
 {
 	@Override
-	public List<String> buildLinesFromFile(File file)
-			throws IOException, NoDataException, EmptyFileException
+	public List<String> buildLinesFromFile(File file) throws IOException, NoDataException, EmptyFileException
 	{
 		FileReader fileReader = new FileReader(file);
 		BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -35,5 +34,11 @@ public class CsvServiceImpl implements CsvService
 		{
 			return lines;
 		}
+	}
+
+	@Override
+	public String[] splitLineOnSeparator(String line)
+	{
+		return line.split(CSV_SEPARATOR + "(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
 	}
 }

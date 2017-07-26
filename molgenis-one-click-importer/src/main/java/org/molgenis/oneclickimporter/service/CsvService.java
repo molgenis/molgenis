@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface CsvService
 {
+	String CSV_SEPARATOR = ",";
+
 	/**
 	 * Creates a List containing the lines of a CSV file
 	 * Including the header
@@ -16,4 +18,16 @@ public interface CsvService
 	 * @param file
 	 */
 	List<String> buildLinesFromFile(File file) throws IOException, NoDataException, EmptyFileException;
+
+	/**
+	 * Splits a line from a file based on a separator.
+	 * Takes into account values between '""'
+	 * <p>
+	 * e.g. "hello,world","21",43,"21,5" is split into ["hello,world", "21", "43", "21,5"]
+	 *
+	 * @param line
+	 * @param separator
+	 * @return A String array of values from the original string
+	 */
+	String[] splitLineOnSeparator(String line);
 }

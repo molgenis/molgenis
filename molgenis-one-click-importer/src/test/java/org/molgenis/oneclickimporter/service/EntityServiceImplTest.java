@@ -11,8 +11,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.Impl.EntityServiceImpl;
-import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -21,11 +20,12 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 
-public class EntityServiceImplTest extends AbstractMockitoTest
+public class EntityServiceImplTest
 {
 	@Mock
 	private EntityTypeFactory entityTypeFactory;
@@ -52,18 +52,17 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 	private OneClickImporterService oneClickImporterService;
 
 	@Mock
+	private OneClickImporterNamingService oneClickImporterNamingService;
+
+	@Mock
 	private PackageFactory packageFactory;
 
 	private EntityService entityService;
 
-	@BeforeMethod
-	public void setup()
+	@BeforeClass
+	public void beforeClass()
 	{
-		this.entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator,
-				dataService, metaDataService, entityManager, attributeTypeService, oneClickImporterService,
-				packageFactory);
-
-		when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
+		initMocks(this);
 	}
 
 	@Test
@@ -76,38 +75,60 @@ public class EntityServiceImplTest extends AbstractMockitoTest
 				Column.create("super power", 1, superPowers));
 		DataCollection dataCollection = DataCollection.create(tableName, columns);
 
+		// mock auto id
 		String generatedId = "id_0";
-		EntityType table = mock(EntityType.class);
-		when(entityTypeFactory.create()).thenReturn(table);
 		when(idGenerator.generateId()).thenReturn(generatedId);
-		when(table.getId()).thenReturn(generatedId);
 
-		Package package_ = mock(Package.class);
-		when(metaDataService.getPackage("package_")).thenReturn(package_);
-
+		// mock attributes
 		Attribute idAttr = mock(Attribute.class);
-		//row.getEntityType().getAttribute(column.getName()).getDataType()
-		Attribute nameAttr = mock(Attribute.class);
-		when(nameAttr.getDataType()).thenReturn(STRING);
-		Attribute powerAttr = mock(Attribute.class);
-		when(powerAttr.getDataType()).thenReturn(STRING);
-		when(attributeFactory.create()).thenReturn(idAttr, nameAttr, powerAttr);
 		when(idAttr.setName(anyString())).thenReturn(idAttr);
 		when(idAttr.setVisible(anyBoolean())).thenReturn(idAttr);
 		when(idAttr.setAuto(anyBoolean())).thenReturn(idAttr);
 		when(idAttr.setIdAttribute(anyBoolean())).thenReturn(idAttr);
+
+		Attribute nameAttr = mock(Attribute.class);
+		when(nameAttr.getDataType()).thenReturn(STRING);
+
+		Attribute powerAttr = mock(Attribute.class);
+		when(powerAttr.getDataType()).thenReturn(STRING);
+
+		when(attributeFactory.create()).thenReturn(idAttr, nameAttr, powerAttr);
+
+		// mock table
+		EntityType table = mock(EntityType.class);
+		when(entityTypeFactory.create()).thenReturn(table);
+		when(table.getId()).thenReturn(generatedId);
+
 		when(table.getAttribute("user_name")).thenReturn(nameAttr);
 		when(table.getAttribute("super_power")).thenReturn(powerAttr);
 
-		MetaDataService meta = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(meta);
+		// mock package
+		Package package_ = mock(Package.class);
+		when(metaDataService.getPackage("package_")).thenReturn(package_);
+
+		when(dataService.getMeta()).thenReturn(metaDataService);
+
+		// mock rows
 		Entity row1 = mock(Entity.class);
 		when(row1.getEntityType()).thenReturn(table);
+
 		Entity row2 = mock(Entity.class);
 		when(row2.getEntityType()).thenReturn(table);
+
 		Entity row3 = mock(Entity.class);
 		when(row3.getEntityType()).thenReturn(table);
+
 		when(entityManager.create(table, NO_POPULATE)).thenReturn(row1, row2, row3);
+
+		when(oneClickImporterNamingService.asValidColumnName("user name")).thenReturn("user_name");
+		when(oneClickImporterNamingService.asValidColumnName("super power")).thenReturn("super_power");
+		when(oneClickImporterNamingService.getLabelWithPostFix("super-powers")).thenReturn("super-powers");
+
+		when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
+
+		entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator, dataService,
+				metaDataService, entityManager, attributeTypeService, oneClickImporterService,
+				oneClickImporterNamingService, packageFactory);
 
 		EntityType entityType = entityService.createEntityType(dataCollection, "package_");
 		assertEquals(entityType.getId(), generatedId);

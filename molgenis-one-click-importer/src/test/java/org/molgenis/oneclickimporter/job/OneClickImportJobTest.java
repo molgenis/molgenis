@@ -11,12 +11,8 @@ import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.CsvService;
-import org.molgenis.oneclickimporter.service.EntityService;
-import org.molgenis.oneclickimporter.service.ExcelService;
-import org.molgenis.oneclickimporter.service.OneClickImporterService;
+import org.molgenis.oneclickimporter.service.*;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -27,9 +23,10 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadFile;
 
-public class OneClickImportJobTest extends AbstractMockitoTest
+public class OneClickImportJobTest
 {
 	@Mock
 	private ExcelService excelService;
@@ -39,6 +36,9 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 
 	@Mock
 	private OneClickImporterService oneClickImporterService;
+
+	@Mock
+	private OneClickImporterNamingService oneClickImporterNamingService;
 
 	@Mock
 	private EntityService entityService;
@@ -54,7 +54,7 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		initMocks();
+		initMocks(this);
 	}
 
 	@Test
@@ -64,6 +64,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 	{
 		Progress progress = mock(Progress.class);
 		String filename = "simple-valid.xlsx";
+
+		when(oneClickImporterNamingService.createValidIdFromFileName(filename)).thenReturn("simple_valid");
 
 		File file = loadFile(OneClickImportJobTest.class, "/" + filename);
 		when(fileStore.getFile(filename)).thenReturn(file);
@@ -77,8 +79,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityService.createEntityType(dataCollection, "simple_valid")).thenReturn(entityType);
 
-		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService, entityService,
-				fileStore, permissionSystemService);
+		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
+				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
@@ -96,6 +98,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		Progress progress = mock(Progress.class);
 		String filename = "simple-valid.csv";
 
+		when(oneClickImporterNamingService.createValidIdFromFileName(filename)).thenReturn("simple_valid");
+
 		File file = loadFile(OneClickImportJobTest.class, "/" + filename);
 		when(fileStore.getFile(filename)).thenReturn(file);
 
@@ -108,8 +112,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityService.createEntityType(dataCollection, "simple_valid")).thenReturn(entityType);
 
-		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService, entityService,
-				fileStore, permissionSystemService);
+		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
+				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
@@ -127,13 +131,22 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		Progress progress = mock(Progress.class);
 		String filename = "simple-valid.zip";
 
+		when(oneClickImporterNamingService.createValidIdFromFileName(filename)).thenReturn("simple_valid");
+
 		File file = loadFile(OneClickImportJobTest.class, "/" + filename);
 		when(fileStore.getFile(filename)).thenReturn(file);
 
 		File zipFile1 = loadFile(OneClickImportJobTest.class, "/zip_file_1.csv");
+		when(oneClickImporterNamingService.createValidIdFromFileName("zip_file_1.csv")).thenReturn("zip_file_1");
+
 		File zipFile2 = loadFile(OneClickImportJobTest.class, "/zip_file_2.csv");
+		when(oneClickImporterNamingService.createValidIdFromFileName("zip_file_2.csv")).thenReturn("zip_file_2");
+
 		File zipFile3 = loadFile(OneClickImportJobTest.class, "/zip_file_3.csv");
+		when(oneClickImporterNamingService.createValidIdFromFileName("zip_file_3.csv")).thenReturn("zip_file_3");
+
 		File zipFile4 = loadFile(OneClickImportJobTest.class, "/zip_file_4.csv");
+		when(oneClickImporterNamingService.createValidIdFromFileName("zip_file_4.csv")).thenReturn("zip_file_4");
 
 		List<String> lines1 = newArrayList("name,age", "piet,25");
 		when(csvService.buildLinesFromFile(zipFile1)).thenReturn(lines1);
@@ -171,8 +184,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		EntityType entityType4 = mock(EntityType.class);
 		when(entityService.createEntityType(dataCollection4, "simple_valid")).thenReturn(entityType4);
 
-		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService, entityService,
-				fileStore, permissionSystemService);
+		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
+				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
@@ -208,8 +221,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		File file = loadFile(OneClickImportJobTest.class, "/" + filename);
 		when(fileStore.getFile(filename)).thenReturn(file);
 
-		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService, entityService,
-				fileStore, permissionSystemService);
+		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
+				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
@@ -225,8 +238,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		File file = loadFile(OneClickImportJobTest.class, "/" + filename);
 		when(fileStore.getFile(filename)).thenReturn(file);
 
-		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService, entityService,
-				fileStore, permissionSystemService);
+		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
+				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
@@ -242,8 +255,8 @@ public class OneClickImportJobTest extends AbstractMockitoTest
 		File file = loadFile(OneClickImportJobTest.class, "/" + filename);
 		when(fileStore.getFile(filename)).thenReturn(file);
 
-		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService, entityService,
-				fileStore, permissionSystemService);
+		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
+				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 	}

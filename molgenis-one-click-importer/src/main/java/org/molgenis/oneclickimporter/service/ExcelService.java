@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Creates a list of {@link Sheet}s from an excel file
+ */
 public interface ExcelService
 {
 	/**

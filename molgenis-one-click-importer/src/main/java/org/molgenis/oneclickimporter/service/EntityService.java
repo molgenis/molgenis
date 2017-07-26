@@ -7,7 +7,7 @@ public interface EntityService
 {
 	/**
 	 * Create one {@link EntityType} from a {@link DataCollection}
-	 * Uses file name to create a package
+	 * Uses file name to find a package. If the package does not exist, it is created
 	 *
 	 * @param dataCollection
 	 * @param packageName
