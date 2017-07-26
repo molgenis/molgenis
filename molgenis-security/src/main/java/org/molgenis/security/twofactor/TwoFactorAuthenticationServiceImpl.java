@@ -113,10 +113,10 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
 		if(user != null)
 		{
-//			if (user.is2faEnabled())
-//			{
+//			if (user.())
+			{
 				isEnabled = true;
-//			}
+			}
 		}
 		else
 		{
@@ -125,6 +125,11 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		return isEnabled;
 	}
 
+	@Override
+	public String getUnAuthenticatedUser() {
+		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		return userDetails.getUsername();
+	}
 
 	@Override
 	public void authenticate() throws BadCredentialsException {

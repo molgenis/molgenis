@@ -186,21 +186,21 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.antMatchers('/' + PATH_SEGMENT_APPS + "/**").permitAll()
 
 				.anyRequest()
-				.denyAll()
+					.denyAll()
 				.and()
 
 				.httpBasic()
-				.authenticationEntryPoint(authenticationEntryPoint())
+					.authenticationEntryPoint(authenticationEntryPoint())
 				.and()
 
 				.formLogin()
-				.loginPage("/login")
-				.failureUrl("/login?error")
+					.loginPage("/login")
+					.failureUrl("/login?error")
 				.and()
 
 				.logout()
-				.deleteCookies("JSESSIONID")
-				.addLogoutHandler((req, res, auth) ->
+					.deleteCookies("JSESSIONID")
+					.addLogoutHandler((req, res, auth) ->
 					{
 						if (req.getSession(false) != null && req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 						{
@@ -208,7 +208,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 						}
 					})
 
-				.logoutSuccessHandler((req, res, auth) ->
+					.logoutSuccessHandler((req, res, auth) ->
 					{
 						StringBuilder logoutSuccessUrl = new StringBuilder("/");
 						if (req.getAttribute("continueWithUnsupportedBrowser") != null)

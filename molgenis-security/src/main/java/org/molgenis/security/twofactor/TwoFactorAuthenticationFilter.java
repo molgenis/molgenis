@@ -30,7 +30,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 	public TwoFactorAuthenticationFilter(AppSettings appSettings, TwoFactorAuthenticationService twoFactorAuthenticationService)
 	{
 		this.appSettings = requireNonNull(appSettings);
-		this.twoFactorAuthenticationService = twoFactorAuthenticationService;
+		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		if (isTwoFactorAuthenticationEnabled())
 		{
 			//FIXME remove path hack
-			if (!httpServletRequest.getRequestURI().equals(TwoFactorAuthenticationController.URI) && SecurityUtils.currentUserIsAuthenticated()
+			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI) && SecurityUtils.currentUserIsAuthenticated()
 					&& !SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION))
 			{
 				if(twoFactorAuthenticationService.isConfiguredForUser()) {

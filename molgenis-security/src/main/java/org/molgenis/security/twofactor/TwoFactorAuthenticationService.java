@@ -1,6 +1,7 @@
 package org.molgenis.security.twofactor;
 
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
@@ -30,13 +31,29 @@ public interface TwoFactorAuthenticationService
 
 	/**
 	 *
-	 * <p>Check if the user is 2 factor authentication ready.</p>
+	 * <p>Has user 2 factor authentication enabled?</p>
 	 *
 	 * @return is ready
 	 */
 	boolean isEnabledForUser() throws UsernameNotFoundException;
 
+	/**
+	 *
+	 * <p>Check if the user is 2 factor authentication ready.</p>
+	 *
+	 * @return is configured
+	 * @throws UsernameNotFoundException
+	 */
 	boolean isConfiguredForUser() throws UsernameNotFoundException;
+
+	/**
+	 *
+	 * <p>Get user for QR-code generation</p>
+	 *
+	 * @return
+	 * @throws UsernameNotFoundException
+	 */
+	String getUnAuthenticatedUser() throws UsernameNotFoundException;
 
 	/**
 	 *

@@ -20,14 +20,14 @@ import javax.servlet.http.HttpSession;
 public class MolgenisLoginController
 {
 	public static final String SESSION_EXPIRED_SESSION_ATTRIBUTE = "sessionExpired";
-	private static final String ERROR_MESSAGE_ATTRIBUTE = "errorMessage";
+	public static final String ERROR_MESSAGE_ATTRIBUTE = "errorMessage";
 
 	private static final String ERROR_MESSAGE_BAD_CREDENTIALS = "The username or password you entered is incorrect.";
 	public static final String ERROR_MESSAGE_DISABLED = "Your account is not yet activated.";
 	private static final String ERROR_MESSAGE_SESSION_AUTHENTICATION = "Your login session has expired.";
 	private static final String ERROR_MESSAGE_UNKNOWN = "Sign in failed.";
 
-	private static final String VIEW_LOGIN = "view-login";
+	public static final String VIEW_LOGIN = "view-login";
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String getLoginPage(Model model, HttpSession session)

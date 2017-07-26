@@ -1,7 +1,7 @@
 <#-- Bootstrap login modal -->
 <#assign googleSignIn = app_settings.googleSignIn && app_settings.signUp && !app_settings.signUpModeration>
 <div id="login-modal" class="modal"<#if disableClose?? && disableClose == "true"><#else> tabindex="-1"</#if>
-     aria-labelledby="login-modal-label" aria-hidden="true">
+     aria-labelledby="login-modal-label" aria-hidden="true" xmlns="http://www.w3.org/1999/html">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -37,38 +37,54 @@
             <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
             </#if>
             <#-- login form -->
-                <form id="login-form" role="form" method="POST" action="/login">
-                    <div class="form-group">
-                        <input id="username-field" type="text" placeholder="Username" class="form-control"
-                               name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <input id="password-field" type="password" placeholder="Password" class="form-control"
-                               name="password" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
+                <#if is2faEnabled??>
+                    <form id="2fakey-form" role="form" method="POST" action="/2fa/validate">
+                        <div class="form-group">
+                            <input id="text-field" type="text" placeholder="Key" class="form-control" name="key" required>
                         </div>
-                        <div class="col-md-8">
-                            <p class="pull-right"><a class="modal-href" href="/account/password/reset"
-                                                     data-target="resetpassword-modal-container">
-                                <small>Forgot password?</small>
-                            </a></p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button id="signin-button" type="submit" class="btn btn-success">Verify</button>
+                            </div>
                         </div>
-                    </div>
-                </form>
-
-            <#if is2faEnabled?has_content>
-            <div class="col-md-7" style="border-left: 1px solid #e5e5e5">
-                <#-- login form -->
-                <form id="2fakey-form" role="form" method="POST" action="/2fa/enabled">
-                    <div class="form-group">
-                        <input id="text-field" type="text" placeholder="Key" class="form-control" name="key" required>
-                    </div>
-                </form>
-            </div>
-            </#if>
+                    </form>
+                <#elseif is2faInitial??>
+                    <form id="initial-2fa-form" role="form" method="POST" action="/2fa/secret">
+                        <div class="form-group">
+                            <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=otpauth%3A//totp/User%2540Realm%3Fsecret%3DKO5DE2YD3Q2ZXEOO%26issuer%3DIssuer%2520Name&admin=UTF-8" style="height:200px; widht:200px" name="secret"/>
+                        </div>
+                        <div class="form-group">
+                            <input id="text-field" type="text" placeholder="Secret" class="form-control" name="secret" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button id="signin-button" type="submit" class="btn btn-success">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                <#else>
+                    <form id="login-form" role="form" method="POST" action="/login">
+                        <div class="form-group">
+                            <input id="username-field" type="text" placeholder="Username" class="form-control"
+                                   name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <input id="password-field" type="password" placeholder="Password" class="form-control"
+                                   name="password" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
+                            </div>
+                            <div class="col-md-8">
+                                <p class="pull-right"><a class="modal-href" href="/account/password/reset"
+                                                         data-target="resetpassword-modal-container">
+                                    <small>Forgot password?</small>
+                                </a></p>
+                            </div>
+                        </div>
+                    </form>
+                </#if>
             <#if googleSignIn>
             </div>
             </div>
