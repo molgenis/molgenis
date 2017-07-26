@@ -37,12 +37,36 @@
             </td>
 
             <td v-else>
-              <a target="_blank" :href="response.dataexplorerUrl">{{response.filename}}</a>
-              <span class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span>
+              <div v-if="!response.error">
+                Imported entities from <strong><a :href="'/menu/main/navigator/' + response.package">{{response.filename}}</a></strong>:
+                <br/> 
+
+                <span v-for="entityType in response.entityTypes">
+                <a target="_blank"
+                   :href="'/menu/main/dataexplorer?entity=' + entityType.id">{{entityType.label}}</a> <span
+                  class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span> <br>
+              </span>
+              </div>
+              <div v-else>
+                Something went wrong while importing <strong>{{response.filename}}</strong>
+              </div>
             </td>
 
-            <td v-if="response.error">
-              <span class="error-message">{{response.error}}</span>
+            <td v-if="response.log">
+              <div v-if="!showDetails">
+                {{response.message}}
+              </div>
+
+              <button v-if="showDetails" class="btn btn-sm btn-secondary" @click="toggleDetails">Hide details</button>
+              <button v-if="!showDetails" class="btn btn-sm btn-secondary float-left" @click="toggleDetails">
+                Show details
+              </button>
+              <div v-if="showDetails">
+                <hr>
+                <textarea rows="4" cols="50">
+                  {{response.log}}
+                </textarea>
+              </div>
             </td>
             <td v-else></td>
           </tr>
@@ -80,10 +104,14 @@
       return {
         file: null,
         responses: [],
-        currentProgressMessage: null
+        currentProgressMessage: null,
+        showDetails: false
       }
     },
     methods: {
+      toggleDetails () {
+        this.showDetails = !this.showDetails
+      },
       setFile (event) {
         this.file = event.target.files[0]
       },
@@ -107,12 +135,17 @@
           self.currentProgressMessage = 'Starting import'
           response.text().then(poller).then(job => {
             if (job.status === 'SUCCESS') {
-              entity.dataexplorerUrl = '/plugin/dataexplorer?entity=' + job.entityType
+              entity.entityTypes = job.entityTypes
+              entity.log = job.log
               entity.loading = false
+              entity.message = job.progressMessage
+              entity.package = job.package
 
               self.currentProgressMessage = null
             } else {
-              entity.error = job.log
+              entity.error = job.progressMessage
+              entity.message = job.progressMessage
+              entity.log = job.log
               entity.loading = false
 
               self.currentProgressMessage = null

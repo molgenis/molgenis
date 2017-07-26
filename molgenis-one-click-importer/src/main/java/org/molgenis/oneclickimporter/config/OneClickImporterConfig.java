@@ -10,6 +10,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 @Configuration
@@ -29,14 +33,23 @@ public class OneClickImporterConfig
 		return new JobFactory<OneClickImportJobExecution>()
 		{
 			@Override
-			public Job<EntityType> createJob(OneClickImportJobExecution oneClickImportJobExecution)
+			public Job<List<EntityType>> createJob(OneClickImportJobExecution oneClickImportJobExecution)
 			{
 				final String filename = oneClickImportJobExecution.getFile();
 				return (Progress progress) ->
 				{
-					EntityType entityType = oneClickImportJob.getEntityType(progress, filename);
-					oneClickImportJobExecution.setEntityTypeId(entityType.getId());
-					return entityType;
+					List<EntityType> entityTypes = oneClickImportJob.getEntityType(progress, filename);
+					oneClickImportJobExecution.setEntityTypes(entityTypes);
+
+					String packageId = entityTypes.get(0).getPackage().getId();
+					oneClickImportJobExecution.setPackage(packageId);
+
+					String labels = entityTypes.stream()
+											   .map(entityType -> entityType.getLabel())
+											   .collect(Collectors.joining(","));
+
+					progress.status(format("Created table(s): %s", labels));
+					return entityTypes;
 				};
 			}
 		};

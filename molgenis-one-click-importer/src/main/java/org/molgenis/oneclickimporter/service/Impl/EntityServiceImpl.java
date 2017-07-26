@@ -4,18 +4,15 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
+import org.molgenis.oneclickimporter.service.OneClickImporterNamingService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
@@ -32,30 +29,23 @@ public class EntityServiceImpl implements EntityService
 {
 	private static final String ID_ATTR_NAME = "auto_identifier";
 
-	private final DefaultPackage defaultPackage;
-
 	private final EntityTypeFactory entityTypeFactory;
-
 	private final AttributeFactory attributeFactory;
-
 	private final IdGenerator idGenerator;
-
 	private final DataService dataService;
-
 	private final MetaDataService metaDataService;
-
 	private final EntityManager entityManager;
-
 	private final AttributeTypeService attributeTypeService;
-
 	private final OneClickImporterService oneClickImporterService;
+	private final OneClickImporterNamingService oneClickImporterNamingService;
+	private final PackageFactory packageFactory;
 
-	public EntityServiceImpl(DefaultPackage defaultPackage, EntityTypeFactory entityTypeFactory,
-			AttributeFactory attributeFactory, IdGenerator idGenerator, DataService dataService,
-			MetaDataService metaDataService, EntityManager entityManager, AttributeTypeService attributeTypeService,
-			OneClickImporterService oneClickImporterService)
+	public EntityServiceImpl(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
+			IdGenerator idGenerator, DataService dataService, MetaDataService metaDataService,
+			EntityManager entityManager, AttributeTypeService attributeTypeService,
+			OneClickImporterService oneClickImporterService,
+			OneClickImporterNamingService oneClickImporterNamingService, PackageFactory packageFactory)
 	{
-		this.defaultPackage = requireNonNull(defaultPackage);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
 		this.idGenerator = requireNonNull(idGenerator);
@@ -64,18 +54,29 @@ public class EntityServiceImpl implements EntityService
 		this.entityManager = requireNonNull(entityManager);
 		this.attributeTypeService = requireNonNull(attributeTypeService);
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
+		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
+		this.packageFactory = requireNonNull(packageFactory);
 	}
 
 	@Override
-	public EntityType createEntityType(DataCollection dataCollection)
+	public EntityType createEntityType(DataCollection dataCollection, String packageName)
 	{
 		String entityTypeId = idGenerator.generateId();
 
 		// Create a dataTable
 		EntityType entityType = entityTypeFactory.create();
-		entityType.setPackage(defaultPackage);
+
+		org.molgenis.data.meta.model.Package package_ = metaDataService.getPackage(packageName);
+		if (package_ == null)
+		{
+			package_ = packageFactory.create(packageName);
+			package_.setLabel(packageName);
+			metaDataService.addPackage(package_);
+		}
+
+		entityType.setPackage(package_);
 		entityType.setId(entityTypeId);
-		entityType.setLabel(dataCollection.getName());
+		entityType.setLabel(oneClickImporterNamingService.getLabelWithPostFix(dataCollection.getName()));
 
 		// Check if first column can be used as id ( has unique values )
 		List<Column> columns = dataCollection.getColumns();
@@ -86,16 +87,20 @@ public class EntityServiceImpl implements EntityService
 		final boolean isValidAttributeType = AttributeUtils.getValidIdAttributeTypes().contains(type);
 		final boolean useAutoId = !isFirstColumnUnique || !isValidAttributeType;
 
-		if(useAutoId) {
+		if (useAutoId)
+		{
 			entityType.addAttribute(createIdAttribute(), ROLE_ID);
-		} else {
+		}
+		else
+		{
 			entityType.addAttribute(createAttribute(firstColumn), ROLE_ID);
 		}
 
 		// Add all columns to the dataTable
 		columns.forEach(column ->
 		{
-			if(useAutoId || column != firstColumn){
+			if (useAutoId || column != firstColumn)
+			{
 				Attribute attribute = createAttribute(column);
 				entityType.addAttribute(attribute);
 			}
@@ -109,7 +114,8 @@ public class EntityServiceImpl implements EntityService
 		while (rowIndex.get() < dataCollection.getColumns().get(0).getDataValues().size())
 		{
 			Entity row = entityManager.create(entityType, NO_POPULATE);
-			if(useAutoId) {
+			if (useAutoId)
+			{
 				row.setIdValue(idGenerator.generateId());
 			}
 
@@ -125,7 +131,7 @@ public class EntityServiceImpl implements EntityService
 
 	private void setRowValueForAttribute(Entity row, int index, Column column)
 	{
-		String attributeName = asValidAttributeName(column.getName());
+		String attributeName = oneClickImporterNamingService.asValidColumnName(column.getName());
 		Object dataValue = column.getDataValues().get(index);
 
 		EntityType rowType = row.getEntityType();
@@ -148,14 +154,9 @@ public class EntityServiceImpl implements EntityService
 	private Attribute createAttribute(Column column)
 	{
 		Attribute attribute = attributeFactory.create();
-		attribute.setName(asValidAttributeName(column.getName()));
+		attribute.setName(oneClickImporterNamingService.asValidColumnName(column.getName()));
 		attribute.setLabel(column.getName());
 		attribute.setDataType(attributeTypeService.guessAttributeType(column.getDataValues()));
 		return attribute;
-	}
-
-	private String asValidAttributeName(String columnName)
-	{
-		return columnName.replace(" ", "_");
 	}
 }
