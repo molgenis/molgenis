@@ -1,5 +1,7 @@
 package org.molgenis.security.twofactor;
 
+import static org.apache.commons.lang3.StringUtils.capitalize;
+
 public enum TwoFactorAuthenticationSetting
 {
 	ENABLED, DISABLED, ENFORCED;
@@ -7,6 +9,6 @@ public enum TwoFactorAuthenticationSetting
 	@Override
 	public String toString()
 	{
-		return name().toLowerCase();
+		return capitalize(name().toLowerCase());
 	}
 }

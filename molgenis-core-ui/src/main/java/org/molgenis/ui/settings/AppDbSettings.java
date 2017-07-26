@@ -124,7 +124,9 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 											 TwoFactorAuthenticationSetting.ENABLED.toString(),
 											 TwoFactorAuthenticationSetting.ENFORCED.toString()))
 									 .setLabel("Two Factor Authentication")
-									 .setDescription("Enable or enforce users to sign in with Google Authenticator");
+									 .setDescription(
+											 "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.")
+									 .setValidationExpression(getSignIn2FAValidationExpression());
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
 										  .setNillable(true)
 										  .setLabel("Logo in navigation bar")
@@ -216,6 +218,13 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 											  .setLabel("Tracking code footer")
 											  .setDescription(
 													  "JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
+		}
+
+		private static String getSignIn2FAValidationExpression()
+		{
+			return "$('" + SIGN_IN_2FA + "').eq('" + TwoFactorAuthenticationSetting.ENABLED.toString() + "').or().eq('"
+					+ TwoFactorAuthenticationSetting.ENFORCED.toString() + "').and($('" + GOOGLE_SIGN_IN
+					+ "').eq(false)).value()";
 		}
 
 		private String getDefaultMenuValue()
