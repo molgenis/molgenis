@@ -14,13 +14,14 @@ import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.google.Google2FAWebAuthenticationDetailsSource;
 import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
 import org.molgenis.security.session.ApiSessionExpirationFilter;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationFilter;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.security.user.UserService;
@@ -34,6 +35,7 @@ import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -86,7 +88,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	private GroupMemberFactory groupMemberFactory;
 
 	@Autowired
-	private Google2FAWebAuthenticationDetailsSource google2FAWebAuthenticationDetailsSource;
+	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
@@ -124,6 +126,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
+
+		http.addFilterAfter(changePasswordFilter(), MolgenisChangePasswordFilter.class);
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
@@ -189,8 +193,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.formLogin()
 					.loginPage("/login")
 				 	.failureUrl("/login?error")
-					.authenticationDetailsSource(google2FAWebAuthenticationDetailsSource)
-					.failureHandler(defaultAuthenicationFailureHandler())
 				.and()
 
 				.logout()
@@ -294,6 +296,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
+	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
+		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService);
+	}
+
+
+	@Bean
 	public RedirectStrategy redirectStrategy()
 	{
 		return new DefaultRedirectStrategy();
@@ -337,12 +345,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
-	public DefaultAuthenicationFailureHandler defaultAuthenicationFailureHandler()
-	{
-		return new DefaultAuthenicationFailureHandler();
-	}
-
-	@Bean
 	public UserDetailsChecker userDetailsChecker()
 	{
 		return new MolgenisUserDetailsChecker();
@@ -354,11 +356,11 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		try
 		{
 			auth.userDetailsService(userDetailsServiceBean());
-			MolgenisDefaultAuthenticationProvider molgenisDefaultAuthenticationProvider = new MolgenisDefaultAuthenticationProvider(appSettings, dataService);
-			molgenisDefaultAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-			molgenisDefaultAuthenticationProvider.setUserDetailsService(userDetailsServiceBean());
-			molgenisDefaultAuthenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
-			auth.authenticationProvider(molgenisDefaultAuthenticationProvider);
+			DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+			authenticationProvider.setPasswordEncoder(passwordEncoder());
+			authenticationProvider.setUserDetailsService(userDetailsServiceBean());
+			authenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
+			auth.authenticationProvider(authenticationProvider);
 		}
 		catch (Exception e)
 		{
