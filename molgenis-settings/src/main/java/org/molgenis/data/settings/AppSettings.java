@@ -215,4 +215,5 @@ public interface AppSettings
 	 * @return Custom JavaScript <script src="..."></script> headers, specified as comma separated list
 	 */
 	String getCustomJavascript();
+
 }

@@ -263,4 +263,9 @@ public class User extends StaticEntity
 	{
 		set(GOOGLEACCOUNTID, googleAccountId);
 	}
+
+	public String getSecret2fa() { return getString(SECRET2FA); }
+
+	public void setSecret2fa(String secret2fa) { set(SECRET2FA, secret2fa); }
+
 }

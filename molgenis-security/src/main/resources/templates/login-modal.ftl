@@ -45,7 +45,13 @@
                     <div class="form-group">
                         <input id="password-field" type="password" placeholder="Password" class="form-control"
                                name="password" required>
-
+                    </div>
+                    <#if !app_settings.googleSignIn && app_settings.google_2factor_authentication>
+                        <div class="form-group">
+                            <input id="text-field" type="text" placeholder="Code" class="form-control"
+                                   name="code" required>
+                        </div>
+                    </#if>
                     <div class="row">
                         <div class="col-md-4">
                             <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
@@ -58,18 +64,6 @@
                         </div>
                     </div>
                 </form>
-            </div>
-
-            <#if is2faEnabled?has_content>
-            <div class="row" style="border-left: 1px solid #e5e5e5">
-                <form id="login-form" role="form" method="POST" action="/2fa/validate">
-                <div class="form-group">
-                        <input id="text-field" type="text" placeholder="Key" class="form-control" name="key" required>
-                    </div>
-                </form>
-            </div>
-            </#if>
-
             <#if googleSignIn>
             </div>
             </div>
