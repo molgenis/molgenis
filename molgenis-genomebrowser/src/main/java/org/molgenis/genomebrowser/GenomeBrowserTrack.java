@@ -15,18 +15,19 @@ import java.util.stream.Collectors;
 @AutoValue
 public abstract class GenomeBrowserTrack
 {
-	public static GenomeBrowserTrack create(String id, String labelAttr, EntityType entity,
+	public static GenomeBrowserTrack create(String id, String label, String labelAttr, EntityType entity,
 			GenomeBrowserSettings.TrackType trackType, Iterable<GenomeBrowserTrack> molgenisReferenceTracks,
 			GenomeBrowserSettings.MolgenisReferenceMode molgenisReferenceMode,
 			GenomeBrowserAttributes genomeBrowserAttrs, String actions, String attrs, String scoreAttr, String exonKey)
 	{
-		return new AutoValue_GenomeBrowserTrack(id, labelAttr, entity, trackType, molgenisReferenceTracks,
+		return new AutoValue_GenomeBrowserTrack(id, label, labelAttr, entity, trackType, molgenisReferenceTracks,
 				molgenisReferenceMode, genomeBrowserAttrs, actions, attrs, scoreAttr, exonKey);
 	}
 
 	public static GenomeBrowserTrack create(GenomeBrowserSettings settings)
 	{
-		return new AutoValue_GenomeBrowserTrack(settings.getIdentifier(), settings.getLabelAttr().getName(),
+		return new AutoValue_GenomeBrowserTrack(settings.getIdentifier(), settings.getLabel(),
+				settings.getLabelAttr().getName(),
 				settings.getEntity(), settings.getTrackType(),
 				settings.getMolgenisReferenceTracks().collect(Collectors.toList()), settings.getMolgenisReferenceMode(),
 				settings.getGenomeBrowserAttrs(), settings.getActions(), settings.getAttrs(), settings.getScoreAttr(),
@@ -34,6 +35,8 @@ public abstract class GenomeBrowserTrack
 	}
 
 	public abstract String getId();
+
+	public abstract String getLabel();
 
 	public abstract String getLabelAttr();
 
@@ -63,8 +66,8 @@ public abstract class GenomeBrowserTrack
 	public JSONObject toTrackJson()
 	{
 		JSONObject json = new JSONObject();
-		json.put("name", getEntity().getLabel());
-		json.put("uri", "http://localhost:8080/api/v2/" + getEntity().getId() + "?" + getId());
+		json.put("name", getLabel());
+		json.put("entity", getEntity().getId());
 		json.put("tier_type", "molgenis");
 		json.put("genome_attrs", getGenomeBrowserAttrsJSON(getGenomeBrowserAttrs()));
 		if (getLabelAttr() != null) json.put("label_attr", getLabelAttr());
