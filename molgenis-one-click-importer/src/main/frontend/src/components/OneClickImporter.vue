@@ -23,22 +23,6 @@
           <span class="text-muted"><em>Supported file types: XLSX, XLS, CSV</em></span>
         </div>
         <br/>
-        <!--<dropzone FIXME-->
-        <!--id="import-dropzone"-->
-        <!--url="/plugin/one-click-importer/upload"-->
-        <!--:accepted-filetypes="['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].join(',')"-->
-        <!--:thumbnail-height=100-->
-        <!--:thumbnail-width=200-->
-        <!--:duplicate-check=true-->
-        <!--:use-font-awesome=true-->
-        <!--:showRemoveLink=false-->
-        <!--:preview-template="previewTemplate"-->
-        <!--v-on:vdropzone-success="onComplete"-->
-        <!--v-on:vdropzone-error="onError"-->
-        <!--v-on:duplicate-file="onDuplicate">-->
-
-        <!--<div class="text-center">supported file types: xlsx, xls, csv, tsv</div>-->
-        <!--</dropzone>-->
       </div>
     </div>
 
