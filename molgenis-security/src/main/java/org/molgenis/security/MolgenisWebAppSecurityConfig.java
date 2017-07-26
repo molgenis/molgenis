@@ -20,6 +20,7 @@ import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationFilter;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.security.user.UserService;
@@ -114,6 +115,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.addFilterBefore(apiSessionExpirationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
 
+		http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
+
 		http.authenticationProvider(runAsAuthenticationProvider());
 
 		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
@@ -129,6 +132,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		expressionInterceptUrlRegistry
 
 				.antMatchers("/login").permitAll()
+
+				//FIXME
+				.antMatchers("/2fa").permitAll()
 
 				.antMatchers(GOOGLE_AUTHENTICATION_URL).permitAll()
 
@@ -204,6 +210,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.and()
 
 				.csrf().disable();
+	}
+
+	@Bean
+	public Filter twoFactorAuthenticationFilter()
+	{
+		return new TwoFactorAuthenticationFilter();
 	}
 
 	@Bean
