@@ -1,7 +1,6 @@
 package org.molgenis.security.twofactor;
 
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.MolgenisAnonymousAuthenticationFilter;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,35 +14,57 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.DISABLED;
+
 public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 {
-	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationFilter.class);
+
+	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationFilter.class.getName());
 
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-	private static String PATH = "/2fa";
 	private AppSettings appSettings;
+	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
-	public TwoFactorAuthenticationFilter(AppSettings appSettings) {
-		this.appSettings = appSettings;
+	public TwoFactorAuthenticationFilter(AppSettings appSettings, TwoFactorAuthenticationService twoFactorAuthenticationService)
+	{
+		this.appSettings = requireNonNull(appSettings);
+		this.twoFactorAuthenticationService = twoFactorAuthenticationService;
 	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
 			FilterChain filterChain) throws ServletException, IOException
 	{
-
-		if(appSettings.is2FAEnabled()) {
+		if (isTwoFactorAuthenticationEnabled())
+		{
 			//FIXME remove path hack
-			if (!httpServletRequest.getRequestURI().equals(PATH) && SecurityUtils.currentUserIsAuthenticated()
-					&& !SecurityUtils.currentUserHasRole("ROLE_TWO_FACTOR_AUTHENTICATED"))
+			if (!httpServletRequest.getRequestURI().equals(TwoFactorAuthenticationController.ID) && SecurityUtils.currentUserIsAuthenticated()
+					&& !SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION))
 			{
-				//TODO replace url with controller path
-				redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, PATH);
-				return;
+				if(twoFactorAuthenticationService.isConfiguredForUser()) {
+					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.ID + TwoFactorAuthenticationController.TWO_FACTOR_ENABLED_URI);
+					return;
+				}
+				else
+				{
+					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.ID + TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
+					return;
+				}
 			}
-		} else {
-			LOG.debug("2 factor authentication is not enabled");
 		}
+		else
+		{
+			LOG.debug("No 2 factor authentication configured");
+		}
+
 		filterChain.doFilter(httpServletRequest, httpServletResponse);
+	}
+
+	private boolean isTwoFactorAuthenticationEnabled()
+	{
+		return !appSettings.getTwoFactorAuthentication().equals(DISABLED.toString());
+	}
+
 }

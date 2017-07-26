@@ -26,7 +26,7 @@ public interface TwoFactorAuthenticationService
 	 *
 	 * @param secret
 	 */
-	void set2FaSecret(String secret) throws UsernameNotFoundException;
+	void setSecretKey(String secret) throws UsernameNotFoundException;
 
 	/**
 	 *
@@ -34,14 +34,16 @@ public interface TwoFactorAuthenticationService
 	 *
 	 * @return is ready
 	 */
-	boolean is2FAEnabledForUser() throws UsernameNotFoundException;
+	boolean isEnabledForUser() throws UsernameNotFoundException;
+
+	boolean isConfiguredForUser() throws UsernameNotFoundException;
 
 	/**
 	 *
 	 * <p>Set the new Authentication object</p>
 	 *
 	 */
-	void set2FAAuthenticated() throws BadCredentialsException;
+	void authenticate() throws BadCredentialsException;
 
 
 
