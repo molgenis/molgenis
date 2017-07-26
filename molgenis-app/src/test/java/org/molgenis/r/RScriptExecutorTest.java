@@ -17,18 +17,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class RScriptExecutorTest extends AbstractMockitoTest
 {
@@ -74,7 +70,9 @@ public class RScriptExecutorTest extends AbstractMockitoTest
 		ArgumentCaptor<HttpUriRequest> requestsCaptor = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(requestsCaptor.capture())).thenReturn(executeScriptResponse, getScriptResultResponse);
 
-		String outputPath = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString().replaceAll("-", "");
+		String outputPath = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID()
+																						.toString()
+																						.replaceAll("-", "");
 		boolean deleted;
 		try
 		{
@@ -85,7 +83,10 @@ public class RScriptExecutorTest extends AbstractMockitoTest
 
 			List<HttpUriRequest> requests = requestsCaptor.getAllValues();
 			assertEquals(requests.get(0).getURI(), new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"));
-			assertTrue(requests.get(1).getURI().toString().matches("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/files/[a-z0-9]+"));
+			assertTrue(requests.get(1)
+							   .getURI()
+							   .toString()
+							   .matches("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/files/[a-z0-9]+"));
 		}
 		finally
 		{
