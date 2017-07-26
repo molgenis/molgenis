@@ -3,50 +3,45 @@ package org.molgenis.security.twofactor;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Controller
 @RequestMapping("/2fa")
 public class TwoFactorAuthenticationController
 {
-
-	private DataService dataService;
-	private UserAuthorityFactory userAuthorityFactory;
+	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
 	@Autowired
-	public TwoFactorAuthenticationController(DataService dataService, UserAuthorityFactory userAuthorityFactory)
+	public TwoFactorAuthenticationController(TwoFactorAuthenticationService twoFactorAuthenticationService)
 	{
-		this.dataService = dataService;
-		this.userAuthorityFactory = userAuthorityFactory;
+		this.twoFactorAuthenticationService = twoFactorAuthenticationService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String get2FA(@RequestParam String code)
+	public String init2FA()
 	{
-		if (code.equals("123456"))
-		{
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-			List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
-			updatedAuthorities.add(new SimpleGrantedAuthority("ROLE_TWO_FACTOR_AUTHENTICATED"));
+		if(twoFactorAuthenticationService.is2FAEnabledForUser()) {
 
-			Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(),
-					updatedAuthorities);
+		} else {
 
-			SecurityContextHolder.getContext().setAuthentication(newAuth);
 		}
 
+
+		return "view-2fa";
+	}
+
+
+	@RequestMapping(method = RequestMethod.GET)
+	public String get2FAEnabled(@RequestParam String code)
+	{
+		if(twoFactorAuthenticationService.isVerificationCodeValid(code)) {
+			twoFactorAuthenticationService.set2FAAuthenticated();
+		}
 		return "view-2fa";
 	}
 }
