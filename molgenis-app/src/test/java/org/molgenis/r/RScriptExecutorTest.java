@@ -74,7 +74,7 @@ public class RScriptExecutorTest extends AbstractMockitoTest
 		ArgumentCaptor<HttpUriRequest> requestsCaptor = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(requestsCaptor.capture())).thenReturn(executeScriptResponse, getScriptResultResponse);
 
-		String outputPath = System.getProperty("java.io.tmpdir") + File.pathSeparator + UUID.randomUUID().toString();
+		String outputPath = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString().replaceAll("-", "");
 		boolean deleted;
 		try
 		{
