@@ -40,16 +40,18 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		if (isTwoFactorAuthenticationEnabled())
 		{
 			//FIXME remove path hack
-			if (!httpServletRequest.getRequestURI().equals(TwoFactorAuthenticationController.ID) && SecurityUtils.currentUserIsAuthenticated()
+			if (!httpServletRequest.getRequestURI().equals(TwoFactorAuthenticationController.URI) && SecurityUtils.currentUserIsAuthenticated()
 					&& !SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION))
 			{
 				if(twoFactorAuthenticationService.isConfiguredForUser()) {
-					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.ID + TwoFactorAuthenticationController.TWO_FACTOR_ENABLED_URI);
+					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.URI
+							+ TwoFactorAuthenticationController.TWO_FACTOR_ENABLED_URI);
 					return;
 				}
 				else
 				{
-					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.ID + TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
+					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.URI
+							+ TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
 					return;
 				}
 			}

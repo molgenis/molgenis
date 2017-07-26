@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/2fa")
 public class TwoFactorAuthenticationController
 {
-	public static final String ID = "/2fa";
+	public static final String URI = "/2fa";
 	public static final String TWO_FACTOR_ENABLED_URI = "/enabled";
 	public static final String TWO_FACTOR_INITIAL_URI = "/initial";
 

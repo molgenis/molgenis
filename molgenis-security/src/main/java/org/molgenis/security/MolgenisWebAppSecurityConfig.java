@@ -20,6 +20,7 @@ import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationFilter;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
@@ -136,6 +137,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.antMatchers("/login").permitAll()
 
+				.antMatchers(TwoFactorAuthenticationController.URI + "/**").permitAll()
+
 				.antMatchers(GOOGLE_AUTHENTICATION_URL).permitAll()
 
 				.antMatchers("/logo/**").permitAll()
@@ -183,21 +186,21 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.antMatchers('/' + PATH_SEGMENT_APPS + "/**").permitAll()
 
 				.anyRequest()
-					.denyAll()
+				.denyAll()
 				.and()
 
 				.httpBasic()
-					.authenticationEntryPoint(authenticationEntryPoint())
+				.authenticationEntryPoint(authenticationEntryPoint())
 				.and()
 
 				.formLogin()
-					.loginPage("/login")
-				 	.failureUrl("/login?error")
+				.loginPage("/login")
+				.failureUrl("/login?error")
 				.and()
 
 				.logout()
-					.deleteCookies("JSESSIONID")
-					.addLogoutHandler((req, res, auth) ->
+				.deleteCookies("JSESSIONID")
+				.addLogoutHandler((req, res, auth) ->
 					{
 						if (req.getSession(false) != null && req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 						{
@@ -219,7 +222,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.and()
 
 				.csrf()
-					.disable();
+				.disable();
 
 	}
 
