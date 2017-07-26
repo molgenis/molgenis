@@ -47,19 +47,19 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 
 		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString())) {
 			User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
-//			if (StringUtils.hasText(user.getSecret2fa())) {
+			if (StringUtils.hasText(user.getSecretKey())) {
 				if (verificationCode == null)
 				{
 					throw new BadCredentialsException("2 factor authentication code is mandatory");
 				}
-//				final Totp totp = new Totp(user.getSecret2fa());
-//				if (!isValidLong(verificationCode) || !totp.verify(verificationCode))
-//				{
-//					throw new BadCredentialsException("Invalid 2 factor authentication code");
-//				}
-//			} else {
-//				throw new BadCredentialsException("2 factor authentication secret key is not available");
-//			}
+				final Totp totp = new Totp(user.getSecretKey());
+				if (!isValidLong(verificationCode) || !totp.verify(verificationCode))
+				{
+					throw new BadCredentialsException("Invalid 2 factor authentication code");
+				}
+			} else {
+				throw new BadCredentialsException("2 factor authentication secret key is not available");
+			}
 		}
 		return isValid;
 	}
@@ -79,7 +79,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
 		if(user != null)
 		{
-//			user.setSecret2fa(secret);
+			user.setSecretKey(secret);
 		}
 		else
 		{
@@ -94,10 +94,10 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
 		if(user != null)
 		{
-//			if (StringUtils.hasText(user.getSecret2fa()))
-//			{
+			if (StringUtils.hasText(user.getSecretKey()))
+			{
 				isConfigured = true;
-//			}
+			}
 		}
 		else
 		{
@@ -115,7 +115,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		{
 //			if (user.is2faEnabled())
 //			{
-//				isEnabled = true;
+				isEnabled = true;
 //			}
 		}
 		else
