@@ -11,76 +11,86 @@
       <div class="col-md-12">
         <form id="upload-form" v-on:submit.prevent class="form-inline">
           <div class="form-group">
-            <input ref="fileInput" id="file-input" type="file" @change="setFile"/>
+            <input
+              id="file-input"
+              ref="fileInput"
+              type="file"
+              accept=".csv, .zip, .xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+              @change="importFile"/>
           </div>
-          <button class="btn btn-primary" type="submit" @click="importFile" :disabled="file === null">Import</button>
         </form>
         <div class="supported-types">
           <span class="text-muted"><em>Supported file types: XLSX, XLS, CSV</em></span>
         </div>
         <br/>
-        <!--<dropzone FIXME-->
-        <!--id="import-dropzone"-->
-        <!--url="/plugin/one-click-importer/upload"-->
-        <!--:accepted-filetypes="['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].join(',')"-->
-        <!--:thumbnail-height=100-->
-        <!--:thumbnail-width=200-->
-        <!--:duplicate-check=true-->
-        <!--:use-font-awesome=true-->
-        <!--:showRemoveLink=false-->
-        <!--:preview-template="previewTemplate"-->
-        <!--v-on:vdropzone-success="onComplete"-->
-        <!--v-on:vdropzone-error="onError"-->
-        <!--v-on:duplicate-file="onDuplicate">-->
-
-        <!--<div class="text-center">supported file types: xlsx, xls, csv, tsv</div>-->
-        <!--</dropzone>-->
       </div>
     </div>
 
     <div class="row">
       <div class="col">
-        <table class="table">
-          <thead>
-          <th>Uploads</th>
-          <th></th>
-          </thead>
-          <tbody>
-          <tr v-for="response in responses">
-            <td v-if="response.loading">
-              <span>{{response.filename}}</span>
-              <i class="fa fa-spinner fa-pulse fa-fw"></i>
-            </td>
-            <td v-else>
-              <a target="_blank" :href="response.url">{{response.filename}}</a>
-              <span class="success-check"><i class="fa fa-check" aria-hidden="true"></i></span>
-            </td>
-            <td v-if="response.error">
-              <span class="error-message">{{response.error}}</span>
-            </td>
-            <td v-else></td>
-          </tr>
-          </tbody>
-        </table>
+        <h5>Imports</h5>
+        <ul class="imports-list list-unstyled">
+
+          <li v-for="upload in uploads" v-bind:key="upload.filename" class="upload-item">
+
+            <div v-show="upload.status === 'LOADING' ">
+              <i class="fa fa-spinner fa-pulse fa-fw "></i> {{upload.filename}}
+            </div>
+
+            <div v-show="upload.status === 'ERROR'">
+              <i class="fa fa-times text-danger" ></i> {{upload.filename}}
+              <div class="error-message text-muted"><em>Import failed; {{upload.message}}</em></div>
+            </div>
+
+            <div v-show="upload.status === 'DONE' ">
+              <a target="_blank" :href="'/menu/main/navigator/' + upload.package">
+                <i class="fa fa-folder-open-o" ></i> {{upload.package}}
+              </a>
+
+              <ul class="list-unstyled">
+                <li v-for="table in upload.tables">
+                  <span>
+                    <a target="_blank" :href="'/menu/main/dataexplorer?entity=' + table.id">
+                       <i class="fa fa-list"></i> {{table.label}}
+                    </a>
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+          </li>
+
+        </ul>
       </div>
     </div>
+
   </div>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-
-  .error-message {
-    color: $brand-danger
-  }
+<style>
 
   .supported-types {
     padding-top: 1em;
     font-size: smaller;
   }
 
-  .success-check {
-    color: $brand-success
+  .imports-list {
+    margin-left: 1rem;
+  }
+
+  .list-unstyled .list-unstyled {
+    margin-left: 1rem;
+    padding-top: 0.5rem;
+  }
+
+  .upload-item {
+    padding: 0.5rem 0 1rem;
+  }
+
+  .error-message {
+    margin-left: 1rem;
+    padding-top: 0.5em;
+    font-size: smaller;
   }
 
 </style>
@@ -92,20 +102,23 @@
     name: 'one-click-importer',
     data () {
       return {
-        file: null,
-        responses: []
+        uploads: []
       }
     },
     methods: {
-      setFile: function (event) {
-        this.file = event.target.files[0]
-      },
-      importFile: function () {
-        let entity = {filename: this.file.name, loading: true}
-        this.responses.push(entity)
+      importFile (event) {
+        const file = event.target.files[0]
+        if (!file) {
+          return
+        }
+        let entity = {
+          filename: file.name,
+          status: 'LOADING'
+        }
+        this.uploads.unshift(entity)
 
         const formData = new FormData()
-        formData.append('file', this.file)
+        formData.append('file', file)
 
         const options = {
           body: formData,
@@ -113,41 +126,43 @@
           credentials: 'same-origin'
         }
 
+        const poller = this.pollJob
+
         fetch('/plugin/one-click-importer/upload', options).then(response => {
-          if (response.headers.get('content-type') === 'application/json') {
-            response.json().then(function (json) {
-              const feedback = response.ok ? json : json.errors[0].message
-              if (response.ok) {
-                entity.filename = feedback.baseFileName
-                entity.loading = false
-                entity.url = '/menu/main/dataexplorer?entity=' + feedback.entityId
+          response.text().then(poller).then(job => {
+            if (job.status === 'SUCCESS') {
+              entity.tables = job.entityTypes
+              entity.status = 'DONE'
+              entity.message = job.progressMessage
+              entity['package'] = job.package
+            } else {
+              entity.error = job.progressMessage
+              entity.message = job.progressMessage
+              entity.log = job.log
+              entity.status = 'ERROR'
+            }
+          })
+        })
+
+        this.$refs.fileInput.value = null
+      },
+      pollJob (jobUrl) {
+        const poller = this.pollJob
+
+        return new Promise((resolve) => {
+          return fetch(jobUrl, {credentials: 'same-origin'}).then(response => {
+            return response.json().then(job => {
+              if (job.status === 'RUNNING' || job.status === 'PENDING') {
+                setTimeout(function () {
+                  resolve(poller(jobUrl))
+                }, 1000)
               } else {
-                entity.error = feedback
-                entity.loading = false
+                resolve(job)
               }
             })
-          }
+          })
         })
-        this.$refs.fileInput.value = null
-        this.file = null
       }
-
-//     FIXME onComplete (file, response) {
-//        this.responses.push({
-//          url: '/menu/main/dataexplorer?entity=' + response.entityId,
-//          filename: response.baseFileName
-//        })
-//        this.message = null
-//      },
-//      onDuplicate (file) {
-//        this.message = 'Can not upload duplicate file [' + file.upload.filename + ']'
-//      },
-//      onError (file) {
-//        this.message = 'Something went wrong when uploading [' + file.upload.filename + ']. Please contact an administrator'
-//      },
-//      previewTemplate () {
-//        return '<div></div>'
-//      }
     }
   }
 </script>
