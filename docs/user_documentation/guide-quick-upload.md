@@ -8,7 +8,8 @@ There are some assumptions we make with regards file types and file contents.
 2. A file consists of a at least two lines, the first is the header, the rest is data
 3. We always expect the first line to be the header 
 
-We do not accept empty files or files with only a header.
+- __Empty files can not be imported__
+- __Files containing only a header can not be uploaded__
 
 Metadata guessing
 -----------------
@@ -27,7 +28,7 @@ Data placement
 --------------
 
 Data is imported into the MOLGENIS database as a single _data table_
-We group a _data table_ under a _package_.
+_Data tables_ are grouped within packages
 
 1. In the case of an excel, the file name is used as the _package_ name and the workbook sheet is used as the _data table_ name.
 2. In the case of a CSV, the file is used as the _package_ and the _data table_ name.
