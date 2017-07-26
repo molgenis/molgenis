@@ -127,7 +127,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
-		http.addFilterAfter(changePasswordFilter(), MolgenisChangePasswordFilter.class);
+		http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisChangePasswordFilter.class);
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
