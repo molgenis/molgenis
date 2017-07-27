@@ -1,8 +1,8 @@
 package org.molgenis.model.registry.services;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.model.registry.model.ModelRegistrySearch;
 import org.molgenis.model.registry.model.ModelRegistryEntity;
+import org.molgenis.model.registry.model.ModelRegistrySearch;
 import org.molgenis.model.registry.model.ModelRegistryTag;
 
 import java.util.List;
@@ -27,7 +27,6 @@ public interface MetaDataSearchService
 	 * @param query
 	 * @param offSet
 	 * @param number
-	 *
 	 * @return {@link ModelRegistrySearch}
 	 */
 	ModelRegistrySearch search(String query, int offSet, int number);

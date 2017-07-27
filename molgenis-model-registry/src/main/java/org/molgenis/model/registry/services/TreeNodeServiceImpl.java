@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 /**
- *
- *
  * <p>TreeNode service which provides treenodes.</p>
  *
  * @author sido
@@ -28,7 +26,8 @@ public class TreeNodeServiceImpl implements TreeNodeService
 	}
 
 	@Override
-	public ModelRegistryTreeNode createTreeNode(Package package_) {
+	public ModelRegistryTreeNode createTreeNode(Package package_)
+	{
 		return treeNodeMapper.fromPackageToTreeNode(package_);
 	}
 

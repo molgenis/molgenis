@@ -9,6 +9,11 @@ import com.google.auto.value.AutoValue;
 public abstract class ModelRegistryTag
 {
 
+	public static ModelRegistryTag create(String label, String iri, String relation)
+	{
+		return new AutoValue_ModelRegistryTag(label, iri, relation);
+	}
+
 	@SuppressWarnings("unused")
 	public abstract String getLabel();
 
@@ -17,11 +22,5 @@ public abstract class ModelRegistryTag
 
 	@SuppressWarnings("unused")
 	public abstract String getRelation();
-
-	public static ModelRegistryTag create(String label, String iri, String relation)
-	{
-		return new AutoValue_ModelRegistryTag(label, iri, relation);
-	}
-
 
 }

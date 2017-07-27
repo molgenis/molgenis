@@ -10,8 +10,8 @@ import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.model.registry.model.ModelRegistryPackage;
 import org.molgenis.model.registry.model.ModelRegistrySearch;
-import org.molgenis.model.registry.model.PackageSearchRequest;
 import org.molgenis.model.registry.model.ModelRegistryTreeNode;
+import org.molgenis.model.registry.model.PackageSearchRequest;
 import org.molgenis.model.registry.services.MetaDataSearchService;
 import org.molgenis.model.registry.services.TreeNodeService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -38,12 +38,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class ModelRegistryController extends MolgenisPluginController
 {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ModelRegistryController.class);
-//  namechange of route to model-registry is planned for 6.0.0
-//	public static final String ID = "model-registry";
+	//  namechange of route to model-registry is planned for 6.0.0
+	//	public static final String ID = "model-registry";
 	public static final String ID = "standardsregistry";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-
+	private static final Logger LOG = LoggerFactory.getLogger(ModelRegistryController.class);
 	private static final String VIEW_NAME = "view-model-registry";
 	private static final String VIEW_NAME_DETAILS = "view-model-registry_details";
 	private static final String VIEW_NAME_DOCUMENTATION = "view-model-registry_docs";
@@ -62,11 +61,10 @@ public class ModelRegistryController extends MolgenisPluginController
 	private final TreeNodeService treeNodeService;
 	private final MetaDataSearchService metaDataSearchService;
 
-
-
 	@Autowired
 	public ModelRegistryController(MetaDataService metaDataService, MetaDataSearchService metaDataSearchService,
-			TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService, LanguageService languageService, AppSettings appSettings, MenuReaderService menuReaderService)
+			TagService<LabeledResource, LabeledResource> tagService, TreeNodeService treeNodeService,
+			LanguageService languageService, AppSettings appSettings, MenuReaderService menuReaderService)
 	{
 		super(URI);
 		this.metaDataService = Objects.requireNonNull(metaDataService);
@@ -82,7 +80,8 @@ public class ModelRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound,  Model model)
+	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound,
+			Model model)
 	{
 		if (showPackageNotFound != null && showPackageNotFound.equalsIgnoreCase("true"))
 		{
@@ -112,7 +111,6 @@ public class ModelRegistryController extends MolgenisPluginController
 	}
 
 	/**
-	 *
 	 * <p>Fired when a search is performed</p>
 	 *
 	 * @param packageSearchValue
@@ -141,7 +139,8 @@ public class ModelRegistryController extends MolgenisPluginController
 	@ResponseBody
 	public ModelRegistrySearch search(@Valid @RequestBody PackageSearchRequest packageSearchRequest)
 	{
-		return metaDataSearchService.search(packageSearchRequest.getQuery(), packageSearchRequest.getOffset(), packageSearchRequest.getNum());
+		return metaDataSearchService.search(packageSearchRequest.getQuery(), packageSearchRequest.getOffset(),
+				packageSearchRequest.getNum());
 	}
 
 	@RequestMapping(value = "/details", method = GET)
@@ -160,7 +159,6 @@ public class ModelRegistryController extends MolgenisPluginController
 	}
 
 	/**
-	 *
 	 * <p>Get uml data for UML-viewer</p>
 	 *
 	 * @param selectedPackageName

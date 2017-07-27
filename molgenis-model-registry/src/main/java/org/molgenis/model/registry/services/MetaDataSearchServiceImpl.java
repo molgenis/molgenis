@@ -26,7 +26,6 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
-
 @Service
 public class MetaDataSearchServiceImpl implements MetaDataSearchService
 {
@@ -106,7 +105,9 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	@Override
 	public List<ModelRegistryTag> getTagsForPackage(Package p)
 	{
-		return ImmutableList.copyOf(stream(tagService.getTagsForPackage(p).spliterator(), false).map(tag -> ModelRegistryTag.create(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation().toString())).iterator());
+		return ImmutableList.copyOf(stream(tagService.getTagsForPackage(p).spliterator(), false).map(
+				tag -> ModelRegistryTag.create(tag.getObject().getLabel(), tag.getObject().getIri(),
+						tag.getRelation().toString())).iterator());
 	}
 
 	@Override
@@ -120,7 +121,8 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 
 	private void getEntitiesInPackageRec(Package pkg, List<ModelRegistryEntity> entriesForThisPackage)
 	{
-		entriesForThisPackage.addAll(ImmutableList.copyOf(stream(pkg.getEntityTypes().spliterator(), false).map(emd -> ModelRegistryEntity.create(emd.getId(), emd.getLabel(), emd.isAbstract())).iterator()));
+		entriesForThisPackage.addAll(ImmutableList.copyOf(stream(pkg.getEntityTypes().spliterator(), false).map(
+				emd -> ModelRegistryEntity.create(emd.getId(), emd.getLabel(), emd.isAbstract())).iterator()));
 
 		Iterable<Package> subPackages = pkg.getChildren();
 		if (subPackages != null)
@@ -138,7 +140,8 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 
 		if (StringUtils.isBlank(searchTerm))
 		{
-			results.addAll(ImmutableList.copyOf(stream(metaDataService.getRootPackages().spliterator(), false).map(pkg -> new PackageSearchResultItem(pkg)).iterator()));
+			results.addAll(ImmutableList.copyOf(stream(metaDataService.getRootPackages().spliterator(), false).map(
+					pkg -> new PackageSearchResultItem(pkg)).iterator()));
 		}
 		else
 		{
@@ -176,7 +179,9 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		}
 
 		// Remove default package
-		return ImmutableList.copyOf(results.stream().filter(item -> !item.getPackageFound().getId().equalsIgnoreCase("default")).iterator());
+		return ImmutableList.copyOf(results.stream()
+										   .filter(item -> !item.getPackageFound().getId().equalsIgnoreCase("default"))
+										   .iterator());
 	}
 
 	// Get the root package of an entity
