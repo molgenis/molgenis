@@ -43,14 +43,14 @@
             </div>
 
             <div v-show="upload.status === 'DONE' ">
-              <a target="_blank" :href="'/menu/main/navigator/' + upload.package">
+              <a target="_blank" :href="navigatorBaseUrl + '/' + upload.package">
                 <i class="fa fa-folder-open-o" ></i> {{upload.package}}
               </a>
 
               <ul class="list-unstyled">
                 <li v-for="table in upload.tables">
                   <span>
-                    <a target="_blank" :href="'/menu/main/dataexplorer?entity=' + table.id">
+                    <a target="_blank" :href="dataExplorerBaseUrl + '?entity=' + table.id">
                        <i class="fa fa-list"></i> {{table.label}}
                     </a>
                   </span>
@@ -102,7 +102,9 @@
     name: 'one-click-importer',
     data () {
       return {
-        uploads: []
+        uploads: [],
+        navigatorBaseUrl: window.__INITIAL_STATE__.navigatorBaseUrl,
+        dataExplorerBaseUrl: window.__INITIAL_STATE__.dataExplorerBaseUrl
       }
     },
     methods: {
