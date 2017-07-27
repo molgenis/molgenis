@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,7 +13,6 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 /**
  * Repository decorated that validates that current user has permission to perform an operation for an entity type.
@@ -50,14 +48,6 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		EntityType entityType = decoratedRepository.getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
 		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		EntityType entityType = decoratedRepository.getEntityType();
-		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.close();
 	}
 
 	@Override
@@ -184,7 +174,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void add(Entity entity)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validateCurrentUserCanCreateEntityType(entityType);
+		validateCurrentUserPermission(entityType, Permission.WRITE);
 		decoratedRepository.add(entity);
 	}
 
@@ -192,7 +182,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Integer add(Stream<Entity> entities)
 	{
 		EntityType entityType = decoratedRepository.getEntityType();
-		validateCurrentUserCanCreateEntityType(entityType);
+		validateCurrentUserPermission(entityType, Permission.WRITE);
 		return decoratedRepository.add(entities);
 	}
 
@@ -204,27 +194,8 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		return decoratedRepository.aggregate(aggregateQuery);
 	}
 
-	private void validateCurrentUserCanCreateEntityType(EntityType entityType)
-	{
-		if (currentUserIsSuOrSystem())
-		{
-			return;
-		}
-
-		boolean granted = permissionService.hasPermissionOnEntityType(entityType.getId(), Permission.WRITE);
-		if (!granted)
-		{
-			throw new MolgenisDataAccessException("No permission to create entity types");
-		}
-	}
-
 	private void validateCurrentUserPermission(EntityType entityType, Permission permission)
 	{
-		if (currentUserIsSuOrSystem())
-		{
-			return;
-		}
-
 		boolean granted = permissionService.hasPermissionOnEntityType(entityType.getId(), permission);
 		if (!granted)
 		{
