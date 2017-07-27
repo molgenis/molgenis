@@ -34,12 +34,12 @@ public class OneClickImportJob
 	private final OneClickImporterNamingService oneClickImporterNamingService;
 	private final EntityService entityService;
 	private final FileStore fileStore;
-	private final PermissionSystemService permissionSystemService;
+
 
 	public OneClickImportJob(ExcelService excelService, CsvService csvService,
 			OneClickImporterService oneClickImporterService,
 			OneClickImporterNamingService oneClickImporterNamingService, EntityService entityService,
-			FileStore fileStore, PermissionSystemService permissionSystemService)
+			FileStore fileStore)
 	{
 		this.excelService = requireNonNull(excelService);
 		this.csvService = requireNonNull(csvService);
@@ -47,7 +47,6 @@ public class OneClickImportJob
 		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
 		this.entityService = requireNonNull(entityService);
 		this.fileStore = requireNonNull(fileStore);
-		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Transactional
@@ -104,7 +103,6 @@ public class OneClickImportJob
 			entityTypes.add(entityService.createEntityType(dataCollection, packageName));
 		});
 
-		permissionSystemService.giveUserWriteMetaPermissions(entityTypes);
 		return entityTypes;
 	}
 }

@@ -14,6 +14,7 @@ import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.OneClickImporterNamingService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,12 +40,14 @@ public class EntityServiceImpl implements EntityService
 	private final OneClickImporterService oneClickImporterService;
 	private final OneClickImporterNamingService oneClickImporterNamingService;
 	private final PackageFactory packageFactory;
+	private final PermissionSystemService permissionSystemService;
 
 	public EntityServiceImpl(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
 			IdGenerator idGenerator, DataService dataService, MetaDataService metaDataService,
 			EntityManager entityManager, AttributeTypeService attributeTypeService,
 			OneClickImporterService oneClickImporterService,
-			OneClickImporterNamingService oneClickImporterNamingService, PackageFactory packageFactory)
+			OneClickImporterNamingService oneClickImporterNamingService, PackageFactory packageFactory,
+			PermissionSystemService permissionSystemService)
 	{
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
@@ -56,6 +59,7 @@ public class EntityServiceImpl implements EntityService
 		this.oneClickImporterService = requireNonNull(oneClickImporterService);
 		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
 		this.packageFactory = requireNonNull(packageFactory);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Override
@@ -65,6 +69,7 @@ public class EntityServiceImpl implements EntityService
 
 		// Create a dataTable
 		EntityType entityType = entityTypeFactory.create();
+
 
 		org.molgenis.data.meta.model.Package package_ = metaDataService.getPackage(packageName);
 		if (package_ == null)
@@ -107,6 +112,7 @@ public class EntityServiceImpl implements EntityService
 		});
 
 		// Store the dataTable (metadata only)
+		permissionSystemService.giveUserWriteMetaPermissions(entityType);
 		metaDataService.addEntityType(entityType);
 
 		AtomicInteger rowIndex = new AtomicInteger(0);
