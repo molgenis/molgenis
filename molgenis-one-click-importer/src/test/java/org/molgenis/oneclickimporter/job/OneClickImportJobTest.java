@@ -46,9 +46,6 @@ public class OneClickImportJobTest
 	@Mock
 	private FileStore fileStore;
 
-	@Mock
-	private PermissionSystemService permissionSystemService;
-
 	private OneClickImportJob oneClickImporterJob;
 
 	@BeforeClass
@@ -81,7 +78,7 @@ public class OneClickImportJobTest
 		when(entityService.createEntityType(dataCollection, "simple_valid")).thenReturn(entityType);
 
 		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
-				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
+				oneClickImporterNamingService, entityService, fileStore);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
@@ -90,7 +87,6 @@ public class OneClickImportJobTest
 		verify(oneClickImporterService).buildDataCollectionsFromExcel(sheets);
 		verify(progress).status("Importing [Sheet1] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection, "simple_valid");
-		verify(permissionSystemService).giveUserWriteMetaPermissions(newArrayList(entityType));
 	}
 
 	@Test
@@ -117,7 +113,7 @@ public class OneClickImportJobTest
 		when(entityService.createEntityType(dataCollection, "simple_valid")).thenReturn(entityType);
 
 		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
-				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
+				oneClickImporterNamingService, entityService, fileStore);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
@@ -126,7 +122,6 @@ public class OneClickImportJobTest
 		verify(oneClickImporterService).buildDataCollectionFromCsv("simple_valid", lines);
 		verify(progress).status("Importing [file_1] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection, "simple_valid");
-		verify(permissionSystemService).giveUserWriteMetaPermissions(newArrayList(entityType));
 	}
 
 	@Test
@@ -195,7 +190,7 @@ public class OneClickImportJobTest
 		when(entityService.createEntityType(dataCollection4, "simple_valid")).thenReturn(entityType4);
 
 		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
-				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
+				oneClickImporterNamingService, entityService, fileStore);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 
@@ -223,9 +218,6 @@ public class OneClickImportJobTest
 
 		verify(progress).status("Importing [zip_file_4] into package [simple_valid]");
 		verify(entityService).createEntityType(dataCollection4, "simple_valid");
-
-		verify(permissionSystemService).giveUserWriteMetaPermissions(
-				newArrayList(entityType1, entityType2, entityType3, entityType4));
 	}
 
 	@Test(expectedExceptions = UnknownFileTypeException.class, expectedExceptionsMessageRegExp = "Zip file contains files which are not of type CSV")
@@ -240,7 +232,7 @@ public class OneClickImportJobTest
 		when(fileStore.getFile(filename)).thenReturn(file);
 
 		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
-				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
+				oneClickImporterNamingService, entityService, fileStore);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
@@ -257,7 +249,7 @@ public class OneClickImportJobTest
 		when(fileStore.getFile(filename)).thenReturn(file);
 
 		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
-				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
+				oneClickImporterNamingService, entityService, fileStore);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
@@ -274,7 +266,7 @@ public class OneClickImportJobTest
 		when(fileStore.getFile(filename)).thenReturn(file);
 
 		oneClickImporterJob = new OneClickImportJob(excelService, csvService, oneClickImporterService,
-				oneClickImporterNamingService, entityService, fileStore, permissionSystemService);
+				oneClickImporterNamingService, entityService, fileStore);
 
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
