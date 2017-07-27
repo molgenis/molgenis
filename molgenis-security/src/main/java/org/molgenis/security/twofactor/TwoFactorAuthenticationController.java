@@ -2,7 +2,6 @@ package org.molgenis.security.twofactor;
 
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,9 +41,12 @@ public class TwoFactorAuthenticationController
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_VALIDATION_URI)
 	public String validateKeyAndAuthenticate(Model model, @RequestBody String key)
 	{
-		if(twoFactorAuthenticationService.isVerificationCodeValid(key)) {
+		if (twoFactorAuthenticationService.isVerificationCodeValid(key))
+		{
 			twoFactorAuthenticationService.authenticate();
-		} else {
+		}
+		else
+		{
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid key found!");
 		}
 		return MolgenisLoginController.VIEW_LOGIN;
@@ -57,14 +59,15 @@ public class TwoFactorAuthenticationController
 		{
 			String userName = twoFactorAuthenticationService.getUnAuthenticatedUser();
 			model.addAttribute(TWO_FACTOR_UNAUTHENTICATED_USER_ATTRIBUTE, userName);
-		} catch (UsernameNotFoundException err) {
+		}
+		catch (UsernameNotFoundException err)
+		{
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No user found!");
 		}
 
 		model.addAttribute(TWO_FACTOR_IS_INITIAL_ATTRIBUTE, true);
 		return MolgenisLoginController.VIEW_LOGIN;
 	}
-
 
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_SECRET_URI)
 	public String setSecret(Model model, @RequestBody String secret)
@@ -75,6 +78,5 @@ public class TwoFactorAuthenticationController
 		model.addAttribute(TWO_FACTOR_IS_ENABLED_ATTRIBUTE, true);
 		return MolgenisLoginController.VIEW_LOGIN;
 	}
-
 
 }

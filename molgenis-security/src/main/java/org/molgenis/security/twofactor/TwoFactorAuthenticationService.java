@@ -1,7 +1,6 @@
 package org.molgenis.security.twofactor;
 
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
@@ -12,7 +11,6 @@ public interface TwoFactorAuthenticationService
 {
 
 	/**
-	 *
 	 * <p>Check verificationcode given by user from Google Authenticator</p>
 	 *
 	 * @param verificationCode code given by user from Google Authenticator
@@ -21,8 +19,6 @@ public interface TwoFactorAuthenticationService
 	boolean isVerificationCodeValid(String verificationCode) throws UsernameNotFoundException, BadCredentialsException;
 
 	/**
-	 *
-	 *
 	 * <p>Add generated userSecret to userdata.</p>
 	 *
 	 * @param secret
@@ -30,7 +26,6 @@ public interface TwoFactorAuthenticationService
 	void setSecretKey(String secret) throws UsernameNotFoundException;
 
 	/**
-	 *
 	 * <p>Has user 2 factor authentication enabled?</p>
 	 *
 	 * @return is ready
@@ -38,7 +33,6 @@ public interface TwoFactorAuthenticationService
 	boolean isEnabledForUser() throws UsernameNotFoundException;
 
 	/**
-	 *
 	 * <p>Check if the user is 2 factor authentication ready.</p>
 	 *
 	 * @return is configured
@@ -47,7 +41,6 @@ public interface TwoFactorAuthenticationService
 	boolean isConfiguredForUser() throws UsernameNotFoundException;
 
 	/**
-	 *
 	 * <p>Get user for QR-code generation</p>
 	 *
 	 * @return
@@ -56,17 +49,8 @@ public interface TwoFactorAuthenticationService
 	String getUnAuthenticatedUser() throws UsernameNotFoundException;
 
 	/**
-	 *
 	 * <p>Set the new Authentication object</p>
-	 *
 	 */
 	void authenticate() throws BadCredentialsException;
-
-
-
-
-
-
-
 
 }

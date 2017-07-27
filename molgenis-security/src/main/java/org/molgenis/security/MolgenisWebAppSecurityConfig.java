@@ -130,7 +130,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisChangePasswordFilter.class);
 
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http.authorizeRequests();
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
+				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
 		expressionInterceptUrlRegistry
@@ -185,48 +186,36 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.antMatchers('/' + PATH_SEGMENT_APPS + "/**").permitAll()
 
-				.anyRequest()
-					.denyAll()
-				.and()
+				.anyRequest().denyAll().and()
 
-				.httpBasic()
-					.authenticationEntryPoint(authenticationEntryPoint())
-				.and()
+				.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
 
-				.formLogin()
-					.loginPage("/login")
-					.failureUrl("/login?error")
-				.and()
+				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout()
-					.deleteCookies("JSESSIONID")
-					.addLogoutHandler((req, res, auth) ->
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
+		{
+			if (req.getSession(false) != null
+					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+			{
+				req.setAttribute("continueWithUnsupportedBrowser", true);
+			}
+		})
+
+				.logoutSuccessHandler((req, res, auth) ->
+				{
+					StringBuilder logoutSuccessUrl = new StringBuilder("/");
+					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
-						if (req.getSession(false) != null && req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
-						{
-							req.setAttribute("continueWithUnsupportedBrowser", true);
-						}
-					})
+						logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+					}
+					SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+				}).and()
 
-					.logoutSuccessHandler((req, res, auth) ->
-					{
-						StringBuilder logoutSuccessUrl = new StringBuilder("/");
-						if (req.getAttribute("continueWithUnsupportedBrowser") != null)
-						{
-							logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
-						}
-						SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-						logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
-						logoutSuccessHandler.onLogoutSuccess(req, res, auth);
-					})
-				.and()
-
-				.csrf()
-				.disable();
+				.csrf().disable();
 
 	}
-
-
 
 	@Bean
 	public AuthenticationProvider runAsAuthenticationProvider()
@@ -299,10 +288,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
-	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
+	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
+	{
 		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService);
 	}
-
 
 	@Bean
 	public RedirectStrategy redirectStrategy()
@@ -370,7 +359,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 			throw new RuntimeException(e);
 		}
 	}
-
 
 	@Bean
 	@Override

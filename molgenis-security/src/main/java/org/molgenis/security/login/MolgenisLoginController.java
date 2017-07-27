@@ -2,8 +2,6 @@ package org.molgenis.security.login;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Controller;
@@ -33,13 +31,12 @@ public class MolgenisLoginController
 	public String getLoginPage(Model model, HttpSession session)
 	{
 		if (session.getAttribute(SESSION_EXPIRED_SESSION_ATTRIBUTE) != null)
-		{	
+		{
 			model.addAttribute(ERROR_MESSAGE_ATTRIBUTE, ERROR_MESSAGE_SESSION_AUTHENTICATION);
 			session.removeAttribute(SESSION_EXPIRED_SESSION_ATTRIBUTE);
 		}
 		return VIEW_LOGIN;
 	}
-
 
 	@RequestMapping(method = RequestMethod.GET, params = "error")
 	public String getLoginErrorPage(Model model, HttpServletRequest request, HttpServletResponse response)

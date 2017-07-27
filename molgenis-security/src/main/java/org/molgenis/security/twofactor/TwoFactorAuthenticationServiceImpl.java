@@ -35,19 +35,25 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	private AppSettings appSettings;
 	private DataService dataService;
 
-	public TwoFactorAuthenticationServiceImpl(AppSettings appSettings, DataService dataService) {
+	public TwoFactorAuthenticationServiceImpl(AppSettings appSettings, DataService dataService)
+	{
 		this.appSettings = appSettings;
 		this.dataService = dataService;
 	}
 
 	@Override
-	public boolean isVerificationCodeValid(String verificationCode) throws BadCredentialsException, UsernameNotFoundException {
+	public boolean isVerificationCodeValid(String verificationCode)
+			throws BadCredentialsException, UsernameNotFoundException
+	{
 		boolean isValid = true;
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString())) {
-			User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
-			if (StringUtils.hasText(user.getSecretKey())) {
+		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString()))
+		{
+			User user = runAsSystem(() -> dataService.findOne(USER,
+					new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+			if (StringUtils.hasText(user.getSecretKey()))
+			{
 				if (verificationCode == null)
 				{
 					throw new BadCredentialsException("2 factor authentication code is mandatory");
@@ -57,27 +63,35 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 				{
 					throw new BadCredentialsException("Invalid 2 factor authentication code");
 				}
-			} else {
+			}
+			else
+			{
 				throw new BadCredentialsException("2 factor authentication secret key is not available");
 			}
 		}
 		return isValid;
 	}
 
-	private boolean isValidLong(String code) {
-		try {
+	private boolean isValidLong(String code)
+	{
+		try
+		{
 			Long.parseLong(code);
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e)
+		{
 			return false;
 		}
 		return true;
 	}
 
 	@Override
-	public void setSecretKey(String secret) throws UsernameNotFoundException {
+	public void setSecretKey(String secret) throws UsernameNotFoundException
+	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
-		if(user != null)
+		User user = runAsSystem(() -> dataService.findOne(USER,
+				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+		if (user != null)
 		{
 			user.setSecretKey(secret);
 		}
@@ -88,11 +102,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean isConfiguredForUser() throws UsernameNotFoundException {
+	public boolean isConfiguredForUser() throws UsernameNotFoundException
+	{
 		boolean isConfigured = false;
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
-		if(user != null)
+		User user = runAsSystem(() -> dataService.findOne(USER,
+				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+		if (user != null)
 		{
 			if (StringUtils.hasText(user.getSecretKey()))
 			{
@@ -107,13 +123,15 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean isEnabledForUser() {
+	public boolean isEnabledForUser()
+	{
 		boolean isEnabled = false;
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
-		if(user != null)
+		User user = runAsSystem(() -> dataService.findOne(USER,
+				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+		if (user != null)
 		{
-//			if (user.())
+			//			if (user.())
 			{
 				isEnabled = true;
 			}
@@ -126,18 +144,21 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public String getUnAuthenticatedUser() {
+	public String getUnAuthenticatedUser()
+	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return userDetails.getUsername();
 	}
 
 	@Override
-	public void authenticate() throws BadCredentialsException {
+	public void authenticate() throws BadCredentialsException
+	{
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
 		List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
 		updatedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION));
-		Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), updatedAuthorities);
+		Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(),
+				updatedAuthorities);
 
 		SecurityContextHolder.getContext().setAuthentication(newAuth);
 	}
