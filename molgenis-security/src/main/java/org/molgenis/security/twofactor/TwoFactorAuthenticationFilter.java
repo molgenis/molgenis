@@ -16,6 +16,7 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.DISABLED;
+import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.ENFORCED;
 
 public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 {
@@ -42,22 +43,27 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		{
 			//FIXME remove path hack
 			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
-					&& SecurityUtils.currentUserIsAuthenticated() && !SecurityUtils.currentUserHasRole(
-					SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION))
+					&& SecurityUtils.currentUserIsAuthenticated())
 			{
-				if (twoFactorAuthenticationService.isConfiguredForUser())
+				if (!isUserTwoFactorAuthenticated())
 				{
-					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-							TwoFactorAuthenticationController.URI
-									+ TwoFactorAuthenticationController.TWO_FACTOR_ENABLED_URI);
-					return;
-				}
-				else
-				{
-					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-							TwoFactorAuthenticationController.URI
-									+ TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
-					return;
+					if (isTwoFactorAuthenticationEnforced() || userUsesTwoFactorAuthentication())
+					{
+						if (twoFactorAuthenticationService.isConfiguredForUser())
+						{
+							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
+									TwoFactorAuthenticationController.URI
+											+ TwoFactorAuthenticationController.TWO_FACTOR_ENABLED_URI);
+							return;
+						}
+						else
+						{
+							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
+									TwoFactorAuthenticationController.URI
+											+ TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
+							return;
+						}
+					}
 				}
 			}
 		}
@@ -74,4 +80,19 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		return !appSettings.getTwoFactorAuthentication().equals(DISABLED.toString());
 	}
 
+	private boolean isTwoFactorAuthenticationEnforced()
+	{
+		return appSettings.getTwoFactorAuthentication().equals(ENFORCED.toString());
+	}
+
+	//TODO add 2fa option for users
+	private boolean userUsesTwoFactorAuthentication()
+	{
+		return true;
+	}
+
+	private boolean isUserTwoFactorAuthenticated()
+	{
+		return SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION);
+	}
 }
