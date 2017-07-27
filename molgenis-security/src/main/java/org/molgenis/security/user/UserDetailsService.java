@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.*;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
@@ -30,8 +31,8 @@ public class UserDetailsService implements org.springframework.security.core.use
 	@Autowired
 	public UserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
-		this.dataService = Objects.requireNonNull(dataService, "DataService is null");
-		this.grantedAuthoritiesMapper = Objects.requireNonNull(grantedAuthoritiesMapper,
+		this.dataService = requireNonNull(dataService, "DataService is null");
+		this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper,
 				"Granted authorities mapper is null");
 	}
 
