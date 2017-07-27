@@ -5,6 +5,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
@@ -24,6 +25,7 @@ import java.time.format.DateTimeParseException;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.Href.concatEntityHref;
+import static org.molgenis.navigator.NavigatorController.NAVIGATOR;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -63,7 +65,9 @@ public class OneClickImporterController extends MolgenisPluginController
 	{
 		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
-		model.addAttribute("baseUrl", getBaseUrl());
+		model.addAttribute("baseUrl", getBaseUrl(ONE_CLICK_IMPORTER));
+		model.addAttribute("navigatorBaseUrl", getBaseUrl(NAVIGATOR));
+		model.addAttribute("dataExplorerBaseUrl", getBaseUrl(DataExplorerController.ID));
 
 		return "view-one-click-importer";
 	}
@@ -102,8 +106,8 @@ public class OneClickImporterController extends MolgenisPluginController
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
-	private String getBaseUrl()
+	private String getBaseUrl(String plugin)
 	{
-		return menuReaderService.getMenu().findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER);
+		return menuReaderService.getMenu().findMenuItemPath(plugin);
 	}
 }

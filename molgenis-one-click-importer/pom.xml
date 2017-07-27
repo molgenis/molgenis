@@ -144,6 +144,16 @@
             <artifactId>molgenis-data-rest</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-navigator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-dataexplorer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
