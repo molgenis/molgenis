@@ -128,5 +128,6 @@ public class UserMetaData extends SystemEntityType
 									 .setDescription(
 											 "An identifier for the user, unique among all Google accounts and never reused.")
 									 .setNillable(true);
+
 	}
 }

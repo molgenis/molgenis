@@ -263,4 +263,5 @@ public class User extends StaticEntity
 	{
 		set(GOOGLEACCOUNTID, googleAccountId);
 	}
+
 }

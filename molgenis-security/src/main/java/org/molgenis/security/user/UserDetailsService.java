@@ -14,10 +14,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
@@ -33,10 +30,9 @@ public class UserDetailsService implements org.springframework.security.core.use
 	@Autowired
 	public UserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (grantedAuthoritiesMapper == null) throw new IllegalArgumentException("Granted authorities mapper is null");
-		this.dataService = dataService;
-		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
+		this.dataService = Objects.requireNonNull(dataService, "DataService is null");
+		this.grantedAuthoritiesMapper = Objects.requireNonNull(grantedAuthoritiesMapper,
+				"Granted authorities mapper is null");
 	}
 
 	@Override
@@ -64,14 +60,15 @@ public class UserDetailsService implements org.springframework.security.core.use
 	{
 		// user authorities
 		List<? extends Authority> authorities = getUserAuthorities(user);
-		List<GrantedAuthority> grantedAuthorities =
-				authorities != null ? Lists.transform(authorities,
-						(Function<Authority, GrantedAuthority>) authority -> new SimpleGrantedAuthority(authority.getRole())) : null;
+		List<GrantedAuthority> grantedAuthorities = authorities != null ? Lists.transform(authorities,
+				(Function<Authority, GrantedAuthority>) authority -> new SimpleGrantedAuthority(
+						authority.getRole())) : null;
 
 		// // user group authorities
 		List<GroupAuthority> groupAuthorities = getGroupAuthorities(user);
 		List<GrantedAuthority> grantedGroupAuthorities = groupAuthorities != null ? Lists.transform(groupAuthorities,
-				(Function<GroupAuthority, GrantedAuthority>) groupAuthority -> new SimpleGrantedAuthority(groupAuthority.getRole())) : null;
+				(Function<GroupAuthority, GrantedAuthority>) groupAuthority -> new SimpleGrantedAuthority(
+						groupAuthority.getRole())) : null;
 
 		// union of user and group authorities
 		Set<GrantedAuthority> allGrantedAuthorities = new HashSet<>();

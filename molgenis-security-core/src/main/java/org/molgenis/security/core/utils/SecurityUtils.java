@@ -19,6 +19,7 @@ public class SecurityUtils
 
 	public static final String AUTHORITY_SU = "ROLE_SU";
 	public static final String AUTHORITY_ANONYMOUS = "ROLE_ANONYMOUS";
+	public static final String AUTHORITY_TWO_FACTOR_AUTHENTICATION = "ROLE_TWO_FACTOR_AUTHENTICATED";
 
 	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
 	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
