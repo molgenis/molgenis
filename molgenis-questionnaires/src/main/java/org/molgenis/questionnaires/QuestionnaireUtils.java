@@ -13,9 +13,6 @@ public class QuestionnaireUtils
 {
 	/**
 	 * Get all MetaData entities that extend from QuestionnaireMetaData
-	 *
-	 * @param dataService
-	 * @return
 	 */
 	public static Stream<EntityType> findQuestionnairesMetaData(DataService dataService)
 	{

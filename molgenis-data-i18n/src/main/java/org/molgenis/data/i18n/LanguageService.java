@@ -49,8 +49,6 @@ public class LanguageService
 	 * "en": is default
 	 * "xx": is a placeholder for having your own language
 	 * "nl", "de", "es", "it", "pt", "fr": are extra languages
-	 *
-	 * @return
 	 */
 	public static Stream<String> getLanguageCodes()
 	{

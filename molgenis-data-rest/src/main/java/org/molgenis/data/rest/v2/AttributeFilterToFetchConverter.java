@@ -143,7 +143,6 @@ public class AttributeFilterToFetchConverter
 	/**
 	 * Create default entity fetch that fetches all attributes.
 	 *
-	 * @param entityType
 	 * @return default entity fetch or null
 	 */
 	public static Fetch createDefaultEntityFetch(EntityType entityType, String languageCode)
@@ -166,7 +165,6 @@ public class AttributeFilterToFetchConverter
 	 * Create default fetch for the given attribute. For attributes referencing entities the id and label value are
 	 * fetched. Additionally for file entities the URL is fetched. For other attributes the default fetch is null;
 	 *
-	 * @param attr
 	 * @return default attribute fetch or null
 	 */
 	public static Fetch createDefaultAttributeFetch(Attribute attr, String languageCode)

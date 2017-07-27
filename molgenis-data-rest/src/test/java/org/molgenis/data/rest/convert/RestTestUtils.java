@@ -295,9 +295,6 @@ public class RestTestUtils
 
 	/**
 	 * Removes permissions from UserAuthority table for a given user identifier
-	 *
-	 * @param adminToken
-	 * @param testUserId
 	 */
 	public static void removeRightsForUser(String adminToken, String testUserId)
 	{

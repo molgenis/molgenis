@@ -242,10 +242,6 @@ public class SortaServiceImpl implements SortaService
 	 * A helper function to check if the ontology term (OT) contains the ontology annotations provided in input. If the
 	 * OT has the same annotation, the OT will be considered as a good match and the similarity scores 100 are allocated
 	 * to the OT
-	 *
-	 * @param inputEntity
-	 * @param ontologyTermEntity
-	 * @return
 	 */
 	private Entity calculateNGromOTAnnotations(Entity inputEntity, Entity ontologyTermEntity)
 	{
@@ -272,10 +268,6 @@ public class SortaServiceImpl implements SortaService
 
 	/**
 	 * A helper function to calculate the best NGram score from a list ontologyTerm synonyms
-	 *
-	 * @param queryString
-	 * @param ontologyTermEntity
-	 * @return
 	 */
 	private Entity findSynonymWithHighestNgramScore(String ontologyIri, String queryString, Entity ontologyTermEntity)
 	{
@@ -367,9 +359,6 @@ public class SortaServiceImpl implements SortaService
 	 * A helper function to produce fuzzy match query with 80% similarity in elasticsearch because PorterStem does not
 	 * work in some cases, e.g. the stemming results for placenta and placental are different, therefore would be missed
 	 * by elasticsearch
-	 *
-	 * @param queryString
-	 * @return
 	 */
 
 	private String stemQuery(String queryString)

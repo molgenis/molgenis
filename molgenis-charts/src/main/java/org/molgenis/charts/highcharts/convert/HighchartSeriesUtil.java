@@ -27,7 +27,6 @@ public class HighchartSeriesUtil
 	 * Parse the xyDataSeries objects list to a Series objects list. The new series object can be used for xy data
 	 * charts (like scatter plot)
 	 *
-	 * @param xYDataSeries
 	 * @return Series
 	 */
 	public List<Series> parseToXYDataSeriesList(List<XYDataSerie> xYDataSeries)
@@ -44,7 +43,6 @@ public class HighchartSeriesUtil
 	 * Parse the boxPlotSeries objects list to a Series objects list. The new series object can be used only for
 	 * BoxPlotSeries
 	 *
-	 * @param boxPlotSeries
 	 * @return series
 	 */
 	public List<Series> parseToBoxPlotSeriesList(List<BoxPlotSerie> boxPlotSeries)
@@ -60,7 +58,6 @@ public class HighchartSeriesUtil
 	/**
 	 * Parse the xYDataSerie to a Series object computable with the Highcharts xy series standard.
 	 *
-	 * @param xYDataSerie
 	 * @return Series
 	 */
 	public Series parsexYDataSerieToSeries(XYDataSerie xYDataSerie)
@@ -85,7 +82,6 @@ public class HighchartSeriesUtil
 	/**
 	 * Parse the boxPlotSerie to a Series object computable with the Highcharts box plot series standard
 	 *
-	 * @param boxPlotSerie
 	 * @return series
 	 */
 	public Series parseBoxPlotSerieToSeries(BoxPlotSerie boxPlotSerie)
@@ -99,9 +95,6 @@ public class HighchartSeriesUtil
 	/**
 	 * Parse the x and y data-objects to object computable with the Highcharts scatter plot standard.
 	 *
-	 * @param xydata
-	 * @param xValueFieldTypeEnum
-	 * @param yValueFieldTypeEnum
 	 * @return List<Object>
 	 */
 	public List<Object> parseXYDataToList(List<XYData> xydata, AttributeType xValueFieldTypeEnum,

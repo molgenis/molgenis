@@ -145,8 +145,6 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 	 * Return new batch, should not return null but empty list if no more elements are available
 	 *
 	 * @param offset    (startIndex)
-	 * @param batchSize
-	 * @return
 	 */
 	protected abstract Iterable<T> getBatch(int offset, int batchSize);
 }

@@ -34,13 +34,6 @@ public class OntologyTermRepository
 		this.dataService = requireNonNull(dataService);
 	}
 
-	/**
-	 * FIXME write docs
-	 *
-	 * @param term
-	 * @param pageSize
-	 * @return
-	 */
 	public List<OntologyTerm> findOntologyTerms(String term, int pageSize)
 	{
 		Iterable<Entity> ontologyTermEntities;
@@ -164,8 +157,6 @@ public class OntologyTermRepository
 	 * Calculate the distance between any two ontology terms in the ontology tree structure by calculating the
 	 * difference in nodePaths.
 	 *
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
 	 * @return the distance between two ontology terms
 	 */
 	public int getOntologyTermDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2)
@@ -206,8 +197,6 @@ public class OntologyTermRepository
 	 * Calculate the distance between nodePaths, e.g. 0[0].1[1].2[2], 0[0].2[1].2[2]. The distance is the non-overlap
 	 * part of the strings
 	 *
-	 * @param nodePath1
-	 * @param nodePath2
 	 * @return distance
 	 */
 	public int calculateNodePathDistance(String nodePath1, String nodePath2)
@@ -228,7 +217,6 @@ public class OntologyTermRepository
 	/**
 	 * Retrieve all descendant ontology terms
 	 *
-	 * @param ontologyTerm
 	 * @return a list of {@link OntologyTerm}
 	 */
 	public List<OntologyTerm> getChildren(OntologyTerm ontologyTerm)
