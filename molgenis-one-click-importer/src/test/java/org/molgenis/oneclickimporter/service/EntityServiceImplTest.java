@@ -11,6 +11,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.Impl.EntityServiceImpl;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -56,6 +57,9 @@ public class EntityServiceImplTest
 
 	@Mock
 	private PackageFactory packageFactory;
+
+	@Mock
+	private PermissionSystemService permissionSystemService;
 
 	private EntityService entityService;
 
@@ -128,7 +132,7 @@ public class EntityServiceImplTest
 
 		entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator, dataService,
 				metaDataService, entityManager, attributeTypeService, oneClickImporterService,
-				oneClickImporterNamingService, packageFactory);
+				oneClickImporterNamingService, packageFactory, permissionSystemService);
 
 		EntityType entityType = entityService.createEntityType(dataCollection, "package_");
 		assertEquals(entityType.getId(), generatedId);
@@ -136,5 +140,6 @@ public class EntityServiceImplTest
 		verify(table).setPackage(package_);
 		verify(table).setId(generatedId);
 		verify(table).setLabel(tableName);
+		verify(permissionSystemService).giveUserWriteMetaPermissions(table);
 	}
 }
