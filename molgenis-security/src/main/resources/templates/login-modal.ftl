@@ -26,10 +26,10 @@
                              data-onsuccess="onSignIn"></div>
                     </form>
                     <script>
-                        function onSignIn(googleUser) {
+                        function onSignIn (googleUser) {
                             <#if !(errorMessage??)>
-                                $('#google-id-token').val(googleUser.getAuthResponse().id_token);
-                                $('#login-google-form').submit();
+                                $('#google-id-token').val(googleUser.getAuthResponse().id_token)
+                                $('#login-google-form').submit()
                             </#if>
                         }
                     </script>
@@ -37,54 +37,60 @@
             <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
             </#if>
             <#-- login form -->
-                <#if is2faEnabled??>
-                    <form id="2fakey-form" role="form" method="POST" action="/2fa/validate">
-                        <div class="form-group">
-                            <input id="text-field" type="text" placeholder="Key" class="form-control" name="key" required>
+            <#if is2faEnabled??>
+                <form id="2fakey-form" role="form" method="POST" action="/2fa/validate">
+                    <div class="form-group">
+                        <input id="text-field" type="text" placeholder="Key" class="form-control" name="key" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button id="signin-button" type="submit" class="btn btn-success">Verify</button>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <button id="signin-button" type="submit" class="btn btn-success">Verify</button>
-                            </div>
+                    </div>
+                </form>
+            <#elseif is2faInitial??>
+                <form id="initial-2fa-form" role="form" method="POST" action="/2fa/secret">
+                    <div class="form-group">
+                        <div id="qrcode"></div>
+                        <script type="text/javascript">
+                            new QRCode(document.getElementById('qrcode'), 'otpauth%3A//totp/User%2540Realm%3Fsecret%3DKO5DE2YD3Q2ZXEOO%26issuer%3DIssuer%2520Name&admin')
+                        </script>
+                    <#--<img src="https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=otpauth%3A//totp/User%2540Realm%3Fsecret%3DKO5DE2YD3Q2ZXEOO%26issuer%3DIssuer%2520Name&admin=UTF-8"-->
+                    <#--style="height:200px; widht:200px" name="secret"/>-->
+                    </div>
+                    <div class="form-group">
+                        <input id="text-field" type="text" placeholder="Secret" class="form-control" name="secret"
+                               required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button id="signin-button" type="submit" class="btn btn-success">Save</button>
                         </div>
-                    </form>
-                <#elseif is2faInitial??>
-                    <form id="initial-2fa-form" role="form" method="POST" action="/2fa/secret">
-                        <div class="form-group">
-                            <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=otpauth%3A//totp/User%2540Realm%3Fsecret%3DKO5DE2YD3Q2ZXEOO%26issuer%3DIssuer%2520Name&admin=UTF-8" style="height:200px; widht:200px" name="secret"/>
+                    </div>
+                </form>
+            <#else>
+                <form id="login-form" role="form" method="POST" action="/login">
+                    <div class="form-group">
+                        <input id="username-field" type="text" placeholder="Username" class="form-control"
+                               name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <input id="password-field" type="password" placeholder="Password" class="form-control"
+                               name="password" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
                         </div>
-                        <div class="form-group">
-                            <input id="text-field" type="text" placeholder="Secret" class="form-control" name="secret" required>
+                        <div class="col-md-8">
+                            <p class="pull-right"><a class="modal-href" href="/account/password/reset"
+                                                     data-target="resetpassword-modal-container">
+                                <small>Forgot password?</small>
+                            </a></p>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <button id="signin-button" type="submit" class="btn btn-success">Save</button>
-                            </div>
-                        </div>
-                    </form>
-                <#else>
-                    <form id="login-form" role="form" method="POST" action="/login">
-                        <div class="form-group">
-                            <input id="username-field" type="text" placeholder="Username" class="form-control"
-                                   name="username" required>
-                        </div>
-                        <div class="form-group">
-                            <input id="password-field" type="password" placeholder="Password" class="form-control"
-                                   name="password" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
-                            </div>
-                            <div class="col-md-8">
-                                <p class="pull-right"><a class="modal-href" href="/account/password/reset"
-                                                         data-target="resetpassword-modal-container">
-                                    <small>Forgot password?</small>
-                                </a></p>
-                            </div>
-                        </div>
-                    </form>
-                </#if>
+                    </div>
+                </form>
+            </#if>
             <#if googleSignIn>
             </div>
             </div>
@@ -105,46 +111,46 @@
 <div id="resetpassword-modal-container"></div>
 <script type="text/javascript">
     $(function () {
-        var modal = $('#login-modal');
-        var submitBtn = $('#login-btn');
-        var form = $('#login-form');
-        form.validate();
+        var modal = $('#login-modal')
+        var submitBtn = $('#login-btn')
+        var form = $('#login-form')
+        form.validate()
 
     <#-- modal events -->
         modal.on('hide.bs.modal', function (e) {
-            e.stopPropagation();
-            form[0].reset();
-            $('.text-error', modal).remove();
-            $('.alert', modal).remove();
-        });
+            e.stopPropagation()
+            form[0].reset()
+            $('.text-error', modal).remove()
+            $('.alert', modal).remove()
+        })
 
     <#-- form events -->
         form.submit(function (e) {
             if (!form.valid()) {
-                e.preventDefault();
-                e.stopPropagation();
+                e.preventDefault()
+                e.stopPropagation()
             }
-        });
+        })
         submitBtn.click(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            form.submit();
-        });
+            e.preventDefault()
+            e.stopPropagation()
+            form.submit()
+        })
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
             if (e.which == 13) {
-                e.preventDefault();
-                e.stopPropagation();
-                form.submit();
+                e.preventDefault()
+                e.stopPropagation()
+                form.submit()
             }
-        });
+        })
 
     <#-- submodal events -->
         $(document).on('molgenis-registered', function (e, msg) {
-            $('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
-        });
+            $('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
+        })
         $(document).on('molgenis-passwordresetted', function (e, msg) {
-            $('#alert-container', modal).empty();
-            $('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
-        });
-    });
+            $('#alert-container', modal).empty()
+            $('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
+        })
+    })
 </script>

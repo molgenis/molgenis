@@ -41,7 +41,8 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 	{
 		if (isTwoFactorAuthenticationEnabled())
 		{
-			if (SecurityUtils.currentUserIsAuthenticated() && httpServletRequest.getRequestURI().equals("/"))
+			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
+					&& SecurityUtils.currentUserIsAuthenticated())
 			{
 				if (!isUserTwoFactorAuthenticated())
 				{

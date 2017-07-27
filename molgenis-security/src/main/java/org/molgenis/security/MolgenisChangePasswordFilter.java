@@ -40,11 +40,7 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean
 
 		if ((authentication != null) && authentication.isAuthenticated() && !authentication.getName()
 																						   .equals(ANONYMOUS_USERNAME)
-				&& !httpRequest.getRequestURI().toLowerCase().endsWith(CHANGE_PASSWORD_URI.toLowerCase())
-				&& !httpRequest.getRequestURI().toLowerCase().startsWith("/img/") && !httpRequest.getRequestURI()
-																								 .toLowerCase()
-																								 .startsWith("/css/")
-				&& !httpRequest.getRequestURI().toLowerCase().startsWith("/js/"))
+				&& !httpRequest.getRequestURI().toLowerCase().endsWith(CHANGE_PASSWORD_URI.toLowerCase()))
 		{
 			User user = userService.getUser(authentication.getName());
 			if (user == null)
