@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/2fa")
@@ -20,7 +21,6 @@ public class TwoFactorAuthenticationController
 	private static final String TWO_FACTOR_SECRET_URI = "/secret";
 
 	private static final String TWO_FACTOR_IS_INITIAL_ATTRIBUTE = "is2faInitial";
-	private static final String TWO_FACTOR_UNAUTHENTICATED_USER_ATTRIBUTE = "unAuthUserName";
 	private static final String TWO_FACTOR_IS_ENABLED_ATTRIBUTE = "is2faEnabled";
 
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
@@ -39,9 +39,9 @@ public class TwoFactorAuthenticationController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_VALIDATION_URI)
-	public String validateKeyAndAuthenticate(Model model, @RequestBody String key)
+	public String validateVerificationCodeAndAuthenticate(Model model, @RequestBody String verificationCode)
 	{
-		if (twoFactorAuthenticationService.isVerificationCodeValid(key))
+		if (twoFactorAuthenticationService.isVerificationCodeValid(verificationCode))
 		{
 			twoFactorAuthenticationService.authenticate();
 		}
@@ -49,7 +49,7 @@ public class TwoFactorAuthenticationController
 		{
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid key found!");
 		}
-		return MolgenisLoginController.VIEW_LOGIN;
+		return "redirect:/";
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_INITIAL_URI)
@@ -57,8 +57,9 @@ public class TwoFactorAuthenticationController
 	{
 		try
 		{
-			String userName = twoFactorAuthenticationService.getUnAuthenticatedUser();
-			model.addAttribute(TWO_FACTOR_UNAUTHENTICATED_USER_ATTRIBUTE, userName);
+			String secretKey = twoFactorAuthenticationService.generateSecretKey();
+			model.addAttribute("secretKey", secretKey);
+			model.addAttribute("authenticatorURI", twoFactorAuthenticationService.getGoogleAuthenticatorURI(secretKey));
 		}
 		catch (UsernameNotFoundException err)
 		{
@@ -70,13 +71,13 @@ public class TwoFactorAuthenticationController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_SECRET_URI)
-	public String setSecret(Model model, @RequestBody String secret)
+	public String setSecret(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
 	{
+		twoFactorAuthenticationService.tryVerificationCode(verificationCode, secretKey);
+		twoFactorAuthenticationService.setSecretKey(secretKey);
+		twoFactorAuthenticationService.authenticate();
 
-		twoFactorAuthenticationService.setSecretKey(secret);
-
-		model.addAttribute(TWO_FACTOR_IS_ENABLED_ATTRIBUTE, true);
-		return MolgenisLoginController.VIEW_LOGIN;
+		return "redirect:/";
 	}
 
 }

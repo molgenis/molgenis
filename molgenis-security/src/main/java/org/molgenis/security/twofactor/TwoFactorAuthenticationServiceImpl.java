@@ -1,5 +1,6 @@
 package org.molgenis.security.twofactor;
 
+import org.apache.commons.codec.binary.Base32;
 import org.jboss.aerogear.security.otp.Totp;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
@@ -18,6 +19,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +72,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		return isValid;
 	}
 
+	@Override
+	public boolean tryVerificationCode(String verificationCode, String secretKey)
+	{
+		final Totp totp = new Totp(secretKey);
+		return isValidLong(verificationCode) && totp.verify(verificationCode);
+	}
+
 	private boolean isValidLong(String code)
 	{
 		try
@@ -90,6 +101,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		if (user != null)
 		{
 			user.setSecretKey(secret);
+			runAsSystem(() -> dataService.update(USER, user));
 		}
 		else
 		{
@@ -156,6 +168,33 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 				updatedAuthorities);
 
 		SecurityContextHolder.getContext().setAuthentication(newAuth);
+	}
+
+	@Override
+	public String generateSecretKey()
+	{
+		SecureRandom random = new SecureRandom();
+		byte[] bytes = new byte[20];
+		random.nextBytes(bytes);
+		Base32 base32 = new Base32();
+		return base32.encodeToString(bytes);
+	}
+
+	@Override
+	public String getGoogleAuthenticatorURI(String secretKey)
+	{
+		String normalizedBase32Key = secretKey.replace(" ", "").toUpperCase();
+		String user = "";
+		try
+		{
+			return "otpauth://totp/" + URLEncoder.encode("molgenis" + ":" + "admin", "UTF-8").replace("+", "%20")
+					+ "?secret=" + URLEncoder.encode(normalizedBase32Key, "UTF-8").replace("+", "%20") + "&issuer="
+					+ URLEncoder.encode("molgenis", "UTF-8").replace("+", "%20");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new IllegalStateException(e);
+		}
 	}
 
 }

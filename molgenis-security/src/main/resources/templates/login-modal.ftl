@@ -48,26 +48,41 @@
                         </div>
                     </div>
                 </form>
+
             <#elseif is2faInitial??>
-                <form id="initial-2fa-form" role="form" method="POST" action="/2fa/secret">
+                <form id="initial-2fa-form" method="POST" action="/2fa/secret">
+                    <div class="form-group" style="padding-bottom: 5px;">
+                        <b>Two Factor Authentication Set-up</b>
+                        <p>Please configure your two factor authentication by scanning the QR code with the <a
+                                href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
+                                target="_blank">Google Authenticator app</a> and enter the verification code in the
+                            field below to confirm.</p>
+                    </div>
                     <div class="form-group">
-                        <div id="qrcode"></div>
+                        <div class="col-md-12 text-center">
+                            <div id="qrcode" style="width: 50%; margin: 0 auto;"></div>
+                            <em class="text-muted">${secretKey}</em>
+                            <hr>
+                        </div>
                         <script type="text/javascript">
-                            new QRCode(document.getElementById('qrcode'), 'otpauth%3A//totp/User%2540Realm%3Fsecret%3DKO5DE2YD3Q2ZXEOO%26issuer%3DIssuer%2520Name&admin')
+                            new QRCode(document.getElementById('qrcode'), '${authenticatorURI}')
                         </script>
-                    <#--<img src="https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=otpauth%3A//totp/User%2540Realm%3Fsecret%3DKO5DE2YD3Q2ZXEOO%26issuer%3DIssuer%2520Name&admin=UTF-8"-->
-                    <#--style="height:200px; widht:200px" name="secret"/>-->
                     </div>
-                    <div class="form-group">
-                        <input id="text-field" type="text" placeholder="Secret" class="form-control" name="secret"
-                               required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <button id="signin-button" type="submit" class="btn btn-success">Save</button>
+                    <div>
+                        <div class="input-group col-md-6 col-md-offset-3">
+                            <input id="verification-code-field"
+                                   placeholder="Enter verification code..."
+                                   class="form-control"
+                                   name="verificationCode"
+                                   required autofocus>
+                            <span class="input-group-btn">
+                            <button id="verify" class="btn btn-success">Verify</button>
+                            </span>
+                            <input type="hidden" name="secretKey" value="${secretKey}"/>
                         </div>
                     </div>
                 </form>
+
             <#else>
                 <form id="login-form" role="form" method="POST" action="/login">
                     <div class="form-group">
