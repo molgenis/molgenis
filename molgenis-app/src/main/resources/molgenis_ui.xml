@@ -22,7 +22,7 @@
 			<plugin id="feedback" name="Feedback" url="feedback"/>
 			<plugin id="gavin-app" name="Gavin" url="gavin-app"/>
             <plugin id="jobs" name="Job overview" url="jobs" />
-			<plugin id="pathways" name="Pathways" url="pathways"
+			<plugin id="pathways" name="Pathways" url="pathways"/>
 			<plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="scripts" name="Scripts" url="scripts" />
