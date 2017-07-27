@@ -30,22 +30,15 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 {
 	private static final int ID_BATCH_SIZE = 1000;
 
-	private final Repository<Entity> decoratedRepository;
 	private final L1Cache l1Cache;
 
 	private final boolean cacheable;
 
-	public L1CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L1Cache l1Cache)
+	public L1CacheRepositoryDecorator(Repository<Entity> delegateRepository, L1Cache l1Cache)
 	{
-		this.decoratedRepository = requireNonNull(decoratedRepository);
+		super(delegateRepository);
 		this.l1Cache = requireNonNull(l1Cache);
-		this.cacheable = decoratedRepository.getCapabilities().containsAll(newArrayList(CACHEABLE, WRITABLE));
-	}
-
-	@Override
-	public Repository<Entity> delegate()
-	{
-		return decoratedRepository;
+		this.cacheable = delegateRepository.getCapabilities().containsAll(newArrayList(CACHEABLE, WRITABLE));
 	}
 
 	@Override

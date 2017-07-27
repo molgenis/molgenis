@@ -12,19 +12,12 @@ import static java.util.Objects.requireNonNull;
 
 public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Language>
 {
-	private final Repository<Language> decorated;
 	private final LanguageService languageService;
 
-	public LanguageRepositoryDecorator(Repository<Language> decorated, LanguageService languageService)
+	public LanguageRepositoryDecorator(Repository<Language> delegateRepository, LanguageService languageService)
 	{
-		this.decorated = requireNonNull(decorated);
+		super(delegateRepository);
 		this.languageService = requireNonNull(languageService);
-	}
-
-	@Override
-	protected Repository<Language> delegate()
-	{
-		return decorated;
 	}
 
 	@Override
@@ -69,7 +62,7 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 		else
 		{
 			// Add language
-			decorated.add(language);
+			delegate().add(language);
 		}
 	}
 

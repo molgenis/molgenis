@@ -17,27 +17,20 @@ import java.util.stream.Stream;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
 
 public class TransactionalRepositoryDecoratorTest
 {
 	private TransactionalRepositoryDecorator<Entity> transactionalRepo;
-	private Repository<Entity> decoratedRepo;
+	private Repository<Entity> delegateRepository;
 	private PlatformTransactionManager transactionManager;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
+		delegateRepository = mock(Repository.class);
 		transactionManager = mock(PlatformTransactionManager.class);
-		transactionalRepo = new TransactionalRepositoryDecorator<>(decoratedRepo, transactionManager);
-	}
-
-	@Test
-	public void delegate() throws Exception
-	{
-		assertEquals(transactionalRepo.delegate(), decoratedRepo);
+		transactionalRepo = new TransactionalRepositoryDecorator<>(delegateRepository, transactionManager);
 	}
 
 	@Test
@@ -48,7 +41,7 @@ public class TransactionalRepositoryDecoratorTest
 		int batchSize = 1000;
 		transactionalRepo.forEachBatched(consumer, batchSize);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).forEachBatched(consumer, batchSize);
+		verify(delegateRepository).forEachBatched(consumer, batchSize);
 	}
 
 	@Test
@@ -60,7 +53,7 @@ public class TransactionalRepositoryDecoratorTest
 		int batchSize = 1000;
 		transactionalRepo.forEachBatched(fetch, consumer, batchSize);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).forEachBatched(fetch, consumer, batchSize);
+		verify(delegateRepository).forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Test
@@ -68,7 +61,7 @@ public class TransactionalRepositoryDecoratorTest
 	{
 		transactionalRepo.count();
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).count();
+		verify(delegateRepository).count();
 	}
 
 	@Test
@@ -78,7 +71,7 @@ public class TransactionalRepositoryDecoratorTest
 		Query<Entity> query = mock(Query.class);
 		transactionalRepo.count(query);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).count(query);
+		verify(delegateRepository).count(query);
 	}
 
 	@Test
@@ -88,7 +81,7 @@ public class TransactionalRepositoryDecoratorTest
 		Query<Entity> query = mock(Query.class);
 		transactionalRepo.findAll(query);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).findAll(query);
+		verify(delegateRepository).findAll(query);
 	}
 
 	@Test
@@ -98,7 +91,7 @@ public class TransactionalRepositoryDecoratorTest
 		Stream<Object> entityIds = mock(Stream.class);
 		transactionalRepo.findAll(entityIds);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).findAll(entityIds);
+		verify(delegateRepository).findAll(entityIds);
 	}
 
 	@Test
@@ -109,7 +102,7 @@ public class TransactionalRepositoryDecoratorTest
 		Fetch fetch = mock(Fetch.class);
 		transactionalRepo.findAll(entityIds, fetch);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).findAll(entityIds, fetch);
+		verify(delegateRepository).findAll(entityIds, fetch);
 	}
 
 	@Test
@@ -119,7 +112,7 @@ public class TransactionalRepositoryDecoratorTest
 		Query<Entity> query = mock(Query.class);
 		transactionalRepo.findOne(query);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).findOne(query);
+		verify(delegateRepository).findOne(query);
 	}
 
 	@Test
@@ -128,7 +121,7 @@ public class TransactionalRepositoryDecoratorTest
 		Object id = mock(Object.class);
 		transactionalRepo.findOneById(id);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).findOneById(id);
+		verify(delegateRepository).findOneById(id);
 	}
 
 	@Test
@@ -138,7 +131,7 @@ public class TransactionalRepositoryDecoratorTest
 		Fetch fetch = mock(Fetch.class);
 		transactionalRepo.findOneById(id, fetch);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).findOneById(id, fetch);
+		verify(delegateRepository).findOneById(id, fetch);
 	}
 
 	@Test
@@ -147,7 +140,7 @@ public class TransactionalRepositoryDecoratorTest
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		transactionalRepo.aggregate(aggregateQuery);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).aggregate(aggregateQuery);
+		verify(delegateRepository).aggregate(aggregateQuery);
 	}
 
 	@Test
@@ -156,7 +149,7 @@ public class TransactionalRepositoryDecoratorTest
 		Entity entity = mock(Entity.class);
 		transactionalRepo.update(entity);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).update(entity);
+		verify(delegateRepository).update(entity);
 	}
 
 	@Test
@@ -166,7 +159,7 @@ public class TransactionalRepositoryDecoratorTest
 		Stream<Entity> entityStream = mock(Stream.class);
 		transactionalRepo.update(entityStream);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).update(entityStream);
+		verify(delegateRepository).update(entityStream);
 	}
 
 	@Test
@@ -175,7 +168,7 @@ public class TransactionalRepositoryDecoratorTest
 		Entity entity = mock(Entity.class);
 		transactionalRepo.delete(entity);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).delete(entity);
+		verify(delegateRepository).delete(entity);
 	}
 
 	@Test
@@ -185,7 +178,7 @@ public class TransactionalRepositoryDecoratorTest
 		Stream<Entity> entityStream = mock(Stream.class);
 		transactionalRepo.delete(entityStream);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).delete(entityStream);
+		verify(delegateRepository).delete(entityStream);
 	}
 
 	@Test
@@ -194,7 +187,7 @@ public class TransactionalRepositoryDecoratorTest
 		Object id = mock(Object.class);
 		transactionalRepo.deleteById(id);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).deleteById(id);
+		verify(delegateRepository).deleteById(id);
 	}
 
 	@Test
@@ -202,7 +195,7 @@ public class TransactionalRepositoryDecoratorTest
 	{
 		transactionalRepo.deleteAll();
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).deleteAll();
+		verify(delegateRepository).deleteAll();
 	}
 
 	@Test
@@ -212,7 +205,7 @@ public class TransactionalRepositoryDecoratorTest
 		Stream<Object> entityIds = mock(Stream.class);
 		transactionalRepo.deleteAll(entityIds);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).deleteAll(entityIds);
+		verify(delegateRepository).deleteAll(entityIds);
 	}
 
 	@Test
@@ -221,7 +214,7 @@ public class TransactionalRepositoryDecoratorTest
 		Entity entity = mock(Entity.class);
 		transactionalRepo.add(entity);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).add(entity);
+		verify(delegateRepository).add(entity);
 	}
 
 	@Test
@@ -231,7 +224,7 @@ public class TransactionalRepositoryDecoratorTest
 		Stream<Entity> entityStream = mock(Stream.class);
 		transactionalRepo.add(entityStream);
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).add(entityStream);
+		verify(delegateRepository).add(entityStream);
 	}
 
 	@Test
@@ -239,6 +232,6 @@ public class TransactionalRepositoryDecoratorTest
 	{
 		transactionalRepo.iterator();
 		verify(transactionManager).getTransaction(any(TransactionDefinition.class));
-		verify(decoratedRepo).iterator();
+		verify(delegateRepository).iterator();
 	}
 }
