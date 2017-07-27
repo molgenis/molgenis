@@ -9,6 +9,9 @@ describe('getters', () => {
             {
               'id': 'sys_App',
               'name': 'App',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'app',
@@ -21,6 +24,9 @@ describe('getters', () => {
             }, {
               'id': 'sys_FileMeta',
               'name': 'File metadata',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'filemetadata',
@@ -33,6 +39,9 @@ describe('getters', () => {
             }, {
               'id': 'sys_FreemarkerTemplate',
               'name': 'Freemarker template',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'freemarker',
@@ -45,6 +54,9 @@ describe('getters', () => {
             }, {
               'id': 'sys_ImportRun',
               'name': 'Import',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'importrun',
@@ -57,6 +69,9 @@ describe('getters', () => {
             }, {
               'id': 'sys_Language',
               'name': 'Language',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'language',
@@ -69,6 +84,9 @@ describe('getters', () => {
             }, {
               'id': 'sys_L10nString',
               'name': 'Localization',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'local',
@@ -81,6 +99,9 @@ describe('getters', () => {
             }, {
               'id': 'sys_Questionnaire',
               'name': 'Questionnaire',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'questionnaire',
@@ -93,6 +114,9 @@ describe('getters', () => {
             }, {
               'id': 'sys_StaticContent',
               'name': 'Static content',
+              'package': {
+                'id': 'test'
+              },
               'attributes': [
                 {
                   'id': 'static',
@@ -112,51 +136,88 @@ describe('getters', () => {
         nodeData: [
           {
             key: 'sys_App',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Application: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Application: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
           },
           {
             key: 'sys_FileMeta',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Filemeta: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Filemeta: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
           },
           {
             key: 'sys_FreemarkerTemplate',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Freemarker: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Freemarker: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
           },
           {
             key: 'sys_ImportRun',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Import: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Import: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
           },
           {
             key: 'sys_Language',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Language: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Language: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
           },
           {
             key: 'sys_L10nString',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Localization: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Localization: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
           },
           {
             key: 'sys_Questionnaire',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Questionnaire: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Questionnaire: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
           },
           {
             key: 'sys_StaticContent',
+            abstract: '',
+            color: '#FFFFFF',
+            extends: '',
+            group: 'test',
             items: [
-              {name: 'Static content: String', iskey: true, figure: 'Cubel', color: 'yellow'}
+              {name: 'Static content: String', iskey: true, figure: 'Triangle', color: '#F0EF9A'}
             ]
+          },
+          {
+            color: '#F0F0E9',
+            isGroup: true,
+            key: 'test'
           }
         ],
         linkData: [
