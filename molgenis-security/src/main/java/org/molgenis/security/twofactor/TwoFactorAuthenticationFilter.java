@@ -4,7 +4,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,22 +15,24 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.DISABLED;
+import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.ENFORCED;
 
 public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationFilter.class.getName());
 
-	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+	private final RedirectStrategy redirectStrategy;
 
 	private AppSettings appSettings;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
 	public TwoFactorAuthenticationFilter(AppSettings appSettings,
-			TwoFactorAuthenticationService twoFactorAuthenticationService)
+			TwoFactorAuthenticationService twoFactorAuthenticationService, RedirectStrategy redirectStrategy)
 	{
 		this.appSettings = requireNonNull(appSettings);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
+		this.redirectStrategy = requireNonNull(redirectStrategy);
 	}
 
 	@Override
@@ -40,24 +41,28 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 	{
 		if (isTwoFactorAuthenticationEnabled())
 		{
-			//FIXME remove path hack
 			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
-					&& SecurityUtils.currentUserIsAuthenticated() && !SecurityUtils.currentUserHasRole(
-					SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION))
+					&& SecurityUtils.currentUserIsAuthenticated())
 			{
-				if (twoFactorAuthenticationService.isConfiguredForUser())
+				if (!isUserTwoFactorAuthenticated())
 				{
-					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-							TwoFactorAuthenticationController.URI
-									+ TwoFactorAuthenticationController.TWO_FACTOR_ENABLED_URI);
-					return;
-				}
-				else
-				{
-					redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-							TwoFactorAuthenticationController.URI
-									+ TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
-					return;
+					if (isTwoFactorAuthenticationEnforced() || userUsesTwoFactorAuthentication())
+					{
+						if (twoFactorAuthenticationService.isConfiguredForUser())
+						{
+							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
+									TwoFactorAuthenticationController.URI
+											+ TwoFactorAuthenticationController.TWO_FACTOR_ENABLED_URI);
+							return;
+						}
+						else
+						{
+							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
+									TwoFactorAuthenticationController.URI
+											+ TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
+							return;
+						}
+					}
 				}
 			}
 		}
@@ -74,4 +79,19 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		return !appSettings.getTwoFactorAuthentication().equals(DISABLED.toString());
 	}
 
+	private boolean isTwoFactorAuthenticationEnforced()
+	{
+		return appSettings.getTwoFactorAuthentication().equals(ENFORCED.toString());
+	}
+
+	//TODO add 2fa option for users
+	private boolean userUsesTwoFactorAuthentication()
+	{
+		return true;
+	}
+
+	private boolean isUserTwoFactorAuthenticated()
+	{
+		return SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION);
+	}
 }

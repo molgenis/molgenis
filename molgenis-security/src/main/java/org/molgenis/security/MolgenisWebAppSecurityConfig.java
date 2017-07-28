@@ -39,6 +39,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.GrantedAuthority;
@@ -192,8 +193,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
-		{
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
 			if (req.getSession(false) != null
 					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 			{
@@ -201,8 +201,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 			}
 		})
 
-				.logoutSuccessHandler((req, res, auth) ->
-				{
+				.logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -215,6 +214,16 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.csrf().disable();
 
+	}
+
+	@Override
+	public void configure(WebSecurity web) throws Exception
+	{
+		web.ignoring()
+		   .antMatchers(PATTERN_CSS)
+		   .antMatchers(PATTERN_IMG)
+		   .antMatchers(PATTERN_JS)
+		   .antMatchers(PATTERN_FONTS);
 	}
 
 	@Bean
@@ -290,7 +299,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
 	{
-		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService);
+		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService, redirectStrategy());
 	}
 
 	@Bean

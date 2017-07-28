@@ -18,6 +18,8 @@ public interface TwoFactorAuthenticationService
 	 */
 	boolean isVerificationCodeValid(String verificationCode) throws UsernameNotFoundException, BadCredentialsException;
 
+	boolean tryVerificationCode(String verificationCode, String secretKey);
+
 	/**
 	 * <p>Add generated userSecret to userdata.</p>
 	 *
@@ -53,4 +55,7 @@ public interface TwoFactorAuthenticationService
 	 */
 	void authenticate() throws BadCredentialsException;
 
+	String generateSecretKey();
+
+	String getGoogleAuthenticatorURI(String secretKey);
 }

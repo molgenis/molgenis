@@ -18,13 +18,14 @@
     <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
     <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
     <script src="<@resource_href "/js/molgenis.js"/>"></script>
+    <script src="<@resource_href "/js/qrcode.min.js"/>"></script>
 <#if googleSignIn>
 <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
     <script>
-        function onLoad() {
+        function onLoad () {
             gapi.load('auth2', function () {
-                gapi.auth2.init();
-            });
+                gapi.auth2.init()
+            })
         }
     </script>
     <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
@@ -35,11 +36,11 @@
 <#include "/login-modal.ftl">
 <script type="text/javascript">
     $(function () {
-        $('#login-modal').modal({backdrop: 'static'});
+        $('#login-modal').modal({backdrop: 'static'})
     <#if errorMessage??>
-        $('#password-field').after($('<p class="text-error">${errorMessage?html}</p>'));
+        $('#password-field').after($('<p class="text-error">${errorMessage?html}</p>'))
     </#if>
-    });
+    })
 </script>
 </body>
 </html>	
