@@ -31,44 +31,44 @@
         <h5>Imports</h5>
         <ul class="imports-list list-unstyled">
 
-          <li v-for="upload in uploads" v-bind:key="upload.filename" class="upload-item">
+          <!-- Running job -->
+          <div v-if="job" v-show="job && job.status === 'RUNNING' || job.status === 'PENDING' ">
+            <i class="fa fa-spinner fa-pulse fa-fw "></i> {{job.file}}
+          </div>
 
-            <div v-show="upload.status === 'LOADING' ">
-              <i class="fa fa-spinner fa-pulse fa-fw "></i> {{upload.filename}}
+          <!-- List of finished jobs -->
+          <li v-for="job in finishedJobs" :key="job.file" class="upload-item">
+
+            <div v-show="job.status === 'FAILED'">
+              <i class="fa fa-times text-danger"></i> {{job.file}}
+              <div class="error-message text-muted"><em>Import failed; {{job.progressMessage}}</em></div>
             </div>
 
-            <div v-show="upload.status === 'ERROR'">
-              <i class="fa fa-times text-danger" ></i> {{upload.filename}}
-              <div class="error-message text-muted"><em>Import failed; {{upload.message}}</em></div>
-            </div>
+            <div v-show="job.status === 'SUCCESS' ">
 
-            <div v-show="upload.status === 'DONE' ">
-              <a target="_blank" :href="navigatorBaseUrl + '/' + upload.package">
-                <i class="fa fa-folder-open-o" ></i> {{upload.package}}
+              <a target="_blank" :href="navigatorBaseUrl + '/' + job.package">
+                <i class="fa fa-folder-open-o"></i> {{job.package}}
               </a>
 
               <ul class="list-unstyled">
-                <li v-for="table in upload.tables">
+                <li v-for="table in job.entityTypes">
                   <span>
                     <a target="_blank" :href="dataExplorerBaseUrl + '?entity=' + table.id">
-                       <i class="fa fa-list"></i> {{table.label}}
-                    </a>
+                      <i class="fa fa-list"></i> {{table.label}}
+                     </a>
                   </span>
                 </li>
               </ul>
+
             </div>
-
           </li>
-
         </ul>
       </div>
     </div>
-
   </div>
 </template>
 
 <style>
-
   .supported-types {
     padding-top: 1em;
     font-size: smaller;
@@ -92,78 +92,30 @@
     padding-top: 0.5em;
     font-size: smaller;
   }
-
 </style>
 
 <script>
-  import fetch from 'isomorphic-fetch'
+  import { mapState } from 'vuex'
+  import { IMPORT_FILE } from '../store/actions'
 
   export default {
     name: 'one-click-importer',
     data () {
       return {
-        uploads: [],
         navigatorBaseUrl: window.__INITIAL_STATE__.navigatorBaseUrl,
         dataExplorerBaseUrl: window.__INITIAL_STATE__.dataExplorerBaseUrl
       }
     },
+    computed: {
+      ...mapState(['job', 'finishedJobs'])
+    },
     methods: {
       importFile (event) {
         const file = event.target.files[0]
-        if (!file) {
-          return
-        }
-        let entity = {
-          filename: file.name,
-          status: 'LOADING'
-        }
-        this.uploads.unshift(entity)
+        if (!file) return
 
-        const formData = new FormData()
-        formData.append('file', file)
-
-        const options = {
-          body: formData,
-          method: 'POST',
-          credentials: 'same-origin'
-        }
-
-        const poller = this.pollJob
-
-        fetch('/plugin/one-click-importer/upload', options).then(response => {
-          response.text().then(poller).then(job => {
-            if (job.status === 'SUCCESS') {
-              entity.tables = job.entityTypes
-              entity.status = 'DONE'
-              entity.message = job.progressMessage
-              entity['package'] = job.package
-            } else {
-              entity.error = job.progressMessage
-              entity.message = job.progressMessage
-              entity.log = job.log
-              entity.status = 'ERROR'
-            }
-          })
-        })
-
+        this.$store.dispatch(IMPORT_FILE, file)
         this.$refs.fileInput.value = null
-      },
-      pollJob (jobUrl) {
-        const poller = this.pollJob
-
-        return new Promise((resolve) => {
-          return fetch(jobUrl, {credentials: 'same-origin'}).then(response => {
-            return response.json().then(job => {
-              if (job.status === 'RUNNING' || job.status === 'PENDING') {
-                setTimeout(function () {
-                  resolve(poller(jobUrl))
-                }, 1000)
-              } else {
-                resolve(job)
-              }
-            })
-          })
-        })
       }
     }
   }
