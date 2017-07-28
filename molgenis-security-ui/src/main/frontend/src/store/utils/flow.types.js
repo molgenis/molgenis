@@ -48,6 +48,8 @@ export type Row = {
   entityLabel: string
 }
 
+export type SidType = 'role' | 'user'
+
 export type State = {
   me: PrincipalSid,
   roles: Array<Role>,
@@ -55,6 +57,7 @@ export type State = {
   users: ?Array<string>,
   groups: ?Array<string>,
   permissions: Array<string>,
+  sidType: SidType,
   selectedEntityTypeId: ?string,
   entityTypes: Array<EntityType>,
   rows: Array<Row>,

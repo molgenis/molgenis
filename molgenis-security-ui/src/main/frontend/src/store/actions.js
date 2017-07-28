@@ -1,8 +1,16 @@
-import {delete_, get, post} from '@molgenis/molgenis-api-client'
-import {SET_ENTITY_TYPES, CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_FILTER, SET_GROUPS, SET_ROLES, SET_ROWS,
+import { delete_, get, post } from '@molgenis/molgenis-api-client'
+import {
+  CANCEL_CREATE_ROLE,
+  CANCEL_UPDATE_ROLE,
+  SET_ENTITY_TYPES,
+  SET_FILTER,
+  SET_GROUPS,
+  SET_ROLES,
+  SET_ROWS,
   SET_SELECTED_ROLE,
-  SET_USERS} from './mutations'
-import {debounce} from 'lodash'
+  SET_USERS
+} from './mutations'
+import { debounce } from 'lodash'
 
 export const SELECT_ROLE = '__SELECT_ROLE__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
@@ -21,26 +29,44 @@ export default {
     dispatch(GET_ROLES)
     dispatch(GET_ENTITY_TYPES)
   },
-  [GET_ROLES] ({commit, dispatch}) {
-    get('/api/v2/sys_sec_Role', {}).then(response => {
-      commit(SET_ROLES, response.items)
-      dispatch(SELECT_ROLE, response.items[0].id)
-    }, error => {
-      console.log(error)
-    })
+  [GET_ROLES] ({state, commit, dispatch}) {
+    if (state.sidType === 'role') {
+      get('/api/v2/sys_sec_Role?sort=label', {}).then(response => {
+        commit(SET_ROLES, response.items)
+        dispatch(SELECT_ROLE, response.items[0].id)
+      }, error => {
+        console.log(error)
+      })
+    } else {
+      get('/api/v2/sys_sec_User?sort=username', {}).then(response => {
+        commit(SET_ROLES, response.items)
+        dispatch(SELECT_ROLE, response.items[0].id)
+      }, error => {
+        console.log(error)
+      })
+    }
   },
-  [SELECT_ROLE] ({commit}, role) {
+  [SELECT_ROLE] ({state, commit}, role) {
     commit(SET_SELECTED_ROLE, role)
-    get(`/api/v2/sys_sec_UserAuthority?q=role==${role}`, {}).then(response => {
-      commit(SET_USERS, response.items.map(e => e.User.username))
-    }, error => {
-      console.log(error)
-    })
-    get(`/api/v2/sys_sec_GroupAuthority?q=role==${role}`, {}).then(response => {
-      commit(SET_GROUPS, response.items.map(e => e.Group.name))
-    }, error => {
-      console.log(error)
-    })
+    if (state.sidType === 'role') {
+      get(`/api/v2/sys_sec_UserAuthority?q=role==${role}&sort=User`, {}).then(response => {
+        commit(SET_USERS, response.items.map(e => e.User.username))
+      }, error => {
+        console.log(error)
+      })
+      get(`/api/v2/sys_sec_GroupAuthority?q=role==${role}&sort=Group`, {}).then(response => {
+        commit(SET_GROUPS, response.items.map(e => e.Group.name))
+      }, error => {
+        console.log(error)
+      })
+    } else {
+      commit(SET_USERS, [])
+      get(`/api/v2/sys_sec_GroupMember?q=User==${role}&sort=Group`, {}).then(response => {
+        commit(SET_GROUPS, response.items.map(e => e.Group.name))
+      }, error => {
+        console.log(error)
+      })
+    }
   },
   [FILTER_CHANGED]: debounce(({state, dispatch, commit}, filter) => {
     commit(SET_FILTER, filter)
@@ -105,7 +131,7 @@ export default {
      * Pass options to the fetch like body, method, x-molgenis-token etc...
      * @type {{}}
      */
-    get('/api/v2/sys_md_EntityType?q=isEntityLevelSecurity==true;isAbstract==false&attrs=id,label,description', {}).then(response => {
+    get('/api/v2/sys_md_EntityType?q=isEntityLevelSecurity==true;isAbstract==false&attrs=id,label,description&sort=label', {}).then(response => {
       commit(SET_ENTITY_TYPES, response.items)
     }, error => {
       console.log(error)

@@ -6,22 +6,37 @@
     </ol>
     <div class="row pt-3">
       <div class="col col-md-4">
-        <h3>{{'ROLE' | i18n}}</h3>
-        <roles :roles="roles"
-               :selectedRole="selectedRole"
-               :selectRole="selectRole" :createRole="createRole" :updateRole="updateRole" :onUpdateRole="onUpdateRole" :onDeleteRole="onDeleteRole"></roles>
-        <div v-if="selectedRole">
-          <h3 class="pt-3">{{'MEMBERS' | i18n}}</h3>
-          <template v-if="users && groups">
-            <ul class="fa-ul" v-if="users || groups">
-              <li v-for="group in groups"><i class="fa fa-users fa-li"></i>{{group}}
-              </li>
-              <li v-for="user in users"><i class="fa fa-user fa-li"></i>{{user}}
-              </li>
-            </ul>
-            <p v-else>{{'NO_MEMBERS_IN_ROLE' | i18n}}</p>
-          </template>
-          <p v-else><i class="fa fa-spinner fa-spin"></i></p>
+        <h3 class="pt-3">Security ID</h3>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a :class="'nav-link ' + (sidType == 'role' ? 'active' : '')" href="#"
+               @click="sidType = 'role'">{{'ROLE' | i18n}}</a>
+          </li>
+          <li class="nav-item">
+            <a :class="'nav-link ' + (sidType == 'user' ? 'active' : '')" href="#"
+               @click="sidType = 'user'">{{'USER' | i18n}}</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active pt-3">
+            <roles :roles="roles" :sidType="sidType"
+                   :selectedRole="selectedRole"
+                   :selectRole="selectRole" :createRole="createRole" :updateRole="updateRole"
+                   :onUpdateRole="onUpdateRole" :onDeleteRole="onDeleteRole"></roles>
+            <div v-if="selectedRole">
+              <h3 class="pt-3">{{'MEMBERS' | i18n}}</h3>
+              <template v-if="users && groups">
+                <ul class="fa-ul" v-if="users || groups">
+                  <li v-for="group in groups"><i class="fa fa-users fa-li"></i>{{group}}
+                  </li>
+                  <li v-for="user in users"><i class="fa fa-user fa-li"></i>{{user}}
+                  </li>
+                </ul>
+                <p v-else>{{'NO_MEMBERS_IN_ROLE' | i18n}}</p>
+              </template>
+              <p v-else><i class="fa fa-spinner fa-spin"></i></p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="col col-md-8">
@@ -87,9 +102,18 @@
   import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
   import {
     CREATE_ROLE,
-    CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING
+    CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_SID_TYPE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING
   } from '../store/mutations'
-  import { SELECT_ROLE, GET_ACLS, FILTER_CHANGED, SAVE_ACL, SAVE_CREATE_ROLE, UPDATE_ROLE, DELETE_ROLE } from '../store/actions'
+  import {
+    GET_ROLES,
+    SELECT_ROLE,
+    GET_ACLS,
+    FILTER_CHANGED,
+    SAVE_ACL,
+    SAVE_CREATE_ROLE,
+    UPDATE_ROLE,
+    DELETE_ROLE
+  } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Roles from './Roles'
@@ -103,6 +127,7 @@
         cancelCreateRole: CANCEL_CREATE_ROLE,
         updateRole: UPDATE_ROLE,
         cancelUpdateRole: CANCEL_UPDATE_ROLE,
+        setSidType: SET_SID_TYPE,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE,
         togglePermission: TOGGLE_PERMISSION,
         toggleGranting: TOGGLE_GRANTING
@@ -139,13 +164,22 @@
           return this.$store.state.selectedEntityType
         },
         set (selectedEntityType) {
-          this.$store.commit(SET_SELECTED_ENTITY_TYPE, selectedEntityType.id)
+          this.setSelectedEntityType(selectedEntityType.id)
           this.$store.dispatch(GET_ACLS)
         }
       },
       role: {
         get () {
           return Object.assign({}, this.roles.find(role => { return role.id === this.selectedRole }))
+        }
+      },
+      sidType: {
+        get () {
+          return this.$store.state.sidType
+        },
+        set (sidType) {
+          this.setSidType(sidType)
+          this.$store.dispatch(GET_ROLES)
         }
       }
     },
