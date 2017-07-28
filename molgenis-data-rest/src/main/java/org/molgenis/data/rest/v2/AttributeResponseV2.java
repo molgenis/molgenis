@@ -44,11 +44,7 @@ class AttributeResponseV2
 	private String validationExpression;
 
 	/**
-	 * @param entityParentName
-	 * @param entityType
-	 * @param attr
 	 * @param fetch             set of lowercase attribute names to include in response
-	 * @param permissionService
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)

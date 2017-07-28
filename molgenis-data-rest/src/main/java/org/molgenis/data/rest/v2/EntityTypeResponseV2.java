@@ -37,9 +37,6 @@ class EntityTypeResponseV2
 	private final Boolean writable;
 	private String languageCode;
 
-	/**
-	 * @param meta
-	 */
 	public EntityTypeResponseV2(EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
 			LanguageService languageService)
 	{
@@ -47,7 +44,6 @@ class EntityTypeResponseV2
 	}
 
 	/**
-	 * @param meta
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public EntityTypeResponseV2(EntityType meta, Fetch fetch, MolgenisPermissionService permissionService,

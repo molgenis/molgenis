@@ -34,9 +34,6 @@ public class EntityTypeResponse
 	 */
 	private final Boolean writable;
 
-	/**
-	 * @param meta
-	 */
 	public EntityTypeResponse(EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
 			LanguageService languageService)
 	{
@@ -44,7 +41,6 @@ public class EntityTypeResponse
 	}
 
 	/**
-	 * @param meta
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */

@@ -46,20 +46,11 @@ public class CrudRepositoryAnnotator
 		this.attributeFactory = attributeFactory;
 	}
 
-	/**
-	 * @param annotator
-	 * @param repository
-	 */
 	public void annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
 		annotate(annotator, repository, UPDATE);
 	}
 
-	/**
-	 * @param annotator
-	 * @param repository
-	 * @param action
-	 */
 	private void annotate(RepositoryAnnotator annotator, Repository<Entity> repository, DatabaseAction action)
 	{
 		if (!repository.getCapabilities().contains(WRITABLE))

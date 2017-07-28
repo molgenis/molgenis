@@ -230,8 +230,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 
 	/**
 	 * Adds an Attribute to an EntityType
-	 *
-	 * @param attribute
 	 */
 	void addAttribute(Attribute attribute);
 
@@ -244,8 +242,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 
 	/**
 	 * Deletes an Attribute from an Entity
-	 *
-	 * @param id
 	 */
 	void deleteAttributeById(Object id);
 
@@ -254,7 +250,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * same as the new attributes
 	 *
 	 * @param repositoryCollection the new entities
-	 * @return
 	 */
 	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 
@@ -281,9 +276,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Returns whether the given {@link EntityType} attributes are compatible with
 	 * the attributes of an existing repository with the same name
-	 *
-	 * @param entityTypeData
-	 * @return
 	 */
 	boolean isEntityTypeCompatible(EntityType entityTypeData);
 

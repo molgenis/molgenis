@@ -14,7 +14,6 @@ public interface SortaService
 	/**
 	 * Get a specified ontology entity in generic type based on the given ontologyIri
 	 *
-	 * @param ontologyIri
 	 * @return specified ontology entity in generic type
 	 */
 	Entity getOntologyEntity(String ontologyIri);
@@ -22,8 +21,6 @@ public interface SortaService
 	/**
 	 * Get a specified ontologyterm in generic type based on the given ontologyIri and ontologyTermIri
 	 *
-	 * @param ontologyTermIri
-	 * @param ontologyIri
 	 * @return specifieid ontologyterm entity in a generic type
 	 */
 	Entity getOntologyTermEntity(String ontologyTermIri, String ontologyIri);
@@ -32,8 +29,6 @@ public interface SortaService
 	 * Find a list of relevant ontologyterm typed entities using lexical matching (elasticsearch + ngram) in generic
 	 * type based on given ontologyIri and a set of query inputs (name, synonym, ontology database id, e.g. hpo, omim)
 	 *
-	 * @param ontologyIri
-	 * @param inputEntity
 	 * @return a list of ontologyterm entities in generic type
 	 */
 	Iterable<Entity> findOntologyTermEntities(String ontologyIri, Entity inputEntity);
