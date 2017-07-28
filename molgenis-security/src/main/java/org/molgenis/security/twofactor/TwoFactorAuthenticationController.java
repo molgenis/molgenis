@@ -1,11 +1,11 @@
 package org.molgenis.security.twofactor;
 
+import org.molgenis.security.google.GoogleAuthenticatorService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,33 +23,51 @@ public class TwoFactorAuthenticationController
 	private static final String TWO_FACTOR_IS_INITIAL_ATTRIBUTE = "is2faInitial";
 	private static final String TWO_FACTOR_IS_ENABLED_ATTRIBUTE = "is2faEnabled";
 
+	private static final String TWO_FACTOR_VERIFY_KEY_HEADER_ATTRIBUTE = "verifyKeyHeader";
+	private static final String TWO_FACTOR_VERIFY_KEY_HEADER_VALUE = "Verification code";
+
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private OTPService otpService;
+	private GoogleAuthenticatorService googleAuthenticatorService;
 
 	@Autowired
-	public TwoFactorAuthenticationController(TwoFactorAuthenticationService twoFactorAuthenticationService)
+	public TwoFactorAuthenticationController(TwoFactorAuthenticationService twoFactorAuthenticationService,
+			OTPService otpService, GoogleAuthenticatorService googleAuthenticatorService)
 	{
 		this.twoFactorAuthenticationService = twoFactorAuthenticationService;
+		this.otpService = otpService;
+		this.googleAuthenticatorService = googleAuthenticatorService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_ENABLED_URI)
 	public String enabled(Model model)
 	{
+		model.addAttribute(TWO_FACTOR_VERIFY_KEY_HEADER_ATTRIBUTE, TWO_FACTOR_VERIFY_KEY_HEADER_VALUE);
 		model.addAttribute(TWO_FACTOR_IS_ENABLED_ATTRIBUTE, true);
 		return MolgenisLoginController.VIEW_LOGIN;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_VALIDATION_URI)
-	public String validateVerificationCodeAndAuthenticate(Model model, @RequestBody String verificationCode)
+	public String validateVerificationCodeAndAuthenticate(Model model, @RequestParam String verificationCode)
 	{
-		if (twoFactorAuthenticationService.isVerificationCodeValid(verificationCode))
+		String redirectUri = "redirect:/";
+		try
 		{
-			twoFactorAuthenticationService.authenticate();
+			if (twoFactorAuthenticationService.isVerificationCodeValidForUser(verificationCode))
+			{
+				twoFactorAuthenticationService.authenticate();
+			}
 		}
-		else
+		catch (Exception er)
 		{
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid key found!");
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
+			redirectUri = MolgenisLoginController.VIEW_LOGIN;
 		}
-		return "redirect:/";
+
+		model.addAttribute(TWO_FACTOR_IS_ENABLED_ATTRIBUTE, true);
+		model.addAttribute(TWO_FACTOR_VERIFY_KEY_HEADER_ATTRIBUTE, TWO_FACTOR_VERIFY_KEY_HEADER_VALUE);
+
+		return redirectUri;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_INITIAL_URI)
@@ -59,7 +77,7 @@ public class TwoFactorAuthenticationController
 		{
 			String secretKey = twoFactorAuthenticationService.generateSecretKey();
 			model.addAttribute("secretKey", secretKey);
-			model.addAttribute("authenticatorURI", twoFactorAuthenticationService.getGoogleAuthenticatorURI(secretKey));
+			model.addAttribute("authenticatorURI", googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
 		}
 		catch (UsernameNotFoundException err)
 		{
@@ -67,13 +85,14 @@ public class TwoFactorAuthenticationController
 		}
 
 		model.addAttribute(TWO_FACTOR_IS_INITIAL_ATTRIBUTE, true);
+
 		return MolgenisLoginController.VIEW_LOGIN;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_SECRET_URI)
 	public String setSecret(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
 	{
-		twoFactorAuthenticationService.tryVerificationCode(verificationCode, secretKey);
+		otpService.tryVerificationCode(verificationCode, secretKey);
 		twoFactorAuthenticationService.setSecretKey(secretKey);
 		twoFactorAuthenticationService.authenticate();
 
