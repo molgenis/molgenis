@@ -38,7 +38,7 @@
     $(function () {
         $('#login-modal').modal({backdrop: 'static'})
     <#if errorMessage??>
-        $('#password-field').after($('<p class="text-error">${errorMessage?html}</p>'))
+        $('#alert-container').append($('<div class="alert alert-block alert-danger alert-dismissable fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong>Warning!</strong> ${errorMessage?html}</div>'))
     </#if>
     })
 </script>
