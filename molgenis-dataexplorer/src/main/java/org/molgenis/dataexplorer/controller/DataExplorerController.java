@@ -110,7 +110,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Show the explorer page
 	 *
-	 * @param model
 	 * @return the view name
 	 */
 	@RequestMapping(method = GET)
@@ -238,9 +237,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	/**
 	 * Returns modules configuration for this entity based on current user permissions.
-	 *
-	 * @param entityTypeId
-	 * @return
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
@@ -317,8 +313,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	/**
 	 * Get readable genome entities
-	 *
-	 * @return
 	 */
 	private List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks)
 	{
@@ -407,9 +401,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
 	 *
-	 * @param entityTypeId
-	 * @param entityId
-	 * @param model
 	 * @return entity report view
 	 * @throws Exception if an entity name or id is not found
 	 */
@@ -435,9 +426,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Builds a model containing one entity and returns standalone report ftl view
 	 *
-	 * @param entityTypeId
-	 * @param entityId
-	 * @param model
 	 * @return standalone report view
 	 * @throws Exception                   if an entity name or id is not found
 	 * @throws MolgenisDataAccessException if an EntityType does not exist

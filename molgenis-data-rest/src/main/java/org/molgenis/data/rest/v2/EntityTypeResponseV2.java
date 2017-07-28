@@ -35,16 +35,12 @@ class EntityTypeResponseV2
 	private final Boolean writable;
 	private String languageCode;
 
-	/**
-	 * @param meta
-	 */
 	public EntityTypeResponseV2(EntityType meta, DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, dataService, languageService);
 	}
 
 	/**
-	 * @param meta
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public EntityTypeResponseV2(EntityType meta, Fetch fetch, DataService dataService, LanguageService languageService)

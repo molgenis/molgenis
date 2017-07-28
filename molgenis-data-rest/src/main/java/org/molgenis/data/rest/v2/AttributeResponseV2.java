@@ -44,9 +44,6 @@ class AttributeResponseV2
 	private String validationExpression;
 
 	/**
-	 * @param entityParentName
-	 * @param entityType
-	 * @param attr
 	 * @param fetch            set of lowercase attribute names to include in response
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,

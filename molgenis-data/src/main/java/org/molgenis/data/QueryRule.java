@@ -209,9 +209,6 @@ public class QueryRule
 
 	/**
 	 * Specific constructor for rules that do not apply to a field such as LIMIT and OFFSET.
-	 *
-	 * @param operator
-	 * @param value
 	 */
 	@SuppressWarnings("unchecked")
 	public QueryRule(Operator operator, Object value)

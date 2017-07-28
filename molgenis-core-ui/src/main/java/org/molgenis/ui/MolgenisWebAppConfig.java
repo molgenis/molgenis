@@ -240,8 +240,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
-	 *
-	 * @return
 	 */
 	@Bean
 	public ApplicationContextProvider applicationContextProvider()
@@ -264,9 +262,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
-	 *
-	 * @throws TemplateException
-	 * @throws IOException
 	 */
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException

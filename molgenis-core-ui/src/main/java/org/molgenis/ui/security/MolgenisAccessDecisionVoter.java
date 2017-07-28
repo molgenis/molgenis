@@ -58,8 +58,6 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 
 	/**
 	 * Can't be autowired due to circular dependency resolving
-	 *
-	 * @return
 	 */
 	private PermissionService getMolgenisPermissionService()
 	{
@@ -68,8 +66,6 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 
 	/**
 	 * Can't be autowired due to circular dependency resolving
-	 *
-	 * @return
 	 */
 	private MolgenisUi getMolgenisUi()
 	{

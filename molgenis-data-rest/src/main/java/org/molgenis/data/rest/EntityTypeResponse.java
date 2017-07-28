@@ -33,16 +33,12 @@ public class EntityTypeResponse
 	 */
 	private final Boolean writable;
 
-	/**
-	 * @param meta
-	 */
 	public EntityTypeResponse(EntityType meta, DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, null, dataService, languageService);
 	}
 
 	/**
-	 * @param meta
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */

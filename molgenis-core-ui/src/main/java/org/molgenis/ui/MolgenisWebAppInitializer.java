@@ -31,10 +31,7 @@ public class MolgenisWebAppInitializer
 	/**
 	 * A Molgenis common web application initializer
 	 *
-	 * @param servletContext
-	 * @param appConfig
 	 * @param isDasUsed      is the molgenis-das module used?
-	 * @throws ServletException
 	 */
 	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed, int maxFileSize)
 			throws ServletException

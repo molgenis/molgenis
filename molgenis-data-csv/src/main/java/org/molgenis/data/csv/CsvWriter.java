@@ -112,9 +112,6 @@ public class CsvWriter extends AbstractWritable
 
 	/**
 	 * Use attribute labels as column names
-	 *
-	 * @param attributes
-	 * @throws IOException
 	 */
 	public void writeAttributes(Iterable<Attribute> attributes) throws IOException
 	{

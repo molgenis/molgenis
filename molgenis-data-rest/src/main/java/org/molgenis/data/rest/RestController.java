@@ -130,7 +130,6 @@ public class RestController
 	 * <p>
 	 * Example url: /api/v1/person/meta
 	 *
-	 * @param entityTypeId
 	 * @return EntityType
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -151,7 +150,6 @@ public class RestController
 	 * <p>
 	 * Example url: /api/v1/person/meta?_method=GET
 	 *
-	 * @param entityTypeId
 	 * @return EntityType
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -169,7 +167,6 @@ public class RestController
 	/**
 	 * Example url: /api/v1/person/meta/emailaddresses
 	 *
-	 * @param entityTypeId
 	 * @return EntityType
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -188,7 +185,6 @@ public class RestController
 	/**
 	 * Same as retrieveEntityAttributeMeta (GET) only tunneled through POST.
 	 *
-	 * @param entityTypeId
 	 * @return EntityType
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -208,12 +204,6 @@ public class RestController
 	 * Examples:
 	 * <p>
 	 * /api/v1/person/99 Retrieves a person with id 99
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param attributeExpands
-	 * @return
-	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -242,11 +232,6 @@ public class RestController
 
 	/**
 	 * Same as retrieveEntity (GET) only tunneled through POST.
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param request
-	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -274,14 +259,6 @@ public class RestController
 	 * Example:
 	 * <p>
 	 * /api/v1/person/99/address
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param refAttributeName
-	 * @param request
-	 * @param attributeExpands
-	 * @return
-	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -304,13 +281,6 @@ public class RestController
 	 * Example:
 	 * <p>
 	 * /api/v1/person/99/address
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param refAttributeName
-	 * @param request
-	 * @return
-	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -329,12 +299,6 @@ public class RestController
 	 * Do a query
 	 * <p>
 	 * Returns json
-	 *
-	 * @param entityTypeId
-	 * @param request
-	 * @param attributeExpands
-	 * @return
-	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -355,10 +319,6 @@ public class RestController
 	 * Example url: /api/v1/person?_method=GET
 	 * <p>
 	 * Returns json
-	 *
-	 * @param request
-	 * @param entityTypeId
-	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -386,13 +346,6 @@ public class RestController
 	 * <p>
 	 * <p>
 	 * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
-	 *
-	 * @param entityTypeId
-	 * @param attributes
-	 * @param req
-	 * @param resp
-	 * @return
-	 * @throws IOException
 	 */
 	@RequestMapping(value = "/csv/{entityTypeId}", method = GET, produces = "text/csv")
 	@ResponseBody
@@ -487,11 +440,6 @@ public class RestController
 
 	/**
 	 * Creates a new entity from a html form post.
-	 *
-	 * @param entityTypeId
-	 * @param request
-	 * @param response
-	 * @throws UnknownEntityException
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
@@ -514,11 +462,6 @@ public class RestController
 
 	/**
 	 * Creates a new entity from a html form post.
-	 *
-	 * @param entityTypeId
-	 * @param request
-	 * @param response
-	 * @throws UnknownEntityException
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}", method = POST, headers = "Content-Type=multipart/form-data")
@@ -567,10 +510,6 @@ public class RestController
 	 * Updates an entity using PUT
 	 * <p>
 	 * Example url: /api/v1/person/99
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param entityMap
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}/{id}", method = PUT)
@@ -585,10 +524,6 @@ public class RestController
 	 * Updates an entity by tunneling PUT through POST
 	 * <p>
 	 * Example url: /api/v1/person/99?_method=PUT
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param entityMap
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=PUT")
@@ -653,11 +588,6 @@ public class RestController
 	 * Tunnels PUT through POST
 	 * <p>
 	 * Example url: /api/v1/person/99?_method=PUT
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param request
-	 * @throws UnknownEntityException
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=multipart/form-data")
@@ -693,11 +623,6 @@ public class RestController
 	 * Tunnels PUT through POST
 	 * <p>
 	 * Example url: /api/v1/person/99?_method=PUT
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param request
-	 * @throws UnknownEntityException
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
@@ -718,9 +643,6 @@ public class RestController
 
 	/**
 	 * Deletes an entity by it's id
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}/{id}", method = DELETE)
@@ -744,9 +666,6 @@ public class RestController
 	 * Deletes an entity by it's id but tunnels DELETE through POST
 	 * <p>
 	 * Example url: /api/v1/person/99?_method=DELETE
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -757,8 +676,6 @@ public class RestController
 
 	/**
 	 * Deletes all entities for the given entity name
-	 *
-	 * @param entityTypeId
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -769,8 +686,6 @@ public class RestController
 
 	/**
 	 * Deletes all entities for the given entity name but tunnels DELETE through POST
-	 *
-	 * @param entityTypeId
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -781,8 +696,6 @@ public class RestController
 
 	/**
 	 * Deletes all entities and entity meta data for the given entity name
-	 *
-	 * @param entityTypeId
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -793,8 +706,6 @@ public class RestController
 
 	/**
 	 * Deletes all entities and entity meta data for the given entity name but tunnels DELETE through POST
-	 *
-	 * @param entityTypeId
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -819,10 +730,6 @@ public class RestController
 	 * Request: {username:admin,password:xxx}
 	 * <p>
 	 * Response: {token: b4fd94dc-eae6-4d9a-a1b7-dd4525f2f75d}
-	 *
-	 * @param login
-	 * @param request
-	 * @return
 	 */
 	@RequestMapping(value = "/login", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -1283,7 +1190,6 @@ public class RestController
 	}
 
 	/**
-	 * @param attributes
 	 * @return set of lower case attribute names
 	 */
 	private Set<String> toAttributeSet(String[] attributes)
@@ -1295,7 +1201,6 @@ public class RestController
 	/**
 	 * expand is of form 'attr1', 'entity1[attr1]', 'entity1[attr1;attr2]'
 	 *
-	 * @param expands
 	 * @return map from lower case expand names to a attribute set
 	 */
 	private Map<String, Set<String>> toExpandMap(String[] expands)

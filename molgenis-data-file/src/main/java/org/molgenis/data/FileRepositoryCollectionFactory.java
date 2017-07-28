@@ -55,9 +55,6 @@ public class FileRepositoryCollectionFactory
 	 * Factory method for creating a new FileRepositorySource
 	 * <p>
 	 * For example an excel file
-	 *
-	 * @param file
-	 * @return
 	 */
 	public FileRepositoryCollection createFileRepositoryCollection(File file)
 	{
