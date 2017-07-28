@@ -31,8 +31,8 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 			AttributeType basicTypeGuess = getCommonType(currentGuess, basicType);
 			AttributeType enrichedTypeGuess = getEnrichedType(basicTypeGuess, value);
 
-			// If the newly found type is not narrower the current type do not update as the value wil not fit
-			// ( for example; as string does not fit into a integer).
+			// If the newly found type is not narrower than the current type, do not update
+			// e.g. a long does not fit into an integer
 			if(isBroader(enrichedTypeGuess, currentGuess)) {
 				currentGuess = enrichedTypeGuess;
 			}
