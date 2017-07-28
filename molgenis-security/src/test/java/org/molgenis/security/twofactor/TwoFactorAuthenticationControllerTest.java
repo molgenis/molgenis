@@ -75,8 +75,6 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_ENABLED));
 		assertEquals("Verification code",
 				model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_HEADER_2FA_VERIFY_CODE));
-		assertEquals("No valid verification code entered!",
-				model.asMap().get(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE));
 		assertEquals("view-login", viewTemplate);
 
 	}
