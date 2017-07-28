@@ -27,7 +27,7 @@ paths:
       tags:
         - OneClickImporter
       summary: Upload files without metadata.
-      description: Upload files without metadata. Supports Excel, CSV, or zip containing CSV files
+      description: Upload files without metadata. Metadata is guessed based on the values in the file. Able to guess String, Numbers and Dates. Supports Excel, CSV, or zip containing CSV files
       consumes:
         - multipart/form-data
       produces:

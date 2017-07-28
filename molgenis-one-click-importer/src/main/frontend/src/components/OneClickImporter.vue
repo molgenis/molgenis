@@ -33,19 +33,21 @@
 
           <!-- Running job -->
           <div v-if="job" v-show="job && job.status === 'RUNNING' || job.status === 'PENDING' ">
-            <i class="fa fa-spinner fa-pulse fa-fw "></i> Importing {{job.file}}
+            <i class="fa fa-spinner fa-pulse fa-fw "></i> {{job.file}}
           </div>
 
           <!-- List of finished jobs -->
-          <li v-for="job in finishedJobs" :key="job.file" class="job-item">
+          <li v-for="job in finishedJobs" :key="job.file" class="upload-item">
+
             <div v-show="job.status === 'FAILED'">
               <i class="fa fa-times text-danger"></i> {{job.file}}
               <div class="error-message text-muted"><em>Import failed; {{job.progressMessage}}</em></div>
             </div>
 
             <div v-show="job.status === 'SUCCESS' ">
+
               <a target="_blank" :href="navigatorBaseUrl + '/' + job.package">
-                <i class="fa fa-folder-open-o"></i> {{job.package}} <i class="fa fa-check success-checks"></i>
+                <i class="fa fa-folder-open-o"></i> {{job.package}}
               </a>
 
               <ul class="list-unstyled">
@@ -57,9 +59,9 @@
                   </span>
                 </li>
               </ul>
+
             </div>
           </li>
-
         </ul>
       </div>
     </div>
@@ -81,7 +83,7 @@
     padding-top: 0.5rem;
   }
 
-  .job-item {
+  .upload-item {
     padding: 0.5rem 0 1rem;
   }
 
@@ -89,10 +91,6 @@
     margin-left: 1rem;
     padding-top: 0.5em;
     font-size: smaller;
-  }
-
-  .success-checks {
-    color: #00AA00;
   }
 </style>
 
