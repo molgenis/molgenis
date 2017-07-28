@@ -16,6 +16,8 @@
                 <h4 class="modal-title" id="login-modal-label">
                 <#if verifyKeyHeader??>
                 ${verifyKeyHeader}
+                <#elseif setup2faHeader??>
+                ${setup2faHeader}
                 <#else>
                     Sign in
                 </#if>
