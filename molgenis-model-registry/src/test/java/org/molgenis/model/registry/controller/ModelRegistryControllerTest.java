@@ -34,11 +34,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-/**
- * <p>Test for <code>StandardRegistryTest</code>.</p>
- *
- * @author sido
- */
 @ContextConfiguration(classes = { TestHarnessConfig.class,
 		ModelRegistryControllerTest.ModelRegistryControllerTestConfig.class })
 public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
@@ -66,7 +61,8 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	private ModelRegistryController modelRegistryController;
 
 	@Test
-	public void testInit() {
+	public void testInit()
+	{
 		ExtendedModelMap modelWarning = new ExtendedModelMap();
 		String templateWarning = modelRegistryController.init("true", modelWarning);
 		assertEquals(templateWarning, "view-model-registry");
@@ -98,8 +94,9 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		when(metaDataService.getPackage(TEST_SINGLE_PACKAGE)).thenReturn(pkg);
 
 		ExtendedModelMap modelDocsMacros = new ExtendedModelMap();
-		String templateDocsMacros = modelRegistryController.getModelDocumentation(TEST_SINGLE_PACKAGE, true, modelDocsMacros);
-		assertEquals(templateDocsMacros,"view-model-registry_docs-macros");
+		String templateDocsMacros = modelRegistryController.getModelDocumentation(TEST_SINGLE_PACKAGE, true,
+				modelDocsMacros);
+		assertEquals(templateDocsMacros, "view-model-registry_docs-macros");
 		Package pkgResponse = (Package) modelDocsMacros.asMap().get("package");
 		assertEquals(pkgResponse, pkg);
 
@@ -110,9 +107,11 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	{
 		String TEST_PACKAGE = "test-package";
 
-		ModelRegistryPackage modelRegistryPackage = ModelRegistryPackage.create("test-package-response", "", "", null, null, null);
-		ModelRegistrySearch packageSearchResponse = ModelRegistrySearch.create(TEST_PACKAGE, 0, 3, 0, Lists.newArrayList(modelRegistryPackage));
-		when(metaDataSearchService.search(TEST_PACKAGE, 0 ,3)).thenReturn(packageSearchResponse);
+		ModelRegistryPackage modelRegistryPackage = ModelRegistryPackage.create("test-package-response", "", "", null,
+				null, null);
+		ModelRegistrySearch packageSearchResponse = ModelRegistrySearch.create(TEST_PACKAGE, 0, 3, 0,
+				Lists.newArrayList(modelRegistryPackage));
+		when(metaDataSearchService.search(TEST_PACKAGE, 0, 3)).thenReturn(packageSearchResponse);
 
 		ExtendedModelMap model = new ExtendedModelMap();
 		String template = modelRegistryController.search(TEST_PACKAGE, model);
@@ -185,7 +184,8 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testPackageNotFound() {
+	public void testPackageNotFound()
+	{
 		String TEST_PACKAGE = "test-package";
 		when(metaDataService.getPackage(TEST_PACKAGE)).thenReturn(null);
 		modelRegistryController.getPackage(TEST_PACKAGE);
@@ -222,7 +222,10 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public TagService<LabeledResource, LabeledResource> tagService() { return mock(TagService.class); }
+		public TagService<LabeledResource, LabeledResource> tagService()
+		{
+			return mock(TagService.class);
+		}
 
 		@Bean
 		public TreeNodeService treeNodeService()
@@ -237,17 +240,20 @@ public class ModelRegistryControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public LanguageService languageService() {
+		public LanguageService languageService()
+		{
 			return mock(LanguageService.class);
 		}
 
 		@Bean
-		public AppSettings appSettings() {
+		public AppSettings appSettings()
+		{
 			return mock(AppSettings.class);
 		}
 
 		@Bean
-		public MenuReaderService menuReaderService() {
+		public MenuReaderService menuReaderService()
+		{
 			return mock(MenuReaderService.class);
 		}
 

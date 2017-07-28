@@ -1,10 +1,5 @@
-import type {State, Node, Link} from 'utils/flow.types'
+import type { Link, Node, State } from 'utils/flow.types'
 
-// xref 1 - 1
-// mref 1 - N
-// categorical 1 - 1
-// categorical_mref 1 - N
-// onetomany 1 - N
 const types = {
   'xref': {nullable: '0...1', notnullable: '1...1'},
   'mref': {nullable: '0...N', notnullable: '1...N'},
@@ -130,7 +125,6 @@ const entityTypeColor = (entityType) => {
   const entityTypeColor = '#FFFFFF'
   const extendEntityTypeColor = '#BDC4DA'
   const abstractEntityTypeColor = '#8A9FD8'
-  // const externalEntityTypeColor = 'FA6D6D'
   let color = entityTypeColor
   if (entityType.isAbstract) color = abstractEntityTypeColor
   if (entityType.extends) color = extendEntityTypeColor
@@ -146,7 +140,6 @@ const mapLinkData = (entityTypes) => {
         const attributeName = attribute.label || attribute.name
         let refAttributeType = types[attribute.type].notnullable
         if (attribute.isNullable) refAttributeType = types[attribute.type].nullable
-        // mapEnvironmentEntityTypes(attribute.refEntityType.id)
         linkData.push({
           from: entityType.id,
           to: attribute.refEntityType.id,
@@ -158,22 +151,9 @@ const mapLinkData = (entityTypes) => {
   })
 }
 
-// const mapEnvironmentEntityTypes = (refEntityTypeId) => {
-//   console.log(nodeData)
-//   const isPresent = nodeData.some(node => {
-//     node.key === refEntityTypeId
-//   })
-//   console.log(isPresent)
-//   if (!isPresent) {
-//     console.log(refEntityTypeId)
-//     nodeData.push({key: refEntityTypeId, items: {}})
-//   }
-// }
-
 export default {
 
   umlData: (state: State) => {
-    //  state.uml.children are all other packages included in the main package that is selected
     if (state.umlData.entityTypes) {
       console.log(state.umlData.entityTypes)
       mapNodeData(state.umlData.entityTypes)
