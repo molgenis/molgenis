@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col">
-        <h1>Import your data</h1>
+        <h1>{{ 'plugin-title' | i18n }}</h1>
         <hr>
       </div>
     </div>
@@ -20,7 +20,7 @@
           </div>
         </form>
         <div class="supported-types">
-          <span class="text-muted"><em>Supported file types: XLSX, XLS, CSV</em></span>
+          <span class="text-muted"><em>{{ 'file-types' | i18n }}: XLSX, XLS, CSV</em></span>
         </div>
         <br/>
       </div>
@@ -28,7 +28,7 @@
 
     <div class="row">
       <div class="col">
-        <h5>Imports</h5>
+        <h5>{{ 'import-list-header' | i18n }}</h5>
         <ul class="imports-list list-unstyled">
 
           <!-- Running job -->
@@ -41,7 +41,7 @@
 
             <div v-show="job.status === 'FAILED'">
               <i class="fa fa-times text-danger"></i> {{job.file}}
-              <div class="error-message text-muted"><em>Import failed; {{job.progressMessage}}</em></div>
+              <div class="error-message text-muted"><em>{{ 'error-message-prefix' | i18n }}; {{job.progressMessage}}</em></div>
             </div>
 
             <div v-show="job.status === 'SUCCESS' ">
