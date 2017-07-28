@@ -23,7 +23,6 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;

@@ -11,7 +11,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
 

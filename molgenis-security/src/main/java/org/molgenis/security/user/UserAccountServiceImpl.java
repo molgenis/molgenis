@@ -51,7 +51,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_useraccount')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public boolean validateCurrentUserPassword(String password)
 	{
