@@ -1,5 +1,6 @@
 package org.molgenis.oneclickimporter.config;
 
+import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.Progress;
@@ -20,11 +21,19 @@ import static java.util.Objects.requireNonNull;
 @Import(OneClickImportJob.class)
 public class OneClickImporterConfig
 {
+	public static final String NAMESPACE = "one-click-importer";
+
 	private final OneClickImportJob oneClickImportJob;
 
 	public OneClickImporterConfig(OneClickImportJob oneClickImportJob)
 	{
 		this.oneClickImportJob = requireNonNull(oneClickImportJob);
+	}
+
+	@Bean
+	public PropertiesMessageSource oneClickImportMessageSource()
+	{
+		return new PropertiesMessageSource(NAMESPACE);
 	}
 
 	@Bean
