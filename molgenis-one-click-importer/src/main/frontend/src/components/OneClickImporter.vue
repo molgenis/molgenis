@@ -46,17 +46,29 @@
 
             <div v-show="job.status === 'SUCCESS' ">
 
-              <a target="_blank" :href="navigatorBaseUrl + '/' + job.package">
+              <span v-if="navigatorBaseUrl">
+                <a target="_blank" :href="navigatorBaseUrl + '/' + job.package">
+                  <i class="fa fa-folder-open-o"></i> {{job.package}}
+                </a>
+              </span>
+
+              <span v-else>
                 <i class="fa fa-folder-open-o"></i> {{job.package}}
-              </a>
+              </span>
 
               <ul class="list-unstyled">
                 <li v-for="table in job.entityTypes">
-                  <span>
+
+                  <span v-if="dataExplorerBaseUrl">
                     <a target="_blank" :href="dataExplorerBaseUrl + '?entity=' + table.id">
                       <i class="fa fa-list"></i> {{table.label}}
                      </a>
                   </span>
+
+                  <span v-else>
+                    <i class="fa fa-list"></i> {{table.label}}
+                  </span>
+
                 </li>
               </ul>
 
