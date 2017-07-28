@@ -15,7 +15,6 @@ public class GoogleAuthenticatorServiceImpl implements GoogleAuthenticatorServic
 	public String getGoogleAuthenticatorURI(String secretKey)
 	{
 		String normalizedBase32Key = secretKey.replace(" ", "").toUpperCase();
-		String user = "";
 		try
 		{
 			return "otpauth://totp/" + URLEncoder.encode("molgenis" + ":" + "admin", "UTF-8").replace("+", "%20")
