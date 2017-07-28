@@ -43,7 +43,7 @@ public class RestControllerV2APIIT
 	private static final String V2_TEST_FILE = "/RestControllerV2_API_TestEMX.xlsx";
 	private static final String V2_DELETE_TEST_FILE = "/RestControllerV2_DeleteEMX.xlsx";
 	private static final String V2_COPY_TEST_FILE = "/RestControllerV2_CopyEMX.xlsx";
-	private static final String V2_FILE_ONE_CLICK_IMPORT_EXEL = "/OneClickImport_complex-valid.xlsx";
+	private static final String V2_FILE_ONE_CLICK_IMPORT_EXCEL = "/OneClickImport_complex-valid.xlsx";
 	private static final String V2_FILE_ONE_CLICK_IMPORT_CSV = "/OneClickImport_complex-valid.csv";
 	private static final String API_V2 = "api/v2/";
 
@@ -486,7 +486,7 @@ public class RestControllerV2APIIT
 	@Test
 	public void testOneClickImportExelFile() throws IOException, URISyntaxException
 	{
-		oneClickImportTest(V2_FILE_ONE_CLICK_IMPORT_EXEL);
+		oneClickImportTest(V2_FILE_ONE_CLICK_IMPORT_EXCEL);
 	}
 
 	@Test
