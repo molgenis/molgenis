@@ -4,8 +4,6 @@
   </button>
 </template>
 
-<style scoped src="bootstrap/dist/css/bootstrap.css" />
-
 <script>
   /**
    * MOLGENIS save button component

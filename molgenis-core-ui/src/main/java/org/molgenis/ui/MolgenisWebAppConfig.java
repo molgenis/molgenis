@@ -26,9 +26,7 @@ import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
-import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.ResourceFingerprintRegistry;
+import org.molgenis.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -175,9 +173,16 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public TemplateResourceUtils templateResourceUtils()
+	{
+		return new TemplateResourceUtils();
+	}
+
+	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, languageService, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), templateResourceUtils(), appSettings,
+				languageService, environment);
 	}
 
 	@Bean
