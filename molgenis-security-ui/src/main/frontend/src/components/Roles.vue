@@ -12,13 +12,15 @@
         <div class="list-group">
           <a v-for="role in roles"
              class="list-group-item list-group-item-action flex-column align-items-start"
-             :class="{'active': selectedRole === role.id}"
-             @click="selectRole(role.id)"
+             :class="{'active': selectedRole === (sidType == 'role' ? role.id : role.username)}"
+             @click="selectRole(sidType == 'role' ? role.id : role.username)"
              href="#">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1">{{ sidType == 'role' ? role.label : role.username }}</h5>
             </div>
-            <small v-if="role.description && selectedRole === role.id">{{ role.description }}</small>
+            <small v-if="role.description && selectedRole === (sidType == 'role' ? role.id : role.username)">
+              {{ role.description }}
+            </small>
           </a>
         </div>
       </div>

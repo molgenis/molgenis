@@ -40,7 +40,7 @@ export default {
     } else {
       get('/api/v2/sys_sec_User?sort=username', {}).then(response => {
         commit(SET_ROLES, response.items)
-        dispatch(SELECT_ROLE, response.items[0].id)
+        dispatch(SELECT_ROLE, response.items[0].username)
       }, error => {
         console.log(error)
       })
