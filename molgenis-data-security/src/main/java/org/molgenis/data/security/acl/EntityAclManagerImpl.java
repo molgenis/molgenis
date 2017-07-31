@@ -13,6 +13,7 @@ import org.springframework.security.acls.model.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public boolean isGranted(EntityIdentity entityIdentity, Permission permission)
 	{
 		Acl acl = readDomainAcl(entityIdentity);
@@ -56,6 +58,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public EntityAcl readAcl(EntityIdentity entityIdentity)
 	{
 		Acl acl = readDomainAcl(entityIdentity);
@@ -63,6 +66,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	@Transactional
 	public EntityAcl createAcl(Entity entity)
 	{
 		List<EntityAce> entityAces;
@@ -82,6 +86,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	@Transactional
 	public void updateAcl(EntityAcl entityAcl)
 	{
 		MutableAcl acl = readDomainAcl(entityAcl.getEntityIdentity());
@@ -102,6 +107,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	@Transactional
 	public void deleteAcl(EntityIdentity entityIdentity)
 	{
 		ObjectIdentity objectId = toObjectIdentity(entityIdentity);
