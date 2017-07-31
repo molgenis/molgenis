@@ -6,7 +6,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.EntityUtils;
 
@@ -33,10 +33,10 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 {
 	private final Repository<Attribute> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final MolgenisPermissionService permissionService;
+	private final PermissionService permissionService;
 
 	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService)
+			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);

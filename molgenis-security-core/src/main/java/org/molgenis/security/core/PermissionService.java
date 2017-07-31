@@ -1,6 +1,6 @@
 package org.molgenis.security.core;
 
-public interface MolgenisPermissionService
+public interface PermissionService
 {
 	boolean hasPermissionOnPlugin(String pluginId, Permission permission);
 

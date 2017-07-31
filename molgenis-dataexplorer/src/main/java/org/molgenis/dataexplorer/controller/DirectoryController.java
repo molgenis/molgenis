@@ -3,7 +3,7 @@ package org.molgenis.dataexplorer.controller;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.directory.DirectorySettings;
 import org.molgenis.dataexplorer.directory.NegotiatorQuery;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.MolgenisPluginController;
@@ -36,11 +36,11 @@ public class DirectoryController extends MolgenisPluginController
 
 	private final DirectorySettings settings;
 	private final RestTemplate restTemplate;
-	private final MolgenisPermissionService permissions;
+	private final PermissionService permissions;
 
 	@Autowired
 	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate,
-			MolgenisPermissionService permissions)
+			PermissionService permissions)
 	{
 		super(URI);
 		this.settings = requireNonNull(settings);

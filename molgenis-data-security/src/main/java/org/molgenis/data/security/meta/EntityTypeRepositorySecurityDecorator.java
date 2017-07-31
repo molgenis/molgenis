@@ -8,7 +8,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 
@@ -41,11 +41,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 {
 	private final Repository<EntityType> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final MolgenisPermissionService permissionService;
+	private final PermissionService permissionService;
 	private final DataService dataService;
 
 	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> decoratedRepo,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
 			DataService dataService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
@@ -408,9 +408,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private static class FilteredConsumer
 	{
 		private final Consumer<List<EntityType>> consumer;
-		private final MolgenisPermissionService permissionService;
+		private final PermissionService permissionService;
 
-		FilteredConsumer(Consumer<List<EntityType>> consumer, MolgenisPermissionService permissionService)
+		FilteredConsumer(Consumer<List<EntityType>> consumer, PermissionService permissionService)
 		{
 			this.consumer = requireNonNull(consumer);
 			this.permissionService = requireNonNull(permissionService);

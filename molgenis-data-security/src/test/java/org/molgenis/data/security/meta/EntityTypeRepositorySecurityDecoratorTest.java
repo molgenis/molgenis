@@ -13,7 +13,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,7 +67,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	@Mock
-	private MolgenisPermissionService permissionService;
+	private PermissionService permissionService;
 	@Captor
 	private ArgumentCaptor<Consumer<List<EntityType>>> consumerCaptor;
 	@Mock

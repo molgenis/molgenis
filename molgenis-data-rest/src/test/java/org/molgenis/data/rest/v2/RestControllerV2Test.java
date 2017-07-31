@@ -23,7 +23,7 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.GsonConfig;
@@ -115,7 +115,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
@@ -623,7 +623,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
-		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
 		ResultActions resultActions = mockMvc.perform(
@@ -672,7 +672,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
@@ -1101,9 +1101,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public MolgenisPermissionService molgenisPermissionService()
+		public PermissionService permissionService()
 		{
-			return mock(MolgenisPermissionService.class);
+			return mock(PermissionService.class);
 		}
 
 		@Bean
@@ -1163,7 +1163,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		@Bean
 		public RestControllerV2 restController()
 		{
-			return new RestControllerV2(dataService(), molgenisPermissionService(),
+			return new RestControllerV2(dataService(), permissionService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService(), permissionSystemService(),
 					repositoryCopier(), localizationService());

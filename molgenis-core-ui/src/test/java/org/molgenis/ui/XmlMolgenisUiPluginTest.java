@@ -1,6 +1,6 @@
 package org.molgenis.ui;
 
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,14 +14,14 @@ import static org.testng.Assert.*;
 @SuppressWarnings("deprecation")
 public class XmlMolgenisUiPluginTest
 {
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 	private Authentication authentication;
 	private MolgenisUiMenu molgenisUiMenu;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		molgenisPermissionService = mock(MolgenisPermissionService.class);
+		permissionService = mock(PermissionService.class);
 		authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		molgenisUiMenu = mock(MolgenisUiMenu.class);
@@ -40,8 +40,7 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setId(pluginId);
 
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
-				molgenisPermissionService);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
 		assertEquals(xmlMolgenisUiPlugin.getId(), pluginId);
 	}
 
@@ -54,8 +53,7 @@ public class XmlMolgenisUiPluginTest
 		pluginType.setName(pluginId);
 		pluginType.setName(pluginName);
 
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
-				molgenisPermissionService);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
 		assertEquals(xmlMolgenisUiPlugin.getName(), pluginName);
 	}
 
@@ -67,8 +65,7 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setId(pluginId);
 		pluginType.setName(pluginName);
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
-				molgenisPermissionService);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
 		assertEquals(xmlMolgenisUiPlugin.getName(), pluginName);
 	}
 
@@ -76,7 +73,7 @@ public class XmlMolgenisUiPluginTest
 	public void getType()
 	{
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu,
-				molgenisPermissionService);
+				permissionService);
 		assertEquals(xmlMolgenisUiPlugin.getType(), MolgenisUiMenuItemType.PLUGIN);
 	}
 
@@ -84,7 +81,7 @@ public class XmlMolgenisUiPluginTest
 	public void getParentMenu()
 	{
 		assertEquals(
-				new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, molgenisPermissionService).getParentMenu(),
+				new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, permissionService).getParentMenu(),
 				molgenisUiMenu);
 	}
 
@@ -96,9 +93,8 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setName(type);
 		pluginType.setId(id);
-		when(molgenisPermissionService.hasPermissionOnPlugin(id, Permission.READ)).thenReturn(true);
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
-				molgenisPermissionService);
+		when(permissionService.hasPermissionOnPlugin(id, Permission.READ)).thenReturn(true);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
 		assertTrue(xmlMolgenisUiPlugin.isAuthorized());
 	}
 
@@ -108,7 +104,7 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setName("type_notauthorized");
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu,
-				molgenisPermissionService);
+				permissionService);
 		assertFalse(xmlMolgenisUiPlugin.isAuthorized());
 	}
 }

@@ -1,6 +1,6 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.core.Authentication;
@@ -13,7 +13,7 @@ import java.util.Collection;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Component
-public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
+public class PermissionServiceImpl implements PermissionService
 {
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginId, Permission permission)

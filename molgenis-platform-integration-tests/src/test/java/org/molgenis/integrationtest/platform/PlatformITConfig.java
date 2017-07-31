@@ -31,7 +31,7 @@ import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
+import org.molgenis.security.permission.PermissionServiceImpl;
 import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +88,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class,
+		PermissionServiceImpl.class, MolgenisRoleHierarchy.class,
 		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class,
 		OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>

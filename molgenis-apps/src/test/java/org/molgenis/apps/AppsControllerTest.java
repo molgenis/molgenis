@@ -8,7 +8,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.util.GsonConfig;
@@ -47,7 +47,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	private FileStore fileStore;
 
 	@Mock
-	private MolgenisPermissionService permissionService;
+	private PermissionService permissionService;
 
 	private MockMvc mockMvc;
 
