@@ -16,7 +16,7 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -75,7 +75,7 @@ public class RestControllerV2
 
 	private final DataService dataService;
 	private final RestService restService;
-	private final MolgenisPermissionService permissionService;
+	private final PermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
@@ -131,8 +131,8 @@ public class RestControllerV2
 	}
 
 	@Autowired
-	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService,
+	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
+			LanguageService languageService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -373,7 +373,7 @@ public class RestControllerV2
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
-		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopyFrom.getName(),
+		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
 				Permission.READ);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
 

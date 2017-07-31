@@ -244,9 +244,10 @@ public class RestTestUtils
 
 	/**
 	 * Grant user read right on given plugin
+	 *
 	 * @param adminToken the token to use for signin
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
-	 * @param plugin the name of the plugin
+	 * @param plugin     the name of the plugin
 	 */
 	public static void grantPluginRights(String adminToken, String userId, String plugin)
 	{
@@ -254,10 +255,10 @@ public class RestTestUtils
 		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
 
 		given().header("x-molgenis-token", adminToken)
-				.contentType(APPLICATION_JSON)
-				.body(body.toJSONString())
-				.when()
-				.post("api/v1/" + "sys_sec_UserAuthority");
+			   .contentType(APPLICATION_JSON)
+			   .body(body.toJSONString())
+			   .when()
+			   .post("api/v1/" + "sys_sec_UserAuthority");
 	}
 
 	/**
@@ -307,8 +308,8 @@ public class RestTestUtils
 	public static void removePackage(String adminToken, String packageName)
 	{
 		given().header("x-molgenis-token", adminToken)
-				.contentType(APPLICATION_JSON)
-				.delete("api/v1/sys_md_Package/" + packageName);
+			   .contentType(APPLICATION_JSON)
+			   .delete("api/v1/sys_md_Package/" + packageName);
 	}
 
 	public static void removeEntity(String adminToken, String entityId)
@@ -321,10 +322,9 @@ public class RestTestUtils
 	public static void removeImportJob(String adminToken, String jobId)
 	{
 		given().header("x-molgenis-token", adminToken)
-				.contentType(APPLICATION_JSON)
-				.delete("api/v2/sys_job_OneClickImportJobExecution/" + jobId);
+			   .contentType(APPLICATION_JSON)
+			   .delete("api/v2/sys_job_OneClickImportJobExecution/" + jobId);
 	}
-
 
 	/**
 	 * Removes permissions from UserAuthority table for a given user identifier

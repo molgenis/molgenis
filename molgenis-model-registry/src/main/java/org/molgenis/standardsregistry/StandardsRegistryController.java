@@ -15,7 +15,7 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.molgenis.ui.MolgenisPluginController;
@@ -46,22 +46,22 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private final MetaDataService metaDataService;
 	private final DataService dataService;
 	private final MetaDataSearchService metaDataSearchService;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			MolgenisPermissionService molgenisPermissionService,
-			TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService)
+			PermissionService permissionService, TagService<LabeledResource, LabeledResource> tagService,
+			MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
+		if (permissionService == null) throw new IllegalArgumentException("permissionService is null");
 		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
 		if (metaDataSearchService == null) throw new IllegalArgumentException("metaDataSearchService is null");
 		this.dataService = dataService;
 		this.metaDataService = metaDataService;
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.permissionService = permissionService;
 		this.metaDataSearchService = metaDataSearchService;
 		this.tagService = tagService;
 	}
@@ -135,8 +135,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 						String entityTypeId = entity.getName();
 
 						// Check read permission
-						if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
-							return false;
+						if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.READ)) return false;
 
 						// Check has data
 						if (!dataService.hasRepository(entityTypeId)

@@ -129,8 +129,8 @@ public class GenomeBrowserService
 			GenomeBrowserAttributes attrs)
 	{
 		return GenomeBrowserTrack.create(entityType.getIdValue().toString(), entityType.getLabel(),
-				entityType.getLabelAttribute().getName(),
-				entityType, GenomeBrowserSettings.TrackType.VARIANT, Collections.emptyList(),
-				GenomeBrowserSettings.MolgenisReferenceMode.ALL, attrs, null, null, null, null);
+				entityType.getLabelAttribute().getName(), entityType, GenomeBrowserSettings.TrackType.VARIANT,
+				Collections.emptyList(), GenomeBrowserSettings.MolgenisReferenceMode.ALL, attrs, null, null, null,
+				null);
 	}
 }

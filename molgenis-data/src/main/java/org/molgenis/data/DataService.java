@@ -40,8 +40,8 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Get a CrudRepository by entity name
 	 *
-	 * @throws UnknownEntityException      when the repository can not be found
-	 * @throws MolgenisDataException       if the repository doesn't implement CrudRepository
+	 * @throws UnknownEntityException when the repository can not be found
+	 * @throws MolgenisDataException  if the repository doesn't implement CrudRepository
 	 */
 	Repository<Entity> getRepository(String entityTypeId);
 
@@ -72,14 +72,14 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * return number of entities matched by query
 	 *
-	 * @throws MolgenisDataException       if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
 	long count(String entityTypeId, Query<Entity> q);
 
 	/**
 	 * Find all entities of the given type. Returns empty Stream if no matches.
 	 *
-	 * @throws MolgenisDataException       if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
 	Stream<Entity> findAll(String entityTypeId);
 
@@ -176,7 +176,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Find one entity based on id. Returns null if not exists
 	 *
-	 * @throws MolgenisDataException       if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
 	Entity findOne(String entityTypeId, Query<Entity> q);
 
@@ -190,7 +190,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Adds an entity to it's repository
 	 *
-	 * @throws MolgenisDataException       if the repository of the entity isn't a Writable
+	 * @throws MolgenisDataException if the repository of the entity isn't a Writable
 	 */
 	void add(String entityTypeId, Entity entity);
 
@@ -204,7 +204,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Updates an entity
 	 *
-	 * @throws MolgenisDataException       if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
 	void update(String entityTypeId, Entity entity);
 
@@ -218,7 +218,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Deletes an entity
 	 *
-	 * @throws MolgenisDataException       if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
 	void delete(String entityTypeId, Entity entity);
 
