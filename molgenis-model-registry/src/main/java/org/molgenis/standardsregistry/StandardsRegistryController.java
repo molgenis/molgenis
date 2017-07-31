@@ -51,8 +51,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			PermissionService permissionService,
-			TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService)
+			PermissionService permissionService, TagService<LabeledResource, LabeledResource> tagService,
+			MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
@@ -135,8 +135,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 						String entityTypeId = entity.getName();
 
 						// Check read permission
-						if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.READ))
-							return false;
+						if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.READ)) return false;
 
 						// Check has data
 						if (!dataService.hasRepository(entityTypeId)

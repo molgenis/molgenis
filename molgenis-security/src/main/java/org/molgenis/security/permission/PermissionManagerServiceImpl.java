@@ -76,9 +76,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<Object> getEntityClassIds()
 	{
-		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
-						  .map(Entity::getIdValue)
-						  .collect(toList());
+		return dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA).map(Entity::getIdValue).collect(toList());
 	}
 
 	@Override
@@ -227,8 +225,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		Stream<UserAuthority> authorities = dataService.findAll(USER_AUTHORITY,
 				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user), UserAuthority.class);
 
-		return authorities.filter(authority ->
-				authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true).collect(toList());
+		return authorities.filter(
+				authority -> authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true)
+						  .collect(toList());
 	}
 
 	private List<Authority> getGroupPermissions(Group group)
@@ -251,8 +250,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		Stream<GroupAuthority> authorities = dataService.findAll(GROUP_AUTHORITY,
 				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.GROUP, groups), GroupAuthority.class);
 
-		return authorities.filter(authority ->
-				authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true).collect(toList());
+		return authorities.filter(
+				authority -> authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true)
+						  .collect(toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)

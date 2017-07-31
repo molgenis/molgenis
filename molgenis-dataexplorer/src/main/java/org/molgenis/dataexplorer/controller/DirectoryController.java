@@ -39,8 +39,7 @@ public class DirectoryController extends MolgenisPluginController
 	private final PermissionService permissions;
 
 	@Autowired
-	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate,
-			PermissionService permissions)
+	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate, PermissionService permissions)
 	{
 		super(URI);
 		this.settings = requireNonNull(settings);

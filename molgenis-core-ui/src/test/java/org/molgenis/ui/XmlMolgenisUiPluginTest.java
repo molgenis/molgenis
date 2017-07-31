@@ -40,7 +40,8 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setId(pluginId);
 
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
+				permissionService);
 		assertEquals(xmlMolgenisUiPlugin.getId(), pluginId);
 	}
 
@@ -53,7 +54,8 @@ public class XmlMolgenisUiPluginTest
 		pluginType.setName(pluginId);
 		pluginType.setName(pluginName);
 
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
+				permissionService);
 		assertEquals(xmlMolgenisUiPlugin.getName(), pluginName);
 	}
 
@@ -65,7 +67,8 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setId(pluginId);
 		pluginType.setName(pluginName);
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
+				permissionService);
 		assertEquals(xmlMolgenisUiPlugin.getName(), pluginName);
 	}
 
@@ -80,8 +83,7 @@ public class XmlMolgenisUiPluginTest
 	@Test
 	public void getParentMenu()
 	{
-		assertEquals(
-				new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, permissionService).getParentMenu(),
+		assertEquals(new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu, permissionService).getParentMenu(),
 				molgenisUiMenu);
 	}
 
@@ -94,7 +96,8 @@ public class XmlMolgenisUiPluginTest
 		pluginType.setName(type);
 		pluginType.setId(id);
 		when(permissionService.hasPermissionOnPlugin(id, Permission.READ)).thenReturn(true);
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu, permissionService);
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
+				permissionService);
 		assertTrue(xmlMolgenisUiPlugin.isAuthorized());
 	}
 

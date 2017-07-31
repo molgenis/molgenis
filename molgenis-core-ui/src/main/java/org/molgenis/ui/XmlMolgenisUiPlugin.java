@@ -13,8 +13,7 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	private final MolgenisUiMenu parentMenu;
 	private final PermissionService permissionService;
 
-	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu,
-			PermissionService permissionService)
+	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu, PermissionService permissionService)
 	{
 		if (pluginType == null) throw new IllegalArgumentException("plugin type is null");
 		if (parentMenu == null) throw new IllegalArgumentException("parent menu is null");

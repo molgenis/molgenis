@@ -22,8 +22,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 		this(menuType, null, permissionService);
 	}
 
-	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu,
-			PermissionService permissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu, PermissionService permissionService)
 	{
 		if (menuType == null) throw new IllegalArgumentException("menu type is null");
 		if (permissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");

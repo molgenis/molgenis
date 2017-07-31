@@ -705,8 +705,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), tokenService(), authenticationManager(),
-					permissionService(), new MolgenisRSQL(),
+			return new RestController(dataService(), tokenService(), authenticationManager(), permissionService(),
+					new MolgenisRSQL(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService());
 		}

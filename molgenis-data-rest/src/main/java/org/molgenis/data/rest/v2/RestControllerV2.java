@@ -131,8 +131,8 @@ public class RestControllerV2
 	}
 
 	@Autowired
-	public RestControllerV2(DataService dataService, PermissionService permissionService,
-			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService,
+	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
+			LanguageService languageService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);

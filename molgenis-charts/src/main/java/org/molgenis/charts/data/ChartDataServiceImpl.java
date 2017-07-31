@@ -261,7 +261,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	/**
 	 * Get a map containing keys to different data lists
 	 *
-	 * @param split         (String) if null or empty String will not split
+	 * @param split (String) if null or empty String will not split
 	 * @return map (Map<String, List<Double>>)
 	 */
 	private Map<String, List<Double>> getBoxPlotDataListMap(EntityType entityType, Iterable<Entity> iterable,

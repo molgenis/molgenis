@@ -175,8 +175,7 @@ public class XmlMolgenisUiMenuTest
 	{
 		assertNull(new XmlMolgenisUiMenu(new MenuType(), permissionService).getParentMenu());
 		MolgenisUiMenu parentMenu = new XmlMolgenisUiMenu(new MenuType(), permissionService);
-		assertEquals(new XmlMolgenisUiMenu(new MenuType(), parentMenu, permissionService).getParentMenu(),
-				parentMenu);
+		assertEquals(new XmlMolgenisUiMenu(new MenuType(), parentMenu, permissionService).getParentMenu(), parentMenu);
 	}
 
 	@Test

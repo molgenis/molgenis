@@ -155,8 +155,7 @@ public class DataExplorerController extends MolgenisPluginController
 			StringBuilder message)
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
-		boolean hasEntityPermission = permissionService.hasPermissionOnEntityType(selectedEntityName,
-				Permission.COUNT);
+		boolean hasEntityPermission = permissionService.hasPermissionOnEntityType(selectedEntityName, Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -322,9 +321,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			allTracks.putAll(genomeBrowserService.getReferenceTracks(track));
 		}
-		return allTracks.values()
-						.stream().map(track -> track.toTrackJson())
-						.collect(Collectors.toList());
+		return allTracks.values().stream().map(track -> track.toTrackJson()).collect(Collectors.toList());
 	}
 
 	@RequestMapping(value = "/download", method = POST)

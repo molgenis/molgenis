@@ -502,23 +502,29 @@ public class RestControllerV2APIIT
 
 		// Post the file to be imported
 		ValidatableResponse response = given().log()
-				.all()
-				.header(X_MOLGENIS_TOKEN, testUserToken)
-				.multiPart(file)
-				.post(OneClickImporterController.URI + "/upload")
-				.then()
-				.log()
-				.all()
-				.statusCode(OKE);
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .multiPart(file)
+											  .post(OneClickImporterController.URI + "/upload")
+											  .then()
+											  .log()
+											  .all()
+											  .statusCode(OKE);
 
 		// Verify the post returns a job url
-		String jobUrl = ((ValidatableResponseImpl)response).originalResponse().asString();
+		String jobUrl = ((ValidatableResponseImpl) response).originalResponse().asString();
 		assertTrue(jobUrl.startsWith("/api/v2/sys_job_OneClickImportJobExecution/"));
 
-		String jobStatus = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).get(jobUrl).then().statusCode(OKE)
-				.extract().path("status");
+		String jobStatus = given().log()
+								  .all()
+								  .header(X_MOLGENIS_TOKEN, testUserToken)
+								  .get(jobUrl)
+								  .then()
+								  .statusCode(OKE)
+								  .extract()
+								  .path("status");
 
-		List<String> validJobStats = Arrays.asList("PENDING", "RUNNING", "SUCCESS" );
+		List<String> validJobStats = Arrays.asList("PENDING", "RUNNING", "SUCCESS");
 		assertTrue(validJobStats.contains(jobStatus));
 
 		// Poll job until it finishes
@@ -533,11 +539,15 @@ public class RestControllerV2APIIT
 			pollIndex++;
 		}
 		LOG.info("Import job status : " + jobStatus);
-		assertEquals(jobStatus,"SUCCESS");
+		assertEquals(jobStatus, "SUCCESS");
 
 		// Extract the id of the entity created by the import
-		ValidatableResponse completedJobResponse = given().log().all().header(X_MOLGENIS_TOKEN, testUserToken)
-				.get(jobUrl).then().statusCode(OKE);
+		ValidatableResponse completedJobResponse = given().log()
+														  .all()
+														  .header(X_MOLGENIS_TOKEN, testUserToken)
+														  .get(jobUrl)
+														  .then()
+														  .statusCode(OKE);
 
 		String entityId = completedJobResponse.extract().path("entityTypes[0].id");
 		String packageName = completedJobResponse.extract().path("package");
@@ -550,12 +560,13 @@ public class RestControllerV2APIIT
 
 		// Get the entity value to check the import
 		ValidatableResponse entityResponse = given().log()
-				.all()
-				.header(X_MOLGENIS_TOKEN, testUserToken)
-				.get(API_V2 + entityId + "?attrs=~id,first_name,last_name,full_name,UMCG_employee,Age")
-				.then()
-				.log()
-				.all();
+													.all()
+													.header(X_MOLGENIS_TOKEN, testUserToken)
+													.get(API_V2 + entityId
+															+ "?attrs=~id,first_name,last_name,full_name,UMCG_employee,Age")
+													.then()
+													.log()
+													.all();
 		entityResponse.statusCode(OKE);
 
 		// Check first row for expected values
@@ -571,11 +582,13 @@ public class RestControllerV2APIIT
 		entityResponse.body("items[9].Age", equalTo(32));
 	}
 
-	private String pollJobForStatus(String jobUrl) {
+	private String pollJobForStatus(String jobUrl)
+	{
 		return given().header(X_MOLGENIS_TOKEN, testUserToken).get(jobUrl).then().extract().path("status");
 	}
 
-	private void waitForNMillis(Long numberOfMillis) {
+	private void waitForNMillis(Long numberOfMillis)
+	{
 		try
 		{
 			sleep(numberOfMillis);
@@ -738,7 +751,6 @@ public class RestControllerV2APIIT
 
 		// Delete created packages
 		importPackages.forEach(p -> removePackage(adminToken, p));
-
 
 		// Clean up TestEMX
 		removeEntity(adminToken, "V2_API_TypeTestAPIV2");

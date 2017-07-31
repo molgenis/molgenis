@@ -44,8 +44,7 @@ public class PermissionServiceImplTest
 				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.COUNT + "_plugin3").getMock();
 
 		when((Collection<GrantedAuthority>) (authentication.getAuthorities())).thenReturn(
-				Arrays.asList(authority1, authority2, authority3, authority4, authority5,
-						authority6));
+				Arrays.asList(authority1, authority2, authority3, authority4, authority5, authority6));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		permissionService = new PermissionServiceImpl();

@@ -98,8 +98,8 @@ public class RestController
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, PermissionService permissionService,
-			MolgenisRSQL molgenisRSQL, RestService restService, LanguageService languageService)
+			AuthenticationManager authenticationManager, PermissionService permissionService, MolgenisRSQL molgenisRSQL,
+			RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -1091,7 +1091,8 @@ public class RestController
 			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
 		}
 
-		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityTypeId, meta, permissionService, dataService, languageService);
+		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityTypeId, meta, permissionService,
+				dataService, languageService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1118,8 +1119,9 @@ public class RestController
 				if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-					entityMap.put(attrName, new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null,
-							permissionService, dataService, languageService));
+					entityMap.put(attrName,
+							new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null, permissionService,
+									dataService, languageService));
 				}
 				else
 				{
