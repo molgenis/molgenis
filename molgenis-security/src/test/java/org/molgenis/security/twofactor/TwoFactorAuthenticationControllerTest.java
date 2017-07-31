@@ -71,7 +71,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 	public void enabledExceptionTest() throws Exception
 	{
 		Model model = new ExtendedModelMap();
-		String viewTemplate = twoFactorAuthenticationController.enabled(model);
+		String viewTemplate = twoFactorAuthenticationController.configured(model);
 		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
 		assertEquals("Verification code",
 				model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_HEADER_2FA_IS_CONFIGURED));

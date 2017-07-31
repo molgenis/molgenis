@@ -47,7 +47,8 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		boolean isValid = false;
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString()))
+		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString())
+				|| appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENFORCED.toString()))
 		{
 			User user = runAsSystem(() -> dataService.findOne(USER,
 					new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));

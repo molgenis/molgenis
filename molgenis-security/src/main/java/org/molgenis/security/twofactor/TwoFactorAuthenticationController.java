@@ -26,8 +26,8 @@ public class TwoFactorAuthenticationController
 	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
 	public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
 
-	public static final String ATTRIBUTE_HEADER_2FA_IS_CONFIGURED = "isConfigured2faHeader";
-	public static final String ATTRIBUTE_HEADER_2FA_IS_INITIAL = "isInitial2faHeader";
+	public static final String ATTRIBUTE_HEADER_2FA_IS_CONFIGURED = "configured2faHeader";
+	public static final String ATTRIBUTE_HEADER_2FA_IS_INITIAL = "initial2faHeader";
 
 	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
 	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Setup 2 factor authentication";
@@ -46,7 +46,7 @@ public class TwoFactorAuthenticationController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_CONFIGURED_URI)
-	public String enabled(Model model)
+	public String configured(Model model)
 	{
 		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_CONFIGURED, HEADER_VALUE_2FA_IS_CONFIGURED);
 		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
