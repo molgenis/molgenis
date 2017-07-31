@@ -138,6 +138,7 @@
         var modal = $('#login-modal')
         var submitBtn = $('#login-btn')
         var form = $('#login-form')
+        form.validate()
 
     <#-- modal events -->
         modal.on('hide.bs.modal', function (e) {
@@ -147,10 +148,26 @@
             $('.alert', modal).remove()
         })
 
+    <#-- form events -->
+        form.submit(function (e) {
+            if (!form.valid()) {
+                e.preventDefault()
+                e.stopPropagation()
+            }
+        })
+
         submitBtn.click(function (e) {
             e.preventDefault()
             e.stopPropagation()
             form.submit()
+        })
+
+        $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
+            if (e.which == 13) {
+                e.preventDefault()
+                e.stopPropagation()
+                form.submit()
+            }
         })
 
     <#-- submodal events -->
