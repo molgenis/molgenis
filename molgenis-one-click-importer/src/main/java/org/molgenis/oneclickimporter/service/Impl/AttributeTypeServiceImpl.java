@@ -33,7 +33,8 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 
 			// If the newly found type is not narrower than the current type, do not update
 			// e.g. a long does not fit into an integer
-			if(isBroader(enrichedTypeGuess, currentGuess)) {
+			if (isBroader(enrichedTypeGuess, currentGuess))
+			{
 				currentGuess = enrichedTypeGuess;
 			}
 
@@ -55,23 +56,28 @@ public class AttributeTypeServiceImpl implements AttributeTypeService
 
 	/**
 	 * Check if the new enriched type is broader the the previously found type
+	 *
 	 * @return
 	 */
 	private boolean isBroader(AttributeType enrichedTypeGuess, AttributeType columnTypeGuess)
 	{
-		if(columnTypeGuess == null && enrichedTypeGuess != null || columnTypeGuess == null) {
+		if (columnTypeGuess == null && enrichedTypeGuess != null || columnTypeGuess == null)
+		{
 			return true;
 		}
 
 		switch (columnTypeGuess)
 		{
 			case INT:
-				return enrichedTypeGuess.equals(INT) || enrichedTypeGuess.equals(LONG) || enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+				return enrichedTypeGuess.equals(INT) || enrichedTypeGuess.equals(LONG) || enrichedTypeGuess.equals(
+						DECIMAL) || enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
 
 			case DECIMAL:
-				return enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(DATE) || enrichedTypeGuess.equals(DATE_TIME) || enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
+				return enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(DATE) || enrichedTypeGuess.equals(
+						DATE_TIME) || enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);
 			case LONG:
-				return enrichedTypeGuess.equals(LONG) || enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(DATE) || enrichedTypeGuess.equals(DATE_TIME) || enrichedTypeGuess.equals(STRING)
+				return enrichedTypeGuess.equals(LONG) || enrichedTypeGuess.equals(DECIMAL) || enrichedTypeGuess.equals(
+						DATE) || enrichedTypeGuess.equals(DATE_TIME) || enrichedTypeGuess.equals(STRING)
 						|| enrichedTypeGuess.equals(TEXT);
 			case BOOL:
 				return enrichedTypeGuess.equals(STRING) || enrichedTypeGuess.equals(TEXT);

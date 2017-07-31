@@ -35,7 +35,6 @@ public class OneClickImportJob
 	private final EntityService entityService;
 	private final FileStore fileStore;
 
-
 	public OneClickImportJob(ExcelService excelService, CsvService csvService,
 			OneClickImporterService oneClickImporterService,
 			OneClickImporterNamingService oneClickImporterNamingService, EntityService entityService,

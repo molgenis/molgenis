@@ -247,7 +247,8 @@ public class SortaServiceController extends MolgenisPluginController
 			User currentUser = userAccountService.getCurrentUser();
 			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
-				RunAsSystemProxy.runAsSystem(() -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
+				RunAsSystemProxy.runAsSystem(
+						() -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
 				tryDeleteRepository(sortaJobExecution.getResultEntityName());
 				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
 			}
@@ -347,8 +348,8 @@ public class SortaServiceController extends MolgenisPluginController
 	@RequestMapping(method = POST, value = "/match")
 	public String match(@RequestParam(value = "taskName") String jobName,
 			@RequestParam(value = "selectOntologies") String ontologyIri,
-			@RequestParam(value = "inputTerms") String inputTerms, Model model,
-			HttpServletRequest httpServletRequest) throws Exception
+			@RequestParam(value = "inputTerms") String inputTerms, Model model, HttpServletRequest httpServletRequest)
+			throws Exception
 	{
 		if (isEmpty(ontologyIri) || isEmpty(inputTerms)) return init(model);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8"));
@@ -357,9 +358,8 @@ public class SortaServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
 	public String upload(@RequestParam(value = "taskName") String jobName,
-			@RequestParam(value = "selectOntologies") String ontologyIri,
-			@RequestParam(value = "file") Part file, Model model,
-			HttpServletRequest httpServletRequest) throws Exception
+			@RequestParam(value = "selectOntologies") String ontologyIri, @RequestParam(value = "file") Part file,
+			Model model, HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (isEmpty(ontologyIri) || file == null) return init(model);
 		InputStream inputStream = file.getInputStream();

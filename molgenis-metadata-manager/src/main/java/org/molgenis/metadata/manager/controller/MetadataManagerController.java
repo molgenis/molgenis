@@ -49,7 +49,7 @@ public class MetadataManagerController extends MolgenisPluginController
 		this.appSettings = requireNonNull(appSettings);
 		this.metadataManagerService = requireNonNull(metadataManagerService);
 	}
-	
+
 	@RequestMapping(value = "/**", method = GET)
 	public String init(Model model)
 	{
