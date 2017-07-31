@@ -45,8 +45,8 @@
             <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
             </#if>
             <#-- login form -->
-            <#if is2faEnabled??>
-                <form id="2fakey-form" role="form" method="POST" action="/2fa/validate">
+            <#if is2faConfigured??>
+                <form id="key-2fa-form" role="form" method="POST" action="/2fa/validate">
                     <div class="form-group">
                         <input id="verification-code-field" placeholder="Enter verification code..."
                                class="form-control" name="verificationCode" required autofocus>

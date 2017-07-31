@@ -15,20 +15,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class TwoFactorAuthenticationController
 {
 	public static final String URI = "/2fa";
-	public static final String TWO_FACTOR_ENABLED_URI = "/enabled";
+	public static final String TWO_FACTOR_CONFIGURED_URI = "/configured";
 	public static final String TWO_FACTOR_INITIAL_URI = "/initial";
 	private static final String TWO_FACTOR_VALIDATION_URI = "/validate";
 	private static final String TWO_FACTOR_SECRET_URI = "/secret";
 
 	public static final String ATTRIBUTE_2FA_IS_INITIAL = "is2faInitial";
-	public static final String ATTRIBUTE_2FA_IS_ENABLED = "is2faEnabled";
+	public static final String ATTRIBUTE_2FA_IS_CONFIGURED = "is2faConfigured";
+
 	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
 	public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
-	public static final String ATTRIBUTE_HEADER_2FA_IS_INITIAL = "setup2faHeader";
-	public static final String ATTRIBUTE_HEADER_2FA_VERIFY_CODE = "verifyKeyHeader";
 
-	private static final String HEADER_VALUE_2FA_VERIFY_CODE = "Verification code";
-	private static final String HEADER_VALUE_2FA_INITIAL = "Setup 2 factor authentication";
+	public static final String ATTRIBUTE_HEADER_2FA_IS_CONFIGURED = "isConfigured2faHeader";
+	public static final String ATTRIBUTE_HEADER_2FA_IS_INITIAL = "isInitial2faHeader";
+
+	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
+	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Setup 2 factor authentication";
 
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private OTPService otpService;
@@ -43,11 +45,11 @@ public class TwoFactorAuthenticationController
 		this.googleAuthenticatorService = googleAuthenticatorService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_ENABLED_URI)
+	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_CONFIGURED_URI)
 	public String enabled(Model model)
 	{
-		model.addAttribute(ATTRIBUTE_HEADER_2FA_VERIFY_CODE, HEADER_VALUE_2FA_VERIFY_CODE);
-		model.addAttribute(ATTRIBUTE_2FA_IS_ENABLED, true);
+		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_CONFIGURED, HEADER_VALUE_2FA_IS_CONFIGURED);
+		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
 		return MolgenisLoginController.VIEW_LOGIN;
 	}
 
@@ -78,8 +80,8 @@ public class TwoFactorAuthenticationController
 
 	private void setModelAttributesWhenNotValidated(Model model)
 	{
-		model.addAttribute(ATTRIBUTE_2FA_IS_ENABLED, true);
-		model.addAttribute(ATTRIBUTE_HEADER_2FA_VERIFY_CODE, HEADER_VALUE_2FA_VERIFY_CODE);
+		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
+		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_CONFIGURED, HEADER_VALUE_2FA_IS_CONFIGURED);
 		model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
 	}
 
@@ -87,7 +89,7 @@ public class TwoFactorAuthenticationController
 	public String initial(Model model)
 	{
 
-		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_INITIAL, HEADER_VALUE_2FA_INITIAL);
+		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_INITIAL, HEADER_VALUE_2FA_IS_INITIAL);
 		model.addAttribute(ATTRIBUTE_2FA_IS_INITIAL, true);
 
 		try
@@ -119,7 +121,7 @@ public class TwoFactorAuthenticationController
 		catch (Exception e)
 		{
 			model.addAttribute(ATTRIBUTE_2FA_IS_INITIAL, true);
-			model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_INITIAL, HEADER_VALUE_2FA_INITIAL);
+			model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_INITIAL, HEADER_VALUE_2FA_IS_INITIAL);
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
 					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));

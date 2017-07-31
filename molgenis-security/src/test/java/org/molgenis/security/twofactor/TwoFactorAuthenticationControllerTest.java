@@ -72,9 +72,9 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 	{
 		Model model = new ExtendedModelMap();
 		String viewTemplate = twoFactorAuthenticationController.enabled(model);
-		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_ENABLED));
+		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
 		assertEquals("Verification code",
-				model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_HEADER_2FA_VERIFY_CODE));
+				model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_HEADER_2FA_IS_CONFIGURED));
 		assertEquals("view-login", viewTemplate);
 
 	}
@@ -103,7 +103,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		Model model = new ExtendedModelMap();
 		String viewTemplate = twoFactorAuthenticationController.validateVerificationCodeAndAuthenticate(model,
 				verificationCode);
-		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_ENABLED));
+		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
 		assertEquals("view-login", viewTemplate);
 
 	}
