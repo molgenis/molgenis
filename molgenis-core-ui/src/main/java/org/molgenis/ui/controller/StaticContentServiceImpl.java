@@ -2,7 +2,7 @@ package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -28,13 +28,13 @@ public class StaticContentServiceImpl implements StaticContentService
 	private final DataService dataService;
 	private final StaticContentFactory staticContentFactory;
 
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 
 	@Autowired
 	public StaticContentServiceImpl(DataService dataService, StaticContentFactory staticContentFactory,
-			MolgenisPermissionService molgenisPermissionService)
+			PermissionService permissionService)
 	{
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);
 		this.staticContentFactory = staticContentFactory;
 	}
@@ -70,7 +70,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return SecurityUtils.currentUserIsAuthenticated() && molgenisPermissionService.hasPermissionOnPlugin(pluginId,
+		return SecurityUtils.currentUserIsAuthenticated() && permissionService.hasPermissionOnPlugin(pluginId,
 				Permission.WRITE);
 	}
 

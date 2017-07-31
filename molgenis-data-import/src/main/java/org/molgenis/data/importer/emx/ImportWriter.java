@@ -18,7 +18,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -54,7 +54,7 @@ public class ImportWriter
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 	private final EntityManager entityManager;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
@@ -67,12 +67,12 @@ public class ImportWriter
 	 * @param entityTypeDependencyResolver entity type dependency resolver
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			MolgenisPermissionService molgenisPermissionService, EntityManager entityManager,
+			PermissionService permissionService, EntityManager entityManager,
 			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.permissionService = requireNonNull(permissionService);
 		this.entityManager = requireNonNull(entityManager);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
@@ -117,7 +117,7 @@ public class ImportWriter
 	private void validateEntityTypePermission(EntityType entityType)
 	{
 		String entityTypeName = entityType.getId();
-		if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeName, Permission.READ))
+		if (!permissionService.hasPermissionOnEntityType(entityTypeName, Permission.READ))
 		{
 			throw new MolgenisValidationException(
 					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));
@@ -463,7 +463,7 @@ public class ImportWriter
 	{
 		if (entities == null) return 0;
 
-		if (!molgenisPermissionService.hasPermissionOnEntity(repo.getName(), Permission.WRITE))
+		if (!permissionService.hasPermissionOnEntityType(repo.getName(), Permission.WRITE))
 		{
 			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
 					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
