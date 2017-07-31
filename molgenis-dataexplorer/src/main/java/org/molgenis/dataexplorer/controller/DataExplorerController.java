@@ -322,9 +322,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			allTracks.putAll(genomeBrowserService.getReferenceTracks(track));
 		}
-		return allTracks.values()
-						.stream().map(track -> track.toTrackJson())
-						.collect(Collectors.toList());
+		return allTracks.values().stream().map(track -> track.toTrackJson()).collect(Collectors.toList());
 	}
 
 	@RequestMapping(value = "/download", method = POST)
