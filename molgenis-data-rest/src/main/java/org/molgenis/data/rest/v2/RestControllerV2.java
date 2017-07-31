@@ -373,7 +373,7 @@ public class RestControllerV2
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
-		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopyFrom.getName(),
+		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
 				Permission.READ);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
 

@@ -135,7 +135,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 						String entityTypeId = entity.getName();
 
 						// Check read permission
-						if (!permissionService.hasPermissionOnEntity(entityTypeId, Permission.READ))
+						if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.READ))
 							return false;
 
 						// Check has data

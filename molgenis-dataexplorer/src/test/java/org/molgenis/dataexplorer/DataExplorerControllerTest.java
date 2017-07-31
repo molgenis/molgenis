@@ -88,8 +88,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
-		when(permissionService.hasPermissionOnEntity("yes", Permission.WRITEMETA)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntity("no", Permission.WRITEMETA)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntityType("yes", Permission.WRITEMETA)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntityType("no", Permission.WRITEMETA)).thenReturn(false);
 
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);

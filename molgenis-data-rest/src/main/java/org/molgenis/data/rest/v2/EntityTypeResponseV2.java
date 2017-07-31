@@ -101,8 +101,8 @@ class EntityTypeResponseV2
 		this.isAbstract = meta.isAbstract();
 
 		this.writable =
-				permissionService.hasPermissionOnEntity(name, Permission.WRITE) && dataService.getCapabilities(name)
-																							  .contains(
+				permissionService.hasPermissionOnEntityType(name, Permission.WRITE) && dataService.getCapabilities(name)
+																								  .contains(
 																									  RepositoryCapability.WRITABLE);
 	}
 

@@ -117,7 +117,7 @@ public class ImportWriter
 	private void validateEntityTypePermission(EntityType entityType)
 	{
 		String entityTypeName = entityType.getId();
-		if (!permissionService.hasPermissionOnEntity(entityTypeName, Permission.READ))
+		if (!permissionService.hasPermissionOnEntityType(entityTypeName, Permission.READ))
 		{
 			throw new MolgenisValidationException(
 					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));
@@ -463,7 +463,7 @@ public class ImportWriter
 	{
 		if (entities == null) return 0;
 
-		if (!permissionService.hasPermissionOnEntity(repo.getName(), Permission.WRITE))
+		if (!permissionService.hasPermissionOnEntityType(repo.getName(), Permission.WRITE))
 		{
 			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
 					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");

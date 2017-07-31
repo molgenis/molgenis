@@ -22,7 +22,7 @@ public class PermissionServiceImpl implements PermissionService
 	}
 
 	@Override
-	public boolean hasPermissionOnEntity(String entityTypeId, Permission permission)
+	public boolean hasPermissionOnEntityType(String entityTypeId, Permission permission)
 	{
 		return hasPermission(entityTypeId, permission, AUTHORITY_ENTITY_PREFIX);
 	}

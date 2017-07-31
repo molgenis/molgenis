@@ -71,7 +71,7 @@ public class AppsController extends MolgenisPluginController
 		Query<App> query = dataService.query(APP, App.class);
 		query.sort().on(AppMetaData.NAME);
 		Stream<App> apps = query.findAll();
-		if (!permissionService.hasPermissionOnEntity(APP, Permission.WRITE))
+		if (!permissionService.hasPermissionOnEntityType(APP, Permission.WRITE))
 		{
 			apps = apps.filter(App::isActive);
 		}

@@ -60,18 +60,18 @@ public class PermissionServiceImplTest
 	@Test
 	public void hasPermissionOnEntity()
 	{
-		assertTrue(permissionService.hasPermissionOnEntity("entity1", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntity("entity1", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntity("entity1", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntity("entity2", Permission.READ));
-		assertTrue(permissionService.hasPermissionOnEntity("entity2", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntity("entity2", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntity("entity3", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntity("entity3", Permission.WRITE));
-		assertTrue(permissionService.hasPermissionOnEntity("entity3", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntity("entity-unknown", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntity("entity-unknown", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntity("entity-unknown", Permission.COUNT));
+		assertTrue(permissionService.hasPermissionOnEntityType("entity1", Permission.READ));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.WRITE));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.COUNT));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.READ));
+		assertTrue(permissionService.hasPermissionOnEntityType("entity2", Permission.WRITE));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.COUNT));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.READ));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.WRITE));
+		assertTrue(permissionService.hasPermissionOnEntityType("entity3", Permission.COUNT));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.READ));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.WRITE));
+		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.COUNT));
 	}
 
 	@Test

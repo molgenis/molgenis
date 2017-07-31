@@ -623,7 +623,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
-		when(permissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntityType("entity", Permission.READ)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
 		ResultActions resultActions = mockMvc.perform(
@@ -672,7 +672,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(permissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntityType("entity", Permission.READ)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
