@@ -25,8 +25,7 @@ public abstract class GenomeBrowserTrack
 	public static GenomeBrowserTrack create(GenomeBrowserSettings settings)
 	{
 		return new AutoValue_GenomeBrowserTrack(settings.getIdentifier(), settings.getLabel(),
-				settings.getLabelAttr().getName(),
-				settings.getEntity(), settings.getTrackType(),
+				settings.getLabelAttr().getName(), settings.getEntity(), settings.getTrackType(),
 				settings.getMolgenisReferenceTracks().collect(Collectors.toList()), settings.getMolgenisReferenceMode(),
 				settings.getGenomeBrowserAttrs(), settings.getActions(), settings.getAttrs(), settings.getScoreAttr(),
 				settings.getExonKey());

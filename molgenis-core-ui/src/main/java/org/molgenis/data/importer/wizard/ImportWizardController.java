@@ -168,7 +168,7 @@ public class ImportWizardController extends AbstractWizardController
 	/**
 	 * Imports entities present in the submitted file
 	 *
-	 * @param url   URL from which a file is downloaded
+	 * @param url URL from which a file is downloaded
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/importByUrl")
 	@ResponseBody
