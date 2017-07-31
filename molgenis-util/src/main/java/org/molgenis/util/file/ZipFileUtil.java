@@ -1,4 +1,4 @@
-package org.molgenis.ontology.utils;
+package org.molgenis.util.file;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +42,11 @@ public class ZipFileUtil
 			while (entries.hasMoreElements())
 			{
 				ZipEntry entry = entries.nextElement();
+				if (entry.getName().startsWith(".") || entry.getName().startsWith("_"))
+				{
+					continue;
+				}
+
 				if (entry.isDirectory())
 				{
 					LOG.info("Extracting directory: " + entry.getName());
@@ -51,6 +56,7 @@ public class ZipFileUtil
 				LOG.info("Extracting directory: " + entry.getName());
 				File newFile = new File(file.getParent(), entry.getName());
 				copyInputStream(zipFile.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(newFile)));
+
 				unzippedFiles.add(newFile);
 			}
 		}

@@ -243,11 +243,11 @@
             <artifactId>molgenis-fair</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-settings</artifactId>
@@ -271,6 +271,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-metadata-manager</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-one-click-importer</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
