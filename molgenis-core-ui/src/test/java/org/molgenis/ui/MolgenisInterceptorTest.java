@@ -28,6 +28,7 @@ public class MolgenisInterceptorTest
 	public void setUp()
 	{
 		resourceFingerprintRegistry = mock(ResourceFingerprintRegistry.class);
+		templateResourceUtils = mock(TemplateResourceUtils.class);
 		appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
 		languageService = mock(LanguageService.class);
 	}
