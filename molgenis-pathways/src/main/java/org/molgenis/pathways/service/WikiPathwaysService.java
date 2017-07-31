@@ -102,7 +102,7 @@ public class WikiPathwaysService
 	/**
 	 * Retrieves a colored pathway image
 	 *
-	 * @param pathwayId        ID of the pathway from WikiPathways
+	 * @param pathwayId ID of the pathway from WikiPathways
 	 * @return String containing the pathway svg
 	 * @throws ExecutionException if loading of the cache fails
 	 */

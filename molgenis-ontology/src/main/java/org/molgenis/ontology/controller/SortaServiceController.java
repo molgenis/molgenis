@@ -34,7 +34,7 @@ import org.molgenis.ontology.sorta.request.SortaServiceResponse;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -93,7 +93,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final SortaJobFactory sortaMatchJobFactory;
 	private final ExecutorService taskExecutor;
 	private final FileStore fileStore;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 	private final LanguageService languageService;
 	private final MenuReaderService menuReaderService;
 	private final IdGenerator idGenerator;
@@ -115,7 +115,7 @@ public class SortaServiceController extends MolgenisPluginController
 	@Autowired
 	public SortaServiceController(OntologyService ontologyService, SortaService sortaService,
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
-			FileStore fileStore, MolgenisPermissionService molgenisPermissionService, DataService dataService,
+			FileStore fileStore, PermissionService permissionService, DataService dataService,
 			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
 			PermissionSystemService permissionSystemService, MatchingTaskContentMetaData matchingTaskContentMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
@@ -129,7 +129,7 @@ public class SortaServiceController extends MolgenisPluginController
 		this.taskExecutor = requireNonNull(taskExecutor);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.fileStore = requireNonNull(fileStore);
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);
 		this.languageService = requireNonNull(languageService);
 		this.menuReaderService = requireNonNull(menuReaderService);
@@ -247,7 +247,8 @@ public class SortaServiceController extends MolgenisPluginController
 			User currentUser = userAccountService.getCurrentUser();
 			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
-				RunAsSystemProxy.runAsSystem(() -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
+				RunAsSystemProxy.runAsSystem(
+						() -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
 				tryDeleteRepository(sortaJobExecution.getResultEntityName());
 				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
 			}
@@ -257,7 +258,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void tryDeleteRepository(String entityTypeId)
 	{
-		if (dataService.hasRepository(entityTypeId) && molgenisPermissionService.hasPermissionOnEntity(entityTypeId,
+		if (dataService.hasRepository(entityTypeId) && permissionService.hasPermissionOnEntityType(entityTypeId,
 				Permission.WRITEMETA))
 		{
 			RunAsSystemProxy.runAsSystem(() -> deleteRepository(entityTypeId));
@@ -341,14 +342,14 @@ public class SortaServiceController extends MolgenisPluginController
 
 		EntityPager pager = new EntityPager(start, num, count, null);
 		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", ontologyTermMetaData,
-				molgenisPermissionService, dataService, languageService);
+				permissionService, dataService, languageService);
 	}
 
 	@RequestMapping(method = POST, value = "/match")
 	public String match(@RequestParam(value = "taskName") String jobName,
 			@RequestParam(value = "selectOntologies") String ontologyIri,
-			@RequestParam(value = "inputTerms") String inputTerms, Model model,
-			HttpServletRequest httpServletRequest) throws Exception
+			@RequestParam(value = "inputTerms") String inputTerms, Model model, HttpServletRequest httpServletRequest)
+			throws Exception
 	{
 		if (isEmpty(ontologyIri) || isEmpty(inputTerms)) return init(model);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8"));
@@ -357,9 +358,8 @@ public class SortaServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
 	public String upload(@RequestParam(value = "taskName") String jobName,
-			@RequestParam(value = "selectOntologies") String ontologyIri,
-			@RequestParam(value = "file") Part file, Model model,
-			HttpServletRequest httpServletRequest) throws Exception
+			@RequestParam(value = "selectOntologies") String ontologyIri, @RequestParam(value = "file") Part file,
+			Model model, HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (isEmpty(ontologyIri) || file == null) return init(model);
 		InputStream inputStream = file.getInputStream();

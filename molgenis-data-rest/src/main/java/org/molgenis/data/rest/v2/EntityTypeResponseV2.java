@@ -10,7 +10,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 
 import java.util.List;
@@ -37,7 +37,7 @@ class EntityTypeResponseV2
 	private final Boolean writable;
 	private String languageCode;
 
-	public EntityTypeResponseV2(EntityType meta, MolgenisPermissionService permissionService, DataService dataService,
+	public EntityTypeResponseV2(EntityType meta, PermissionService permissionService, DataService dataService,
 			LanguageService languageService)
 	{
 		this(meta, null, permissionService, dataService, languageService);
@@ -46,7 +46,7 @@ class EntityTypeResponseV2
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityTypeResponseV2(EntityType meta, Fetch fetch, MolgenisPermissionService permissionService,
+	public EntityTypeResponseV2(EntityType meta, Fetch fetch, PermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getId();
@@ -101,9 +101,9 @@ class EntityTypeResponseV2
 		this.isAbstract = meta.isAbstract();
 
 		this.writable =
-				permissionService.hasPermissionOnEntity(name, Permission.WRITE) && dataService.getCapabilities(name)
-																							  .contains(
-																									  RepositoryCapability.WRITABLE);
+				permissionService.hasPermissionOnEntityType(name, Permission.WRITE) && dataService.getCapabilities(name)
+																								  .contains(
+																										  RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

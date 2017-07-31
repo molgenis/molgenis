@@ -14,7 +14,7 @@ import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.converter.RdfConverter;
@@ -72,7 +72,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private AppSettings appSettings;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
@@ -195,7 +195,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(molgenisUi(), molgenisPermissionService);
+		return new MolgenisPluginInterceptor(molgenisUi(), permissionService);
 	}
 
 	@Bean
@@ -282,8 +282,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		result.setFreemarkerSettings(freemarkerSettings);
 		Map<String, Object> freemarkerVariables = Maps.newHashMap();
 		freemarkerVariables.put("limit", new LimitMethod());
-		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
-		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("hasPermission", new HasPermissionDirective(permissionService));
+		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(permissionService));
 		addFreemarkerVariables(freemarkerVariables);
 
 		result.setFreemarkerVariables(freemarkerVariables);
@@ -319,7 +319,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisUi molgenisUi()
 	{
 		MolgenisUi molgenisUi = new MenuMolgenisUi(menuReaderService());
-		return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService);
+		return new MolgenisUiPermissionDecorator(molgenisUi, permissionService);
 	}
 
 	@Bean

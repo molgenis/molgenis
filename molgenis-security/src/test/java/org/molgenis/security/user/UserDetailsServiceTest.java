@@ -68,9 +68,8 @@ public class UserDetailsServiceTest
 	public void loadUserByUsername_SuperUser()
 	{
 		UserDetails user = userDetailsService.loadUserByUsername("admin");
-		Set<String> authorities = Sets.newHashSet(
-				Collections2.transform(user.getAuthorities(),
-						(Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
+		Set<String> authorities = Sets.newHashSet(Collections2.transform(user.getAuthorities(),
+				(Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
 		assertTrue(authorities.contains(SecurityUtils.AUTHORITY_SU));
 		assertEquals(authorities.size(), 1);
 	}
@@ -79,9 +78,8 @@ public class UserDetailsServiceTest
 	public void loadUserByUsername_NonSuperUser()
 	{
 		UserDetails user = userDetailsService.loadUserByUsername("user");
-		Set<String> authorities = Sets.newHashSet(
-				Collections2.transform(user.getAuthorities(),
-						(Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
+		Set<String> authorities = Sets.newHashSet(Collections2.transform(user.getAuthorities(),
+				(Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
 		assertEquals(authorities.size(), 0);
 	}
 }
