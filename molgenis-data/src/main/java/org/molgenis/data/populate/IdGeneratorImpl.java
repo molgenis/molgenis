@@ -42,7 +42,7 @@ public class IdGeneratorImpl implements IdGenerator
 		switch (strategy)
 		{
 			case SECURE_RANDOM:
-				return generateRandomBytes(16, Holder.SECURE_RANDOM);
+				return generateRandomBytes(20, Holder.SECURE_RANDOM);
 			case SHORT_SECURE_RANDOM:
 				return generateRandomBytes(5, Holder.SECURE_RANDOM);
 			case SHORT_RANDOM:
