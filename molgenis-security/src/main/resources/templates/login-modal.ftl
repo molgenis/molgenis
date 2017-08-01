@@ -172,7 +172,8 @@
 
     <#-- submodal events -->
         $(document).on('molgenis-registered', function (e, msg) {
-            $('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
+            $('#alert-container', modal).empty()
+            $('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
         })
         $(document).on('molgenis-passwordresetted', function (e, msg) {
             $('#alert-container', modal).empty()
