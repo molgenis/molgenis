@@ -23,19 +23,7 @@
                    :selectedRole="selectedRole"
                    :selectRole="selectRole" :createRole="createRole" :updateRole="updateRole"
                    :onUpdateRole="onUpdateRole" :onDeleteRole="onDeleteRole"></roles>
-            <div v-if="selectedRole">
-              <h3 class="pt-3">{{'MEMBERS' | i18n}}</h3>
-              <template v-if="users && groups">
-                <ul class="fa-ul" v-if="users || groups">
-                  <li v-for="group in groups"><i class="fa fa-users fa-li"></i>{{group}}
-                  </li>
-                  <li v-for="user in users"><i class="fa fa-user fa-li"></i>{{user}}
-                  </li>
-                </ul>
-                <p v-else>{{'NO_MEMBERS_IN_ROLE' | i18n}}</p>
-              </template>
-              <p v-else><i class="fa fa-spinner fa-spin"></i></p>
-            </div>
+            <role-members v-if="sidType==='role'"></role-members>
           </div>
         </div>
       </div>
@@ -93,6 +81,7 @@
   import ACLs from './ACLs'
   import Roles from './Roles'
   import RoleForm from './RoleForm'
+  import RoleMembers from './RoleMembers'
   import capitalizeFirstLetter from '../filters/capitalizeFirstLetter'
 
   export default {
@@ -126,7 +115,7 @@
       }
     },
     computed: {
-      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter', 'users', 'groups']),
+      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
       ...mapGetters(['tableRows']),
       selectedEntityType: {
         get () {
@@ -156,6 +145,7 @@
       Multiselect,
       Roles,
       RoleForm,
+      RoleMembers,
       acls: ACLs
     },
     filters: {
