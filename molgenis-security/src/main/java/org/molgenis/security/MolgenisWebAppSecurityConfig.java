@@ -94,6 +94,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Autowired
 	private RecoveryCodeFactory recoveryCodeFactory;
 
+	@Autowired
+	private UserSecretFactory userSecretFactory;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
@@ -196,7 +199,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
+		{
 			if (req.getSession(false) != null
 					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 			{
@@ -204,7 +208,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 			}
 		})
 
-				.logoutSuccessHandler((req, res, auth) -> {
+				.logoutSuccessHandler((req, res, auth) ->
+				{
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -315,7 +320,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public TwoFactorAuthenticationService twoFactorAuthenticationService()
 	{
 		return new TwoFactorAuthenticationServiceImpl(appSettings, otpService(), dataService, idGenerator,
-				recoveryCodeFactory);
+				recoveryCodeFactory, userSecretFactory);
 	}
 
 	@Bean
