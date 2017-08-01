@@ -34,16 +34,16 @@ public class TwoFactorAuthenticationController
 	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
 	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Setup 2 factor authentication";
 
-	private TwoFactorAuthenticationProvider authenticationProvider;
+	private TwoFactorAuthenticationProvider twoFactorAuthenticationProvider;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private GoogleAuthenticatorService googleAuthenticatorService;
 
 	@Autowired
-	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
+	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider twoFactorAuthenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
 			GoogleAuthenticatorService googleAuthenticatorService)
 	{
-		this.authenticationProvider = authenticationProvider;
+		this.twoFactorAuthenticationProvider = twoFactorAuthenticationProvider;
 		this.twoFactorAuthenticationService = twoFactorAuthenticationService;
 		this.googleAuthenticatorService = googleAuthenticatorService;
 	}
@@ -63,7 +63,7 @@ public class TwoFactorAuthenticationController
 		try
 		{
 			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, null);
-			Authentication authentication = authenticationProvider.authenticate(authToken);
+			Authentication authentication = twoFactorAuthenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		catch (Exception er)
@@ -112,7 +112,7 @@ public class TwoFactorAuthenticationController
 		try
 		{
 			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, secretKey);
-			Authentication authentication = authenticationProvider.authenticate(authToken);
+			Authentication authentication = twoFactorAuthenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		catch (Exception e)

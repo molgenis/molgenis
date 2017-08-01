@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 public class TwoFactorAuthenticationProvider implements AuthenticationProvider
 {
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private OTPService otpService;
+	private final OTPService otpService;
 
 	public TwoFactorAuthenticationProvider(TwoFactorAuthenticationService twoFactorAuthenticationService,
 			OTPService otpService)
