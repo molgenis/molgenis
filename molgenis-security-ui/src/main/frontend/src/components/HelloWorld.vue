@@ -6,7 +6,7 @@
     </ol>
     <div class="row pt-3">
       <div class="col col-md-4">
-        <h3 class="pt-3">Security ID</h3>
+        <h3 class="pt-3">{{'SECURITY_ID' | i18n}}</h3>
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a class="nav-link" :class="{ active: sidType === 'role' }" href="#"
