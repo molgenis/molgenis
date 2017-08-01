@@ -8,13 +8,9 @@
       <div class="col col-md-4">
         <h3 class="pt-3">{{'SECURITY_ID' | i18n}}</h3>
         <ul class="nav nav-tabs">
-          <li class="nav-item">
-            <a class="nav-link" :class="{ active: sidType === 'role' }" href="#"
-               @click="sidType = 'role'">{{'ROLE' | i18n}}</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" :class="{ active: sidType === 'user' }" href="#"
-               @click="sidType = 'user'">{{'USER' | i18n}}</a>
+          <li class="nav-item" v-for="type in ['role', 'user']">
+            <a class="nav-link" :class="{ active: sidType === type }" href="#"
+               @click="sidType = type">{{type | toUpper | i18n}}</a>
           </li>
         </ul>
         <div class="tab-content">
@@ -82,7 +78,7 @@
   import Roles from './Roles'
   import RoleForm from './RoleForm'
   import RoleMembers from './RoleMembers'
-  import capitalizeFirstLetter from '../filters/capitalizeFirstLetter'
+  import {capitalizeFirstLetter, toUpper} from '../filters/text'
 
   export default {
     name: 'permission-manager',
@@ -149,7 +145,8 @@
       acls: ACLs
     },
     filters: {
-      capitalizeFirstLetter
+      capitalizeFirstLetter,
+      toUpper
     }
   }
 </script>

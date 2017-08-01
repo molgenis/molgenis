@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from 'components/HelloWorld'
+import PermissionManager from 'components/PermissionManager'
 import {INITIAL_STATE} from '../store/state'
 
 Vue.use(Router)
@@ -10,7 +10,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      component: HelloWorld
+      component: PermissionManager
     }
   ]
 })
