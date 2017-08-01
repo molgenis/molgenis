@@ -261,4 +261,10 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 			return null;
 		});
 	}
+
+	@Override
+	public String toString()
+	{
+		return getEntity().toString();
+	}
 }
