@@ -2,6 +2,7 @@ package org.molgenis.security.twofactor;
 
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.token.RestAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -46,7 +47,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
 					&& SecurityUtils.currentUserIsAuthenticated())
 			{
-				if (!isUserTwoFactorAuthenticated())
+				if (!isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken())
 				{
 					if (isTwoFactorAuthenticationEnforced() || userUsesTwoFactorAuthentication())
 					{
@@ -100,6 +101,23 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		{
 			isTwoFactorAuthenticated = authentication.isAuthenticated();
 		}
+
 		return isTwoFactorAuthenticated;
+	}
+
+	/**
+	 * Check on authenticated RestAuthenticationToken
+	 *
+	 * @return authenticated {@link RestAuthenticationToken}
+	 */
+	private boolean hasAuthenticatedMolgenisToken()
+	{
+		boolean hasAuthenticatedMolgenisToken = false;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication instanceof RestAuthenticationToken)
+		{
+			hasAuthenticatedMolgenisToken = authentication.isAuthenticated();
+		}
+		return hasAuthenticatedMolgenisToken;
 	}
 }
