@@ -3,6 +3,8 @@ package org.molgenis.security.twofactor;
 import org.molgenis.security.google.GoogleAuthenticatorService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,16 +34,17 @@ public class TwoFactorAuthenticationController
 	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
 	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Setup 2 factor authentication";
 
+	private TwoFactorAuthenticationProvider authenticationProvider;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private OTPService otpService;
 	private GoogleAuthenticatorService googleAuthenticatorService;
 
 	@Autowired
-	public TwoFactorAuthenticationController(TwoFactorAuthenticationService twoFactorAuthenticationService,
-			OTPService otpService, GoogleAuthenticatorService googleAuthenticatorService)
+	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
+			TwoFactorAuthenticationService twoFactorAuthenticationService,
+			GoogleAuthenticatorService googleAuthenticatorService)
 	{
+		this.authenticationProvider = authenticationProvider;
 		this.twoFactorAuthenticationService = twoFactorAuthenticationService;
-		this.otpService = otpService;
 		this.googleAuthenticatorService = googleAuthenticatorService;
 	}
 
@@ -59,15 +62,9 @@ public class TwoFactorAuthenticationController
 		String redirectUri = "redirect:/";
 		try
 		{
-			if (twoFactorAuthenticationService.isVerificationCodeValidForUser(verificationCode))
-			{
-				twoFactorAuthenticationService.authenticate();
-			}
-			else
-			{
-				setModelAttributesWhenNotValidated(model);
-				redirectUri = MolgenisLoginController.VIEW_LOGIN;
-			}
+			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, null);
+			Authentication authentication = authenticationProvider.authenticate(authToken);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		catch (Exception er)
 		{
@@ -114,9 +111,9 @@ public class TwoFactorAuthenticationController
 
 		try
 		{
-			otpService.tryVerificationCode(verificationCode, secretKey);
-			twoFactorAuthenticationService.setSecretKey(secretKey);
-			twoFactorAuthenticationService.authenticate();
+			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, secretKey);
+			Authentication authentication = authenticationProvider.authenticate(authToken);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		catch (Exception e)
 		{

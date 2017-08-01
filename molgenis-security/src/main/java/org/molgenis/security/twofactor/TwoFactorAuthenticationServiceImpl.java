@@ -6,12 +6,7 @@ import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
@@ -36,7 +29,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	public TwoFactorAuthenticationServiceImpl(AppSettings appSettings, OTPService otpService, DataService dataService)
 	{
 		this.appSettings = requireNonNull(appSettings);
-		this.otpService = otpService;
+		this.otpService = requireNonNull(otpService);
 		this.dataService = requireNonNull(dataService);
 	}
 
@@ -128,19 +121,6 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			throw new UsernameNotFoundException("Can't find user: [" + userDetails.getUsername() + "]");
 		}
 		return isEnabled;
-	}
-
-	@Override
-	public void authenticate() throws BadCredentialsException
-	{
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-		List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
-		updatedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_TWO_FACTOR_AUTHENTICATION));
-		Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(),
-				updatedAuthorities);
-
-		SecurityContextHolder.getContext().setAuthentication(newAuth);
 	}
 
 }

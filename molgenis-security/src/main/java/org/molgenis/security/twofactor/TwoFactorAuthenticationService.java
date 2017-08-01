@@ -43,11 +43,6 @@ public interface TwoFactorAuthenticationService
 	boolean isConfiguredForUser() throws UsernameNotFoundException;
 
 	/**
-	 * <p>Set the new Authentication object</p>
-	 */
-	void authenticate() throws BadCredentialsException;
-
-	/**
 	 * @return the secretkey for logged in user
 	 */
 	String generateSecretKey();
