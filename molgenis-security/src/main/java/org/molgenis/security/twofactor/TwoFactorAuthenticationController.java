@@ -23,6 +23,7 @@ public class TwoFactorAuthenticationController
 	public static final String TWO_FACTOR_INITIAL_URI = "/initial";
 	private static final String TWO_FACTOR_VALIDATION_URI = "/validate";
 	private static final String TWO_FACTOR_SECRET_URI = "/secret";
+	private static final String TWO_FACTOR_RECOVER_URI = "/recover";
 
 	public static final String ATTRIBUTE_2FA_IS_INITIAL = "is2faInitial";
 	public static final String ATTRIBUTE_2FA_IS_CONFIGURED = "is2faConfigured";
@@ -64,7 +65,7 @@ public class TwoFactorAuthenticationController
 		String redirectUri = "redirect:/";
 		try
 		{
-			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, null);
+			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, null, null);
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
@@ -113,7 +114,8 @@ public class TwoFactorAuthenticationController
 
 		try
 		{
-			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, secretKey);
+			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, secretKey,
+					null);
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
@@ -125,6 +127,26 @@ public class TwoFactorAuthenticationController
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
 					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
+			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
+		}
+
+		return redirectUrl;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_RECOVER_URI)
+	public String recoverAccount(Model model, @RequestParam String recoveryCode)
+	{
+		String redirectUrl = "redirect:/";
+
+		try
+		{
+			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(null, null, recoveryCode);
+			Authentication authentication = authenticationProvider.authenticate(authToken);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		}
+		catch (Exception e)
+		{
+			setModelAttributesWhenNotValidated(model);
 			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
 		}
 

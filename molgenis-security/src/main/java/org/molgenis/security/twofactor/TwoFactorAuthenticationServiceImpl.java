@@ -125,7 +125,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 		else
 		{
-			throw new MolgenisDataException("Invalid recovery code!");
+			throw new MolgenisDataException("Invalid recovery code");
 		}
 	}
 

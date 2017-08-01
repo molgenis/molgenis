@@ -76,7 +76,6 @@
                         <button id="recovery-button" class="btn btn-success">Recover</button>
                         </span>
                         </div>
-                        <hr>
                     </form>
                 </div>
 
