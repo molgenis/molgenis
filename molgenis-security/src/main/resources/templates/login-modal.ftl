@@ -4,7 +4,7 @@
      aria-labelledby="login-modal-label" aria-hidden="true" xmlns="http://www.w3.org/1999/html">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" id="login-model-header">
             <#if disableClose?? && disableClose == "true">
             <#-- Display close button after login failure, because of the missing fallback page (/login) -->
                 <button type="button" class="close" onclick="location.href='/'"><span
@@ -13,7 +13,15 @@
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
                         class="sr-only">Close</span></button>
             </#if>
-                <h4 class="modal-title" id="login-modal-label">Sign in</h4>
+                <h4 class="modal-title" id="login-modal-label">
+                <#if configured2faHeader??>
+                ${configured2faHeader}
+                <#elseif initial2faHeader??>
+                ${initial2faHeader}
+                <#else>
+                    Sign in
+                </#if>
+                </h4>
             </div>
             <div class="modal-body">
                 <div id="alert-container"></div>
@@ -37,10 +45,11 @@
             <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
             </#if>
             <#-- login form -->
-            <#if is2faEnabled??>
-                <form id="2fakey-form" role="form" method="POST" action="/2fa/validate">
+            <#if is2faConfigured??>
+                <form id="key-2fa-form" role="form" method="POST" action="/2fa/validate">
                     <div class="form-group">
-                        <input id="text-field" type="text" placeholder="Key" class="form-control" name="key" required>
+                        <input id="verification-code-field" placeholder="Enter verification code..."
+                               class="form-control" name="verificationCode" required autofocus>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
@@ -87,7 +96,7 @@
                 <form id="login-form" role="form" method="POST" action="/login">
                     <div class="form-group">
                         <input id="username-field" type="text" placeholder="Username" class="form-control"
-                               name="username" required>
+                               name="username" required autofocus>
                     </div>
                     <div class="form-group">
                         <input id="password-field" type="password" placeholder="Password" class="form-control"
@@ -146,11 +155,13 @@
                 e.stopPropagation()
             }
         })
+
         submitBtn.click(function (e) {
             e.preventDefault()
             e.stopPropagation()
             form.submit()
         })
+
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
             if (e.which == 13) {
                 e.preventDefault()
@@ -167,5 +178,6 @@
             $('#alert-container', modal).empty()
             $('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
         })
+
     })
 </script>

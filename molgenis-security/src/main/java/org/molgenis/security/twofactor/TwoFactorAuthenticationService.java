@@ -4,8 +4,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
- * @author sido
- * @since 26-7-2017
+ * <p>Service to use in {@link TwoFactorAuthenticationFilter} and {@link TwoFactorAuthenticationController}</p>
  */
 public interface TwoFactorAuthenticationService
 {
@@ -16,14 +15,13 @@ public interface TwoFactorAuthenticationService
 	 * @param verificationCode code given by user from Google Authenticator
 	 * @return is verificationCode valid
 	 */
-	boolean isVerificationCodeValid(String verificationCode) throws UsernameNotFoundException, BadCredentialsException;
-
-	boolean tryVerificationCode(String verificationCode, String secretKey);
+	boolean isVerificationCodeValidForUser(String verificationCode)
+			throws UsernameNotFoundException, BadCredentialsException;
 
 	/**
 	 * <p>Add generated userSecret to userdata.</p>
 	 *
-	 * @param secret
+	 * @param secret given secret for user
 	 */
 	void setSecretKey(String secret) throws UsernameNotFoundException;
 
@@ -37,25 +35,13 @@ public interface TwoFactorAuthenticationService
 	/**
 	 * <p>Check if the user is 2 factor authentication ready.</p>
 	 *
-	 * @return is configured
-	 * @throws UsernameNotFoundException
+	 * @return is configured for user
 	 */
 	boolean isConfiguredForUser() throws UsernameNotFoundException;
 
 	/**
-	 * <p>Get user for QR-code generation</p>
-	 *
-	 * @return
-	 * @throws UsernameNotFoundException
+	 * @return the secretkey for logged in user
 	 */
-	String getUnAuthenticatedUser() throws UsernameNotFoundException;
-
-	/**
-	 * <p>Set the new Authentication object</p>
-	 */
-	void authenticate() throws BadCredentialsException;
-
 	String generateSecretKey();
 
-	String getGoogleAuthenticatorURI(String secretKey);
 }

@@ -1,7 +1,8 @@
 package org.molgenis.security.login;
 
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Controller;
@@ -43,16 +44,11 @@ public class MolgenisLoginController
 	{
 		String errorMessage;
 		Object attribute = request.getSession().getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-		request.getUserPrincipal();
 		if (attribute != null)
 		{
 			if (attribute instanceof BadCredentialsException)
 			{
 				errorMessage = ERROR_MESSAGE_BAD_CREDENTIALS;
-			}
-			else if (attribute instanceof DisabledException)
-			{
-				errorMessage = ERROR_MESSAGE_DISABLED;
 			}
 			else if (attribute instanceof SessionAuthenticationException)
 			{
@@ -60,7 +56,14 @@ public class MolgenisLoginController
 			}
 			else
 			{
-				errorMessage = ERROR_MESSAGE_UNKNOWN;
+				if (!determineErrorMessagesFromInternalAuthenticationExceptions(attribute).isEmpty())
+				{
+					errorMessage = determineErrorMessagesFromInternalAuthenticationExceptions(attribute);
+				}
+				else
+				{
+					errorMessage = ERROR_MESSAGE_UNKNOWN;
+				}
 			}
 		}
 		else
@@ -71,4 +74,19 @@ public class MolgenisLoginController
 		model.addAttribute(ERROR_MESSAGE_ATTRIBUTE, errorMessage);
 		return VIEW_LOGIN;
 	}
+
+	private String determineErrorMessagesFromInternalAuthenticationExceptions(Object attribute)
+	{
+		String errorMessage = "";
+		if (attribute instanceof InternalAuthenticationServiceException)
+		{
+			Throwable throwable = ((InternalAuthenticationServiceException) attribute).getCause();
+			if (throwable.getCause() instanceof UsernameNotFoundException)
+			{
+				errorMessage = ERROR_MESSAGE_BAD_CREDENTIALS;
+			}
+		}
+		return errorMessage;
+	}
+
 }

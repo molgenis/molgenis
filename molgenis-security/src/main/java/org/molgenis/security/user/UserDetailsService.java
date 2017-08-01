@@ -14,7 +14,10 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -32,8 +35,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 	public UserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		this.dataService = requireNonNull(dataService, "DataService is null");
-		this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper,
-				"Granted authorities mapper is null");
+		this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper, "Granted authorities mapper is null");
 	}
 
 	@Override
