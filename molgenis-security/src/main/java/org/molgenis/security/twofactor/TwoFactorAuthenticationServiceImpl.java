@@ -10,7 +10,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.security.SecureRandom;
@@ -19,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
-@Service
 public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticationService
 {
 	private AppSettings appSettings;

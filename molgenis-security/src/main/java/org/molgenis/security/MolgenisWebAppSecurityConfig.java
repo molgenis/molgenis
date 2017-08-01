@@ -87,12 +87,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Autowired
 	private GroupMemberFactory groupMemberFactory;
 
-	@Autowired
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-
-	@Autowired
-	private OTPService otpService;
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
@@ -303,13 +297,25 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
 	{
-		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService, redirectStrategy());
+		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService(), redirectStrategy());
 	}
 
 	@Bean
-	public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
+	public AuthenticationProvider twoFactorAuthenticationProvider()
 	{
-		return new TwoFactorAuthenticationProvider(twoFactorAuthenticationService, otpService);
+		return new TwoFactorAuthenticationProvider(twoFactorAuthenticationService(), otpService());
+	}
+
+	@Bean
+	public TwoFactorAuthenticationService twoFactorAuthenticationService()
+	{
+		return new TwoFactorAuthenticationServiceImpl(appSettings, otpService(), dataService);
+	}
+
+	@Bean
+	public OTPService otpService()
+	{
+		return new OTPServiceImpl();
 	}
 
 	@Bean

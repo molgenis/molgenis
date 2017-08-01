@@ -3,6 +3,8 @@ package org.molgenis.security.twofactor;
 import org.molgenis.security.google.GoogleAuthenticatorService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import static java.util.Objects.requireNonNull;
 
 @Controller
 @RequestMapping("/2fa")
@@ -34,18 +38,19 @@ public class TwoFactorAuthenticationController
 	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
 	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Setup 2 factor authentication";
 
-	private TwoFactorAuthenticationProvider twoFactorAuthenticationProvider;
+	private AuthenticationProvider authenticationProvider;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private GoogleAuthenticatorService googleAuthenticatorService;
 
 	@Autowired
-	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider twoFactorAuthenticationProvider,
+	public TwoFactorAuthenticationController(
+			@Qualifier("twoFactorAuthenticationProvider") AuthenticationProvider authenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
 			GoogleAuthenticatorService googleAuthenticatorService)
 	{
-		this.twoFactorAuthenticationProvider = twoFactorAuthenticationProvider;
-		this.twoFactorAuthenticationService = twoFactorAuthenticationService;
-		this.googleAuthenticatorService = googleAuthenticatorService;
+		this.authenticationProvider = requireNonNull(authenticationProvider);
+		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
+		this.googleAuthenticatorService = requireNonNull(googleAuthenticatorService);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_CONFIGURED_URI)
@@ -63,7 +68,7 @@ public class TwoFactorAuthenticationController
 		try
 		{
 			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, null);
-			Authentication authentication = twoFactorAuthenticationProvider.authenticate(authToken);
+			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		catch (Exception er)
@@ -112,7 +117,7 @@ public class TwoFactorAuthenticationController
 		try
 		{
 			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, secretKey);
-			Authentication authentication = twoFactorAuthenticationProvider.authenticate(authToken);
+			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		catch (Exception e)

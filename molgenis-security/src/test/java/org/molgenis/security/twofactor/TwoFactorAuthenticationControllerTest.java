@@ -6,6 +6,7 @@ import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.ui.ExtendedModelMap;
@@ -45,6 +46,12 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
 		{
 			return new TwoFactorAuthenticationProvider(twoFactorAuthenticationService(), otpService());
+		}
+
+		@Bean
+		public AuthenticationManager authenticationManager()
+		{
+			return mock(AuthenticationManager.class);
 		}
 
 		@Bean

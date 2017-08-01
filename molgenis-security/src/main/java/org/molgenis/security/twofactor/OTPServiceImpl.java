@@ -2,13 +2,11 @@ package org.molgenis.security.twofactor;
 
 import org.jboss.aerogear.security.otp.Totp;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
  * Created by sido on 28/07/2017.
  */
-@Service
 public class OTPServiceImpl implements OTPService
 {
 
