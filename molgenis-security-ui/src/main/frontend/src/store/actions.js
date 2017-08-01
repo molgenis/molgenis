@@ -1,4 +1,4 @@
-import { delete_, get, post } from '@molgenis/molgenis-api-client'
+import {delete_, get, post} from '@molgenis/molgenis-api-client'
 import {
   CANCEL_CREATE_ROLE,
   CANCEL_UPDATE_ROLE,
@@ -10,7 +10,7 @@ import {
   SET_SELECTED_ROLE,
   SET_USERS
 } from './mutations'
-import { debounce } from 'lodash'
+import {debounce} from 'lodash'
 
 export const SELECT_ROLE = '__SELECT_ROLE__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
@@ -89,7 +89,9 @@ export default {
   },
   [UPDATE_ROLE] ({state, commit, dispatch}, role) {
     post('/api/v2/sys_sec_Role/', {
-      body: JSON.stringify({entities: [role]}),
+      body: JSON.stringify({
+        entities: [{...role, id: state.selectedRole}]
+      }),
       headers: {
         'Content-Type': 'application/json'
       },
