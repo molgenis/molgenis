@@ -301,9 +301,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
-	public AuthenticationProvider twoFactorAuthenticationProvider()
+	public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
 	{
-		return new TwoFactorAuthenticationProvider(twoFactorAuthenticationService(), otpService());
+		return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), otpService());
 	}
 
 	@Bean

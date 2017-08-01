@@ -43,9 +43,9 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		}
 
 		@Bean
-		public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
+		public TwoFactorAuthenticationProviderImpl twoFactorAuthenticationProvider()
 		{
-			return new TwoFactorAuthenticationProvider(twoFactorAuthenticationService(), otpService());
+			return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), otpService());
 		}
 
 		@Bean

@@ -3,8 +3,6 @@ package org.molgenis.security.twofactor;
 import org.molgenis.security.google.GoogleAuthenticatorService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -38,13 +36,12 @@ public class TwoFactorAuthenticationController
 	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
 	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Setup 2 factor authentication";
 
-	private AuthenticationProvider authenticationProvider;
+	private TwoFactorAuthenticationProvider authenticationProvider;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private GoogleAuthenticatorService googleAuthenticatorService;
 
 	@Autowired
-	public TwoFactorAuthenticationController(
-			@Qualifier("twoFactorAuthenticationProvider") AuthenticationProvider authenticationProvider,
+	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
 			GoogleAuthenticatorService googleAuthenticatorService)
 	{
