@@ -59,13 +59,6 @@ export default {
       }, error => {
         console.log(error)
       })
-    } else {
-      commit(SET_USERS, [])
-      get(`/api/v2/sys_sec_GroupMember?q=User==${role}&sort=Group`, {}).then(response => {
-        commit(SET_GROUPS, response.items.map(e => e.Group.name))
-      }, error => {
-        console.log(error)
-      })
     }
   },
   [FILTER_CHANGED]: debounce(({state, dispatch, commit}, filter) => {
