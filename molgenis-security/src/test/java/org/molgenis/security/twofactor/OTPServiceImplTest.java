@@ -27,7 +27,7 @@ public class OTPServiceImplTest extends AbstractTestNGSpringContextTests
 	private OTPService otpService;
 
 	/**
-	 * <p>Hoe dit te testen?</p>
+	 * FIXME(SH): how do we test this properly?
 	 */
 	@Test(expectedExceptions = BadCredentialsException.class)
 	public void tryVerificationKeyTest()

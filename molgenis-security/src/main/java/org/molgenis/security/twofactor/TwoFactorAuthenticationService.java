@@ -5,9 +5,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
  * <p>Service to use in {@link TwoFactorAuthenticationFilter} and {@link TwoFactorAuthenticationController}</p>
- *
- * @author sido
- * @since 26-7-2017
  */
 public interface TwoFactorAuthenticationService
 {

@@ -3,7 +3,7 @@ package org.molgenis.security.twofactor;
 import org.springframework.security.authentication.BadCredentialsException;
 
 /**
- * @author tommy
+ * Authenticates the verification code
  */
 public interface OTPService
 {

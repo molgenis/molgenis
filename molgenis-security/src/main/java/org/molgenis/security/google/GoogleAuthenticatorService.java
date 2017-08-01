@@ -1,12 +1,12 @@
 package org.molgenis.security.google;
 
 /**
- * @author tommy
+ * Creates a QR-code URI to create an account in Google Authenticator App on your mobile device
  */
 public interface GoogleAuthenticatorService
 {
 	/**
-	 * <p>Genreate URI for Google Authenticator</p>
+	 * <p>Generate URI for Google Authenticator</p>
 	 *
 	 * @return Google Authenticator URI
 	 */

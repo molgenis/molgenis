@@ -118,7 +118,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	}
 
 	/**
-	 * <p>Needs to be implmentend in {@link UserMetaData}.</p>
+	 * TODO(SH): needs to be implmentend in {@link UserMetaData}
 	 */
 	@Test
 	@Ignore
@@ -130,7 +130,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	}
 
 	/**
-	 * <p>How do we implement this test?</p>
+	 * FIXME(SH): how do we implement this test properly
 	 */
 	@Test
 	@Ignore
@@ -141,12 +141,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		when(molgenisUser.getSecretKey()).thenReturn("secretKey");
 		boolean isValid = twoFactorAuthenticationService.isVerificationCodeValidForUser(verificationCode);
 		assertEquals(false, isValid);
-	}
-
-	@Test
-	public void authenticateTest()
-	{
-		twoFactorAuthenticationService.authenticate();
 	}
 
 }
