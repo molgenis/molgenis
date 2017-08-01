@@ -3,6 +3,7 @@ package org.molgenis.security.twofactor;
 import org.junit.Ignore;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -34,7 +35,8 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		@Bean
 		public TwoFactorAuthenticationService twoFactorAuthenticationService()
 		{
-			return new TwoFactorAuthenticationServiceImpl(appSettings(), otpService(), dataService());
+			return new TwoFactorAuthenticationServiceImpl(appSettings(), otpService(), dataService(), idGenerator(),
+					recoveryCodeFactory());
 		}
 
 		@Bean
@@ -53,6 +55,18 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		public DataService dataService()
 		{
 			return mock(DataServiceImpl.class);
+		}
+
+		@Bean
+		public IdGenerator idGenerator()
+		{
+			return mock(IdGenerator.class);
+		}
+
+		@Bean
+		RecoveryCodeFactory recoveryCodeFactory()
+		{
+			return mock(RecoveryCodeFactory.class);
 		}
 
 		@Bean
