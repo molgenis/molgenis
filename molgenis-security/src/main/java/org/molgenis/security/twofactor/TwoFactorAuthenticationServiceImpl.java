@@ -36,13 +36,11 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			throws BadCredentialsException, UsernameNotFoundException
 	{
 		boolean isValid = false;
-		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString())
 				|| appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENFORCED.toString()))
 		{
-			User user = runAsSystem(() -> dataService.findOne(USER,
-					new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+			User user = getUser();
 
 			if (otpService.tryVerificationCode(verificationCode, user.getSecretKey()))
 			{
@@ -56,18 +54,9 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	@Override
 	public void setSecretKey(String secret) throws UsernameNotFoundException
 	{
-		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER,
-				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
-		if (user != null)
-		{
-			user.setSecretKey(secret);
-			runAsSystem(() -> dataService.update(USER, user));
-		}
-		else
-		{
-			throw new UsernameNotFoundException("Can't find user: [" + userDetails.getUsername() + "]");
-		}
+		User user = getUser();
+		user.setSecretKey(secret);
+		runAsSystem(() -> dataService.update(USER, user));
 	}
 
 	@Override
@@ -84,20 +73,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	public boolean isConfiguredForUser() throws UsernameNotFoundException
 	{
 		boolean isConfigured = false;
-		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER,
-				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
-		if (user != null)
+		User user = getUser();
+
+		if (StringUtils.hasText(user.getSecretKey()))
 		{
-			if (StringUtils.hasText(user.getSecretKey()))
-			{
-				isConfigured = true;
-			}
+			isConfigured = true;
 		}
-		else
-		{
-			throw new UsernameNotFoundException("Can't find user: [" + userDetails.getUsername() + "]");
-		}
+
 		return isConfigured;
 	}
 
@@ -105,20 +87,24 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	public boolean isEnabledForUser()
 	{
 		boolean isEnabled = false;
+		User user = getUser();
+		isEnabled = true;
+		return isEnabled;
+	}
+
+	private User getUser()
+	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		User user = runAsSystem(() -> dataService.findOne(USER,
 				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+
 		if (user != null)
 		{
-			{
-				isEnabled = true;
-			}
+			return user;
 		}
 		else
 		{
 			throw new UsernameNotFoundException("Can't find user: [" + userDetails.getUsername() + "]");
 		}
-		return isEnabled;
 	}
-
 }
