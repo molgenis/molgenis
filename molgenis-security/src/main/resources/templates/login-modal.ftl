@@ -46,17 +46,39 @@
             </#if>
             <#-- login form -->
             <#if is2faConfigured??>
-                <form id="key-2fa-form" role="form" method="POST" action="/2fa/validate">
-                    <div class="form-group">
-                        <input id="verification-code-field" placeholder="Enter verification code..."
-                               class="form-control" name="verificationCode" required autofocus>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <button id="signin-button" type="submit" class="btn btn-success">Verify</button>
+                <div class="verification-form-toggle collapse in">
+
+                    <form id="key-2fa-form" role="form" method="POST" action="/2fa/validate">
+                        <div class="input-group">
+                            <input id="verification-code-field" placeholder="Enter verification code..."
+                                   class="form-control" name="verificationCode" required autofocus>
+                            <span class="input-group-btn">
+                        <button id="signin-button" class="btn btn-success">Verify</button>
+                        </span>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                    <hr>
+                    <p>
+                        Don't have your phone?
+                        <br/>
+                        <a href=".verification-form-toggle" data-toggle="collapse">Enter a recovery
+                            code</a>
+                    </p>
+                </div>
+
+
+                <div class="verification-form-toggle collapse">
+                    <form id="recover-form" method="POST" action="/2fa/recover">
+                        <div class="input-group collapse">
+                            <input id="recovery-code-field" placeholder="Enter recovery code..."
+                                   class="form-control" name="recoveryCode" required autofocus>
+                            <span class="input-group-btn">
+                        <button id="recovery-button" class="btn btn-success">Recover</button>
+                        </span>
+                        </div>
+                        <hr>
+                    </form>
+                </div>
 
             <#elseif is2faInitial??>
                 <form id="initial-2fa-form" method="POST" action="/2fa/secret">
