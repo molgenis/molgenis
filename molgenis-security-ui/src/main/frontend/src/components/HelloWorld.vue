@@ -128,7 +128,7 @@
       },
       role: {
         get () {
-          return Object.assign({}, this.roles.find(role => { return role.id === this.selectedRole }))
+          return this.roles.find(role => role.id === this.selectedRole)
         }
       },
       sidType: {
