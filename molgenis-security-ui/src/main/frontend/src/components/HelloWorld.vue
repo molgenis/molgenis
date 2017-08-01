@@ -9,11 +9,11 @@
         <h3 class="pt-3">Security ID</h3>
         <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a :class="'nav-link ' + (sidType == 'role' ? 'active' : '')" href="#"
+            <a class="nav-link" :class="{ active: sidType === 'role' }" href="#"
                @click="sidType = 'role'">{{'ROLE' | i18n}}</a>
           </li>
           <li class="nav-item">
-            <a :class="'nav-link ' + (sidType == 'user' ? 'active' : '')" href="#"
+            <a class="nav-link" :class="{ active: sidType === 'user' }" href="#"
                @click="sidType = 'user'">{{'USER' | i18n}}</a>
           </li>
         </ul>
