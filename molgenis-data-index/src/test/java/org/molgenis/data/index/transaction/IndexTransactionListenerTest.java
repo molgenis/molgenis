@@ -59,31 +59,17 @@ public class IndexTransactionListenerTest
 	}
 
 	@Test
-	public void testRollbackTransactionForgetsChanges()
+	public void testRollbackTransactionDoesNothing()
 	{
 		indexTransactionListener.rollbackTransaction("ABCDE");
-		verify(indexActionRegisterService).forgetIndexActions("ABCDE");
-		verifyNoMoreInteractions(indexActionRegisterService);
-		verifyZeroInteractions(indexJobScheduler);
+		verifyZeroInteractions(indexActionRegisterService, indexJobScheduler);
 	}
 
 	@Test
-	public void testDoCleanupAfterCompletionSchedulesJobIfWorkNeeded()
+	public void testDoCleanupAfterCompletionForgetsChanges()
 	{
-		when(indexActionRegisterService.forgetIndexActions("ABCDE")).thenReturn(true);
 		indexTransactionListener.doCleanupAfterCompletion("ABCDE");
 		verify(indexActionRegisterService).forgetIndexActions("ABCDE");
-		verify(indexJobScheduler).scheduleIndexJob("ABCDE");
 		verifyNoMoreInteractions(indexActionRegisterService, indexJobScheduler);
-	}
-
-	@Test
-	public void testDoCleanupAfterCompletionDoesNothingIfNoWorkNeeded()
-	{
-		when(indexActionRegisterService.forgetIndexActions("ABCDE")).thenReturn(false);
-		indexTransactionListener.doCleanupAfterCompletion("ABCDE");
-		verify(indexActionRegisterService).forgetIndexActions("ABCDE");
-		verifyNoMoreInteractions(indexActionRegisterService);
-		verifyZeroInteractions(indexActionRegisterService);
 	}
 }

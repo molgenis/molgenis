@@ -29,15 +29,16 @@ public interface IndexActionRegisterService
 	 * storeIndexActions uses a set as optimization to remove the double index actions before the index actions are stored in database.
 	 *
 	 * @param transactionId ID for the transaction the index actions were registered under
+	 *
+	 * @return boolean indicating if any work was present
 	 */
 	@RunAsSystem
-	void storeIndexActions(String transactionId);
+	boolean storeIndexActions(String transactionId);
 
 	/**
 	 * Removes all index actions registered for a transaction.
 	 *
 	 * @param transactionId ID for the transaction the index actions were registered under
-	 * @return boolean indicating if any work was present
 	 */
-	boolean forgetIndexActions(String transactionId);
+	void forgetIndexActions(String transactionId);
 }

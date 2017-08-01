@@ -1,7 +1,6 @@
 package org.molgenis.data.index;
 
 import com.google.common.collect.ImmutableSet;
-import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GenericDependencyResolver;
@@ -15,8 +14,6 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Collections.emptySet;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 
 /**
  * Models the dependencies between {@link EntityType}s for the purpose of indexing.
@@ -26,16 +23,6 @@ class IndexDependencyModel
 {
 	private final Map<String, EntityType> entityTypes;
 	private final GenericDependencyResolver genericDependencyResolver = new GenericDependencyResolver();
-
-	/**
-	 * The fetch to use when retrieving the {@link EntityType}s fed to this DependencyModel.
-	 */
-	static final Fetch ENTITY_TYPE_FETCH = new Fetch().field(ID)
-													  .field(IS_ABSTRACT)
-													  .field(INDEXING_DEPTH)
-													  .field(EXTENDS, new Fetch().field(ID))
-													  .field(ATTRIBUTES, new Fetch().field(REF_ENTITY_TYPE,
-															  new Fetch().field(ID)));
 
 	/**
 	 * Creates an IndexDependencyModel for a list of EntityTypes.
