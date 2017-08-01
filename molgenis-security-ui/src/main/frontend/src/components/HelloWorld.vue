@@ -115,7 +115,7 @@
       }
     },
     computed: {
-      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
+      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
       ...mapGetters(['tableRows']),
       selectedEntityType: {
         get () {
