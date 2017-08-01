@@ -23,7 +23,6 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -680,8 +679,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_NO_ENTITIES
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testCreateEntitiesExceptions1() throws Exception
@@ -692,8 +689,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testCreateEntitiesExceptions2() throws Exception
@@ -704,8 +699,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityException
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testCreateEntitiesExceptions3() throws Exception
@@ -716,8 +709,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
-	 *
-	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
@@ -783,8 +774,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_NO_ENTITIES
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesExceptions1() throws Exception
@@ -795,8 +784,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesExceptions2() throws Exception
@@ -807,8 +794,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityException
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesExceptions3() throws Exception
@@ -834,8 +819,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_NO_ENTITIES
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions1() throws Exception
@@ -846,8 +829,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions2() throws Exception
@@ -858,8 +839,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityException
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
@@ -870,8 +849,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownAttributeException
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
@@ -882,8 +859,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataAccessExceptionReadOnlyAttribute
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions5() throws Exception
@@ -1009,8 +984,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataExceptionIdentifierAndValue
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
@@ -1022,8 +995,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception
@@ -1035,8 +1006,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityExceptionNotValidId
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception

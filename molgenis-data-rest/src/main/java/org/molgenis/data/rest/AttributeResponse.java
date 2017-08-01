@@ -48,9 +48,6 @@ public class AttributeResponse
 	}
 
 	/**
-	 * @param entityParentName
-	 * @param entityType
-	 * @param attr
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */

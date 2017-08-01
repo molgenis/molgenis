@@ -66,7 +66,6 @@ public class AnnotatorController
 	/**
 	 * Gets a map of all available annotators.
 	 *
-	 * @param dataSetName
 	 * @return annotatorMap
 	 */
 	@RequestMapping(value = "/get-available-annotators", method = RequestMethod.POST)
@@ -81,8 +80,6 @@ public class AnnotatorController
 	 * Annotates an entity based on selected entity and selected annotators. Creates a copy of the entity dataset if
 	 * option is ticked by the user.
 	 *
-	 * @param annotatorNames
-	 * @param entityTypeId
 	 * @return repositoryName
 	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
@@ -114,7 +111,6 @@ public class AnnotatorController
 	/**
 	 * Sets a map of annotators, whether they can be used by the selected data set.
 	 *
-	 * @param dataSetName
 	 * @return mapOfAnnotators
 	 */
 	private Map<String, Map<String, Object>> setMapOfAnnotators(String dataSetName)

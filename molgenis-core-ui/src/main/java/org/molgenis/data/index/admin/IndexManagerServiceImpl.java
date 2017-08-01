@@ -31,7 +31,7 @@ public class IndexManagerServiceImpl implements IndexManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_indexmanager')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<EntityType> getIndexedEntities()
 	{
 		// collect indexed repos

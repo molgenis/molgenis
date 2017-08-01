@@ -49,8 +49,6 @@ public abstract class MolgenisPluginController
 
 	/**
 	 * Returns the base URI of the plugin
-	 *
-	 * @return
 	 */
 	public String getUri()
 	{
@@ -93,8 +91,6 @@ public abstract class MolgenisPluginController
 
 	/**
 	 * Testability
-	 *
-	 * @param dataService
 	 */
 	void setDataService(DataService dataService)
 	{

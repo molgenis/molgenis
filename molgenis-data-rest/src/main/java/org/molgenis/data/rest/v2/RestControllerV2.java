@@ -62,7 +62,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @Controller
 @RequestMapping(BASE_URI)
-class RestControllerV2
+public class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
@@ -161,11 +161,6 @@ class RestControllerV2
 
 	/**
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param attributeFilter
-	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = GET)
 	@ResponseBody
@@ -178,11 +173,6 @@ class RestControllerV2
 
 	/**
 	 * Tunnel retrieveEntity through a POST request
-	 *
-	 * @param entityTypeId
-	 * @param untypedId
-	 * @param attributeFilter
-	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = POST, params = "_method=GET")
 	@ResponseBody
@@ -250,11 +240,6 @@ class RestControllerV2
 
 	/**
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
-	 *
-	 * @param entityTypeId
-	 * @param request
-	 * @param httpRequest
-	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = GET)
 	@ResponseBody
@@ -274,10 +259,6 @@ class RestControllerV2
 
 	/**
 	 * Retrieve attribute meta data
-	 *
-	 * @param entityTypeId
-	 * @param attributeName
-	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -302,7 +283,6 @@ class RestControllerV2
 	 * @param request      EntityCollectionCreateRequestV2
 	 * @param response     HttpServletResponse
 	 * @return EntityCollectionCreateResponseBodyV2
-	 * @throws Exception
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}", method = POST, produces = APPLICATION_JSON_VALUE)
@@ -368,7 +348,6 @@ class RestControllerV2
 	 * @param request      CopyEntityRequestV2
 	 * @param response     HttpServletResponse
 	 * @return String name of the new entity
-	 * @throws Exception
 	 */
 	@Transactional
 	@RequestMapping(value = "copy/{entityTypeId}", method = POST, produces = APPLICATION_JSON_VALUE)
@@ -419,7 +398,6 @@ class RestControllerV2
 	 * @param entityTypeId name of the entity where the entities are going to be added.
 	 * @param request      EntityCollectionCreateRequestV2
 	 * @param response     HttpServletResponse
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = PUT)
 	public synchronized void updateEntities(@PathVariable("entityTypeId") String entityTypeId,
@@ -456,7 +434,6 @@ class RestControllerV2
 	 * @param attributeName The name of the attribute to update
 	 * @param request       EntityCollectionBatchRequestV2
 	 * @param response      HttpServletResponse
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{attributeName}", method = PUT)
 	@ResponseStatus(OK)
@@ -595,10 +572,6 @@ class RestControllerV2
 
 	/**
 	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
-	 *
-	 * @param entity
-	 * @param count
-	 * @return
 	 */
 	private static Object checkForEntityId(Entity entity, int count)
 	{

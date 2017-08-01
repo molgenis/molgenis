@@ -10,7 +10,6 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.PermissionService;
 
 import java.util.*;
 
@@ -33,16 +32,12 @@ public class EntityTypeResponse
 	 */
 	private final Boolean writable;
 
-	/**
-	 * @param meta
-	 */
 	public EntityTypeResponse(EntityType meta, DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, null, dataService, languageService);
 	}
 
 	/**
-	 * @param meta
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */

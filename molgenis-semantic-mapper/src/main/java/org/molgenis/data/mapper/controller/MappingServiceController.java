@@ -177,7 +177,6 @@ public class MappingServiceController extends MolgenisPluginController
 	 * @param target           the target entity
 	 * @param source           the source entity
 	 * @param attribute        the attribute that is mapped
-	 * @return
 	 */
 	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST)
 	public String removeAttributeMapping(@RequestParam() String mappingProjectId, @RequestParam() String target,
@@ -459,9 +458,6 @@ public class MappingServiceController extends MolgenisPluginController
 	 * <p>
 	 * If string terms are sent to the SemanticSearchService, they will be first of all converted to the ontologyTerms
 	 * using findTag method
-	 *
-	 * @param requestBody
-	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -758,13 +754,6 @@ public class MappingServiceController extends MolgenisPluginController
 
 	/**
 	 * Returns a view that allows the user to edit mappings involving xrefs / categoricals / strings
-	 *
-	 * @param mappingProjectId
-	 * @param target
-	 * @param source
-	 * @param targetAttribute
-	 * @param sourceAttribute
-	 * @param model
 	 */
 	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.POST)
 	public String advancedMappingEditor(@RequestParam() String mappingProjectId, @RequestParam() String target,
@@ -952,12 +941,6 @@ public class MappingServiceController extends MolgenisPluginController
 
 	/**
 	 * Generate algorithms based on semantic matches between attribute tags and descriptions
-	 *
-	 * @param mapping
-	 * @param sourceEntityType
-	 * @param targetEntityType
-	 * @param attributes
-	 * @param project
 	 */
 	private void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType, EntityType targetEntityType,
 			Iterable<Attribute> attributes, MappingProject project)
@@ -972,7 +955,6 @@ public class MappingServiceController extends MolgenisPluginController
 	 * Lists the entities that may be added as new sources to this mapping project's selected target
 	 *
 	 * @param target the selected target
-	 * @return
 	 */
 	private List<EntityType> getNewSources(MappingTarget target)
 	{

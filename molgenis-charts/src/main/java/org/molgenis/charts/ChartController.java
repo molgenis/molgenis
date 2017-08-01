@@ -102,12 +102,6 @@ public class ChartController
 	 * Gets a file from the filestore.
 	 * <p>
 	 * User can only view his own files he created with the charts module
-	 *
-	 * @param out
-	 * @param name
-	 * @param extension
-	 * @param response
-	 * @throws IOException
 	 */
 	@RequestMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name") String name,
@@ -132,14 +126,6 @@ public class ChartController
 	 * Returns a piece of javascript that can be retrieved by an html page with an ajax request.
 	 * <p>
 	 * The page must have an element with id named 'container'. The svg image will be added to this container element.
-	 *
-	 * @param request
-	 * @param model
-	 * @return
-	 * @throws IOException
-	 * @throws TemplateException
-	 * @throws FactoryConfigurationError
-	 * @throws XMLStreamException
 	 */
 	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody

@@ -191,8 +191,6 @@ public class LocalizationService
 
 	/**
 	 * Deletes all localization strings for a given namespace
-	 *
-	 * @param namespace
 	 */
 	@RunAsSystem
 	@Transactional

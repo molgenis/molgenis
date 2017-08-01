@@ -1,10 +1,11 @@
 // @flow
-import type { ACE, ACL, EntityType, GrantedAuthoritySid, Role, Row, State } from './utils/flow.types'
+import type { ACE, ACL, EntityType, Role, Row, Sid, SidType, State } from './utils/flow.types'
 
 export const SET_SELECTED_ROLE = '__SET_SELECTED_ROLE__'
 export const SET_USERS = '__SET_USERS__'
 export const SET_GROUPS = '__SET_GROUPS__'
 export const SET_SELECTED_ENTITY_TYPE = '__SET_SELECTED_ENTITY_TYPE__'
+export const SET_SID_TYPE = '__SET_SID_TYPE__'
 export const SET_FILTER = '__SET_FILTER__'
 export const SET_ROWS = '__SET_ACLS__'
 export const SET_ENTITY_TYPES = '__SET_ENTITY_TYPES__'
@@ -45,7 +46,7 @@ export default {
     if (!state.selectedRole) {
       return
     }
-    const sid: GrantedAuthoritySid = {authority: state.selectedRole}
+    const sid: Sid = state.sidType === 'role' ? {authority: state.selectedRole} : {username: state.selectedRole}
     const acl: ACL = state.rows[rowIndex].acl
     if (aceIndex === -1) {
       const ace: ACE = {
@@ -67,7 +68,7 @@ export default {
     if (!state.selectedRole) {
       return
     }
-    const sid: GrantedAuthoritySid = {authority: state.selectedRole}
+    const sid: Sid = state.sidType === 'role' ? {authority: state.selectedRole} : {username: state.selectedRole}
     const acl: ACL = state.rows[rowIndex].acl
     if (aceIndex === -1) {
       const ace: ACE = {
@@ -102,6 +103,9 @@ export default {
   },
   [CANCEL_UPDATE_ROLE] (state: State) {
     state.doUpdateRole = false
+  },
+  [SET_SID_TYPE] (state: State, sidType: SidType) {
+    state.sidType = sidType
   },
   [SET_SELECTED_ENTITY_TYPE] (state: State, selectedEntityTypeId: string) {
     state.selectedEntityTypeId = selectedEntityTypeId

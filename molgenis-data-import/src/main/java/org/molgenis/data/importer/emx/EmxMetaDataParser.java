@@ -83,6 +83,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String EMX_ENTITIES_EXTENDS = "extends";
 	private static final String EMX_ENTITIES_BACKEND = "backend";
 	private static final String EMX_ENTITIES_TAGS = "tags";
+	private static final String EMX_ENTITIES_ROW_SECURITY = "rowSecurity";
 
 	// Column names in the attributes sheet
 	private static final String EMX_ATTRIBUTES_NAME = "name";
@@ -146,7 +147,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final List<String> EMX_ENTITIES_ALLOWED_ATTRS = Arrays.asList(EMX_ENTITIES_NAME.toLowerCase(),
 			EMX_ENTITIES_PACKAGE.toLowerCase(), EMX_ENTITIES_LABEL.toLowerCase(), EMX_ENTITIES_DESCRIPTION,
 			EMX_ENTITIES_ABSTRACT.toLowerCase(), EMX_ENTITIES_EXTENDS.toLowerCase(), EMX_ENTITIES_BACKEND.toLowerCase(),
-			EMX_ENTITIES_TAGS.toLowerCase());
+			EMX_ENTITIES_TAGS.toLowerCase(), EMX_ENTITIES_ROW_SECURITY.toLowerCase());
 
 	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(EMX_ATTRIBUTES_AGGREGATEABLE,
 			EMX_ATTRIBUTES_DATA_TYPE, EMX_ATTRIBUTES_DESCRIPTION, EMX_ATTRIBUTES_ENTITY, EMX_ATTRIBUTES_ENUM_OPTIONS,
@@ -478,10 +479,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Convert tag identifiers to tags
-	 *
-	 * @param intermediateResults
-	 * @param tagIdentifiers
-	 * @return
 	 */
 	private static List<Tag> toTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers)
 	{
@@ -505,10 +502,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Transforms an {@link Entity} to a {@link Tag}
-	 *
-	 * @param id
-	 * @param tagEntity
-	 * @return
 	 */
 	private Tag entityToTag(String id, Entity tagEntity)
 	{
@@ -554,6 +547,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				String emxEntityExtends = entity.getString(EMX_ENTITIES_EXTENDS);
 				String emxEntityBackend = entity.getString(EMX_ENTITIES_BACKEND);
 				String emxEntityTags = entity.getString(EMX_ENTITIES_TAGS);
+				String emxEntityRowSecurity = entity.getString(EMX_ENTITIES_ROW_SECURITY);
 
 				// required
 				if (emxEntityName == null)
@@ -674,15 +668,14 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					entityType.setTags(toTags(intermediateResults, tagIdentifiers));
 				}
+
+				entityType.setEntityLevelSecurity(parseBoolean(emxEntityRowSecurity, i, EMX_ENTITIES_ROW_SECURITY));
 			}
 		}
 	}
 
 	/**
 	 * Resolves package fullNames by looping through all the packages and their parents
-	 *
-	 * @param packageRepo
-	 * @return
 	 */
 	private static List<Entity> resolvePackages(Repository<Entity> packageRepo)
 	{
@@ -1165,10 +1158,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Put the entities that are not in a package in the selected package
-	 *
-	 * @param intermediateResults
-	 * @param defaultPackageId
-	 * @return
 	 */
 	private List<EntityType> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
 			String defaultPackageId)
@@ -1223,9 +1212,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Throws Exception if an import is trying to update metadata of a system entity
-	 *
-	 * @param allEntityTypeMap
-	 * @param existingMetaData
 	 */
 	public static void scanMetaDataForSystemEntityType(Map<String, EntityType> allEntityTypeMap,
 			Iterable<EntityType> existingMetaData)
@@ -1311,11 +1297,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Goes through all the sheets in the source EMX and creates an {@link MyEntitiesValidationReport}
-	 *
-	 * @param source
-	 * @param report
-	 * @param metaDataMap
-	 * @return
 	 */
 	private MyEntitiesValidationReport generateEntityValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)

@@ -61,7 +61,6 @@ public interface RepositoryAnnotator
 	/**
 	 * Returns null if the annotator will work for the given metadata, a reason if not so
 	 *
-	 * @param inputMetaData
 	 * @return canAnnotate
 	 */
 	String canAnnotate(EntityType inputMetaData);

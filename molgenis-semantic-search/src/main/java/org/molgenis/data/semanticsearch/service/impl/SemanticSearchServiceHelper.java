@@ -58,8 +58,6 @@ public class SemanticSearchServiceHelper
 	 * Create a disMaxJunc query rule based on the given search terms as well as the information from given ontology
 	 * terms
 	 *
-	 * @param ontologyTerms
-	 * @param searchTerms
 	 * @return disMaxJunc queryRule
 	 */
 	public QueryRule createDisMaxQueryRuleForAttribute(Set<String> searchTerms, Collection<OntologyTerm> ontologyTerms)
@@ -92,7 +90,6 @@ public class SemanticSearchServiceHelper
 	/**
 	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
 	 *
-	 * @param queryTerms
 	 * @return disMaxJunc queryRule
 	 */
 	public QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms)
@@ -111,8 +108,6 @@ public class SemanticSearchServiceHelper
 	/**
 	 * Create a disMaxQueryRule with corresponding boosted value
 	 *
-	 * @param queryTerms
-	 * @param boostValue
 	 * @return a disMaxQueryRule with boosted value
 	 */
 	public QueryRule createBoostedDisMaxQueryRuleForTerms(List<String> queryTerms, Double boostValue)
@@ -128,7 +123,6 @@ public class SemanticSearchServiceHelper
 	/**
 	 * Create a boolean should query for composite tags containing multiple ontology terms
 	 *
-	 * @param multiOntologyTermIri
 	 * @return return a boolean should queryRule
 	 */
 	public QueryRule createShouldQueryRule(String multiOntologyTermIri)
@@ -148,9 +142,6 @@ public class SemanticSearchServiceHelper
 	/**
 	 * Create a list of string queries based on the information collected from current ontologyterm including label,
 	 * synonyms and child ontologyterms
-	 *
-	 * @param ontologyTerm
-	 * @return
 	 */
 	public List<String> parseOntologyTermQueries(OntologyTerm ontologyTerm)
 	{
@@ -170,7 +161,6 @@ public class SemanticSearchServiceHelper
 	/**
 	 * A helper function to collect synonyms as well as label of ontologyterm
 	 *
-	 * @param ontologyTerm
 	 * @return a list of synonyms plus label
 	 */
 	public Set<String> getOtLabelAndSynonyms(OntologyTerm ontologyTerm)
@@ -222,9 +212,6 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * A helper function that gets identifiers of all the attributes from one EntityType
-	 *
-	 * @param sourceEntityType
-	 * @return
 	 */
 	public List<String> getAttributeIdentifiers(EntityType sourceEntityType)
 	{
