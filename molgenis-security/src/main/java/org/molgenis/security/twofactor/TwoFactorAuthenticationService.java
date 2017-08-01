@@ -44,4 +44,7 @@ public interface TwoFactorAuthenticationService
 	 */
 	String generateSecretKey();
 
+	void generateNewRecoveryCodes();
+
+	void useRecoveryCode(String recoveryCode);
 }
