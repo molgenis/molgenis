@@ -14,6 +14,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -30,6 +31,7 @@ import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDO
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.twofactor.RecoveryCodeMetadata.*;
 
+@Service
 public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticationService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationService.class);
@@ -108,7 +110,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean isConfiguredForUser() throws UsernameNotFoundException
+	public boolean isConfiguredForUser() throws InternalAuthenticationServiceException
 	{
 		boolean isConfigured = false;
 		try
@@ -128,7 +130,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean isEnabledForUser()
+	public boolean isEnabledForUser() throws InternalAuthenticationServiceException
 	{
 		boolean isEnabled = false;
 		User user = getUser();
@@ -199,7 +201,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		else
 		{
 			throw new InternalAuthenticationServiceException(
-					format("Secret not found, user: [ %s ] is not configured for 2 factor authentication",
+					format("Secret not found, user: [ {0} ] is not configured for 2 factor authentication",
 							user.getUsername()));
 		}
 
@@ -217,7 +219,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 		else
 		{
-			throw new UsernameNotFoundException("Can't find user: [" + userDetails.getUsername() + "]");
+			throw new UsernameNotFoundException(format("Can''t find user: [ {0} ]", userDetails.getUsername()));
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package org.molgenis.security.twofactor;
 
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
@@ -30,14 +31,14 @@ public interface TwoFactorAuthenticationService
 	 *
 	 * @return is ready
 	 */
-	boolean isEnabledForUser() throws UsernameNotFoundException;
+	boolean isEnabledForUser() throws InternalAuthenticationServiceException;
 
 	/**
 	 * <p>Check if the user is 2 factor authentication ready.</p>
 	 *
 	 * @return is configured for user
 	 */
-	boolean isConfiguredForUser() throws UsernameNotFoundException;
+	boolean isConfiguredForUser() throws InternalAuthenticationServiceException;
 
 	/**
 	 * @return the secretkey for logged in user

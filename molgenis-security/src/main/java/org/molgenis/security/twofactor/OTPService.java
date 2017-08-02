@@ -3,7 +3,9 @@ package org.molgenis.security.twofactor;
 import org.springframework.security.authentication.BadCredentialsException;
 
 /**
- * Authenticates the verification code
+ * OTPService is used to determine if the {@link UserSecret} matches the given validationcode.
+ * <p>
+ * The base is the TOTP algorithm. We have included a thirdparty library which serves the code for the validity check
  */
 public interface OTPService
 {
