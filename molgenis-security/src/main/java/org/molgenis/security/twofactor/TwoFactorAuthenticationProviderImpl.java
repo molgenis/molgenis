@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import static java.util.Objects.requireNonNull;
 
 /**
- * AuthenticationProvider that uses the TwoFactorAuthenticationSerivce and expects a TwoFactorAuthenticationToken
+ * AuthenticationProvider that uses the TwoFactorAuthenticationService and expects a TwoFactorAuthenticationToken
  * <p>
  * Checks if 2 factor authentication is configured for user.
  * <p>
@@ -39,7 +39,10 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 			if (authToken.getSecretKey() != null)
 			{
 				otpService.tryVerificationCode(authToken.getVerificationCode(), authToken.getSecretKey());
+
+				//TODO combine configuration methods into one
 				twoFactorAuthenticationService.setSecretKey(authToken.getSecretKey());
+				twoFactorAuthenticationService.generateNewRecoveryCodes();
 				UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
 																			 .getAuthentication()
 																			 .getPrincipal();
@@ -61,7 +64,6 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 					authToken = new TwoFactorAuthenticationToken(userDetails, userDetails.getPassword(),
 							userDetails.getAuthorities(), authToken.getVerificationCode(), null);
 				}
-
 			}
 		}
 
