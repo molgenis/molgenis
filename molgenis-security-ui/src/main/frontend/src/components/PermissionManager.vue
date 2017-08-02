@@ -6,15 +6,11 @@
     </ol>
     <div class="row pt-3">
       <div class="col col-md-4">
-        <h3 class="pt-3">Security ID</h3>
+        <h3 class="pt-3">{{'SECURITY_ID' | i18n}}</h3>
         <ul class="nav nav-tabs">
-          <li class="nav-item">
-            <a :class="'nav-link ' + (sidType == 'role' ? 'active' : '')" href="#"
-               @click="sidType = 'role'">{{'ROLE' | i18n}}</a>
-          </li>
-          <li class="nav-item">
-            <a :class="'nav-link ' + (sidType == 'user' ? 'active' : '')" href="#"
-               @click="sidType = 'user'">{{'USER' | i18n}}</a>
+          <li class="nav-item" v-for="type in ['role', 'user']">
+            <a class="nav-link" :class="{ active: sidType === type }" href="#"
+               @click="sidType = type">{{type | toUpper | i18n}}</a>
           </li>
         </ul>
         <div class="tab-content">
@@ -23,58 +19,21 @@
                    :selectedRole="selectedRole"
                    :selectRole="selectRole" :createRole="createRole" :updateRole="updateRole"
                    :onUpdateRole="onUpdateRole" :onDeleteRole="onDeleteRole"></roles>
-            <div v-if="selectedRole">
-              <h3 class="pt-3">{{'MEMBERS' | i18n}}</h3>
-              <template v-if="users && groups">
-                <ul class="fa-ul" v-if="users || groups">
-                  <li v-for="group in groups"><i class="fa fa-users fa-li"></i>{{group}}
-                  </li>
-                  <li v-for="user in users"><i class="fa fa-user fa-li"></i>{{user}}
-                  </li>
-                </ul>
-                <p v-else>{{'NO_MEMBERS_IN_ROLE' | i18n}}</p>
-              </template>
-              <p v-else><i class="fa fa-spinner fa-spin"></i></p>
-            </div>
+            <role-members v-if="sidType==='role'"></role-members>
           </div>
         </div>
       </div>
       <div class="col col-md-8">
-        <div v-if="doCreateRole">
-          <h3>{{'CREATE_ROLE' | i18n}}</h3>
-          <form v-on:submit="onSaveRole({label: roleLabel, description: roleDescription})">
-            <div class="form-group">
-              <label for="labelInput">{{'LABEL' | i18n}}</label>
-              <input v-model="roleLabel" type="text" class="form-control" id="labelInput"
-                     :placeholder="'ROLE_LABEL' | i18n"
-                     required>
-              <label for="descriptionInput">{{'DESCRIPTION' | i18n}}</label>
-              <input v-model="roleDescription" type="text" class="form-control" id="descriptionInput"
-                     :placeholder="'ROLE_DESCRIPTION' | i18n">
-            </div>
-            <div class="float-right">
-              <button type="button" class="btn btn-default" @click="cancelCreateRole()">{{'CANCEL' | i18n}}</button>
-              <button type="submit" class="btn btn-primary">{{'SAVE' | i18n}}</button>
-            </div>
-          </form>
-        </div>
-        <div v-else-if="doUpdateRole">
-          <h3>{{'UPDATE_ROLE' | i18n}}</h3>
-          <form v-on:submit="onUpdateRole(role)">
-            <div class="form-group">
-              <label for="labelInput">Label</label>
-              <input v-model="role.label" type="text" class="form-control" id="labelInput" placeholder="Role label"
-                     required>
-              <label for="descriptionInput">Description</label>
-              <input v-model="role.description" type="text" class="form-control" id="descriptionInput"
-                     placeholder="Role description">
-            </div>
-            <div class="float-right">
-              <button type="button" class="btn btn-default" @click="cancelUpdateRole()">{{'CANCEL' | i18n}}</button>
-              <button type="submit" class="btn btn-primary">{{'SAVE' | i18n}}</button>
-            </div>
-          </form>
-        </div>
+        <role-form v-if="doCreateRole"
+                   :title="$t('CREATE_ROLE')"
+                   :cancel="cancelCreateRole"
+                   :submit="onSaveRole"></role-form>
+        <role-form v-else-if="doUpdateRole"
+                   :title="$t('UPDATE_ROLE')"
+                   :initialLabel="role.label"
+                   :initialDescription="role.description"
+                   :cancel="cancelUpdateRole"
+                   :submit="onUpdateRole"></role-form>
         <div v-else-if="selectedRole">
           <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
@@ -117,7 +76,9 @@
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Roles from './Roles'
-  import capitalizeFirstLetter from '../filters/capitalizeFirstLetter'
+  import RoleForm from './RoleForm'
+  import RoleMembers from './RoleMembers'
+  import {capitalizeFirstLetter, toUpper} from '../filters/text'
 
   export default {
     name: 'permission-manager',
@@ -149,15 +110,8 @@
         this.save(args.rowIndex)
       }
     },
-    data: function () {
-      return {
-        roleId: null,
-        roleLabel: null,
-        roleDescription: null
-      }
-    },
     computed: {
-      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'selectedSid', 'sids', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter', 'users', 'groups']),
+      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
       ...mapGetters(['tableRows']),
       selectedEntityType: {
         get () {
@@ -170,7 +124,7 @@
       },
       role: {
         get () {
-          return Object.assign({}, this.roles.find(role => { return role.id === this.selectedRole }))
+          return this.roles.find(role => role.id === this.selectedRole)
         }
       },
       sidType: {
@@ -186,10 +140,13 @@
     components: {
       Multiselect,
       Roles,
+      RoleForm,
+      RoleMembers,
       acls: ACLs
     },
     filters: {
-      capitalizeFirstLetter
+      capitalizeFirstLetter,
+      toUpper
     }
   }
 </script>
