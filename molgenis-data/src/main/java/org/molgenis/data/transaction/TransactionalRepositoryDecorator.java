@@ -23,19 +23,13 @@ import static java.util.Objects.requireNonNull;
  */
 public class TransactionalRepositoryDecorator<E extends Entity> extends AbstractRepositoryDecorator<E>
 {
-	private final Repository<E> decoratedRepo;
 	private final PlatformTransactionManager transactionManager;
 
-	public TransactionalRepositoryDecorator(Repository<E> decoratedRepo, PlatformTransactionManager transactionManager)
+	public TransactionalRepositoryDecorator(Repository<E> delegateRepository,
+			PlatformTransactionManager transactionManager)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.transactionManager = requireNonNull(transactionManager);
-	}
-
-	@Override
-	protected Repository<E> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
@@ -43,7 +37,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createReadonlyTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.forEachBatched(consumer, batchSize);
+			delegate().forEachBatched(consumer, batchSize);
 			return null;
 		});
 	}
@@ -53,7 +47,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createReadonlyTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+			delegate().forEachBatched(fetch, consumer, batchSize);
 			return null;
 		});
 	}
@@ -61,55 +55,55 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	@Override
 	public long count()
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.count());
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().count());
 	}
 
 	@Override
 	public long count(Query<E> q)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.count(q));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().count(q));
 	}
 
 	@Override
 	public Stream<E> findAll(Query<E> q)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.findAll(q));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().findAll(q));
 	}
 
 	@Override
 	public E findOne(Query<E> q)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.findOne(q));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().findOne(q));
 	}
 
 	@Override
 	public E findOneById(Object id)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.findOneById(id));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().findOneById(id));
 	}
 
 	@Override
 	public E findOneById(Object id, Fetch fetch)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.findOneById(id, fetch));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().findOneById(id, fetch));
 	}
 
 	@Override
 	public Stream<E> findAll(Stream<Object> ids)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.findAll(ids));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().findAll(ids));
 	}
 
 	@Override
 	public Stream<E> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.findAll(ids, fetch));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().findAll(ids, fetch));
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.aggregate(aggregateQuery));
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().aggregate(aggregateQuery));
 	}
 
 	@Override
@@ -117,7 +111,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.update(entity);
+			delegate().update(entity);
 			return null;
 		});
 	}
@@ -127,7 +121,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.update(entities);
+			delegate().update(entities);
 			return null;
 		});
 	}
@@ -137,7 +131,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.delete(entity);
+			delegate().delete(entity);
 			return null;
 		});
 	}
@@ -147,7 +141,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.delete(entities);
+			delegate().delete(entities);
 			return null;
 		});
 	}
@@ -157,7 +151,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.deleteById(id);
+			delegate().deleteById(id);
 			return null;
 		});
 	}
@@ -167,7 +161,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.deleteAll(ids);
+			delegate().deleteAll(ids);
 			return null;
 		});
 	}
@@ -177,7 +171,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.deleteAll();
+			delegate().deleteAll();
 			return null;
 		});
 	}
@@ -187,7 +181,7 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	{
 		createWriteTransactionTemplate().execute((status) ->
 		{
-			decoratedRepo.add(entity);
+			delegate().add(entity);
 			return null;
 		});
 	}
@@ -195,13 +189,13 @@ public class TransactionalRepositoryDecorator<E extends Entity> extends Abstract
 	@Override
 	public Integer add(Stream<E> entities)
 	{
-		return createWriteTransactionTemplate().execute((status) -> decoratedRepo.add(entities));
+		return createWriteTransactionTemplate().execute((status) -> delegate().add(entities));
 	}
 
 	@Override
 	public Iterator<E> iterator()
 	{
-		return createReadonlyTransactionTemplate().execute((status) -> decoratedRepo.iterator());
+		return createReadonlyTransactionTemplate().execute((status) -> delegate().iterator());
 	}
 
 	private TransactionTemplate createWriteTransactionTemplate()

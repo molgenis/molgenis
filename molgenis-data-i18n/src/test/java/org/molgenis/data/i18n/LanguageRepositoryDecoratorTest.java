@@ -21,7 +21,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	private static final String MESSAGE_DELETE_NOT_ALLOWED = "Deleting languages is not allowed";
 
 	@Mock
-	private Repository<Language> decoratedRepo;
+	private Repository<Language> delegateRepository;
 	@Mock
 	private LanguageService languageService;
 
@@ -30,7 +30,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, languageService);
+		languageRepositoryDecorator = new LanguageRepositoryDecorator(delegateRepository, languageService);
 	}
 
 	@Test
@@ -38,7 +38,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		Language language = getMockLanguage(LANGUAGE_CODE_NL);
 		languageRepositoryDecorator.add(Stream.of(language));
-		verify(decoratedRepo).add(language);
+		verify(delegateRepository).add(language);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
@@ -55,8 +55,8 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		Language language1 = getMockLanguage(LANGUAGE_CODE_NL);
 		Integer count = languageRepositoryDecorator.add(Stream.of(language0, language1));
 		assertEquals(count, Integer.valueOf(2));
-		verify(decoratedRepo).add(language0);
-		verify(decoratedRepo).add(language1);
+		verify(delegateRepository).add(language0);
+		verify(delegateRepository).add(language1);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
@@ -77,7 +77,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDeleteById()
 	{
 		Language language = getMockLanguage(LANGUAGE_CODE_NL);
-		when(decoratedRepo.findOneById(LANGUAGE_CODE_NL)).thenReturn(language);
+		when(delegateRepository.findOneById(LANGUAGE_CODE_NL)).thenReturn(language);
 		languageRepositoryDecorator.deleteById(LANGUAGE_CODE_NL);
 	}
 

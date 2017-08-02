@@ -12,7 +12,7 @@ import static org.testng.Assert.assertEquals;
 public class AggregateAnonymizerRepositoryDecoratorTest
 {
 	private AggregateAnonymizerRepositoryDecorator aggregateAnonymizerRepoDecorator;
-	private Repository<Entity> decoratedRepo;
+	private Repository<Entity> delegateRepository;
 	private AggregateAnonymizer aggregateAnonymizer;
 	private AppSettings appSettings;
 
@@ -20,17 +20,11 @@ public class AggregateAnonymizerRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
+		delegateRepository = mock(Repository.class);
 		aggregateAnonymizer = mock(AggregateAnonymizer.class);
 		appSettings = mock(AppSettings.class);
-		aggregateAnonymizerRepoDecorator = new AggregateAnonymizerRepositoryDecorator<>(decoratedRepo,
+		aggregateAnonymizerRepoDecorator = new AggregateAnonymizerRepositoryDecorator<>(delegateRepository,
 				aggregateAnonymizer, appSettings);
-	}
-
-	@Test
-	public void delegate() throws Exception
-	{
-		assertEquals(aggregateAnonymizerRepoDecorator.delegate(), decoratedRepo);
 	}
 
 	@Test
@@ -39,7 +33,7 @@ public class AggregateAnonymizerRepositoryDecoratorTest
 		when(appSettings.getAggregateThreshold()).thenReturn(null);
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		AggregateResult aggregateResult = mock(AggregateResult.class);
-		when(decoratedRepo.aggregate(aggregateQuery)).thenReturn(aggregateResult);
+		when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResult);
 		assertEquals(aggregateResult, aggregateAnonymizerRepoDecorator.aggregate(aggregateQuery));
 		verifyZeroInteractions(aggregateAnonymizer);
 		verifyZeroInteractions(aggregateResult);
@@ -52,7 +46,7 @@ public class AggregateAnonymizerRepositoryDecoratorTest
 		when(appSettings.getAggregateThreshold()).thenReturn(threshold);
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		AggregateResult aggregateResult = mock(AggregateResult.class);
-		when(decoratedRepo.aggregate(aggregateQuery)).thenReturn(aggregateResult);
+		when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResult);
 		AnonymizedAggregateResult anonymizedAggregateResult = mock(AnonymizedAggregateResult.class);
 		when(aggregateAnonymizer.anonymize(aggregateResult, threshold)).thenReturn(anonymizedAggregateResult);
 		assertEquals(anonymizedAggregateResult, aggregateAnonymizerRepoDecorator.aggregate(aggregateQuery));

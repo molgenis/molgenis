@@ -149,10 +149,10 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	public static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
-		public PermissionService molgenisPermissionService()
+		public PermissionService permissionService()
 		{
-			return new PermissionServiceImpl(mock(EntityAclService.class));
-		}
+			return new PermissionServiceImpl(null);
+		} // FIXME replace null with dependency
 
 		@Bean
 		public StaticContentFactory staticContentFactory()
@@ -163,7 +163,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentService staticContentService()
 		{
-			return new StaticContentServiceImpl(dataService(), staticContentFactory(), molgenisPermissionService());
+			return new StaticContentServiceImpl(dataService(), staticContentFactory(), permissionService());
 		}
 
 		@Bean

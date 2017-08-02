@@ -22,26 +22,19 @@ import static java.util.stream.Collectors.toList;
  */
 public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDecorator<EntityType>
 {
-	private final Repository<EntityType> decoratedRepo;
 	private final PermissionService permissionService;
 
-	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> decoratedRepo,
+	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
 			PermissionService permissionService)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.permissionService = requireNonNull(permissionService);
-	}
-
-	@Override
-	protected Repository<EntityType> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
 	public Iterator<EntityType> iterator()
 	{
-		Iterable<EntityType> entityTypeIterable = decoratedRepo::iterator;
+		Iterable<EntityType> entityTypeIterable = delegate()::iterator;
 		return StreamSupport.stream(entityTypeIterable.spliterator(), false)
 							.map(this::toPermittedEntityType)
 							.iterator();
@@ -51,44 +44,44 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public void forEachBatched(Fetch fetch, Consumer<List<EntityType>> consumer, int batchSize)
 	{
 		MappedConsumer mappedConsumer = new MappedConsumer(consumer, this);
-		decoratedRepo.forEachBatched(fetch, mappedConsumer::map, batchSize);
+		delegate().forEachBatched(fetch, mappedConsumer::map, batchSize);
 		super.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
 	public Stream<EntityType> findAll(Query<EntityType> q)
 	{
-		return decoratedRepo.findAll(q).map(this::toPermittedEntityType);
+		return delegate().findAll(q).map(this::toPermittedEntityType);
 	}
 
 	@Override
 	public EntityType findOne(Query<EntityType> q)
 	{
-		return toPermittedEntityType(decoratedRepo.findOne(q));
+		return toPermittedEntityType(delegate().findOne(q));
 	}
 
 	@Override
 	public EntityType findOneById(Object id)
 	{
-		return toPermittedEntityType(decoratedRepo.findOneById(id));
+		return toPermittedEntityType(delegate().findOneById(id));
 	}
 
 	@Override
 	public EntityType findOneById(Object id, Fetch fetch)
 	{
-		return toPermittedEntityType(decoratedRepo.findOneById(id, fetch));
+		return toPermittedEntityType(delegate().findOneById(id, fetch));
 	}
 
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids)
 	{
-		return decoratedRepo.findAll(ids).map(this::toPermittedEntityType);
+		return delegate().findAll(ids).map(this::toPermittedEntityType);
 	}
 
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return decoratedRepo.findAll(ids, fetch).map(this::toPermittedEntityType);
+		return delegate().findAll(ids, fetch).map(this::toPermittedEntityType);
 	}
 
 	private EntityType toPermittedEntityType(EntityType entityType)

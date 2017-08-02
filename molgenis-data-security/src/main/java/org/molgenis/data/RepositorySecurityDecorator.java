@@ -19,179 +19,172 @@ import static java.util.Objects.requireNonNull;
  */
 public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Entity>
 {
-	private final Repository<Entity> decoratedRepository;
 	private final PermissionService permissionService;
 
-	public RepositorySecurityDecorator(Repository<Entity> decoratedRepository, PermissionService permissionService)
+	public RepositorySecurityDecorator(Repository<Entity> delegateRepository, PermissionService permissionService)
 	{
-		this.decoratedRepository = requireNonNull(decoratedRepository);
+		super(delegateRepository);
 		this.permissionService = requireNonNull(permissionService);
-	}
-
-	@Override
-	protected Repository<Entity> delegate()
-	{
-		return decoratedRepository;
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		return decoratedRepository.iterator();
+		return delegate().iterator();
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
+		delegate().forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.COUNT);
-		return decoratedRepository.count(q);
+		return delegate().count(q);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		return decoratedRepository.findAll(q);
+		return delegate().findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query<Entity> q)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		return decoratedRepository.findOne(q);
+		return delegate().findOne(q);
 	}
 
 	@Override
 	public Entity findOneById(Object id)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		return decoratedRepository.findOneById(id);
+		return delegate().findOneById(id);
 	}
 
 	@Override
 	public Entity findOneById(Object id, Fetch fetch)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		return decoratedRepository.findOneById(id, fetch);
+		return delegate().findOneById(id, fetch);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		return decoratedRepository.findAll(ids);
+		return delegate().findAll(ids);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.READ);
-		return decoratedRepository.findAll(ids, fetch);
+		return delegate().findAll(ids, fetch);
 	}
 
 	@Override
 	public long count()
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.COUNT);
-		return decoratedRepository.count();
+		return delegate().count();
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.update(entity);
+		delegate().update(entity);
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.update(entities);
+		delegate().update(entities);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.delete(entity);
+		delegate().delete(entity);
 	}
 
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.delete(entities);
+		delegate().delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.deleteById(id);
+		delegate().deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.deleteAll(ids);
+		delegate().deleteAll(ids);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.deleteAll();
+		delegate().deleteAll();
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		decoratedRepository.add(entity);
+		delegate().add(entity);
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.WRITE);
-		return decoratedRepository.add(entities);
+		return delegate().add(entities);
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		EntityType entityType = decoratedRepository.getEntityType();
+		EntityType entityType = delegate().getEntityType();
 		validateCurrentUserPermission(entityType, Permission.COUNT);
-		return decoratedRepository.aggregate(aggregateQuery);
+		return delegate().aggregate(aggregateQuery);
 	}
 
 	private void validateCurrentUserPermission(EntityType entityType, Permission permission)

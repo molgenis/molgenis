@@ -15,32 +15,26 @@ import static java.util.Objects.requireNonNull;
  */
 public class PackageRepositoryValidationDecorator extends AbstractRepositoryDecorator<Package>
 {
-	private final Repository<Package> decoratedRepo;
 	private final PackageValidator packageValidator;
 
-	public PackageRepositoryValidationDecorator(Repository<Package> decoratedRepo, PackageValidator packageValidator)
+	public PackageRepositoryValidationDecorator(Repository<Package> delegateRepository,
+			PackageValidator packageValidator)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.packageValidator = requireNonNull(packageValidator);
-	}
-
-	@Override
-	public Repository<Package> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
 	public void add(Package package_)
 	{
 		packageValidator.validate(package_);
-		decoratedRepo.add(package_);
+		delegate().add(package_);
 	}
 
 	@Override
 	public Integer add(Stream<Package> packageStream)
 	{
-		return decoratedRepo.add(packageStream.filter(entityType ->
+		return delegate().add(packageStream.filter(entityType ->
 		{
 			packageValidator.validate(entityType);
 			return true;
@@ -51,13 +45,13 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 	public void update(Package package_)
 	{
 		packageValidator.validate(package_);
-		decoratedRepo.update(package_);
+		delegate().update(package_);
 	}
 
 	@Override
 	public void update(Stream<Package> packageStream)
 	{
-		decoratedRepo.update(packageStream.filter(entityType ->
+		delegate().update(packageStream.filter(entityType ->
 		{
 			packageValidator.validate(entityType);
 			return true;
@@ -74,7 +68,7 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 	@Override
 	public void delete(Stream<Package> packageStream)
 	{
-		decoratedRepo.delete(packageStream.filter(package_ ->
+		delegate().delete(packageStream.filter(package_ ->
 		{
 			packageValidator.validate(package_);
 			return true;

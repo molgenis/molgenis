@@ -3,19 +3,19 @@ package org.molgenis.security.freemarker;
 import freemarker.core.Environment;
 import freemarker.template.*;
 import org.molgenis.data.DataConverter;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.Permission;
 
 import java.io.IOException;
 import java.util.Map;
 
 public abstract class PermissionDirective implements TemplateDirectiveModel
 {
-	private final PermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 
-	public PermissionDirective(PermissionService molgenisPermissionService)
+	public PermissionDirective(PermissionService permissionService)
 	{
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.permissionService = permissionService;
 	}
 
 	@Override
@@ -33,13 +33,12 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		boolean hasPermission = true;
 		if (entityTypeId != null)
 		{
-			hasPermission = molgenisPermissionService.hasPermissionOnEntityType(entityTypeId,
-					Permission.valueOf(permission));
+			hasPermission = permissionService.hasPermissionOnEntityType(entityTypeId, Permission.valueOf(permission));
 		}
 
 		if ((plugin != null) && hasPermission)
 		{
-			hasPermission = molgenisPermissionService.hasPermissionOnPlugin(plugin, Permission.valueOf(permission));
+			hasPermission = permissionService.hasPermissionOnPlugin(plugin, Permission.valueOf(permission));
 		}
 
 		execute(hasPermission, env, body);

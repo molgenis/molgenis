@@ -13,19 +13,12 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 {
 	private static final int BATCH_SIZE = 1000;
 
-	private final Repository<Entity> decoratedRepository;
 	private final DataService dataService;
 
-	public CascadeDeleteRepositoryDecorator(Repository<Entity> decoratedRepository, DataService dataService)
+	public CascadeDeleteRepositoryDecorator(Repository<Entity> delegateRepository, DataService dataService)
 	{
-		this.decoratedRepository = requireNonNull(decoratedRepository);
+		super(delegateRepository);
 		this.dataService = requireNonNull(dataService);
-	}
-
-	@Override
-	protected Repository<Entity> delegate()
-	{
-		return decoratedRepository;
 	}
 
 	@Override
@@ -39,7 +32,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 		}
 		else
 		{
-			decoratedRepository.delete(entity);
+			delegate().delete(entity);
 		}
 	}
 
@@ -54,7 +47,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 		}
 		else
 		{
-			decoratedRepository.deleteById(id);
+			delegate().deleteById(id);
 		}
 	}
 
@@ -71,7 +64,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 		}
 		else
 		{
-			decoratedRepository.deleteAll();
+			delegate().deleteAll();
 		}
 	}
 
@@ -89,7 +82,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 		}
 		else
 		{
-			decoratedRepository.delete(entities);
+			delegate().delete(entities);
 		}
 	}
 
@@ -107,7 +100,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 		}
 		else
 		{
-			decoratedRepository.deleteAll(ids);
+			delegate().deleteAll(ids);
 		}
 	}
 

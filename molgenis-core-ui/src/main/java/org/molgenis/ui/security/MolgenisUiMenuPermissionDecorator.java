@@ -2,8 +2,8 @@ package org.molgenis.ui.security;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
@@ -13,14 +13,14 @@ import java.util.List;
 public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 {
 	private final MolgenisUiMenu molgenisUiMenu;
-	private final PermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 
-	public MolgenisUiMenuPermissionDecorator(MolgenisUiMenu molgenisUiMenu, PermissionService molgenisPermissionService)
+	public MolgenisUiMenuPermissionDecorator(MolgenisUiMenu molgenisUiMenu, PermissionService permissionService)
 	{
 		if (molgenisUiMenu == null) throw new IllegalArgumentException("menu is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
+		if (permissionService == null) throw new IllegalArgumentException("permissionService is null");
 		this.molgenisUiMenu = molgenisUiMenu;
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.permissionService = permissionService;
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 			{
 				case MENU:
 					return new MolgenisUiMenuPermissionDecorator((MolgenisUiMenu) molgenisUiMenuItem,
-							molgenisPermissionService);
+							permissionService);
 				case PLUGIN:
 					return molgenisUiMenuItem;
 				default:
@@ -102,7 +102,7 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 				break;
 			case PLUGIN:
 				String menuItemId = molgenisUiMenuItem.getId();
-				hasPermission = molgenisPermissionService.hasPermissionOnPlugin(menuItemId, Permission.READ);
+				hasPermission = permissionService.hasPermissionOnPlugin(menuItemId, Permission.READ);
 				break;
 			default:
 				throw new RuntimeException("Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");

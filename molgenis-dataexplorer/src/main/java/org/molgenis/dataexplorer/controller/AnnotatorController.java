@@ -10,6 +10,7 @@ import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionFactory;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.user.UserAccountService;
@@ -42,7 +43,7 @@ public class AnnotatorController
 	public static final String URI = "/annotators";
 	private final DataService dataService;
 	private final AnnotationService annotationService;
-	private final PermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 	private final UserAccountService userAccountService;
 	private final AnnotationJobFactory annotationJobFactory;
 	private final ExecutorService taskExecutor;
@@ -50,13 +51,13 @@ public class AnnotatorController
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
-			PermissionService molgenisPermissionService, UserAccountService userAccountService,
+			PermissionService permissionService, UserAccountService userAccountService,
 			AnnotationJobFactory annotationJobFactory, ExecutorService taskExecutor,
 			AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.permissionService = permissionService;
 		this.userAccountService = userAccountService;
 		this.annotationJobFactory = annotationJobFactory;
 		this.taskExecutor = taskExecutor;
@@ -134,7 +135,7 @@ public class AnnotatorController
 
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
-						molgenisPermissionService.hasPermissionOnEntityType(settingsEntityName, Permission.WRITE));
+						permissionService.hasPermissionOnEntityType(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}
