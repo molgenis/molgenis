@@ -18,16 +18,14 @@
   </div>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-
+<style>
   .temp-header {
-    background-color: $black;
-    a {
-      color: $white;
-    }
-
+    background-color: #000000;
     margin-bottom: 20px;
+  }
+
+  .temp-header  a {
+      color: #ffffff;
   }
 </style>
 
