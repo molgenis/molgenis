@@ -15,9 +15,9 @@ import java.io.IOException;
 public class NotHasPermissionDirective extends PermissionDirective
 {
 
-	public NotHasPermissionDirective(PermissionService molgenisPermissionService)
+	public NotHasPermissionDirective(PermissionService permissionService)
 	{
-		super(molgenisPermissionService);
+		super(permissionService);
 	}
 
 	@Override

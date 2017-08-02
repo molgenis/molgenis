@@ -9,25 +9,25 @@ import static java.util.Objects.requireNonNull;
 public class MolgenisUiPermissionDecorator implements MolgenisUi
 {
 	private final MolgenisUi molgenisUi;
-	private final PermissionService molgenisPermissionService;
+	private final PermissionService permissionService;
 
-	public MolgenisUiPermissionDecorator(MolgenisUi molgenisUi, PermissionService molgenisPermissionService)
+	public MolgenisUiPermissionDecorator(MolgenisUi molgenisUi, PermissionService permissionService)
 	{
 		this.molgenisUi = requireNonNull(molgenisUi);
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
 	public MolgenisUiMenu getMenu()
 	{
 		MolgenisUiMenu menu = molgenisUi.getMenu();
-		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, molgenisPermissionService) : null;
+		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, permissionService) : null;
 	}
 
 	@Override
 	public MolgenisUiMenu getMenu(String menuId)
 	{
 		MolgenisUiMenu menu = molgenisUi.getMenu(menuId);
-		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, molgenisPermissionService) : null;
+		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, permissionService) : null;
 	}
 }

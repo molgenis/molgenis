@@ -21,7 +21,7 @@ import static org.testng.Assert.assertEquals;
 public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	@Mock
-	private Repository<FileMeta> fileMetaRepository;
+	private Repository<FileMeta> delegateRepository;
 
 	@Mock
 	private FileStore fileStore;
@@ -32,9 +32,9 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		EntityType entityType = when(mock(EntityType.class).getLabel()).thenReturn("file metadata").getMock();
-		when(fileMetaRepository.getEntityType()).thenReturn(entityType);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		when(fileStore.delete(anyString())).thenReturn(true);
-		fileMetaRepositoryDecorator = new FileMetaRepositoryDecorator(fileMetaRepository, fileStore);
+		fileMetaRepositoryDecorator = new FileMetaRepositoryDecorator(delegateRepository, fileStore);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -44,17 +44,11 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testDelegate()
-	{
-		assertEquals(fileMetaRepositoryDecorator.delegate(), fileMetaRepository);
-	}
-
-	@Test
 	public void testDelete() throws Exception
 	{
 		FileMeta fileMeta = getMockFileMeta("id");
 		fileMetaRepositoryDecorator.delete(fileMeta);
-		verify(fileMetaRepository).delete(fileMeta);
+		verify(delegateRepository).delete(fileMeta);
 		verify(fileStore).delete("id");
 	}
 
@@ -66,7 +60,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		fileMetaRepositoryDecorator.delete(Stream.of(fileMeta0, fileMeta1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<FileMeta>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(fileMetaRepository).delete(captor.capture());
+		verify(delegateRepository).delete(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(fileMeta0, fileMeta1));
 		verify(fileStore).delete("id0");
 		verify(fileStore).delete("id1");
@@ -76,9 +70,9 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDeleteById() throws Exception
 	{
 		FileMeta fileMeta = getMockFileMeta("id");
-		when(fileMetaRepository.findOneById("id")).thenReturn(fileMeta);
+		when(delegateRepository.findOneById("id")).thenReturn(fileMeta);
 		fileMetaRepositoryDecorator.deleteById("id");
-		verify(fileMetaRepository).deleteById("id");
+		verify(delegateRepository).deleteById("id");
 		verify(fileStore).delete("id");
 	}
 
@@ -86,7 +80,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDeleteByIdUnknownId() throws Exception
 	{
 		FileMeta fileMeta = getMockFileMeta("id");
-		when(fileMetaRepository.findOneById("id")).thenReturn(null);
+		when(delegateRepository.findOneById("id")).thenReturn(null);
 		fileMetaRepositoryDecorator.deleteById("id");
 	}
 
@@ -96,9 +90,9 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		FileMeta fileMeta0 = getMockFileMeta("id0");
 		FileMeta fileMeta1 = getMockFileMeta("id1");
-		when(fileMetaRepository.findAll(any(Query.class))).thenReturn(Stream.of(fileMeta0, fileMeta1));
+		when(delegateRepository.findAll(any(Query.class))).thenReturn(Stream.of(fileMeta0, fileMeta1));
 		fileMetaRepositoryDecorator.deleteAll();
-		verify(fileMetaRepository).deleteAll();
+		verify(delegateRepository).deleteAll();
 		verify(fileStore).delete("id0");
 		verify(fileStore).delete("id1");
 	}
@@ -108,12 +102,12 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		FileMeta fileMeta0 = getMockFileMeta("id0");
 		FileMeta fileMeta1 = getMockFileMeta("id1");
-		when(fileMetaRepository.findOneById("id0")).thenReturn(fileMeta0);
-		when(fileMetaRepository.findOneById("id1")).thenReturn(fileMeta1);
+		when(delegateRepository.findOneById("id0")).thenReturn(fileMeta0);
+		when(delegateRepository.findOneById("id1")).thenReturn(fileMeta1);
 		fileMetaRepositoryDecorator.deleteAll(Stream.of("id0", "id1"));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(fileMetaRepository).deleteAll(captor.capture());
+		verify(delegateRepository).deleteAll(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList("id0", "id1"));
 		verify(fileStore).delete("id0");
 		verify(fileStore).delete("id1");

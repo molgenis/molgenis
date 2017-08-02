@@ -33,7 +33,7 @@ public class ImporterConfiguration
 	private ImportServiceFactory importServiceFactory;
 
 	@Autowired
-	private PermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private TagMetadata tagMetadata;
@@ -86,7 +86,7 @@ public class ImporterConfiguration
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, permissionSystemService, molgenisPermissionService, entityManager,
+		return new ImportWriter(dataService, permissionSystemService, permissionService, entityManager,
 				entityTypeDependencyResolver);
 	}
 

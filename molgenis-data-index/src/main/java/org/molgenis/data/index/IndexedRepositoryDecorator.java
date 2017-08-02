@@ -29,7 +29,6 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	private static final String INDEX_REPOSITORY = "Index Repository";
 	private static final String DECORATED_REPOSITORY = "Decorated Repository";
 
-	private final Repository<Entity> decoratedRepo;
 	private SearchService searchService;
 
 	/**
@@ -37,19 +36,13 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private Set<Operator> unsupportedOperators;
 
-	public IndexedRepositoryDecorator(Repository<Entity> decoratedRepo, SearchService searchService)
+	public IndexedRepositoryDecorator(Repository<Entity> delegateRepository, SearchService searchService)
 	{
+		super(delegateRepository);
 		this.searchService = requireNonNull(searchService);
-		this.decoratedRepo = requireNonNull(decoratedRepo);
 		Set<Operator> operators = getQueryOperators();
-		operators.removeAll(this.decoratedRepo.getQueryOperators());
+		operators.removeAll(delegate().getQueryOperators());
 		unsupportedOperators = Collections.unmodifiableSet(operators);
-	}
-
-	@Override
-	protected Repository<Entity> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
@@ -59,14 +52,14 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					DECORATED_REPOSITORY);
-			return decoratedRepo.findOne(q);
+			return delegate().findOne(q);
 		}
 		else
 		{
 			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
 			Object entityId = searchService.searchOne(getEntityType(), q);
-			return entityId != null ? decoratedRepo.findOneById(entityId, q.getFetch()) : null;
+			return entityId != null ? delegate().findOneById(entityId, q.getFetch()) : null;
 		}
 
 	}
@@ -78,14 +71,14 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					DECORATED_REPOSITORY);
-			return decoratedRepo.findAll(q);
+			return delegate().findAll(q);
 		}
 		else
 		{
 			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
 			Stream<Object> entityIds = searchService.search(getEntityType(), q);
-			return decoratedRepo.findAll(entityIds, q.getFetch());
+			return delegate().findAll(entityIds, q.getFetch());
 		}
 	}
 
@@ -98,7 +91,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		Set<RepositoryCapability> capabilities = new HashSet<>();
-		capabilities.addAll(decoratedRepo.getCapabilities());
+		capabilities.addAll(delegate().getCapabilities());
 		capabilities.addAll(EnumSet.of(QUERYABLE, AGGREGATEABLE));
 		return unmodifiableSet(capabilities);
 	}
@@ -117,7 +110,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public long count({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					DECORATED_REPOSITORY);
-			return decoratedRepo.count(q);
+			return delegate().count(q);
 		}
 		else
 		{

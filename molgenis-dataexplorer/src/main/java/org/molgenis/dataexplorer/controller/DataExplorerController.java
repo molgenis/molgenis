@@ -19,8 +19,8 @@ import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -85,7 +85,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private PermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
@@ -155,8 +155,7 @@ public class DataExplorerController extends MolgenisPluginController
 			StringBuilder message)
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
-		boolean hasEntityPermission = molgenisPermissionService.hasPermissionOnEntityType(selectedEntityName,
-				Permission.COUNT);
+		boolean hasEntityPermission = permissionService.hasPermissionOnEntityType(selectedEntityName, Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -210,7 +209,7 @@ public class DataExplorerController extends MolgenisPluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
+				if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
 					throw new MolgenisDataAccessException(
 							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
@@ -231,7 +230,7 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService.getCapabilities(
+		return permissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService.getCapabilities(
 				entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
@@ -255,9 +254,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, WRITE)) pluginPermission = WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, READ)) pluginPermission = READ;
-		else if (molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT))
+		if (permissionService.hasPermissionOnEntityType(entityTypeId, WRITE)) pluginPermission = WRITE;
+		else if (permissionService.hasPermissionOnEntityType(entityTypeId, READ)) pluginPermission = READ;
+		else if (permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
