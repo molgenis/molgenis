@@ -5,11 +5,11 @@ import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,17 +38,15 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 
 	private static final int RECOVERY_CODE_COUNT = 10;
 
-	private AppSettings appSettings;
 	private OTPService otpService;
 	private DataService dataService;
 	private IdGenerator idGenerator;
 	private RecoveryCodeFactory recoveryCodeFactory;
 	private UserSecretFactory userSecretFactory;
 
-	public TwoFactorAuthenticationServiceImpl(AppSettings appSettings, OTPService otpService, DataService dataService,
-			IdGenerator idGenerator, RecoveryCodeFactory recoveryCodeFactory, UserSecretFactory userSecretFactory)
+	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService, IdGenerator idGenerator,
+			RecoveryCodeFactory recoveryCodeFactory, UserSecretFactory userSecretFactory)
 	{
-		this.appSettings = requireNonNull(appSettings);
 		this.otpService = requireNonNull(otpService);
 		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
@@ -58,35 +56,45 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 
 	@Override
 	public boolean isVerificationCodeValidForUser(String verificationCode)
-			throws BadCredentialsException, UsernameNotFoundException, InvalidVerificationCodeException
+			throws InvalidVerificationCodeException, TooManyLoginAttemptsException
 	{
 		boolean isValid = false;
 
 		UserSecret userSecret = getSecret();
-		if (userSecret.getFailedLoginAttempts() > 2)
+		if (!userIsBlocked())
 		{
-			throw new InvalidVerificationCodeException(
-					"You entered the wrong verification code 3 times, please enter a recovery code to unlock your account");
-		}
-		try
-		{
-			if (otpService.tryVerificationCode(verificationCode, userSecret.getSecret()))
+			try
 			{
-				isValid = true;
-				userSecret.setLastSuccessfulAuthentication(Instant.now());
-				userSecret.setFailedLoginAttempts(0);
-				runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
+				if (otpService.tryVerificationCode(verificationCode, userSecret.getSecret()))
+				{
+					isValid = true;
+					userSecret.setLastSuccessfulAuthentication(Instant.now());
+					updateFailedLoginAttempts(0);
+				}
+			}
+			catch (InvalidVerificationCodeException err)
+			{
+				updateFailedLoginAttempts(userSecret.getFailedLoginAttempts() + 1);
+				throw err;
 			}
 		}
-		catch (BadCredentialsException err)
+		return isValid;
+	}
+
+	@Override
+	public boolean userIsBlocked()
+	{
+		UserSecret userSecret = getSecret();
+		if (userSecret.getFailedLoginAttempts() > 2)
 		{
-			int failedLoginAttempts = userSecret.getFailedLoginAttempts();
-			userSecret.setFailedLoginAttempts(failedLoginAttempts + 1);
-			runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
-			throw err;
+			throw new TooManyLoginAttemptsException(
+					"You entered the wrong verification code 3 times, please enter a recovery code to unlock your account");
+		}
+		else
+		{
+			return false;
 		}
 
-		return isValid;
 	}
 
 	@Override
@@ -163,6 +171,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		if (existingCode != null)
 		{
 			runAsSystem(() -> dataService.delete(RECOVERY_CODE, existingCode));
+			updateFailedLoginAttempts(0);
 		}
 		else
 		{
@@ -210,6 +219,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 							user.getUsername()));
 		}
 
+	}
+
+	private void updateFailedLoginAttempts(int numberOfAttempts)
+	{
+		UserSecret userSecret = getSecret();
+		userSecret.setFailedLoginAttempts(numberOfAttempts);
+		runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
 	}
 
 	private User getUser()

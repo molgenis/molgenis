@@ -1,6 +1,6 @@
 package org.molgenis.security.twofactor;
 
-import org.springframework.security.authentication.BadCredentialsException;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 
 /**
  * OTPService is used to determine if the {@link UserSecret} matches the given validationcode.
@@ -17,6 +17,6 @@ public interface OTPService
 	 * @param secretKey        generated secret key
 	 * @return vericifcationCode matches secret key
 	 */
-	boolean tryVerificationCode(String verificationCode, String secretKey) throws BadCredentialsException;
+	boolean tryVerificationCode(String verificationCode, String secretKey) throws InvalidVerificationCodeException;
 
 }

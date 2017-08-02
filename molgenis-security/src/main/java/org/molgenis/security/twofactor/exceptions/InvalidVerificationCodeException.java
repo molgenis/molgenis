@@ -1,5 +1,6 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.exceptions;
 
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 
 /**

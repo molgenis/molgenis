@@ -1,6 +1,7 @@
 package org.molgenis.security.twofactor;
 
-import org.springframework.security.authentication.BadCredentialsException;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -17,7 +18,12 @@ public interface TwoFactorAuthenticationService
 	 * @return is verificationCode valid
 	 */
 	boolean isVerificationCodeValidForUser(String verificationCode)
-			throws UsernameNotFoundException, BadCredentialsException;
+			throws InvalidVerificationCodeException, TooManyLoginAttemptsException;
+
+	/**
+	 * @return user had too many authentication failures
+	 */
+	boolean userIsBlocked();
 
 	/**
 	 * <p>Add generated userSecret to userdata.</p>

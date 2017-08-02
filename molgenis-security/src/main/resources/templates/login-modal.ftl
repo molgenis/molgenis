@@ -14,10 +14,8 @@
                         class="sr-only">Close</span></button>
             </#if>
                 <h4 class="modal-title" id="login-modal-label">
-                <#if configured2faHeader??>
-                ${configured2faHeader}
-                <#elseif initial2faHeader??>
-                ${initial2faHeader}
+                <#if twoFactorAuthenticatedHeader??>
+                ${twoFactorAuthenticatedHeader}
                 <#else>
                     Sign in
                 </#if>
@@ -46,6 +44,13 @@
             </#if>
             <#-- login form -->
             <#if is2faConfigured??>
+                <#if is2faRecover??>
+                    <script type="text/javascript">
+                        $(function () {
+                            $('#toggle-recovery')[0].click()
+                        })
+                    </script>
+                </#if>
                 <div class="verification-form-toggle collapse in">
 
                     <form id="key-2fa-form" role="form" method="POST" action="/2fa/validate">
@@ -61,7 +66,7 @@
                     <p>
                         Don't have your phone?
                         <br/>
-                        <a href=".verification-form-toggle" data-toggle="collapse">Enter a recovery
+                        <a id="toggle-recovery" href=".verification-form-toggle" data-toggle="collapse">Enter a recovery
                             code</a>
                     </p>
                 </div>

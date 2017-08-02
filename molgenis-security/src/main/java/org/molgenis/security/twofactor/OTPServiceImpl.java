@@ -1,7 +1,7 @@
 package org.molgenis.security.twofactor;
 
 import org.jboss.aerogear.security.otp.Totp;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -10,14 +10,15 @@ public class OTPServiceImpl implements OTPService
 {
 
 	@Override
-	public boolean tryVerificationCode(String verificationCode, String secretKey) throws BadCredentialsException
+	public boolean tryVerificationCode(String verificationCode, String secretKey)
+			throws InvalidVerificationCodeException
 	{
 		boolean isValid;
 		if (StringUtils.hasText(secretKey))
 		{
 			if (verificationCode == null)
 			{
-				throw new BadCredentialsException("Verificationcode is mandatory");
+				throw new InvalidVerificationCodeException("Verificationcode is mandatory");
 			}
 			else
 			{
@@ -28,7 +29,7 @@ public class OTPServiceImpl implements OTPService
 				}
 				else
 				{
-					throw new BadCredentialsException("Invalid verificationcode entered");
+					throw new InvalidVerificationCodeException("Invalid verificationcode entered");
 
 				}
 			}
@@ -36,7 +37,7 @@ public class OTPServiceImpl implements OTPService
 		}
 		else
 		{
-			throw new BadCredentialsException("2 factor authentication secret key is not available");
+			throw new InvalidVerificationCodeException("2 factor authentication secret key is not available");
 		}
 		return isValid;
 	}

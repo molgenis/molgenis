@@ -49,7 +49,8 @@ public class UserSecretMetaData extends SystemEntityType
 		addAttribute(LAST_SUCCESSFUL_AUTHENICATION).setDataType(AttributeType.DATE_TIME)
 												   .setNillable(true)
 												   .setLabel("Is last successful authenticated at");
-		addAttribute(FAILED_LOGIN_ATTEMPTS).setNillable(true)
+		addAttribute(FAILED_LOGIN_ATTEMPTS).setDefaultValue("0")
+										   .setNillable(false)
 										   .setDataType(AttributeType.INT)
 										   .setLabel("Failed login attempts");
 	}
