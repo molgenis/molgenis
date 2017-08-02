@@ -58,29 +58,34 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 
 	@Override
 	public boolean isVerificationCodeValidForUser(String verificationCode)
-			throws BadCredentialsException, UsernameNotFoundException
+			throws BadCredentialsException, UsernameNotFoundException, InvalidVerificationCodeException
 	{
 		boolean isValid = false;
 
-		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString())
-				|| appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENFORCED.toString()))
+		UserSecret userSecret = getSecret();
+		if (userSecret.getFailedLoginAttempts() > 2)
 		{
-			UserSecret userSecret = getSecret();
-
+			throw new InvalidVerificationCodeException(
+					"You entered the wrong verification code 3 times, please enter a recovery code to unlock your account");
+		}
+		try
+		{
 			if (otpService.tryVerificationCode(verificationCode, userSecret.getSecret()))
 			{
 				isValid = true;
 				userSecret.setLastSuccessfulAuthentication(Instant.now());
 				userSecret.setFailedLoginAttempts(0);
+				runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
 			}
-			else
-			{
-				int failedLoginAttempts = userSecret.getFailedLoginAttempts();
-				userSecret.setFailedLoginAttempts(failedLoginAttempts + 1);
-			}
-			runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
-
 		}
+		catch (BadCredentialsException err)
+		{
+			int failedLoginAttempts = userSecret.getFailedLoginAttempts();
+			userSecret.setFailedLoginAttempts(failedLoginAttempts + 1);
+			runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
+			throw err;
+		}
+
 		return isValid;
 	}
 

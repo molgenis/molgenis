@@ -17,7 +17,7 @@ public class OTPServiceImpl implements OTPService
 		{
 			if (verificationCode == null)
 			{
-				throw new BadCredentialsException("2 factor authentication code is mandatory");
+				throw new BadCredentialsException("Verificationcode is mandatory");
 			}
 			else
 			{
@@ -28,7 +28,7 @@ public class OTPServiceImpl implements OTPService
 				}
 				else
 				{
-					throw new BadCredentialsException("Invalid 2 factor authentication code");
+					throw new BadCredentialsException("Invalid verificationcode entered");
 
 				}
 			}

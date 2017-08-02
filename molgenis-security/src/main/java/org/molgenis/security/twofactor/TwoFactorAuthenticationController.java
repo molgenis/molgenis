@@ -3,9 +3,9 @@ package org.molgenis.security.twofactor;
 import org.molgenis.security.google.GoogleAuthenticatorService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,20 +68,20 @@ public class TwoFactorAuthenticationController
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		catch (Exception er)
+		catch (Exception err)
 		{
-			setModelAttributesWhenNotValidated(model);
+			setModelAttributesWhenNotValidated(model, err);
 			redirectUri = MolgenisLoginController.VIEW_LOGIN;
 		}
 
 		return redirectUri;
 	}
 
-	private void setModelAttributesWhenNotValidated(Model model)
+	private void setModelAttributesWhenNotValidated(Model model, Exception err)
 	{
 		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
 		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_CONFIGURED, HEADER_VALUE_2FA_IS_CONFIGURED);
-		model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
+		model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_INITIAL_URI)
@@ -98,9 +98,9 @@ public class TwoFactorAuthenticationController
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
 					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
 		}
-		catch (UsernameNotFoundException err)
+		catch (Exception err)
 		{
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No user found!");
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
 		}
 
 		return MolgenisLoginController.VIEW_LOGIN;
@@ -117,18 +117,32 @@ public class TwoFactorAuthenticationController
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		catch (Exception e)
+		catch (Exception err)
 		{
 			model.addAttribute(ATTRIBUTE_2FA_IS_INITIAL, true);
 			model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_INITIAL, HEADER_VALUE_2FA_IS_INITIAL);
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
 					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
 			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
 		}
 
 		return redirectUrl;
+	}
+
+	private String determineErrorMessage(Exception err)
+	{
+		String message = "Signin failed";
+		if (err instanceof BadCredentialsException)
+		{
+			message = err.getMessage();
+		}
+		else if (err instanceof InvalidVerificationCodeException)
+		{
+			message = err.getMessage();
+		}
+		return message;
 	}
 
 }
