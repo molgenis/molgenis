@@ -44,7 +44,7 @@ public class RepositoryValidationDecoratorTest
 	private Attribute uniqueStringAttr;
 	private Attribute uniqueXrefAttr;
 	private EntityType entityType;
-	private Repository<Entity> decoratedRepo;
+	private Repository<Entity> delegateRepository;
 	private Repository<Entity> refRepo;
 	private DataService dataService;
 	private MetaDataService metaDataService;
@@ -160,17 +160,17 @@ public class RepositoryValidationDecoratorTest
 		when(refEntity1Clone.getString(refAttrIdName)).thenReturn(refEntity1Id);
 
 		// beans
-		decoratedRepo = mock(Repository.class);
-		when(decoratedRepo.getEntityType()).thenReturn(entityType);
-		when(decoratedRepo.getName()).thenReturn(entityTypeId);
-		when(decoratedRepo.findAll(
+		delegateRepository = mock(Repository.class);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(delegateRepository.getName()).thenReturn(entityTypeId);
+		when(delegateRepository.findAll(
 				new QueryImpl<>().fetch(new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName)))).thenReturn(
 				Stream.empty());
 		refRepo = mock(Repository.class);
 		when(refRepo.getEntityType()).thenReturn(refEntityType);
 
 		dataService = mock(DataService.class);
-		when(dataService.getRepository(entityTypeId)).thenReturn(decoratedRepo);
+		when(dataService.getRepository(entityTypeId)).thenReturn(delegateRepository);
 		when(dataService.getRepository(refEntityName)).thenReturn(refRepo);
 		when(dataService.findAll(refEntityName, new QueryImpl<>().fetch(new Fetch().field(refAttrIdName)))).thenReturn(
 				Stream.of(refEntity0, refEntity1));
@@ -180,7 +180,7 @@ public class RepositoryValidationDecoratorTest
 
 		expressionValidator = mock(ExpressionValidator.class);
 		entityAttributesValidator = mock(EntityAttributesValidator.class);
-		repositoryValidationDecorator = new RepositoryValidationDecorator(dataService, decoratedRepo,
+		repositoryValidationDecorator = new RepositoryValidationDecorator(dataService, delegateRepository,
 				entityAttributesValidator, expressionValidator);
 	}
 
@@ -215,14 +215,14 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
+		verify(delegateRepository, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
 	@Test
 	public void addEntityDoesNotRequireValidationDueToRepoCapabilities()
 	{
-		when(decoratedRepo.getCapabilities()).thenReturn(
+		when(delegateRepository.getCapabilities()).thenReturn(
 				new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT)));
 
 		// entities
@@ -247,13 +247,13 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
+		verify(delegateRepository, times(1)).add(entity0);
 	}
 
 	@Test
 	public void addEntityCrossRepositoryCollectionReference()
 	{
-		when(decoratedRepo.getCapabilities()).thenReturn(
+		when(delegateRepository.getCapabilities()).thenReturn(
 				new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT)));
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		// references need to be validated because they are stored in another repository collection
@@ -407,7 +407,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
+		verify(delegateRepository, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -477,7 +477,7 @@ public class RepositoryValidationDecoratorTest
 				Stream.of(entity0));
 		repositoryValidationDecorator.add(entity0);
 
-		verify(decoratedRepo, times(1)).add(entity0);
+		verify(delegateRepository, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -559,7 +559,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
+		verify(delegateRepository, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -629,7 +629,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -690,7 +690,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -715,7 +715,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
+		verify(delegateRepository, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -741,7 +741,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -807,7 +807,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		stream.collect(Collectors.toList()); // process stream to enable validation
 
@@ -864,7 +864,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -909,7 +909,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -955,7 +955,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -991,7 +991,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -1039,7 +1039,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -1098,7 +1098,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -1161,7 +1161,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -1235,7 +1235,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -1298,7 +1298,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -1338,7 +1338,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1366,7 +1366,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -1407,7 +1407,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1435,7 +1435,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -1490,7 +1490,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -1530,7 +1530,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1558,7 +1558,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -1579,7 +1579,7 @@ public class RepositoryValidationDecoratorTest
 	{
 		Stream<Entity> stream = Stream.empty();
 		repositoryValidationDecorator.delete(stream);
-		verify(decoratedRepo, times(1)).delete(stream);
+		verify(delegateRepository, times(1)).delete(stream);
 	}
 
 	@Test
@@ -1607,7 +1607,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
+		verify(delegateRepository, times(1)).update(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -1712,7 +1712,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
+		verify(delegateRepository, times(1)).update(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -1781,7 +1781,7 @@ public class RepositoryValidationDecoratorTest
 		when(dataService.findAll(entityTypeId, new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entity0));
 		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
+		verify(delegateRepository, times(1)).update(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -1863,7 +1863,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.update(entity1);
-		verify(decoratedRepo, times(1)).update(entity1);
+		verify(delegateRepository, times(1)).update(entity1);
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
 	}
 
@@ -1933,7 +1933,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -1994,7 +1994,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -2019,7 +2019,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
+		verify(delegateRepository, times(1)).update(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -2045,7 +2045,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -2118,7 +2118,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyStringName)).thenReturn("str0");
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -2190,7 +2190,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -2214,7 +2214,7 @@ public class RepositoryValidationDecoratorTest
 
 		// actual tests
 		repositoryValidationDecorator.update(updatedEntity0);
-		verify(decoratedRepo, times(1)).update(updatedEntity0);
+		verify(delegateRepository, times(1)).update(updatedEntity0);
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
 	}
 
@@ -2254,7 +2254,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -2326,7 +2326,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -2352,7 +2352,7 @@ public class RepositoryValidationDecoratorTest
 		// changes
 		// actual tests
 		repositoryValidationDecorator.update(updatedEntity0);
-		verify(decoratedRepo, times(1)).update(updatedEntity0);
+		verify(delegateRepository, times(1)).update(updatedEntity0);
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
 	}
 
@@ -2394,7 +2394,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(emptyList());
 		when(entity0.getEntities(attrReadonlyMrefName)).thenReturn(emptyList());
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -2420,7 +2420,7 @@ public class RepositoryValidationDecoratorTest
 		// changes
 		// actual tests
 		repositoryValidationDecorator.update(updatedEntity0);
-		verify(decoratedRepo, times(1)).update(updatedEntity0);
+		verify(delegateRepository, times(1)).update(updatedEntity0);
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
 	}
 
@@ -2460,7 +2460,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -2528,7 +2528,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		stream.collect(Collectors.toList()); // process stream to enable validation
 
@@ -2585,7 +2585,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -2630,7 +2630,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -2676,7 +2676,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -2712,7 +2712,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -2760,7 +2760,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -2819,7 +2819,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -2882,7 +2882,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -2956,7 +2956,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -3019,7 +3019,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -3059,7 +3059,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -3087,7 +3087,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -3128,7 +3128,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -3156,7 +3156,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -3211,7 +3211,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -3251,7 +3251,7 @@ public class RepositoryValidationDecoratorTest
 		when(entityInBackend0.get(attrUniqueStringName)).thenReturn("unique0");
 		when(entityInBackend0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
+		when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName)))).thenReturn(
 				Stream.of(entityInBackend0));
 
 		// entities
@@ -3279,7 +3279,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -3332,7 +3332,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyStringName)).thenReturn("str0");
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -3359,7 +3359,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(updatedEntities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -3412,7 +3412,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -3439,7 +3439,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -3483,7 +3483,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -3510,7 +3510,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(updatedEntities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -3563,7 +3563,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -3592,7 +3592,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
 		stream.collect(Collectors.toList()); // process stream to enable validation
@@ -3636,7 +3636,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
+		when(delegateRepository.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityType()).thenReturn(entityType);
@@ -3666,7 +3666,7 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(updatedEntities.stream());
 
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
+		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
@@ -3690,7 +3690,7 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = repositoryValidationDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -3704,7 +3704,7 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = repositoryValidationDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -3737,7 +3737,7 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
-		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
+		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositoryValidationDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
@@ -3749,6 +3749,6 @@ public class RepositoryValidationDecoratorTest
 		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		repositoryValidationDecorator.forEachBatched(fetch, consumer, 234);
-		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);
+		verify(delegateRepository, times(1)).forEachBatched(fetch, consumer, 234);
 	}
 }

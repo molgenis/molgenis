@@ -10,21 +10,20 @@ import org.testng.annotations.Test;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
 
 public class EntityTypeRepositoryValidationDecoratorTest
 {
 	private EntityTypeRepositoryValidationDecorator entityTypeRepoValidationDecorator;
-	private Repository<EntityType> decoratedRepo;
+	private Repository<EntityType> delegateRepository;
 	private EntityTypeValidator entityTypeValidator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
+		delegateRepository = mock(Repository.class);
 		entityTypeValidator = mock(EntityTypeValidator.class);
-		entityTypeRepoValidationDecorator = new EntityTypeRepositoryValidationDecorator(decoratedRepo,
+		entityTypeRepoValidationDecorator = new EntityTypeRepositoryValidationDecorator(delegateRepository,
 				entityTypeValidator);
 	}
 
@@ -32,12 +31,6 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	public void EntityTypeRepositoryValidationDecorator()
 	{
 		new EntityTypeRepositoryValidationDecorator(null, null);
-	}
-
-	@Test
-	public void delegate()
-	{
-		assertEquals(entityTypeRepoValidationDecorator.delegate(), decoratedRepo);
 	}
 
 	@Test
@@ -66,7 +59,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).update(captor.capture());
+		verify(delegateRepository).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}
 
@@ -80,7 +73,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).update(captor.capture());
+		verify(delegateRepository).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}
 
@@ -110,7 +103,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).add(captor.capture());
+		verify(delegateRepository).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}
 
@@ -124,7 +117,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).add(captor.capture());
+		verify(delegateRepository).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 	}
 }

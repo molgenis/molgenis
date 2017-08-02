@@ -31,22 +31,15 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
  */
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
-	private final Repository<Attribute> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final PermissionService permissionService;
 
-	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo,
+	public AttributeRepositorySecurityDecorator(Repository<Attribute> delegateRepository,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
-	}
-
-	@Override
-	protected Repository<Attribute> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
@@ -54,11 +47,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.count();
+			return delegate().count();
 		}
 		else
 		{
-			Stream<Attribute> attrs = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			Stream<Attribute> attrs = StreamSupport.stream(delegate().spliterator(), false);
 			return filterCountPermission(attrs).count();
 		}
 	}
@@ -68,14 +61,14 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.count(q);
+			return delegate().count(q);
 		}
 		else
 		{
 			// ignore query offset and page size
 			Query<Attribute> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<Attribute> attrs = decoratedRepo.findAll(qWithoutLimitOffset);
+			Stream<Attribute> attrs = delegate().findAll(qWithoutLimitOffset);
 			return filterCountPermission(attrs).count();
 		}
 	}
@@ -85,13 +78,13 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findAll(q);
+			return delegate().findAll(q);
 		}
 		else
 		{
 			Query<Attribute> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<Attribute> attrs = decoratedRepo.findAll(qWithoutLimitOffset);
+			Stream<Attribute> attrs = delegate().findAll(qWithoutLimitOffset);
 			Stream<Attribute> filteredAttrs = filterReadPermission(attrs);
 			if (q.getOffset() > 0)
 			{
@@ -111,11 +104,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.iterator();
+			return delegate().iterator();
 		}
 		else
 		{
-			Stream<Attribute> attrs = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			Stream<Attribute> attrs = StreamSupport.stream(delegate().spliterator(), false);
 			return filterReadPermission(attrs).iterator();
 		}
 	}
@@ -125,12 +118,12 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+			delegate().forEachBatched(fetch, consumer, batchSize);
 		}
 		else
 		{
 			FilteredConsumer filteredConsumer = new FilteredConsumer(consumer);
-			decoratedRepo.forEachBatched(fetch, filteredConsumer::filter, batchSize);
+			delegate().forEachBatched(fetch, filteredConsumer::filter, batchSize);
 		}
 	}
 
@@ -139,12 +132,12 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findOne(q);
+			return delegate().findOne(q);
 		}
 		else
 		{
 			// ignore query offset and page size
-			return filterReadPermission(decoratedRepo.findOne(q));
+			return filterReadPermission(delegate().findOne(q));
 		}
 	}
 
@@ -153,11 +146,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findOneById(id);
+			return delegate().findOneById(id);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findOneById(id));
+			return filterReadPermission(delegate().findOneById(id));
 		}
 	}
 
@@ -166,11 +159,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findOneById(id, fetch);
+			return delegate().findOneById(id, fetch);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findOneById(id, fetch));
+			return filterReadPermission(delegate().findOneById(id, fetch));
 		}
 	}
 
@@ -179,11 +172,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findAll(ids);
+			return delegate().findAll(ids);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findAll(ids));
+			return filterReadPermission(delegate().findAll(ids));
 		}
 	}
 
@@ -192,11 +185,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findAll(ids, fetch);
+			return delegate().findAll(ids, fetch);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findAll(ids, fetch));
+			return filterReadPermission(delegate().findAll(ids, fetch));
 		}
 	}
 
@@ -205,7 +198,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.aggregate(aggregateQuery);
+			return delegate().aggregate(aggregateQuery);
 		}
 		else
 		{
@@ -217,13 +210,13 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	public void update(Attribute attr)
 	{
 		validateUpdateAllowed(attr);
-		decoratedRepo.update(attr);
+		delegate().update(attr);
 	}
 
 	@Override
 	public void update(Stream<Attribute> attrs)
 	{
-		decoratedRepo.update(attrs.filter(attr ->
+		delegate().update(attrs.filter(attr ->
 		{
 			validateUpdateAllowed(attr);
 			return true;
@@ -234,7 +227,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	public void delete(Attribute attr)
 	{
 		validateDeleteAllowed(attr);
-		decoratedRepo.delete(attr);
+		delegate().delete(attr);
 	}
 
 	@Override
@@ -268,13 +261,13 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public void add(Attribute attr)
 	{
-		decoratedRepo.add(attr);
+		delegate().add(attr);
 	}
 
 	@Override
 	public Integer add(Stream<Attribute> attrs)
 	{
-		return decoratedRepo.add(attrs);
+		return delegate().add(attrs);
 	}
 
 	/**

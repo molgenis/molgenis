@@ -18,19 +18,12 @@ import static java.util.Objects.requireNonNull;
 public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final IndexActionRegisterService indexActionRegisterService;
-	private final Repository<Entity> decorated;
 
-	public IndexActionRepositoryDecorator(Repository<Entity> decorated,
+	public IndexActionRepositoryDecorator(Repository<Entity> delegateRepository,
 			IndexActionRegisterService indexActionRegisterService)
 	{
-		this.decorated = decorated;
+		super(delegateRepository);
 		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
-	}
-
-	@Override
-	protected Repository<Entity> delegate()
-	{
-		return decorated;
 	}
 
 	@Override
