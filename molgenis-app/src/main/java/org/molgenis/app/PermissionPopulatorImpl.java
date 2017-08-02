@@ -35,9 +35,10 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 		EntityAce roleUserReadAce = EntityAce.create(newHashSet(READ), roleUserSecurityId, true);
 
 		// allow user role to see system package
-		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
-		entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
-		entityAclManager.updateAcl(entityTypeAcl);
+		// FIXME enable system package ACL population once we solved 'max_locks_per_transaction' issue
+//		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
+//		entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
+//		entityAclManager.updateAcl(entityTypeAcl);
 
 		// allow anonymous user and user role to see the home plugin
 		EntityAcl homePluginAcl = entityAclManager.readAcl(EntityIdentity.create(PLUGIN, HomeController.ID));
