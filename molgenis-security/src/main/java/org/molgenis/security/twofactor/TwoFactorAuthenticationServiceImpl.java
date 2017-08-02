@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
@@ -68,7 +69,6 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 				if (otpService.tryVerificationCode(verificationCode, userSecret.getSecret()))
 				{
 					isValid = true;
-					userSecret.setLastSuccessfulAuthentication(Instant.now());
 					updateFailedLoginAttempts(0);
 				}
 			}
@@ -87,14 +87,14 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		UserSecret userSecret = getSecret();
 		if (userSecret.getFailedLoginAttempts() > 2)
 		{
-			throw new TooManyLoginAttemptsException(
-					"You entered the wrong verification code 3 times, please enter a recovery code to unlock your account");
+			if (userSecret.getLastFailedAuthentication() != null && (Instant.now().toEpochMilli()
+					< userSecret.getLastFailedAuthentication().plus(Duration.ofSeconds(30)).toEpochMilli()))
+			{
+				throw new TooManyLoginAttemptsException(
+						"You entered the wrong verification code 3 times, please wait 30 seconds before you try again");
+			}
 		}
-		else
-		{
-			return false;
-		}
-
+		return false;
 	}
 
 	@Override
@@ -225,6 +225,10 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	{
 		UserSecret userSecret = getSecret();
 		userSecret.setFailedLoginAttempts(numberOfAttempts);
+		if (numberOfAttempts >= 3)
+		{
+			userSecret.setLastFailedAuthentication(Instant.now());
+		}
 		runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
 	}
 

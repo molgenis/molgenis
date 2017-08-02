@@ -23,7 +23,7 @@ public class UserSecretMetaData extends SystemEntityType
 	public static final String ID = "id";
 	public static final String USER_ID = "user_id";
 	public static final String SECRET = "secret";
-	public static final String LAST_SUCCESSFUL_AUTHENICATION = "last_successful_authentication";
+	public static final String LAST_FAILED_AUTHENICATION = "last_failed_authentication";
 	public static final String FAILED_LOGIN_ATTEMPTS = "failed_login_attempts";
 
 	private final SecurityPackage securityPackage;
@@ -46,9 +46,9 @@ public class UserSecretMetaData extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("ID");
 		addAttribute(USER_ID).setNillable(false).setUnique(true).setLabel("User ID");
 		addAttribute(SECRET).setNillable(false).setLabel("Secret");
-		addAttribute(LAST_SUCCESSFUL_AUTHENICATION).setDataType(AttributeType.DATE_TIME)
-												   .setNillable(true)
-												   .setLabel("Is last successful authenticated at");
+		addAttribute(LAST_FAILED_AUTHENICATION).setDataType(AttributeType.DATE_TIME)
+											   .setNillable(true)
+											   .setLabel("Is last successful authenticated at");
 		addAttribute(FAILED_LOGIN_ATTEMPTS).setDefaultValue("0")
 										   .setNillable(false)
 										   .setDataType(AttributeType.INT)

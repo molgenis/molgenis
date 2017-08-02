@@ -44,13 +44,6 @@
             </#if>
             <#-- login form -->
             <#if is2faConfigured??>
-                <#if is2faRecover??>
-                    <script type="text/javascript">
-                        $(function () {
-                            $('#toggle-recovery')[0].click()
-                        })
-                    </script>
-                </#if>
                 <div class="verification-form-toggle collapse in">
 
                     <form id="key-2fa-form" role="form" method="POST" action="/2fa/validate">

@@ -57,14 +57,14 @@ public class UserSecret extends StaticEntity
 		set(UserSecretMetaData.SECRET, secret);
 	}
 
-	public Instant getLastSuccessfulAuthenticated()
+	public Instant getLastFailedAuthentication()
 	{
-		return getInstant(UserSecretMetaData.LAST_SUCCESSFUL_AUTHENICATION);
+		return getInstant(UserSecretMetaData.LAST_FAILED_AUTHENICATION);
 	}
 
-	public void setLastSuccessfulAuthentication(Instant lastSuccessfulAuthentication)
+	public void setLastFailedAuthentication(Instant lastSuccessfulAuthentication)
 	{
-		set(UserSecretMetaData.LAST_SUCCESSFUL_AUTHENICATION, lastSuccessfulAuthentication);
+		set(UserSecretMetaData.LAST_FAILED_AUTHENICATION, lastSuccessfulAuthentication);
 	}
 
 	public int getFailedLoginAttempts()
