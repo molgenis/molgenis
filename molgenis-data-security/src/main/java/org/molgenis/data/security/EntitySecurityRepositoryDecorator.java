@@ -35,26 +35,19 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
  */
 public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
-	private final Repository<Entity> decoratedRepository;
 	private final EntityAclManager entityAclManager;
 
-	public EntitySecurityRepositoryDecorator(Repository<Entity> decoratedRepository, EntityAclManager entityAclManager)
+	public EntitySecurityRepositoryDecorator(Repository<Entity> delegateRepository, EntityAclManager entityAclManager)
 	{
-		this.decoratedRepository = requireNonNull(decoratedRepository);
+		super(delegateRepository);
 		this.entityAclManager = requireNonNull(entityAclManager);
-	}
-
-	@Override
-	protected Repository<Entity> delegate()
-	{
-		return decoratedRepository;
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		FilteredConsumer filteredConsumer = new FilteredConsumer(consumer, this);
-		decoratedRepository.forEachBatched(fetch, filteredConsumer::filter, batchSize);
+		delegate().forEachBatched(fetch, filteredConsumer::filter, batchSize);
 	}
 
 	@Override
@@ -83,14 +76,14 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		// current user is allowed to add entity, see RepositorySecurityDecorator
 		entityAclManager.createAcl(entity);
-		decoratedRepository.add(entity);
+		delegate().add(entity);
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
 		// current user is allowed to add entities, see RepositorySecurityDecorator
-		return decoratedRepository.add(entities.filter(entity ->
+		return delegate().add(entities.filter(entity ->
 		{
 			entityAclManager.createAcl(entity);
 			return true;
@@ -102,13 +95,13 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	public void update(Entity entity)
 	{
 		validateCurrentUserCanUpdateEntity(entity);
-		decoratedRepository.update(entity);
+		delegate().update(entity);
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		decoratedRepository.update(entities.filter(entity ->
+		delegate().update(entities.filter(entity ->
 		{
 			validateCurrentUserCanUpdateEntity(entity);
 			return true;
@@ -120,7 +113,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		validateCurrentUserCanDeleteEntity(entity);
 		deleteAcl(entity);
-		decoratedRepository.delete(entity);
+		delegate().delete(entity);
 	}
 
 	@Override
@@ -128,7 +121,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		validateCurrentUserCanDeleteEntityById(id);
 		deleteAcl(id);
-		decoratedRepository.deleteById(id);
+		delegate().deleteById(id);
 	}
 
 	@Override
@@ -137,7 +130,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		if (currentUserIsSuOrSystem())
 		{
 			query().findAll().forEach(this::deleteAcl);
-			decoratedRepository.deleteAll();
+			delegate().deleteAll();
 		}
 		else
 		{
@@ -149,7 +142,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		decoratedRepository.delete(entities.filter(entity ->
+		delegate().delete(entities.filter(entity ->
 		{
 			validateCurrentUserCanDeleteEntity(entity);
 			deleteAcl(entity);
@@ -160,7 +153,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepository.deleteAll(ids.filter(id ->
+		delegate().deleteAll(ids.filter(id ->
 		{
 			validateCurrentUserCanDeleteEntityById(id);
 			deleteAcl(id);
@@ -173,10 +166,10 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepository.findAll(ids);
+			return delegate().findAll(ids);
 		}
 
-		return decoratedRepository.findAll(ids).filter(this::currentUserCanReadEntity).map(this::updateEntityWritable);
+		return delegate().findAll(ids).filter(this::currentUserCanReadEntity).map(this::updateEntityWritable);
 	}
 
 	@Override
@@ -184,10 +177,10 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepository.findAll(ids, fetch);
+			return delegate().findAll(ids, fetch);
 		}
 
-		return decoratedRepository.findAll(ids, fetch)
+		return delegate().findAll(ids, fetch)
 								  .filter(this::currentUserCanReadEntity)
 								  .map(this::updateEntityWritable);
 	}
@@ -197,12 +190,12 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepository.findAll(q);
+			return delegate().findAll(q);
 		}
 
 		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(q);
 		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-		Stream<Entity> entityStream = decoratedRepository.findAll(qWithoutLimitOffset)
+		Stream<Entity> entityStream = delegate().findAll(qWithoutLimitOffset)
 														 .filter(this::currentUserCanReadEntity)
 														 .map(this::updateEntityWritable);
 		if (q.getOffset() > 0)
@@ -222,7 +215,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepository.aggregate(aggregateQuery);
+			return delegate().aggregate(aggregateQuery);
 		}
 
 		if (aggregateQuery.getAttributeDistinct() != null)

@@ -22,26 +22,19 @@ import static java.util.stream.Collectors.toList;
  */
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
-	private final Repository<Attribute> decoratedRepo;
 	private final PermissionService permissionService;
 
-	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo,
+	public AttributeRepositorySecurityDecorator(Repository<Attribute> delegateRepository,
 			PermissionService permissionService)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.permissionService = requireNonNull(permissionService);
-	}
-
-	@Override
-	protected Repository<Attribute> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
 	public Iterator<Attribute> iterator()
 	{
-		Iterable<Attribute> attributeIterable = decoratedRepo::iterator;
+		Iterable<Attribute> attributeIterable = delegate()::iterator;
 		return StreamSupport.stream(attributeIterable.spliterator(), false).map(this::toPermittedAttribute).iterator();
 	}
 
@@ -49,44 +42,44 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	public void forEachBatched(Fetch fetch, Consumer<List<Attribute>> consumer, int batchSize)
 	{
 		MappedConsumer mappedConsumer = new MappedConsumer(consumer, this);
-		decoratedRepo.forEachBatched(fetch, mappedConsumer::map, batchSize);
+		delegate().forEachBatched(fetch, mappedConsumer::map, batchSize);
 		super.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
 	public Stream<Attribute> findAll(Query<Attribute> q)
 	{
-		return decoratedRepo.findAll(q).map(this::toPermittedAttribute);
+		return delegate().findAll(q).map(this::toPermittedAttribute);
 	}
 
 	@Override
 	public Attribute findOne(Query<Attribute> q)
 	{
-		return toPermittedAttribute(decoratedRepo.findOne(q));
+		return toPermittedAttribute(delegate().findOne(q));
 	}
 
 	@Override
 	public Attribute findOneById(Object id)
 	{
-		return toPermittedAttribute(decoratedRepo.findOneById(id));
+		return toPermittedAttribute(delegate().findOneById(id));
 	}
 
 	@Override
 	public Attribute findOneById(Object id, Fetch fetch)
 	{
-		return toPermittedAttribute(decoratedRepo.findOneById(id, fetch));
+		return toPermittedAttribute(delegate().findOneById(id, fetch));
 	}
 
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids)
 	{
-		return decoratedRepo.findAll(ids).map(this::toPermittedAttribute);
+		return delegate().findAll(ids).map(this::toPermittedAttribute);
 	}
 
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return decoratedRepo.findAll(ids, fetch).map(this::toPermittedAttribute);
+		return delegate().findAll(ids, fetch).map(this::toPermittedAttribute);
 	}
 
 	private Attribute toPermittedAttribute(Attribute attribute)

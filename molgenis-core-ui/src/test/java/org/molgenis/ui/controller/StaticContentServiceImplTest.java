@@ -151,8 +151,8 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public PermissionService permissionService()
 		{
-			return new PermissionServiceImpl();
-		}
+			return new PermissionServiceImpl(null);
+		} // FIXME replace null with dependency
 
 		@Bean
 		public StaticContentFactory staticContentFactory()
