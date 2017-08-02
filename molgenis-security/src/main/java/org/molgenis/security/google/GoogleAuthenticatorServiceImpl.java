@@ -12,7 +12,7 @@ import java.net.URLEncoder;
 public class GoogleAuthenticatorServiceImpl implements GoogleAuthenticatorService
 {
 	@Override
-	public String getGoogleAuthenticatorURI(String secretKey)
+	public String getGoogleAuthenticatorURI(String secretKey) throws IllegalStateException
 	{
 		String normalizedBase32Key = secretKey.replace(" ", "").toUpperCase();
 		try

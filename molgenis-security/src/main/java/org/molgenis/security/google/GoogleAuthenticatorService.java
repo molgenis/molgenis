@@ -10,5 +10,5 @@ public interface GoogleAuthenticatorService
 	 *
 	 * @return Google Authenticator URI
 	 */
-	String getGoogleAuthenticatorURI(String secretKey);
+	String getGoogleAuthenticatorURI(String secretKey) throws IllegalStateException;
 }

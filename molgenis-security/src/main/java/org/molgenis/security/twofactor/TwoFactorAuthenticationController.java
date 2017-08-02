@@ -23,6 +23,7 @@ public class TwoFactorAuthenticationController
 	public static final String TWO_FACTOR_INITIAL_URI = "/initial";
 	private static final String TWO_FACTOR_VALIDATION_URI = "/validate";
 	private static final String TWO_FACTOR_SECRET_URI = "/secret";
+	private static final String TWO_FACTOR_RECOVER_URI = "/recover";
 
 	public static final String ATTRIBUTE_2FA_IS_INITIAL = "is2faInitial";
 	public static final String ATTRIBUTE_2FA_IS_CONFIGURED = "is2faConfigured";
@@ -38,15 +39,18 @@ public class TwoFactorAuthenticationController
 
 	private TwoFactorAuthenticationProvider authenticationProvider;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private RecoveryAuthenticationProvider recoveryAuthenticationProvider;
 	private GoogleAuthenticatorService googleAuthenticatorService;
 
 	@Autowired
 	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
+			RecoveryAuthenticationProvider recoveryAuthenticationProvider,
 			GoogleAuthenticatorService googleAuthenticatorService)
 	{
 		this.authenticationProvider = requireNonNull(authenticationProvider);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
+		this.recoveryAuthenticationProvider = recoveryAuthenticationProvider;
 		this.googleAuthenticatorService = requireNonNull(googleAuthenticatorService);
 	}
 
@@ -125,6 +129,26 @@ public class TwoFactorAuthenticationController
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
 					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
+			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
+		}
+
+		return redirectUrl;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_RECOVER_URI)
+	public String recoverAccount(Model model, @RequestParam String recoveryCode)
+	{
+		String redirectUrl = "redirect:/";
+
+		try
+		{
+			RecoveryAuthenticationToken authToken = new RecoveryAuthenticationToken(recoveryCode);
+			Authentication authentication = recoveryAuthenticationProvider.authenticate(authToken);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		}
+		catch (Exception e)
+		{
+			setModelAttributesWhenNotValidated(model);
 			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
 		}
 
