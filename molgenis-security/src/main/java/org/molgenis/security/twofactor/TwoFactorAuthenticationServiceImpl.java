@@ -21,7 +21,6 @@ import static com.google.api.client.util.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
-import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.twofactor.RecoveryCodeMetadata.*;
 
@@ -155,7 +154,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		{
 			RecoveryCode recoveryCode = recoveryCodeFactory.create();
 			recoveryCode.setUserId(userId);
-			recoveryCode.setCode(idGenerator.generateId(SHORT_SECURE_RANDOM));
+			recoveryCode.setCode(idGenerator.generateId(SECURE_RANDOM));
 			recoveryCodes.add(recoveryCode);
 		}
 		return recoveryCodes;

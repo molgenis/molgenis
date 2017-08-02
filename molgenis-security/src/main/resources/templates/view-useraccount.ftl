@@ -185,7 +185,6 @@
         <legend>Security</legend>
         <div class="row">
             <div class="col-md-12">
-
                 <b>Two Factor Recovery Codes</b>
                 <p>
                     Recovery codes can be used to access your account in the event you lose access to your device and
@@ -195,24 +194,27 @@
         </div>
         <div class="row collapse in recovery-code-list-toggle">
             <div class="col-md-4">
-                <button id="recovery-codes-button" class="btn btn-danger">Show recovery codes</button>
+                <button id="recovery-codes-button" class="btn btn-primary">Show recovery codes</button>
             </div>
         </div>
         <div id="recovery-codes" class="collapse recovery-code-list-toggle">
             <div class="row">
-                <div class="panel panel-warning">
-                    <div class="panel-body">
-                        Put these codes in a safe spot. If you lose your device and don't have the recovery codes you
-                        will lose access to your account.
+                <div class="col-md-12">
+                    <div class="panel panel-warning">
+                        <div class="panel-body">
+                            Put these codes in a safe spot. If you lose your device and don't have the recovery codes
+                            you
+                            will lose access to your account.
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4">
-                    <ul id="recovery-codes-list" class="list-group" style="font-family: Monospace, serif">
+                <div class="col-md-6">
+                    <ul id="recovery-codes-list" class="list-group">
                     </ul>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <div class="panel panel-danger">
                         <div class="panel-body">
                             <div class="form-group">
@@ -229,6 +231,13 @@
     </div>
 </div>
 </#if>
+
+<style>
+    #recovery-codes-list {
+        font-family: Monospace, serif;
+        text-align: center;
+    }
+</style>
 
 <script type="text/javascript">
     $(function () {
