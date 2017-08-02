@@ -3,6 +3,8 @@ package org.molgenis.security.twofactor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.stream.Stream;
+
 /**
  * <p>Service to use in {@link TwoFactorAuthenticationFilter} and {@link TwoFactorAuthenticationController}</p>
  */
@@ -44,7 +46,9 @@ public interface TwoFactorAuthenticationService
 	 */
 	String generateSecretKey();
 
-	void generateNewRecoveryCodes();
+	Stream<RecoveryCode> generateNewRecoveryCodes();
 
 	void useRecoveryCode(String recoveryCode);
+
+	Stream<RecoveryCode> getRecoveryCodes();
 }

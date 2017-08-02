@@ -104,11 +104,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 
 	@Override
 	@Transactional
-	public void generateNewRecoveryCodes()
+	public Stream<RecoveryCode> generateNewRecoveryCodes()
 	{
 		String userId = getUser().getId();
 		deleteOldRecoveryCodes(userId);
-		dataService.add(RECOVERY_CODE, generateRecoveryCodes(userId));
+		List<RecoveryCode> newRecoveryCodes = generateRecoveryCodes(userId);
+		dataService.add(RECOVERY_CODE, newRecoveryCodes.stream());
+		return newRecoveryCodes.stream();
 	}
 
 	@Override
@@ -129,6 +131,14 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 	}
 
+	@Override
+	public Stream<RecoveryCode> getRecoveryCodes()
+	{
+		String userId = getUser().getId();
+		return dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, userId),
+				RecoveryCode.class);
+	}
+
 	private void deleteOldRecoveryCodes(String userId)
 	{
 		runAsSystem(() -> {
@@ -138,7 +148,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		});
 	}
 
-	private Stream<RecoveryCode> generateRecoveryCodes(String userId)
+	private List<RecoveryCode> generateRecoveryCodes(String userId)
 	{
 		List<RecoveryCode> recoveryCodes = newArrayList();
 		for (int i = 0; i < RECOVERY_CODE_COUNT; i++)
@@ -148,7 +158,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			recoveryCode.setCode(idGenerator.generateId(SHORT_SECURE_RANDOM));
 			recoveryCodes.add(recoveryCode);
 		}
-		return recoveryCodes.stream();
+		return recoveryCodes;
 	}
 
 	private User getUser()
