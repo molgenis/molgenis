@@ -133,6 +133,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisChangePasswordFilter.class);
 		http.authenticationProvider(twoFactorAuthenticationProvider());
+		http.authenticationProvider(recoveryAuthenticationProvider());
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
 				.authorizeRequests();
@@ -309,6 +310,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
 	{
 		return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), otpService());
+	}
+
+	@Bean
+	public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
+	{
+		return new RecoveryAuthenticationProviderImpl(twoFactorAuthenticationService());
 	}
 
 	@Bean

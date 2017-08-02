@@ -39,15 +39,18 @@ public class TwoFactorAuthenticationController
 
 	private TwoFactorAuthenticationProvider authenticationProvider;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private RecoveryAuthenticationProvider recoveryAuthenticationProvider;
 	private GoogleAuthenticatorService googleAuthenticatorService;
 
 	@Autowired
 	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
+			RecoveryAuthenticationProvider recoveryAuthenticationProvider,
 			GoogleAuthenticatorService googleAuthenticatorService)
 	{
 		this.authenticationProvider = requireNonNull(authenticationProvider);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
+		this.recoveryAuthenticationProvider = requireNonNull(recoveryAuthenticationProvider);
 		this.googleAuthenticatorService = requireNonNull(googleAuthenticatorService);
 	}
 
@@ -65,7 +68,7 @@ public class TwoFactorAuthenticationController
 		String redirectUri = "redirect:/";
 		try
 		{
-			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, null, null);
+			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, null);
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
@@ -114,8 +117,7 @@ public class TwoFactorAuthenticationController
 
 		try
 		{
-			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, secretKey,
-					null);
+			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(verificationCode, secretKey);
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
@@ -140,8 +142,8 @@ public class TwoFactorAuthenticationController
 
 		try
 		{
-			TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken(null, null, recoveryCode);
-			Authentication authentication = authenticationProvider.authenticate(authToken);
+			RecoveryAuthenticationToken authToken = new RecoveryAuthenticationToken(recoveryCode);
+			Authentication authentication = recoveryAuthenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		catch (Exception e)

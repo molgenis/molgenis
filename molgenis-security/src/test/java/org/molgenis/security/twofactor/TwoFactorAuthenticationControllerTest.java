@@ -49,6 +49,12 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		}
 
 		@Bean
+		public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
+		{
+			return mock(RecoveryAuthenticationProvider.class);
+		}
+
+		@Bean
 		public AuthenticationManager authenticationManager()
 		{
 			return mock(AuthenticationManager.class);
@@ -58,7 +64,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		public TwoFactorAuthenticationController twoFactorAuthenticationController()
 		{
 			return new TwoFactorAuthenticationController(twoFactorAuthenticationProvider(),
-					twoFactorAuthenticationService(), googleAuthenticatorService());
+					twoFactorAuthenticationService(), recoveryAuthenticationProvider(), googleAuthenticatorService());
 		}
 	}
 

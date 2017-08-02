@@ -14,7 +14,6 @@ public class TwoFactorAuthenticationToken extends UsernamePasswordAuthentication
 
 	private final String verificationCode;
 	private final String secretKey;
-	private final String recoveryCode;
 
 	public String getVerificationCode()
 	{
@@ -26,27 +25,19 @@ public class TwoFactorAuthenticationToken extends UsernamePasswordAuthentication
 		return secretKey;
 	}
 
-	public String getRecoveryCode()
-	{
-		return recoveryCode;
-	}
-
 	public TwoFactorAuthenticationToken(Object principal, Object credentials,
-			Collection<? extends GrantedAuthority> authorities, String verificationCode, String secretKey,
-			String recoveryCode)
+			Collection<? extends GrantedAuthority> authorities, String verificationCode, String secretKey)
 	{
 		super(principal, credentials, authorities);
 		this.verificationCode = verificationCode;
 		this.secretKey = secretKey;
-		this.recoveryCode = recoveryCode;
 	}
 
-	public TwoFactorAuthenticationToken(String verificationCode, String secretKey, String recoveryCode)
+	public TwoFactorAuthenticationToken(String verificationCode, String secretKey)
 	{
 		super("N/A", "N/A");
 		this.verificationCode = verificationCode;
 		this.secretKey = secretKey;
-		this.recoveryCode = recoveryCode;
 	}
 
 }

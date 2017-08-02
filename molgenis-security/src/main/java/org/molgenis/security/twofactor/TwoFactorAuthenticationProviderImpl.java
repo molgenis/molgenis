@@ -48,7 +48,7 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 																			 .getPrincipal();
 				// if token is invalid
 				authToken = new TwoFactorAuthenticationToken(userDetails, userDetails.getPassword(),
-						userDetails.getAuthorities(), authToken.getVerificationCode(), authToken.getSecretKey(), null);
+						userDetails.getAuthorities(), authToken.getVerificationCode(), authToken.getSecretKey());
 			}
 		}
 		else
@@ -62,18 +62,8 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 																				 .getPrincipal();
 					// if token is invalid
 					authToken = new TwoFactorAuthenticationToken(userDetails, userDetails.getPassword(),
-							userDetails.getAuthorities(), authToken.getVerificationCode(), null, null);
+							userDetails.getAuthorities(), authToken.getVerificationCode(), null);
 				}
-			}
-			else if (authToken.getRecoveryCode() != null)
-			{
-				twoFactorAuthenticationService.useRecoveryCode(authToken.getRecoveryCode());
-				UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
-																			 .getAuthentication()
-																			 .getPrincipal();
-				// if token is invalid
-				authToken = new TwoFactorAuthenticationToken(userDetails, userDetails.getPassword(),
-						userDetails.getAuthorities(), null, null, authToken.getRecoveryCode());
 			}
 		}
 
