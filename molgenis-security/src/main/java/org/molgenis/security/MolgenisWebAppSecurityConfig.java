@@ -9,6 +9,7 @@ import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.TokenFactory;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
@@ -87,6 +88,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Autowired
 	private GroupMemberFactory groupMemberFactory;
 
+	@Autowired
+	private IdGenerator idGenerator;
+
+	@Autowired
+	private RecoveryCodeFactory recoveryCodeFactory;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
@@ -126,6 +133,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisChangePasswordFilter.class);
 		http.authenticationProvider(twoFactorAuthenticationProvider());
+		http.authenticationProvider(recoveryAuthenticationProvider());
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
 				.authorizeRequests();
@@ -189,8 +197,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
-		{
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
 			if (req.getSession(false) != null
 					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 			{
@@ -198,8 +205,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 			}
 		})
 
-				.logoutSuccessHandler((req, res, auth) ->
-				{
+				.logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -303,13 +309,26 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
 	{
-		return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), otpService());
+		return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), otpService(),
+				recoveryService());
+	}
+
+	@Bean
+	public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
+	{
+		return new RecoveryAuthenticationProviderImpl(recoveryService());
 	}
 
 	@Bean
 	public TwoFactorAuthenticationService twoFactorAuthenticationService()
 	{
-		return new TwoFactorAuthenticationServiceImpl(appSettings, otpService(), dataService);
+		return new TwoFactorAuthenticationServiceImpl(appSettings, otpService(), dataService, idGenerator);
+	}
+
+	@Bean
+	public RecoveryService recoveryService()
+	{
+		return new RecoveryServiceImpl(dataService, recoveryCodeFactory, idGenerator);
 	}
 
 	@Bean

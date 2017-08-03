@@ -47,7 +47,8 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
 					&& SecurityUtils.currentUserIsAuthenticated())
 			{
-				if (!isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken())
+				if (!isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken()
+						&& !isUserRecoveryAuthenticated())
 				{
 					if (isTwoFactorAuthenticationEnforced() || userUsesTwoFactorAuthentication())
 					{
@@ -103,6 +104,18 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		}
 
 		return isTwoFactorAuthenticated;
+	}
+
+	private boolean isUserRecoveryAuthenticated()
+	{
+		boolean isRecoveryAuthenticated = false;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication instanceof RecoveryAuthenticationToken)
+		{
+			isRecoveryAuthenticated = authentication.isAuthenticated();
+		}
+
+		return isRecoveryAuthenticated;
 	}
 
 	/**

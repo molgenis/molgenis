@@ -1,5 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
+
 <@header/>
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
@@ -151,7 +152,7 @@
             <div class="row">
                 <div class="col-md-6 col-md-offset-6">
                     <div class="form-group">
-                        <button type="submit" id="submit-button" class="btn btn-primary pull-right">Apply changes
+                        <button id="submit-button" class="btn btn-primary pull-right">Apply changes
                         </button>
                     </div>
                 </div>
@@ -178,47 +179,133 @@
     </div>
 </div>
 
+<#if is_2fa_enabled??>
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <legend>Security</legend>
+        <div class="row">
+            <div class="col-md-12">
+                <b>Two Factor Recovery Codes</b>
+                <p>
+                    Recovery codes can be used to access your account in the event you lose access to your device and
+                    cannot receive two-factor authentication codes.
+                </p>
+            </div>
+        </div>
+        <div class="row collapse in recovery-code-list-toggle">
+            <div class="col-md-4">
+                <button id="recovery-codes-button" class="btn btn-primary">Show recovery codes</button>
+            </div>
+        </div>
+        <div id="recovery-codes" class="collapse recovery-code-list-toggle">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-warning">
+                        <div class="panel-body">
+                            Put these codes in a safe spot. If you lose your device and don't have the recovery codes
+                            you
+                            will lose access to your account.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul id="recovery-codes-list" class="list-group">
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-danger">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <button id="generate-codes-button" class="btn btn-danger">Generate new recovery codes
+                                </button>
+                            </div>
+                            <p>Generating new recovery codes will replace the existing codes. The old codes will
+                                no longer be usable. </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</#if>
+
+<style>
+    #recovery-codes-list {
+        font-family: Monospace, serif;
+        text-align: center;
+    }
+</style>
+
 <script type="text/javascript">
     $(function () {
-        var submitBtn = $('#submit-button');
-        var form = $('#account-form');
-        form.validate();
+        const submitBtn = $('#submit-button')
+        const recoveryCodesBtn = $('#recovery-codes-button')
+        const generateCodesBtn = $('#generate-codes-button')
+        const form = $('#account-form')
+        form.validate()
 
         $('#reg-password').rules('add', {
             minlength: ${min_password_length?js_string}
-        });
+        })
         $('#reg-password-confirm').rules('add', {
             equalTo: '#reg-password'
-        });
+        })
 
     <#-- form events -->
         form.submit(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault()
+            e.stopPropagation()
             if (form.valid()) {
-                $('.text-error', form).remove();
+                $('.text-error', form).remove()
                 $.ajax({
                     type: form.attr('method'),
                     url: form.attr('action'),
                     data: form.serialize(),
                     success: function () {
-                        molgenis.createAlert([{'message': 'Your account has been updated.'}], 'success');
+                        molgenis.createAlert([{'message': 'Your account has been updated.'}], 'success')
                     }
-                });
+                })
             }
-        });
+        })
         submitBtn.click(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            form.submit();
-        });
+            e.preventDefault()
+            e.stopPropagation()
+            form.submit()
+        })
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
-            if (e.which == 13) {
-                e.preventDefault();
-                e.stopPropagation();
-                form.submit();
+            if (e.which === 13) {
+                e.preventDefault()
+                e.stopPropagation()
+                form.submit()
             }
-        });
-    });
+        })
+
+        function listRecoveryCodes (codes) {
+            let listItems = []
+            const listTagOpen = '<li class="list-group-item">'
+            const listTagClose = '</li>'
+            $.each(codes, function (i, code) {
+                listItems.push(listTagOpen + code + listTagClose)
+            })
+            $('#recovery-codes-list').html(listItems.join(''))
+        }
+
+        recoveryCodesBtn.click(function (e) {
+            $.get('${context_url?html}/recoveryCodes', function (codes) {
+                listRecoveryCodes(codes)
+            })
+
+            $('.recovery-code-list-toggle').collapse('toggle')
+        })
+
+        generateCodesBtn.click(function (e) {
+            $.get('${context_url?html}/generateRecoveryCodes', function (codes) {
+                listRecoveryCodes(codes)
+            })
+        })
+    })
 </script>
 <@footer/>

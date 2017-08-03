@@ -125,8 +125,8 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 											 TwoFactorAuthenticationSetting.ENFORCED.toString()))
 									 .setLabel("Two Factor Authentication")
 									 .setDescription(
-											 "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.");
-			//									 .setValidationExpression(getSignIn2FAValidationExpression());
+											 "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.")
+									 .setValidationExpression(getSignIn2FAValidationExpression());
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
 										  .setNillable(true)
 										  .setLabel("Logo in navigation bar")
@@ -220,11 +220,15 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 													  "JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
 		}
 
+		/**
+		 * SIGN_IN_2FA == DISABLED || !SIGNUP || SIGNUP_MODERATION || !GOOGLE_SIGN_IN
+		 *
+		 * @return true if condition is met
+		 */
 		private static String getSignIn2FAValidationExpression()
 		{
-			return "$('" + SIGN_IN_2FA + "').eq('" + TwoFactorAuthenticationSetting.ENABLED.toString() + "').or().eq('"
-					+ TwoFactorAuthenticationSetting.ENFORCED.toString() + "').and($('" + GOOGLE_SIGN_IN
-					+ "').eq(false)).value()";
+			return String.format("$('%s').eq('%s').or($('%s').not()).or($('%s')).or($('%s').not()).value()",
+					SIGN_IN_2FA, TwoFactorAuthenticationSetting.DISABLED, SIGNUP, SIGNUP_MODERATION, GOOGLE_SIGN_IN);
 		}
 
 		private String getDefaultMenuValue()
