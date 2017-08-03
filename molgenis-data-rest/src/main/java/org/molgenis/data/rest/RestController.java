@@ -321,8 +321,7 @@ public class RestController
 	 * /api/v1/person/99/address
 	 *
 	 * @param entityTypeId
-	 * @param untypedId
-	 * @param refAttributeName
+	 * @param untypedId    f * @param refAttributeName
 	 * @param request
 	 * @return
 	 * @throws UnknownEntityException
