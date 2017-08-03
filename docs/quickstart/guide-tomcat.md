@@ -36,6 +36,7 @@ db_password=molgenis
 db_uri=jdbc\:postgresql\://localhost/molgenis
 admin.password=admin
 user.password=admin
+python_script_executable=<python3_executable_path>
 ```
 
 Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in PostgreSQL. This effectively means that whatever you call your database, your db_uri should point to it.
