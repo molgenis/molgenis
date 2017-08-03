@@ -54,7 +54,7 @@
         <jsr305.version>3.0.1</jsr305.version>
         <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
-        <elasticsearch.version>5.4.1</elasticsearch.version>
+        <elasticsearch.version>5.5.1</elasticsearch.version>
         <postgres.version>9.4.1211</postgres.version>
         <mockito.version>2.7.22</mockito.version>
     </properties>
