@@ -54,16 +54,6 @@ public class User extends StaticEntity
 		set(PASSWORD_, password);
 	}
 
-	public String getSecretKey()
-	{
-		return getString(SECRET_KEY);
-	}
-
-	public void setSecretKey(String secretKey)
-	{
-		set(SECRET_KEY, secretKey);
-	}
-
 	public String getActivationCode()
 	{
 		return getString(ACTIVATIONCODE);

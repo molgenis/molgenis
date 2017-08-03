@@ -3,7 +3,6 @@ package org.molgenis.security.twofactor;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
@@ -28,9 +27,7 @@ import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
-import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.security.twofactor.RecoveryCodeMetadata.*;
 
 @Service
 public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticationService
@@ -42,17 +39,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	private OTPService otpService;
 	private DataService dataService;
 	private IdGenerator idGenerator;
-	private RecoveryCodeFactory recoveryCodeFactory;
-	private UserSecretFactory userSecretFactory;
 
-	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService, IdGenerator idGenerator,
-			RecoveryCodeFactory recoveryCodeFactory, UserSecretFactory userSecretFactory)
+	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService,
+			IdGenerator idGenerator)
 	{
 		this.otpService = requireNonNull(otpService);
 		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
-		this.recoveryCodeFactory = requireNonNull(recoveryCodeFactory);
-		this.userSecretFactory = requireNonNull(userSecretFactory);
 	}
 
 	@Override
@@ -151,57 +144,6 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		return isEnabled;
 	}
 
-	@Override
-	@Transactional
-	public void generateNewRecoveryCodes()
-	{
-		String userId = getUser().getId();
-		deleteOldRecoveryCodes(userId);
-		dataService.add(RECOVERY_CODE, generateRecoveryCodes(userId));
-	}
-
-	@Override
-	@Transactional
-	public void useRecoveryCode(String recoveryCode)
-	{
-		String userId = getUser().getId();
-		RecoveryCode existingCode = runAsSystem(() -> dataService.findOne(RECOVERY_CODE,
-				new QueryImpl<RecoveryCode>().eq(USER_ID, userId).and().eq(CODE, recoveryCode), RecoveryCode.class));
-
-		if (existingCode != null)
-		{
-			runAsSystem(() -> dataService.delete(RECOVERY_CODE, existingCode));
-			updateFailedLoginAttempts(0);
-		}
-		else
-		{
-			throw new MolgenisDataException("Invalid recovery code");
-		}
-	}
-
-	private void deleteOldRecoveryCodes(String userId)
-	{
-		runAsSystem(() ->
-		{
-			Stream<RecoveryCode> recoveryCodes = dataService.findAll(RECOVERY_CODE,
-					new QueryImpl<RecoveryCode>().eq(USER_ID, userId), RecoveryCode.class);
-			dataService.delete(RECOVERY_CODE, recoveryCodes);
-		});
-	}
-
-	private Stream<RecoveryCode> generateRecoveryCodes(String userId)
-	{
-		List<RecoveryCode> recoveryCodes = newArrayList();
-		for (int i = 0; i < RECOVERY_CODE_COUNT; i++)
-		{
-			RecoveryCode recoveryCode = recoveryCodeFactory.create();
-			recoveryCode.setUserId(userId);
-			recoveryCode.setCode(idGenerator.generateId(SHORT_SECURE_RANDOM));
-			recoveryCodes.add(recoveryCode);
-		}
-		return recoveryCodes.stream();
-	}
-
 	private UserSecret getSecret() throws InternalAuthenticationServiceException
 	{
 		User user = getUser();
@@ -232,6 +174,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
 	}
 
+	//FIXME use userservice
 	private User getUser()
 	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

@@ -21,7 +21,6 @@ public class UserMetaData extends SystemEntityType
 	public static final String USERNAME = "username";
 	public static final String SUPERUSER = "superuser";
 	public static final String PASSWORD_ = "password_";
-	public static final String SECRET_KEY = "secretKey";
 	public static final String EMAIL = "Email";
 	public static final String GOOGLEACCOUNTID = "googleAccountId";
 	public static final String ACTIVATIONCODE = "activationCode";
@@ -113,11 +112,6 @@ public class UserMetaData extends SystemEntityType
 											 "If true the user must first change his password before he can proceed")
 									 .setAggregatable(true)
 									 .setNillable(false);
-		addAttribute(SECRET_KEY).setLabel("Secret 2FA Key")
-								.setDataType(STRING)
-								.setNillable(true)
-								.setVisible(false)
-								.setDescription("Secret key to use with two factor authentication");
 		// TODO use LanguageService.getLanguageCodes() instead of hardcoded language list
 		addAttribute(LANGUAGECODE).setLabel("Language code")
 								  .setDescription("Selected language for this site.")

@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  */
 public interface TwoFactorAuthenticationService
 {
-
 	/**
 	 * <p>Check verificationcode given by user from Google Authenticator</p>
 	 *
@@ -50,8 +49,4 @@ public interface TwoFactorAuthenticationService
 	 * @return the secretkey for logged in user
 	 */
 	String generateSecretKey();
-
-	void generateNewRecoveryCodes();
-
-	void useRecoveryCode(String recoveryCode);
 }

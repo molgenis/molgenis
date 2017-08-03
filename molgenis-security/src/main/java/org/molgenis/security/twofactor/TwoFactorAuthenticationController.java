@@ -30,7 +30,7 @@ public class TwoFactorAuthenticationController
 
 	public static final String ATTRIBUTE_2FA_IS_INITIAL = "is2faInitial";
 	public static final String ATTRIBUTE_2FA_IS_CONFIGURED = "is2faConfigured";
-	
+
 	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
 	public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
 	public static final String ATTRIBUTE_2FA_HEADER = "twoFactorAuthenticatedHeader";
@@ -108,7 +108,7 @@ public class TwoFactorAuthenticationController
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_SECRET_URI)
 	public String setSecret(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
 	{
-		String redirectUrl = "redirect:/";
+		String redirectUrl = "redirect:/menu/main/useraccount?showCodes=true#security";
 
 		try
 		{
