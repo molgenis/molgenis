@@ -1,7 +1,7 @@
 package org.molgenis.integrationtest.platform;
 
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,7 +72,7 @@ public class MultipleAnnotationIT extends AbstractTestNGSpringContextTests
 
 	@EnableTransactionManagement
 	@EnableAspectJAutoProxy
-	@Import(RunAsSystemProxy.class)
+	@Import(RunAsSystemAspect.class)
 	@Configuration
 	public static class Config
 	{

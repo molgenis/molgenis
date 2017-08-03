@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 @Aspect
 @Component
-public class RunAsSystemProxy
+public class RunAsSystemAspect
 {
 	@Around("@annotation(RunAsSystem)")
 	public Object aroundAdvice(ProceedingJoinPoint joinPoint) throws Throwable

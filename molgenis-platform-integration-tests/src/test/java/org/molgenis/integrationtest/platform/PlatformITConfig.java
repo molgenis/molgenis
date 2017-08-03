@@ -29,7 +29,7 @@ import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.PermissionServiceImpl;
 import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
 		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class,
-		PostgreSqlConfiguration.class, RunAsSystemProxy.class, IdGeneratorImpl.class,
+		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class,
 		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactoryImpl.class,
@@ -180,7 +180,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 		{
 			try
 			{
-				RunAsSystemProxy.runAsSystem(() ->
+				RunAsSystemAspect.runAsSystem(() ->
 				{
 					LOG.info("Bootstrapping registries ...");
 					LOG.trace("Registering repository collections ...");
