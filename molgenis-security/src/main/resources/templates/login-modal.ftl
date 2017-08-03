@@ -61,7 +61,8 @@
                         <p>
                             Don't have your phone?
                             <br/>
-                            <a id="toggle-recovery" href=".verification-form-toggle" data-toggle="collapse">Enter a recovery
+                            <a id="toggle-recovery" href=".verification-form-toggle" data-toggle="collapse">Enter a
+                                recovery
                                 code</a>
                         </p>
                     </div>

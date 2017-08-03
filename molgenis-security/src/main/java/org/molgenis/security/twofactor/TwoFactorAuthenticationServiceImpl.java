@@ -14,15 +14,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.stream.Stream;
 
-import static com.google.api.client.util.Lists.newArrayList;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
@@ -39,13 +35,15 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	private OTPService otpService;
 	private DataService dataService;
 	private IdGenerator idGenerator;
+	private UserSecretFactory userSecretFactory;
 
-	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService,
-			IdGenerator idGenerator)
+	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService, IdGenerator idGenerator,
+			UserSecretFactory userSecretFactory)
 	{
 		this.otpService = requireNonNull(otpService);
 		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
+		this.userSecretFactory = requireNonNull(userSecretFactory);
 	}
 
 	@Override

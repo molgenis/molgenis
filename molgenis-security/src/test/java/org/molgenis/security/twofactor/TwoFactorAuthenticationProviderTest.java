@@ -28,7 +28,8 @@ public class TwoFactorAuthenticationProviderTest extends AbstractTestNGSpringCon
 		@Bean
 		public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
 		{
-			return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), new OTPServiceImpl());
+			return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), new OTPServiceImpl(),
+					recoveryService());
 		}
 
 		@Bean
@@ -36,6 +37,13 @@ public class TwoFactorAuthenticationProviderTest extends AbstractTestNGSpringCon
 		{
 			return mock(TwoFactorAuthenticationServiceImpl.class);
 		}
+
+		@Bean
+		public RecoveryService recoveryService()
+		{
+			return mock(RecoveryServiceImpl.class);
+		}
+
 	}
 
 	@Autowired

@@ -27,13 +27,13 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 		@Bean
 		public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
 		{
-			return new RecoveryAuthenticationProviderImpl(twoFactorAuthenticationService());
+			return new RecoveryAuthenticationProviderImpl(recoveryService());
 		}
 
 		@Bean
-		public TwoFactorAuthenticationService twoFactorAuthenticationService()
+		public RecoveryService recoveryService()
 		{
-			return mock(TwoFactorAuthenticationServiceImpl.class);
+			return mock(RecoveryServiceImpl.class);
 		}
 	}
 
@@ -41,7 +41,7 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 	private RecoveryAuthenticationProvider recoveryAuthenticationProvider;
 
 	@Autowired
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private RecoveryService recoveryService;
 
 	@Test
 	public void testAuthentication()
@@ -57,7 +57,7 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 		RecoveryAuthenticationToken authToken = new RecoveryAuthenticationToken("dsda545ds4dsa456");
 		assertFalse(authToken.isAuthenticated());
 
-		doNothing().when(twoFactorAuthenticationService).useRecoveryCode(authToken.getRecoveryCode());
+		doNothing().when(recoveryService).useRecoveryCode(authToken.getRecoveryCode());
 
 		Authentication auth = recoveryAuthenticationProvider.authenticate(authToken);
 		assertNotNull(auth);

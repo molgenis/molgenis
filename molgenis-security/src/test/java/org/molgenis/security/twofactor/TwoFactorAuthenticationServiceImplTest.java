@@ -4,6 +4,7 @@ import org.junit.Ignore;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -39,13 +40,20 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		@Bean
 		public TwoFactorAuthenticationService twoFactorAuthenticationService()
 		{
-			return new TwoFactorAuthenticationServiceImpl(appSettings(), otpService(), dataService(), idGenerator());
+			return new TwoFactorAuthenticationServiceImpl(otpService(), dataService(), idGenerator(),
+					userSecretFactory());
 		}
 
 		@Bean
 		public OTPService otpService()
 		{
-			return mock(OTPServiceImpl.class);
+			return new OTPServiceImpl();
+		}
+
+		@Bean
+		public IdGenerator idGenerator()
+		{
+			return new IdGeneratorImpl();
 		}
 
 		@Bean
