@@ -41,8 +41,7 @@ public class RestControllerIT
 	public void beforeClass()
 	{
 		LOG.info("Read environment variables");
-		//		String envHost = System.getProperty("REST_TEST_HOST");
-		String envHost = "http://localhost:8080";
+		String envHost = System.getProperty("REST_TEST_HOST");
 		RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
 		LOG.info("baseURI: " + baseURI);
 
@@ -50,8 +49,7 @@ public class RestControllerIT
 		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
 		LOG.info("adminUserName: " + adminUserName);
 
-		//		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String envAdminPW = "admin";
+		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
 		String adminPassword = Strings.isNullOrEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
