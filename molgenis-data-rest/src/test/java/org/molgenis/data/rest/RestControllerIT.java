@@ -3,6 +3,9 @@ package org.molgenis.data.rest;
 import com.google.common.base.Strings;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
+import net.minidev.json.JSONObject;
+import org.molgenis.data.rest.convert.RestTestUtils;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -38,7 +41,8 @@ public class RestControllerIT
 	public void beforeClass()
 	{
 		LOG.info("Read environment variables");
-		String envHost = System.getProperty("REST_TEST_HOST");
+		//		String envHost = System.getProperty("REST_TEST_HOST");
+		String envHost = "http://localhost:8080";
 		RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
 		LOG.info("baseURI: " + baseURI);
 
@@ -46,7 +50,8 @@ public class RestControllerIT
 		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
 		LOG.info("adminUserName: " + adminUserName);
 
-		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
+		//		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
+		String envAdminPW = "admin";
 		String adminPassword = Strings.isNullOrEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
@@ -56,7 +61,6 @@ public class RestControllerIT
 
 		testUserId = getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
-
 		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", Permission.WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", Permission.READ);
 		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", Permission.COUNT);
@@ -114,6 +118,46 @@ public class RestControllerIT
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
 						equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+	}
+
+	@Test
+	public void test2faEnforced()
+	{
+		RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
+
+		ValidatableResponse response;
+
+		response = given().log()
+						  .all()
+						  .header(X_MOLGENIS_TOKEN, adminToken)
+						  .contentType(APPLICATION_JSON)
+						  .when()
+						  .get(PATH + "api/v1/logout")
+						  .then();
+		response.statusCode(UNAUTHORIZED);
+
+		JSONObject loginBody = new JSONObject();
+		loginBody.put("username", "test");
+		loginBody.put("password", "test");
+
+		response = given().contentType(APPLICATION_JSON)
+						  .body(loginBody.toJSONString())
+						  .when()
+						  .post("api/v1/login")
+						  .then();
+		response.statusCode(UNAUTHORIZED)
+				.body("errors.message[0]",
+						equalTo("2 factor authentication is [ Enforced ], you cannot login via the RESTAPI anymore"));
+
+		response = given().log()
+						  .all()
+						  .header(X_MOLGENIS_TOKEN, adminToken)
+						  .contentType(APPLICATION_JSON)
+						  .when()
+						  .get(PATH + "sys_scr_ScriptType")
+						  .then();
+		response.statusCode(OKE);
+
 	}
 
 	@Test
@@ -257,6 +301,8 @@ public class RestControllerIT
 
 		// Clean up user
 		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
+
+		RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
 	}
 
 }

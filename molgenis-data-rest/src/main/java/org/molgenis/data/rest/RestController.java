@@ -849,7 +849,7 @@ public class RestController
 		}
 		if (userIs2fa())
 		{
-			throw new HttpMessageNotReadableException(
+			throw new BadCredentialsException(
 					format("2 factor authentication is [ {0} ], you cannot login via the RESTAPI anymore",
 							appSettings.getTwoFactorAuthentication()));
 		}
