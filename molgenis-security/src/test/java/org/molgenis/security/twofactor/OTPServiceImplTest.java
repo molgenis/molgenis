@@ -1,9 +1,10 @@
 package org.molgenis.security.twofactor;
 
+import org.junit.Ignore;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
@@ -26,14 +27,22 @@ public class OTPServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private OTPService otpService;
 
-	/**
-	 * FIXME(SH): how do we test this properly?
-	 */
-	@Test(expectedExceptions = BadCredentialsException.class)
-	public void tryVerificationKeyTest()
+	@Test(expectedExceptions = InvalidVerificationCodeException.class)
+	public void testTryVerificationKeyFailed()
 	{
 		boolean isValid = otpService.tryVerificationCode("", "secretKey");
 		assertEquals(false, isValid);
+	}
+
+	/**
+	 * FIXME(SH): how do we test this properly?
+	 */
+	@Test
+	@Ignore
+	public void testTryVerificationKey()
+	{
+		boolean isValid = otpService.tryVerificationCode("", "secretKey");
+		assertEquals(true, isValid);
 	}
 
 }
