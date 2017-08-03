@@ -128,7 +128,8 @@ public class TwoFactorAuthenticationController
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
 					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE,
+					"The verification code you entered was incorrect");
 			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
 		}
 
@@ -149,6 +150,8 @@ public class TwoFactorAuthenticationController
 		catch (Exception e)
 		{
 			setModelAttributesWhenNotValidated(model);
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE,
+					"The recovery code you entered was incorrect");
 			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
 		}
 
