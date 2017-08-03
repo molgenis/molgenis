@@ -6,7 +6,7 @@ import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.twofactor.RecoveryCode;
-import org.molgenis.security.twofactor.TwoFactorAuthenticationService;
+import org.molgenis.security.twofactor.RecoveryService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -46,17 +46,17 @@ public class UserAccountController extends MolgenisPluginController
 
 	private final UserAccountService userAccountService;
 	private final LanguageService languageService;
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private RecoveryService recoveryService;
 	private AppSettings appSettings;
 
 	@Autowired
 	public UserAccountController(UserAccountService userAccountService, LanguageService languageService,
-			TwoFactorAuthenticationService twoFactorAuthenticationService, AppSettings appSettings)
+			RecoveryService recoveryService, AppSettings appSettings)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.languageService = requireNonNull(languageService);
-		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
+		this.recoveryService = requireNonNull(recoveryService);
 		this.appSettings = requireNonNull(appSettings);
 	}
 
@@ -157,14 +157,14 @@ public class UserAccountController extends MolgenisPluginController
 	@ResponseBody
 	public List<String> getRecoveryCodes()
 	{
-		return twoFactorAuthenticationService.getRecoveryCodes().map(RecoveryCode::getCode).collect(toList());
+		return recoveryService.getRecoveryCodes().map(RecoveryCode::getCode).collect(toList());
 	}
 
 	@RequestMapping(value = "generateRecoveryCodes", method = GET)
 	@ResponseBody
 	public List<String> generateRecoveryCodes()
 	{
-		Stream<RecoveryCode> recoveryCodes = twoFactorAuthenticationService.generateNewRecoveryCodes();
+		Stream<RecoveryCode> recoveryCodes = recoveryService.generateRecoveryCodes();
 		return recoveryCodes.map(RecoveryCode::getCode).collect(toList());
 	}
 

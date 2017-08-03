@@ -18,12 +18,14 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 {
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private final OTPService otpService;
+	private RecoveryService recoveryService;
 
 	public TwoFactorAuthenticationProviderImpl(TwoFactorAuthenticationService twoFactorAuthenticationService,
-			OTPService otpService)
+			OTPService otpService, RecoveryService recoveryService)
 	{
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.otpService = requireNonNull(otpService);
+		this.recoveryService = requireNonNull(recoveryService);
 	}
 
 	@Override
@@ -42,7 +44,7 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 
 				//TODO combine configuration methods into one
 				twoFactorAuthenticationService.setSecretKey(authToken.getSecretKey());
-				twoFactorAuthenticationService.generateNewRecoveryCodes();
+				recoveryService.generateRecoveryCodes();
 				UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
 																			 .getAuthentication()
 																			 .getPrincipal();

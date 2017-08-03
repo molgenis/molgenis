@@ -35,8 +35,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		@Bean
 		public TwoFactorAuthenticationService twoFactorAuthenticationService()
 		{
-			return new TwoFactorAuthenticationServiceImpl(appSettings(), otpService(), dataService(), idGenerator(),
-					recoveryCodeFactory());
+			return new TwoFactorAuthenticationServiceImpl(appSettings(), otpService(), dataService(), idGenerator());
 		}
 
 		@Bean
