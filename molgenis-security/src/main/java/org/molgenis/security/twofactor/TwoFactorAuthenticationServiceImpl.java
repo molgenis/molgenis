@@ -82,7 +82,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean userIsBlocked()
+	public boolean userIsBlocked() throws TooManyLoginAttemptsException
 	{
 		UserSecret userSecret = getSecret();
 		if (userSecret.getFailedLoginAttempts() > 2)

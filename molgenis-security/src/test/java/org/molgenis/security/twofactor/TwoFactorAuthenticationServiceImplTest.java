@@ -4,9 +4,11 @@ import org.junit.Ignore;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +22,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
+import java.time.Instant;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -60,7 +65,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		@Bean
 		public IdGenerator idGenerator()
 		{
-			return mock(IdGenerator.class);
+			return new IdGeneratorImpl();
 		}
 
 		@Bean
@@ -80,16 +85,28 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		{
 			return mock(org.molgenis.auth.User.class);
 		}
+
+		@Bean
+		public UserSecret userSecret()
+		{
+			return mock(UserSecret.class);
+		}
 	}
 
 	@Autowired
 	private org.molgenis.auth.User molgenisUser;
 
 	@Autowired
+	private UserSecret userSecret;
+
+	@Autowired
 	private DataService dataService;
 
 	@Autowired
 	private AppSettings appSettings;
+
+	@Autowired
+	private UserSecretFactory userSecretFactory;
 
 	@Autowired
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
@@ -106,33 +123,37 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		when(dataService.findOne(USER,
 				new QueryImpl<org.molgenis.auth.User>().eq(UserMetaData.USERNAME, userDetails.getUsername()),
 				org.molgenis.auth.User.class)).thenReturn(molgenisUser);
+		when(runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
+				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
+				UserSecret.class))).thenReturn(userSecret);
 	}
 
 	@Test
 	public void generateSecretKeyTest()
 	{
 		String key = twoFactorAuthenticationService.generateSecretKey();
-		assertTrue(key.matches("^[A-Z0-9]+$"));
+		assertTrue(key.matches("^[a-z0-9]+$"));
 	}
 
 	@Test
 	public void generateWrongSecretKeyTest()
 	{
 		String key = twoFactorAuthenticationService.generateSecretKey();
-		assertTrue(!key.matches("^[a-z0-9]+$"));
+		assertTrue(!key.matches("^[A-Z0-9]+$"));
 	}
 
 	@Test
 	public void setSecretKeyTest()
 	{
 		String secretKey = "secretKey";
+		when(userSecretFactory.create()).thenReturn(userSecret);
 		twoFactorAuthenticationService.setSecretKey(secretKey);
 	}
 
 	@Test
 	public void isConfiguredForUserTest()
 	{
-		when(molgenisUser.getSecretKey()).thenReturn("secretKey");
+		when(userSecret.getSecret()).thenReturn("secretKey");
 		boolean isConfigured = twoFactorAuthenticationService.isConfiguredForUser();
 		assertEquals(true, isConfigured);
 	}
@@ -144,7 +165,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	@Ignore
 	public void isEnabledForUserTest()
 	{
-		when(molgenisUser.getSecretKey()).thenReturn("secretKey");
+		when(userSecret.getSecret()).thenReturn("secretKey");
 		boolean isEnabled = twoFactorAuthenticationService.isEnabledForUser();
 		assertEquals(true, isEnabled);
 	}
@@ -158,9 +179,18 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	{
 		String verificationCode = "123467";
 		when(appSettings.getTwoFactorAuthentication()).thenReturn(TwoFactorAuthenticationSetting.ENABLED.toString());
-		when(molgenisUser.getSecretKey()).thenReturn("secretKey");
+		when(userSecret.getSecret()).thenReturn("secretKey");
 		boolean isValid = twoFactorAuthenticationService.isVerificationCodeValidForUser(verificationCode);
 		assertEquals(false, isValid);
+	}
+
+	@Test(expectedExceptions = TooManyLoginAttemptsException.class)
+	public void testUserIsBlocked()
+	{
+		when(userSecret.getLastFailedAuthentication()).thenReturn(Instant.now());
+		when(userSecret.getFailedLoginAttempts()).thenReturn(3);
+		boolean isBlocked = twoFactorAuthenticationService.userIsBlocked();
+		assertEquals(true, isBlocked);
 	}
 
 }
