@@ -180,7 +180,7 @@
 </div>
 
 <#if is_2fa_enabled??>
-<div class="row">
+<div id="security" class="row">
     <div class="col-md-8 col-md-offset-2">
         <legend>Security</legend>
         <div class="row">
@@ -254,6 +254,12 @@
             equalTo: '#reg-password'
         })
 
+        let showCodes = false
+        showCodes = ${show_recovery_codes?c}
+        if (showCodes === true) {
+            showRecoveryCodes()
+        }
+
     <#-- form events -->
         form.submit(function (e) {
             e.preventDefault()
@@ -293,13 +299,14 @@
             $('#recovery-codes-list').html(listItems.join(''))
         }
 
-        recoveryCodesBtn.click(function (e) {
+        function showRecoveryCodes () {
             $.get('${context_url?html}/recoveryCodes', function (codes) {
                 listRecoveryCodes(codes)
             })
-
             $('.recovery-code-list-toggle').collapse('toggle')
-        })
+        }
+
+        recoveryCodesBtn.click(showRecoveryCodes)
 
         generateCodesBtn.click(function (e) {
             $.get('${context_url?html}/generateRecoveryCodes', function (codes) {

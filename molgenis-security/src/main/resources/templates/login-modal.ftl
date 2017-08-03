@@ -81,13 +81,13 @@
 
             <#elseif is2faInitial??>
                 <form id="initial-2fa-form" method="POST" action="/2fa/secret">
-                    <div class="form-group" style="padding-bottom: 5px;">
-                        <b>Two Factor Authentication Set-up</b>
+                    <div class="form-group">
                         <p>Please configure your two factor authentication by scanning the QR code with the <a
                                 href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
                                 target="_blank">Google Authenticator app</a> and enter the verification code in the
                             field below to confirm.</p>
                     </div>
+                    <div class="vertical-spacer"></div>
                     <div class="form-group">
                         <div class="col-md-12 text-center">
                             <div id="qrcode" style="width: 50%; margin: 0 auto;"></div>
@@ -109,6 +109,13 @@
                             <button id="verify" class="btn btn-success">Verify</button>
                             </span>
                             <input type="hidden" name="secretKey" value="${secretKey}"/>
+                        </div>
+                        <div class="vertical-spacer"></div>
+                        <div>
+                            <em class="text-muted">
+                                You will be redirected to your user account page where you can retrieve recovery codes.
+                                These codes can be used to unlock your account in case you lose your phone.
+                            </em>
                         </div>
                     </div>
                 </form>
@@ -154,6 +161,13 @@
 </div>
 <div id="register-modal-container"></div>
 <div id="resetpassword-modal-container"></div>
+
+<style>
+    .vertical-spacer {
+        padding-top: 10px;
+    }
+</style>
+
 <script type="text/javascript">
     $(function () {
         var modal = $('#login-modal')
