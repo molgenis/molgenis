@@ -61,7 +61,7 @@ public class UserAccountController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String showAccount(Model model)
+	public String showAccount(Model model, @RequestParam(defaultValue = "false") boolean showCodes)
 	{
 		boolean is2faEnabled = !appSettings.getTwoFactorAuthentication().equals(DISABLED.toString());
 
@@ -70,6 +70,7 @@ public class UserAccountController extends MolgenisPluginController
 		model.addAttribute("groups", Lists.newArrayList(userAccountService.getCurrentUserGroups()));
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
 		model.addAttribute("is_2fa_enabled", is2faEnabled);
+		model.addAttribute("show_recovery_codes", showCodes);
 		return "view-useraccount";
 	}
 
