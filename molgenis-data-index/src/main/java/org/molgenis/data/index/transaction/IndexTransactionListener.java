@@ -23,11 +23,14 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 	}
 
 	@Override
-	public void commitTransaction(String transactionId)
+	public void afterCommitTransaction(String transactionId)
 	{
 		try
 		{
-			indexActionRegisterService.storeIndexActions(transactionId);
+			if (indexActionRegisterService.storeIndexActions(transactionId))
+			{
+				indexJobScheduler.scheduleIndexJob(transactionId);
+			}
 		}
 		catch (Exception ex)
 		{
@@ -36,27 +39,11 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 	}
 
 	@Override
-	public void rollbackTransaction(String transactionId)
-	{
-		try
-		{
-			indexActionRegisterService.forgetIndexActions(transactionId);
-		}
-		catch (Exception ex)
-		{
-			LOG.error("Error forgetting actions for transaction id {}", transactionId, ex);
-		}
-	}
-
-	@Override
 	public void doCleanupAfterCompletion(String transactionId)
 	{
 		try
 		{
-			if (indexActionRegisterService.forgetIndexActions(transactionId))
-			{
-				indexJobScheduler.scheduleIndexJob(transactionId);
-			}
+			indexActionRegisterService.forgetIndexActions(transactionId);
 		}
 		catch (Exception ex)
 		{
