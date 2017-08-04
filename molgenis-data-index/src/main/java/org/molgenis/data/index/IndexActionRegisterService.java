@@ -21,7 +21,7 @@ public interface IndexActionRegisterService
 	 *
 	 * @param entityId the ID of the entity, may be null to indicate change to entire repository
 	 */
-	void register(EntityType entityType, String entityId);
+	void register(EntityType entityType, Object entityId);
 
 	/**
 	 * Stores the index actions in the repository.
