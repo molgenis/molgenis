@@ -28,9 +28,9 @@ install:
 before_script:
   - sudo sysctl -w vm.max_map_count=262144
 script:
-  # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to
+  # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
   # Travis provides us with a travis user and travis database
-  - travis_wait 40 mvn verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Ddb_user=travis -Ddb_password -Dit_db_name=travis -P!create-it-db
+  - travis_wait 40 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Ddb_user=travis -Ddb_password -Dit_db_name=travis -P!create-it-db
 notifications:
   slack:
     rooms:
