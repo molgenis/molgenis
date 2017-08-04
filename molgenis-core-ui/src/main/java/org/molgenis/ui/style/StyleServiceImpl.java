@@ -1,16 +1,34 @@
 package org.molgenis.ui.style;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileDownloadController;
+import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMeta;
+import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.file.model.FileMetaMetaData;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_3;
+import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
 
 @Component
 public class StyleServiceImpl implements StyleService
@@ -18,33 +36,77 @@ public class StyleServiceImpl implements StyleService
 	private static final String LOCAL_CSS_BOOTSTRAP_THEME_LOCATION = "classpath*:css/bootstrap-*.min.css";
 
 	private final AppSettings appSettings;
+	private final IdGenerator idGenerator;
+	private final FileStore fileStore;
+	private final FileMetaFactory fileMetaFactory;
+	private final StyleSheetFactory styleSheetFactory;
+	private final DataService dataService;
 
 	@Autowired
-	public StyleServiceImpl(AppSettings appSettings)
+	public StyleServiceImpl(AppSettings appSettings, IdGenerator idGenerator,FileStore fileStore,
+			FileMetaFactory fileMetaFactory, StyleSheetFactory styleSheetFactory, DataService dataService)
 	{
 		this.appSettings = requireNonNull(appSettings);
+		this.idGenerator = requireNonNull(idGenerator);
+		this.fileStore = requireNonNull(fileStore);
+		this.fileMetaFactory = requireNonNull(fileMetaFactory);
+		this.styleSheetFactory = requireNonNull(styleSheetFactory);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
 	public Set<Style> getAvailableStyles()
 	{
-		Set<Style> availableStyles = new HashSet<>();
+		Stream<StyleSheet> styleEntities = dataService.findAll(StyleMetadata.STYLE_SHEET, StyleSheet.class);
 
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		return styleEntities.map(s -> Style.createLocal(s.getName())).collect(Collectors.toSet());
+	}
+
+	@Override
+	public void addStyles(MultipartFile bootstrap3Style, MultipartFile bootstrap4Style) throws MolgenisStyleException
+	{
+		String originalFilename = bootstrap3Style.getOriginalFilename();
+		if (dataService.getRepository(STYLE_SHEET).findOneById(originalFilename) != null)
+		{
+			throw new MolgenisStyleException(
+					String.format("A style with the same identifier (%s) already exists", originalFilename));
+		}
+
+		StyleSheet styleSheet = styleSheetFactory.create(originalFilename);
+		styleSheet.setName(originalFilename);
+
+		FileMeta bootstrap3ThemeFileMeta = createStyleSheetFileMeta(bootstrap3Style);
+		FileMeta bootstrap4ThemeFileMeta = createStyleSheetFileMeta(bootstrap4Style);
+
+		styleSheet.setBootstrap3Theme(bootstrap3ThemeFileMeta);
+		styleSheet.setBootstrap4Theme(bootstrap4ThemeFileMeta);
+
+		dataService.add(STYLE_SHEET, styleSheet);
+	}
+
+	private FileMeta createStyleSheetFileMeta(MultipartFile multipartFile) throws MolgenisStyleException
+	{
+		String fileId = idGenerator.generateId();
 		try
 		{
-			Resource[] resources = resolver.getResources(LOCAL_CSS_BOOTSTRAP_THEME_LOCATION);
-			for (Resource resource : resources)
-			{
-				availableStyles.add(Style.createLocal(resource.getFilename()));
-			}
+			fileStore.store(multipartFile.getInputStream(), fileId);
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			throw new MolgenisStyleException("Unable to save style file with name : " + multipartFile.getName(), e);
 		}
 
-		return availableStyles;
+		FileMeta fileMeta = fileMetaFactory.create(fileId);
+		fileMeta.setContentType("css");
+		fileMeta.setFilename(multipartFile.getOriginalFilename() + "123	");
+		fileMeta.setSize(multipartFile.getSize());
+		ServletUriComponentsBuilder currentRequest = ServletUriComponentsBuilder.fromCurrentRequest();
+		UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + fileId)
+				.replaceQuery(null)
+				.build();
+		fileMeta.setUrl(downloadUri.toUriString());
+		dataService.add(FileMetaMetaData.FILE_META, fileMeta);
+		return fileMeta;
 	}
 
 	@Override
@@ -92,4 +154,53 @@ public class StyleServiceImpl implements StyleService
 
 		return null;
 	}
+
+	@Override
+	@RunAsSystem
+	public FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
+			throws MolgenisStyleException, IOException
+	{
+		Query<StyleSheet> findByName = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		StyleSheet styleSheet = dataService.findOne(StyleMetadata.STYLE_SHEET, findByName, StyleSheet.class);
+
+		if (styleSheet == null)
+		{
+			throw new MolgenisStyleException("No theme found for with name: " + styleName);
+		}
+
+		// Fetch the theme file from the store.
+		// If no bootstrap 4 theme was set fetch the default theme from the resources folder
+		File file = null;
+		if (bootstrapVersion.equals(BOOTSTRAP_VERSION_3))
+		{
+			FileMeta fileMeta = styleSheet.getBootstrap3Theme();
+			file = fileStore.getFile(fileMeta.getId());
+		}
+		else
+		{
+			FileMeta fileMeta = styleSheet.getBootstrap4Theme();
+			if (fileMeta == null)
+			{
+				file = getFallBackTheme();
+			}
+			else
+			{
+				file = fileStore.getFile(fileMeta.getId());
+			}
+		}
+
+		return new FileSystemResource(file);
+	}
+
+	private File getFallBackTheme() throws IOException
+	{
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+		Resource resource = resolver.getResource("classpath*:css/bootstrap-4/bootstrap.min.css");
+
+		return resource.getFile();
+	}
+
+
+
 }

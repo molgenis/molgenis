@@ -32,5 +32,42 @@
 				}
 			});
 		});
+
+    $('#show-add-theme-btn').on('click', function() {
+			$('#add-theme-container').show();
+    });
+
+    $('#cancel-add-themes-btn').on('click', function() {
+      $('#add-theme-container').hide();
+    });
+
+    $('#add-themes-btn').on('click', function() {
+      var bs3ThemeFile = $('#bootstrap3-file')[0].files[0];
+      var bs4ThemeFile = $('#bootstrap4-file')[0].files[0];
+
+      var data = new FormData();
+			data.append('bootstrap3-style', bs3ThemeFile);
+			if(bs4ThemeFile) {
+        data.append('bootstrap4-style', bs4ThemeFile);
+      }
+
+      $.ajax({
+        url : molgenis.getContextUrl() + '/add-bootstrap-theme',
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        type: 'POST',
+        success : function() {
+          molgenis.createAlert([ {
+            'message' : 'Succesfully added the application theme'
+          } ], 'success');
+          $('#add-theme-container').hide();
+        }
+      });
+
+
+
+    });
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

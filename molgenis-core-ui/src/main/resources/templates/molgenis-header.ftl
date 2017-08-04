@@ -2,6 +2,7 @@
 <#--   css (optional) list of additional stylesheets to include -->
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
+<#include "theme-macros.ftl">
 <#macro header css=[] js=[]>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
     <#assign googleSignIn = app_settings.googleSignIn && app_settings.signUp && !app_settings.signUpModeration>
@@ -19,7 +20,7 @@
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
     <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
     <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-    <link rel="stylesheet" href="<@resource_href "/css/${app_settings.bootstrapTheme?html}"/>" type="text/css"
+    <link rel="stylesheet" href="<@theme_href "/css/theme/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css"
           id="bootstrap-theme">
 
     <#if app_settings.logoTopHref?has_content>

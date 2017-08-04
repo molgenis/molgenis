@@ -2,6 +2,7 @@ package org.molgenis.ui;
 
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.util.ResourceUtils;
 import org.molgenis.util.TemplateResourceUtils;
@@ -22,17 +23,19 @@ import static org.molgenis.ui.MolgenisPluginAttributes.*;
 public class MolgenisInterceptor extends HandlerInterceptorAdapter
 {
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
+	private final ThemeFingerprintRegistry themeFingerprintRegistry;
 	private final TemplateResourceUtils templateResourceUtils;
 	private final AppSettings appSettings;
 	private final String environment;
 	private final LanguageService languageService;
 
 	@Autowired
-	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry,
+	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry, ThemeFingerprintRegistry themeFingerprintRegistry,
 			TemplateResourceUtils templateResourceUtils, AppSettings appSettings, LanguageService languageService,
 			@Value("${environment}") String environment)
 	{
 		this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
+		this.themeFingerprintRegistry = requireNonNull(themeFingerprintRegistry);
 		this.templateResourceUtils = requireNonNull(templateResourceUtils);
 		this.appSettings = requireNonNull(appSettings);
 		this.languageService = requireNonNull(languageService);
@@ -46,6 +49,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 		if (modelAndView != null)
 		{
 			modelAndView.addObject(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
+			modelAndView.addObject(KEY_THEME_FINGERPRINT_REGISTRY, themeFingerprintRegistry);
 			modelAndView.addObject(KEY_RESOURCE_UTILS, templateResourceUtils);
 			modelAndView.addObject(KEY_ENVIRONMENT, environment);
 			modelAndView.addObject(KEY_APP_SETTINGS, appSettings);
