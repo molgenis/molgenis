@@ -117,18 +117,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="vertical-spacer"></div>
-                                    <div>
-                                        <em class="text-muted">
-                                            You will be redirected to your user account page where you can retrieve
-                                            recovery codes.
-                                            These codes can be used to unlock your account in case you lose your phone.
-                                        </em>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </form>
 
