@@ -18,8 +18,5 @@ public interface MolgenisUi
 	 */
 	MolgenisUiMenu getMenu(String menuId);
 
-	default String getMenuJson()
-	{
-		return MenuUtils.getMenuJson(getMenu());
-	}
+	String getMenuJson();
 }
