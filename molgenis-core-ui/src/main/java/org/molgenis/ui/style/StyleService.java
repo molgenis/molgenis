@@ -17,11 +17,17 @@ public interface StyleService
 	Set<Style> getAvailableStyles();
 
 	/**
-	 * Add given the style files to style folder
-	 * @param bootstrap3Style this is monitory and may not be null
-	 * @param bootstrap4Style this is optional and may be set to null to indicate not bootstrap4 style needs to be added
+	 * Add a bootstrap theme
+	 *
+	 * @param styleId             the them identifier used in the request
+	 * @param bootstrap3FileName  the name to use as fileName for the bootstrap 3 file
+	 * @param bootstrap3StyleData the bootstrap 3 style data
+	 * @param bootstrap4FileName  the name to use as fileName for the bootstrap 4 file, this is optional
+	 * @param bootstrap4StyleData the bootstrap 4 style data, this is optional
+	 * @throws MolgenisStyleException
 	 */
-	void addStyles(MultipartFile bootstrap3Style, MultipartFile bootstrap4Style) throws MolgenisStyleException;
+	void addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
+			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException;
 
 	/**
 	 * Set the runtime property that controls the css style with a selected style

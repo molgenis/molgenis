@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponents;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,43 +64,46 @@ public class StyleServiceImpl implements StyleService
 	}
 
 	@Override
-	public void addStyles(MultipartFile bootstrap3Style, MultipartFile bootstrap4Style) throws MolgenisStyleException
+	public void addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
+			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException
 	{
-		String originalFilename = bootstrap3Style.getOriginalFilename();
-		if (dataService.getRepository(STYLE_SHEET).findOneById(originalFilename) != null)
+		if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null)
 		{
 			throw new MolgenisStyleException(
-					String.format("A style with the same identifier (%s) already exists", originalFilename));
+					String.format("A style with the same identifier (%s) already exists", styleId));
 		}
 
-		StyleSheet styleSheet = styleSheetFactory.create(originalFilename);
-		styleSheet.setName(originalFilename);
+		StyleSheet styleSheet = styleSheetFactory.create(styleId);
+		styleSheet.setName(styleId);
 
-		FileMeta bootstrap3ThemeFileMeta = createStyleSheetFileMeta(bootstrap3Style);
-		FileMeta bootstrap4ThemeFileMeta = createStyleSheetFileMeta(bootstrap4Style);
-
+		FileMeta bootstrap3ThemeFileMeta = createStyleSheetFileMeta(bootstrap3FileName, bootstrap3StyleData);
 		styleSheet.setBootstrap3Theme(bootstrap3ThemeFileMeta);
-		styleSheet.setBootstrap4Theme(bootstrap4ThemeFileMeta);
+
+		// Setting the bootstrap 4 style is optional
+		if(bootstrap4FileName != null && bootstrap4StyleData != null) {
+			FileMeta bootstrap4ThemeFileMeta = createStyleSheetFileMeta(bootstrap4FileName, bootstrap4StyleData);
+			styleSheet.setBootstrap4Theme(bootstrap4ThemeFileMeta);
+		}
 
 		dataService.add(STYLE_SHEET, styleSheet);
 	}
 
-	private FileMeta createStyleSheetFileMeta(MultipartFile multipartFile) throws MolgenisStyleException
+	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data) throws MolgenisStyleException
 	{
 		String fileId = idGenerator.generateId();
 		try
 		{
-			fileStore.store(multipartFile.getInputStream(), fileId);
+			fileStore.store(data, fileId);
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisStyleException("Unable to save style file with name : " + multipartFile.getName(), e);
+			throw new MolgenisStyleException("Unable to save style file with name : " + fileName, e);
 		}
 
 		FileMeta fileMeta = fileMetaFactory.create(fileId);
 		fileMeta.setContentType("css");
-		fileMeta.setFilename(multipartFile.getOriginalFilename() + "123	");
-		fileMeta.setSize(multipartFile.getSize());
+		fileMeta.setFilename(fileName);
+		fileMeta.setSize(fileStore.getFile(fileId).length());
 		ServletUriComponentsBuilder currentRequest = ServletUriComponentsBuilder.fromCurrentRequest();
 		UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + fileId)
 				.replaceQuery(null)
@@ -169,8 +173,7 @@ public class StyleServiceImpl implements StyleService
 		}
 
 		// Fetch the theme file from the store.
-		// If no bootstrap 4 theme was set fetch the default theme from the resources folder
-		File file = null;
+		File file;
 		if (bootstrapVersion.equals(BOOTSTRAP_VERSION_3))
 		{
 			FileMeta fileMeta = styleSheet.getBootstrap3Theme();
@@ -179,6 +182,7 @@ public class StyleServiceImpl implements StyleService
 		else
 		{
 			FileMeta fileMeta = styleSheet.getBootstrap4Theme();
+			// If no bootstrap 4 theme was set fetch the default theme from the resources folder
 			if (fileMeta == null)
 			{
 				file = getFallBackTheme();

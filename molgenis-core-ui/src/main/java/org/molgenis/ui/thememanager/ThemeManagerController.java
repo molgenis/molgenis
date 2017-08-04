@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
+import java.io.IOException;
+
 import static java.util.Collections.singletonList;
 import static org.molgenis.ui.thememanager.ThemeManagerController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -61,10 +63,21 @@ public class ThemeManagerController extends MolgenisPluginController
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/add-bootstrap-theme", method = RequestMethod.POST)
-	public @ResponseBody void addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
-			@RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style) throws MolgenisStyleException
+	public @ResponseBody
+	void addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
+			@RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style)
+			throws MolgenisStyleException
 	{
-		styleService.addStyles(bootstrap3Style, bootstrap4Style);
+		String styleIdentifier = bootstrap3Style.getOriginalFilename();
+		try
+		{
+			styleService.addStyles(styleIdentifier, bootstrap3Style.getOriginalFilename(), bootstrap3Style.getInputStream(),
+					bootstrap4Style.getOriginalFilename(), bootstrap4Style.getInputStream());
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisStyleException("unable to add style: " + styleIdentifier, e);
+		}
 	}
 
 	@ResponseBody
