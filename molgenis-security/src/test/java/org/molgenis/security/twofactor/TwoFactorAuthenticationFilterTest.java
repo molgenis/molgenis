@@ -3,6 +3,8 @@ package org.molgenis.security.twofactor;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserAccountServiceImpl;
+import org.molgenis.security.user.UserService;
+import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
@@ -59,6 +63,18 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		public UserAccountService userAccountService()
 		{
 			return mock(UserAccountServiceImpl.class);
+		}
+
+		@Bean
+		public UserService userService()
+		{
+			return mock(UserServiceImpl.class);
+		}
+
+		@Bean
+		public PasswordEncoder passwordEncoder()
+		{
+			return new BCryptPasswordEncoder();
 		}
 
 	}

@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor.services;
+package org.molgenis.security.twofactor;
 
 import org.junit.Ignore;
 import org.molgenis.data.DataService;
@@ -7,22 +7,21 @@ import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.twofactor.*;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.user.UserService;
 import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.collections.Lists;
 
 import java.time.Instant;
 
@@ -33,8 +32,12 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
 @ContextConfiguration(classes = { TwoFactorAuthenticationServiceImplTest.Config.class, })
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpringContextTests
 {
+	private final static String USERNAME = "molgenisUser";
+	private final static String ROLE_SU = "SU";
+
 	@Configuration
 	static class Config
 	{
@@ -81,24 +84,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 			return mock(UserSecretFactory.class);
 		}
 
-		@Bean
-		public org.molgenis.auth.User user()
-		{
-			return mock(org.molgenis.auth.User.class);
-		}
-
-		@Bean
-		public UserSecret userSecret()
-		{
-			return mock(UserSecret.class);
-		}
 	}
-
-	@Autowired
-	private org.molgenis.auth.User molgenisUser;
-
-	@Autowired
-	private UserSecret userSecret;
 
 	@Autowired
 	private DataService dataService;
@@ -115,16 +101,16 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	@Autowired
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
-	@BeforeClass
-	public void setUpBeforeClass()
+	private org.molgenis.auth.User molgenisUser = mock(org.molgenis.auth.User.class);
+	private UserSecret userSecret = mock(UserSecret.class);
+
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@WithUserDetails(USERNAME)
+	@BeforeMethod
+	public void setUpBeforeMethod()
 	{
-		UserDetails userDetails = new User("molgenisUser", "", Lists.newArrayList());
-		Authentication authentication = mock(Authentication.class);
-		when(authentication.getPrincipal()).thenReturn(userDetails);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userDetails);
-		when(molgenisUser.getUsername()).thenReturn("molgenisUser");
-		when(userService.getUser(userDetails.getUsername())).thenReturn(molgenisUser);
+		when(molgenisUser.getUsername()).thenReturn(USERNAME);
+		when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
 		when(runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
 				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
 				UserSecret.class))).thenReturn(userSecret);
@@ -145,6 +131,8 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	}
 
 	@Test
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@WithUserDetails(USERNAME)
 	public void setSecretKeyTest()
 	{
 		String secretKey = "secretKey";
@@ -153,6 +141,8 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	}
 
 	@Test
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@WithUserDetails(USERNAME)
 	public void isConfiguredForUserTest()
 	{
 		when(userSecret.getSecret()).thenReturn("secretKey");
@@ -163,8 +153,10 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	/**
 	 * FIXME(SH): how do we implement this test properly
 	 */
-	@Test
 	@Ignore
+	@Test(expectedExceptions = InvalidVerificationCodeException.class)
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@WithUserDetails(USERNAME)
 	public void isVerificationCodeValidForUserTest()
 	{
 		String verificationCode = "123467";
@@ -175,6 +167,8 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	}
 
 	@Test(expectedExceptions = TooManyLoginAttemptsException.class)
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@WithUserDetails(USERNAME)
 	public void testUserIsBlocked()
 	{
 		when(userSecret.getLastFailedAuthentication()).thenReturn(Instant.now());

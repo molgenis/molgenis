@@ -1,8 +1,6 @@
-package org.molgenis.security.twofactor.services;
+package org.molgenis.security.twofactor;
 
 import org.junit.Ignore;
-import org.molgenis.security.twofactor.OTPService;
-import org.molgenis.security.twofactor.OTPServiceImpl;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +42,7 @@ public class OTPServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testTryVerificationKey()
 	{
 		boolean isValid = otpService.tryVerificationCode("", "secretKey");
-		assertEquals(true, isValid);
+		assertEquals(false, isValid);
 	}
 
 }

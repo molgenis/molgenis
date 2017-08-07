@@ -1,5 +1,6 @@
 package org.molgenis.security.twofactor;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,7 +33,7 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException
 	{
 		if (!supports(authentication.getClass()))
-			throw new IllegalArgumentException("Only RestAuthenticationToken is supported");
+			throw new IllegalArgumentException("Only TwoFactorAuthenticationToken is supported");
 
 		TwoFactorAuthenticationToken authToken = (TwoFactorAuthenticationToken) authentication;
 
@@ -40,17 +41,22 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 		{
 			if (authToken.getSecretKey() != null)
 			{
-				otpService.tryVerificationCode(authToken.getVerificationCode(), authToken.getSecretKey());
+				if (otpService.tryVerificationCode(authToken.getVerificationCode(), authToken.getSecretKey()))
+				{
+					//TODO combine configuration methods into one
+					twoFactorAuthenticationService.setSecretKey(authToken.getSecretKey());
+					recoveryService.generateRecoveryCodes();
+					UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
+																				 .getAuthentication()
+																				 .getPrincipal();
 
-				//TODO combine configuration methods into one
-				twoFactorAuthenticationService.setSecretKey(authToken.getSecretKey());
-				recoveryService.generateRecoveryCodes();
-				UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
-																			 .getAuthentication()
-																			 .getPrincipal();
-				// if token is invalid
-				authToken = new TwoFactorAuthenticationToken(userDetails, userDetails.getPassword(),
-						userDetails.getAuthorities(), authToken.getVerificationCode(), authToken.getSecretKey());
+					authToken = new TwoFactorAuthenticationToken(userDetails, userDetails.getPassword(),
+							userDetails.getAuthorities(), authToken.getVerificationCode(), authToken.getSecretKey());
+				}
+			}
+			else
+			{
+				throw new BadCredentialsException("Invalid secret generated");
 			}
 		}
 		else
@@ -66,6 +72,10 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 					authToken = new TwoFactorAuthenticationToken(userDetails, userDetails.getPassword(),
 							userDetails.getAuthorities(), authToken.getVerificationCode(), null);
 				}
+			}
+			else
+			{
+				throw new BadCredentialsException("Invalid verificationcode entered");
 			}
 		}
 

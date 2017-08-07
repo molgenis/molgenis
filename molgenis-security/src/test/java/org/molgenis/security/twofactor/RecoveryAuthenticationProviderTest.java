@@ -1,26 +1,29 @@
-package org.molgenis.security.twofactor.providers;
+package org.molgenis.security.twofactor;
 
-import com.google.common.collect.Lists;
-import org.molgenis.security.twofactor.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { RecoveryAuthenticationProviderTest.Config.class })
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringContextTests
 {
+
+	private final static String USERNAME = "admin";
+	private final static String ROLE_SU = "SU";
 
 	@Configuration
 	static class Config
@@ -44,17 +47,17 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 	@Autowired
 	private RecoveryService recoveryService;
 
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void testAuthenticateInvalidToken()
+	{
+		recoveryAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken("dsda545ds4dsa456", ""));
+	}
+
 	@Test
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@WithUserDetails(USERNAME)
 	public void testAuthentication()
 	{
-		UserDetails userDetails = mock(UserDetails.class);
-		when(userDetails.getUsername()).thenReturn("admin");
-		when(userDetails.getPassword()).thenReturn("admin");
-
-		UsernamePasswordAuthenticationToken originalToken = new UsernamePasswordAuthenticationToken(userDetails,
-				"admin", Lists.newArrayList(new SimpleGrantedAuthority("admin")));
-		SecurityContextHolder.getContext().setAuthentication(originalToken);
-
 		RecoveryAuthenticationToken authToken = new RecoveryAuthenticationToken("dsda545ds4dsa456");
 		assertFalse(authToken.isAuthenticated());
 
@@ -66,9 +69,4 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 		assertEquals(auth.getName(), "admin");
 	}
 
-	@Test(expectedExceptions = AuthenticationException.class)
-	public void testAuthenticateInvalidToken()
-	{
-		recoveryAuthenticationProvider.authenticate(new RecoveryAuthenticationToken("dsda545ds4dsa456"));
-	}
 }

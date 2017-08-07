@@ -58,7 +58,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		@Bean
 		public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
 		{
-			return mock(RecoveryAuthenticationProvider.class);
+			return new RecoveryAuthenticationProviderImpl(recoveryService());
 		}
 
 		@Bean
@@ -94,7 +94,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 	}
 
 	@Test
-	public void enabledExceptionTest() throws Exception
+	public void configuredExceptionTest() throws Exception
 	{
 		Model model = new ExtendedModelMap();
 		String viewTemplate = twoFactorAuthenticationController.configured(model);
@@ -115,7 +115,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		assertEquals(secretKey, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_SECRET_KEY));
 		assertEquals("Setup 2 factor authentication",
 				model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_HEADER));
-		assertEquals("No valid verification code entered!",
+		assertEquals("Invalid verificationcode entered",
 				model.asMap().get(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE));
 		assertEquals("view-login", viewTemplate);
 
@@ -130,7 +130,16 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 				verificationCode);
 		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
 		assertEquals("view-login", viewTemplate);
+	}
 
+	@Test
+	public void testRecoverAccount()
+	{
+		String recoveryCodeId = "123456";
+		Model model = new ExtendedModelMap();
+		String viewTemplate = twoFactorAuthenticationController.recoverAccount(model, recoveryCodeId);
+		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
+		assertEquals("view-login", viewTemplate);
 	}
 
 }
