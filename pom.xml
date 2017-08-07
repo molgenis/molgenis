@@ -56,6 +56,7 @@
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
         <elasticsearch.version>5.4.1</elasticsearch.version>
         <postgres.version>9.4.1211</postgres.version>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <mockito.version>2.7.22</mockito.version>
     </properties>
 
@@ -409,6 +410,12 @@
                     <artifactId>properties-maven-plugin</artifactId>
                     <version>1.0-alpha-2</version>
                 </plugin>
+                <!-- specify plugin version -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.7.2.201409121644</version>
+                </plugin>
                 <!-- Eclipse m2e mappings -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -623,12 +630,27 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.6.201602180812</version>
+                <configuration>
+                    <append>true</append>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>amend-unit-test-java-agent-option</id>
+                        <id>agent-for-ut</id>
                         <goals>
                             <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>agent-for-it</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -642,12 +664,6 @@
 
     <reporting>
         <plugins>
-            <!-- code coverage -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.6.201602180812</version>
-            </plugin>
             <!-- code analysis -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
