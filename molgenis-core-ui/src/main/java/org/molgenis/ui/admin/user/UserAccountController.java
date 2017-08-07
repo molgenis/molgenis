@@ -17,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +32,6 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -63,13 +65,15 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String showAccount(Model model, @RequestParam(defaultValue = "false") boolean showCodes)
 	{
-		boolean is2faEnabled = !appSettings.getTwoFactorAuthentication().equals(DISABLED.toString());
+		String twoFactorAuthenticationApp = appSettings.getTwoFactorAuthentication();
+		boolean twoFactorAuthenticationUser = userAccountService.getCurrentUser().getTwoFactorAuthentication();
 
 		model.addAttribute("user", userAccountService.getCurrentUser());
 		model.addAttribute("countries", CountryCodes.get());
 		model.addAttribute("groups", Lists.newArrayList(userAccountService.getCurrentUserGroups()));
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
-		model.addAttribute("is_2fa_enabled", is2faEnabled);
+		model.addAttribute("two_factor_authentication_app", twoFactorAuthenticationApp);
+		model.addAttribute("two_factor_authentication_user", twoFactorAuthenticationUser);
 		model.addAttribute("show_recovery_codes", showCodes);
 		return "view-useraccount";
 	}
@@ -152,6 +156,37 @@ public class UserAccountController extends MolgenisPluginController
 		}
 
 		userAccountService.updateCurrentUser(user);
+	}
+
+	@RequestMapping(value = "enableTwoFactorAuthentication", method = POST)
+	public String enableTwoFactorAuthentication()
+	{
+		User user = userAccountService.getCurrentUser();
+		user.setTwoFactorAuthentication(true);
+		userAccountService.updateCurrentUser(user);
+
+		return "redirect:/login";
+	}
+
+	@RequestMapping(value = "disableTwoFactorAuthentication", method = POST)
+	public String disableTwoFactorAuthentication(Model model)
+	{
+		User user = userAccountService.getCurrentUser();
+		user.setTwoFactorAuthentication(false);
+		user.setSecretKey(null);
+		userAccountService.updateCurrentUser(user);
+
+		downgradeUserAuthentication();
+
+		return showAccount(model, false);
+	}
+
+	private void downgradeUserAuthentication()
+	{
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(auth.getPrincipal(),
+				auth.getCredentials(), auth.getAuthorities());
+		SecurityContextHolder.getContext().setAuthentication(token);
 	}
 
 	@RequestMapping(value = "recoveryCodes", method = GET)
