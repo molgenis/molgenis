@@ -1,6 +1,8 @@
 package org.molgenis.security.twofactor;
 
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.user.UserAccountServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +34,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
 		{
 			return new TwoFactorAuthenticationFilter(appSettings(), twoFactorAuthenticationService(),
-					redirectStrategy());
+					redirectStrategy(), userAccountService());
 		}
 
 		@Bean
@@ -51,6 +53,12 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		public RedirectStrategy redirectStrategy()
 		{
 			return new DefaultRedirectStrategy();
+		}
+
+		@Bean
+		public UserAccountService userAccountService()
+		{
+			return mock(UserAccountServiceImpl.class);
 		}
 
 	}
