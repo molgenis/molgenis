@@ -32,13 +32,6 @@ public interface TwoFactorAuthenticationService
 	void setSecretKey(String secret) throws UsernameNotFoundException;
 
 	/**
-	 * <p>Has user 2 factor authentication enabled?</p>
-	 *
-	 * @return is ready
-	 */
-	boolean isEnabledForUser() throws InternalAuthenticationServiceException;
-
-	/**
 	 * <p>Check if the user is 2 factor authentication ready.</p>
 	 *
 	 * @return is configured for user

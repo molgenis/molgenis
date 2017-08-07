@@ -1,10 +1,10 @@
 package org.molgenis.security.twofactor;
 
 import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.user.UserService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.twofactor.RecoveryCodeMetadata.*;
@@ -28,11 +27,13 @@ public class RecoveryServiceImpl implements RecoveryService
 	private final DataService dataService;
 	private final RecoveryCodeFactory recoveryCodeFactory;
 	private final IdGenerator idGenerator;
+	private final UserService userService;
 
-	public RecoveryServiceImpl(DataService dataService, RecoveryCodeFactory recoveryCodeFactory,
-			IdGenerator idGenerator)
+	public RecoveryServiceImpl(DataService dataService, UserService userService,
+			RecoveryCodeFactory recoveryCodeFactory, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.userService = requireNonNull(userService);
 		this.recoveryCodeFactory = requireNonNull(recoveryCodeFactory);
 		this.idGenerator = requireNonNull(idGenerator);
 	}
@@ -76,7 +77,8 @@ public class RecoveryServiceImpl implements RecoveryService
 
 	private void deleteOldRecoveryCodes(String userId)
 	{
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			Stream<RecoveryCode> recoveryCodes = dataService.findAll(RECOVERY_CODE,
 					new QueryImpl<RecoveryCode>().eq(USER_ID, userId), RecoveryCode.class);
 			dataService.delete(RECOVERY_CODE, recoveryCodes);
@@ -96,12 +98,10 @@ public class RecoveryServiceImpl implements RecoveryService
 		return recoveryCodes;
 	}
 
-	//FIXME use userservice
 	private User getUser()
 	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER,
-				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+		User user = runAsSystem(() -> userService.getUser(userDetails.getUsername()));
 
 		if (user != null)
 		{

@@ -1,12 +1,12 @@
 package org.molgenis.security.twofactor;
 
 import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
+import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -21,7 +21,6 @@ import java.time.Instant;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -30,18 +29,18 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationService.class);
 
-	private static final int RECOVERY_CODE_COUNT = 10;
-
 	private OTPService otpService;
 	private DataService dataService;
+	private UserService userService;
 	private IdGenerator idGenerator;
 	private UserSecretFactory userSecretFactory;
 
-	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService, IdGenerator idGenerator,
-			UserSecretFactory userSecretFactory)
+	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService, UserService userService,
+			IdGenerator idGenerator, UserSecretFactory userSecretFactory)
 	{
 		this.otpService = requireNonNull(otpService);
 		this.dataService = requireNonNull(dataService);
+		this.userService = requireNonNull(userService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.userSecretFactory = requireNonNull(userSecretFactory);
 	}
@@ -133,15 +132,6 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		return isConfigured;
 	}
 
-	@Override
-	public boolean isEnabledForUser() throws InternalAuthenticationServiceException
-	{
-		boolean isEnabled = false;
-		User user = getUser();
-		isEnabled = true;
-		return isEnabled;
-	}
-
 	private UserSecret getSecret() throws InternalAuthenticationServiceException
 	{
 		User user = getUser();
@@ -172,12 +162,10 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
 	}
 
-	//FIXME use userservice
 	private User getUser()
 	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER,
-				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+		User user = runAsSystem(() -> userService.getUser(userDetails.getUsername()));
 
 		if (user != null)
 		{

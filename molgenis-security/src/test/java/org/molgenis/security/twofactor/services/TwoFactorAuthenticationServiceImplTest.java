@@ -1,14 +1,16 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.services;
 
 import org.junit.Ignore;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.twofactor.*;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
+import org.molgenis.security.user.UserService;
+import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +28,6 @@ import java.time.Instant;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
@@ -40,7 +41,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		@Bean
 		public TwoFactorAuthenticationService twoFactorAuthenticationService()
 		{
-			return new TwoFactorAuthenticationServiceImpl(otpService(), dataService(), idGenerator(),
+			return new TwoFactorAuthenticationServiceImpl(otpService(), dataService(), userService(), idGenerator(),
 					userSecretFactory());
 		}
 
@@ -48,6 +49,18 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		public OTPService otpService()
 		{
 			return new OTPServiceImpl();
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataServiceImpl.class);
+		}
+
+		@Bean
+		public UserService userService()
+		{
+			return mock(UserServiceImpl.class);
 		}
 
 		@Bean
@@ -60,12 +73,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		public AppSettings appSettings()
 		{
 			return mock(AppSettings.class);
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataServiceImpl.class);
 		}
 
 		@Bean
@@ -97,6 +104,9 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	private DataService dataService;
 
 	@Autowired
+	private UserService userService;
+
+	@Autowired
 	private AppSettings appSettings;
 
 	@Autowired
@@ -114,9 +124,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userDetails);
 		when(molgenisUser.getUsername()).thenReturn("molgenisUser");
-		when(dataService.findOne(USER,
-				new QueryImpl<org.molgenis.auth.User>().eq(UserMetaData.USERNAME, userDetails.getUsername()),
-				org.molgenis.auth.User.class)).thenReturn(molgenisUser);
+		when(userService.getUser(userDetails.getUsername())).thenReturn(molgenisUser);
 		when(runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
 				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
 				UserSecret.class))).thenReturn(userSecret);
@@ -150,18 +158,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		when(userSecret.getSecret()).thenReturn("secretKey");
 		boolean isConfigured = twoFactorAuthenticationService.isConfiguredForUser();
 		assertEquals(true, isConfigured);
-	}
-
-	/**
-	 * TODO(SH): needs to be implmentend in {@link UserMetaData}
-	 */
-	@Test
-	@Ignore
-	public void isEnabledForUserTest()
-	{
-		when(userSecret.getSecret()).thenReturn("secretKey");
-		boolean isEnabled = twoFactorAuthenticationService.isEnabledForUser();
-		assertEquals(true, isEnabled);
 	}
 
 	/**

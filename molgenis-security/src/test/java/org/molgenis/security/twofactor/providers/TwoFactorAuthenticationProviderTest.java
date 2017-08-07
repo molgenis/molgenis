@@ -1,6 +1,7 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.providers;
 
 import com.google.common.collect.Lists;
+import org.molgenis.security.twofactor.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
