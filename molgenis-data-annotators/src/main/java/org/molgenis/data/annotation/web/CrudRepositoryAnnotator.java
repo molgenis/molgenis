@@ -25,7 +25,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.DatabaseAction.UPDATE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.annotation.core.utils.AnnotatorUtils.addAnnotatorMetaDataToRepositories;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 @Component
 public class CrudRepositoryAnnotator

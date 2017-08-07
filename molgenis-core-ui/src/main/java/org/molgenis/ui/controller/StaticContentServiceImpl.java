@@ -2,9 +2,9 @@ package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
@@ -77,7 +77,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public String getContent(String key)
 	{
-		StaticContent staticContent = RunAsSystemProxy.runAsSystem(
+		StaticContent staticContent = RunAsSystemAspect.runAsSystem(
 				() -> dataService.findOneById(STATIC_CONTENT, key, StaticContent.class));
 		return staticContent != null ? staticContent.getContent() : null;
 	}
