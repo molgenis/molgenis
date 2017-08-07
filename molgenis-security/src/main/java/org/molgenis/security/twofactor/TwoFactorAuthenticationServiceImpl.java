@@ -185,7 +185,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 		else
 		{
-			throw new UsernameNotFoundException(format("Can''t find user: [ {0} ]", userDetails.getUsername()));
+			throw new UsernameNotFoundException(format("Can't find user: [ {0} ]", userDetails.getUsername()));
 		}
 	}
 }
