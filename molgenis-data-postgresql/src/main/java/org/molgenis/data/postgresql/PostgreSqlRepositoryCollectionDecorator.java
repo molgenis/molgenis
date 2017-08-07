@@ -21,10 +21,10 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	private final EntityTypeCopier entityTypeCopier;
 	private final AttributeCopier attributeCopier;
 
-	PostgreSqlRepositoryCollectionDecorator(RepositoryCollection repoCollection, EntityTypeRegistry entityTypeRegistry,
+	PostgreSqlRepositoryCollectionDecorator(RepositoryCollection delegateRepositoryCollection, EntityTypeRegistry entityTypeRegistry,
 			EntityTypeCopier entityTypeCopier, AttributeCopier attributeCopier)
 	{
-		super(repoCollection);
+		super(delegateRepositoryCollection);
 		this.entityTypeRegistry = requireNonNull(entityTypeRegistry);
 		this.entityTypeCopier = requireNonNull(entityTypeCopier);
 		this.attributeCopier = requireNonNull(attributeCopier);

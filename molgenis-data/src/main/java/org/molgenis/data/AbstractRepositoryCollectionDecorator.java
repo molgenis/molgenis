@@ -83,6 +83,12 @@ public abstract class AbstractRepositoryCollectionDecorator extends ForwardingOb
 	}
 
 	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		delegate().updateRepository(entityType, updatedEntityType);
+	}
+
+	@Override
 	public void addAttribute(EntityType entityType, Attribute attribute)
 	{
 		delegate().addAttribute(entityType, attribute);
