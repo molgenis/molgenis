@@ -106,7 +106,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.debug("Populated entity type registry");
 
 		LOG.trace("Populating bootstrap themes ...");
-		entityTypeRegistryPopulator.populate();
+		bootstrapThemePopulator.populate();
 		LOG.debug("Populated bootstrap themes");
 
 		LOG.info("Bootstrapping application completed");

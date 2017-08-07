@@ -16,7 +16,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 
@@ -34,14 +34,13 @@ import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
 @Component
 public class StyleServiceImpl implements StyleService
 {
-	private static final String LOCAL_CSS_BOOTSTRAP_THEME_LOCATION = "classpath*:css/bootstrap-*.min.css";
-
 	private final AppSettings appSettings;
 	private final IdGenerator idGenerator;
 	private final FileStore fileStore;
 	private final FileMetaFactory fileMetaFactory;
 	private final StyleSheetFactory styleSheetFactory;
 	private final DataService dataService;
+
 
 	@Autowired
 	public StyleServiceImpl(AppSettings appSettings, IdGenerator idGenerator,FileStore fileStore,
@@ -104,11 +103,7 @@ public class StyleServiceImpl implements StyleService
 		fileMeta.setContentType("css");
 		fileMeta.setFilename(fileName);
 		fileMeta.setSize(fileStore.getFile(fileId).length());
-		ServletUriComponentsBuilder currentRequest = ServletUriComponentsBuilder.fromCurrentRequest();
-		UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + fileId)
-				.replaceQuery(null)
-				.build();
-		fileMeta.setUrl(downloadUri.toUriString());
+		fileMeta.setUrl(buildFileUrl(fileId));
 		dataService.add(FileMetaMetaData.FILE_META, fileMeta);
 		return fileMeta;
 	}
@@ -205,6 +200,29 @@ public class StyleServiceImpl implements StyleService
 		return resource.getFile();
 	}
 
+	/**
+	 * Build a downLoadUrl for the file identified by the given fileId. If this method is called outside of a
+	 * request context ( system initialization for example) the server context is used for generating a relative path
+	 */
+	private String buildFileUrl(String fileId)
+	{
 
+		if (RequestContextHolder.getRequestAttributes() != null)
+		{
+			ServletUriComponentsBuilder currentRequest = ServletUriComponentsBuilder.fromCurrentRequest();
+			UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + fileId)
+					.replaceQuery(null).build();
+			return downloadUri.toUriString();
+		}
+		else
+		{
+			// TODO this is a workaround for the situation where the File url needs to be created without a request
+			// context, in order to fix the properly we would need to add a deploy time property
+			// defining the file download server location
+			return FileDownloadController.URI + '/' + fileId;
+		}
+
+	}
 
 }
+
