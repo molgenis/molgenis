@@ -1,14 +1,17 @@
 package org.molgenis.data.rest.v2;
 
+import com.google.gson.Gson;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LocalizationService;
+import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
@@ -43,6 +46,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
@@ -55,6 +59,7 @@ import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -80,6 +85,7 @@ public class RestControllerV2
 	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
+	private final SearchService searchService;
 
 	static UnknownEntityException createUnknownEntityException(String entityTypeId)
 	{
@@ -133,7 +139,7 @@ public class RestControllerV2
 	@Autowired
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
 			LanguageService languageService, PermissionSystemService permissionSystemService,
-			RepositoryCopier repoCopier, LocalizationService localizationService)
+			RepositoryCopier repoCopier, LocalizationService localizationService, SearchService searchService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
@@ -142,6 +148,7 @@ public class RestControllerV2
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.repoCopier = requireNonNull(repoCopier);
 		this.localizationService = requireNonNull(localizationService);
+		this.searchService = requireNonNull(searchService);
 	}
 
 	@Autowired
@@ -173,6 +180,57 @@ public class RestControllerV2
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		return getEntityResponse(entityTypeId, untypedId, attributeFilter);
+	}
+
+	@RequestMapping(value = "/findall/", method = GET)
+	@ResponseBody
+	public String findAll()
+	{
+		String term = "#CHROM";
+		Map<String, Result> results = new HashMap<>();
+		Stream<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class)
+													.filter(entityType -> isSystemEntity(entityType));
+		entityTypes.forEach(entityType -> results.put(entityType.getId(), getResult(entityType, term)));
+		return new Gson().toJson(results);
+	}
+
+	private Result getResult(EntityType entityType, String term)
+	{
+		List<Entity> rows = dataService.findAll(entityType.getEntityType().getId(), new QueryImpl<>().search(term))
+									   .collect(toList());
+		boolean isLabelMatch = entityType.getLabel().contains(term);
+		boolean isDescMatch = entityType.getDescription().contains(term);
+		List<Attribute> attrs = StreamSupport.stream(entityType.getAllAttributes().spliterator(), false)
+											 .filter(attr -> isMatchingAttr(attr, term))
+											 .collect(toList());
+		return new Result(entityType, attrs, rows, isLabelMatch, isDescMatch);
+	}
+
+	private boolean isMatchingAttr(Attribute attr, String term)
+	{
+		boolean isLabelMatch = attr.getLabel().contains(term);
+		boolean isDescMatch = attr.getDescription().contains(term);
+		boolean isNameMatch = attr.getName().contains(term);
+		return isDescMatch && isLabelMatch && isNameMatch;
+	}
+
+	private static boolean isSystemEntity(EntityType entityType)
+	{
+		return isSystemPackage(entityType.getPackage());
+	}
+
+	private static boolean isSystemPackage(Package package_)
+	{
+		if (package_ == null)
+		{
+			return false;
+		}
+		if (package_.getId().equals(PACKAGE_SYSTEM))
+		{
+			return true;
+		}
+		Package rootPackage = package_.getRootPackage();
+		return rootPackage != null && rootPackage.getId().equals(PACKAGE_SYSTEM);
 	}
 
 	/**
