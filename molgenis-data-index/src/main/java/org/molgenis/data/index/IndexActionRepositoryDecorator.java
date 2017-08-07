@@ -39,14 +39,14 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	public void update(Entity entity)
 	{
 		delegate().update(entity);
-		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
+		indexActionRegisterService.register(getEntityType(), entity.getIdValue());
 		registerRefEntityIndexActions();
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
+		indexActionRegisterService.register(getEntityType(), entity.getIdValue());
 		registerRefEntityIndexActions(entity);
 		delegate().delete(entity);
 	}
@@ -54,7 +54,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public void deleteById(Object id)
 	{
-		indexActionRegisterService.register(getEntityType(), id.toString());
+		indexActionRegisterService.register(getEntityType(), id);
 		registerRefEntityIndexActions();
 		delegate().deleteById(id);
 	}
@@ -71,7 +71,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	public void add(Entity entity)
 	{
 		delegate().add(entity);
-		indexActionRegisterService.register(getEntityType(), entity.getIdValue().toString());
+		indexActionRegisterService.register(getEntityType(), entity.getIdValue());
 		registerRefEntityIndexActions(entity);
 	}
 
@@ -139,7 +139,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 			EntityType mappedByAttrRefEntity = mappedByAttr.getRefEntity();
 			entity.getEntities(mappedByAttr.getName())
 				  .forEach(refEntity -> indexActionRegisterService.register(mappedByAttrRefEntity,
-						  refEntity.getIdValue().toString()));
+						  refEntity.getIdValue()));
 		});
 
 		getEntityType().getInversedByAttributes().forEach(inversedByAttr ->
@@ -148,7 +148,7 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 			if (refEntity != null)
 			{
 				EntityType inversedByAttrRefEntity = inversedByAttr.getRefEntity();
-				indexActionRegisterService.register(inversedByAttrRefEntity, refEntity.getIdValue().toString());
+				indexActionRegisterService.register(inversedByAttrRefEntity, refEntity.getIdValue());
 			}
 		});
 	}

@@ -28,7 +28,7 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -1010,7 +1010,7 @@ public class MappingServiceController extends MolgenisPluginController
 		Map<String, List<OntologyTerm>> attributeTagMap = new HashMap<>();
 		for (Attribute amd : project.getMappingTarget(target).getTarget().getAtomicAttributes())
 		{
-			EntityType targetMetaData = RunAsSystemProxy.runAsSystem(() -> dataService.getEntityType(target));
+			EntityType targetMetaData = RunAsSystemAspect.runAsSystem(() -> dataService.getEntityType(target));
 			attributeTagMap.put(amd.getName(),
 					newArrayList(ontologyTagService.getTagsForAttribute(targetMetaData, amd).values()));
 		}

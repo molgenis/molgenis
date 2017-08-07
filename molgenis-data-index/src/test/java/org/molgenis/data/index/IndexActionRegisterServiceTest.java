@@ -92,7 +92,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(query.findAll()).thenReturn(Stream.empty());
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(query);
 
-		indexActionRegisterServiceImpl.register(entityType, "123");
+		indexActionRegisterServiceImpl.register(entityType, 123);
 
 		verifyZeroInteractions(dataService);
 
@@ -125,7 +125,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn("entityTypeId");
-		indexActionRegisterServiceImpl.register(entityType, "123");
+		indexActionRegisterServiceImpl.register(entityType, 123);
 
 		verifyZeroInteractions(dataService);
 
@@ -156,7 +156,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(entityType.getId()).thenReturn("entityTypeId");
 		indexActionRegisterServiceImpl.addExcludedEntity("ABC");
 
-		indexActionRegisterServiceImpl.register(entityType, "123");
+		indexActionRegisterServiceImpl.register(entityType, 123);
 		verifyNoMoreInteractions(dataService);
 	}
 
@@ -164,9 +164,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	public void isEntityDirtyTrue()
 	{
 		String entityTypeId = "myEntityTypeId";
-		String entityTypeName = "myEntityTypeName";
-		String entityIdString = "123";
-		Integer entityIdInteger = Integer.valueOf("123");
+		int entityId = 123;
 
 		when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
 		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
@@ -174,15 +172,15 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityTypeId(entityTypeId)).thenReturn(indexAction);
 		when(indexAction.getEntityTypeId()).thenReturn(entityTypeId);
-		when(indexAction.setEntityId(entityIdString)).thenReturn(indexAction);
-		when(indexAction.getEntityId()).thenReturn(entityIdString);
+		when(indexAction.setEntityId("123")).thenReturn(indexAction);
+		when(indexAction.getEntityId()).thenReturn("123");
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
-		indexActionRegisterServiceImpl.register(entityType, entityIdString);
-		EntityKey entityKey = EntityKey.create(entityTypeId, entityIdInteger);
+		indexActionRegisterServiceImpl.register(entityType, entityId);
+		EntityKey entityKey = EntityKey.create(entityTypeId, entityId);
 		assertTrue(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
 	}
 
@@ -190,25 +188,24 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	public void isEntityDirtyFalse()
 	{
 		String entityTypeId = "myEntityTypeId";
-		String entityTypeName = "myEntityTypeName";
-		String entityId1 = "123";
-		String entityId2 = "false";
+		String entityId = "id";
+		String otherId = "otherID";
 
 		when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
 		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
 		when(indexActionFactory.create()).thenReturn(indexAction);
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityTypeId(entityTypeId)).thenReturn(indexAction);
-		when(indexAction.getEntityTypeId()).thenReturn(entityTypeName);
-		when(indexAction.setEntityId(entityId1)).thenReturn(indexAction);
-		when(indexAction.getEntityId()).thenReturn(entityId1);
+		when(indexAction.getEntityTypeId()).thenReturn(entityTypeId);
+		when(indexAction.setEntityId(entityId)).thenReturn(indexAction);
+		when(indexAction.getEntityId()).thenReturn(entityId);
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
-		indexActionRegisterServiceImpl.register(entityType, entityId1);
-		EntityKey entityKey = EntityKey.create(entityTypeId, entityId2);
+		indexActionRegisterServiceImpl.register(entityType, entityId);
+		EntityKey entityKey = EntityKey.create(entityTypeId, otherId);
 		assertFalse(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
 	}
 }
