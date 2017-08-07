@@ -3,6 +3,7 @@ package org.molgenis.data.security.acl;
 import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +29,8 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
 @Service
 public class EntityAclManagerImpl implements EntityAclManager
 {
+	private static final int BATCH_SIZE = 1000;
+
 	private final AclService aclService;
 	private final SidRetrievalStrategy sidRetrievalStrategy;
 	private final DataService dataService;
@@ -66,8 +70,15 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public Collection<EntityAcl> readAcls(Collection<EntityIdentity> entityIdentities)
+	{
+		return entityIdentities.stream().map(this::readAcl).collect(toList());
+	}
+
+	@Override
 	@Transactional
-	public EntityAcl createAcl(Entity entity)
+	public void createAcl(Entity entity)
 	{
 		List<EntityAce> entityAces;
 		if (!currentUserIsSuOrSystem())
@@ -81,8 +92,29 @@ public class EntityAclManagerImpl implements EntityAclManager
 		{
 			entityAces = emptyList();
 		}
-		MutableAcl acl = createDomainAcl(entity, entityAces);
-		return toEntityAcl(acl);
+		createDomainAcl(entity, entityAces);
+	}
+
+	@Override
+	@Transactional
+	public void createAclClass(EntityType entityType)
+	{
+		// TODO do not create ACL class on demand when calling aclService.createAcl but create when calling this method
+	}
+
+	@Override
+	@Transactional
+	public void deleteAclClass(EntityType entityType)
+	{
+		Fetch entityIdFetch = new Fetch().field(entityType.getIdAttribute().getName());
+		dataService.getMeta().getRepository(entityType).forEachBatched(entityIdFetch, this::deleteAcls, BATCH_SIZE);
+	}
+
+	@Override
+	@Transactional
+	public void createAcls(Collection<Entity> entities)
+	{
+		entities.forEach(this::createAcl);
 	}
 
 	@Override
@@ -108,10 +140,32 @@ public class EntityAclManagerImpl implements EntityAclManager
 
 	@Override
 	@Transactional
+	public void updateAcls(Collection<EntityAcl> entityAcls)
+	{
+		entityAcls.forEach(this::updateAcl);
+	}
+
+	@Override
+	@Transactional
+	public void deleteAcl(Entity entity)
+	{
+		EntityIdentity entityIdentity = EntityIdentity.create(entity.getEntityType().getId(), entity.getIdValue());
+		deleteAcl(entityIdentity);
+	}
+
+	@Override
+	@Transactional
 	public void deleteAcl(EntityIdentity entityIdentity)
 	{
 		ObjectIdentity objectId = toObjectIdentity(entityIdentity);
 		aclService.deleteAcl(objectId, false);
+	}
+
+	@Override
+	@Transactional
+	public void deleteAcls(Collection<Entity> entities)
+	{
+		entities.forEach(this::deleteAcl);
 	}
 
 	private MutableAcl createDomainAcl(Entity entity, List<EntityAce> entityAces)
