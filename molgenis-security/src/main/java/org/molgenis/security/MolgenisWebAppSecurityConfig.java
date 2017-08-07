@@ -22,6 +22,7 @@ import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
 import org.molgenis.security.twofactor.*;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 	@Autowired
 	private RecoveryService recoveryService;
+
+	@Autowired
+	private UserAccountService userAccountService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
@@ -199,8 +203,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
-		{
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
 			if (req.getSession(false) != null
 					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 			{
@@ -208,8 +211,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 			}
 		})
 
-				.logoutSuccessHandler((req, res, auth) ->
-				{
+				.logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -307,7 +309,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
 	{
-		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService, redirectStrategy());
+		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService(), redirectStrategy(),
+				userAccountService);
 	}
 
 	@Bean

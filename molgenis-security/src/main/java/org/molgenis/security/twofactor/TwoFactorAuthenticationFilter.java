@@ -3,6 +3,7 @@ package org.molgenis.security.twofactor;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.RestAuthenticationToken;
+import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -22,20 +23,22 @@ import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.ENF
 
 public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 {
-
 	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationFilter.class.getName());
 
 	private final RedirectStrategy redirectStrategy;
+	private final UserAccountService userAccountService;
 
-	private AppSettings appSettings;
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private final AppSettings appSettings;
+	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 
 	public TwoFactorAuthenticationFilter(AppSettings appSettings,
-			TwoFactorAuthenticationService twoFactorAuthenticationService, RedirectStrategy redirectStrategy)
+			TwoFactorAuthenticationService twoFactorAuthenticationService, RedirectStrategy redirectStrategy,
+			UserAccountService userAccountService)
 	{
 		this.appSettings = requireNonNull(appSettings);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.redirectStrategy = requireNonNull(redirectStrategy);
+		this.userAccountService = requireNonNull(userAccountService);
 	}
 
 	@Override
@@ -88,10 +91,9 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		return appSettings.getTwoFactorAuthentication().equals(ENFORCED.toString());
 	}
 
-	//TODO add 2fa option for users
 	private boolean userUsesTwoFactorAuthentication()
 	{
-		return true;
+		return userAccountService.getCurrentUser().getTwoFactorAuthentication();
 	}
 
 	private boolean isUserTwoFactorAuthenticated()

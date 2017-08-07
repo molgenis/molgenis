@@ -17,9 +17,10 @@ public class GoogleAuthenticatorServiceImpl implements GoogleAuthenticatorServic
 		String normalizedBase32Key = secretKey.replace(" ", "").toUpperCase();
 		try
 		{
-			return "otpauth://totp/" + URLEncoder.encode("molgenis" + ":" + "admin", "UTF-8").replace("+", "%20")
-					+ "?secret=" + URLEncoder.encode(normalizedBase32Key, "UTF-8").replace("+", "%20") + "&issuer="
-					+ URLEncoder.encode("molgenis", "UTF-8").replace("+", "%20");
+			return String.format("otpauth://totp/%s?secret=%s&issuer=%s",
+					URLEncoder.encode("molgenis" + ":" + "admin", "UTF-8").replace("+", "%20"),
+					URLEncoder.encode(normalizedBase32Key, "UTF-8").replace("+", "%20"),
+					URLEncoder.encode("molgenis", "UTF-8").replace("+", "%20"));
 		}
 		catch (UnsupportedEncodingException e)
 		{
