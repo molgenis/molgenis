@@ -19,7 +19,7 @@ import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.token.TokenService;
-import org.molgenis.security.twofactor.TwoFactorAuthenticationService;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -675,9 +675,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public TwoFactorAuthenticationService twoFactorAuthenticationService()
+		public UserAccountService userAccountService()
 		{
-			return mock(TwoFactorAuthenticationService.class);
+			return mock(UserAccountService.class);
 		}
 
 		@Bean
@@ -720,7 +720,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public RestController restController()
 		{
 			return new RestController(appSettings(), dataService(), tokenService(), authenticationManager(),
-					molgenisPermissionService(), twoFactorAuthenticationService(), new MolgenisRSQL(),
+					molgenisPermissionService(), userAccountService(), new MolgenisRSQL(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService());
 		}
