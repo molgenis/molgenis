@@ -46,10 +46,10 @@ public class IndexActionRepositoryDecoratorTest
 		initEntityMeta();
 
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn("1");
+		when(entity0.getIdValue()).thenReturn(1);
 		indexActionRepositoryDecorator.update(entity0);
 		verify(delegateRepository, times(1)).update(entity0);
-		verify(indexActionRegisterService).register(entityType, "1");
+		verify(indexActionRegisterService).register(entityType, 1);
 		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
@@ -59,10 +59,10 @@ public class IndexActionRepositoryDecoratorTest
 		initEntityMetaBidi();
 
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn("1");
+		when(entity0.getIdValue()).thenReturn(1);
 		indexActionRepositoryDecorator.update(entity0);
 		verify(delegateRepository, times(1)).update(entity0);
-		verify(indexActionRegisterService).register(entityType, "1");
+		verify(indexActionRegisterService).register(entityType, 1);
 		verify(indexActionRegisterService).register(mappedByEntity, null);
 		verify(indexActionRegisterService).register(inversedByEntity, null);
 		verifyNoMoreInteractions(indexActionRegisterService);
@@ -106,10 +106,10 @@ public class IndexActionRepositoryDecoratorTest
 		initEntityMeta();
 
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn("1");
+		when(entity0.getIdValue()).thenReturn(1);
 		indexActionRepositoryDecorator.delete(entity0);
 		verify(delegateRepository, times(1)).delete(entity0);
-		verify(indexActionRegisterService).register(entityType, "1");
+		verify(indexActionRegisterService).register(entityType, 1);
 		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
@@ -119,19 +119,19 @@ public class IndexActionRepositoryDecoratorTest
 		initEntityMetaBidi();
 
 		Entity mappedByEntity0 = mock(Entity.class);
-		when(mappedByEntity0.getIdValue()).thenReturn("mappedBy0");
+		when(mappedByEntity0.getIdValue()).thenReturn(2);
 		Entity inversedByEntity0 = mock(Entity.class);
-		when(inversedByEntity0.getIdValue()).thenReturn("inversedBy0");
+		when(inversedByEntity0.getIdValue()).thenReturn(3);
 
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
 		when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
-		when(entity0.getIdValue()).thenReturn("1");
+		when(entity0.getIdValue()).thenReturn(1);
 		indexActionRepositoryDecorator.delete(entity0);
 		verify(delegateRepository, times(1)).delete(entity0);
-		verify(indexActionRegisterService).register(entityType, "1");
-		verify(indexActionRegisterService).register(mappedByEntity, "mappedBy0");
-		verify(indexActionRegisterService).register(inversedByEntity, "inversedBy0");
+		verify(indexActionRegisterService).register(entityType, 1);
+		verify(indexActionRegisterService).register(mappedByEntity, 2);
+		verify(indexActionRegisterService).register(inversedByEntity, 3);
 		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
@@ -167,10 +167,10 @@ public class IndexActionRepositoryDecoratorTest
 		initEntityMeta();
 
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn("1");
-		indexActionRepositoryDecorator.deleteById("1");
-		verify(delegateRepository, times(1)).deleteById("1");
-		verify(indexActionRegisterService).register(entityType, "1");
+		when(entity0.getIdValue()).thenReturn(1);
+		indexActionRepositoryDecorator.deleteById(1);
+		verify(delegateRepository, times(1)).deleteById(1);
+		verify(indexActionRegisterService).register(entityType, 1);
 		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
@@ -180,10 +180,10 @@ public class IndexActionRepositoryDecoratorTest
 		initEntityMetaBidi();
 
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn("1");
-		indexActionRepositoryDecorator.deleteById("1");
-		verify(delegateRepository, times(1)).deleteById("1");
-		verify(indexActionRegisterService).register(entityType, "1");
+		when(entity0.getIdValue()).thenReturn(1);
+		indexActionRepositoryDecorator.deleteById(1);
+		verify(delegateRepository, times(1)).deleteById(1);
+		verify(indexActionRegisterService).register(entityType, 1);
 		verify(indexActionRegisterService).register(mappedByEntity, null);
 		verify(indexActionRegisterService).register(inversedByEntity, null);
 		verifyNoMoreInteractions(indexActionRegisterService);
@@ -245,10 +245,10 @@ public class IndexActionRepositoryDecoratorTest
 		initEntityMeta();
 
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn("1");
+		when(entity0.getIdValue()).thenReturn(1);
 		indexActionRepositoryDecorator.add(entity0);
 		verify(delegateRepository, times(1)).add(entity0);
-		verify(indexActionRegisterService).register(entityType, "1");
+		verify(indexActionRegisterService).register(entityType, 1);
 		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
@@ -265,10 +265,10 @@ public class IndexActionRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
 		when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
-		when(entity0.getIdValue()).thenReturn("1");
+		when(entity0.getIdValue()).thenReturn(1);
 		indexActionRepositoryDecorator.add(entity0);
 		verify(delegateRepository, times(1)).add(entity0);
-		verify(indexActionRegisterService).register(entityType, "1");
+		verify(indexActionRegisterService).register(entityType, 1);
 		verify(indexActionRegisterService).register(mappedByEntity, "mappedBy0");
 		verify(indexActionRegisterService).register(inversedByEntity, "inversedBy0");
 		verifyNoMoreInteractions(indexActionRegisterService);
