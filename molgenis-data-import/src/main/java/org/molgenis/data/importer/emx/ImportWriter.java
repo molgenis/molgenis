@@ -18,8 +18,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.HugeSet;
@@ -82,11 +82,8 @@ public class ImportWriter
 	{
 		// languages first
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
-		runAsSystem(() ->
-		{
-			importTags(job.parsedMetaData);
-			importPackages(job.parsedMetaData);
-		});
+		importTags(job.parsedMetaData);
+		importPackages(job.parsedMetaData);
 		importEntityTypes(job.parsedMetaData.getEntities(), job.report);
 
 		List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(job.parsedMetaData.getEntities());
