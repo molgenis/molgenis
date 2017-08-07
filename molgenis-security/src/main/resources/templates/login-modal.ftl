@@ -49,16 +49,24 @@
                 <#-- login form -->
                 <#if is2faConfigured??>
                     <div class="verification-form-toggle collapse in">
-
-                        <form id="key-2fa-form" role="form" method="POST" action="/2fa/validate">
+                        <form id="verification-form" role="form" method="POST" action="/2fa/validate">
+                            <p>Please enter the authentication code show in the
+                                <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
+                                   target="_blank">Google Authenticator app</a></p>
                             <div class="input-group">
-                                <input id="verification-code-field" type="text" placeholder="Enter verification code..."
+                                <input id="verification-code-field" type="text"
                                        class="form-control" name="verificationCode" required autofocus>
-                                <span class="input-group-btn">
-                            <button id="signin-button" type="submit" class="btn btn-success">Verify</button>
-                            </span>
                             </div>
                         </form>
+                        <script>
+                            $('#verification-code-field').pincodeInput({
+                                inputs: 6,
+                                hidedigits: false,
+                                complete: function (value, e) {
+                                    $('#verification-form').submit()
+                                }
+                            })
+                        </script>
                         <hr>
                         <p>
                             Don't have your phone?
@@ -67,7 +75,6 @@
                                 code</a>
                         </p>
                     </div>
-
 
                     <div class="verification-form-toggle collapse">
                         <form id="recover-form" method="POST" action="/2fa/recover">
@@ -82,9 +89,9 @@
                     </div>
 
                 <#elseif is2faInitial??>
-                    <form id="initial-2fa-form" method="POST" action="/2fa/secret">
+                    <form id="activation-form" method="POST" action="/2fa/secret">
                         <div class="form-group">
-                            <p>Please configure your two factor authentication by scanning the QR code with the <a
+                            <p>Please configure two factor authentication by scanning the QR code with the <a
                                     href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
                                     target="_blank">Google Authenticator app</a> and enter the verification code in the
                                 field below to confirm.</p>
@@ -102,19 +109,22 @@
                         </div>
                         <div>
                             <div class="row">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <div class="input-group">
-                                        <input id="verification-code-field"
-                                               type="text"
-                                               placeholder="Enter verification code..."
-                                               class="form-control"
-                                               name="verificationCode"
-                                               required autofocus>
-                                        <span class="input-group-btn">
-                                <button id="verify" type="submit" class="btn btn-success">Verify</button>
-                                </span>
-                                        <input type="hidden" name="secretKey" value="${secretKey}"/>
-                                    </div>
+                                <div class="col-md-12 text-center">
+                                    <input id="verification-code-field"
+                                           type="text"
+                                           class="form-control"
+                                           name="verificationCode"
+                                           required autofocus/>
+                                    <script>
+                                        $('#verification-code-field').pincodeInput({
+                                            inputs: 6,
+                                            hidedigits: false,
+                                            complete: function (value, e) {
+                                                $('#activation-form').submit()
+                                            }
+                                        })
+                                    </script>
+                                    <input type="hidden" name="secretKey" value="${secretKey}"/>
                                 </div>
                             </div>
                         </div>
