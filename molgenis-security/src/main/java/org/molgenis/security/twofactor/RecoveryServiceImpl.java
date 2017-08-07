@@ -62,6 +62,10 @@ public class RecoveryServiceImpl implements RecoveryService
 		if (existingCode != null)
 		{
 			runAsSystem(() -> dataService.delete(RECOVERY_CODE, existingCode));
+			UserSecret secret = runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
+					new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, userId), UserSecret.class));
+			secret.setFailedLoginAttempts(0);
+			runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, secret));
 		}
 		else
 		{
