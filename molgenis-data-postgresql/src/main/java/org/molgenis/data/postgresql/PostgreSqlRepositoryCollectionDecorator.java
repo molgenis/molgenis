@@ -17,7 +17,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryCollectionDecorator
 {
-	private final RepositoryCollection repoCollection;
 	private final EntityTypeRegistry entityTypeRegistry;
 	private final EntityTypeCopier entityTypeCopier;
 	private final AttributeCopier attributeCopier;
@@ -25,22 +24,16 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	PostgreSqlRepositoryCollectionDecorator(RepositoryCollection repoCollection, EntityTypeRegistry entityTypeRegistry,
 			EntityTypeCopier entityTypeCopier, AttributeCopier attributeCopier)
 	{
-		this.repoCollection = requireNonNull(repoCollection);
+		super(repoCollection);
 		this.entityTypeRegistry = requireNonNull(entityTypeRegistry);
 		this.entityTypeCopier = requireNonNull(entityTypeCopier);
 		this.attributeCopier = requireNonNull(attributeCopier);
 	}
 
 	@Override
-	protected RepositoryCollection delegate()
-	{
-		return repoCollection;
-	}
-
-	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		Repository<Entity> repo = repoCollection.createRepository(entityType);
+		Repository<Entity> repo = delegate().createRepository(entityType);
 		entityTypeRegistry.registerEntityType(entityType);
 		return repo;
 	}
@@ -48,14 +41,14 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	@Override
 	public void deleteRepository(EntityType entityType)
 	{
-		repoCollection.deleteRepository(entityType);
+		delegate().deleteRepository(entityType);
 		entityTypeRegistry.unregisterEntityType(entityType);
 	}
 
 	@Override
 	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
 	{
-		repoCollection.updateRepository(entityType, updatedEntityType);
+		delegate().updateRepository(entityType, updatedEntityType);
 		entityTypeRegistry.registerEntityType(updatedEntityType);
 	}
 
@@ -67,7 +60,7 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 		updatedEntityType.addAttribute(attributeCopy);
 
 		entityTypeRegistry.registerEntityType(updatedEntityType);
-		repoCollection.addAttribute(entityType, attribute);
+		delegate().addAttribute(entityType, attribute);
 	}
 
 	@Override
@@ -79,7 +72,7 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 		updatedEntityType.addAttribute(updatedAttributeCopy);
 
 		entityTypeRegistry.registerEntityType(updatedEntityType);
-		repoCollection.updateAttribute(entityType, attr, updatedAttr);
+		delegate().updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Override
@@ -89,6 +82,6 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 		updatedEntityType.removeAttribute(attr);
 
 		entityTypeRegistry.registerEntityType(updatedEntityType);
-		repoCollection.deleteAttribute(entityType, attr);
+		delegate().deleteAttribute(entityType, attr);
 	}
 }
