@@ -13,8 +13,6 @@ import org.molgenis.file.model.FileMetaMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -34,6 +32,7 @@ import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
 @Component
 public class StyleServiceImpl implements StyleService
 {
+	private static final String BOOTSTRAP_FALL_BACK_THEME = "bootstrap-basic.min.css";
 	private final AppSettings appSettings;
 	private final IdGenerator idGenerator;
 	private final FileStore fileStore;
@@ -63,7 +62,7 @@ public class StyleServiceImpl implements StyleService
 	}
 
 	@Override
-	public void addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
+	public Style addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
 			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException
 	{
 		if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null)
@@ -85,6 +84,8 @@ public class StyleServiceImpl implements StyleService
 		}
 
 		dataService.add(STYLE_SHEET, styleSheet);
+
+		return Style.createLocal(styleSheet.getName());
 	}
 
 	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data) throws MolgenisStyleException
@@ -157,10 +158,9 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	@RunAsSystem
 	public FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-			throws MolgenisStyleException, IOException
+			throws MolgenisStyleException
 	{
-		Query<StyleSheet> findByName = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
-		StyleSheet styleSheet = dataService.findOne(StyleMetadata.STYLE_SHEET, findByName, StyleSheet.class);
+		StyleSheet styleSheet = findThemeByName(styleName);
 
 		if (styleSheet == null)
 		{
@@ -180,24 +180,22 @@ public class StyleServiceImpl implements StyleService
 			// If no bootstrap 4 theme was set fetch the default theme from the resources folder
 			if (fileMeta == null)
 			{
-				file = getFallBackTheme();
+				StyleSheet fallBackTheme = findThemeByName(BOOTSTRAP_FALL_BACK_THEME);
+				fileMeta = fallBackTheme.getBootstrap4Theme();
 			}
-			else
-			{
-				file = fileStore.getFile(fileMeta.getId());
-			}
+
+			file = fileStore.getFile(fileMeta.getId());
+
 		}
 
 		return new FileSystemResource(file);
 	}
 
-	private File getFallBackTheme() throws IOException
+	@Override
+	public StyleSheet findThemeByName(String themeName)
 	{
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-
-		Resource resource = resolver.getResource("classpath*:css/bootstrap-4/bootstrap.min.css");
-
-		return resource.getFile();
+		Query<StyleSheet> findByName = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, themeName);
+		return dataService.findOne(StyleMetadata.STYLE_SHEET, findByName, StyleSheet.class);
 	}
 
 	/**

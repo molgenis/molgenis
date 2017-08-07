@@ -33,22 +33,28 @@ public class StyleController
 	@RequestMapping(value = "/css/theme/{bootstrap-version}/{theme}", method = RequestMethod.GET)
 	public ResponseEntity getThemeCss(@PathVariable("bootstrap-version") String bootstrapVersion,
 			@PathVariable("theme") String theme, HttpServletResponse response)
-			throws IOException, MolgenisStyleException
+			throws MolgenisStyleException
 	{
 		response.setHeader("Content-Type", "text/css");
 		response.setHeader("Cache-Control", "max-age=31536000");
 
 		final String themeName = theme.endsWith(".css") ? theme : theme + ".css";
 
-		// Find the theme file
 		BootstrapVersion version = bootstrapVersion.equals("bootstrap-4") ? BOOTSTRAP_VERSION_4 : BOOTSTRAP_VERSION_3;
 		Resource styleSheetResource = styleService.getThemeData(themeName, version);
 
-		InputStream inputStream = styleSheetResource.getInputStream();
-		IOUtils.copy(inputStream, response.getOutputStream());
-		IOUtils.closeQuietly(inputStream);
+		try
+		{
+			InputStream inputStream = styleSheetResource.getInputStream();
+			IOUtils.copy(inputStream, response.getOutputStream());
+			IOUtils.closeQuietly(inputStream);
+			response.flushBuffer();
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisStyleException("Unable to return theme data", e);
+		}
 
-		response.flushBuffer();
 
 		return new ResponseEntity(HttpStatus.OK);
 	}

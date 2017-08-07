@@ -24,9 +24,8 @@ public interface StyleService
 	 * @param bootstrap3StyleData the bootstrap 3 style data
 	 * @param bootstrap4FileName  the name to use as fileName for the bootstrap 4 file, this is optional
 	 * @param bootstrap4StyleData the bootstrap 4 style data, this is optional
-	 * @throws MolgenisStyleException
 	 */
-	void addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
+	Style addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
 			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException;
 
 	/**
@@ -48,6 +47,20 @@ public interface StyleService
 	 */
 	Style getStyle(String styleName);
 
+	/**
+	 * Get the styleSheet data for a given theme and bootstrap version ( 3 or 4 )
+	 * @param styleName the theme identifier
+	 * @param bootstrapVersion the bootstrap version ( 3 or 4)
+	 * @return The theme data, as setting the bootstrap 4 theme is optional the fallback bootstrap 4 theme data is
+	 * returned in case there is not theme data for the bootstrap 4 version.
+	 */
 	FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-			throws MolgenisStyleException, IOException;
+			throws MolgenisStyleException;
+
+	/**
+	 * Find the styleSheet for a given theme name
+	 * @param themeName the name of the theme
+	 * @return The styleSheet entity or null in case no theme matching the given name is found
+	 */
+	StyleSheet findThemeByName(String themeName);
 }

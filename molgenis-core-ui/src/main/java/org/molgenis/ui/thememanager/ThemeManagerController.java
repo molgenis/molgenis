@@ -2,6 +2,7 @@ package org.molgenis.ui.thememanager;
 
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.style.MolgenisStyleException;
+import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import static java.util.Collections.singletonList;
 import static org.molgenis.ui.thememanager.ThemeManagerController.URI;
@@ -52,7 +54,8 @@ public class ThemeManagerController extends MolgenisPluginController
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public @ResponseBody void setBootstrapTheme(@Valid @RequestBody String styleName)
+	public @ResponseBody
+	void setBootstrapTheme(@Valid @RequestBody String styleName)
 	{
 		styleService.setSelectedStyle(styleName);
 	}
@@ -64,15 +67,23 @@ public class ThemeManagerController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/add-bootstrap-theme", method = RequestMethod.POST)
 	public @ResponseBody
-	void addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
+	Style addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
 			@RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style)
 			throws MolgenisStyleException
 	{
 		String styleIdentifier = bootstrap3Style.getOriginalFilename();
 		try
 		{
-			styleService.addStyles(styleIdentifier, bootstrap3Style.getOriginalFilename(), bootstrap3Style.getInputStream(),
-					bootstrap4Style.getOriginalFilename(), bootstrap4Style.getInputStream());
+			String bs4FileName = null;
+			InputStream bs4InputStream = null;
+			if (bootstrap4Style != null)
+			{
+				bs4FileName = bootstrap4Style.getOriginalFilename();
+				bs4InputStream = bootstrap4Style.getInputStream();
+			}
+			return styleService
+					.addStyles(styleIdentifier, bootstrap3Style.getOriginalFilename(), bootstrap3Style.getInputStream(),
+							bs4FileName, bs4InputStream);
 		}
 		catch (IOException e)
 		{
@@ -82,7 +93,7 @@ public class ThemeManagerController extends MolgenisPluginController
 
 	@ResponseBody
 	@ResponseStatus(BAD_REQUEST)
-	@ExceptionHandler({ MolgenisStyleException.class})
+	@ExceptionHandler({ MolgenisStyleException.class })
 	public ErrorMessageResponse handleStyleException(Exception e)
 	{
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));

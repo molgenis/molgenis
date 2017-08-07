@@ -34,10 +34,16 @@
 		});
 
     $('#show-add-theme-btn').on('click', function() {
+    	$('#bootstrap-theme-select').prop('disabled', true);
+      $('#save-selected-bootstrap-theme').prop('disabled', true);
+      $('#show-add-theme-btn').prop('disabled', true);
 			$('#add-theme-container').show();
     });
 
     $('#cancel-add-themes-btn').on('click', function() {
+      $('#bootstrap-theme-select').prop('disabled', false);
+      $('#save-selected-bootstrap-theme').prop('disabled', false);
+      $('#show-add-theme-btn').prop('disabled', false);
       $('#add-theme-container').hide();
     });
 
@@ -60,8 +66,11 @@
         type: 'POST',
         success : function() {
           molgenis.createAlert([ {
-            'message' : 'Succesfully added the application theme'
+            'message' : 'Successfully added the application theme'
           } ], 'success');
+          $('#bootstrap-theme-select').prop('disabled', false);
+          $('#save-selected-bootstrap-theme').prop('disabled', false);
+          $('#show-add-theme-btn').prop('disabled', false);
           $('#add-theme-container').hide();
         }
       });

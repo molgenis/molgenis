@@ -1,4 +1,5 @@
 <#include "resource-macros.ftl">
+<#include "theme-macros.ftl">
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,17 +9,8 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="/js/favicon.ico">
-    <#if resource_utils.resourceExists("/css/bootstrap-4/" + app_settings.bootstrapTheme) >
-        <link rel="stylesheet"
-              href="<@resource_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>"
-              type="text/css"
-              id="bootstrap-theme">
-    <#else >
-        <link  rel="stylesheet"
-               href="<@resource_href "/css/bootstrap-4/bootstrap.min.css" />"
-               type="text/css"
-               id="bootstrap-theme">
-    </#if>
+    <link rel="stylesheet" href="<@theme_href "/css/theme/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css"
+          id="bootstrap-theme">
     <link href="<@resource_href "/css/metadata-manager/app.css" />" rel="stylesheet">
 </head>
 <body>
