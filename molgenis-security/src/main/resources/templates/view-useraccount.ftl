@@ -205,47 +205,65 @@
 
         <div role="tabpanel" class="tab-pane" id="security">
         <#if two_factor_authentication_app == "Enabled" || two_factor_authentication_app == "Enforced">
-            <#if two_factor_authentication_app == "Enabled">
-                <div id="two-factor-authentication" class="row">
-                    <div class="col-md-8 col-md-offset-2">
-                        <legend>Two Factor Authentication</legend>
-                        <div class="row">
-                    <#if two_factor_authentication_user == false>
-                        <div class="col-md-6">
-                            <h4><span class="label label-danger">Disabled</span></h4>
-                            <em>You haven't configured two factor authentication yet.</em>
-                        </div>
-                        <div class="col-md-6">
-                            <form id="enable-two-factor-authentication-form" class="form-horizontal"
-                                  role="form"
-                                  action="${context_url?html}/enableTwoFactorAuthentication"
-                                  method="POST">
-                                <button type="submit" class="btn btn-primary">Enable two factor
-                                    authentication
-                                </button>
-                            </form>
-                        </div>
-                    <#else>
-                        <div class="col-md-6">
-                            <h4><span class="label label-success">Enabled</span></h4>
-                            <em>You have configured two factor authentication.</em>
-                        </div>
-                        <div class="col-md-6">
-                            <form id="enable-two-factor-authentication-form" class="form-horizontal"
-                                  role="form"
-                                  action="${context_url?html}/disableTwoFactorAuthentication"
-                                  method="POST">
-                                <button type="submit" class="btn btn-danger">Disable two factor
-                                    authentication
-                                </button>
-
-                            </form>
-                        </div>
-                    </#if>
+            <div id="two-factor-authentication" class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <legend>Two Factor Authentication</legend>
+                    <div class="row">
+                        <#if two_factor_authentication_user == false && two_factor_authentication_app != "Enforced">
+                            <div class="col-md-6">
+                                <h4><span class="label label-danger">Disabled</span></h4>
+                                <em>You haven't configured two factor authentication yet.</em>
+                            </div>
+                            <div class="col-md-6">
+                                <form id="enable-two-factor-authentication-form" class="form-horizontal"
+                                      role="form"
+                                      action="${context_url?html}/enableTwoFactorAuthentication"
+                                      method="POST">
+                                    <button type="submit" class="btn btn-primary btn-block">Enable two factor
+                                        authentication
+                                    </button>
+                                </form>
+                            </div>
+                        <#else>
+                            <div class="col-md-6">
+                                <h4><span class="label label-success">Enabled</span></h4>
+                                <em>You have configured two factor authentication.</em>
+                            </div>
+                            <div class="col-md-6">
+                                <#if two_factor_authentication_app != "Enforced">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <form id="enable-two-factor-authentication-form" class="form-horizontal"
+                                                  role="form"
+                                                  action="${context_url?html}/disableTwoFactorAuthentication"
+                                                  method="POST">
+                                                <button type="submit" class="btn btn-danger btn-block">Disable two
+                                                    factor
+                                                    authentication
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="vertical-spacer"></div>
+                                </#if>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <form id="enable-two-factor-authentication-form" class="form-horizontal"
+                                              role="form"
+                                              action="${context_url?html}/resetTwoFactorAuthentication"
+                                              method="POST">
+                                            <button type="submit" class="btn btn-primary btn-block">Reconfigure two
+                                                factor
+                                                authentication
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </#if>
+                    </div>
                 </div>
             </div>
-            </div>
-            </#if>
             <#if two_factor_authentication_app == "Enforced" || (two_factor_authentication_app == "Enabled" && two_factor_authentication_user == true)>
                 <div id="recovery-codes" class="row">
                     <div class="col-md-8 col-md-offset-2">

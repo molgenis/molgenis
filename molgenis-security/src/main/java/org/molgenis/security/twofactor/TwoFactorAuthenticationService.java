@@ -31,6 +31,8 @@ public interface TwoFactorAuthenticationService
 	 */
 	void saveSecretForUser(String secret) throws UsernameNotFoundException;
 
+	void resetSecretForUser();
+
 	void enableForUser();
 
 	/**

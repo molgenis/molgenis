@@ -109,7 +109,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	{
 		when(molgenisUser.getUsername()).thenReturn(USERNAME);
 		when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
-		when(runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
+		when(runAsSystem(() -> dataService.findOne(UserSecretMetaData.USER_SECRET,
 				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
 				UserSecret.class))).thenReturn(userSecret);
 	}
@@ -165,7 +165,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	public void testDisableForUser()
 	{
 		when(userService.getUser(molgenisUser.getUsername())).thenReturn(molgenisUser);
-		when(dataService.findOne(UserSecretMetaData.USERSECRET,
+		when(dataService.findOne(UserSecretMetaData.USER_SECRET,
 				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
 				UserSecret.class)).thenReturn(userSecret);
 		twoFactorAuthenticationService.disableForUser();

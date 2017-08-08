@@ -179,6 +179,14 @@ public class UserAccountController extends MolgenisPluginController
 		return showAccount(model, false);
 	}
 
+	@RequestMapping(value = "resetTwoFactorAuthentication", method = POST)
+	public String resetTwoFactorAuthentication()
+	{
+		twoFactorAuthenticationService.resetSecretForUser();
+
+		return "redirect:/2fa/activation";
+	}
+
 	/**
 	 * <p>Set AuthenticationToken back to {@link UsernamePasswordAuthenticationToken} generated with default DaoAuthenticationProvider</p>
 	 */
