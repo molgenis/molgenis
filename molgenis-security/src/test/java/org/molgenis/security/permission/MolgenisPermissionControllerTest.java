@@ -1,7 +1,7 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

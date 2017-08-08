@@ -3,7 +3,6 @@ package org.molgenis.ui;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.util.ResourceFingerprintRegistry;
-import org.molgenis.util.ResourceUtils;
 import org.molgenis.util.TemplateResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
