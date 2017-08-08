@@ -1,8 +1,10 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.auth;
 
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.RestAuthenticationToken;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.DISABLED;
-import static org.molgenis.security.twofactor.TwoFactorAuthenticationSetting.ENFORCED;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 
 public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 {

@@ -1,6 +1,9 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.auth;
 
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserAccountServiceImpl;
 import org.molgenis.security.user.UserService;

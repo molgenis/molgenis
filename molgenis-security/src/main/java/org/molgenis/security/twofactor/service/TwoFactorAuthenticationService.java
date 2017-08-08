@@ -1,5 +1,7 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationFilter;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;

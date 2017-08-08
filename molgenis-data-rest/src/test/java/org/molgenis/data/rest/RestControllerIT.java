@@ -5,7 +5,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import net.minidev.json.JSONObject;
 import org.molgenis.data.rest.convert.RestTestUtils;
-import org.molgenis.security.twofactor.TwoFactorAuthenticationSetting;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;

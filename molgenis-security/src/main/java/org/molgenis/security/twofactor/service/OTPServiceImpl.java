@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
 import org.jboss.aerogear.security.otp.Totp;
 import org.molgenis.data.settings.AppSettings;

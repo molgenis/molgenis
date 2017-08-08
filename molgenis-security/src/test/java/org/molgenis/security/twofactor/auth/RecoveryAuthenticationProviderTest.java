@@ -1,5 +1,7 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.auth;
 
+import org.molgenis.security.twofactor.service.RecoveryService;
+import org.molgenis.security.twofactor.service.RecoveryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

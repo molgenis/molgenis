@@ -1,8 +1,14 @@
 package org.molgenis.security.twofactor;
 
 import org.molgenis.security.login.MolgenisLoginController;
+import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProvider;
+import org.molgenis.security.twofactor.auth.RecoveryAuthenticationToken;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationProvider;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationToken;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
+import org.molgenis.security.twofactor.service.OTPService;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;

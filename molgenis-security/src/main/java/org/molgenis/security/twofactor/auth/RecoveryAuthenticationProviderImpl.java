@@ -1,5 +1,6 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.auth;
 
+import org.molgenis.security.twofactor.service.RecoveryService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
