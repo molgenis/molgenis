@@ -117,7 +117,7 @@
     <#-- VUE -->
     <div id="molgenis-menu"></div>
     <script type="text/javascript">
-        window.__INITIAL_STATE__ = {
+        window.molgenismenu = {
             menu: ${menu}
             <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
             <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>

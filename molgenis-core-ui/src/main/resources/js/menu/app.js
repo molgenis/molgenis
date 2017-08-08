@@ -1,90 +1,90 @@
 webpackJsonp([1], {
-  117: function (t, e) {},
-  118: function (t, e) {},
-  119: function (t, e, n) {
+  117: function (e, t) {},
+  118: function (e, t) {},
+  119: function (e, t, n) {
     var a = n(86)(n(122), n(311), null, null, null)
-    t.exports = a.exports
+    e.exports = a.exports
   },
-  121: function (t, e, n) {
+  121: function (e, t, n) {
     'use strict'
-    Object.defineProperty(e, '__esModule', {value: !0})
-    var a = n(116), s = (n.n(a), n(115)), l = (n.n(s), n(120)), o = n.n(l), i = n(119), r = n.n(i), c = n(117),
-      d = (n.n(c), n(118))
-    n.n(d)
+    Object.defineProperty(t, '__esModule', {value: !0})
+    var a = n(116), s = (n.n(a), n(115)), l = (n.n(s), n(120)), o = n.n(l), i = n(119), r = n.n(i), u = n(117),
+      c = (n.n(u), n(118))
+    n.n(c)
     new o.a({el: '#molgenis-menu', template: '<MolgenisMenu />', components: {MolgenisMenu: r.a}})
   },
-  122: function (t, e, n) {
+  122: function (e, t, n) {
     'use strict'
-    Object.defineProperty(e, '__esModule', {value: !0})
+    Object.defineProperty(t, '__esModule', {value: !0})
     var a = n(309), s = n.n(a)
-    e.default = {
+    t.default = {
       components: {SubMenu: s.a},
       name: 'molgenis-menu',
       data: function () {
         return {
-          menu: window.__INITIAL_STATE__.menu,
-          topLogo: window.__INITIAL_STATE__.topLogo,
-          navBarLogo: window.__INITIAL_STATE__.navBarLogo,
-          helpLink: window.__INITIAL_STATE__.helpLink,
-          authenticated: window.__INITIAL_STATE__.authenticated,
-          selectedPlugin: window.__INITIAL_STATE__.selectedPlugin,
-          showLanguageDropdown: window.__INITIAL_STATE__.showLanguageDropdown,
-          logoutFunction: window.__INITIAL_STATE__.logoutFunction,
-          googleSignIn: window.__INITIAL_STATE__.googleSignIn,
+          menu: window.molgenismenu.menu,
+          topLogo: window.molgenismenu.topLogo,
+          navBarLogo: window.molgenismenu.navBarLogo,
+          helpLink: window.molgenismenu.helpLink,
+          authenticated: window.molgenismenu.authenticated,
+          selectedPlugin: window.molgenismenu.selectedPlugin,
+          showLanguageDropdown: window.molgenismenu.showLanguageDropdown,
+          logoutFunction: window.molgenismenu.logoutFunction,
+          googleSignIn: window.molgenismenu.googleSignIn,
           collapse: !0,
           selectedIndex: {default: -1, type: Number}
         }
       },
       methods: {
-        setIndex: function (t) {this.selectedIndex === t ? this.selectedIndex = -1 : this.selectedIndex = t},
+        setIndex: function (e) {this.selectedIndex === e ? this.selectedIndex = -1 : this.selectedIndex = e},
         toggleNavbar: function () {this.collapse = !this.collapse},
-        isSelectedPlugin: function (t) {return t === this.selectedPlugin},
+        isSelectedPlugin: function (e) {return e === this.selectedPlugin},
         logout: function () {this.logoutFunction && this.logoutFunction(), document.getElementById('logout-form').submit()},
         login: function () {document.getElementById('login-modal').classList.add('show')}
       },
       mounted: function () {
-        var t = this.setIndex
-        window.addEventListener('click', function (e) {'nav-link dropdown-toggle' !== e.target.className && t(-1)}, !1)
+        var e = this.setIndex
+        window.addEventListener('click', function (t) {'nav-link dropdown-toggle' !== t.target.className && e(-1)}, !1)
       }
     }
   },
-  123: function (t, e, n) {
+  123: function (e, t, n) {
     'use strict'
-    Object.defineProperty(e, '__esModule', {value: !0})
+    Object.defineProperty(t, '__esModule', {value: !0})
     var a = n(310), s = n.n(a)
-    e.default = {
+    t.default = {
       components: {SubMenuContent: s.a},
       name: 'sub-menu',
       props: ['selected', 'id', 'label', 'callback', 'index', 'items']
     }
   },
-  124: function (t, e, n) {
+  124: function (e, t, n) {
     'use strict'
-    Object.defineProperty(e, '__esModule', {value: !0}), e.default = {
+    Object.defineProperty(t, '__esModule', {value: !0}), t.default = {
       name: 'sub-menu-content',
       props: ['parent', 'id', 'href', 'label', 'type', 'items', 'depth']
     }
   },
-  309: function (t, e, n) {
+  309: function (e, t, n) {
     var a = n(86)(n(123), n(312), null, null, null)
-    t.exports = a.exports
+    e.exports = a.exports
   },
-  310: function (t, e, n) {
+  310: function (e, t, n) {
     var a = n(86)(n(124), n(313), null, null, null)
-    t.exports = a.exports
+    e.exports = a.exports
   },
-  311: function (t, e) {
-    t.exports = {
+  311: function (e, t) {
+    e.exports = {
       render: function () {
-        var t = this, e = t.$createElement, n = t._self._c || e
-        return n('div', [t.topLogo ? [n('div', {attrs: {id: 'TopLogo'}}, [n('a', {attrs: {href: '/'}}, [n('img', {
+        var e = this, t = e.$createElement, n = e._self._c || t
+        return n('div', [e.topLogo ? [n('div', {attrs: {id: 'TopLogo'}}, [n('a', {attrs: {href: '/'}}, [n('img', {
           attrs: {
-            src: t.topLogo,
+            src: e.topLogo,
             alt: '',
             border: '0',
             height: '150'
           }
-        })])])] : t._e(), t._v(' '), n('nav', {staticClass: 'navbar navbar-toggleable-md navbar-light bg-faded'}, [n('button', {
+        })])])] : e._e(), e._v(' '), n('nav', {staticClass: 'navbar navbar-toggleable-md navbar-light bg-faded'}, [n('button', {
           staticClass: 'navbar-toggler navbar-toggler-right',
           attrs: {
             type: 'button',
@@ -93,46 +93,46 @@ webpackJsonp([1], {
             'aria-expanded': 'false',
             'aria-label': 'Toggle navigation'
           },
-          on: {click: t.toggleNavbar}
-        }, [n('span', {staticClass: 'navbar-toggler-icon'})]), t._v(' '), t.navBarLogo ? n('a', {
+          on: {click: e.toggleNavbar}
+        }, [n('span', {staticClass: 'navbar-toggler-icon'})]), e._v(' '), e.navBarLogo ? n('a', {
           staticClass: 'navbar-brand',
-          attrs: {href: '/menu/main/' + t.menu.items[0].href}
-        }, [n('img', {attrs: {src: t.navBarLogo}})]) : n('a', {
+          attrs: {href: '/menu/main/' + e.menu.items[0].href}
+        }, [n('img', {attrs: {src: e.navBarLogo}})]) : n('a', {
           staticClass: 'navbar-brand',
           attrs: {href: '#'}
-        }), t._v(' '), n('div', {
-          class: {collapse: t.collapse, 'navbar-collapse': t.collapse},
+        }), e._v(' '), n('div', {
+          class: {collapse: e.collapse, 'navbar-collapse': e.collapse},
           attrs: {id: 'navbarNavDropdown'}
-        }, [n('ul', {staticClass: 'navbar-nav mr-auto'}, [t._l(t.menu.items, function (e, a) {
-          return ['PLUGIN' != e.type || 0 == a && t.navBarLogo ? ['MENU' == e.type && 0 != a ? [n('sub-menu', {
+        }, [n('ul', {staticClass: 'navbar-nav mr-auto'}, [e._l(e.menu.items, function (t, a) {
+          return ['PLUGIN' != t.type || 0 == a && e.navBarLogo ? ['MENU' == t.type && 0 != a ? [n('sub-menu', {
             attrs: {
-              id: e.id,
-              label: e.label,
+              id: t.id,
+              label: t.label,
               index: a,
-              selected: a == t.selectedIndex,
-              callback: t.setIndex,
-              items: e.items
+              selected: a == e.selectedIndex,
+              callback: e.setIndex,
+              items: t.items
             }
-          })] : t._e()] : [n('li', {
+          })] : e._e()] : [n('li', {
             staticClass: 'nav-item',
-            class: {active: t.isSelectedPlugin(e.id)}
-          }, [n('a', {staticClass: 'nav-link', attrs: {href: '/menu/main/' + e.href}}, [t._v(t._s(e.label))])])]]
-        })], 2), t._v(' '), n('ul', {staticClass: 'nav navbar-nav'}, [t._m(0), t._v(' '), n('li', {staticClass: 'nav-item'}, [n('a', {
+            class: {active: e.isSelectedPlugin(t.id)}
+          }, [n('a', {staticClass: 'nav-link', attrs: {href: '/menu/main/' + t.href}}, [e._v(e._s(t.label))])])]]
+        })], 2), e._v(' '), n('ul', {staticClass: 'nav navbar-nav'}, [e._m(0), e._v(' '), n('li', {staticClass: 'nav-item'}, [n('a', {
           staticClass: 'nav-link navbar-right',
-          attrs: {href: t.helpLink.href, target: '_blank'}
-        }, [t._v(t._s(t.helpLink.label))])]), t._v(' '), t.authenticated ? n('li', {staticClass: 'nav-link'}, [n('form', {
+          attrs: {href: e.helpLink.href, target: '_blank'}
+        }, [e._v(e._s(e.helpLink.label))])]), e._v(' '), e.authenticated ? n('li', {staticClass: 'nav-link'}, [n('form', {
           staticClass: 'navbar-form navbar-right',
           attrs: {id: 'logout-form', method: 'post', action: '/logout'}
         }, [n('button', {
           staticClass: 'btn btn-primary btn-sm',
           attrs: {id: 'signout-button', type: 'button'},
-          on: {click: t.logout}
-        }, [t._v('Sign out\n            ')])])]) : n('li', {staticClass: 'nav-item'}, [n('a', {
+          on: {click: e.logout}
+        }, [e._v('Sign out\n            ')])])]) : n('li', {staticClass: 'nav-item'}, [n('a', {
           staticClass: 'nav-link navbar-right btn btn-secondary',
-          on: {click: t.login}
-        }, [t._v('Sign in')])])])])])], 2)
+          on: {click: e.login}
+        }, [e._v('Sign in')])])])])])], 2)
       }, staticRenderFns: [function () {
-        var t = this, e = t.$createElement, n = t._self._c || e
+        var e = this, t = e.$createElement, n = e._self._c || t
         return n('li', {staticClass: 'nav-item'}, [n('div', {
           staticClass: 'navbar-right',
           attrs: {id: 'language-select-box'}
@@ -140,26 +140,26 @@ webpackJsonp([1], {
       }]
     }
   },
-  312: function (t, e) {
-    t.exports = {
+  312: function (e, t) {
+    e.exports = {
       render: function () {
-        var t = this, e = t.$createElement, n = t._self._c || e
-        return n('li', {class: ['nav-item', 'dropdown', t.selected ? 'show' : '']}, [n('a', {
+        var e = this, t = e.$createElement, n = e._self._c || t
+        return n('li', {class: ['nav-item', 'dropdown', e.selected ? 'show' : '']}, [n('a', {
           staticClass: 'nav-link dropdown-toggle',
-          attrs: {id: t.id, 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': t.selected, href: '#'},
-          on: {click: function (e) {t.callback(t.index)}}
-        }, [t._v('\n    ' + t._s(t.label) + '\n  ')]), t._v(' '), n('div', {
+          attrs: {id: e.id, 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': e.selected, href: '#'},
+          on: {click: function (t) {e.callback(e.index)}}
+        }, [e._v('\n    ' + e._s(e.label) + '\n  ')]), e._v(' '), n('div', {
           staticClass: 'dropdown-menu',
           attrs: {'aria-labelledby': 'navbarDropdownMenuLink'}
-        }, [t._l(t.items, function (e, a) {
+        }, [e._l(e.items, function (t, a) {
           return [n('sub-menu-content', {
             attrs: {
-              parent: t.id,
-              id: e.id,
-              href: e.href,
-              label: e.label,
-              type: e.type,
-              items: e.items,
+              parent: e.id,
+              id: t.id,
+              href: t.href,
+              label: t.label,
+              type: t.type,
+              items: t.items,
               depth: 0
             }
           })]
@@ -167,31 +167,31 @@ webpackJsonp([1], {
       }, staticRenderFns: []
     }
   },
-  313: function (t, e) {
-    t.exports = {
+  313: function (e, t) {
+    e.exports = {
       render: function () {
-        var t = this, e = t.$createElement, n = t._self._c || e
-        return 'PLUGIN' == t.type ? n('a', {
+        var e = this, t = e.$createElement, n = e._self._c || t
+        return 'PLUGIN' == e.type ? n('a', {
           staticClass: 'dropdown-item',
-          attrs: {href: '/menu/' + t.parent + '/' + t.href}
-        }, [t._v(t._s(t.label))]) : n('span', [n('h6', {
+          attrs: {href: '/menu/' + e.parent + '/' + e.href}
+        }, [e._v(e._s(e.label))]) : n('span', [n('h6', {
           staticClass: 'dropdown-header',
-          class: 'menu-depth-' + t.depth
-        }, [t._v(t._s(t.label))]), t._v(' '), t._l(t.items, function (e) {
+          class: 'menu-depth-' + e.depth
+        }, [e._v(e._s(e.label))]), e._v(' '), e._l(e.items, function (t) {
           return [n('sub-menu-content', {
             attrs: {
-              parent: t.id,
-              id: e.id,
-              href: e.href,
-              label: e.label,
-              type: e.type,
-              items: e.items,
-              depth: t.depth + 1
+              parent: e.id,
+              id: t.id,
+              href: t.href,
+              label: t.label,
+              type: t.type,
+              items: t.items,
+              depth: e.depth + 1
             }
           })]
         })], 2)
       }, staticRenderFns: []
     }
   },
-  315: function (t, e) {}
+  315: function (e, t) {}
 }, [121])

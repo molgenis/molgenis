@@ -10,7 +10,7 @@
             <div id="footer"></div>
 
             <script type=text/javascript>
-                window.__INITIAL_STATE__ = {
+                window.molgenisfooter = {
                         <#if app_settings.footer??>additionalMessage: '${app_settings.footer}'</#if>
                     <#if app_settings.footer?? && (molgenis_version??||molgenis_build_date??)>,</#if>
                         <#if molgenis_version??>version: '${molgenis_version}'</#if>
@@ -43,7 +43,7 @@
 </body>
     <#if app_settings.trackingCodeFooter?has_content>
     <script id="app-tracking-code-footer" type="text/javascript">
-        123${app_settings.trackingCodeFooter?string}
+        ${app_settings.trackingCodeFooter?string}
 		</script>
     </#if>
 </html>
