@@ -159,4 +159,16 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		assertEquals(true, isBlocked);
 	}
 
+	@Test
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@WithUserDetails(USERNAME)
+	public void testDisableForUser()
+	{
+		when(userService.getUser(molgenisUser.getUsername())).thenReturn(molgenisUser);
+		when(dataService.findOne(UserSecretMetaData.USERSECRET,
+				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
+				UserSecret.class)).thenReturn(userSecret);
+		twoFactorAuthenticationService.disableForUser();
+	}
+
 }

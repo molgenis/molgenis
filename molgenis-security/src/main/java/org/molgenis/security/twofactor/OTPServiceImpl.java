@@ -3,6 +3,8 @@ package org.molgenis.security.twofactor;
 import org.jboss.aerogear.security.otp.Totp;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,8 @@ import java.net.URLEncoder;
 @Service
 public class OTPServiceImpl implements OTPService
 {
+
+	private final static Logger LOG = LoggerFactory.getLogger(OTPServiceImpl.class);
 
 	private final AppSettings appSettings;
 
@@ -62,8 +66,14 @@ public class OTPServiceImpl implements OTPService
 	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		String appName = appSettings.getTitle() == null ? "molgenis" : appSettings.getTitle();
-		String userName = userDetails == null ? "admin" : userDetails.getUsername();
+		String appName = appSettings.getTitle() == null ? "MOLGENIS" : appSettings.getTitle();
+		if (userDetails == null)
+		{
+			String errorMessage = "User is not available";
+			LOG.error(errorMessage);
+			throw new IllegalStateException();
+		}
+		String userName = userDetails.getUsername();
 		String normalizedBase32Key = secretKey.replace(" ", "").toUpperCase();
 		try
 		{
