@@ -202,113 +202,113 @@
                 </div>
             </div>
         </div>
+
         <div role="tabpanel" class="tab-pane" id="security">
         <#if two_factor_authentication_app == "Enabled" || two_factor_authentication_app == "Enforced">
-            <div id="security" class="row">
-            <div class="col-md-8 col-md-offset-2">
-                <legend>Two Factor Authentication</legend>
-                <#if two_factor_authentication_app == "Enabled">
-                    <div class="row">
-                        <#if two_factor_authentication_user == false>
-                            <div class="col-md-6">
-                                <h4><span class="label label-danger">Disabled</span></h4>
-                                <em>You haven't configured two factor authentication yet.</em>
-                            </div>
-                            <div class="col-md-6">
-                                <form id="enable-two-factor-authentication-form" class="form-horizontal"
-                                      role="form"
-                                      action="${context_url?html}/enableTwoFactorAuthentication"
-                                      method="POST">
-                                    <button type="submit" class="btn btn-primary">Enable two factor
-                                        authentication
-                                    </button>
-                                </form>
-                            </div>
-                        <#else>
-                            <div class="col-md-6">
-                                <h4><span class="label label-success">Enabled</span></h4>
-                                <em>You have configured two factor authentication.</em>
-                            </div>
-                            <div class="col-md-6">
-                                <form id="enable-two-factor-authentication-form" class="form-horizontal"
-                                      role="form"
-                                      action="${context_url?html}/disableTwoFactorAuthentication"
-                                      method="POST">
-                                    <button type="submit" class="btn btn-danger">Disable two factor
-                                        authentication
-                                    </button>
+            <#if two_factor_authentication_app == "Enabled">
+                <div id="two-factor-authentication" class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <legend>Two Factor Authentication</legend>
+                        <div class="row">
+                    <#if two_factor_authentication_user == false>
+                        <div class="col-md-6">
+                            <h4><span class="label label-danger">Disabled</span></h4>
+                            <em>You haven't configured two factor authentication yet.</em>
+                        </div>
+                        <div class="col-md-6">
+                            <form id="enable-two-factor-authentication-form" class="form-horizontal"
+                                  role="form"
+                                  action="${context_url?html}/enableTwoFactorAuthentication"
+                                  method="POST">
+                                <button type="submit" class="btn btn-primary">Enable two factor
+                                    authentication
+                                </button>
+                            </form>
+                        </div>
+                    <#else>
+                        <div class="col-md-6">
+                            <h4><span class="label label-success">Enabled</span></h4>
+                            <em>You have configured two factor authentication.</em>
+                        </div>
+                        <div class="col-md-6">
+                            <form id="enable-two-factor-authentication-form" class="form-horizontal"
+                                  role="form"
+                                  action="${context_url?html}/disableTwoFactorAuthentication"
+                                  method="POST">
+                                <button type="submit" class="btn btn-danger">Disable two factor
+                                    authentication
+                                </button>
 
-                                </form>
-                            </div>
-                        </#if>
-                    </div>
-                    <div class="vertical-spacer"></div>
+                            </form>
+                        </div>
+                    </#if>
                 </div>
-                </#if>
-                <#if two_factor_authentication_app == "Enforced" || (two_factor_authentication_app == "Enabled" && two_factor_authentication_user == true)>
-                <div class="col-md-8 col-md-offset-2">
-                    <legend>Recovery Codes</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <p>
-                                Recovery codes can be used to access your account in the event you lose
-                                access
-                                to your
-                                device
-                                and cannot receive two-factor authentication codes.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row collapse in recovery-code-list-toggle">
-                        <div class="col-md-4">
-                            <button id="recovery-codes-button" type="button" class="btn btn-primary">Show
-                                recovery codes
-                            </button>
-                        </div>
-                    </div>
-                    <div id="recovery-codes" class="collapse recovery-code-list-toggle">
+            </div>
+            </div>
+            </#if>
+            <#if two_factor_authentication_app == "Enforced" || (two_factor_authentication_app == "Enabled" && two_factor_authentication_user == true)>
+                <div id="recovery-codes" class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <legend>Recovery Codes</legend>
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="panel panel-warning">
-                                    <div class="panel-body">
-                                        Put these codes in a safe spot. If you lose your device and don't
-                                        have
-                                        the recovery codes you will lose access to your account.
+                                <p>
+                                    Recovery codes can be used to access your account in the event you lose
+                                    access
+                                    to your
+                                    device
+                                    and cannot receive two-factor authentication codes.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row collapse in recovery-code-list-toggle">
+                            <div class="col-md-4">
+                                <button id="recovery-codes-button" type="button" class="btn btn-primary">Show
+                                    recovery codes
+                                </button>
+                            </div>
+                        </div>
+                        <div id="recovery-codes" class="collapse recovery-code-list-toggle">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-warning">
+                                        <div class="panel-body">
+                                            Put these codes in a safe spot. If you lose your device and don't
+                                            have
+                                            the recovery codes you will lose access to your account.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <ul id="recovery-codes-list" class="list-group">
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="panel panel-danger">
-                                    <div class="panel-body">
-                                        <div class="form-group">
-                                            <button id="generate-codes-button" type="button"
-                                                    class="btn btn-danger">Generate
-                                                new
-                                                recovery codes
-                                            </button>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul id="recovery-codes-list" class="list-group">
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="panel panel-danger">
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <button id="generate-codes-button" type="button"
+                                                        class="btn btn-danger">Generate
+                                                    new
+                                                    recovery codes
+                                                </button>
+                                            </div>
+                                            <p>Generating new recovery codes will replace the existing codes.
+                                                The
+                                                old codes will no longer be usable. </p>
                                         </div>
-                                        <p>Generating new recovery codes will replace the existing codes.
-                                            The
-                                            old codes will no longer be usable. </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </#if>
-            </div>
-            </div>
+                </div>
+            </#if>
         </#if>
         </div>
     </div>
-</div>
-</div>
 </div>
 
 <style>
