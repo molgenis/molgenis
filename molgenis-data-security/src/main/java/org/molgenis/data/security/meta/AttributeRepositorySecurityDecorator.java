@@ -16,6 +16,7 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
 /**
  * Attribute repository decorator that marks attributes as read-only for the current user based on permissions.
@@ -43,7 +44,6 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		MappedConsumer mappedConsumer = new MappedConsumer(consumer, this);
 		delegate().forEachBatched(fetch, mappedConsumer::map, batchSize);
-		super.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -86,9 +86,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (attribute != null)
 		{
-			String entityTypeId = attribute.getEntityType().getId();
-			Object entityId = attribute.getIdValue();
-			if (!permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.WRITE))
+			String attributeIdentifier = attribute.getIdentifier();
+			if (!permissionService.hasPermissionOnEntity(ATTRIBUTE_META_DATA, attributeIdentifier, Permission.WRITE))
 			{
 				attribute.setReadOnly(true);
 			}
