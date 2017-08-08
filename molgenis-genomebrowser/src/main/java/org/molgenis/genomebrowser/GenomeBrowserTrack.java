@@ -1,15 +1,13 @@
 package org.molgenis.genomebrowser;
 
 import com.google.auto.value.AutoValue;
-
-import javax.annotation.Nullable;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 
+import javax.annotation.Nullable;
 import java.util.stream.Collectors;
 
 @AutoValue

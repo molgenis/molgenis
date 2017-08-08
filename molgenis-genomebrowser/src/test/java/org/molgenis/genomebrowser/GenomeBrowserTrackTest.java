@@ -10,7 +10,7 @@ import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 public class GenomeBrowserTrackTest
 {
