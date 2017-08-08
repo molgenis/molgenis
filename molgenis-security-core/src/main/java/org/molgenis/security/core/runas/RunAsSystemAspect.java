@@ -1,42 +1,26 @@
 package org.molgenis.security.core.runas;
 
-import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.framework.Advised;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.lang.reflect.Method;
+import org.springframework.stereotype.Component;
 
 /**
  * Proxy that set a SystemSecurityToken in the security context for the duration of a method
  */
-public class RunAsSystemProxy implements Advice, MethodInterceptor
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
+@Aspect
+@Component
+public class RunAsSystemAspect
 {
-	private final Object targetObject;
-
-	public RunAsSystemProxy(Object targetObject)
+	@Around("@annotation(RunAsSystem)")
+	public Object aroundAdvice(ProceedingJoinPoint joinPoint) throws Throwable
 	{
-		this.targetObject = targetObject;
-	}
-
-	@Override
-	public Object invoke(MethodInvocation invocation) throws Throwable
-	{
-		Method interfaceMethod = invocation.getMethod();
-
-		Class<?> clazz = targetObject instanceof Advised ? ((Advised) targetObject).getTargetClass() : targetObject.getClass();
-
-		Method targetMethod = clazz.getMethod(interfaceMethod.getName(), interfaceMethod.getParameterTypes());
-
-		if (!targetMethod.isAnnotationPresent(RunAsSystem.class))
-		{
-			return invocation.proceed();
-		}
-
-		return runAsSystem(invocation::proceed);
-
+		return runAsSystem((RunnableAsSystem<Object, Throwable>) joinPoint::proceed);
 	}
 
 	public static void runAsSystem(Runnable runnable)

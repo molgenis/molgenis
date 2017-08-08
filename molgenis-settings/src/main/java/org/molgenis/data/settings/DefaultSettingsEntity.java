@@ -6,7 +6,7 @@ import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,7 +45,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 
 	public EntityType getEntityType()
 	{
-		return RunAsSystemProxy.runAsSystem(() -> dataService.getEntityType(entityTypeId));
+		return RunAsSystemAspect.runAsSystem(() -> dataService.getEntityType(entityTypeId));
 	}
 
 	@Override
@@ -165,7 +165,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	 */
 	public void addListener(SettingsEntityListener settingsEntityListener)
 	{
-		RunAsSystemProxy.runAsSystem(() -> entityListenersService.addEntityListener(entityTypeId, new EntityListener()
+		RunAsSystemAspect.runAsSystem(() -> entityListenersService.addEntityListener(entityTypeId, new EntityListener()
 		{
 			@Override
 			public void postUpdate(Entity entity)
@@ -188,7 +188,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	 */
 	public void removeListener(SettingsEntityListener settingsEntityListener)
 	{
-		RunAsSystemProxy.runAsSystem(
+		RunAsSystemAspect.runAsSystem(
 				() -> entityListenersService.removeEntityListener(entityTypeId, new EntityListener()
 				{
 
@@ -224,7 +224,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 	{
 		if (cachedEntity == null)
 		{
-			cachedEntity = RunAsSystemProxy.runAsSystem(() ->
+			cachedEntity = RunAsSystemAspect.runAsSystem(() ->
 			{
 				Entity entity = dataService.findOneById(entityTypeId, entityId);
 
@@ -252,7 +252,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 
 	private void updateEntity(Entity entity)
 	{
-		RunAsSystemProxy.runAsSystem(() ->
+		RunAsSystemAspect.runAsSystem(() ->
 		{
 			dataService.update(entityTypeId, entity);
 			ResourceBundle.clearCache();
