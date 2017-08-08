@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.meta;
 
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.meta.AttributeType;
@@ -18,7 +18,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 public class UserSecretMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "UserSecret";
-	public static final String USERSECRET = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String USER_SECRET = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String USER_ID = "user_id";

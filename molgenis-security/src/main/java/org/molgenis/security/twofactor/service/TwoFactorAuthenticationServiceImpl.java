@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
@@ -6,6 +6,9 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
+import org.molgenis.security.twofactor.meta.UserSecret;
+import org.molgenis.security.twofactor.meta.UserSecretFactory;
+import org.molgenis.security.twofactor.meta.UserSecretMetaData;
 import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +21,14 @@ import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.stream.Stream;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.twofactor.meta.UserSecretMetaData.USER_ID;
+import static org.molgenis.security.twofactor.meta.UserSecretMetaData.USER_SECRET;
 
 @Service
 public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticationService
@@ -105,9 +111,25 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			UserSecret userSecret = userSecretFactory.create();
 			userSecret.setUserId(user.getId());
 			userSecret.setSecret(secret);
-			runAsSystem(() -> dataService.add(UserSecretMetaData.USERSECRET, userSecret));
+			runAsSystem(() -> dataService.add(USER_SECRET, userSecret));
 		}
+	}
 
+	@Override
+	public void resetSecretForUser()
+	{
+		User user = getUser();
+		Stream<UserSecret> userSecrets = dataService.findAll(USER_SECRET,
+				new QueryImpl<UserSecret>().eq(USER_ID, user.getId()), UserSecret.class);
+		dataService.delete(USER_SECRET, userSecrets);
+	}
+
+	@Override
+	public void enableForUser()
+	{
+		User user = getUser();
+		user.setTwoFactorAuthentication(true);
+		userService.update(user);
 	}
 
 	@Override
@@ -117,7 +139,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		user.setTwoFactorAuthentication(false);
 		userService.update(user);
 		UserSecret userSecret = getSecret();
-		runAsSystem(() -> dataService.delete(UserSecretMetaData.USERSECRET, userSecret));
+		runAsSystem(() -> dataService.delete(USER_SECRET, userSecret));
 	}
 
 	@Override
@@ -171,13 +193,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		{
 			userSecret.setLastFailedAuthentication(Instant.now());
 		}
-		runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
+		runAsSystem(() -> dataService.update(USER_SECRET, userSecret));
 	}
 
 	private UserSecret getSecret() throws InternalAuthenticationServiceException
 	{
 		User user = getUser();
-		UserSecret secret = runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
+		UserSecret secret = runAsSystem(() -> dataService.findOne(USER_SECRET,
 				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, user.getId()), UserSecret.class));
 
 		if (secret != null)

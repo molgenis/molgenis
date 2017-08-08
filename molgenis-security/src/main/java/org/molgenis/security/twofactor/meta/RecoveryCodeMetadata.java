@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.meta;
 
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.meta.SystemEntityType;

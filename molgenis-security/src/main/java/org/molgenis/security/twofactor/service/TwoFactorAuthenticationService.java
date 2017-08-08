@@ -1,5 +1,7 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationFilter;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -30,6 +32,10 @@ public interface TwoFactorAuthenticationService
 	 * @param secret given secret for user
 	 */
 	void saveSecretForUser(String secret) throws UsernameNotFoundException;
+
+	void resetSecretForUser();
+
+	void enableForUser();
 
 	/**
 	 * <p>Disable 2 factor authentication for the current user</p>

@@ -5,9 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.twofactor.RecoveryCode;
-import org.molgenis.security.twofactor.RecoveryService;
-import org.molgenis.security.twofactor.TwoFactorAuthenticationService;
+import org.molgenis.security.twofactor.meta.RecoveryCode;
+import org.molgenis.security.twofactor.service.RecoveryService;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -165,9 +165,7 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(value = "enableTwoFactorAuthentication", method = POST)
 	public String enableTwoFactorAuthentication()
 	{
-		User user = userAccountService.getCurrentUser();
-		user.setTwoFactorAuthentication(true);
-		userAccountService.updateCurrentUser(user);
+		twoFactorAuthenticationService.enableForUser();
 
 		return "redirect:/login";
 	}
@@ -179,6 +177,14 @@ public class UserAccountController extends MolgenisPluginController
 		downgradeUserAuthentication();
 
 		return showAccount(model, false);
+	}
+
+	@RequestMapping(value = "resetTwoFactorAuthentication", method = POST)
+	public String resetTwoFactorAuthentication()
+	{
+		twoFactorAuthenticationService.resetSecretForUser();
+
+		return "redirect:/2fa/activation";
 	}
 
 	/**

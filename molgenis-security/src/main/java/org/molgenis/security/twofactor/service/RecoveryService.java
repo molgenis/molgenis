@@ -1,5 +1,6 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
+import org.molgenis.security.twofactor.meta.RecoveryCode;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import java.util.stream.Stream;

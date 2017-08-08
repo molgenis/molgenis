@@ -1,6 +1,7 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.security.twofactor.meta.UserSecret;
 
 /**
  * OTPService is used to determine if the {@link UserSecret} matches the given validationcode.

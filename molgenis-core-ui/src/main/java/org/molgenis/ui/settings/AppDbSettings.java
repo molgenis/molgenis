@@ -5,7 +5,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
-import org.molgenis.security.twofactor.TwoFactorAuthenticationSetting;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;

@@ -1,5 +1,8 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.auth;
 
+import org.molgenis.security.twofactor.service.OTPService;
+import org.molgenis.security.twofactor.service.RecoveryService;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -43,7 +46,7 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 			{
 				if (otpService.tryVerificationCode(authToken.getVerificationCode(), authToken.getSecretKey()))
 				{
-					enableTwoFactorAuthentication(authToken);
+					activateTwoFactorAuthentication(authToken);
 					UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
 																				 .getAuthentication()
 																				 .getPrincipal();
@@ -80,8 +83,9 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 		return authToken;
 	}
 
-	private void enableTwoFactorAuthentication(TwoFactorAuthenticationToken authToken)
+	private void activateTwoFactorAuthentication(TwoFactorAuthenticationToken authToken)
 	{
+		twoFactorAuthenticationService.enableForUser();
 		twoFactorAuthenticationService.saveSecretForUser(authToken.getSecretKey());
 		recoveryService.generateRecoveryCodes();
 	}
