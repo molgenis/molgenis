@@ -43,9 +43,7 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 			{
 				if (otpService.tryVerificationCode(authToken.getVerificationCode(), authToken.getSecretKey()))
 				{
-					//TODO combine configuration methods into one
-					twoFactorAuthenticationService.setSecretKey(authToken.getSecretKey());
-					recoveryService.generateRecoveryCodes();
+					enableTwoFactorAuthentication(authToken);
 					UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
 																				 .getAuthentication()
 																				 .getPrincipal();
@@ -80,6 +78,12 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 		}
 
 		return authToken;
+	}
+
+	private void enableTwoFactorAuthentication(TwoFactorAuthenticationToken authToken)
+	{
+		twoFactorAuthenticationService.saveSecretForUser(authToken.getSecretKey());
+		recoveryService.generateRecoveryCodes();
 	}
 
 	@Override

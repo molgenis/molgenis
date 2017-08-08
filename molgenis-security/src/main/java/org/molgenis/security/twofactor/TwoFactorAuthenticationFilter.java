@@ -73,10 +73,6 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 				}
 			}
 		}
-		else
-		{
-			LOG.debug("No 2 factor authentication configured");
-		}
 
 		filterChain.doFilter(httpServletRequest, httpServletResponse);
 	}

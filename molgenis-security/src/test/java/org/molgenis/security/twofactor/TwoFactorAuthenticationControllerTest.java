@@ -1,12 +1,10 @@
 package org.molgenis.security.twofactor;
 
-import org.molgenis.security.google.GoogleAuthenticatorService;
-import org.molgenis.security.google.GoogleAuthenticatorServiceImpl;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.ui.ExtendedModelMap;
@@ -33,13 +31,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		@Bean
 		public OTPService otpService()
 		{
-			return new OTPServiceImpl();
-		}
-
-		@Bean
-		public GoogleAuthenticatorService googleAuthenticatorService()
-		{
-			return new GoogleAuthenticatorServiceImpl();
+			return new OTPServiceImpl(appSettings());
 		}
 
 		@Bean
@@ -62,16 +54,16 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		}
 
 		@Bean
-		public AuthenticationManager authenticationManager()
+		public AppSettings appSettings()
 		{
-			return mock(AuthenticationManager.class);
+			return mock(AppSettings.class);
 		}
 
 		@Bean
 		public TwoFactorAuthenticationController twoFactorAuthenticationController()
 		{
 			return new TwoFactorAuthenticationController(twoFactorAuthenticationProvider(),
-					twoFactorAuthenticationService(), recoveryAuthenticationProvider(), googleAuthenticatorService());
+					twoFactorAuthenticationService(), recoveryAuthenticationProvider(), otpService());
 		}
 	}
 

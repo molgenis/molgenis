@@ -47,7 +47,7 @@ public class RecoveryServiceImpl implements RecoveryService
 		String userId = getUser().getId();
 		deleteOldRecoveryCodes(userId);
 		List<RecoveryCode> newRecoveryCodes = generateRecoveryCodes(userId);
-		dataService.add(RECOVERY_CODE, newRecoveryCodes.stream());
+		runAsSystem(() -> dataService.add(RECOVERY_CODE, newRecoveryCodes.stream()));
 		return newRecoveryCodes.stream();
 	}
 
@@ -77,8 +77,8 @@ public class RecoveryServiceImpl implements RecoveryService
 	public Stream<RecoveryCode> getRecoveryCodes()
 	{
 		String userId = getUser().getId();
-		return dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, userId),
-				RecoveryCode.class);
+		return runAsSystem(() -> dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, userId),
+				RecoveryCode.class));
 	}
 
 	private void deleteOldRecoveryCodes(String userId)

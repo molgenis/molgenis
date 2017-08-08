@@ -29,7 +29,14 @@ public interface TwoFactorAuthenticationService
 	 *
 	 * @param secret given secret for user
 	 */
-	void setSecretKey(String secret) throws UsernameNotFoundException;
+	void saveSecretForUser(String secret) throws UsernameNotFoundException;
+
+	/**
+	 * <p>Disable 2 factor authentication for the current user</p>
+	 * <p>
+	 * Removes the secret key and set the TwoFactorAuthentication field to false
+	 */
+	void disableForUser();
 
 	/**
 	 * <p>Check if the user is 2 factor authentication ready.</p>

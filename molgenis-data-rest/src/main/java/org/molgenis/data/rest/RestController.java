@@ -61,7 +61,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -849,8 +848,7 @@ public class RestController
 		if (userIs2fa())
 		{
 			throw new BadCredentialsException(
-					format("2 factor authentication is [ {0} ], you cannot login via the RESTAPI anymore",
-							appSettings.getTwoFactorAuthentication()));
+					"2 factor authentication is enabled, you cannot use /login via the RESTAPI anymore");
 		}
 
 		return runAsSystem(() ->

@@ -1,6 +1,5 @@
 package org.molgenis.security.twofactor;
 
-import org.molgenis.security.google.GoogleAuthenticatorService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
@@ -34,21 +33,20 @@ public class TwoFactorAuthenticationController
 	private static final String VIEW_2FA_ACTIVATION_MODAL = "view-2fa-activation-modal";
 	private static final String VIEW_2FA_CONFIGURED_MODAL = "view-2fa-configured-modal";
 
-	private TwoFactorAuthenticationProvider authenticationProvider;
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private RecoveryAuthenticationProvider recoveryAuthenticationProvider;
-	private GoogleAuthenticatorService googleAuthenticatorService;
+	private final TwoFactorAuthenticationProvider authenticationProvider;
+	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private final RecoveryAuthenticationProvider recoveryAuthenticationProvider;
+	private final OTPService otpService;
 
 	@Autowired
 	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
-			RecoveryAuthenticationProvider recoveryAuthenticationProvider,
-			GoogleAuthenticatorService googleAuthenticatorService)
+			RecoveryAuthenticationProvider recoveryAuthenticationProvider, OTPService otpService)
 	{
 		this.authenticationProvider = requireNonNull(authenticationProvider);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.recoveryAuthenticationProvider = recoveryAuthenticationProvider;
-		this.googleAuthenticatorService = requireNonNull(googleAuthenticatorService);
+		this.otpService = requireNonNull(otpService);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_CONFIGURED_URI)
@@ -83,8 +81,7 @@ public class TwoFactorAuthenticationController
 		{
 			String secretKey = twoFactorAuthenticationService.generateSecretKey();
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
-			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
-					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
+			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI, otpService.getAuthenticatorURI(secretKey));
 		}
 		catch (IllegalStateException err)
 		{
@@ -108,8 +105,7 @@ public class TwoFactorAuthenticationController
 		catch (Exception err)
 		{
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
-			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
-					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
+			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI, otpService.getAuthenticatorURI(secretKey));
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
 			redirectUrl = VIEW_2FA_ACTIVATION_MODAL;
 		}

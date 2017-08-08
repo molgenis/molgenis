@@ -92,7 +92,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public void setSecretKey(String secret) throws InternalAuthenticationServiceException
+	public void saveSecretForUser(String secret) throws InternalAuthenticationServiceException
 	{
 
 		if (secret == null)
@@ -108,6 +108,16 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			runAsSystem(() -> dataService.add(UserSecretMetaData.USERSECRET, userSecret));
 		}
 
+	}
+
+	@Override
+	public void disableForUser()
+	{
+		User user = getUser();
+		user.setTwoFactorAuthentication(false);
+		userService.update(user);
+		UserSecret userSecret = getSecret();
+		runAsSystem(() -> dataService.delete(UserSecretMetaData.USERSECRET, userSecret));
 	}
 
 	@Override

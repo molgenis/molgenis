@@ -1,13 +1,11 @@
 package org.molgenis.security.twofactor;
 
-import org.junit.Ignore;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.user.UserService;
 import org.molgenis.security.user.UserServiceImpl;
@@ -31,7 +29,7 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
-@ContextConfiguration(classes = { TwoFactorAuthenticationServiceImplTest.Config.class, })
+@ContextConfiguration(classes = { TwoFactorAuthenticationServiceImplTest.Config.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpringContextTests
 {
@@ -51,7 +49,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		@Bean
 		public OTPService otpService()
 		{
-			return new OTPServiceImpl();
+			return new OTPServiceImpl(appSettings());
 		}
 
 		@Bean
@@ -137,7 +135,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	{
 		String secretKey = "secretKey";
 		when(userSecretFactory.create()).thenReturn(userSecret);
-		twoFactorAuthenticationService.setSecretKey(secretKey);
+		twoFactorAuthenticationService.saveSecretForUser(secretKey);
 	}
 
 	@Test
@@ -148,22 +146,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 		when(userSecret.getSecret()).thenReturn("secretKey");
 		boolean isConfigured = twoFactorAuthenticationService.isConfiguredForUser();
 		assertEquals(true, isConfigured);
-	}
-
-	/**
-	 * FIXME(SH): how do we implement this test properly
-	 */
-	@Ignore
-	@Test(expectedExceptions = InvalidVerificationCodeException.class)
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
-	public void isVerificationCodeValidForUserTest()
-	{
-		String verificationCode = "123467";
-		when(appSettings.getTwoFactorAuthentication()).thenReturn(TwoFactorAuthenticationSetting.ENABLED.toString());
-		when(userSecret.getSecret()).thenReturn("secretKey");
-		boolean isValid = twoFactorAuthenticationService.isVerificationCodeValidForUser(verificationCode);
-		assertEquals(false, isValid);
 	}
 
 	@Test(expectedExceptions = TooManyLoginAttemptsException.class)

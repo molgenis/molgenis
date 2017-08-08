@@ -19,4 +19,11 @@ public interface OTPService
 	 */
 	boolean tryVerificationCode(String verificationCode, String secretKey) throws InvalidVerificationCodeException;
 
+	/**
+	 * <p>Generate URI for Google Authenticator</p>
+	 *
+	 * @return Google Authenticator URI
+	 */
+	String getAuthenticatorURI(String secretKey) throws IllegalStateException;
+
 }
