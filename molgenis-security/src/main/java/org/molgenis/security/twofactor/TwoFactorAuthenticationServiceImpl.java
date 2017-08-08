@@ -146,25 +146,6 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		return isConfigured;
 	}
 
-	private UserSecret getSecret() throws InternalAuthenticationServiceException
-	{
-		User user = getUser();
-		UserSecret secret = runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
-				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, user.getId()), UserSecret.class));
-
-		if (secret != null)
-		{
-			return secret;
-		}
-		else
-		{
-			throw new InternalAuthenticationServiceException(
-					format("Secret not found, user: [ {0} ] is not configured for 2 factor authentication",
-							user.getUsername()));
-		}
-
-	}
-
 	private void updateFailedLoginAttempts(int numberOfAttempts)
 	{
 		UserSecret userSecret = getSecret();
@@ -182,6 +163,25 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			userSecret.setLastFailedAuthentication(Instant.now());
 		}
 		runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
+	}
+
+	private UserSecret getSecret() throws InternalAuthenticationServiceException
+	{
+		User user = getUser();
+		UserSecret secret = runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
+				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, user.getId()), UserSecret.class));
+
+		if (secret != null)
+		{
+			return secret;
+		}
+		else
+		{
+			throw new InternalAuthenticationServiceException(
+					format("Secret not found, user: [ {0} ] is not configured for 2 factor authentication",
+							user.getUsername()));
+		}
+
 	}
 
 	private User getUser()
