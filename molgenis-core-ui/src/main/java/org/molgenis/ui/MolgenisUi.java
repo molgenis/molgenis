@@ -1,9 +1,5 @@
 package org.molgenis.ui;
 
-import com.google.gson.Gson;
-import org.molgenis.ui.menu.MenuUtils;
-import org.molgenis.ui.menu.json.MenuItem;
-
 public interface MolgenisUi
 {
 	/**
