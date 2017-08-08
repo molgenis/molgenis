@@ -6,6 +6,7 @@ import org.molgenis.oneclickimporter.service.CsvService;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,11 +16,14 @@ public class CsvServiceImpl implements CsvService
 	@Override
 	public List<String> buildLinesFromFile(File file) throws IOException, NoDataException, EmptyFileException
 	{
+		List<String> lines;
+
 		InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
 		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
 		try
 		{
-			List<String> lines = bufferedReader.lines().collect(Collectors.toList());
+			lines = bufferedReader.lines().collect(Collectors.toList());
 			if (lines.size() == 0)
 			{
 				throw new EmptyFileException("File [" + file.getName() + "] is empty");
@@ -28,15 +32,12 @@ public class CsvServiceImpl implements CsvService
 			{
 				throw new NoDataException("Header was found, but no data is present in file [" + file.getName() + "]");
 			}
-			else
-			{
-				return lines;
-			}
 		}
 		finally
 		{
 			inputStreamReader.close();
 		}
+		return lines;
 	}
 
 	@Override
