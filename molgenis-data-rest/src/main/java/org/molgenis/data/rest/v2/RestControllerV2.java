@@ -57,6 +57,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -85,7 +86,6 @@ public class RestControllerV2
 	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
-	private final SearchService searchService;
 
 	static UnknownEntityException createUnknownEntityException(String entityTypeId)
 	{
@@ -139,7 +139,7 @@ public class RestControllerV2
 	@Autowired
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
 			LanguageService languageService, PermissionSystemService permissionSystemService,
-			RepositoryCopier repoCopier, LocalizationService localizationService, SearchService searchService)
+			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
@@ -148,7 +148,6 @@ public class RestControllerV2
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.repoCopier = requireNonNull(repoCopier);
 		this.localizationService = requireNonNull(localizationService);
-		this.searchService = requireNonNull(searchService);
 	}
 
 	@Autowired
@@ -182,10 +181,12 @@ public class RestControllerV2
 		return getEntityResponse(entityTypeId, untypedId, attributeFilter);
 	}
 
-	@RequestMapping(value = "/findall/", method = GET)
+	@RequestMapping(value = "/searchall", method = GET)
 	@ResponseBody
 	public String findAll()
 	{
+		//TODO: search in current i18n desc and label
+		//TODO: return matching packages
 		String term = "#CHROM";
 		Map<String, Result> results = new HashMap<>();
 		Stream<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class)
@@ -198,20 +199,20 @@ public class RestControllerV2
 	{
 		List<Entity> rows = dataService.findAll(entityType.getEntityType().getId(), new QueryImpl<>().search(term))
 									   .collect(toList());
-		boolean isLabelMatch = entityType.getLabel().contains(term);
-		boolean isDescMatch = entityType.getDescription().contains(term);
+		boolean isLabelMatch = entityType.getLabel() == null ? entityType.getLabel().contains(term) : false;
+		boolean isDescMatch = entityType.getDescription() == null ? entityType.getDescription().contains(term) : false;
 		List<Attribute> attrs = StreamSupport.stream(entityType.getAllAttributes().spliterator(), false)
-											 .filter(attr -> isMatchingAttr(attr, term))
+											 .filter(attr -> isMatchingMetadata(attr, term))
 											 .collect(toList());
 		return new Result(entityType, attrs, rows, isLabelMatch, isDescMatch);
 	}
 
-	private boolean isMatchingAttr(Attribute attr, String term)
+	private boolean isMatchingMetadata(Entity metadataEntity, String term)
 	{
-		boolean isLabelMatch = attr.getLabel().contains(term);
-		boolean isDescMatch = attr.getDescription().contains(term);
-		boolean isNameMatch = attr.getName().contains(term);
-		return isDescMatch && isLabelMatch && isNameMatch;
+		boolean isLabelMatch = metadataEntity.getLabelValue().toString().contains(term);
+		boolean isDescMatch = metadataEntity.getString(DESCRIPTION) != null ? metadataEntity.getString(DESCRIPTION)
+																							.contains(term) : false;
+		return isDescMatch && isLabelMatch;
 	}
 
 	private static boolean isSystemEntity(EntityType entityType)
