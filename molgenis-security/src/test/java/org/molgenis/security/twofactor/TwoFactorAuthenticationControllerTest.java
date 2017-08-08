@@ -82,15 +82,12 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 	private TwoFactorAuthenticationController twoFactorAuthenticationController;
 
 	@Test
-	public void initialExceptionTest() throws Exception
+	public void activationExceptionTest() throws Exception
 	{
 		when(twoFactorAuthenticationService.generateSecretKey()).thenReturn("secretKey");
 		Model model = new ExtendedModelMap();
-		String viewTemplate = twoFactorAuthenticationController.initial(model);
-		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_INITIAL));
-		assertEquals("Setup 2 factor authentication",
-				model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_HEADER));
-		assertEquals("view-login", viewTemplate);
+		String viewTemplate = twoFactorAuthenticationController.activation(model);
+		assertEquals("view-2fa-activation-modal", viewTemplate);
 	}
 
 	@Test
@@ -98,26 +95,21 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 	{
 		Model model = new ExtendedModelMap();
 		String viewTemplate = twoFactorAuthenticationController.configured(model);
-		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
-		assertEquals("Verification code", model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_HEADER));
-		assertEquals("view-login", viewTemplate);
+		assertEquals("view-2fa-configured-modal", viewTemplate);
 
 	}
 
 	@Test
-	public void setSecretExceptionTest() throws Exception
+	public void authenticateExceptionTest() throws Exception
 	{
 		String secretKey = "secretKey";
 		String verificationCode = "123456";
 		Model model = new ExtendedModelMap();
-		String viewTemplate = twoFactorAuthenticationController.setSecret(model, verificationCode, secretKey);
-		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_INITIAL));
+		String viewTemplate = twoFactorAuthenticationController.authenticate(model, verificationCode, secretKey);
 		assertEquals(secretKey, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_SECRET_KEY));
-		assertEquals("Setup 2 factor authentication",
-				model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_HEADER));
 		assertEquals("Invalid verificationcode entered",
 				model.asMap().get(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE));
-		assertEquals("view-login", viewTemplate);
+		assertEquals("view-2fa-activation-modal", viewTemplate);
 
 	}
 
@@ -126,10 +118,8 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 	{
 		String verificationCode = "123456";
 		Model model = new ExtendedModelMap();
-		String viewTemplate = twoFactorAuthenticationController.validateVerificationCodeAndAuthenticate(model,
-				verificationCode);
-		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
-		assertEquals("view-login", viewTemplate);
+		String viewTemplate = twoFactorAuthenticationController.validate(model, verificationCode);
+		assertEquals("view-2fa-configured-modal", viewTemplate);
 	}
 
 	@Test
@@ -138,8 +128,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		String recoveryCodeId = "123456";
 		Model model = new ExtendedModelMap();
 		String viewTemplate = twoFactorAuthenticationController.recoverAccount(model, recoveryCodeId);
-		assertEquals(true, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_IS_CONFIGURED));
-		assertEquals("view-login", viewTemplate);
+		assertEquals("view-2fa-configured-modal", viewTemplate);
 	}
 
 }

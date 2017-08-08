@@ -129,7 +129,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		filter.doFilterInternal(request, response, chain);
 
 		String configuredRedirectUrl =
-				TwoFactorAuthenticationController.URI + TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI;
+				TwoFactorAuthenticationController.URI + TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI;
 		assertEquals(configuredRedirectUrl, response.getRedirectedUrl());
 
 	}

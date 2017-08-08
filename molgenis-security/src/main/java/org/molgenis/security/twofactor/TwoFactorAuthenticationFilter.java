@@ -66,7 +66,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 						{
 							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
 									TwoFactorAuthenticationController.URI
-											+ TwoFactorAuthenticationController.TWO_FACTOR_INITIAL_URI);
+											+ TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI);
 							return;
 						}
 					}

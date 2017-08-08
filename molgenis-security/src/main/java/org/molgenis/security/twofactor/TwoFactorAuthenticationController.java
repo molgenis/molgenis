@@ -23,22 +23,16 @@ public class TwoFactorAuthenticationController
 {
 	public static final String URI = "/2fa";
 	public static final String TWO_FACTOR_CONFIGURED_URI = "/configured";
-	public static final String TWO_FACTOR_INITIAL_URI = "/initial";
+	public static final String TWO_FACTOR_ACTIVATION_URI = "/activation";
+	private static final String TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI = TWO_FACTOR_ACTIVATION_URI + "/authenticate";
 	private static final String TWO_FACTOR_VALIDATION_URI = "/validate";
-	private static final String TWO_FACTOR_SECRET_URI = "/secret";
 	private static final String TWO_FACTOR_RECOVER_URI = "/recover";
-
-	public static final String ATTRIBUTE_2FA_IS_INITIAL = "is2faInitial";
-	public static final String ATTRIBUTE_2FA_IS_CONFIGURED = "is2faConfigured";
-	public static final String ATTRIBUTE_2FA_IS_RECOVER = "is2faRecover";
 
 	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
 	public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
-	public static final String ATTRIBUTE_2FA_HEADER = "twoFactorAuthenticatedHeader";
 
-	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
-	private static final String HEADER_VALUE_2FA_RECOVER = "Recovery code";
-	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Setup 2 factor authentication";
+	private static final String VIEW_2FA_ACTIVATION_MODAL = "view-2fa-activation-modal";
+	private static final String VIEW_2FA_CONFIGURED_MODAL = "view-2fa-configured-modal";
 
 	private TwoFactorAuthenticationProvider authenticationProvider;
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
@@ -60,13 +54,11 @@ public class TwoFactorAuthenticationController
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_CONFIGURED_URI)
 	public String configured(Model model)
 	{
-		model.addAttribute(ATTRIBUTE_2FA_HEADER, HEADER_VALUE_2FA_IS_CONFIGURED);
-		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
-		return MolgenisLoginController.VIEW_LOGIN;
+		return VIEW_2FA_CONFIGURED_MODAL;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_VALIDATION_URI)
-	public String validateVerificationCodeAndAuthenticate(Model model, @RequestParam String verificationCode)
+	public String validate(Model model, @RequestParam String verificationCode)
 	{
 		String redirectUri = "redirect:/";
 		try
@@ -77,21 +69,16 @@ public class TwoFactorAuthenticationController
 		}
 		catch (Exception err)
 		{
-			setModelAttributesWhenNotValidated(model, err);
-			setModelAttributesRecoveryMode(model);
-			redirectUri = MolgenisLoginController.VIEW_LOGIN;
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
+			redirectUri = VIEW_2FA_CONFIGURED_MODAL;
 		}
 
 		return redirectUri;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_INITIAL_URI)
-	public String initial(Model model)
+	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_ACTIVATION_URI)
+	public String activation(Model model)
 	{
-
-		model.addAttribute(ATTRIBUTE_2FA_HEADER, HEADER_VALUE_2FA_IS_INITIAL);
-		model.addAttribute(ATTRIBUTE_2FA_IS_INITIAL, true);
-
 		try
 		{
 			String secretKey = twoFactorAuthenticationService.generateSecretKey();
@@ -104,11 +91,11 @@ public class TwoFactorAuthenticationController
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
 		}
 
-		return MolgenisLoginController.VIEW_LOGIN;
+		return VIEW_2FA_ACTIVATION_MODAL;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_SECRET_URI)
-	public String setSecret(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
+	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI)
+	public String authenticate(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
 	{
 		String redirectUrl = "redirect:/menu/main/useraccount?showCodes=true#security";
 
@@ -120,13 +107,11 @@ public class TwoFactorAuthenticationController
 		}
 		catch (Exception err)
 		{
-			model.addAttribute(ATTRIBUTE_2FA_IS_INITIAL, true);
-			model.addAttribute(ATTRIBUTE_2FA_HEADER, HEADER_VALUE_2FA_IS_INITIAL);
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
 					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
-			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
+			redirectUrl = VIEW_2FA_ACTIVATION_MODAL;
 		}
 
 		return redirectUrl;
@@ -145,32 +130,11 @@ public class TwoFactorAuthenticationController
 		}
 		catch (Exception e)
 		{
-			setModelAttributesWhenNotValidated(model, e);
-			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(e));
+			redirectUrl = VIEW_2FA_CONFIGURED_MODAL;
 		}
 
 		return redirectUrl;
-	}
-
-	private void setModelAttributesWhenNotValidated(Model model, Exception err)
-	{
-		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
-		model.addAttribute(ATTRIBUTE_2FA_HEADER, HEADER_VALUE_2FA_IS_CONFIGURED);
-		model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
-	}
-
-	private void setModelAttributesRecoveryMode(Model model)
-	{
-		try
-		{
-			twoFactorAuthenticationService.userIsBlocked();
-		}
-		catch (TooManyLoginAttemptsException err)
-		{
-			model.addAttribute(ATTRIBUTE_2FA_HEADER, HEADER_VALUE_2FA_RECOVER);
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, err.getMessage());
-			model.addAttribute(ATTRIBUTE_2FA_IS_RECOVER, true);
-		}
 	}
 
 	private String determineErrorMessage(Exception err)
