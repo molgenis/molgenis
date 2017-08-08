@@ -79,7 +79,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	public boolean userIsBlocked() throws TooManyLoginAttemptsException
 	{
 		UserSecret userSecret = getSecret();
-		if (userSecret.getFailedLoginAttempts() > 2)
+		if (userSecret.getFailedLoginAttempts() >= 3)
 		{
 			if (userSecret.getLastFailedAuthentication() != null && (Instant.now().toEpochMilli()
 					< userSecret.getLastFailedAuthentication().plus(Duration.ofSeconds(30)).toEpochMilli()))
@@ -146,16 +146,25 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		return isConfigured;
 	}
 
+	/**
+	 * Check if user has 3 or more failed login attempts
+	 * -> then determine if the user is within the 30 seconds of the last failed login attempt
+	 * -> if the user is not outside the timeframe than the failed login attempts are set to 1 because it is a failed login attempt
+	 * When the user has less than 3 failed login attempts
+	 * -> the last failed login attempt is logged
+	 *
+	 * @param numberOfAttempts number of failed login attempts
+	 */
 	private void updateFailedLoginAttempts(int numberOfAttempts)
 	{
 		UserSecret userSecret = getSecret();
 		userSecret.setFailedLoginAttempts(numberOfAttempts);
-		if (userSecret.getFailedLoginAttempts() > 2)
+		if (userSecret.getFailedLoginAttempts() >= 3)
 		{
-			if (userSecret.getLastFailedAuthentication() != null && (Instant.now().toEpochMilli()
-					> userSecret.getLastFailedAuthentication().plus(Duration.ofSeconds(30)).toEpochMilli()))
+			if (!(userSecret.getLastFailedAuthentication() != null && (Instant.now().toEpochMilli()
+					< userSecret.getLastFailedAuthentication().plus(Duration.ofSeconds(30)).toEpochMilli())))
 			{
-				userSecret.setFailedLoginAttempts(0);
+				userSecret.setFailedLoginAttempts(1);
 			}
 		}
 		else
