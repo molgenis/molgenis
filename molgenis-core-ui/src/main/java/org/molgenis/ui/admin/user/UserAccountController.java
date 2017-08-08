@@ -165,9 +165,7 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(value = "enableTwoFactorAuthentication", method = POST)
 	public String enableTwoFactorAuthentication()
 	{
-		User user = userAccountService.getCurrentUser();
-		user.setTwoFactorAuthentication(true);
-		userAccountService.updateCurrentUser(user);
+		twoFactorAuthenticationService.enableForUser();
 
 		return "redirect:/login";
 	}

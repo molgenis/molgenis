@@ -107,7 +107,13 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			userSecret.setSecret(secret);
 			runAsSystem(() -> dataService.add(UserSecretMetaData.USERSECRET, userSecret));
 		}
+	}
 
+	public void enableForUser()
+	{
+		User user = getUser();
+		user.setTwoFactorAuthentication(true);
+		userService.update(user);
 	}
 
 	@Override

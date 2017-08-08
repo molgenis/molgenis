@@ -31,6 +31,8 @@ public interface TwoFactorAuthenticationService
 	 */
 	void saveSecretForUser(String secret) throws UsernameNotFoundException;
 
+	void enableForUser();
+
 	/**
 	 * <p>Disable 2 factor authentication for the current user</p>
 	 * <p>
