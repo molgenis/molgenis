@@ -5,9 +5,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.twofactor.meta.RecoveryCode;
-import org.molgenis.security.twofactor.meta.RecoveryCodeFactory;
-import org.molgenis.security.twofactor.meta.RecoveryCodeMetadata;
+import org.molgenis.security.twofactor.meta.*;
 import org.molgenis.security.user.UserService;
 import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -25,13 +22,13 @@ import org.testng.annotations.Test;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.twofactor.meta.RecoveryCodeMetadata.*;
 import static org.testng.Assert.assertEquals;
 
 /**
- * <p>Used for generating and revoering recovery codes</p>
+ * <p>Used for generating and redeeming recovery codes</p>
  */
 @ContextConfiguration(classes = { RecoveryServiceImplTest.Config.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
@@ -106,7 +103,6 @@ public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testGenerateRecoveryCodes()
 	{
 		when(recoveryCodeFactory.create()).thenReturn(recoveryCode);
@@ -116,19 +112,25 @@ public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testUseRecoveryCode()
 	{
 		String recoveryCodeId = "lkfsdufash";
+		UserSecret userSecret = mock(UserSecret.class);
+
 		when(dataService.findOne(RECOVERY_CODE,
 				new QueryImpl<RecoveryCode>().eq(USER_ID, molgenisUser.getId()).and().eq(CODE, recoveryCodeId),
 				RecoveryCode.class)).thenReturn(recoveryCode);
+		when(runAsSystem(() -> dataService.findOne(UserSecretMetaData.USER_SECRET,
+				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
+				UserSecret.class))).thenReturn(userSecret);
+
 		recoveryService.useRecoveryCode(recoveryCodeId);
+		verify(userSecret).setFailedLoginAttempts(0);
+		verify(dataService).update(UserSecretMetaData.USER_SECRET, userSecret);
 	}
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testGetRecoveryCodes()
 	{
 		when(dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, molgenisUser.getId()),

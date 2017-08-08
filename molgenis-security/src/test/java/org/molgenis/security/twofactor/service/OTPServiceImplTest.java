@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -53,7 +52,6 @@ public class OTPServiceImplTest extends AbstractTestNGSpringContextTests
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testGetAuthenticatorURI()
 	{
 		String uri = otpService.getAuthenticatorURI("secretKey");

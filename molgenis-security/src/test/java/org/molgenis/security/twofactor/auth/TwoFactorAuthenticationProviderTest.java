@@ -8,7 +8,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -66,7 +65,6 @@ public class TwoFactorAuthenticationProviderTest extends AbstractTestNGSpringCon
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testAuthentication2faIsConfigured()
 	{
 		TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken("123456", null);
@@ -84,7 +82,6 @@ public class TwoFactorAuthenticationProviderTest extends AbstractTestNGSpringCon
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testAuthentication2fIsNotConfigured()
 	{
 		TwoFactorAuthenticationToken authToken = new TwoFactorAuthenticationToken("123456", "dsda545ds4dsa456");
