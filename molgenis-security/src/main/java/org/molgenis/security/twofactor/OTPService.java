@@ -20,7 +20,7 @@ public interface OTPService
 	boolean tryVerificationCode(String verificationCode, String secretKey) throws InvalidVerificationCodeException;
 
 	/**
-	 * <p>Generate URI for Google Authenticator</p>
+	 * <p>Generate URI for use in authenticator apps</p>
 	 *
 	 * @return Google Authenticator URI
 	 */
