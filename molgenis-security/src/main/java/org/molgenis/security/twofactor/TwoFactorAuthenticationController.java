@@ -1,8 +1,10 @@
 package org.molgenis.security.twofactor;
 
-import org.molgenis.security.google.GoogleAuthenticatorService;
 import org.molgenis.security.login.MolgenisLoginController;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,50 +22,41 @@ public class TwoFactorAuthenticationController
 {
 	public static final String URI = "/2fa";
 	public static final String TWO_FACTOR_CONFIGURED_URI = "/configured";
-	public static final String TWO_FACTOR_INITIAL_URI = "/initial";
+	public static final String TWO_FACTOR_ACTIVATION_URI = "/activation";
+	private static final String TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI = TWO_FACTOR_ACTIVATION_URI + "/authenticate";
 	private static final String TWO_FACTOR_VALIDATION_URI = "/validate";
-	private static final String TWO_FACTOR_SECRET_URI = "/secret";
 	private static final String TWO_FACTOR_RECOVER_URI = "/recover";
-
-	public static final String ATTRIBUTE_2FA_IS_INITIAL = "is2faInitial";
-	public static final String ATTRIBUTE_2FA_IS_CONFIGURED = "is2faConfigured";
 
 	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
 	public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
 
-	public static final String ATTRIBUTE_HEADER_2FA_IS_CONFIGURED = "configured2faHeader";
-	public static final String ATTRIBUTE_HEADER_2FA_IS_INITIAL = "initial2faHeader";
+	private static final String VIEW_2FA_ACTIVATION_MODAL = "view-2fa-activation-modal";
+	private static final String VIEW_2FA_CONFIGURED_MODAL = "view-2fa-configured-modal";
 
-	private static final String HEADER_VALUE_2FA_IS_CONFIGURED = "Verification code";
-	private static final String HEADER_VALUE_2FA_IS_INITIAL = "Two factor authentication set-up";
-
-	private TwoFactorAuthenticationProvider authenticationProvider;
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private RecoveryAuthenticationProvider recoveryAuthenticationProvider;
-	private GoogleAuthenticatorService googleAuthenticatorService;
+	private final TwoFactorAuthenticationProvider authenticationProvider;
+	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private final RecoveryAuthenticationProvider recoveryAuthenticationProvider;
+	private final OTPService otpService;
 
 	@Autowired
 	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
-			RecoveryAuthenticationProvider recoveryAuthenticationProvider,
-			GoogleAuthenticatorService googleAuthenticatorService)
+			RecoveryAuthenticationProvider recoveryAuthenticationProvider, OTPService otpService)
 	{
 		this.authenticationProvider = requireNonNull(authenticationProvider);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
-		this.recoveryAuthenticationProvider = requireNonNull(recoveryAuthenticationProvider);
-		this.googleAuthenticatorService = requireNonNull(googleAuthenticatorService);
+		this.recoveryAuthenticationProvider = recoveryAuthenticationProvider;
+		this.otpService = requireNonNull(otpService);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_CONFIGURED_URI)
 	public String configured(Model model)
 	{
-		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_CONFIGURED, HEADER_VALUE_2FA_IS_CONFIGURED);
-		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
-		return MolgenisLoginController.VIEW_LOGIN;
+		return VIEW_2FA_CONFIGURED_MODAL;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_VALIDATION_URI)
-	public String validateVerificationCodeAndAuthenticate(Model model, @RequestParam String verificationCode)
+	public String validate(Model model, @RequestParam String verificationCode)
 	{
 		String redirectUri = "redirect:/";
 		try
@@ -72,46 +65,34 @@ public class TwoFactorAuthenticationController
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		catch (Exception er)
+		catch (Exception err)
 		{
-			setModelAttributesWhenNotValidated(model);
-			redirectUri = MolgenisLoginController.VIEW_LOGIN;
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
+			redirectUri = VIEW_2FA_CONFIGURED_MODAL;
 		}
 
 		return redirectUri;
 	}
 
-	private void setModelAttributesWhenNotValidated(Model model)
+	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_ACTIVATION_URI)
+	public String activation(Model model)
 	{
-		model.addAttribute(ATTRIBUTE_2FA_IS_CONFIGURED, true);
-		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_CONFIGURED, HEADER_VALUE_2FA_IS_CONFIGURED);
-		model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No valid verification code entered!");
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_INITIAL_URI)
-	public String initial(Model model)
-	{
-
-		model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_INITIAL, HEADER_VALUE_2FA_IS_INITIAL);
-		model.addAttribute(ATTRIBUTE_2FA_IS_INITIAL, true);
-
 		try
 		{
 			String secretKey = twoFactorAuthenticationService.generateSecretKey();
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
-			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
-					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
+			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI, otpService.getAuthenticatorURI(secretKey));
 		}
-		catch (UsernameNotFoundException err)
+		catch (IllegalStateException err)
 		{
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, "No user found!");
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
 		}
 
-		return MolgenisLoginController.VIEW_LOGIN;
+		return VIEW_2FA_ACTIVATION_MODAL;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_SECRET_URI)
-	public String setSecret(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
+	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI)
+	public String authenticate(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
 	{
 		String redirectUrl = "redirect:/menu/main/useraccount?showCodes=true#security";
 
@@ -121,16 +102,12 @@ public class TwoFactorAuthenticationController
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		catch (Exception e)
+		catch (Exception err)
 		{
-			model.addAttribute(ATTRIBUTE_2FA_IS_INITIAL, true);
-			model.addAttribute(ATTRIBUTE_HEADER_2FA_IS_INITIAL, HEADER_VALUE_2FA_IS_INITIAL);
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
-			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI,
-					googleAuthenticatorService.getGoogleAuthenticatorURI(secretKey));
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE,
-					"The verification code you entered was incorrect");
-			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
+			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI, otpService.getAuthenticatorURI(secretKey));
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
+			redirectUrl = VIEW_2FA_ACTIVATION_MODAL;
 		}
 
 		return redirectUrl;
@@ -149,13 +126,22 @@ public class TwoFactorAuthenticationController
 		}
 		catch (Exception e)
 		{
-			setModelAttributesWhenNotValidated(model);
-			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE,
-					"The recovery code you entered was incorrect");
-			redirectUrl = MolgenisLoginController.VIEW_LOGIN;
+			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(e));
+			redirectUrl = VIEW_2FA_CONFIGURED_MODAL;
 		}
 
 		return redirectUrl;
+	}
+
+	private String determineErrorMessage(Exception err)
+	{
+		String message = "Signin failed";
+		if (err instanceof BadCredentialsException || err instanceof InvalidVerificationCodeException
+				|| err instanceof TooManyLoginAttemptsException || err instanceof UsernameNotFoundException)
+		{
+			message = err.getMessage();
+		}
+		return message;
 	}
 
 }

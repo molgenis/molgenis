@@ -1,5 +1,6 @@
 package org.molgenis.security.twofactor;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,6 +36,10 @@ public class RecoveryAuthenticationProviderImpl implements RecoveryAuthenticatio
 
 			authToken = new RecoveryAuthenticationToken(userDetails, userDetails.getPassword(),
 					userDetails.getAuthorities(), authToken.getRecoveryCode());
+		}
+		else
+		{
+			throw new BadCredentialsException("Invalid recovery code entered");
 		}
 
 		return authToken;

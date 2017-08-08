@@ -1,6 +1,8 @@
 package org.molgenis.security.twofactor;
 
-import org.springframework.security.authentication.BadCredentialsException;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
@@ -15,28 +17,33 @@ public interface TwoFactorAuthenticationService
 	 * @return is verificationCode valid
 	 */
 	boolean isVerificationCodeValidForUser(String verificationCode)
-			throws UsernameNotFoundException, BadCredentialsException;
+			throws InvalidVerificationCodeException, TooManyLoginAttemptsException;
+
+	/**
+	 * @return user had too many authentication failures
+	 */
+	boolean userIsBlocked();
 
 	/**
 	 * <p>Add generated userSecret to userdata.</p>
 	 *
 	 * @param secret given secret for user
 	 */
-	void setSecretKey(String secret) throws UsernameNotFoundException;
+	void saveSecretForUser(String secret) throws UsernameNotFoundException;
 
 	/**
-	 * <p>Has user 2 factor authentication enabled?</p>
-	 *
-	 * @return is ready
+	 * <p>Disable 2 factor authentication for the current user</p>
+	 * <p>
+	 * Removes the secret key and set the TwoFactorAuthentication field to false
 	 */
-	boolean isEnabledForUser() throws UsernameNotFoundException;
+	void disableForUser();
 
 	/**
 	 * <p>Check if the user is 2 factor authentication ready.</p>
 	 *
 	 * @return is configured for user
 	 */
-	boolean isConfiguredForUser() throws UsernameNotFoundException;
+	boolean isConfiguredForUser() throws InternalAuthenticationServiceException;
 
 	/**
 	 * @return the secretkey for logged in user

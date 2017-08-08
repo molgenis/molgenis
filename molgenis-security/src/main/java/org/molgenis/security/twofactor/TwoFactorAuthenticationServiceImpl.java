@@ -1,64 +1,123 @@
 package org.molgenis.security.twofactor;
 
 import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
+import org.molgenis.security.user.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
+import java.time.Instant;
+
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
+@Service
 public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticationService
 {
-	private AppSettings appSettings;
+	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationService.class);
+
 	private OTPService otpService;
 	private DataService dataService;
+	private UserService userService;
 	private IdGenerator idGenerator;
+	private UserSecretFactory userSecretFactory;
 
-	public TwoFactorAuthenticationServiceImpl(AppSettings appSettings, OTPService otpService, DataService dataService,
-			IdGenerator idGenerator)
+	public TwoFactorAuthenticationServiceImpl(OTPService otpService, DataService dataService, UserService userService,
+			IdGenerator idGenerator, UserSecretFactory userSecretFactory)
 	{
-		this.appSettings = requireNonNull(appSettings);
 		this.otpService = requireNonNull(otpService);
 		this.dataService = requireNonNull(dataService);
+		this.userService = requireNonNull(userService);
 		this.idGenerator = requireNonNull(idGenerator);
+		this.userSecretFactory = requireNonNull(userSecretFactory);
 	}
 
 	@Override
 	public boolean isVerificationCodeValidForUser(String verificationCode)
-			throws BadCredentialsException, UsernameNotFoundException
+			throws InvalidVerificationCodeException, TooManyLoginAttemptsException
 	{
 		boolean isValid = false;
 
-		if (appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENABLED.toString())
-				|| appSettings.getTwoFactorAuthentication().equals(TwoFactorAuthenticationSetting.ENFORCED.toString()))
+		UserSecret userSecret = getSecret();
+		if (!userIsBlocked())
 		{
-			User user = getUser();
-
-			if (otpService.tryVerificationCode(verificationCode, user.getSecretKey()))
+			try
 			{
-				isValid = true;
+				if (otpService.tryVerificationCode(verificationCode, userSecret.getSecret()))
+				{
+					isValid = true;
+					updateFailedLoginAttempts(0);
+				}
 			}
+			catch (InvalidVerificationCodeException err)
+			{
+				updateFailedLoginAttempts(userSecret.getFailedLoginAttempts() + 1);
+				if (!userIsBlocked())
+				{
+					throw err;
+				}
 
+			}
 		}
 		return isValid;
 	}
 
 	@Override
-	public void setSecretKey(String secret) throws UsernameNotFoundException
+	public boolean userIsBlocked() throws TooManyLoginAttemptsException
+	{
+		UserSecret userSecret = getSecret();
+		if (userSecret.getFailedLoginAttempts() > 2)
+		{
+			if (userSecret.getLastFailedAuthentication() != null && (Instant.now().toEpochMilli()
+					< userSecret.getLastFailedAuthentication().plus(Duration.ofSeconds(30)).toEpochMilli()))
+			{
+				throw new TooManyLoginAttemptsException(
+						"You entered the wrong verification code 3 times, please wait 30 seconds before you try again");
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void saveSecretForUser(String secret) throws InternalAuthenticationServiceException
+	{
+
+		if (secret == null)
+		{
+			throw new InternalAuthenticationServiceException("No secretKey found");
+		}
+		else
+		{
+			User user = getUser();
+			UserSecret userSecret = userSecretFactory.create();
+			userSecret.setUserId(user.getId());
+			userSecret.setSecret(secret);
+			runAsSystem(() -> dataService.add(UserSecretMetaData.USERSECRET, userSecret));
+		}
+
+	}
+
+	@Override
+	public void disableForUser()
 	{
 		User user = getUser();
-		user.setSecretKey(secret);
-		runAsSystem(() -> dataService.update(USER, user));
+		user.setTwoFactorAuthentication(false);
+		userService.update(user);
+		UserSecret userSecret = getSecret();
+		runAsSystem(() -> dataService.delete(UserSecretMetaData.USERSECRET, userSecret));
 	}
 
 	@Override
@@ -68,34 +127,67 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean isConfiguredForUser() throws UsernameNotFoundException
+	public boolean isConfiguredForUser() throws InternalAuthenticationServiceException
 	{
 		boolean isConfigured = false;
-		User user = getUser();
-
-		if (StringUtils.hasText(user.getSecretKey()))
+		try
 		{
-			isConfigured = true;
+			UserSecret secret = getSecret();
+			if (StringUtils.hasText(secret.getSecret()))
+			{
+				isConfigured = true;
+			}
+		}
+		catch (InternalAuthenticationServiceException err)
+		{
+			LOG.warn(err.getMessage());
 		}
 
 		return isConfigured;
 	}
 
-	@Override
-	public boolean isEnabledForUser()
+	private UserSecret getSecret() throws InternalAuthenticationServiceException
 	{
-		boolean isEnabled = false;
 		User user = getUser();
-		isEnabled = true;
-		return isEnabled;
+		UserSecret secret = runAsSystem(() -> dataService.findOne(UserSecretMetaData.USERSECRET,
+				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, user.getId()), UserSecret.class));
+
+		if (secret != null)
+		{
+			return secret;
+		}
+		else
+		{
+			throw new InternalAuthenticationServiceException(
+					format("Secret not found, user: [ {0} ] is not configured for 2 factor authentication",
+							user.getUsername()));
+		}
+
 	}
 
-	//FIXME use userservice
+	private void updateFailedLoginAttempts(int numberOfAttempts)
+	{
+		UserSecret userSecret = getSecret();
+		userSecret.setFailedLoginAttempts(numberOfAttempts);
+		if (userSecret.getFailedLoginAttempts() > 2)
+		{
+			if (userSecret.getLastFailedAuthentication() != null && (Instant.now().toEpochMilli()
+					> userSecret.getLastFailedAuthentication().plus(Duration.ofSeconds(30)).toEpochMilli()))
+			{
+				userSecret.setFailedLoginAttempts(0);
+			}
+		}
+		else
+		{
+			userSecret.setLastFailedAuthentication(Instant.now());
+		}
+		runAsSystem(() -> dataService.update(UserSecretMetaData.USERSECRET, userSecret));
+	}
+
 	private User getUser()
 	{
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = runAsSystem(() -> dataService.findOne(USER,
-				new QueryImpl<User>().eq(UserMetaData.USERNAME, userDetails.getUsername()), User.class));
+		User user = runAsSystem(() -> userService.getUser(userDetails.getUsername()));
 
 		if (user != null)
 		{
@@ -103,7 +195,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 		else
 		{
-			throw new UsernameNotFoundException("Can't find user: [" + userDetails.getUsername() + "]");
+			throw new UsernameNotFoundException(format("Can't find user: [ {0} ]", userDetails.getUsername()));
 		}
 	}
 }

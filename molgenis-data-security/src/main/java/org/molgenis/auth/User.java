@@ -54,14 +54,14 @@ public class User extends StaticEntity
 		set(PASSWORD_, password);
 	}
 
-	public String getSecretKey()
+	public String getActivationCode()
 	{
-		return getString(SECRET_KEY);
+		return getString(ACTIVATIONCODE);
 	}
 
-	public void setSecretKey(String secretKey)
+	public void setActivationCode(String activationCode)
 	{
-		set(SECRET_KEY, secretKey);
+		set(ACTIVATIONCODE, activationCode);
 	}
 
 	public boolean getTwoFactorAuthentication()
@@ -77,16 +77,6 @@ public class User extends StaticEntity
 	public void setTwoFactorAuthentication(boolean twoFactorAuthentication)
 	{
 		set(TWO_FACTOR_AUTHENTICATION, twoFactorAuthentication);
-	}
-
-	public String getActivationCode()
-	{
-		return getString(ACTIVATIONCODE);
-	}
-
-	public void setActivationCode(String activationCode)
-	{
-		set(ACTIVATIONCODE, activationCode);
 	}
 
 	public Boolean isActive()

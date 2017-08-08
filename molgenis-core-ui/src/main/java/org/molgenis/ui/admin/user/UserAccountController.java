@@ -7,6 +7,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.twofactor.RecoveryCode;
 import org.molgenis.security.twofactor.RecoveryService;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -48,17 +49,20 @@ public class UserAccountController extends MolgenisPluginController
 
 	private final UserAccountService userAccountService;
 	private final LanguageService languageService;
-	private RecoveryService recoveryService;
-	private AppSettings appSettings;
+	private final RecoveryService recoveryService;
+	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
+	private final AppSettings appSettings;
 
 	@Autowired
 	public UserAccountController(UserAccountService userAccountService, LanguageService languageService,
-			RecoveryService recoveryService, AppSettings appSettings)
+			RecoveryService recoveryService, TwoFactorAuthenticationService twoFactorAuthenticationService,
+			AppSettings appSettings)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.languageService = requireNonNull(languageService);
 		this.recoveryService = requireNonNull(recoveryService);
+		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.appSettings = requireNonNull(appSettings);
 	}
 
@@ -171,16 +175,15 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(value = "disableTwoFactorAuthentication", method = POST)
 	public String disableTwoFactorAuthentication(Model model)
 	{
-		User user = userAccountService.getCurrentUser();
-		user.setTwoFactorAuthentication(false);
-		user.setSecretKey(null);
-		userAccountService.updateCurrentUser(user);
-
+		twoFactorAuthenticationService.disableForUser();
 		downgradeUserAuthentication();
 
 		return showAccount(model, false);
 	}
 
+	/**
+	 * <p>Set AuthenticationToken back to {@link UsernamePasswordAuthenticationToken} generated with default DaoAuthenticationProvider</p>
+	 */
 	private void downgradeUserAuthentication()
 	{
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
