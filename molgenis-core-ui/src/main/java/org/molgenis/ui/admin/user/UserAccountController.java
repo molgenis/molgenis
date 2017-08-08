@@ -165,9 +165,7 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(value = "enableTwoFactorAuthentication", method = POST)
 	public String enableTwoFactorAuthentication()
 	{
-		User user = userAccountService.getCurrentUser();
-		user.setTwoFactorAuthentication(true);
-		userAccountService.updateCurrentUser(user);
+		twoFactorAuthenticationService.enableForUser();
 
 		return "redirect:/login";
 	}
@@ -179,6 +177,14 @@ public class UserAccountController extends MolgenisPluginController
 		downgradeUserAuthentication();
 
 		return showAccount(model, false);
+	}
+
+	@RequestMapping(value = "resetTwoFactorAuthentication", method = POST)
+	public String resetTwoFactorAuthentication()
+	{
+		twoFactorAuthenticationService.resetSecretForUser();
+
+		return "redirect:/2fa/activation";
 	}
 
 	/**
