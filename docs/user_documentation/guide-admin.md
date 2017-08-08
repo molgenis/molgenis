@@ -1,5 +1,5 @@
 **
-Once you have a server running and data loaded, you are probably eager to share your data with the world. However, you might want to only show your data to a select few. In the following paragraphs we explain on how to define groups and permissions.
+Once you have a server running and data loaded, you are probably eager to share your data with the world. However, you might want to only show your data to a select few. In the following paragraphs we explain how to define groups and permissions.
 **
 
 # Mail settings
@@ -76,16 +76,17 @@ If at any time you want to edit an existing user, you can click the icon in the 
 Managing your users is quick and easy. And opens up way to our next big security item, setting permissions for your data.
 
 # Authentication
-In MOLGENIS you can configure 2 authentication methods:
+In MOLGENIS you can configure two authentication methods:
  * Default MOLGENIS-authentication
  * Google-Authentication
  
 **Default-authentication**  
- * Set user-moderation: user can sign up
- * Set 2 factor-authentication: users can use or are compelled to use 2-factor-authentication
-   * Disabled: user CAN NOT configure 2 factor authentication
-   * Enforced: users HAVE TO configure 2 factor authentication
-   * Enabled: users CAN configure 2 factor authentication  
+In the App Settings:
+ * Set user-moderation to user can sign up
+ * Set two factor authentication: 
+   * Disabled: user CAN NOT use two factor authentication
+   * Enforced: users MUST two factor authentication
+   * Enabled: users can decide for themselves if they want to use two factor authentication  
 
 **Google-authentication**  
 The Google-authentication method is used to enable the possibility for users to login with their Google-account. 
