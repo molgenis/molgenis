@@ -65,7 +65,11 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 			catch (InvalidVerificationCodeException err)
 			{
 				updateFailedLoginAttempts(userSecret.getFailedLoginAttempts() + 1);
-				throw err;
+				if (!userIsBlocked())
+				{
+					throw err;
+				}
+
 			}
 		}
 		return isValid;
@@ -155,7 +159,15 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	{
 		UserSecret userSecret = getSecret();
 		userSecret.setFailedLoginAttempts(numberOfAttempts);
-		if (numberOfAttempts >= 3)
+		if (userSecret.getFailedLoginAttempts() > 2)
+		{
+			if (userSecret.getLastFailedAuthentication() != null && (Instant.now().toEpochMilli()
+					> userSecret.getLastFailedAuthentication().plus(Duration.ofSeconds(30)).toEpochMilli()))
+			{
+				userSecret.setFailedLoginAttempts(0);
+			}
+		}
+		else
 		{
 			userSecret.setLastFailedAuthentication(Instant.now());
 		}
