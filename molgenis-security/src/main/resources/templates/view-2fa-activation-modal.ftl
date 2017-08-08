@@ -61,9 +61,10 @@
                     <div id="alert-container"></div>
                     <form id="activation-form" method="POST" action="/2fa/activation/authenticate">
                         <div class="form-group">
-                            <p>Please configure two factor authentication by scanning the QR code with the <a
-                                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
-                                    target="_blank">Google Authenticator app</a> and enter the verification code in the
+                            <p>Please configure two factor authentication by scanning the QR code with an authenticator
+                                app (like <a
+                                        href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
+                                        target="_blank">Google Authenticator</a>) and enter the verification code in the
                                 field below to confirm.</p>
                         </div>
                         <div class="vertical-spacer"></div>

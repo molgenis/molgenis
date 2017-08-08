@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -94,9 +93,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	private UserService userService;
 
 	@Autowired
-	private AppSettings appSettings;
-
-	@Autowired
 	private UserSecretFactory userSecretFactory;
 
 	@Autowired
@@ -106,7 +102,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	private UserSecret userSecret = mock(UserSecret.class);
 
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -133,7 +128,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void setSecretKeyTest()
 	{
 		String secretKey = "secretKey";
@@ -143,7 +137,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void isConfiguredForUserTest()
 	{
 		when(userSecret.getSecret()).thenReturn("secretKey");
@@ -153,7 +146,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 
 	@Test(expectedExceptions = TooManyLoginAttemptsException.class)
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testUserIsBlocked()
 	{
 		when(userSecret.getLastFailedAuthentication()).thenReturn(Instant.now());
@@ -164,7 +156,6 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testDisableForUser()
 	{
 		when(userService.getUser(molgenisUser.getUsername())).thenReturn(molgenisUser);
@@ -173,5 +164,4 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 				UserSecret.class)).thenReturn(userSecret);
 		twoFactorAuthenticationService.disableForUser();
 	}
-
 }

@@ -9,7 +9,10 @@ import org.molgenis.security.twofactor.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -20,8 +23,11 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { TwoFactorAuthenticationControllerTest.Config.class })
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringContextTests
 {
+	private final static String USERNAME = "molgenisUser";
+	private final static String ROLE_SU = "SU";
 
 	@Configuration
 	public static class Config
@@ -77,6 +83,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 	@Autowired
 	private TwoFactorAuthenticationController twoFactorAuthenticationController;
 
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
 	@Test
 	public void activationExceptionTest() throws Exception
 	{
@@ -92,15 +99,16 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 		Model model = new ExtendedModelMap();
 		String viewTemplate = twoFactorAuthenticationController.configured(model);
 		assertEquals("view-2fa-configured-modal", viewTemplate);
-
 	}
 
 	@Test
+	@WithMockUser(value = USERNAME, roles = ROLE_SU)
 	public void authenticateExceptionTest() throws Exception
 	{
 		String secretKey = "secretKey";
 		String verificationCode = "123456";
 		Model model = new ExtendedModelMap();
+
 		String viewTemplate = twoFactorAuthenticationController.authenticate(model, verificationCode, secretKey);
 		assertEquals(secretKey, model.asMap().get(TwoFactorAuthenticationController.ATTRIBUTE_2FA_SECRET_KEY));
 		assertEquals("Invalid verificationcode entered",

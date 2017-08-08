@@ -57,7 +57,6 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 
 	@Test
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	@WithUserDetails(USERNAME)
 	public void testAuthentication()
 	{
 		RecoveryAuthenticationToken authToken = new RecoveryAuthenticationToken("dsda545ds4dsa456");
