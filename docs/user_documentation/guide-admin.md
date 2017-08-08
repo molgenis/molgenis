@@ -75,6 +75,21 @@ If at any time you want to edit an existing user, you can click the icon in the 
 
 Managing your users is quick and easy. And opens up way to our next big security item, setting permissions for your data.
 
+# Authentication
+In MOLGENIS you can configure 2 authentication methods:
+ * Default MOLGENIS-authentication
+ * Google-Authentication
+ 
+**Default-authentication**  
+ * Set user-moderation: user can sign up
+ * Set 2 factor-authentication: users can use or are compelled to use 2-factor-authentication
+   * Disabled: user CAN NOT configure 2 factor authentication
+   * Enforced: users HAVE TO configure 2 factor authentication
+   * Enabled: users CAN configure 2 factor authentication  
+
+**Google-authentication**  
+The Google-authentication method is used to enable the possibility for users to login with their Google-account. 
+ 
 # Permissions
 For the scientific community, the need for data security is very large. We tried to meet this demand by implementing an extensive permission system. The system allows for the setting of count, read and write permissions on the different datasets 
 and modules present in MOLGENIS. These permissions can be set either for specific users, or entire user groups.
@@ -101,3 +116,4 @@ Congratulations! The molgenis_user account should now be able to use the data ex
 Note that if you are creating more complex data sets that have references to other data sets, that you should also consider giving permissions to those reference tables.
 
 And if you are wondering about the Entity permissions menu, that is reserved for when we implement row level security.
+
