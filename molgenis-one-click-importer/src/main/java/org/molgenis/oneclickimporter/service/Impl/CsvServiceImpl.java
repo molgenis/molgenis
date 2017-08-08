@@ -18,10 +18,8 @@ public class CsvServiceImpl implements CsvService
 	{
 		List<String> lines;
 
-		InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
-		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-		try
+		try (BufferedReader bufferedReader = new BufferedReader(
+				new InputStreamReader(new FileInputStream(file), "UTF-8")))
 		{
 			lines = bufferedReader.lines().collect(Collectors.toList());
 			if (lines.size() == 0)
@@ -32,10 +30,6 @@ public class CsvServiceImpl implements CsvService
 			{
 				throw new NoDataException("Header was found, but no data is present in file [" + file.getName() + "]");
 			}
-		}
-		finally
-		{
-			inputStreamReader.close();
 		}
 		return lines;
 	}
