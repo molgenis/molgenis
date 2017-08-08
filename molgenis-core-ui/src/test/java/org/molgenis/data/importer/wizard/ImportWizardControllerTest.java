@@ -20,7 +20,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionManagerServiceImpl;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -336,12 +335,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		public UserService userService()
 		{
 			return mock(UserService.class);
-		}
-
-		@Bean
-		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
-		{
-			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper());
 		}
 
 		@Bean
