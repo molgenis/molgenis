@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.auth;
 
 import static org.apache.commons.lang3.StringUtils.capitalize;
 

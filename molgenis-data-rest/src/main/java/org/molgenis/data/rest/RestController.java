@@ -25,7 +25,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.token.TokenExtractor;
-import org.molgenis.security.twofactor.TwoFactorAuthenticationSetting;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;

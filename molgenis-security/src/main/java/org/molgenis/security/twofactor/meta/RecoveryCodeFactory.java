@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.meta;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;

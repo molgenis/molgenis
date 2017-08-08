@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
@@ -6,6 +6,9 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
+import org.molgenis.security.twofactor.meta.UserSecret;
+import org.molgenis.security.twofactor.meta.UserSecretFactory;
+import org.molgenis.security.twofactor.meta.UserSecretMetaData;
 import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +27,8 @@ import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.security.twofactor.UserSecretMetaData.USER_ID;
-import static org.molgenis.security.twofactor.UserSecretMetaData.USER_SECRET;
+import static org.molgenis.security.twofactor.meta.UserSecretMetaData.USER_ID;
+import static org.molgenis.security.twofactor.meta.UserSecretMetaData.USER_SECRET;
 
 @Service
 public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticationService

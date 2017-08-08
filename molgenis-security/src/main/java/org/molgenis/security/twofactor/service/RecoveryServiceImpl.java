@@ -1,9 +1,13 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
 import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.twofactor.meta.RecoveryCode;
+import org.molgenis.security.twofactor.meta.RecoveryCodeFactory;
+import org.molgenis.security.twofactor.meta.UserSecret;
+import org.molgenis.security.twofactor.meta.UserSecretMetaData;
 import org.molgenis.security.user.UserService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +23,7 @@ import static com.google.api.client.util.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.security.twofactor.RecoveryCodeMetadata.*;
+import static org.molgenis.security.twofactor.meta.RecoveryCodeMetadata.*;
 
 @Service
 public class RecoveryServiceImpl implements RecoveryService

@@ -1,10 +1,13 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.twofactor.meta.RecoveryCode;
+import org.molgenis.security.twofactor.meta.RecoveryCodeFactory;
+import org.molgenis.security.twofactor.meta.RecoveryCodeMetadata;
 import org.molgenis.security.user.UserService;
 import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +27,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.twofactor.RecoveryCodeMetadata.*;
+import static org.molgenis.security.twofactor.meta.RecoveryCodeMetadata.*;
 import static org.testng.Assert.assertEquals;
 
 /**

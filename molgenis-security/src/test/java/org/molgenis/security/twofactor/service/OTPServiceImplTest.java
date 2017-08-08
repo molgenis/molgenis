@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.service;
 
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;

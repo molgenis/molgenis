@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor;
+package org.molgenis.security.twofactor.auth;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 
