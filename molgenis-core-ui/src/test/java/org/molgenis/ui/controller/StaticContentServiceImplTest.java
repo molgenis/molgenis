@@ -7,6 +7,7 @@ import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionServiceImpl;
 import org.molgenis.security.user.UserDetailsService;
