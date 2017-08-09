@@ -42,8 +42,6 @@ public class CmdLineAnnotatorUtils
 	 * @param attributesToInclude      the attributes of the annotator that should be written to the result
 	 * @param update                   boolean indicating if values already present for the annotator attributes should be updated(true) or overwritten (false)
 	 * @return the path of the result vcf file
-	 * @throws IOException,
-	 * @throws MolgenisInvalidFormatException
 	 */
 	public static String annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,

@@ -19,8 +19,8 @@ import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -85,7 +85,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
@@ -110,7 +110,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Show the explorer page
 	 *
-	 * @param model
 	 * @return the view name
 	 */
 	@RequestMapping(method = GET)
@@ -156,8 +155,7 @@ public class DataExplorerController extends MolgenisPluginController
 			StringBuilder message)
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
-		boolean hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName,
-				Permission.COUNT);
+		boolean hasEntityPermission = permissionService.hasPermissionOnEntityType(selectedEntityName, Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -211,7 +209,7 @@ public class DataExplorerController extends MolgenisPluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITEMETA))
+				if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
 					throw new MolgenisDataAccessException(
 							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
@@ -232,15 +230,12 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ) && dataService.getCapabilities(
+		return permissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService.getCapabilities(
 				entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
 	/**
 	 * Returns modules configuration for this entity based on current user permissions.
-	 *
-	 * @param entityTypeId
-	 * @return
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
@@ -259,9 +254,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, WRITE)) pluginPermission = WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ)) pluginPermission = READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.COUNT))
+		if (permissionService.hasPermissionOnEntityType(entityTypeId, WRITE)) pluginPermission = WRITE;
+		else if (permissionService.hasPermissionOnEntityType(entityTypeId, READ)) pluginPermission = READ;
+		else if (permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
@@ -317,8 +312,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	/**
 	 * Get readable genome entities
-	 *
-	 * @return
 	 */
 	private List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks)
 	{
@@ -328,9 +321,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			allTracks.putAll(genomeBrowserService.getReferenceTracks(track));
 		}
-		return allTracks.values()
-						.stream().map(track -> track.toTrackJson())
-						.collect(Collectors.toList());
+		return allTracks.values().stream().map(track -> track.toTrackJson()).collect(Collectors.toList());
 	}
 
 	@RequestMapping(value = "/download", method = POST)
@@ -409,9 +400,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
 	 *
-	 * @param entityTypeId
-	 * @param entityId
-	 * @param model
 	 * @return entity report view
 	 * @throws Exception if an entity name or id is not found
 	 */
@@ -437,9 +425,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Builds a model containing one entity and returns standalone report ftl view
 	 *
-	 * @param entityTypeId
-	 * @param entityId
-	 * @param model
 	 * @return standalone report view
 	 * @throws Exception                   if an entity name or id is not found
 	 * @throws MolgenisDataAccessException if an EntityType does not exist

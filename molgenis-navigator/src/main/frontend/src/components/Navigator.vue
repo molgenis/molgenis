@@ -61,15 +61,13 @@
   </div>
 </template>
 
-<style lang="scss">
+<style>
   .navigator-path {
     margin-top: 2rem;
   }
 
-  .navigator-path {
-    .breadcrumb {
-      background-color: transparent;
-    }
+  .navigator-path .breadcrumb{
+    background-color: transparent;
   }
 
   .navigator-search {

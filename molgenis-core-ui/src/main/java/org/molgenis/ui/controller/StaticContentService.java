@@ -9,7 +9,6 @@ public interface StaticContentService
 	/**
 	 * Get static page content
 	 *
-	 * @param uniqueReference
 	 * @return content or null if no content exists for this reference
 	 */
 	String getContent(String uniqueReference);

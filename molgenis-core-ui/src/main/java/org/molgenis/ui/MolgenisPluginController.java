@@ -6,7 +6,7 @@ import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginFactory;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -49,8 +49,6 @@ public abstract class MolgenisPluginController
 
 	/**
 	 * Returns the base URI of the plugin
-	 *
-	 * @return
 	 */
 	public String getUri()
 	{
@@ -73,7 +71,7 @@ public abstract class MolgenisPluginController
 	public Entity getPluginSettings()
 	{
 		String entityTypeId = DefaultSettingsEntityType.getSettingsEntityName(getId());
-		return RunAsSystemProxy.runAsSystem(() -> getPluginSettings(entityTypeId));
+		return RunAsSystemAspect.runAsSystem(() -> getPluginSettings(entityTypeId));
 	}
 
 	private Entity getPluginSettings(String entityTypeId)
@@ -93,8 +91,6 @@ public abstract class MolgenisPluginController
 
 	/**
 	 * Testability
-	 *
-	 * @param dataService
 	 */
 	void setDataService(DataService dataService)
 	{

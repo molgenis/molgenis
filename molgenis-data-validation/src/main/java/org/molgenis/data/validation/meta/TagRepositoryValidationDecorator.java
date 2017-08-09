@@ -13,19 +13,12 @@ import static java.util.Objects.requireNonNull;
  */
 public class TagRepositoryValidationDecorator extends AbstractRepositoryDecorator<Tag>
 {
-	private final Repository<Tag> decoratedRepo;
 	private final TagValidator tagValidator;
 
-	public TagRepositoryValidationDecorator(Repository<Tag> decoratedRepo, TagValidator tagValidator)
+	public TagRepositoryValidationDecorator(Repository<Tag> delegateRepository, TagValidator tagValidator)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.tagValidator = requireNonNull(tagValidator);
-	}
-
-	@Override
-	protected Repository<Tag> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
@@ -45,7 +38,7 @@ public class TagRepositoryValidationDecorator extends AbstractRepositoryDecorato
 	@Override
 	public Integer add(Stream<Tag> tagStream)
 	{
-		return decoratedRepo.add(tagStream.filter(tag ->
+		return delegate().add(tagStream.filter(tag ->
 		{
 			tagValidator.validate(tag);
 			return true;
@@ -55,7 +48,7 @@ public class TagRepositoryValidationDecorator extends AbstractRepositoryDecorato
 	@Override
 	public void update(Stream<Tag> tagStream)
 	{
-		decoratedRepo.update(tagStream.filter(entityType ->
+		delegate().update(tagStream.filter(entityType ->
 		{
 			tagValidator.validate(entityType);
 			return true;

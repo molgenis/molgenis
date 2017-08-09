@@ -14,7 +14,7 @@ import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.converter.RdfConverter;
@@ -29,6 +29,7 @@ import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
+import org.molgenis.util.TemplateResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -72,7 +73,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private AppSettings appSettings;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
@@ -175,9 +176,16 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public TemplateResourceUtils templateResourceUtils()
+	{
+		return new TemplateResourceUtils();
+	}
+
+	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, languageService, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), templateResourceUtils(), appSettings,
+				languageService, environment);
 	}
 
 	@Bean
@@ -195,7 +203,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(molgenisUi(), molgenisPermissionService);
+		return new MolgenisPluginInterceptor(molgenisUi(), permissionService);
 	}
 
 	@Bean
@@ -240,8 +248,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
-	 *
-	 * @return
 	 */
 	@Bean
 	public ApplicationContextProvider applicationContextProvider()
@@ -264,9 +270,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
-	 *
-	 * @throws TemplateException
-	 * @throws IOException
 	 */
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
@@ -287,8 +290,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		result.setFreemarkerSettings(freemarkerSettings);
 		Map<String, Object> freemarkerVariables = Maps.newHashMap();
 		freemarkerVariables.put("limit", new LimitMethod());
-		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
-		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("hasPermission", new HasPermissionDirective(permissionService));
+		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(permissionService));
 		addFreemarkerVariables(freemarkerVariables);
 
 		result.setFreemarkerVariables(freemarkerVariables);
@@ -324,7 +327,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisUi molgenisUi()
 	{
 		MolgenisUi molgenisUi = new MenuMolgenisUi(menuReaderService());
-		return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService);
+		return new MolgenisUiPermissionDecorator(molgenisUi, permissionService);
 	}
 
 	@Bean

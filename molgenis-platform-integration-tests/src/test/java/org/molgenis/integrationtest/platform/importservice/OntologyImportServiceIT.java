@@ -7,7 +7,7 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.ontology.core.meta.Ontology;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
 
@@ -71,7 +71,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 				emptySet());
 
 		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		RunAsSystemProxy.runAsSystem(this::verifyOboAsSystem);
+		RunAsSystemAspect.runAsSystem(this::verifyOboAsSystem);
 	}
 
 	private void verifyOboAsSystem()
@@ -128,7 +128,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 				emptySet());
 
 		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		RunAsSystemProxy.runAsSystem(this::verifyOwlAsSystem);
+		RunAsSystemAspect.runAsSystem(this::verifyOwlAsSystem);
 	}
 
 	private void verifyOwlAsSystem()

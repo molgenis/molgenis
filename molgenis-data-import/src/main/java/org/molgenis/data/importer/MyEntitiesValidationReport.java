@@ -76,7 +76,6 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	 * Creates a new report, with an attribute with state {@link AttributeState#IMPORTABLE} added to the last added
 	 * entity;
 	 *
-	 * @param attributeName
 	 * @return new {@link MyEntitiesValidationReport} with attribute added.
 	 */
 	public MyEntitiesValidationReport addAttribute(String attributeName)
@@ -86,9 +85,6 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 
 	/**
 	 * Add a package to the report
-	 *
-	 * @param pack
-	 * @return
 	 */
 	public MyEntitiesValidationReport addPackage(String pack)
 	{

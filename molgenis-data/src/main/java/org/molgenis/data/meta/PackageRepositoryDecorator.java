@@ -16,22 +16,15 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 
 public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Package>
 {
-	private final Repository<Package> decoratedRepo;
 	private final DataService dataService;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-	public PackageRepositoryDecorator(Repository<Package> decoratedRepo, DataService dataService,
+	public PackageRepositoryDecorator(Repository<Package> delegateRepository, DataService dataService,
 			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.dataService = requireNonNull(dataService);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-	}
-
-	@Override
-	protected Repository<Package> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
@@ -69,7 +62,7 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
 		deleteEntityTypesInPackageAndSubPackages(package_);
 
 		// delete rows from package table
-		decoratedRepo.delete(getPackageTreeTraversal(package_));
+		delegate().delete(getPackageTreeTraversal(package_));
 	}
 
 	private void deleteEntityTypesInPackageAndSubPackages(Package package_)

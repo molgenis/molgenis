@@ -221,15 +221,14 @@
   </div>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-  @import "~mixins";
+<style>
 
-  @include media-breakpoint-up(md) {
+  @media (min-width: 768px) {
     .col-md-3.attribute-tree {
-      border-right: solid $black thin;
+      border-right: solid black thin;
     }
   }
+
 </style>
 
 <script>

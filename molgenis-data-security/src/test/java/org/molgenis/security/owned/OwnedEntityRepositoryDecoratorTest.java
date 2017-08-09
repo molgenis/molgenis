@@ -27,7 +27,7 @@ import static org.testng.Assert.assertNull;
 public class OwnedEntityRepositoryDecoratorTest
 {
 	private EntityType entityType;
-	private Repository<Entity> decoratedRepository;
+	private Repository<Entity> delegateRepository;
 	private OwnedEntityRepositoryDecorator ownedEntityRepositoryDecorator;
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerCaptor;
 
@@ -36,16 +36,10 @@ public class OwnedEntityRepositoryDecoratorTest
 	public void setUp()
 	{
 		entityType = mock(EntityType.class);
-		decoratedRepository = mock(Repository.class);
+		delegateRepository = mock(Repository.class);
 		consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-		when(decoratedRepository.getEntityType()).thenReturn(entityType);
-		ownedEntityRepositoryDecorator = new OwnedEntityRepositoryDecorator(decoratedRepository);
-	}
-
-	@Test
-	public void delegate() throws Exception
-	{
-		assertEquals(ownedEntityRepositoryDecorator.delegate(), decoratedRepository);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		ownedEntityRepositoryDecorator = new OwnedEntityRepositoryDecorator(delegateRepository);
 	}
 
 	@Test
@@ -59,7 +53,7 @@ public class OwnedEntityRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.of(mock(Entity.class));
 		ownedEntityRepositoryDecorator.add(entities);
-		verify(decoratedRepository, times(1)).add(entities);
+		verify(delegateRepository, times(1)).add(entities);
 	}
 
 	@Test
@@ -79,7 +73,7 @@ public class OwnedEntityRepositoryDecoratorTest
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepository, times(1)).add(captor.capture());
+		verify(delegateRepository, times(1)).add(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
 		assertEquals(myEntities, asList(entity0, entity1));
 		verify(entity0, times(1)).set(OwnedEntityType.OWNER_USERNAME, "username");
@@ -93,7 +87,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		ownedEntityRepositoryDecorator.delete(entities);
-		verify(decoratedRepository, times(1)).delete(entities);
+		verify(delegateRepository, times(1)).delete(entities);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -111,7 +105,7 @@ public class OwnedEntityRepositoryDecoratorTest
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepository, times(1)).delete(captor.capture());
+		verify(delegateRepository, times(1)).delete(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
 		assertEquals(myEntities, asList(myEntity));
 	}
@@ -123,7 +117,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0);
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		doNothing().when(decoratedRepository).update(captor.capture());
+		doNothing().when(delegateRepository).update(captor.capture());
 		ownedEntityRepositoryDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), asList(entity0));
 	}
@@ -141,7 +135,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		when(entity0.get(OwnedEntityType.OWNER_USERNAME)).thenReturn("usernameUpdate");
 		Stream<Entity> entities = Stream.of(entity0);
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		doNothing().when(decoratedRepository).update(captor.capture());
+		doNothing().when(delegateRepository).update(captor.capture());
 		ownedEntityRepositoryDecorator.update(entities);
 		List<Entity> entityList = captor.getValue().collect(Collectors.toList());
 		assertEquals(entityList, asList(entity0));
@@ -160,9 +154,9 @@ public class OwnedEntityRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
-		when(decoratedRepository.findOneById(id, decoratedFetch)).thenReturn(myEntity);
+		when(delegateRepository.findOneById(id, decoratedFetch)).thenReturn(myEntity);
 		assertEquals(myEntity, ownedEntityRepositoryDecorator.findOneById(id, fetch));
-		verify(decoratedRepository, times(1)).findOneById(id, fetch);
+		verify(delegateRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -177,9 +171,9 @@ public class OwnedEntityRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
-		when(decoratedRepository.findOneById(id, decoratedFetch)).thenReturn(myEntity);
+		when(delegateRepository.findOneById(id, decoratedFetch)).thenReturn(myEntity);
 		assertNull(ownedEntityRepositoryDecorator.findOneById(id, fetch));
-		verify(decoratedRepository, times(1)).findOneById(id, fetch);
+		verify(delegateRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -189,9 +183,9 @@ public class OwnedEntityRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
-		when(decoratedRepository.findOneById(id, decoratedFetch)).thenReturn(entity);
+		when(delegateRepository.findOneById(id, decoratedFetch)).thenReturn(entity);
 		ownedEntityRepositoryDecorator.findOneById(id, fetch);
-		verify(decoratedRepository, times(1)).findOneById(id, fetch);
+		verify(delegateRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -202,7 +196,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), asList(entity0, entity1));
 	}
@@ -220,7 +214,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Entity entity1 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), asList(entity0, entity1));
 	}
@@ -238,7 +232,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
 		Entity entity1 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), emptyList());
 	}
@@ -253,7 +247,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
-		when(decoratedRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), asList(entity0, entity1));
 	}
@@ -273,7 +267,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity1 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
-		when(decoratedRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), asList(entity0, entity1));
 	}
@@ -293,7 +287,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity1 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("notme").getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		Fetch decoratedFetch = new Fetch().field(OWNER_USERNAME);
-		when(decoratedRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), emptyList());
 	}
@@ -304,7 +298,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
-		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), asList(entity0));
 	}
@@ -320,7 +314,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
-		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), asList(entity0));
 		verify(query, times(1)).eq(OwnedEntityType.OWNER_USERNAME, "username");
@@ -343,7 +337,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		ownedEntityRepositoryDecorator.forEachBatched(fetch, consumer, 123);
 
-		verify(decoratedRepository).forEachBatched(eq(decoratedFetch), consumerCaptor.capture(), eq(123));
+		verify(delegateRepository).forEachBatched(eq(decoratedFetch), consumerCaptor.capture(), eq(123));
 
 		consumerCaptor.getValue().accept(asList(entity0, entity1));
 
@@ -367,7 +361,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		ownedEntityRepositoryDecorator.forEachBatched(fetch, consumer, 123);
 
-		verify(decoratedRepository).forEachBatched(eq(decoratedFetch), consumerCaptor.capture(), eq(123));
+		verify(delegateRepository).forEachBatched(eq(decoratedFetch), consumerCaptor.capture(), eq(123));
 
 		consumerCaptor.getValue().accept(asList(entity0, entity1));
 

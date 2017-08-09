@@ -478,10 +478,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Convert tag identifiers to tags
-	 *
-	 * @param intermediateResults
-	 * @param tagIdentifiers
-	 * @return
 	 */
 	private static List<Tag> toTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers)
 	{
@@ -505,10 +501,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Transforms an {@link Entity} to a {@link Tag}
-	 *
-	 * @param id
-	 * @param tagEntity
-	 * @return
 	 */
 	private Tag entityToTag(String id, Entity tagEntity)
 	{
@@ -680,9 +672,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Resolves package fullNames by looping through all the packages and their parents
-	 *
-	 * @param packageRepo
-	 * @return
 	 */
 	private static List<Entity> resolvePackages(Repository<Entity> packageRepo)
 	{
@@ -783,7 +772,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			// create attribute
 			Attribute attribute = attrMetaFactory.create().setName(attributeName);
 
-			Map<String, EmxAttribute> entitiesMap = attributesMap.computeIfAbsent(entityTypeId, k -> newLinkedHashMap());
+			Map<String, EmxAttribute> entitiesMap = attributesMap.computeIfAbsent(entityTypeId,
+					k -> newLinkedHashMap());
 			entitiesMap.put(attributeName, new EmxAttribute(attribute));
 		}
 
@@ -1164,10 +1154,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Put the entities that are not in a package in the selected package
-	 *
-	 * @param intermediateResults
-	 * @param defaultPackageId
-	 * @return
 	 */
 	private List<EntityType> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
 			String defaultPackageId)
@@ -1222,9 +1208,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Throws Exception if an import is trying to update metadata of a system entity
-	 *
-	 * @param allEntityTypeMap
-	 * @param existingMetaData
 	 */
 	public static void scanMetaDataForSystemEntityType(Map<String, EntityType> allEntityTypeMap,
 			Iterable<EntityType> existingMetaData)
@@ -1310,11 +1293,6 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	/**
 	 * Goes through all the sheets in the source EMX and creates an {@link MyEntitiesValidationReport}
-	 *
-	 * @param source
-	 * @param report
-	 * @param metaDataMap
-	 * @return
 	 */
 	private MyEntitiesValidationReport generateEntityValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)
