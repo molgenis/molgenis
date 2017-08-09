@@ -197,6 +197,16 @@ public interface AppSettings
 	String getGoogleAppClientId();
 
 	/**
+	 * @param twoFactorAuthentication whether two factor authentication is disabled, enabled or enforced
+	 */
+	void setTwoFactorAuthentication(String twoFactorAuthentication);
+
+	/**
+	 * @return <code>enabled</code> or <code>enforced</code> if two factor authentication is optional or mandatory, <code>disabled</code> when it is off
+	 */
+	String getTwoFactorAuthentication();
+
+	/**
 	 * @param customJavascript Custom JavaScript <script src="..."></script> headers, specified as comma separated list
 	 */
 	void setCustomJavascript(String customJavascript);
@@ -205,4 +215,5 @@ public interface AppSettings
 	 * @return Custom JavaScript <script src="..."></script> headers, specified as comma separated list
 	 */
 	String getCustomJavascript();
+
 }
