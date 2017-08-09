@@ -89,7 +89,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	@Override
 	public Object castValueAsAttributeType(Object value, AttributeType type)
 	{
-		Object castedValue = value;
+		Object castedValue = null;
 		if (value == null)
 		{
 			return null;
@@ -144,7 +144,9 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 					castedValue = value.toString();
 				}
 				break;
-
+			default:
+				castedValue = value;
+				break;
 		}
 		return castedValue;
 	}
