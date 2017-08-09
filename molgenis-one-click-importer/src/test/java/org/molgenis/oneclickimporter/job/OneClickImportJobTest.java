@@ -12,7 +12,6 @@ import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

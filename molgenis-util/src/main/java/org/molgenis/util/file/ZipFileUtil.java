@@ -50,7 +50,10 @@ public class ZipFileUtil
 				if (entry.isDirectory())
 				{
 					LOG.info("Extracting directory: " + entry.getName());
-					(new File(file.getParentFile(), entry.getName())).mkdir();
+					if (!(new File(file.getParentFile(), entry.getName())).mkdir())
+					{
+						throw new RuntimeException("Failed to create directory");
+					}
 					continue;
 				}
 				LOG.info("Extracting directory: " + entry.getName());
