@@ -15,7 +15,6 @@ import org.molgenis.vcf.meta.VcfMetaInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.FileNotFoundException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -36,7 +35,6 @@ public class VcfUtils
 	/**
 	 * Creates a internal molgenis id from a vcf entity
 	 *
-	 * @param vcfEntity
 	 * @return the id
 	 */
 	public static String createId(Entity vcfEntity)
@@ -136,10 +134,6 @@ public class VcfUtils
 	/**
 	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
 	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
-	 *
-	 * @param inputVcfFileScanner
-	 * @return
-	 * @throws FileNotFoundException
 	 */
 	public static HashMap<String, Trio> getPedigree(Scanner inputVcfFileScanner)
 	{

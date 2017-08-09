@@ -17,22 +17,15 @@ import static java.util.Objects.requireNonNull;
  */
 public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator<ScheduledJob>
 {
-	private final Repository<ScheduledJob> decorated;
 	private final JobScheduler scheduler;
 	private final JsonValidator jsonValidator;
 
-	ScheduledJobRepositoryDecorator(Repository<ScheduledJob> decorated, JobScheduler scheduler,
+	ScheduledJobRepositoryDecorator(Repository<ScheduledJob> delegateRepository, JobScheduler scheduler,
 			JsonValidator jsonValidator)
 	{
-		this.decorated = requireNonNull(decorated);
+		super(delegateRepository);
 		this.scheduler = requireNonNull(scheduler);
 		this.jsonValidator = jsonValidator;
-	}
-
-	@Override
-	protected Repository<ScheduledJob> delegate()
-	{
-		return decorated;
 	}
 
 	@Override
@@ -40,14 +33,14 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	{
 		validateJobParameters(scheduledJob);
 		setUsername(scheduledJob);
-		decorated.update(scheduledJob);
+		delegate().update(scheduledJob);
 		scheduler.schedule(scheduledJob);
 	}
 
 	@Override
 	public void update(Stream<ScheduledJob> scheduledJobs)
 	{
-		decorated.update(scheduledJobs.filter(job ->
+		delegate().update(scheduledJobs.filter(job ->
 		{
 			validateJobParameters(job);
 			setUsername(job);
@@ -60,14 +53,14 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	public void delete(ScheduledJob scheduledJob)
 	{
 		String entityId = scheduledJob.getId();
-		decorated.delete(scheduledJob);
+		delegate().delete(scheduledJob);
 		scheduler.unschedule(entityId);
 	}
 
 	@Override
 	public void delete(Stream<ScheduledJob> jobs)
 	{
-		decorated.delete(jobs.filter(job ->
+		delegate().delete(jobs.filter(job ->
 		{
 			String entityId = job.getId();
 			scheduler.unschedule(entityId);
@@ -83,13 +76,13 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 			String entityId = (String) id;
 			scheduler.unschedule(entityId);
 		}
-		decorated.deleteById(id);
+		delegate().deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteAll(ids.filter(id ->
+		delegate().deleteAll(ids.filter(id ->
 		{
 			if (id instanceof String)
 			{
@@ -108,7 +101,7 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 			String entityId = e.getString(ScheduledJobMetadata.ID);
 			scheduler.unschedule(entityId);
 		}
-		decorated.deleteAll();
+		delegate().deleteAll();
 	}
 
 	@Override
@@ -116,14 +109,14 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 	{
 		validateJobParameters(scheduledJob);
 		setUsername(scheduledJob);
-		decorated.add(scheduledJob);
+		delegate().add(scheduledJob);
 		scheduler.schedule(scheduledJob);
 	}
 
 	@Override
 	public Integer add(Stream<ScheduledJob> jobs)
 	{
-		return decorated.add(jobs.filter(job ->
+		return delegate().add(jobs.filter(job ->
 		{
 			validateJobParameters(job);
 			setUsername(job);

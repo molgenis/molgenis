@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlRepositoryCollectionDecoratorTest
 {
@@ -36,12 +35,6 @@ public class PostgreSqlRepositoryCollectionDecoratorTest
 		attributeCopier = mock(AttributeCopier.class);
 		repoCollectionDecorator = new PostgreSqlRepositoryCollectionDecorator(repoCollection, entityTypeRegistry,
 				entityTypeCopier, attributeCopier);
-	}
-
-	@Test
-	public void testDelegate()
-	{
-		assertEquals(repoCollectionDecorator.delegate(), repoCollection);
 	}
 
 	@Test

@@ -33,10 +33,6 @@ public class JsMagmaScriptExecutor
 
 	/**
 	 * Execute a JavaScript using the Magma API
-	 *
-	 * @param jsScript
-	 * @param parameters
-	 * @return
 	 */
 	Object executeScript(String jsScript, Map<String, Object> parameters)
 	{

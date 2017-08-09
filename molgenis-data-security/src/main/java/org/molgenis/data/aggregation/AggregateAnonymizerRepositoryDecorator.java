@@ -12,28 +12,21 @@ import static java.util.Objects.requireNonNull;
  */
 public class AggregateAnonymizerRepositoryDecorator<E extends Entity> extends AbstractRepositoryDecorator<E>
 {
-	private final Repository<E> decoratedRepo;
 	private final AggregateAnonymizer aggregateAnonymizer;
 	private final AppSettings appSettings;
 
-	public AggregateAnonymizerRepositoryDecorator(Repository<E> decoratedRepo, AggregateAnonymizer aggregateAnonymizer,
-			AppSettings appSettings)
+	public AggregateAnonymizerRepositoryDecorator(Repository<E> delegateRepository,
+			AggregateAnonymizer aggregateAnonymizer, AppSettings appSettings)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.appSettings = requireNonNull(appSettings);
 		this.aggregateAnonymizer = requireNonNull(aggregateAnonymizer);
 	}
 
 	@Override
-	protected Repository<E> delegate()
-	{
-		return decoratedRepo;
-	}
-
-	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		AggregateResult result = decoratedRepo.aggregate(aggregateQuery);
+		AggregateResult result = delegate().aggregate(aggregateQuery);
 
 		Integer threshold = appSettings.getAggregateThreshold();
 		if (threshold != null && threshold > 0)

@@ -9,19 +9,12 @@ import static java.util.Objects.requireNonNull;
 
 public class MailSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
-	private final Repository<Entity> decoratedRepository;
 	private final MailSenderFactory mailSenderFactory;
 
-	public MailSettingsRepositoryDecorator(Repository<Entity> decoratedRepository, MailSenderFactory mailSenderFactory)
+	public MailSettingsRepositoryDecorator(Repository<Entity> delegateRepository, MailSenderFactory mailSenderFactory)
 	{
-		this.decoratedRepository = requireNonNull(decoratedRepository);
+		super(delegateRepository);
 		this.mailSenderFactory = requireNonNull(mailSenderFactory);
-	}
-
-	@Override
-	protected Repository<Entity> delegate()
-	{
-		return decoratedRepository;
 	}
 
 	@Override

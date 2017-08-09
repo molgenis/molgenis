@@ -68,9 +68,7 @@ public class AnnotatorUtils
 	/**
 	 * Adds a new compound attribute to an existing CrudRepository
 	 *
-	 * @param entityType       {@link EntityType} for the existing repository
-	 * @param attributeFactory
-	 * @param annotator
+	 * @param entityType {@link EntityType} for the existing repository
 	 */
 	public static EntityType addAnnotatorMetaDataToRepositories(EntityType entityType,
 			AttributeFactory attributeFactory, RepositoryAnnotator annotator)

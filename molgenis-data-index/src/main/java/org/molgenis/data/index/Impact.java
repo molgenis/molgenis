@@ -1,6 +1,7 @@
 package org.molgenis.data.index;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.data.EntityKey;
 
 import javax.annotation.Nullable;
 
@@ -20,7 +21,17 @@ public abstract class Impact
 		return getId() == null;
 	}
 
-	public static Impact createSingleEntityImpact(String entityTypeId, String id)
+	public EntityKey toEntityKey()
+	{
+		return EntityKey.create(getEntityTypeId(), getId());
+	}
+
+	public boolean isSingleEntity()
+	{
+		return getId() != null;
+	}
+
+	public static Impact createSingleEntityImpact(String entityTypeId, Object id)
 	{
 		return new AutoValue_Impact(entityTypeId, id);
 	}

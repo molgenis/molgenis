@@ -15,7 +15,6 @@ public class BoxPlotCalcUtil
 	 * Double[3] = thirdQuantile;
 	 * Double[4] = maximum;
 	 *
-	 * @param sortedDataAscendingOrder
 	 * @return Double[]
 	 */
 	public static Double[] calcBoxPlotValues(List<Double> sortedDataAscendingOrder)
@@ -42,10 +41,6 @@ public class BoxPlotCalcUtil
 
 	/**
 	 * IQR inner quartile range
-	 *
-	 * @param thirdQuantile
-	 * @param firstQuantile
-	 * @return
 	 */
 	public static double iqr(double thirdQuantile, double firstQuantile)
 	{
@@ -55,7 +50,6 @@ public class BoxPlotCalcUtil
 	/**
 	 * Get the minimum value thru linear interpolations
 	 *
-	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
 	public static Double minimum(List<Double> sortedDataAscendingOrder)
@@ -66,7 +60,6 @@ public class BoxPlotCalcUtil
 	/**
 	 * Get the maximum value thru linear interpolations
 	 *
-	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
 	public static Double maximum(List<Double> sortedDataAscendingOrder)
@@ -77,7 +70,6 @@ public class BoxPlotCalcUtil
 	/**
 	 * Get the median value thru linear interpolations
 	 *
-	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
 	public static Double median(List<Double> sortedDataAscendingOrder)
@@ -88,7 +80,6 @@ public class BoxPlotCalcUtil
 	/**
 	 * Get the firstQuantile value thru linear interpolations
 	 *
-	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
 	public static Double firstQuantile(List<Double> sortedDataAscendingOrder)
@@ -99,7 +90,6 @@ public class BoxPlotCalcUtil
 	/**
 	 * Get the thirdQuantile value thru linear interpolations
 	 *
-	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
 	public static Double thirdQuantile(List<Double> sortedDataAscendingOrder)

@@ -13,8 +13,6 @@ public interface StyleService
 
 	/**
 	 * Set the runtime property that controls the css style with a selected style
-	 *
-	 * @param styleName
 	 */
 	void setSelectedStyle(String styleName);
 
@@ -28,7 +26,6 @@ public interface StyleService
 	/**
 	 * Returns a style that matches the name of the given input
 	 *
-	 * @param styleName
 	 * @return The Style that matches the name
 	 */
 	Style getStyle(String styleName);

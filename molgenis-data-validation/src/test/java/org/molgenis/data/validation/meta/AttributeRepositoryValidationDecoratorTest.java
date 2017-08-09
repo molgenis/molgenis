@@ -11,21 +11,20 @@ import org.testng.annotations.Test;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
 
 public class AttributeRepositoryValidationDecoratorTest
 {
 	private AttributeRepositoryValidationDecorator attributeRepoValidationDecorator;
-	private Repository<Attribute> decoratedRepo;
+	private Repository<Attribute> delegateRepository;
 	private AttributeValidator attributeValidator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
+		delegateRepository = mock(Repository.class);
 		attributeValidator = mock(AttributeValidator.class);
-		attributeRepoValidationDecorator = new AttributeRepositoryValidationDecorator(decoratedRepo,
+		attributeRepoValidationDecorator = new AttributeRepositoryValidationDecorator(delegateRepository,
 				attributeValidator);
 	}
 
@@ -36,19 +35,13 @@ public class AttributeRepositoryValidationDecoratorTest
 	}
 
 	@Test
-	public void delegate()
-	{
-		assertEquals(attributeRepoValidationDecorator.delegate(), decoratedRepo);
-	}
-
-	@Test
 	public void updateAttributeValid()
 	{
 		Attribute attribute = mock(Attribute.class);
 		doNothing().when(attributeValidator).validate(attribute, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(attribute);
 		verify(attributeValidator, times(1)).validate(attribute, ValidationMode.UPDATE);
-		verify(decoratedRepo, times(1)).update(attribute);
+		verify(delegateRepository, times(1)).update(attribute);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
@@ -71,7 +64,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		attributeRepoValidationDecorator.update(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).update(captor.capture());
+		verify(delegateRepository).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 		verify(attributeValidator, times(2)).validate(any(Attribute.class), eq(ValidationMode.UPDATE));
 	}
@@ -87,7 +80,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		attributeRepoValidationDecorator.update(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).update(captor.capture());
+		verify(delegateRepository).update(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 		verify(attributeValidator, times(1)).validate(any(Attribute.class), ValidationMode.UPDATE);
 	}
@@ -121,7 +114,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		attributeRepoValidationDecorator.add(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).add(captor.capture());
+		verify(delegateRepository).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 		verify(attributeValidator, times(2)).validate(any(Attribute.class), eq(ValidationMode.ADD));
 	}
@@ -137,7 +130,7 @@ public class AttributeRepositoryValidationDecoratorTest
 		attributeRepoValidationDecorator.add(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(decoratedRepo).add(captor.capture());
+		verify(delegateRepository).add(captor.capture());
 		captor.getValue().count(); // process all entities in stream
 		verify(attributeValidator, times(1)).validate(any(Attribute.class), ValidationMode.ADD);
 	}

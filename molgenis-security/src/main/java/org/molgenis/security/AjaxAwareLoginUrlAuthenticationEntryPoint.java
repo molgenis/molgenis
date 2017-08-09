@@ -58,9 +58,6 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	/**
 	 * Checks if this is a X-domain pre-flight request.
-	 *
-	 * @param request
-	 * @return
 	 */
 	private boolean isPreflight(HttpServletRequest request)
 	{
@@ -69,9 +66,6 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	/**
 	 * Checks if it is a rest request
-	 *
-	 * @param request
-	 * @return
 	 */
 	protected boolean isRestRequest(HttpServletRequest request)
 	{

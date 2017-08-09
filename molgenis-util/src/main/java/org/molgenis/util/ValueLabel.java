@@ -70,8 +70,6 @@ public class ValueLabel implements Serializable
 
 	/**
 	 * Set the value
-	 *
-	 * @param value
 	 */
 	public void setValue(Object value)
 	{

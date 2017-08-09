@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 /**
  * Collectors that collect to {@link Multimap}.
- *
- * @see {@link Collectors#toMap(Function, Function)}, the equivalent of which is not (yet?) present in guava for the
+ * <p>
+ * see {@link Collectors#toMap(Function, Function)}, the equivalent of which is not (yet?) present in guava for the
  * {@link Multimap}.
  */
 public class MultimapCollectors

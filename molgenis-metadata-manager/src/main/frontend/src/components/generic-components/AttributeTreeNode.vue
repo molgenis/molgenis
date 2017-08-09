@@ -9,21 +9,18 @@
   </li>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-  @import "~mixins";
-
+<style>
   li {
     list-style-type: none;
   }
 
   .node-content:hover {
     cursor: pointer;
-    background-color: lighten($brand-primary, 50%);
+    background-color: #daeeff
   }
 
   .selected-attribute-node {
-    background-color: lighten($brand-primary, 35%);
+    background-color:  #8fcafe
   }
 </style>
 

@@ -115,9 +115,6 @@ public class Tag extends StaticEntity
 	 *    {@literal @}Nullable public abstract String getCodeSystem();
 	 * }
 	 * </code></pre>
-	 *
-	 * @param o
-	 * @return
 	 */
 	@Override
 	public boolean equals(Object o)
@@ -149,8 +146,6 @@ public class Tag extends StaticEntity
 	 *     public abstract String getId();
 	 * }
 	 * </code></pre>
-	 *
-	 * @return
 	 */
 	@Override
 	public int hashCode()

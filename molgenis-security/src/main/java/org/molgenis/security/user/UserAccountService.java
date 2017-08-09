@@ -12,15 +12,11 @@ public interface UserAccountService
 
 	/**
 	 * Returns the currently logged in user
-	 *
-	 * @return
 	 */
 	User getCurrentUser();
 
 	/**
 	 * Returns the groups to which the currently logged in user belongs
-	 *
-	 * @return
 	 */
 	Iterable<Group> getCurrentUserGroups();
 
@@ -33,9 +29,6 @@ public interface UserAccountService
 
 	/**
 	 * Validates the password of the current logged in user
-	 *
-	 * @param password
-	 * @return
 	 */
 	boolean validateCurrentUserPassword(String password);
 }
