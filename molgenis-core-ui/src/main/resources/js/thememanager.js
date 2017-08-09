@@ -9,7 +9,7 @@
 			var cssLocation = $('#bootstrap-theme-select').val();
 			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('type', 'text/css');
 
-			$(link).attr('href', "/css/" + cssLocation);
+			$(link).attr('href', "/css/theme/bootstrap-3/" + cssLocation);
 
 			$('#bootstrap-theme').remove(); // Remove existing preview theme
 			$('head').append(link); // Set new preview theme
@@ -25,7 +25,7 @@
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/set-bootstrap-theme',
 				data : '"' + styleName + '"',
-				success : function(succes) {
+				success : function() {
 					molgenis.createAlert([ {
 						'message' : 'Succesfully updated the application theme'
 					} ], 'success');
@@ -64,15 +64,31 @@
         contentType: false,
         processData: false,
         type: 'POST',
-        success : function() {
+        success: function(theme) {
+
           molgenis.createAlert([ {
             'message' : 'Successfully added the application theme'
           } ], 'success');
-          $('#bootstrap-theme-select').prop('disabled', false);
+
           $('#save-selected-bootstrap-theme').prop('disabled', false);
           $('#show-add-theme-btn').prop('disabled', false);
           $('#add-theme-container').hide();
-        }
+
+          var newThemeOption = $("<option/>").val(theme.location).text(theme.name);
+
+          $('#bootstrap-theme-select')
+						.append(newThemeOption)
+						.val(theme.location)
+						.prop('disabled', false);
+        },
+				error: function(response) {
+
+        	var detailMessage = response.responseJSON.errors[0].message;
+
+          molgenis.createAlert([ {
+            'message' : 'Could not add theme: ' + detailMessage
+          } ], 'error');
+				}
       });
 
 
