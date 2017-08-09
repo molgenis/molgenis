@@ -898,6 +898,7 @@
         <module>molgenis-python</module>
         <module>molgenis-questionnaires</module>
         <module>molgenis-r</module>
+        <module>molgenis-searchall</module>
         <module>molgenis-scripts-core</module>
         <module>molgenis-scripts</module>
         <module>molgenis-security-core</module>
