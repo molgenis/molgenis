@@ -1,25 +1,17 @@
 # User authentication in MOLGENIS
-In MOLGENIS you can authenticate in MOLGENIS using 2 methods. 
- * Default-authentication
- * Google-Authentication
+In MOLGENIS you can sign in using two methods. 
+ * Default authentication
+ * Google Authentication
 
 ## Default-authentication
-The default way to authenticate in MOLGENIS is to click on 'Sign in'. You can register when the administrator has 
-enabled the 'Sign up' setting. If you can't register via the 'Sign up'-link you have to contact the administrator. 
-In this case only the administrator can sign up new users. 
+The default way to authenticate in MOLGENIS is to click 'Sign in'. You can register a new account by using the 'Sign-up'-link. If there is no 'Sign-up'-link, you'll have to contact the administrator to register an account.
 
 ### 2-factor-authentication
-If you have an existing MOLGENIS-account you can (or have to) secure it with 2-factor-authentication. 
-There are 3 states of 2-factor-authentication in MOLGENIS.
+If you have an existing MOLGENIS-account you can secure it with two factor authentication, depending on the server's settings. 
 
- * **Disabled**: user CAN NOT configure 2 factor authentication
- * **Enforced**: users HAVE TO configure 2 factor authentication
- * **Enabled**: users CAN configure 2 factor authentication
+*note: you can not use Google-Authentication in combination with two factor authentication in MOLGENIS*
 
-*note: you can not use Google-Authentication in combination with 2-factor-authentication in MOLGENIS*
-
-When 2-factor-authentication is **enforced** it is not possible to disable 2-factor-authentication. MOLGENIS will automatically
-redirect you to the 'Configure 2-factor-authentication'-entry point. You have to scan the QR-code with an authenticator-app. 
+When two factor authentication is enabled and you sign in for the first time, you will be promted to secure your account with an authenticator app. The authentication can be configured by scanning a QR-code.
 Examples of authenticator-apps are:
 
  * **Android**
@@ -34,10 +26,9 @@ Examples of authenticator-apps are:
 When the QR-code is scanned, your authenticator-app will create an account for MOLGENIS and also generate a verification code for that account. 
 You have to fill in the verification code in de box below the QR-code. If you have entered the verification code you will be redirected to 
 the *Account-Security*-tab. This will show the recovery-codes. Make sure you have stored the recovery codes somewhere (not in MOLGENIS) so you 
-can access when you for example lost your phone (see TROUBLESHOOTING). Each time you sign in, you will have to enter the verification code.  
+can access them when you for example lost your phone (see TROUBLESHOOTING). Each time you sign in, you will have to enter the verification code.  
 
-When 2-factor-authentication is **enabled**, you can enable or disable it in the *Account-Security*-tab. It is also possible to reset the
-2-factor-authentication-secret. The configuration process is the same as when 2-factor-authentication is enforced.
+Depending on the server's settings, you can enable, disable and reset your two factor authentication in your account settings (under Security).
 
 **TROUBLESHOOTING**  
 When you have lost your phone or misplaced it, you have to use one of the recovery-codes to unlock your account. You can view your recovery codes 
@@ -45,14 +36,12 @@ in the *Account-Security*-tab. Make sure to store the recovery codes somewhere o
 in the screen where you have to enter the verification code. You can then enter the recovery code to unlock your account.
 
 ## Google-Authentication
-When your administrator has enabled 'Google Sign in' you can use your Google-account to authenticate in MOLGENIS. In the login-screen you can 
-see an additional button. Click on it to authenticate with your Google-account. This will create a user which has only rights to the *Account*-tab. 
-You have to ask your administrator to set the permissions you need in MOLGENIS.
+When your administrator has enabled 'Google Sign in' you can use your Google-account to authenticate in MOLGENIS. In the login screen you can 
+see an additional button. Click it to authenticate with your Google account.
 
 ### Link your Google-account
-When you already have a MOLGENIS-account you can link it to your Google-account. This way you can use your Google-account to authenticate in MOLGENIS. 
-Before you 'Sign in' with your Google-account, make sure your MOLGENIS-account has the same email address as your Google-account. This way the 
-MOLGENIS-account will be automatically be linked to the Google-account.
+When you already have a MOLGENIS account you can link it to your Google account. This way you can use your Google account to authenticate in MOLGENIS. 
+Before you 'Sign in' with your Google account, make sure your MOLGENIS account has the same email address as your Google account. This way the 
+MOLGENIS account will automatically be linked to your Google account.
 
-When you already signed in with your Google-account and did not use the same email address as your MOLGENIS-account you have to contact your administrator. 
-Only the administrator can fill in the Google-User-Account-ID. You will have to provide the Google-User-Account-ID to the administrator.
+When you've already signed in with your Google account and did not use the same email address as your MOLGENIS account you have to contact your administrator. 
