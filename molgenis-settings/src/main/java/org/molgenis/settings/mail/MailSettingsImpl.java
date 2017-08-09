@@ -1,5 +1,6 @@
 package org.molgenis.settings.mail;
 
+import com.sun.istack.internal.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
@@ -153,12 +154,14 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	}
 
 	@Override
+	@Nullable
 	public String getUsername()
 	{
 		return getString(Meta.USERNAME);
 	}
 
 	@Override
+	@Nullable
 	public String getPassword()
 	{
 		return getString(Meta.PASSWORD);

@@ -1,5 +1,7 @@
 package org.molgenis.data.settings;
 
+import com.sun.istack.internal.Nullable;
+
 /**
  * Application settings
  */
@@ -18,6 +20,7 @@ public interface AppSettings
 	/**
 	 * @return href of logo displayed above top menu
 	 */
+	@Nullable
 	String getLogoTopHref();
 
 	/**
@@ -28,6 +31,7 @@ public interface AppSettings
 	/**
 	 * @return href of logo displayed in menu
 	 */
+	@Nullable
 	String getLogoNavBarHref();
 
 	/**
@@ -38,6 +42,7 @@ public interface AppSettings
 	/**
 	 * @return footer text
 	 */
+	@Nullable
 	String getFooter();
 
 	/**
@@ -88,6 +93,7 @@ public interface AppSettings
 	/**
 	 * @return file name containing custom CSS without path
 	 */
+	@Nullable
 	String getCssHref();
 
 	/**
@@ -98,6 +104,7 @@ public interface AppSettings
 	/**
 	 * @return JSON object string representation of menu
 	 */
+	@Nullable
 	String getMenu();
 
 	/**
@@ -108,6 +115,7 @@ public interface AppSettings
 	/**
 	 * @return data aggregation threshold or <code>null</code> if no threshold exists
 	 */
+	@Nullable
 	Integer getAggregateThreshold();
 
 	/**
@@ -118,6 +126,7 @@ public interface AppSettings
 	/**
 	 * @return JS string containing tracking code to be placed in the footer
 	 */
+	@Nullable
 	String getTrackingCodeFooter();
 
 	/**
@@ -138,6 +147,7 @@ public interface AppSettings
 	/**
 	 * @return 3rd party Google analytics tracking ID
 	 */
+	@Nullable
 	String getGoogleAnalyticsTrackingId();
 
 	/**
@@ -148,6 +158,7 @@ public interface AppSettings
 	/**
 	 * @return MOLGENIS Google analytics tracking ID
 	 */
+	@Nullable
 	String getGoogleAnalyticsTrackingIdMolgenis();
 
 	/**
@@ -204,5 +215,6 @@ public interface AppSettings
 	/**
 	 * @return Custom JavaScript <script src="..."></script> headers, specified as comma separated list
 	 */
+	@Nullable
 	String getCustomJavascript();
 }
