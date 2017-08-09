@@ -64,7 +64,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	{
 		try
 		{
-			return getStaticContent(pluginId).isWritable();
+			StaticContent staticContent = getStaticContent(pluginId);
+			return staticContent != null && staticContent.isWritable();
 		}
 		catch (MolgenisDataAccessException e)
 		{
