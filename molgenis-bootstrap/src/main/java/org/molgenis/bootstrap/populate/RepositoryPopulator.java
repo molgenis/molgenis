@@ -28,14 +28,12 @@ public class RepositoryPopulator
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
 	private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
-	private final BootstrapThemePopulator bootstrapThemePopulator;
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
 			SystemEntityPopulator systemEntityPopulator, SettingsPopulator settingsPopulator,
 			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
-			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator,
-			BootstrapThemePopulator bootstrapThemePopulator)
+			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
@@ -44,7 +42,6 @@ public class RepositoryPopulator
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
 		this.genomeBrowserAttributesPopulator = requireNonNull(genomeBrowserAttributesPopulator);
-		this.bootstrapThemePopulator = requireNonNull(bootstrapThemePopulator);
 	}
 
 	public void populate(ContextRefreshedEvent event)
@@ -67,10 +64,6 @@ public class RepositoryPopulator
 			LOG.trace("Populating default genome browser attributes ...");
 			genomeBrowserAttributesPopulator.populate();
 			LOG.trace("Populated default genome browser attributes");
-
-			LOG.trace("Populating bootstrap themes ...");
-			bootstrapThemePopulator.populate();
-			LOG.debug("Populated bootstrap themes");
 		}
 
 		LOG.trace("Populating settings entities ...");

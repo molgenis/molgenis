@@ -38,6 +38,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final AnnotatorBootstrapper annotatorBootstrapper;
 	private final IndexBootstrapper indexBootstrapper;
 	private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
+	private final BootstrapThemePopulator bootstrapThemePopulator;
 
 	@Autowired
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
@@ -45,7 +46,8 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
 			RepositoryPopulator repositoryPopulator, JobBootstrapper jobBootstrapper,
 			AnnotatorBootstrapper annotatorBootstrapper, IndexBootstrapper indexBootstrapper,
-			EntityTypeRegistryPopulator entityTypeRegistryPopulator)
+			EntityTypeRegistryPopulator entityTypeRegistryPopulator,
+			BootstrapThemePopulator bootstrapThemePopulator)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
@@ -56,6 +58,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
 		this.indexBootstrapper = requireNonNull(indexBootstrapper);
 		this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
+		this.bootstrapThemePopulator = requireNonNull(bootstrapThemePopulator);
 	}
 
 	@Transactional
@@ -101,6 +104,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Populating entity type registry ...");
 		entityTypeRegistryPopulator.populate();
 		LOG.debug("Populated entity type registry");
+
+		LOG.trace("Populating bootstrap themes ...");
+		bootstrapThemePopulator.populate();
+		LOG.debug("Populated bootstrap themes");
 
 		LOG.info("Bootstrapping application completed");
 	}
