@@ -1,6 +1,6 @@
 package org.molgenis.data.settings;
 
-import com.sun.istack.internal.Nullable;
+import javax.annotation.Nullable;
 
 /**
  * Application settings

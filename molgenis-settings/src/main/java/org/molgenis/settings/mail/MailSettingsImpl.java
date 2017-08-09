@@ -1,6 +1,5 @@
 package org.molgenis.settings.mail;
 
-import com.sun.istack.internal.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Objects;
