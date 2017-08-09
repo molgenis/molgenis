@@ -11,7 +11,6 @@ import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

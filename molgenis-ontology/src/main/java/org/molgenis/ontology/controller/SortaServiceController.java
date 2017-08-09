@@ -34,9 +34,9 @@ import org.molgenis.ontology.sorta.request.SortaServiceResponse;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -154,7 +154,7 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		Fetch fetch = new Fetch();
 		sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
-		SortaJobExecution result = RunAsSystemProxy.runAsSystem(
+		SortaJobExecution result = RunAsSystemAspect.runAsSystem(
 				() -> dataService.findOneById(SORTA_JOB_EXECUTION, sortaJobExecutionId, fetch,
 						SortaJobExecution.class));
 		return result;
@@ -186,7 +186,7 @@ public class SortaServiceController extends MolgenisPluginController
 				User currentUser = userAccountService.getCurrentUser();
 				if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 				{
-					RunAsSystemProxy.runAsSystem(() ->
+					RunAsSystemAspect.runAsSystem(() ->
 					{
 						Double thresholdValue = Double.parseDouble(threshold);
 						sortaJobExecution.setThreshold(thresholdValue);
@@ -247,7 +247,7 @@ public class SortaServiceController extends MolgenisPluginController
 			User currentUser = userAccountService.getCurrentUser();
 			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
-				RunAsSystemProxy.runAsSystem(
+				RunAsSystemAspect.runAsSystem(
 						() -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
 				tryDeleteRepository(sortaJobExecution.getResultEntityName());
 				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
@@ -261,7 +261,7 @@ public class SortaServiceController extends MolgenisPluginController
 		if (dataService.hasRepository(entityTypeId) && permissionService.hasPermissionOnEntityType(entityTypeId,
 				Permission.WRITEMETA))
 		{
-			RunAsSystemProxy.runAsSystem(() -> deleteRepository(entityTypeId));
+			RunAsSystemAspect.runAsSystem(() -> deleteRepository(entityTypeId));
 		}
 		else
 		{
@@ -510,7 +510,7 @@ public class SortaServiceController extends MolgenisPluginController
 		User currentUser = userAccountService.getCurrentUser();
 		Query<Entity> query = QueryImpl.EQ(JobExecutionMetaData.USER, currentUser.getUsername());
 		query.sort().on(JobExecutionMetaData.START_DATE, DESC);
-		RunAsSystemProxy.runAsSystem(() -> dataService.findAll(SORTA_JOB_EXECUTION, query).forEach(job ->
+		RunAsSystemAspect.runAsSystem(() -> dataService.findAll(SORTA_JOB_EXECUTION, query).forEach(job ->
 		{
 			// TODO: fetch the user as well
 			job.set(JobExecutionMetaData.USER, currentUser.getUsername());
@@ -534,7 +534,7 @@ public class SortaServiceController extends MolgenisPluginController
 		sortaJobExecution.setThreshold(DEFAULT_THRESHOLD);
 		sortaJobExecution.setOntologyIri(ontologyIri);
 
-		RunAsSystemProxy.runAsSystem(() ->
+		RunAsSystemAspect.runAsSystem(() ->
 		{
 			createInputRepository(inputData);
 			createEmptyResultRepository(jobName, resultEntityName, inputData.getEntityType());

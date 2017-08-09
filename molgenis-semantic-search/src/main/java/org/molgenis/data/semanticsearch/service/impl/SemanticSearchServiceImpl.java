@@ -241,7 +241,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		String attributeID = attribute.getIdentifier();
 		Explanation explanation = elasticSearchExplainService.explain(query, attributeMetaData, attributeID);
 		return elasticSearchExplainService.findQueriesFromExplanation(collectExpandedQueryMap, explanation);
-
 	}
 
 	@Override

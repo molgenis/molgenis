@@ -1,13 +1,10 @@
 package org.molgenis.data.importer.wizard;
 
-import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.support.Href;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.Permissions;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
@@ -15,13 +12,13 @@ import org.molgenis.util.FileExtensionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,11 +30,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.molgenis.data.importer.wizard.ImportWizardController.URI;
@@ -56,9 +51,6 @@ public class ImportWizardController extends AbstractWizardController
 	private final ValidationResultWizardPage validationResultWizardPage;
 	private final ImportResultsWizardPage importResultsWizardPage;
 	private final PackageWizardPage packageWizardPage;
-	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-	private final UserAccountService userAccountService;
-	private final GroupAuthorityFactory groupAuthorityFactory;
 
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
@@ -72,10 +64,8 @@ public class ImportWizardController extends AbstractWizardController
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
 			PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
 			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
-			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
-			GroupAuthorityFactory groupAuthorityFactory)
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -90,14 +80,11 @@ public class ImportWizardController extends AbstractWizardController
 		this.validationResultWizardPage = validationResultWizardPage;
 		this.importResultsWizardPage = importResultsWizardPage;
 		this.packageWizardPage = packageWizardPage;
-		this.userAccountService = userAccountService;
 		this.dataService = dataService;
-		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
 		this.importServiceFactory = importServiceFactory;
 		this.fileStore = fileStore;
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.importRunService = importRunService;
-		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 		this.dataService = dataService;
 		this.asyncImportJobs = Executors.newSingleThreadExecutor();
 	}
@@ -105,10 +92,9 @@ public class ImportWizardController extends AbstractWizardController
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
 			PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
 			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
-			ExecutorService executorService, GroupAuthorityFactory groupAuthorityFactory)
+			ExecutorService executorService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -121,16 +107,13 @@ public class ImportWizardController extends AbstractWizardController
 		this.validationResultWizardPage = validationResultWizardPage;
 		this.importResultsWizardPage = importResultsWizardPage;
 		this.packageWizardPage = packageWizardPage;
-		this.userAccountService = userAccountService;
 		this.dataService = dataService;
-		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
 		this.importServiceFactory = importServiceFactory;
 		this.fileStore = fileStore;
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.importRunService = importRunService;
 		this.dataService = dataService;
 		this.asyncImportJobs = executorService;
-		this.groupAuthorityFactory = groupAuthorityFactory;
 	}
 
 	@Override
@@ -144,25 +127,6 @@ public class ImportWizardController extends AbstractWizardController
 		wizard.addPage(importResultsWizardPage);
 
 		return wizard;
-	}
-
-	@RequestMapping(value = "/entityclass/group/{groupId}", method = RequestMethod.GET)
-	@ResponseBody
-	public Permissions getGroupEntityClassPermissions(@PathVariable String groupId, WebRequest webRequest)
-	{
-		// FIXME getGroupEntityClassPermissions
-		Permissions permissions = new Permissions();
-		permissions.setEntityIds(Collections.emptyMap());
-		return permissions;
-	}
-
-	@RequestMapping(value = "/add/entityclass/group", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
-	{
-
-		// FIXME addGroupEntityClassPermissions
-		throw new UnsupportedOperationException("addGroupEntityClassPermissions not implemented");
 	}
 
 	/**
@@ -278,7 +242,7 @@ public class ImportWizardController extends AbstractWizardController
 		// no action specified? default is ADD just like the importerPlugin
 		ImportRun importRun;
 		String fileExtension = getExtension(file.getName());
-		DatabaseAction databaseAction = getDatabaseAction(file, action);
+		DatabaseAction databaseAction = getDatabaseAction(action);
 		if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName())))
 		{
 			throw new MolgenisDataException(
@@ -296,7 +260,7 @@ public class ImportWizardController extends AbstractWizardController
 		return importRun;
 	}
 
-	private DatabaseAction getDatabaseAction(File file, String action)
+	private DatabaseAction getDatabaseAction(String action)
 	{
 		DatabaseAction databaseAction = DatabaseAction.ADD;
 		if (action != null)

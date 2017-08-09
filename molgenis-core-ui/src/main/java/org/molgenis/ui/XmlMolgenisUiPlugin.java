@@ -1,5 +1,8 @@
 package org.molgenis.ui;
 
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
+
 /**
  * @deprecated use {@link org.molgenis.ui.menu.MenuItemToMolgenisUiMenuItemAdapter} instead
  */
@@ -8,13 +11,16 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 {
 	private final PluginType pluginType;
 	private final MolgenisUiMenu parentMenu;
+	private final PermissionService permissionService;
 
-	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu)
+	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu, PermissionService permissionService)
 	{
 		if (pluginType == null) throw new IllegalArgumentException("plugin type is null");
 		if (parentMenu == null) throw new IllegalArgumentException("parent menu is null");
+		if (permissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.pluginType = pluginType;
 		this.parentMenu = parentMenu;
+		this.permissionService = permissionService;
 	}
 
 	@Override
@@ -39,6 +45,12 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	public MolgenisUiMenuItemType getType()
 	{
 		return MolgenisUiMenuItemType.PLUGIN;
+	}
+
+	@Override
+	public boolean isAuthorized()
+	{
+		return permissionService.hasPermissionOnPlugin(getId(), Permission.READ);
 	}
 
 	@Override

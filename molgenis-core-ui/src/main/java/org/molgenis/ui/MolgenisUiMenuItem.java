@@ -11,4 +11,6 @@ public interface MolgenisUiMenuItem
 	MolgenisUiMenuItemType getType();
 
 	MolgenisUiMenu getParentMenu();
+
+	boolean isAuthorized();
 }

@@ -1,39 +1,26 @@
 package org.molgenis.data.importer.wizard;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.molgenis.auth.*;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.config.GroupAuthorityTestConfig;
 import org.molgenis.data.config.GroupTestConfig;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.importer.config.ImportTestConfig;
 import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
-import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionManagerServiceImpl;
-import org.molgenis.security.user.UserAccountService;
-import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailSender;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,14 +35,10 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.testng.Assert.assertEquals;
 
@@ -69,25 +52,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 
 	@Autowired
-	private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-
-	@Autowired
-	private UserAccountService userAccountService;
-
-	@Autowired
 	private ImportRunFactory importRunFactory;
-
-	@Autowired
-	private GroupFactory groupFactory;
-
-	@Autowired
-	private GroupAuthorityFactory groupAuthorityFactory;
-
-	@Autowired
-	private MetaDataService metaDataService;
-
-	@Captor
-	private ArgumentCaptor<GroupAuthority> groupAuthorityArgumentCaptor;
 
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
@@ -120,105 +85,25 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		entityType = mock(EntityType.class);
 
 		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
-				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
-				userAccountService, importServiceFactory, fileStore, fileRepositoryCollectionFactory, importRunService,
-				executorService, groupAuthorityFactory);
-
-		List<GroupAuthority> authorities = Lists.newArrayList();
-
-		Group group1 = groupFactory.create();
-		group1.setId("ID");
-		group1.setActive(true);
-		group1.setName("TestGroup");
-
-		Entity entity1 = groupAuthorityFactory.create("entity1");
-		entity1.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity1");
-		entity1.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority1 = groupAuthorityFactory.create();
-		authority1.set(entity1);
-
-		Entity entity2 = groupAuthorityFactory.create("entity2");
-		entity2.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity2");
-		entity2.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority2 = groupAuthorityFactory.create();
-		authority2.set(entity2);
-
-		Entity entity3 = groupAuthorityFactory.create("entity3");
-		entity3.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity3");
-		entity3.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority3 = groupAuthorityFactory.create();
-		authority3.set(entity3);
-
-		Entity entity4 = groupAuthorityFactory.create("entity4");
-		entity4.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity4");
-		entity4.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority4 = groupAuthorityFactory.create();
-		authority4.set(entity4);
-
-		authorities.add(authority1);
-		authorities.add(authority2);
-		authorities.add(authority3);
-		authorities.add(authority4);
+				validationResultWizardPage, importResultsWizardPage, dataService, importServiceFactory, fileStore,
+				fileRepositoryCollectionFactory, importRunService, executorService);
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
-		when(dataService.findOneById(GROUP, "ID", Group.class)).thenReturn(group1);
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
-				GroupAuthority.class)).thenAnswer(
-				invocation -> Stream.of(authority1, authority2, authority3, authority4));
 
 		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
 				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)),
 				eq(EntityType.class))).thenAnswer(invocation -> Stream.of(entityType, entityType));
 
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
-				GroupAuthority.class)).thenAnswer(
-				invocation -> Stream.of(authority1, authority2, authority3, authority4));
-
 		when(dataService.getEntityTypeIds()).thenReturn(
 				Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
-		Authentication authentication = mock(Authentication.class);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
 		date = Instant.parse("2016-01-01T12:34:28.123Z");
-
-		when(userAccountService.getCurrentUserGroups()).thenReturn(singletonList(group1));
 
 		when(entityType.getId()).thenReturn("entityTypeId");
 		when(entityType.getId()).thenReturn("entityTypeName");
 
 		reset(executorService);
-	}
-
-	@Test
-	public void getGroupEntityClassPermissionsTest()
-	{
-		// FIXME see ImportWizardController
-		throw new UnsupportedOperationException();
-	}
-
-	@Test
-	public void addGroupEntityClassPermissionsTest()
-	{
-		// FIXME see ImportWizardController
-		throw new UnsupportedOperationException();
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void addGroupEntityClassPermissionsTestNoPermission()
-	{
-		// FIXME see ImportWizardController
-		throw new UnsupportedOperationException();
-	}
-
-	@Test
-	public void addGroupEntityClassPermissionsTestNoPermissionSU()
-	{
-		// FIXME see ImportWizardController
-		throw new UnsupportedOperationException();
 	}
 
 	@Test
@@ -317,67 +202,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@Import({ ImportTestConfig.class, GroupTestConfig.class, GroupAuthorityTestConfig.class })
 	static class Config
 	{
-		@Autowired
-		private DataService dataService;
 
-		@Bean
-		public PasswordEncoder passwordEncoder()
-		{
-			return mock(PasswordEncoder.class);
-		}
-
-		@Bean
-		public SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry()
-		{
-			return mock(SystemRepositoryDecoratorRegistry.class);
-		}
-
-		@Bean
-		public UserService userService()
-		{
-			return mock(UserService.class);
-		}
-
-		@Bean
-		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
-		{
-			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper());
-		}
-
-		@Bean
-		public MetaDataService metaDataService()
-		{
-			return mock(MetaDataService.class);
-		}
-
-		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
-		{
-			return mock(MolgenisPluginRegistry.class);
-		}
-
-		@Bean
-		public GrantedAuthoritiesMapper grantedAuthoritiesMapper()
-		{
-			return mock(GrantedAuthoritiesMapper.class);
-		}
-
-		@Bean
-		public UserAccountService userAccountService()
-		{
-			return mock(UserAccountService.class);
-		}
-
-		@Bean
-		public MailSender mailSender()
-		{
-			return mock(MailSender.class);
-		}
-
-		@Bean
-		public EntityTypeDependencyResolver entityTypeDependencyResolver()
-		{
-			return mock(EntityTypeDependencyResolver.class);
-		}
 	}
 }

@@ -45,7 +45,6 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		MappedConsumer mappedConsumer = new MappedConsumer(consumer, this);
 		delegate().forEachBatched(fetch, mappedConsumer::map, batchSize);
-		super.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -88,9 +87,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (entityType != null)
 		{
-			String entityTypeId = entityType.getEntityType().getId();
-			Object entityId = entityType.getIdValue();
-			if (!permissionService.hasPermissionOnEntity(entityTypeId, entityId, Permission.WRITE))
+			if (!permissionService.hasPermissionOnEntityType(entityType.getId(), Permission.WRITE))
 			{
 				entityType.setReadOnly(true);
 			}

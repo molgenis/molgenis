@@ -2,8 +2,8 @@ package org.molgenis.ui.security;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
@@ -51,6 +51,12 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	public MolgenisUiMenu getParentMenu()
 	{
 		return molgenisUiMenu.getParentMenu();
+	}
+
+	@Override
+	public boolean isAuthorized()
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
