@@ -3,6 +3,9 @@ package org.molgenis.data.rest;
 import com.google.common.base.Strings;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
+import net.minidev.json.JSONObject;
+import org.molgenis.data.rest.convert.RestTestUtils;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -56,7 +59,6 @@ public class RestControllerIT
 
 		testUserId = getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
-
 		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", Permission.WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", Permission.READ);
 		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", Permission.COUNT);
@@ -114,6 +116,78 @@ public class RestControllerIT
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
 						equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+	}
+
+	@Test
+	public void test2faEnforced()
+	{
+		RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
+
+		try
+		{
+			ValidatableResponse response;
+
+			response = given().log()
+							  .all()
+							  .header(X_MOLGENIS_TOKEN, testUserToken)
+							  .contentType(APPLICATION_JSON)
+							  .when()
+							  .get(PATH + "logout")
+							  .then();
+			response.statusCode(OKE);
+
+			JSONObject loginBody = new JSONObject();
+			loginBody.put("username", REST_TEST_USER);
+			loginBody.put("password", REST_TEST_USER_PASSWORD);
+
+			response = given().contentType(APPLICATION_JSON)
+							  .body(loginBody.toJSONString())
+							  .when()
+							  .post(PATH + "login")
+							  .then();
+			response.statusCode(UNAUTHORIZED)
+					.body("errors.message[0]",
+							equalTo("2 factor authentication is [ Enforced ], you cannot login via the RESTAPI anymore"));
+		}
+		finally
+		{
+			RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+		}
+	}
+
+	@Test
+	public void test2faEnabled()
+	{
+		RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
+
+		try
+		{
+			ValidatableResponse response;
+
+			response = given().log()
+							  .all()
+							  .header(X_MOLGENIS_TOKEN, testUserToken)
+							  .contentType(APPLICATION_JSON)
+							  .when()
+							  .get(PATH + "logout")
+							  .then();
+			response.statusCode(OKE);
+
+			JSONObject loginBody = new JSONObject();
+			loginBody.put("username", REST_TEST_USER);
+			loginBody.put("password", REST_TEST_USER_PASSWORD);
+
+			response = given().contentType(APPLICATION_JSON)
+							  .body(loginBody.toJSONString())
+							  .when()
+							  .post(PATH + "login")
+							  .then();
+			response.statusCode(OKE);
+		}
+		finally
+		{
+			RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+		}
 	}
 
 	@Test
@@ -260,4 +334,3 @@ public class RestControllerIT
 	}
 
 }
-
