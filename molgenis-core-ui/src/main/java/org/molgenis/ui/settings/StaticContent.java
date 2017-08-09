@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.ui.settings.StaticContentMeta.CONTENT;
 import static org.molgenis.ui.settings.StaticContentMeta.KEY;
 
@@ -35,6 +37,7 @@ public class StaticContent extends StaticEntity
 		set(KEY, key);
 	}
 
+	@Nullable
 	public String getContent()
 	{
 		return getString(CONTENT);

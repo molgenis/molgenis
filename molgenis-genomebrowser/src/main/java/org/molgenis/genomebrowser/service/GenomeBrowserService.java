@@ -2,8 +2,6 @@ package org.molgenis.genomebrowser.service;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;

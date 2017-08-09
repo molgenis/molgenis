@@ -14,6 +14,14 @@
     <link href="<@resource_href "/css/molgenis-one-click-importer/app.css" />" rel="stylesheet">
 </head>
 <body>
+<#include "molgenis-header.ftl">
+<#include "molgenis-footer.ftl">
+
+<#assign js = []>
+<#assign css = ["molgenis-one-click-importer/app.css"]>
+<#assign version = 2>
+
+<@header css js version/>
 <div id="app"></div>
 
 <script type="text/javascript">
@@ -29,5 +37,4 @@
 <script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/manifest.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/vendor.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/app.js"/>"></script>
-</body>
-</html>
+<@footer/>

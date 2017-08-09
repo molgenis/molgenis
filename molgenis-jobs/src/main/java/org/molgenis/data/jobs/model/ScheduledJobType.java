@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.data.jobs.model.ScheduledJobTypeMetadata.*;
 
 /**
@@ -37,6 +39,7 @@ public class ScheduledJobType extends StaticEntity
 		set(NAME, name);
 	}
 
+	@Nullable
 	String getLabel()
 	{
 		return getString(LABEL);
@@ -47,6 +50,7 @@ public class ScheduledJobType extends StaticEntity
 		set(LABEL, label);
 	}
 
+	@Nullable
 	String getDescription()
 	{
 		return getString(DESCRIPTION);
@@ -67,6 +71,7 @@ public class ScheduledJobType extends StaticEntity
 		set(JOB_EXECUTION_TYPE, jobExecutionType);
 	}
 
+	@Nullable
 	public String getSchema()
 	{
 		return getString(SCHEMA);

@@ -7,6 +7,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.collect.Iterables.concat;
@@ -197,6 +198,7 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public Integer getLookupAttributeIndex()
 	{
 		return getInt(LOOKUP_ATTRIBUTE_INDEX);
@@ -213,6 +215,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return attribute label
 	 */
+	@Nullable
 	public String getLabel()
 	{
 		String label = getString(LABEL);
@@ -224,6 +227,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return attribute label
 	 */
+	@Nullable
 	public String getLabel(String languageCode)
 	{
 		String i18nString = getString(getI18nAttributeName(LABEL, languageCode));
@@ -247,6 +251,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return attribute description or <tt>null</tt>
 	 */
+	@Nullable
 	public String getDescription()
 	{
 		return getString(DESCRIPTION);
@@ -257,6 +262,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return attribute description or <tt>null</tt>
 	 */
+	@Nullable
 	public String getDescription(String languageCode)
 	{
 		String i18nDescription = getString(getI18nAttributeName(DESCRIPTION, languageCode));
@@ -293,6 +299,7 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public Boolean getCascadeDelete()
 	{
 		return getBoolean(IS_CASCADE_DELETE);
@@ -319,6 +326,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return referenced entity
 	 */
+	@Nullable
 	public EntityType getRefEntity()
 	{
 		return getEntity(REF_ENTITY_TYPE, EntityType.class);
@@ -330,6 +338,7 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public Attribute getMappedBy()
 	{
 		return getEntity(MAPPED_BY, Attribute.class);
@@ -349,6 +358,7 @@ public class Attribute extends StaticEntity
 		return getMappedBy() != null;
 	}
 
+	@Nullable
 	public Sort getOrderBy()
 	{
 		String orderByStr = getString(ORDER_BY);
@@ -367,6 +377,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return String representation of expression, in JSON format
 	 */
+	@Nullable
 	public String getExpression()
 	{
 		return getString(EXPRESSION);
@@ -475,6 +486,7 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public Long getRangeMin()
 	{
 		return getLong(RANGE_MIN);
@@ -486,6 +498,7 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public Long getRangeMax()
 	{
 		return getLong(RANGE_MAX);
@@ -534,6 +547,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return expression
 	 */
+	@Nullable
 	public String getVisibleExpression()
 	{
 		return getString(VISIBLE_EXPRESSION);
@@ -548,6 +562,7 @@ public class Attribute extends StaticEntity
 	/**
 	 * Javascript expression to validate the value of the attribute
 	 */
+	@Nullable
 	public String getValidationExpression()
 	{
 		return getString(VALIDATION_EXPRESSION);
@@ -569,6 +584,7 @@ public class Attribute extends StaticEntity
 	 *
 	 * @return attribute default value
 	 */
+	@Nullable
 	public String getDefaultValue()
 	{
 		return getString(DEFAULT_VALUE);
@@ -599,6 +615,7 @@ public class Attribute extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public Attribute getParent()
 	{
 		return getEntity(PARENT, Attribute.class);

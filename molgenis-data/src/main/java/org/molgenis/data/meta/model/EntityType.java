@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -200,6 +201,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return entity description
 	 */
+	@Nullable
 	public String getDescription()
 	{
 		return getString(DESCRIPTION);
@@ -210,6 +212,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return entity description
 	 */
+	@Nullable
 	public String getDescription(String languageCode)
 	{
 		String i18nDescription = getString(getI18nAttributeName(DESCRIPTION, languageCode));
@@ -249,6 +252,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return package
 	 */
+	@Nullable
 	public Package getPackage()
 	{
 		return getEntity(PACKAGE, Package.class);
@@ -427,6 +431,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return parent entity
 	 */
+	@Nullable
 	public EntityType getExtends()
 	{
 		return getEntity(EXTENDS, EntityType.class);
