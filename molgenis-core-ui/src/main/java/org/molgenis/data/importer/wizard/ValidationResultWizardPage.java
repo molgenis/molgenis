@@ -7,7 +7,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.*;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
@@ -108,7 +108,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		if (!userAccountService.getCurrentUser().isSuperuser())
 		{
 			String username = SecurityUtils.getCurrentUsername();
-			groups = RunAsSystemAspect.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
+			groups = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
 		}
 		else
 		{

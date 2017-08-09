@@ -41,7 +41,7 @@ import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.GroupMetaData.NAME;
 import static org.molgenis.auth.UserMetaData.*;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.springframework.http.HttpMethod.POST;
 
 public class GoogleAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter

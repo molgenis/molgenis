@@ -15,7 +15,7 @@ import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.utils.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
-import org.molgenis.util.file.ZipFileUtil;
+import org.molgenis.ontology.utils.ZipFileUtil;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.annotation.Autowired;

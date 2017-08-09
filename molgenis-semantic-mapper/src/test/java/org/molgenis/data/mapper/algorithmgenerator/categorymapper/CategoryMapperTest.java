@@ -33,14 +33,20 @@ public class CategoryMapperTest
 	@Test
 	public void testExtractNumbers()
 	{
-		Assert.assertEquals(
-				CategoryMapperUtil.extractNumbers("1-3 per month").stream().mapToInt(Double::intValue).sum(), 4);
+		Assert.assertEquals(CategoryMapperUtil.extractNumbers("1-3 per month")
+											  .stream()
+											  .mapToInt(Double::intValue)
+											  .sum(), 4);
 
-		Assert.assertEquals(
-				CategoryMapperUtil.extractNumbers("2.6-3.4 per month").stream().mapToInt(Double::intValue).sum(), 5);
+		Assert.assertEquals(CategoryMapperUtil.extractNumbers("2.6-3.4 per month")
+											  .stream()
+											  .mapToInt(Double::intValue)
+											  .sum(), 5);
 
-		Assert.assertEquals(
-				CategoryMapperUtil.extractNumbers("not this month").stream().mapToInt(Double::intValue).sum(), 0);
+		Assert.assertEquals(CategoryMapperUtil.extractNumbers("not this month")
+											  .stream()
+											  .mapToInt(Double::intValue)
+											  .sum(), 0);
 	}
 
 	@Test

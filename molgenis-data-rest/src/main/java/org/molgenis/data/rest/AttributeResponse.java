@@ -9,7 +9,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,18 +43,21 @@ public class AttributeResponse
 	private String validationExpression;
 
 	public AttributeResponse(String entityParentName, EntityType entityType, Attribute attr,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		this(entityParentName, entityType, attr, null, null, permissionService, dataService, languageService);
 	}
 
 	/**
+	 * @param entityParentName
+	 * @param entityType
+	 * @param attr
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public AttributeResponse(final String entityParentName, EntityType entityType, Attribute attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -127,10 +130,11 @@ public class AttributeResponse
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			Iterable<Attribute> attributeParts = attr.getChildren();
-			this.attributes =
-					attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts, attribute ->
+			this.attributes = attributeParts != null ? Lists.newArrayList(
+					Iterables.transform(attributeParts, attribute ->
 					{
-						if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
+						if (attributeExpandsSet != null && attributeExpandsSet.containsKey(
+								"attributes".toLowerCase()))
 						{
 							Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 							return new AttributeResponse(entityParentName, entityType, attribute, subAttributesSet,

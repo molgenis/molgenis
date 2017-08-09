@@ -43,6 +43,7 @@ public class HighchartService extends AbstractChartVisualizationService
 	 * <p>
 	 * When the xAxisType equals MolgenisAxisType.DATETIME then the Highcharts Stockchart will be used to create a plot
 	 *
+	 * @param scatterChart
 	 * @return Options
 	 */
 	public Options createScatterChart(XYDataChart scatterChart)
@@ -62,6 +63,7 @@ public class HighchartService extends AbstractChartVisualizationService
 	/**
 	 * Create the Highcharts options from the given BoxPlotChart
 	 *
+	 * @param boxPlotChart
 	 * @return Options
 	 */
 	protected Options createBoxPlotChart(BoxPlotChart boxPlotChart)
@@ -100,6 +102,7 @@ public class HighchartService extends AbstractChartVisualizationService
 	/**
 	 * Create the Highcharts options from the given XYDataChart.
 	 *
+	 * @param xYDataChart
 	 * @param chartConstructorType - When defining the chartConstructorType u can invloed the type of the Highchart constructor types
 	 * @return Options
 	 */

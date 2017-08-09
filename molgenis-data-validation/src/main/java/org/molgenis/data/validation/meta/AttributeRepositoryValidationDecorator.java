@@ -11,26 +11,33 @@ import static java.util.Objects.requireNonNull;
 
 public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDecorator<Attribute>
 {
+	private final Repository<Attribute> decoratedRepo;
 	private final AttributeValidator attributeValidator;
 
-	public AttributeRepositoryValidationDecorator(Repository<Attribute> delegateRepository,
+	public AttributeRepositoryValidationDecorator(Repository<Attribute> decoratedRepo,
 			AttributeValidator attributeValidator)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.attributeValidator = requireNonNull(attributeValidator);
+	}
+
+	@Override
+	protected Repository<Attribute> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override
 	public void update(Attribute attr)
 	{
 		attributeValidator.validate(attr, ValidationMode.UPDATE);
-		delegate().update(attr);
+		decoratedRepo.update(attr);
 	}
 
 	@Override
 	public void update(Stream<Attribute> attrs)
 	{
-		delegate().update(attrs.filter(attr ->
+		decoratedRepo.update(attrs.filter(attr ->
 		{
 			attributeValidator.validate(attr, ValidationMode.UPDATE);
 			return true;
@@ -41,13 +48,13 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	public void add(Attribute attr)
 	{
 		attributeValidator.validate(attr, ValidationMode.ADD);
-		delegate().add(attr);
+		decoratedRepo.add(attr);
 	}
 
 	@Override
 	public Integer add(Stream<Attribute> attrs)
 	{
-		return delegate().add(attrs.filter(attr ->
+		return decoratedRepo.add(attrs.filter(attr ->
 		{
 			attributeValidator.validate(attr, ValidationMode.ADD);
 			return true;

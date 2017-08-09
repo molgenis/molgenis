@@ -40,15 +40,23 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
 	private final boolean cacheable;
 
+	private final Repository<Entity> decoratedRepository;
+
 	private final TransactionInformation transactionInformation;
 
-	public L2CacheRepositoryDecorator(Repository<Entity> delegateRepository, L2Cache l2Cache,
+	public L2CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L2Cache l2Cache,
 			TransactionInformation transactionInformation)
 	{
-		super(delegateRepository);
+		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l2Cache = requireNonNull(l2Cache);
-		this.cacheable = delegateRepository.getCapabilities().containsAll(newArrayList(CACHEABLE));
+		this.cacheable = decoratedRepository.getCapabilities().containsAll(newArrayList(CACHEABLE));
 		this.transactionInformation = transactionInformation;
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	/**

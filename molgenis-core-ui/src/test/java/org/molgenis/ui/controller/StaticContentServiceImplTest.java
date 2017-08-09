@@ -3,10 +3,10 @@ package org.molgenis.ui.controller;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.populate.EntityPopulator;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionServiceImpl;
+import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
@@ -116,7 +116,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "HOME"));
 
 		Authentication authentication = mock(Authentication.class);
-		PermissionService permissions = mock(PermissionService.class);
+		MolgenisPermissionService permissions = mock(MolgenisPermissionService.class);
 
 		doReturn(authorities).when(authentication).getAuthorities();
 
@@ -147,9 +147,9 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	public static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
-		public PermissionService permissionService()
+		public MolgenisPermissionService molgenisPermissionService()
 		{
-			return new PermissionServiceImpl();
+			return new MolgenisPermissionServiceImpl();
 		}
 
 		@Bean
@@ -161,7 +161,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentService staticContentService()
 		{
-			return new StaticContentServiceImpl(dataService(), staticContentFactory(), permissionService());
+			return new StaticContentServiceImpl(dataService(), staticContentFactory(), molgenisPermissionService());
 		}
 
 		@Bean

@@ -4,6 +4,8 @@ public interface MolgenisUi
 {
 	/**
 	 * Returns the main menu
+	 *
+	 * @return
 	 */
 	MolgenisUiMenu getMenu();
 

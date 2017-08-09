@@ -8,7 +8,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.meta.AttributeRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.AttributeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.AttributeValidator;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -22,12 +22,12 @@ public class AttributeRepositoryDecoratorFactory
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final DataService dataService;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService permissionService;
 	private final AttributeValidator attributeValidator;
 
 	public AttributeRepositoryDecoratorFactory(AttributeMetadata attributeMetadata,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService,
-			PermissionService permissionService, AttributeValidator attributeValidator)
+			MolgenisPermissionService permissionService, AttributeValidator attributeValidator)
 	{
 		super(attributeMetadata);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);

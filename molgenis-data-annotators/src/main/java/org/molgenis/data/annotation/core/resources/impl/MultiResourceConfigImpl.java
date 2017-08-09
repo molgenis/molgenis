@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.core.resources.impl;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.core.resources.ResourceConfig;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 
 import java.io.File;
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 
 	private String getSetting(String name, String defaultValue)
 	{
-		String value = RunAsSystemAspect.runAsSystem(() -> molgenisSettings.getString(name));
+		String value = RunAsSystemProxy.runAsSystem(() -> molgenisSettings.getString(name));
 		return value != null ? value : defaultValue;
 	}
 

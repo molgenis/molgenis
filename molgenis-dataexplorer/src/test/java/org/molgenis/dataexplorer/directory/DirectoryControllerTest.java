@@ -6,8 +6,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.controller.DirectoryController;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +31,7 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 	@Mock
 	private RestTemplate restTemplate;
 	@Mock
-	private PermissionService permissions;
+	private MolgenisPermissionService permissions;
 	@Mock
 	private EntityType entityType;
 

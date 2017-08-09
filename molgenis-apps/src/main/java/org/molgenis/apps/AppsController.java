@@ -6,8 +6,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -46,10 +46,10 @@ public class AppsController extends MolgenisPluginController
 
 	private final DataService dataService;
 	private final FileStore fileStore;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService permissionService;
 
 	@Autowired
-	public AppsController(DataService dataService, FileStore fileStore, PermissionService permissionService)
+	public AppsController(DataService dataService, FileStore fileStore, MolgenisPermissionService permissionService)
 	{
 		super(URI);
 
@@ -71,7 +71,7 @@ public class AppsController extends MolgenisPluginController
 		Query<App> query = dataService.query(APP, App.class);
 		query.sort().on(AppMetaData.NAME);
 		Stream<App> apps = query.findAll();
-		if (!permissionService.hasPermissionOnEntityType(APP, Permission.WRITE))
+		if (!permissionService.hasPermissionOnEntity(APP, Permission.WRITE))
 		{
 			apps = apps.filter(App::isActive);
 		}

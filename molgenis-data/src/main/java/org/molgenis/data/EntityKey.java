@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Value object to store Entity name / Entity ID combinations for a single entity instance.
+ * Value object to store Entity name / Entity ID combinations.
  */
 @AutoValue
 public abstract class EntityKey

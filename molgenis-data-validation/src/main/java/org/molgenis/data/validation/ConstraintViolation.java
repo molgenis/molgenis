@@ -50,6 +50,8 @@ public class ConstraintViolation
 	/**
 	 * Renumber the violation row number from a list of actual row numbers The list of indices is 0-indexed and the
 	 * rownnr are 1-indexed
+	 *
+	 * @param indices
 	 */
 	public void renumberRowIndex(List<Integer> indices)
 	{

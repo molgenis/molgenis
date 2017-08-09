@@ -62,6 +62,8 @@ public class Fetch implements Iterable<Entry<String, Fetch>>
 
 	/**
 	 * Retrieves the Fetch for an attribute
+	 *
+	 * @param attr
 	 */
 	public Fetch getFetch(Attribute attr)
 	{

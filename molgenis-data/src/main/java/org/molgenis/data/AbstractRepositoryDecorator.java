@@ -13,26 +13,14 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Abstract superclass for {@link Repository} decorators that delegates everything to the
  * decorated repository.
  */
 public abstract class AbstractRepositoryDecorator<E extends Entity> extends ForwardingObject implements Repository<E>
 {
-	private final Repository<E> delegateRepository;
-
-	public AbstractRepositoryDecorator(Repository<E> delegateRepository)
-	{
-		this.delegateRepository = requireNonNull(delegateRepository);
-	}
-
 	@Override
-	protected Repository<E> delegate()
-	{
-		return delegateRepository;
-	}
+	protected abstract Repository<E> delegate();
 
 	@Override
 	public Iterator<E> iterator()

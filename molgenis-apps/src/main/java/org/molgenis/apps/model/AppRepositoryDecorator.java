@@ -25,12 +25,19 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AppRepositoryDecorator.class);
 
+	private final Repository<App> decoratedRepo;
 	private final FileStore fileStore;
 
-	public AppRepositoryDecorator(Repository<App> delegateRepository, FileStore fileStore)
+	public AppRepositoryDecorator(Repository<App> decoratedRepo, FileStore fileStore)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.fileStore = requireNonNull(fileStore);
+	}
+
+	@Override
+	protected Repository<App> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override

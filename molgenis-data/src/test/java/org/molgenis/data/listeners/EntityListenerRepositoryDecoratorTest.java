@@ -21,7 +21,7 @@ import static org.testng.Assert.assertEquals;
 
 public class EntityListenerRepositoryDecoratorTest
 {
-	private Repository<Entity> delegateRepository;
+	private Repository<Entity> decoratedRepository;
 	private EntityListenerRepositoryDecorator entityListenerRepositoryDecorator;
 	private EntityListenersService entityListenersService = new EntityListenersService();
 
@@ -29,9 +29,9 @@ public class EntityListenerRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		delegateRepository = Mockito.mock(Repository.class);
-		Mockito.when(delegateRepository.getName()).thenReturn("entityFullName");
-		entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(delegateRepository,
+		decoratedRepository = Mockito.mock(Repository.class);
+		Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
+		entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(decoratedRepository,
 				entityListenersService);
 		Mockito.when(entityListenerRepositoryDecorator.getName()).thenReturn("entityFullName");
 	}
@@ -50,6 +50,12 @@ public class EntityListenerRepositoryDecoratorTest
 	}
 
 	@Test
+	public void delegate() throws Exception
+	{
+		assertEquals(entityListenerRepositoryDecorator.delegate(), decoratedRepository);
+	}
+
+	@Test
 	public void testQuery() throws Exception
 	{
 		assertEquals(entityListenerRepositoryDecorator.query().getRepository(), entityListenerRepositoryDecorator);
@@ -59,7 +65,7 @@ public class EntityListenerRepositoryDecoratorTest
 	public void addStream()
 	{
 		Stream<Entity> entities = Stream.empty();
-		Mockito.when(delegateRepository.add(entities)).thenReturn(123);
+		Mockito.when(decoratedRepository.add(entities)).thenReturn(123);
 		Assert.assertEquals(entityListenerRepositoryDecorator.add(entities), Integer.valueOf(123));
 	}
 
@@ -68,7 +74,7 @@ public class EntityListenerRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		entityListenerRepositoryDecorator.delete(entities);
-		Mockito.verify(delegateRepository, Mockito.times(1)).delete(entities);
+		Mockito.verify(decoratedRepository, Mockito.times(1)).delete(entities);
 	}
 
 	@SuppressWarnings("resource")
@@ -258,7 +264,7 @@ public class EntityListenerRepositoryDecoratorTest
 		Entity entity0 = Mockito.mock(Entity.class);
 		Entity entity1 = Mockito.mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		Mockito.when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Mockito.when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds);
 		Assert.assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -272,7 +278,7 @@ public class EntityListenerRepositoryDecoratorTest
 		Entity entity0 = Mockito.mock(Entity.class);
 		Entity entity1 = Mockito.mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		Mockito.when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Mockito.when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds, fetch);
 		Assert.assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -283,7 +289,7 @@ public class EntityListenerRepositoryDecoratorTest
 		Entity entity0 = Mockito.mock(Entity.class);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = Mockito.mock(Query.class);
-		Mockito.when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Mockito.when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = entityListenerRepositoryDecorator.findAll(query);
 		Assert.assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
@@ -295,6 +301,6 @@ public class EntityListenerRepositoryDecoratorTest
 		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = Mockito.mock(Consumer.class);
 		entityListenerRepositoryDecorator.forEachBatched(fetch, consumer, 543);
-		Mockito.verify(delegateRepository, Mockito.times(1)).forEachBatched(fetch, consumer, 543);
+		Mockito.verify(decoratedRepository, Mockito.times(1)).forEachBatched(fetch, consumer, 543);
 	}
 }

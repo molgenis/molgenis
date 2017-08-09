@@ -10,7 +10,7 @@ import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 public class GenomeBrowserTrackTest
 {
@@ -20,16 +20,16 @@ public class GenomeBrowserTrackTest
 		EntityType entity = mock(EntityType.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = GenomeBrowserServiceTest.getGenomeBrowserAttributes("postion",
 				"chrom", "normal", "mutant");
-		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "label", "ref_label", entity, VARIANT, null,
+		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "ref_label", entity, VARIANT, null,
 				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, null, null, null, null);
 
 		EntityType molgenisEntity = mock(EntityType.class);
-		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "label", "entityLabel", molgenisEntity, VARIANT,
-				Collections.singletonList(reference), GenomeBrowserSettings.MolgenisReferenceMode.NONE,
-				genomeBrowserAttributes, "alert(\"test\")",
+		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "entityLabel", molgenisEntity, VARIANT,
+				Collections.singletonList(reference),
+				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, "alert(\"test\")",
 				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
 
-		String expected = "{\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"postion\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"name\":\"label\",\"label_attr\":\"entityLabel\",\"tier_type\":\"molgenis\",\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"]}";
+		String expected = "{\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"postion\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"label_attr\":\"entityLabel\",\"tier_type\":\"molgenis\",\"uri\":\"http://localhost:8080/api/v2/null?id\",\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"]}";
 
 		assertEquals(track.toTrackJson().toString(), expected);
 	}

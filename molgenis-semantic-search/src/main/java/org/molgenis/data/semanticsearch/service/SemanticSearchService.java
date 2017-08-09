@@ -16,6 +16,9 @@ public interface SemanticSearchService
 	/**
 	 * Find all relevant source attributes with an explanation based on ontology terms and search terms
 	 *
+	 * @param sourceEntityType
+	 * @param queryTerms
+	 * @param ontologyTerms
 	 * @return Attribute of resembling attributes, sorted by relevance
 	 */
 	Map<Attribute, ExplainedAttribute> findAttributes(EntityType sourceEntityType, Set<String> queryTerms,

@@ -21,7 +21,7 @@ import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.molgenis.ontology.OntologyDataConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.importer.OntologyImportService;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +88,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
 		Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
 		importServiceRegistrar.register(contextRefreshedEvent);
-		RunAsSystemAspect.runAsSystem(() -> dataService.add(USER, getTestUser()));
+		RunAsSystemProxy.runAsSystem(() -> dataService.add(USER, getTestUser()));
 	}
 
 	abstract User getTestUser();

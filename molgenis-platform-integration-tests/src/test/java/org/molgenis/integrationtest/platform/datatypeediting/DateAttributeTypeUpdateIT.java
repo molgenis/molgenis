@@ -51,6 +51,7 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param valueToConvert  The value that will be converted
 	 * @param typeToConvertTo The type to convert to
 	 * @param convertedValue  The expected value after converting the type
+	 * @throws ParseException
 	 */
 	@Test(dataProvider = "validConversionTestCases")
 	public void testValidConversion(LocalDate valueToConvert, AttributeType typeToConvertTo, Object convertedValue)

@@ -62,7 +62,8 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	}
 
 	@RequestMapping(value = "/edit", method = RequestMethod.POST)
-	public String submitContent(@RequestParam(value = "content") final String content, final Model model)
+	public String submitContent(@RequestParam(value = "content") final String content,
+			final Model model)
 	{
 		this.staticContentService.checkPermissions(this.uniqueReference);
 		try

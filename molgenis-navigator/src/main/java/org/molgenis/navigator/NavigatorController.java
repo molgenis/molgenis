@@ -7,13 +7,13 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.navigator.NavigatorController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(URI + "/**")
 public class NavigatorController extends MolgenisPluginController
 {
 	public static final String NAVIGATOR = "navigator";
@@ -32,7 +32,7 @@ public class NavigatorController extends MolgenisPluginController
 		this.appSettings = requireNonNull(appSettings);
 	}
 
-	@RequestMapping(value = "/**", method = GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
 		model.addAttribute("baseUrl", getBaseUrl());

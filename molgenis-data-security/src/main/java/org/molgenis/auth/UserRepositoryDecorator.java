@@ -21,24 +21,31 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 {
 	private static final int BATCH_SIZE = 1000;
 
+	private final Repository<User> decoratedRepository;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final DataService dataService;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserRepositoryDecorator(Repository<User> delegateRepository, UserAuthorityFactory userAuthorityFactory,
+	public UserRepositoryDecorator(Repository<User> decoratedRepository, UserAuthorityFactory userAuthorityFactory,
 			DataService dataService, PasswordEncoder passwordEncoder)
 	{
-		super(delegateRepository);
+		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.dataService = requireNonNull(dataService);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
 	}
 
 	@Override
+	protected Repository<User> delegate()
+	{
+		return decoratedRepository;
+	}
+
+	@Override
 	public void add(User entity)
 	{
 		encodePassword(entity);
-		delegate().add(entity);
+		decoratedRepository.add(entity);
 		addSuperuserAuthority(entity);
 	}
 
@@ -46,7 +53,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	public void update(User entity)
 	{
 		updatePassword(entity);
-		delegate().update(entity);
+		decoratedRepository.update(entity);
 		updateSuperuserAuthority(entity);
 	}
 
@@ -58,7 +65,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 		{
 			users.forEach(this::encodePassword);
 
-			Integer batchCount = delegate().add(users.stream());
+			Integer batchCount = decoratedRepository.add(users.stream());
 			count.addAndGet(batchCount);
 
 			users.forEach(this::addSuperuserAuthority);
@@ -74,7 +81,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 			updatePassword(entity);
 			return entity;
 		});
-		delegate().update(entities);
+		decoratedRepository.update(entities);
 	}
 
 	private void updatePassword(User user)
@@ -140,7 +147,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	public void delete(User entity)
 	{
 		deleteUserAuthoritiesAndGroupMember(entity);
-		delegate().delete(entity);
+		decoratedRepository.delete(entity);
 	}
 
 	@Override
@@ -151,14 +158,14 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 			deleteUserAuthoritiesAndGroupMember(entity);
 			return entity;
 		});
-		delegate().delete(entities);
+		decoratedRepository.delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
 		deleteUserAuthoritiesAndGroupMember(findOneById(id));
-		delegate().deleteById(id);
+		decoratedRepository.deleteById(id);
 	}
 
 	@Override
@@ -169,7 +176,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 			deleteUserAuthoritiesAndGroupMember(findOneById(id));
 			return id;
 		});
-		delegate().deleteAll(ids);
+		decoratedRepository.deleteAll(ids);
 	}
 
 	private void deleteUserAuthoritiesAndGroupMember(User user)

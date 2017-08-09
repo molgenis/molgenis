@@ -55,6 +55,7 @@ public class ExplainServiceHelper
 	/**
 	 * This method is able to recursively collect all the matched words from ElastisSearch Explanation document
 	 *
+	 * @param explanation
 	 * @return a set of matched words that are matched to different ontology terms
 	 */
 	public Set<String> findMatchedWords(Explanation explanation)
@@ -79,8 +80,8 @@ public class ExplainServiceHelper
 		{
 			Explanation maxExplanation = Lists.newArrayList(explanation.getDetails())
 											  .stream()
-											  .max((explanation1, explanation2) -> Float.compare(
-													  explanation1.getValue(), explanation2.getValue()))
+											  .max((explanation1, explanation2) -> Float.compare(explanation1.getValue(),
+													  explanation2.getValue()))
 											  .get();
 
 			words.addAll(findMatchedWords(maxExplanation));
@@ -110,6 +111,8 @@ public class ExplainServiceHelper
 	 * This method is able to find the queries that are used in the matching. Only queries that contain all matched
 	 * words are potential queries.
 	 *
+	 * @param matchedWordsString
+	 * @param collectExpandedQueryMap
 	 * @return a map of potentail queries and their matching scores
 	 */
 	public Map<String, Double> findMatchQueries(String matchedWordsString, Map<String, String> collectExpandedQueryMap)

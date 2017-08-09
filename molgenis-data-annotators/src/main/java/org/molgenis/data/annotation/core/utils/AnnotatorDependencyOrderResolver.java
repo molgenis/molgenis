@@ -66,17 +66,11 @@ public class AnnotatorDependencyOrderResolver
 									 Lists.newArrayList(entityType.getAtomicAttributes()),
 									 Collections.singletonList(requiredInputAttribute)))
 							 .forEachOrdered(requiredInputAttribute -> annotatorList.stream()
-																					.filter(a -> !a.equals(
-																							selectedAnnotator))
-																					.collect(Collectors.toList())
-																					.forEach(
-																							annotator -> resolveAnnotatorDependencies(
-																									selectedAnnotator,
-																									annotatorList,
-																									annotatorQueue,
-																									entityType,
-																									requiredInputAttribute,
-																									annotator)));
+										  .filter(a -> !a.equals(selectedAnnotator))
+										  .collect(Collectors.toList())
+										  .forEach(annotator -> resolveAnnotatorDependencies(selectedAnnotator,
+												  annotatorList, annotatorQueue, entityType, requiredInputAttribute,
+												  annotator)));
 		}
 		else
 		{

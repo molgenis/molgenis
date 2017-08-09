@@ -29,6 +29,10 @@ public class SVGEditor
 
 	/**
 	 * Creates a new instance of SVGEditor.
+	 *
+	 * @throws FactoryConfigurationError
+	 * @throws XMLStreamException
+	 * @throws FileNotFoundException
 	 */
 	public SVGEditor(File inFile, File outFile)
 			throws FileNotFoundException, XMLStreamException, FactoryConfigurationError
@@ -44,6 +48,7 @@ public class SVGEditor
 	 * @param nRow    number of rows of this block
 	 * @param nCol    number of columns of this block
 	 * @param blockId value of the id attribute to give elements in this block
+	 * @throws XMLStreamException
 	 */
 	private void annotateHeatMapBlock(int nRow, int nCol, String blockId, XMLEventWriter writer, XMLEventReader reader)
 			throws XMLStreamException
@@ -88,6 +93,11 @@ public class SVGEditor
 	 * Can annotate SVG heatmap.plus charts made by R. Reads and writes using StAX, adding row and col attributes to
 	 * <path> elements corresponding to data points in the heatmap. All indexes can be calculated using nRow, nCol,
 	 * nRowAnnotations and nColAnnotations.
+	 *
+	 * @param chart
+	 * @throws FactoryConfigurationError
+	 * @throws XMLStreamException
+	 * @throws FileNotFoundException
 	 */
 	public void annotateHeatMap(HeatMapChart chart)
 			throws XMLStreamException, FactoryConfigurationError, FileNotFoundException

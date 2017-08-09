@@ -30,6 +30,12 @@ public class Href
 
 	/**
 	 * Create an encoded href for an attribute
+	 *
+	 * @param qualifiedEntityName
+	 * @param entityIdValue
+	 * @param attributeName
+	 * @return
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String concatAttributeHref(String baseUri, String qualifiedEntityName, Object entityIdValue,
 			String attributeName)
@@ -48,6 +54,10 @@ public class Href
 
 	/**
 	 * Create an encoded href for an attribute meta
+	 *
+	 * @param attributeName
+	 * @return
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String concatMetaAttributeHref(String baseUri, String entityParentName, String attributeName)
 	{
@@ -69,6 +79,11 @@ public class Href
 
 	/**
 	 * Create an encoded href for an entity
+	 *
+	 * @param qualifiedEntityName
+	 * @param entityIdValue
+	 * @return
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String concatEntityHref(String baseUri, String qualifiedEntityName, Object entityIdValue)
 	{
@@ -90,6 +105,10 @@ public class Href
 
 	/**
 	 * Create an encoded href for an entity meta
+	 *
+	 * @param qualifiedEntityName
+	 * @return
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String concatMetaEntityHref(String baseUri, String qualifiedEntityName)
 	{
@@ -117,6 +136,10 @@ public class Href
 
 	/**
 	 * Create an encoded href for an entity collection
+	 *
+	 * @param qualifiedEntityName
+	 * @return
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String concatEntityCollectionHref(String baseUri, String qualifiedEntityName,
 			String qualifiedIdAttributeName, List<String> entitiesIds)

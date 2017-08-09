@@ -37,7 +37,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Mock
 	private L2Cache l2Cache;
 	@Mock
-	private Repository<Entity> delegateRepository;
+	private Repository<Entity> decoratedRepository;
 	@Mock
 	private TransactionInformation transactionInformation;
 	@Autowired
@@ -59,11 +59,11 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		when(delegateRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE, WRITABLE));
-		l2CacheRepositoryDecorator = new L2CacheRepositoryDecorator(delegateRepository, l2Cache,
+		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE, WRITABLE));
+		l2CacheRepositoryDecorator = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache,
 				transactionInformation);
-		when(delegateRepository.getEntityType()).thenReturn(emd);
-		when(delegateRepository.getName()).thenReturn(emd.getId());
+		when(decoratedRepository.getEntityType()).thenReturn(emd);
+		when(decoratedRepository.getName()).thenReturn(emd.getId());
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		when(transactionInformation.isEntireRepositoryDirty(emd)).thenReturn(false);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
-		when(l2Cache.get(delegateRepository, "0")).thenReturn(entities.get(0));
+		when(l2Cache.get(decoratedRepository, "0")).thenReturn(entities.get(0));
 		assertEquals(l2CacheRepositoryDecorator.findOneById("0", new Fetch().field("id")), entities.get(0));
 	}
 
@@ -80,7 +80,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		when(transactionInformation.isEntireRepositoryDirty(emd)).thenReturn(false);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
-		when(l2Cache.get(delegateRepository, "abcde")).thenReturn(null);
+		when(l2Cache.get(decoratedRepository, "abcde")).thenReturn(null);
 		assertNull(l2CacheRepositoryDecorator.findOneById("abcde"));
 	}
 
@@ -89,7 +89,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		when(transactionInformation.isEntireRepositoryDirty(emd)).thenReturn(false);
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(true);
-		when(delegateRepository.findOneById("0")).thenReturn(entities.get(0));
+		when(decoratedRepository.findOneById("0")).thenReturn(entities.get(0));
 		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
 	}
 
@@ -97,7 +97,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void testFindOneByIdEntireRepositoryDirty()
 	{
 		when(transactionInformation.isEntireRepositoryDirty(emd)).thenReturn(true);
-		when(delegateRepository.findOneById("0")).thenReturn(entities.get(0));
+		when(decoratedRepository.findOneById("0")).thenReturn(entities.get(0));
 		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
 	}
 
@@ -118,9 +118,9 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "3"))).thenReturn(false);
 
 		Stream<Object> ids = Lists.<Object>newArrayList("0", "1", "2", "3").stream();
-		when(l2Cache.getBatch(eq(delegateRepository), cacheIdCaptor.capture())).thenReturn(
+		when(l2Cache.getBatch(eq(decoratedRepository), cacheIdCaptor.capture())).thenReturn(
 				newArrayList(entities.get(3)));
-		when(delegateRepository.findAll(repoIdCaptor.capture())).thenReturn(of(entities.get(1)));
+		when(decoratedRepository.findAll(repoIdCaptor.capture())).thenReturn(of(entities.get(1)));
 
 		List<Entity> retrievedEntities = l2CacheRepositoryDecorator.findAll(ids).collect(toList());
 
@@ -150,12 +150,12 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 		Stream<Object> ids = IntStream.range(0, NUMBER_OF_ENTITIES).mapToObj(Integer::toString);
 
-		when(l2Cache.getBatch(eq(delegateRepository), any(Iterable.class))).thenAnswer(invocation ->
+		when(l2Cache.getBatch(eq(decoratedRepository), any(Iterable.class))).thenAnswer(invocation ->
 		{
 			List<Object> queried = Lists.newArrayList((Iterable<Object>) invocation.getArguments()[1]);
 			return Lists.transform(queried, id -> lotsOfEntities.get(Integer.parseInt(id.toString())));
 		});
-		when(delegateRepository.findAll(any(Stream.class))).thenAnswer(invocation ->
+		when(decoratedRepository.findAll(any(Stream.class))).thenAnswer(invocation ->
 		{
 			List<Object> queried = ((Stream<Object>) invocation.getArguments()[0]).collect(toList());
 			return Lists.transform(queried, id -> lotsOfEntities.get(Integer.parseInt(id.toString()))).stream();

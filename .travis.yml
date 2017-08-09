@@ -12,7 +12,7 @@ services:
   - postgresql
 addons:
   postgresql: '9.6'
-  sonarcloud:
+  sonarqube:
     organization: "molgenis"
     branches:
       - master
@@ -28,13 +28,11 @@ install:
 before_script:
   - sudo sysctl -w vm.max_map_count=262144
 script:
-  # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
+  # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to
   # Travis provides us with a travis user and travis database
-  - travis_wait 40 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Ddb_user=travis -Ddb_password -Dit_db_name=travis -P!create-it-db
+  - travis_wait 40 mvn verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Ddb_user=travis -Ddb_password -Dit_db_name=travis -P!create-it-db
 notifications:
   slack:
     rooms:
       # Sends build status updates for molgenis/molgenis repo to #pr-platform channel on molgenis-dev slack
       secure: blnxfapt6aAdRDjNvy2Ykp3yPxhRqo0srfz9MI2obKGXFOO2ee+AF0TNosmz9aZG0J3u4e3YI+z9BvjcNMvTzzPCjiLiC3MSbtB9w0SHwhg6q7s1ehVoYKqB22++8S6GEYy5FgBpBLQ+jXEnwiglHfKLowJjvQS8s2NBMhAwEqY=
-after_success:
-  - .travis/sonar.sh

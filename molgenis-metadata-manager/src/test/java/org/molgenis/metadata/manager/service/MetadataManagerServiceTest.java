@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
+@WebAppConfiguration
 @ContextConfiguration(classes = { MetadataManagerServiceTest.Config.class })
 public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 {

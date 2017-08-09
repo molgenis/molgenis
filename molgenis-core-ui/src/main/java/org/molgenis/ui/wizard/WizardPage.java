@@ -12,6 +12,8 @@ public interface WizardPage extends Serializable
 	/**
 	 * Name of the freemarker template (including the ftl) that holds the piece of html for this wizard page that is
 	 * pasted into the wizard html template
+	 *
+	 * @return
 	 */
 	String getFreemarkerTemplateName();
 
@@ -22,6 +24,7 @@ public interface WizardPage extends Serializable
 	 * <p>
 	 * Returns the successmessage, if you don't have a successmessage return null
 	 *
+	 * @param request
 	 * @return message to show the user (success message)
 	 */
 	String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard);

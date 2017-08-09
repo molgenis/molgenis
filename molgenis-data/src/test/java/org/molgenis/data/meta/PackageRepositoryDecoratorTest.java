@@ -7,20 +7,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
 
 public class PackageRepositoryDecoratorTest
 {
-	private Repository<Package> delegateRepository;
+	private Repository<Package> decoratedRepo;
 	private PackageRepositoryDecorator packageRepositoryDecorator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		delegateRepository = mock(Repository.class);
+		decoratedRepo = mock(Repository.class);
 		EntityTypeDependencyResolver entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		DataService dataService = mock(DataService.class);
-		packageRepositoryDecorator = new PackageRepositoryDecorator(delegateRepository, dataService,
+		packageRepositoryDecorator = new PackageRepositoryDecorator(decoratedRepo, dataService,
 				entityTypeDependencyResolver);
 	}
 
@@ -28,5 +29,11 @@ public class PackageRepositoryDecoratorTest
 	public void testPackageRepositoryDecorator() throws Exception
 	{
 		new PackageRepositoryDecorator(null, null, null);
+	}
+
+	@Test
+	public void testDelegate() throws Exception
+	{
+		assertEquals(packageRepositoryDecorator.delegate(), decoratedRepo);
 	}
 }

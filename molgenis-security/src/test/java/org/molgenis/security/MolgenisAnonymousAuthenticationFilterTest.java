@@ -50,7 +50,8 @@ public class MolgenisAnonymousAuthenticationFilterTest
 		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		UserDetails userDetails = mock(UserDetails.class);
 		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_SOMETHING");
-		when((Collection<GrantedAuthority>) (userDetails.getAuthorities())).thenReturn(Arrays.asList(authority));
+		when((Collection<GrantedAuthority>) (userDetails.getAuthorities())).thenReturn(
+				Arrays.asList(authority));
 		when(userDetailsService.loadUserByUsername(SecurityUtils.ANONYMOUS_USERNAME)).thenReturn(userDetails);
 		MolgenisAnonymousAuthenticationFilter filter = new MolgenisAnonymousAuthenticationFilter("key",
 				SecurityUtils.ANONYMOUS_USERNAME, userDetailsService);
@@ -74,7 +75,8 @@ public class MolgenisAnonymousAuthenticationFilterTest
 		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		UserDetails userDetails = mock(UserDetails.class);
 		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_SOMETHING");
-		when((Collection<GrantedAuthority>) (userDetails.getAuthorities())).thenReturn(Arrays.asList(authority));
+		when((Collection<GrantedAuthority>) (userDetails.getAuthorities())).thenReturn(
+				Arrays.asList(authority));
 		when(userDetailsService.loadUserByUsername(SecurityUtils.ANONYMOUS_USERNAME)).thenReturn(userDetails);
 		MolgenisAnonymousAuthenticationFilter filter = new MolgenisAnonymousAuthenticationFilter("key",
 				SecurityUtils.ANONYMOUS_USERNAME, userDetailsService);

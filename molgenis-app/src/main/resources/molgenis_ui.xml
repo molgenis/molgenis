@@ -2,41 +2,42 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
-		<menu label="Import data" name="importdata">
-			<plugin id="one-click-importer" name="Quick data import" url="one-click-importer"/>
-        	<plugin id="importwizard" name="Advanced data import" url="importwizard"/>
-		</menu>
-		<plugin id="navigator" name="Navigator - BETA" url="navigator"/>
+        <plugin id="importwizard" name="Upload" url="importwizard"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+		<plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<menu label="Data Integration" name="dataintegration">
-			<plugin id="metadata-manager" name="Metadata Manager - BETA" url="metadata-manager"/>
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
 			<plugin id="sortaservice" name="SORTA" url="sortaservice"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
             <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
 		</menu>
         <menu label="Plugins" name="plugins">
-            <plugin id="swagger" name="API documentation" url="swagger"/>
-            <plugin id="apps" name="App store" url="apps"/>
-			<plugin id="catalogue" name="Catalogue" url="catalogue"/>
-			<plugin id="feedback" name="Feedback" url="feedback"/>
-			<plugin id="gavin-app" name="Gavin" url="gavin-app"/>
-            <plugin id="jobs" name="Job overview" url="jobs" />
-			<plugin id="pathways" name="Pathways" url="pathways"/>
-			<plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
+            <plugin id="apps" name="Apps" url="apps"/>
+            <plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
+        	<plugin id="pathways" name="Pathways" url="pathways"/>
             <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
+            <plugin id="background" name="Background" url="background"/>
+            <plugin id="contact" name="Contact" url="contact"/>
+            <plugin id="news" name="News" url="news"/>
+            <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
+            <plugin id="jobs" name="Jobs" url="jobs" />
+            <plugin id="gavin-app" name="Gavin" url="gavin-app"/>
+            <plugin id="swagger" name="API documentation" url="swagger"/>
 	    </menu>
         <menu label="Admin" name="admin">
+            <plugin id="scheduledjobs" name="Scheduled Jobs" url="scheduledjobs"/>
+	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
+	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
+        	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
+        	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
         	<plugin id="logmanager" name="Log manager" url="logmanager"/>
-        	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
-	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
-            <plugin id="scheduledjobs" name="Scheduled Jobs" url="scheduledjobs"/>
         	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
-        	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
-	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
 		</menu>
+		<menu label="About" name="background">
+            <plugin id="feedback" name="Feedback" url="feedback"/>
+        </menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
 	</menu>
 </molgenis>

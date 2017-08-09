@@ -13,13 +13,13 @@ import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.*;
 
 public class IndexMetadataCUDOperationsPlatformIT
@@ -70,7 +70,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		assertFalse(searchService.hasIndex(entityTypeDynamic));
 
 		// Reset context
-		RunAsSystemAspect.runAsSystem(() -> metaDataService.addEntityType(entityTypeDynamic));
+		RunAsSystemProxy.runAsSystem(() -> metaDataService.addEntityType(entityTypeDynamic));
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 

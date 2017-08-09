@@ -30,6 +30,7 @@ public class OntologyRepository
 	 * Retrieves an ontology with a specific IRI.
 	 *
 	 * @param IRI the IRI of the ontology
+	 * @return
 	 */
 	public Ontology getOntology(String IRI)
 	{

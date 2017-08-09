@@ -8,8 +8,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -47,7 +47,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	private FileStore fileStore;
 
 	@Mock
-	private PermissionService permissionService;
+	private MolgenisPermissionService permissionService;
 
 	private MockMvc mockMvc;
 
@@ -95,7 +95,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		Sort sort = mock(Sort.class);
 		when(query.sort()).thenReturn(sort);
 		when(query.findAll()).thenReturn(Stream.of(app0, app1));
-		when(permissionService.hasPermissionOnEntityType(APP, Permission.WRITE)).thenReturn(hasWriteAppPermission);
+		when(permissionService.hasPermissionOnEntity(APP, Permission.WRITE)).thenReturn(hasWriteAppPermission);
 
 		AppInfoDto appInfoDto0 = AppInfoDto.builder()
 										   .setId("id0")

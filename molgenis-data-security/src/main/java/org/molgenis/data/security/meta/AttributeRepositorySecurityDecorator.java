@@ -6,8 +6,8 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.util.EntityUtils;
 
 import java.util.Iterator;
@@ -31,15 +31,22 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
  */
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
+	private final Repository<Attribute> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService permissionService;
 
-	public AttributeRepositorySecurityDecorator(Repository<Attribute> delegateRepository,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService)
+	public AttributeRepositorySecurityDecorator(Repository<Attribute> decoratedRepo,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
+	}
+
+	@Override
+	protected Repository<Attribute> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override
@@ -47,11 +54,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().count();
+			return decoratedRepo.count();
 		}
 		else
 		{
-			Stream<Attribute> attrs = StreamSupport.stream(delegate().spliterator(), false);
+			Stream<Attribute> attrs = StreamSupport.stream(decoratedRepo.spliterator(), false);
 			return filterCountPermission(attrs).count();
 		}
 	}
@@ -61,14 +68,14 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().count(q);
+			return decoratedRepo.count(q);
 		}
 		else
 		{
 			// ignore query offset and page size
 			Query<Attribute> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<Attribute> attrs = delegate().findAll(qWithoutLimitOffset);
+			Stream<Attribute> attrs = decoratedRepo.findAll(qWithoutLimitOffset);
 			return filterCountPermission(attrs).count();
 		}
 	}
@@ -78,13 +85,13 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findAll(q);
+			return decoratedRepo.findAll(q);
 		}
 		else
 		{
 			Query<Attribute> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<Attribute> attrs = delegate().findAll(qWithoutLimitOffset);
+			Stream<Attribute> attrs = decoratedRepo.findAll(qWithoutLimitOffset);
 			Stream<Attribute> filteredAttrs = filterReadPermission(attrs);
 			if (q.getOffset() > 0)
 			{
@@ -104,11 +111,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().iterator();
+			return decoratedRepo.iterator();
 		}
 		else
 		{
-			Stream<Attribute> attrs = StreamSupport.stream(delegate().spliterator(), false);
+			Stream<Attribute> attrs = StreamSupport.stream(decoratedRepo.spliterator(), false);
 			return filterReadPermission(attrs).iterator();
 		}
 	}
@@ -118,12 +125,12 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			delegate().forEachBatched(fetch, consumer, batchSize);
+			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 		}
 		else
 		{
 			FilteredConsumer filteredConsumer = new FilteredConsumer(consumer);
-			delegate().forEachBatched(fetch, filteredConsumer::filter, batchSize);
+			decoratedRepo.forEachBatched(fetch, filteredConsumer::filter, batchSize);
 		}
 	}
 
@@ -132,12 +139,12 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findOne(q);
+			return decoratedRepo.findOne(q);
 		}
 		else
 		{
 			// ignore query offset and page size
-			return filterReadPermission(delegate().findOne(q));
+			return filterReadPermission(decoratedRepo.findOne(q));
 		}
 	}
 
@@ -146,11 +153,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findOneById(id);
+			return decoratedRepo.findOneById(id);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findOneById(id));
+			return filterReadPermission(decoratedRepo.findOneById(id));
 		}
 	}
 
@@ -159,11 +166,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findOneById(id, fetch);
+			return decoratedRepo.findOneById(id, fetch);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findOneById(id, fetch));
+			return filterReadPermission(decoratedRepo.findOneById(id, fetch));
 		}
 	}
 
@@ -172,11 +179,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findAll(ids);
+			return decoratedRepo.findAll(ids);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids));
+			return filterReadPermission(decoratedRepo.findAll(ids));
 		}
 	}
 
@@ -185,11 +192,11 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findAll(ids, fetch);
+			return decoratedRepo.findAll(ids, fetch);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids, fetch));
+			return filterReadPermission(decoratedRepo.findAll(ids, fetch));
 		}
 	}
 
@@ -198,7 +205,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().aggregate(aggregateQuery);
+			return decoratedRepo.aggregate(aggregateQuery);
 		}
 		else
 		{
@@ -210,13 +217,13 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	public void update(Attribute attr)
 	{
 		validateUpdateAllowed(attr);
-		delegate().update(attr);
+		decoratedRepo.update(attr);
 	}
 
 	@Override
 	public void update(Stream<Attribute> attrs)
 	{
-		delegate().update(attrs.filter(attr ->
+		decoratedRepo.update(attrs.filter(attr ->
 		{
 			validateUpdateAllowed(attr);
 			return true;
@@ -227,7 +234,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	public void delete(Attribute attr)
 	{
 		validateDeleteAllowed(attr);
-		delegate().delete(attr);
+		decoratedRepo.delete(attr);
 	}
 
 	@Override
@@ -261,13 +268,13 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	@Override
 	public void add(Attribute attr)
 	{
-		delegate().add(attr);
+		decoratedRepo.add(attr);
 	}
 
 	@Override
 	public Integer add(Stream<Attribute> attrs)
 	{
-		return delegate().add(attrs);
+		return decoratedRepo.add(attrs);
 	}
 
 	/**
@@ -320,7 +327,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	private Stream<Attribute> filterPermission(Stream<Attribute> attrs, Permission permission)
 	{
-		return attrs.filter(attr -> permissionService.hasPermissionOnEntityType(attr.getEntity().getId(), permission));
+		return attrs.filter(attr -> permissionService.hasPermissionOnEntity(attr.getEntity().getId(), permission));
 	}
 
 	private class FilteredConsumer

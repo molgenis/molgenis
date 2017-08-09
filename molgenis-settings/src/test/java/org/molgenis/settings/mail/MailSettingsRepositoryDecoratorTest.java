@@ -22,19 +22,19 @@ public class MailSettingsRepositoryDecoratorTest
 	@Mock
 	private MailSenderFactory mailSenderFactory;
 	@Mock
-	private Repository<Entity> delegateRepository;
+	private Repository<Entity> decorated;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		initMocks(this);
-		mailSettingsRepositoryDecorator = new MailSettingsRepositoryDecorator(delegateRepository, mailSenderFactory);
+		mailSettingsRepositoryDecorator = new MailSettingsRepositoryDecorator(decorated, mailSenderFactory);
 	}
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Mockito.reset(entity, mailSenderFactory, delegateRepository);
+		Mockito.reset(entity, mailSenderFactory, decorated);
 	}
 
 	@DataProvider(name = "addDontTest")
@@ -52,8 +52,8 @@ public class MailSettingsRepositoryDecoratorTest
 		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn(password);
 		mailSettingsRepositoryDecorator.add(entity);
 		verify(mailSenderFactory, never()).validateConnection(any(MailSettingsImpl.class));
-		verify(delegateRepository).add(entity);
-		verifyNoMoreInteractions(delegateRepository);
+		verify(decorated).add(entity);
+		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
@@ -65,8 +65,8 @@ public class MailSettingsRepositoryDecoratorTest
 
 		mailSettingsRepositoryDecorator.add(entity);
 		verify(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
-		verify(delegateRepository).add(entity);
-		verifyNoMoreInteractions(delegateRepository);
+		verify(decorated).add(entity);
+		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class MailSettingsRepositoryDecoratorTest
 		}
 		catch (IllegalStateException expected)
 		{
-			verifyZeroInteractions(delegateRepository);
+			verifyZeroInteractions(decorated);
 		}
 	}
 
@@ -97,8 +97,8 @@ public class MailSettingsRepositoryDecoratorTest
 		when(entity.getString(MailSettingsImpl.Meta.PASSWORD)).thenReturn(password);
 		mailSettingsRepositoryDecorator.update(entity);
 		verify(mailSenderFactory, never()).validateConnection(any(MailSettingsImpl.class));
-		verify(delegateRepository).update(entity);
-		verifyNoMoreInteractions(delegateRepository);
+		verify(decorated).update(entity);
+		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
@@ -110,8 +110,8 @@ public class MailSettingsRepositoryDecoratorTest
 
 		mailSettingsRepositoryDecorator.update(entity);
 		verify(mailSenderFactory).validateConnection(any(MailSettingsImpl.class));
-		verify(delegateRepository).update(entity);
-		verifyNoMoreInteractions(delegateRepository);
+		verify(decorated).update(entity);
+		verifyNoMoreInteractions(decorated);
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class MailSettingsRepositoryDecoratorTest
 		}
 		catch (IllegalStateException expected)
 		{
-			verifyZeroInteractions(delegateRepository);
+			verifyZeroInteractions(decorated);
 		}
 	}
 

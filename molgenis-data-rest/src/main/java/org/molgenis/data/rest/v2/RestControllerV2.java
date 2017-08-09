@@ -16,8 +16,8 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -55,7 +55,7 @@ import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -64,7 +64,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @Controller
 @RequestMapping(BASE_URI)
-public class RestControllerV2
+class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
@@ -75,7 +75,7 @@ public class RestControllerV2
 
 	private final DataService dataService;
 	private final RestService restService;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
@@ -131,8 +131,8 @@ public class RestControllerV2
 	}
 
 	@Autowired
-	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
-			LanguageService languageService, PermissionSystemService permissionSystemService,
+	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
+			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -165,6 +165,11 @@ public class RestControllerV2
 
 	/**
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
+	 *
+	 * @param entityTypeId
+	 * @param untypedId
+	 * @param attributeFilter
+	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = GET)
 	@ResponseBody
@@ -177,6 +182,11 @@ public class RestControllerV2
 
 	/**
 	 * Tunnel retrieveEntity through a POST request
+	 *
+	 * @param entityTypeId
+	 * @param untypedId
+	 * @param attributeFilter
+	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = POST, params = "_method=GET")
 	@ResponseBody
@@ -244,6 +254,11 @@ public class RestControllerV2
 
 	/**
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
+	 *
+	 * @param entityTypeId
+	 * @param request
+	 * @param httpRequest
+	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = GET)
 	@ResponseBody
@@ -263,6 +278,10 @@ public class RestControllerV2
 
 	/**
 	 * Retrieve attribute meta data
+	 *
+	 * @param entityTypeId
+	 * @param attributeName
+	 * @return
 	 */
 	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -287,6 +306,7 @@ public class RestControllerV2
 	 * @param request      EntityCollectionCreateRequestV2
 	 * @param response     HttpServletResponse
 	 * @return EntityCollectionCreateResponseBodyV2
+	 * @throws Exception
 	 */
 	@Transactional
 	@RequestMapping(value = "/{entityTypeId}", method = POST, produces = APPLICATION_JSON_VALUE)
@@ -352,6 +372,7 @@ public class RestControllerV2
 	 * @param request      CopyEntityRequestV2
 	 * @param response     HttpServletResponse
 	 * @return String name of the new entity
+	 * @throws Exception
 	 */
 	@Transactional
 	@RequestMapping(value = "copy/{entityTypeId}", method = POST, produces = APPLICATION_JSON_VALUE)
@@ -373,7 +394,7 @@ public class RestControllerV2
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
-		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
+		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopyFrom.getName(),
 				Permission.READ);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
 
@@ -407,6 +428,7 @@ public class RestControllerV2
 	 * @param entityTypeId name of the entity where the entities are going to be added.
 	 * @param request      EntityCollectionCreateRequestV2
 	 * @param response     HttpServletResponse
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityTypeId}", method = PUT)
 	public synchronized void updateEntities(@PathVariable("entityTypeId") String entityTypeId,
@@ -443,6 +465,7 @@ public class RestControllerV2
 	 * @param attributeName The name of the attribute to update
 	 * @param request       EntityCollectionBatchRequestV2
 	 * @param response      HttpServletResponse
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityTypeId}/{attributeName}", method = PUT)
 	@ResponseStatus(OK)
@@ -581,6 +604,10 @@ public class RestControllerV2
 
 	/**
 	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
+	 *
+	 * @param entity
+	 * @param count
+	 * @return
 	 */
 	private static Object checkForEntityId(Entity entity, int count)
 	{

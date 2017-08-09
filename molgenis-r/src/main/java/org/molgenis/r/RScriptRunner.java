@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 @Service
@@ -33,23 +32,9 @@ public class RScriptRunner implements ScriptRunner
 	@Override
 	public String runScript(Script script, Map<String, Object> parameters)
 	{
-		String rScript = ScriptUtils.generateScript(script, parameters);
-		String outputFile = getOutputFile(parameters);
-		return rScriptExecutor.executeScript(rScript, outputFile);
-	}
-
-	private String getOutputFile(Map<String, Object> parameters)
-	{
-		Object outputFile = parameters.get("outputFile");
-		if (outputFile == null)
-		{
-			return null;
-		}
-		if (!(outputFile instanceof String))
-		{
-			throw new RuntimeException(format("Parameter outputFile is of type '%s' instead of '%s'",
-					outputFile.getClass().getSimpleName(), String.class.getSimpleName()));
-		}
-		return (String) outputFile;
+		String generatedScript = ScriptUtils.generateScript(script, parameters);
+		StringROutputHandler handler = new StringROutputHandler();
+		rScriptExecutor.executeScript(generatedScript, handler);
+		return handler.toString();
 	}
 }

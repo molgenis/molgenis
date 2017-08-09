@@ -40,6 +40,11 @@ public class VcfWriterUtils
 	/**
 	 * Convert an vcfEntity to a VCF line Only output attributes that are in the attributesToInclude list, or all if
 	 * attributesToInclude is empty
+	 *
+	 * @param inputVcfFile
+	 * @param outputVCFWriter
+	 * @param addedAttributes
+	 * @throws IOException,MolgenisInvalidFormatException
 	 */
 	public static void writeVcfHeader(File inputVcfFile, BufferedWriter outputVCFWriter,
 			List<Attribute> addedAttributes) throws MolgenisInvalidFormatException, IOException
@@ -50,7 +55,13 @@ public class VcfWriterUtils
 	/**
 	 * Checks for previous annotations
 	 *
+	 * @param inputVcfFile
+	 * @param outputVCFWriter
+	 * @param addedAttributes
 	 * @param attributesToInclude , the Attribute to write to the VCF file, if empty writes all attributes
+	 * @return
+	 * @throws MolgenisInvalidFormatException
+	 * @throws IOException
 	 */
 	public static void writeVcfHeader(File inputVcfFile, BufferedWriter outputVCFWriter,
 			List<Attribute> addedAttributes, List<String> attributesToInclude)
@@ -94,6 +105,11 @@ public class VcfWriterUtils
 
 	/**
 	 * Overload of writeToVcf to support a simpler call with only Entity and Writer.
+	 *
+	 * @param vcfEntity
+	 * @param writer
+	 * @throws MolgenisDataException
+	 * @throws IOException
 	 */
 	public static void writeToVcf(Entity vcfEntity, BufferedWriter writer) throws MolgenisDataException, IOException
 	{
@@ -103,6 +119,12 @@ public class VcfWriterUtils
 	/**
 	 * Convert an vcfEntity to a VCF line Only output attributes that are in the attributesToInclude list, or all if
 	 * attributesToInclude is empty
+	 *
+	 * @param vcfEntity
+	 * @param addedAttributes
+	 * @param attributesToInclude
+	 * @param writer
+	 * @throws IOException,Exception
 	 */
 	public static void writeToVcf(Entity vcfEntity, List<Attribute> addedAttributes, List<String> attributesToInclude,
 			BufferedWriter writer) throws MolgenisDataException, IOException

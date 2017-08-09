@@ -3,7 +3,6 @@ package org.molgenis.ui;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.util.ResourceFingerprintRegistry;
-import org.molgenis.util.TemplateResourceUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -20,7 +19,6 @@ import static org.testng.Assert.assertTrue;
 public class MolgenisInterceptorTest
 {
 	private ResourceFingerprintRegistry resourceFingerprintRegistry;
-	private TemplateResourceUtils templateResourceUtils;
 	private AppSettings appSettings;
 	private LanguageService languageService;
 
@@ -28,7 +26,6 @@ public class MolgenisInterceptorTest
 	public void setUp()
 	{
 		resourceFingerprintRegistry = mock(ResourceFingerprintRegistry.class);
-		templateResourceUtils = mock(TemplateResourceUtils.class);
 		appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
 		languageService = mock(LanguageService.class);
 	}
@@ -36,15 +33,15 @@ public class MolgenisInterceptorTest
 	@Test(expectedExceptions = NullPointerException.class)
 	public void MolgenisInterceptor()
 	{
-		new MolgenisInterceptor(null, null, null, null, null);
+		new MolgenisInterceptor(null, null, null, null);
 	}
 
 	@Test
 	public void postHandle() throws Exception
 	{
 		String environment = "development";
-		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry,
-				templateResourceUtils, appSettings, languageService, environment);
+		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry, appSettings,
+				languageService, environment);
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		Object handler = mock(Object.class);

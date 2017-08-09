@@ -28,16 +28,23 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	}
 
 	private final DataService dataService;
+	private final Repository<Entity> decoratedRepository;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final ExpressionValidator expressionValidator;
 
-	public RepositoryValidationDecorator(DataService dataService, Repository<Entity> delegateRepository,
+	public RepositoryValidationDecorator(DataService dataService, Repository<Entity> repository,
 			EntityAttributesValidator entityAttributesValidator, ExpressionValidator expressionValidator)
 	{
-		super(delegateRepository);
 		this.dataService = requireNonNull(dataService);
+		this.decoratedRepository = requireNonNull(repository);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
 		this.expressionValidator = requireNonNull(expressionValidator);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	@Override
@@ -47,7 +54,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		{
 			entity = validate(Stream.of(entity), validationResource, ValidationMode.UPDATE).findFirst().get();
 		}
-		delegate().update(entity);
+		decoratedRepository.update(entity);
 	}
 
 	@Override
@@ -56,7 +63,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		try (ValidationResource validationResource = new ValidationResource())
 		{
 			entities = validate(entities, validationResource, ValidationMode.UPDATE);
-			delegate().update(entities);
+			decoratedRepository.update(entities);
 		}
 	}
 
@@ -67,7 +74,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		{
 			entity = validate(Stream.of(entity), validationResource, ValidationMode.ADD).findFirst().get();
 		}
-		delegate().add(entity);
+		decoratedRepository.add(entity);
 	}
 
 	@Override
@@ -76,7 +83,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		try (ValidationResource validationResource = new ValidationResource())
 		{
 			entities = validate(entities, validationResource, ValidationMode.ADD);
-			return delegate().add(entities);
+			return decoratedRepository.add(entities);
 		}
 	}
 
@@ -230,7 +237,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				});
 
 				Query<Entity> q = new QueryImpl<>().fetch(fetch);
-				delegate().findAll(q).forEach(entity -> uniqueAttrs.forEach(uniqueAttr ->
+				decoratedRepository.findAll(q).forEach(entity -> uniqueAttrs.forEach(uniqueAttr ->
 				{
 					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
 					Object attrValue = entity.get(uniqueAttr.getName());

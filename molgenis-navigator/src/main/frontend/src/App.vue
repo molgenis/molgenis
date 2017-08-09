@@ -18,17 +18,15 @@
   </div>
 </template>
 
-<style>
+<style lang="scss">
+  @import "node_modules/bootstrap/scss/_variables.scss";
 
   .temp-header {
-    background-color: #000000;
-
+    background-color: $black;
+    a {
+      color: $white;
+    }
   }
-
-  .temp-header a {
-    color: #ffffff;
-  }
-
 
   #app {
      font-family: 'Avenir', Helvetica, Arial, sans-serif;

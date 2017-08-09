@@ -4,6 +4,9 @@ public class I18nUtils
 {
 	/**
 	 * Check is a name is suffixed with a language code
+	 *
+	 * @param name
+	 * @return
 	 */
 	public static boolean isI18n(String name)
 	{
@@ -14,6 +17,9 @@ public class I18nUtils
 	 * Get the language code of a new with language suffix.
 	 * <p>
 	 * Returns null if not suffixed with language code
+	 *
+	 * @param name
+	 * @return
 	 */
 	public static String getLanguageCode(String name)
 	{

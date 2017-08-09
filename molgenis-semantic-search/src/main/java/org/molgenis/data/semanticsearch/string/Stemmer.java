@@ -13,6 +13,7 @@ public class Stemmer
 	/**
 	 * Remove illegal characters from the string and stem each single word
 	 *
+	 * @param phrase
 	 * @return a string that consists of stemmed words
 	 */
 	public static String cleanStemPhrase(String phrase)

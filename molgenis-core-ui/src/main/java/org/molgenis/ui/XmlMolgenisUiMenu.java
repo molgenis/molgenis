@@ -1,7 +1,7 @@
 package org.molgenis.ui;
 
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,20 +15,21 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 {
 	private final MenuType menuType;
 	private final MolgenisUiMenu parentMenu;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService molgenisPermissionService;
 
-	public XmlMolgenisUiMenu(MenuType menuType, PermissionService permissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, MolgenisPermissionService molgenisPermissionService)
 	{
-		this(menuType, null, permissionService);
+		this(menuType, null, molgenisPermissionService);
 	}
 
-	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu, PermissionService permissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu,
+			MolgenisPermissionService molgenisPermissionService)
 	{
 		if (menuType == null) throw new IllegalArgumentException("menu type is null");
-		if (permissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.menuType = menuType;
 		this.parentMenu = parentMenu;
-		this.permissionService = permissionService;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Override
@@ -126,11 +127,11 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	{
 		if (menuItem instanceof MenuType)
 		{
-			return new XmlMolgenisUiMenu((MenuType) menuItem, this, permissionService);
+			return new XmlMolgenisUiMenu((MenuType) menuItem, this, molgenisPermissionService);
 		}
 		else if (menuItem instanceof PluginType)
 		{
-			return new XmlMolgenisUiPlugin((PluginType) menuItem, this, permissionService);
+			return new XmlMolgenisUiPlugin((PluginType) menuItem, this, molgenisPermissionService);
 		}
 		else throw new RuntimeException("unknown menu item type");
 	}

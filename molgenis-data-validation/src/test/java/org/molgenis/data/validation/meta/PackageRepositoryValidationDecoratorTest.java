@@ -17,17 +17,23 @@ import static org.testng.Assert.assertEquals;
 public class PackageRepositoryValidationDecoratorTest
 {
 	private PackageRepositoryValidationDecorator packageRepositoryValidationDecorator;
-	private Repository<Package> delegateRepository;
+	private Repository<Package> decoratedRepo;
 	private PackageValidator packageValidator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod() throws Exception
 	{
-		delegateRepository = mock(Repository.class);
+		decoratedRepo = mock(Repository.class);
 		packageValidator = mock(PackageValidator.class);
-		packageRepositoryValidationDecorator = new PackageRepositoryValidationDecorator(delegateRepository,
+		packageRepositoryValidationDecorator = new PackageRepositoryValidationDecorator(decoratedRepo,
 				packageValidator);
+	}
+
+	@Test
+	public void testDelegate() throws Exception
+	{
+		assertEquals(packageRepositoryValidationDecorator.delegate(), decoratedRepo);
 	}
 
 	@Test
@@ -35,7 +41,7 @@ public class PackageRepositoryValidationDecoratorTest
 	{
 		Package package_ = mock(Package.class);
 		packageRepositoryValidationDecorator.add(package_);
-		verify(delegateRepository).add(package_);
+		verify(decoratedRepo).add(package_);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
@@ -53,7 +59,7 @@ public class PackageRepositoryValidationDecoratorTest
 		packageRepositoryValidationDecorator.add(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).add(packageCaptor.capture());
+		verify(decoratedRepo).add(packageCaptor.capture());
 		assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
 		verify(packageValidator).validate(package_);
 	}
@@ -67,7 +73,7 @@ public class PackageRepositoryValidationDecoratorTest
 		packageRepositoryValidationDecorator.add(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).add(packageCaptor.capture());
+		verify(decoratedRepo).add(packageCaptor.capture());
 		packageCaptor.getValue().count();
 	}
 
@@ -77,7 +83,7 @@ public class PackageRepositoryValidationDecoratorTest
 		Package package_ = mock(Package.class);
 		packageRepositoryValidationDecorator.update(package_);
 		verify(packageValidator).validate(package_);
-		verify(delegateRepository).update(package_);
+		verify(decoratedRepo).update(package_);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
@@ -95,7 +101,7 @@ public class PackageRepositoryValidationDecoratorTest
 		packageRepositoryValidationDecorator.update(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).update(packageCaptor.capture());
+		verify(decoratedRepo).update(packageCaptor.capture());
 		assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
 		verify(packageValidator).validate(package_);
 	}
@@ -109,7 +115,7 @@ public class PackageRepositoryValidationDecoratorTest
 		packageRepositoryValidationDecorator.update(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).update(packageCaptor.capture());
+		verify(decoratedRepo).update(packageCaptor.capture());
 		packageCaptor.getValue().count();
 	}
 
@@ -119,7 +125,7 @@ public class PackageRepositoryValidationDecoratorTest
 		Package package_ = mock(Package.class);
 		packageRepositoryValidationDecorator.delete(package_);
 		verify(packageValidator).validate(package_);
-		verify(delegateRepository).delete(package_);
+		verify(decoratedRepo).delete(package_);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
@@ -137,7 +143,7 @@ public class PackageRepositoryValidationDecoratorTest
 		packageRepositoryValidationDecorator.delete(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).delete(packageCaptor.capture());
+		verify(decoratedRepo).delete(packageCaptor.capture());
 		assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
 		verify(packageValidator).validate(package_);
 	}
@@ -151,7 +157,7 @@ public class PackageRepositoryValidationDecoratorTest
 		packageRepositoryValidationDecorator.delete(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).delete(packageCaptor.capture());
+		verify(decoratedRepo).delete(packageCaptor.capture());
 		packageCaptor.getValue().count();
 	}
 
@@ -160,10 +166,10 @@ public class PackageRepositoryValidationDecoratorTest
 	{
 		Package package_ = mock(Package.class);
 		Object id = mock(Object.class);
-		when(delegateRepository.findOneById(id)).thenReturn(package_);
+		when(decoratedRepo.findOneById(id)).thenReturn(package_);
 		packageRepositoryValidationDecorator.deleteById(id);
 		verify(packageValidator).validate(package_);
-		verify(delegateRepository).deleteById(id);
+		verify(decoratedRepo).deleteById(id);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
@@ -171,7 +177,7 @@ public class PackageRepositoryValidationDecoratorTest
 	{
 		Package package_ = mock(Package.class);
 		Object id = mock(Object.class);
-		when(delegateRepository.findOneById(id)).thenReturn(package_);
+		when(decoratedRepo.findOneById(id)).thenReturn(package_);
 		doThrow(mock(MolgenisValidationException.class)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.deleteById(id);
 	}
@@ -180,17 +186,17 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteAllValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		when(delegateRepository.iterator()).thenReturn(singletonList(package_).iterator());
+		when(decoratedRepo.iterator()).thenReturn(singletonList(package_).iterator());
 		packageRepositoryValidationDecorator.deleteAll();
 		verify(packageValidator).validate(package_);
-		verify(delegateRepository).deleteAll();
+		verify(decoratedRepo).deleteAll();
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
 	public void testDeleteAllInvalid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		when(delegateRepository.iterator()).thenReturn(singletonList(package_).iterator());
+		when(decoratedRepo.iterator()).thenReturn(singletonList(package_).iterator());
 		doThrow(mock(MolgenisValidationException.class)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.deleteAll();
 	}
@@ -201,11 +207,11 @@ public class PackageRepositoryValidationDecoratorTest
 	{
 		Package package_ = mock(Package.class);
 		Object id = mock(Object.class);
-		when(delegateRepository.findOneById(id)).thenReturn(package_);
+		when(decoratedRepo.findOneById(id)).thenReturn(package_);
 		packageRepositoryValidationDecorator.deleteAll(Stream.of(id));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> packageIdCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).deleteAll(packageIdCaptor.capture());
+		verify(decoratedRepo).deleteAll(packageIdCaptor.capture());
 		packageIdCaptor.getValue().count();
 		verify(packageValidator).validate(package_);
 	}
@@ -216,12 +222,12 @@ public class PackageRepositoryValidationDecoratorTest
 	{
 		Package package_ = mock(Package.class);
 		Object id = mock(Object.class);
-		when(delegateRepository.findOneById(id)).thenReturn(package_);
+		when(decoratedRepo.findOneById(id)).thenReturn(package_);
 		doThrow(mock(MolgenisValidationException.class)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.deleteAll(Stream.of(id));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> packageIdCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).deleteAll(packageIdCaptor.capture());
+		verify(decoratedRepo).deleteAll(packageIdCaptor.capture());
 		packageIdCaptor.getValue().count();
 	}
 }

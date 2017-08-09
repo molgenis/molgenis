@@ -59,7 +59,8 @@ public class EntityListenersServiceTest
 		Mockito.when(entity2.getIdValue()).thenReturn(2).getMock();
 		entityListenersService.addEntityListener(repoFullName, entityListener1);
 		entityListenersService.addEntityListener(repoFullName, entityListener2);
-		entityListenersService.updateEntities(repoFullName, Stream.of(entity1, entity2)).collect(Collectors.toList());
+		entityListenersService.updateEntities(repoFullName, Stream.of(entity1, entity2))
+							  .collect(Collectors.toList());
 		Mockito.verify(entityListener1).postUpdate(entity1);
 		Mockito.verify(entityListener2).postUpdate(entity2);
 		entityListenersService.removeEntityListener(repoFullName, entityListener1);

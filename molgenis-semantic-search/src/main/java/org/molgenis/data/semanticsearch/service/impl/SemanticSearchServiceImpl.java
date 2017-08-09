@@ -199,6 +199,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 * user defined searchTerms. If the user defined searchTerms exist, the targetAttribute information will not be
 	 * used.
 	 *
+	 * @param targetAttribute
+	 * @param searchTerms
 	 * @return list of queryTerms
 	 */
 	public Set<String> createLexicalSearchQueryTerms(Attribute targetAttribute, Set<String> searchTerms)

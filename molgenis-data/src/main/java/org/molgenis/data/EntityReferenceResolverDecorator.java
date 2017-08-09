@@ -12,19 +12,26 @@ import static java.util.Objects.requireNonNull;
 
 public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorator<Entity>
 {
+	private final Repository<Entity> decoratedRepo;
 	private final EntityManager entityManager;
 
-	public EntityReferenceResolverDecorator(Repository<Entity> delegateRepository, EntityManager entityManager)
+	public EntityReferenceResolverDecorator(Repository<Entity> decoratedRepo, EntityManager entityManager)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.entityManager = requireNonNull(entityManager);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	// Resolve entity references based on given fetch
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		Stream<Entity> entities = delegate().findAll(q);
+		Stream<Entity> entities = decoratedRepo.findAll(q);
 		return resolveEntityReferences(entities, q.getFetch());
 	}
 
@@ -32,7 +39,7 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	@Override
 	public Entity findOne(Query<Entity> q)
 	{
-		Entity entity = delegate().findOne(q);
+		Entity entity = decoratedRepo.findOne(q);
 		return entity != null ? resolveEntityReferences(entity, q.getFetch()) : null;
 	}
 
@@ -40,7 +47,7 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		Stream<Entity> entities = delegate().findAll(new QueryImpl<>());
+		Stream<Entity> entities = decoratedRepo.findAll(new QueryImpl<>());
 		return resolveEntityReferences(entities).iterator();
 	}
 
@@ -48,7 +55,7 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		delegate().forEachBatched(fetch, entities ->
+		decoratedRepo.forEachBatched(fetch, entities ->
 		{
 			List<Entity> resolvedEntities = resolveEntityReferences(entities.stream(), fetch).collect(
 					Collectors.toList());
@@ -60,7 +67,7 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	@Override
 	public Entity findOneById(Object id)
 	{
-		Entity entity = delegate().findOneById(id);
+		Entity entity = decoratedRepo.findOneById(id);
 		return entity != null ? resolveEntityReferences(entity) : null;
 	}
 
@@ -68,7 +75,7 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	@Override
 	public Entity findOneById(Object id, Fetch fetch)
 	{
-		Entity entity = delegate().findOneById(id, fetch);
+		Entity entity = decoratedRepo.findOneById(id, fetch);
 		return entity != null ? resolveEntityReferences(entity, fetch) : null;
 	}
 
@@ -76,7 +83,7 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		Stream<Entity> entities = delegate().findAll(ids);
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
 		return resolveEntityReferences(entities);
 	}
 
@@ -84,7 +91,7 @@ public class EntityReferenceResolverDecorator extends AbstractRepositoryDecorato
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		Stream<Entity> entities = delegate().findAll(ids, fetch);
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		return resolveEntityReferences(entities, fetch);
 	}
 

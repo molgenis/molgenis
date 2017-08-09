@@ -119,6 +119,8 @@ public class EntityUtils
 
 	/**
 	 * Checks if an entity contains data or not
+	 *
+	 * @param entity
 	 */
 	public static boolean isEmpty(Entity entity)
 	{
@@ -164,6 +166,9 @@ public class EntityUtils
 
 	/**
 	 * Gets all attribute names of an EntityType (atomic + compound)
+	 *
+	 * @param entityType
+	 * @return
 	 */
 	public static Iterable<String> getAttributeNames(EntityType entityType)
 	{
@@ -181,6 +186,10 @@ public class EntityUtils
 
 	/**
 	 * Checks if an entity has another entity as one of its parents
+	 *
+	 * @param entityType
+	 * @param entityTypeId
+	 * @return
 	 */
 	public static boolean doesExtend(EntityType entityType, String entityTypeId)
 	{
@@ -206,6 +215,10 @@ public class EntityUtils
 
 	/**
 	 * Returns true if entity metadata equals another entity metadata. TODO docs
+	 *
+	 * @param entityType
+	 * @param otherEntityType
+	 * @return
 	 */
 	public static boolean equals(EntityType entityType, EntityType otherEntityType)
 	{
@@ -290,6 +303,10 @@ public class EntityUtils
 
 	/**
 	 * Returns true if an Iterable equals another Iterable.
+	 *
+	 * @param attrsIt
+	 * @param otherAttrsIt
+	 * @return
 	 */
 	public static boolean equals(Iterable<Attribute> attrsIt, Iterable<Attribute> otherAttrsIt)
 	{
@@ -306,6 +323,10 @@ public class EntityUtils
 
 	/**
 	 * Returns true if an Iterable equals another Iterable.
+	 *
+	 * @param entityIterable
+	 * @param otherEntityIterable
+	 * @return
 	 */
 	public static boolean equalsEntities(Iterable<Entity> entityIterable, Iterable<Entity> otherEntityIterable)
 	{
@@ -322,6 +343,10 @@ public class EntityUtils
 
 	/**
 	 * Returns true if a Tag equals another Tag.
+	 *
+	 * @param tag
+	 * @param otherTag
+	 * @return
 	 */
 	public static boolean equals(Tag tag, Tag otherTag)
 	{
@@ -337,6 +362,10 @@ public class EntityUtils
 
 	/**
 	 * Returns true if an attribute equals another attribute.
+	 *
+	 * @param attr
+	 * @param otherAttr
+	 * @return
 	 */
 	public static boolean equals(Attribute attr, Attribute otherAttr)
 	{
@@ -351,7 +380,10 @@ public class EntityUtils
 	 * has not been persisted to the db yet
 	 * </p>
 	 *
+	 * @param attr
+	 * @param otherAttr
 	 * @param checkIdentifier skips checking attribute identifier, parent attribute identifier and attribute entity identifier
+	 * @return
 	 */
 	public static boolean equals(Attribute attr, Attribute otherAttr, boolean checkIdentifier)
 	{
@@ -420,6 +452,8 @@ public class EntityUtils
 	/**
 	 * Returns true if entity equals another entity. For referenced entities compares the referenced entity ids.
 	 *
+	 * @param entity
+	 * @param otherEntity
 	 * @return true if entity equals another entity
 	 */
 	public static boolean equals(Entity entity, Entity otherEntity)

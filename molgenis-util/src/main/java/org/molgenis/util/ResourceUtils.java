@@ -68,6 +68,9 @@ public class ResourceUtils
 	 * <p>
 	 * This workaround is not working for file resources in jars. You will get a NullPointerException because the URL
 	 * cannot be converted to URI.
+	 *
+	 * @param resourceUrl
+	 * @return
 	 */
 	private static File getFile(URL resourceUrl)
 	{

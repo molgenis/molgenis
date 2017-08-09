@@ -26,7 +26,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	private AttributeRepositoryDecorator repo;
 	@Mock
-	private Repository<Attribute> delegateRepository;
+	private Repository<Attribute> decoratedRepo;
 	@Mock
 	private DataService dataService;
 	@Mock
@@ -58,7 +58,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(metadataService.getBackend(concreteEntityType1)).thenReturn(backend1);
 		when(metadataService.getBackend(concreteEntityType2)).thenReturn(backend2);
 		when(attribute.getIdentifier()).thenReturn(attributeId);
-		repo = new AttributeRepositoryDecorator(delegateRepository, dataService);
+		repo = new AttributeRepositoryDecorator(decoratedRepo, dataService);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 
 		repo.delete(attr);
 
-		verify(delegateRepository).delete(attr);
+		verify(decoratedRepo).delete(attr);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 
 		//Test
 		verify(child).setParent(null);
-		verify(delegateRepository).delete(compound);
+		verify(decoratedRepo).delete(compound);
 	}
 
 	@Test
@@ -127,12 +127,12 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		Attribute currentAttribute = mock(Attribute.class);
 		when(systemEntityTypeRegistry.getSystemAttribute(attributeId)).thenReturn(null);
-		when(delegateRepository.findOneById(attributeId)).thenReturn(currentAttribute);
+		when(decoratedRepo.findOneById(attributeId)).thenReturn(currentAttribute);
 		when(currentAttribute.getEntity()).thenReturn(abstractEntityType);
 
 		repo.update(attribute);
 
-		verify(delegateRepository).update(attribute);
+		verify(decoratedRepo).update(attribute);
 		verify(backend1).updateAttribute(concreteEntityType1, currentAttribute, attribute);
 		verify(backend2).updateAttribute(concreteEntityType2, currentAttribute, attribute);
 	}

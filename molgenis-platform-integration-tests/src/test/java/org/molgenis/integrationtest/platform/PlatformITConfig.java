@@ -29,14 +29,18 @@ import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.security.permission.PermissionServiceImpl;
+import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
@@ -63,7 +67,6 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
-@EnableAspectJAutoProxy
 /*
  FIXME Ideally, we'd like to scan all of org.molgenis.data or even org.molgenis, but there's some unwanted dependencies
  in org.molgenis.data and subpackages from included modules
@@ -76,7 +79,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
 		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class,
-		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class,
+		PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, IdGeneratorImpl.class,
 		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactoryImpl.class,
@@ -85,9 +88,9 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
-		MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class,
-		JobFactoryRegistrar.class })
+		MolgenisPermissionServiceImpl.class, MolgenisRoleHierarchy.class,
+		SystemRepositoryDecoratorFactoryRegistrar.class, MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class,
+		OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
@@ -180,7 +183,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 		{
 			try
 			{
-				RunAsSystemAspect.runAsSystem(() ->
+				RunAsSystemProxy.runAsSystem(() ->
 				{
 					LOG.info("Bootstrapping registries ...");
 					LOG.trace("Registering repository collections ...");

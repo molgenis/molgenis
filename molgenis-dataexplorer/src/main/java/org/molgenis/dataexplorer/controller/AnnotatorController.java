@@ -10,8 +10,8 @@ import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionFactory;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class AnnotatorController
 	public static final String URI = "/annotators";
 	private final DataService dataService;
 	private final AnnotationService annotationService;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService molgenisPermissionService;
 	private final UserAccountService userAccountService;
 	private final AnnotationJobFactory annotationJobFactory;
 	private final ExecutorService taskExecutor;
@@ -50,13 +50,13 @@ public class AnnotatorController
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
-			PermissionService permissionService, UserAccountService userAccountService,
+			MolgenisPermissionService molgenisPermissionService, UserAccountService userAccountService,
 			AnnotationJobFactory annotationJobFactory, ExecutorService taskExecutor,
 			AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;
-		this.permissionService = permissionService;
+		this.molgenisPermissionService = molgenisPermissionService;
 		this.userAccountService = userAccountService;
 		this.annotationJobFactory = annotationJobFactory;
 		this.taskExecutor = taskExecutor;
@@ -66,6 +66,7 @@ public class AnnotatorController
 	/**
 	 * Gets a map of all available annotators.
 	 *
+	 * @param dataSetName
 	 * @return annotatorMap
 	 */
 	@RequestMapping(value = "/get-available-annotators", method = RequestMethod.POST)
@@ -80,6 +81,8 @@ public class AnnotatorController
 	 * Annotates an entity based on selected entity and selected annotators. Creates a copy of the entity dataset if
 	 * option is ticked by the user.
 	 *
+	 * @param annotatorNames
+	 * @param entityTypeId
 	 * @return repositoryName
 	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
@@ -111,6 +114,7 @@ public class AnnotatorController
 	/**
 	 * Sets a map of annotators, whether they can be used by the selected data set.
 	 *
+	 * @param dataSetName
 	 * @return mapOfAnnotators
 	 */
 	private Map<String, Map<String, Object>> setMapOfAnnotators(String dataSetName)
@@ -134,7 +138,7 @@ public class AnnotatorController
 
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
-						permissionService.hasPermissionOnEntityType(settingsEntityName, Permission.WRITE));
+						molgenisPermissionService.hasPermissionOnEntity(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}

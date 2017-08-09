@@ -15,6 +15,9 @@ public interface MetaDataParser
 
 	/**
 	 * Generates a {@link EntitiesValidationReport} by parsing all data from a supplied source
+	 *
+	 * @param source
+	 * @return
 	 */
 	EntitiesValidationReport validate(RepositoryCollection source);
 }

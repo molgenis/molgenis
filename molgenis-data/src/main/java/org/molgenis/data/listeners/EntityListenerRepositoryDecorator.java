@@ -10,27 +10,34 @@ import static java.util.Objects.requireNonNull;
 
 public class EntityListenerRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
+	private final Repository<Entity> decoratedRepository;
 	private final EntityListenersService entityListenersService;
 
-	public EntityListenerRepositoryDecorator(Repository<Entity> delegateRepository,
+	public EntityListenerRepositoryDecorator(Repository<Entity> decoratedRepository,
 			EntityListenersService entityListenersService)
 	{
-		super(delegateRepository);
-		requireNonNull(entityListenersService).register(delegate().getName());
+		this.decoratedRepository = requireNonNull(decoratedRepository);
+		requireNonNull(entityListenersService).register(decoratedRepository.getName());
 		this.entityListenersService = entityListenersService;
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		entityListenersService.updateEntity(delegate().getName(), entity);
-		delegate().update(entity);
+		entityListenersService.updateEntity(decoratedRepository.getName(), entity);
+		decoratedRepository.update(entity);
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		entities = entityListenersService.updateEntities(delegate().getName(), entities);
-		delegate().update(entities);
+		entities = entityListenersService.updateEntities(decoratedRepository.getName(), entities);
+		decoratedRepository.update(entities);
 	}
 }

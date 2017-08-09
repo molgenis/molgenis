@@ -25,6 +25,7 @@ public class SystemRepositoryDecoratorFactoryRegistrar
 		ApplicationContext ctx = event.getApplicationContext();
 		Map<String, SystemRepositoryDecoratorFactory> repositoryDecoratorFactoryMap = ctx.getBeansOfType(
 				SystemRepositoryDecoratorFactory.class);
-		repositoryDecoratorFactoryMap.values().forEach(repositoryDecoratorRegistry::addFactory);
+		repositoryDecoratorFactoryMap.values()
+									 .forEach(repositoryDecoratorRegistry::addFactory);
 	}
 }

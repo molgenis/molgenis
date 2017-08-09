@@ -25,7 +25,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.DatabaseAction.UPDATE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.annotation.core.utils.AnnotatorUtils.addAnnotatorMetaDataToRepositories;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @Component
 public class CrudRepositoryAnnotator
@@ -46,11 +46,20 @@ public class CrudRepositoryAnnotator
 		this.attributeFactory = attributeFactory;
 	}
 
+	/**
+	 * @param annotator
+	 * @param repository
+	 */
 	public void annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
 		annotate(annotator, repository, UPDATE);
 	}
 
+	/**
+	 * @param annotator
+	 * @param repository
+	 * @param action
+	 */
 	private void annotate(RepositoryAnnotator annotator, Repository<Entity> repository, DatabaseAction action)
 	{
 		if (!repository.getCapabilities().contains(WRITABLE))

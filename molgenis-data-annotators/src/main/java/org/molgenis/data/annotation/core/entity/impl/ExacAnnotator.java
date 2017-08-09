@@ -83,10 +83,10 @@ public class ExacAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = createExacOutputAttributes();
 
-		List<Attribute> resourceMetaData = new ArrayList<>(
-				asList(attributeFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
-						attributeFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(STRING),
-						attributeFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(STRING)));
+		List<Attribute> resourceMetaData = new ArrayList<>(asList(
+				attributeFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
+				attributeFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(STRING),
+				attributeFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(STRING)));
 
 		AnnotatorInfo exacInfo = AnnotatorInfo.create(READY, POPULATION_REFERENCE, "exac",
 				" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"

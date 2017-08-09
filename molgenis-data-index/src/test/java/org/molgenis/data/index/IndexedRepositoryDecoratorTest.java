@@ -29,7 +29,7 @@ public class IndexedRepositoryDecoratorTest
 {
 	private IndexedRepositoryDecorator indexedRepositoryDecorator;
 	private SearchService searchService;
-	private Repository<Entity> delegateRepository;
+	private Repository<Entity> decoratedRepo;
 	private EntityType repositoryEntityType;
 	private String idAttrName;
 	private Query<Entity> query;
@@ -40,7 +40,7 @@ public class IndexedRepositoryDecoratorTest
 	public void setUp() throws IOException
 	{
 		searchService = mock(SearchService.class);
-		delegateRepository = mock(Repository.class);
+		decoratedRepo = mock(Repository.class);
 		String entityTypeId = "entity";
 		repositoryEntityType = mock(EntityType.class);
 		when(repositoryEntityType.getId()).thenReturn(entityTypeId);
@@ -49,12 +49,11 @@ public class IndexedRepositoryDecoratorTest
 
 		when(idAttr.getExpression()).thenReturn(null);
 		when(repositoryEntityType.getIdAttribute()).thenReturn(idAttr);
-		when(delegateRepository.getEntityType()).thenReturn(repositoryEntityType);
-		when(delegateRepository.getName()).thenReturn("entity");
-		when(delegateRepository.getCapabilities()).thenReturn(
-				EnumSet.of(QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
-		when(delegateRepository.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
-		indexedRepositoryDecorator = new IndexedRepositoryDecorator(delegateRepository, searchService);
+		when(decoratedRepo.getEntityType()).thenReturn(repositoryEntityType);
+		when(decoratedRepo.getName()).thenReturn("entity");
+		when(decoratedRepo.getCapabilities()).thenReturn(EnumSet.of(QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
+		when(decoratedRepo.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
+		indexedRepositoryDecorator = new IndexedRepositoryDecorator(decoratedRepo, searchService);
 
 		when(repositoryEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
 
@@ -87,7 +86,7 @@ public class IndexedRepositoryDecoratorTest
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 		indexedRepositoryDecorator.add(entity);
-		verify(delegateRepository).add(entity);
+		verify(decoratedRepo).add(entity);
 
 		verifyZeroInteractions(searchService);
 	}
@@ -97,7 +96,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		indexedRepositoryDecorator.add(entities);
-		verify(delegateRepository, times(1)).add(entities);
+		verify(decoratedRepo, times(1)).add(entities);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -124,7 +123,7 @@ public class IndexedRepositoryDecoratorTest
 	public void close() throws IOException
 	{
 		indexedRepositoryDecorator.close();
-		verify(delegateRepository).close();
+		verify(decoratedRepo).close();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -132,7 +131,7 @@ public class IndexedRepositoryDecoratorTest
 	public void count()
 	{
 		indexedRepositoryDecorator.count();
-		verify(delegateRepository).count();
+		verify(decoratedRepo).count();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -140,7 +139,7 @@ public class IndexedRepositoryDecoratorTest
 	public void countQuery()
 	{
 		indexedRepositoryDecorator.count(query);
-		verify(delegateRepository).count(query);
+		verify(decoratedRepo).count(query);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -149,7 +148,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		indexedRepositoryDecorator.count(unsupportedQuery);
 		verify(searchService).count(repositoryEntityType, unsupportedQuery);
-		verify(delegateRepository, never()).count(unsupportedQuery);
+		verify(decoratedRepo, never()).count(unsupportedQuery);
 	}
 
 	@Test
@@ -158,7 +157,7 @@ public class IndexedRepositoryDecoratorTest
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 		indexedRepositoryDecorator.delete(entity);
-		verify(delegateRepository).delete(entity);
+		verify(decoratedRepo).delete(entity);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -167,7 +166,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		indexedRepositoryDecorator.delete(entities);
-		verify(delegateRepository, times(1)).delete(entities);
+		verify(decoratedRepo, times(1)).delete(entities);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -175,7 +174,7 @@ public class IndexedRepositoryDecoratorTest
 	public void deleteAll()
 	{
 		indexedRepositoryDecorator.deleteAll();
-		verify(delegateRepository).deleteAll();
+		verify(decoratedRepo).deleteAll();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -184,7 +183,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Object id = "0";
 		indexedRepositoryDecorator.deleteById(id);
-		verify(delegateRepository).deleteById(id);
+		verify(decoratedRepo).deleteById(id);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -192,7 +191,7 @@ public class IndexedRepositoryDecoratorTest
 	public void findOneQuery()
 	{
 		indexedRepositoryDecorator.findOne(query);
-		verify(delegateRepository).findOne(query);
+		verify(decoratedRepo).findOne(query);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -204,7 +203,7 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
 		verify(searchService).searchOne(repositoryEntityType, unsupportedQuery);
-		verify(delegateRepository).findOneById(any(Object.class), isNull());
+		verify(decoratedRepo).findOneById(any(Object.class), isNull());
 	}
 
 	@Test
@@ -212,7 +211,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Object id = mock(Object.class);
 		indexedRepositoryDecorator.findOneById(id);
-		verify(delegateRepository).findOneById(id);
+		verify(decoratedRepo).findOneById(id);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -223,9 +222,9 @@ public class IndexedRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 
 		Entity entity = mock(Entity.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
 		assertEquals(indexedRepositoryDecorator.findOneById(id, fetch), entity);
-		verify(delegateRepository, times(1)).findOneById(id, fetch);
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -247,7 +246,7 @@ public class IndexedRepositoryDecoratorTest
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 		indexedRepositoryDecorator.update(entity);
-		verify(delegateRepository).update(entity);
+		verify(decoratedRepo).update(entity);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -256,7 +255,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		indexedRepositoryDecorator.update(entities);
-		verify(delegateRepository, times(1)).update(entities);
+		verify(decoratedRepo, times(1)).update(entities);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -268,7 +267,7 @@ public class IndexedRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 		verifyZeroInteractions(searchService);
@@ -283,7 +282,7 @@ public class IndexedRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 		verifyZeroInteractions(searchService);
@@ -293,7 +292,7 @@ public class IndexedRepositoryDecoratorTest
 	public void findAllQuery()
 	{
 		indexedRepositoryDecorator.findAll(query);
-		verify(delegateRepository, times(1)).findAll(query);
+		verify(decoratedRepo, times(1)).findAll(query);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -303,7 +302,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
 		verify(searchService).search(repositoryEntityType, unsupportedQuery);
-		verify(delegateRepository).findAll(any(Stream.class), isNull());
+		verify(decoratedRepo).findAll(any(Stream.class), isNull());
 	}
 
 	@Test
@@ -313,14 +312,14 @@ public class IndexedRepositoryDecoratorTest
 		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		indexedRepositoryDecorator.forEachBatched(fetch, consumer, 12);
-		verify(delegateRepository, times(1)).forEachBatched(fetch, consumer, 12);
+		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 12);
 	}
 
 	@Test
 	public void iterator()
 	{
 		indexedRepositoryDecorator.iterator();
-		verify(delegateRepository, times(1)).iterator();
+		verify(decoratedRepo, times(1)).iterator();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -370,7 +369,7 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(repositoryEntityType, q);
-		verify(delegateRepository, never()).count(q);
+		verify(decoratedRepo, never()).count(q);
 	}
 
 	@Test
@@ -399,7 +398,7 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(repositoryEntityType, q);
-		verify(delegateRepository, never()).count(q);
+		verify(decoratedRepo, never()).count(q);
 	}
 
 	@Test
@@ -421,6 +420,6 @@ public class IndexedRepositoryDecoratorTest
 		when(q.getRules()).thenReturn(singletonList(queryRule));
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(repositoryEntityType, q);
-		verify(delegateRepository, never()).count(q);
+		verify(decoratedRepo, never()).count(q);
 	}
 }

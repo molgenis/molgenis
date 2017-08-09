@@ -29,6 +29,9 @@ public interface Annotator
 	/**
 	 * Use this method for the actual annotation process, to ensure that unique
 	 * identifiers by creating a new set of attributes everytime an annotator us executed
+	 *
+	 * @param attributeFactory
+	 * @return
 	 */
 	List<Attribute> createAnnotatorAttributes(AttributeFactory attributeFactory);
 }

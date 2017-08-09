@@ -13,8 +13,8 @@
     "lint:fix": "eslint --ext .js,.vue src test/unit/specs"
   },
   "dependencies": {
-    "@molgenis/molgenis-api-client": "^1.2.5",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
+    "@molgenis/molgenis-api-client": "^1.2.5",
     "bootstrap-vue": "^0.11.1",
     "flow": "^0.2.3",
     "font-awesome": "^4.7.0",
@@ -22,6 +22,8 @@
     "karma-junit-reporter": "^1.2.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
+    "node-sass": "^4.5.3",
+    "sass-loader": "^6.0.5",
     "vue": "^2.2.6",
     "vue-router": "^2.3.1",
     "vuex": "^2.2.1",

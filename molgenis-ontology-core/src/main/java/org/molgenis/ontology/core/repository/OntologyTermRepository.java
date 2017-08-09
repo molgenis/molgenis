@@ -34,6 +34,13 @@ public class OntologyTermRepository
 		this.dataService = requireNonNull(dataService);
 	}
 
+	/**
+	 * FIXME write docs
+	 *
+	 * @param term
+	 * @param pageSize
+	 * @return
+	 */
 	public List<OntologyTerm> findOntologyTerms(String term, int pageSize)
 	{
 		Iterable<Entity> ontologyTermEntities;
@@ -107,8 +114,8 @@ public class OntologyTermRepository
 				new QueryRule(rules));
 
 		final List<QueryRule> finalRules = rules;
-		Iterable<Entity> termEntities = () -> dataService.findAll(ONTOLOGY_TERM,
-				new QueryImpl<>(finalRules).pageSize(pageSize)).iterator();
+		Iterable<Entity> termEntities = () -> dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(finalRules).pageSize(pageSize))
+												 .iterator();
 
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
@@ -121,8 +128,8 @@ public class OntologyTermRepository
 		if (ontologyEntity != null)
 		{
 			Iterable<Entity> ontologyTermEntities = () -> dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM,
-					new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity).pageSize(Integer.MAX_VALUE))
-																	 .iterator();
+					new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)
+									 .pageSize(Integer.MAX_VALUE)).iterator();
 
 			return Lists.newArrayList(
 					Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
@@ -157,6 +164,8 @@ public class OntologyTermRepository
 	 * Calculate the distance between any two ontology terms in the ontology tree structure by calculating the
 	 * difference in nodePaths.
 	 *
+	 * @param ontologyTerm1
+	 * @param ontologyTerm2
 	 * @return the distance between two ontology terms
 	 */
 	public int getOntologyTermDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2)
@@ -197,6 +206,8 @@ public class OntologyTermRepository
 	 * Calculate the distance between nodePaths, e.g. 0[0].1[1].2[2], 0[0].2[1].2[2]. The distance is the non-overlap
 	 * part of the strings
 	 *
+	 * @param nodePath1
+	 * @param nodePath2
 	 * @return distance
 	 */
 	public int calculateNodePathDistance(String nodePath1, String nodePath2)
@@ -217,12 +228,13 @@ public class OntologyTermRepository
 	/**
 	 * Retrieve all descendant ontology terms
 	 *
+	 * @param ontologyTerm
 	 * @return a list of {@link OntologyTerm}
 	 */
 	public List<OntologyTerm> getChildren(OntologyTerm ontologyTerm)
 	{
-		Iterable<Entity> ontologyTermEntities = () -> dataService.findAll(ONTOLOGY_TERM,
-				QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI())).iterator();
+		Iterable<Entity> ontologyTermEntities = () -> dataService.findAll(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()))
+														 .iterator();
 
 		List<OntologyTerm> children = new ArrayList<>();
 		for (Entity ontologyTermEntity : ontologyTermEntities)
@@ -239,9 +251,10 @@ public class OntologyTermRepository
 	{
 		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.NODE_PATH);
 
-		Iterable<Entity> relatedOntologyTermEntities = () -> dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM,
-				new QueryImpl<>(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
-						"\"" + nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)).iterator();
+		Iterable<Entity> relatedOntologyTermEntities = () -> dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM, new QueryImpl<>(
+				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
+						"\"" + nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))
+																.iterator();
 		Iterable<Entity> childOntologyTermEntities = FluentIterable.from(relatedOntologyTermEntities)
 																   .filter(entity -> qualifiedNodePath(nodePath,
 																		   entity))

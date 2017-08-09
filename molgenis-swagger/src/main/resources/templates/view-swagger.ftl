@@ -22,24 +22,6 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
-  /plugin/one-click-importer/upload:
-    post:
-      tags:
-        - OneClickImporter
-      summary: Upload files without metadata.
-      description: Upload files without metadata. Metadata is guessed based on the values in the file. Able to guess String, Numbers and Dates. Supports Excel, CSV, or zip containing CSV files
-      consumes:
-        - multipart/form-data
-      produces:
-        - text/html
-      parameters:
-        - in: formData
-          name: file
-          type: file
-          description: The file you want to upload
-      responses:
-        200:
-          description: Returns the Job ID of the scheduled OneClickImportJob
   /scripts/{name}/start:
     get:
       tags:

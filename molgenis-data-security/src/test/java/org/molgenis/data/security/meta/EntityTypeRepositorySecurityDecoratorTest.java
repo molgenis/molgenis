@@ -13,7 +13,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -59,7 +59,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private final String entityTypeId4 = "EntityType4";
 	private EntityTypeRepositorySecurityDecorator repo;
 	@Mock
-	private Repository<EntityType> delegateRepository;
+	private Repository<EntityType> decoratedRepo;
 	@Mock
 	private DataService dataService;
 	@Mock
@@ -67,7 +67,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	@Mock
-	private PermissionService permissionService;
+	private MolgenisPermissionService permissionService;
 	@Captor
 	private ArgumentCaptor<Consumer<List<EntityType>>> consumerCaptor;
 	@Mock
@@ -91,8 +91,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType3.getLabel()).thenReturn(entityTypeId1);
 		when(entityType4.getId()).thenReturn(entityTypeId4);
 		when(entityType4.getLabel()).thenReturn(entityTypeId1);
-		repo = new EntityTypeRepositorySecurityDecorator(delegateRepository, systemEntityTypeRegistry,
-				permissionService, dataService);
+		repo = new EntityTypeRepositorySecurityDecorator(decoratedRepo, systemEntityTypeRegistry, permissionService,
+				dataService);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
@@ -112,7 +112,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private void countSuOrSystem() throws Exception
 	{
 		long count = 123L;
-		when(delegateRepository.count()).thenReturn(count);
+		when(decoratedRepo.count()).thenReturn(count);
 		assertEquals(repo.count(), 123L);
 	}
 
@@ -124,9 +124,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
-		when(delegateRepository.spliterator()).thenReturn(asList(entityType0, entityType1).spliterator());
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, COUNT)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityType1Name, COUNT)).thenReturn(true);
+		when(decoratedRepo.spliterator()).thenReturn(asList(entityType0, entityType1).spliterator());
+		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(), 1L);
 	}
 
@@ -144,7 +144,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(metaDataService.getBackend(entityType)).thenReturn(repoCollection);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		repo.add(entityType);
-		verify(delegateRepository).add(entityType);
+		verify(decoratedRepo).add(entityType);
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		long count = 123L;
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(delegateRepository.count(q)).thenReturn(count);
+		when(decoratedRepo.count(q)).thenReturn(count);
 		assertEquals(repo.count(q), 123L);
 	}
 
@@ -187,9 +187,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		Query<EntityType> q = new QueryImpl<>();
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
-		when(delegateRepository.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1));
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, COUNT)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityType1Name, COUNT)).thenReturn(true);
+		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(q), 1L);
 		assertEquals(queryCaptor.getValue().getOffset(), 0);
 		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
@@ -215,7 +215,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType1 = mock(EntityType.class);
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(delegateRepository.findAll(q)).thenReturn(Stream.of(entityType0, entityType1));
+		when(decoratedRepo.findAll(q)).thenReturn(Stream.of(entityType0, entityType1));
 		assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType1));
 	}
 
@@ -233,11 +233,10 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		Query<EntityType> q = mock(Query.class);
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
-		when(delegateRepository.findAll(queryCaptor.capture())).thenReturn(
-				Stream.of(entityType0, entityType1, entityType2));
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntityType(entityType1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityType2Name, READ)).thenReturn(true);
+		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType2));
 		Query<EntityType> decoratedQ = queryCaptor.getValue();
 		assertEquals(decoratedQ.getOffset(), 0);
@@ -260,11 +259,10 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(q.getPageSize()).thenReturn(1);
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
-		when(delegateRepository.findAll(queryCaptor.capture())).thenReturn(
-				Stream.of(entityType0, entityType1, entityType2));
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntityType(entityType1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityType2Name, READ)).thenReturn(true);
+		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(q).collect(toList()), singletonList(entityType2));
 		Query<EntityType> decoratedQ = queryCaptor.getValue();
 		assertEquals(decoratedQ.getOffset(), 0);
@@ -289,7 +287,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
-		when(delegateRepository.iterator()).thenReturn(asList(entityType0, entityType1).iterator());
+		when(decoratedRepo.iterator()).thenReturn(asList(entityType0, entityType1).iterator());
 		assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType1));
 	}
 
@@ -303,10 +301,10 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
-		when(delegateRepository.spliterator()).thenReturn(asList(entityType0, entityType1, entityType2).spliterator());
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntityType(entityType1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityType2Name, READ)).thenReturn(true);
+		when(decoratedRepo.spliterator()).thenReturn(asList(entityType0, entityType1, entityType2).spliterator());
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
 		assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType2));
 	}
 
@@ -330,7 +328,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		@SuppressWarnings("unchecked")
 		Consumer<List<EntityType>> consumer = mock(Consumer.class);
 		repo.forEachBatched(fetch, consumer, 10);
-		verify(delegateRepository).forEachBatched(fetch, consumer, 10);
+		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -340,13 +338,13 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		List<Entity> entities = newArrayList();
 		repo.forEachBatched(entities::addAll, 2);
 
-		when(permissionService.hasPermissionOnEntityType(entityTypeId1, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntityType(entityTypeId2, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityTypeId3, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityTypeId4, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityTypeId1, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityTypeId2, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityTypeId3, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityTypeId4, READ)).thenReturn(true);
 
 		// Decorated repo returns two batches of two entityTypes
-		verify(delegateRepository).forEachBatched(eq(null), consumerCaptor.capture(), eq(2));
+		verify(decoratedRepo).forEachBatched(eq(null), consumerCaptor.capture(), eq(2));
 		consumerCaptor.getValue().accept(Lists.newArrayList(entityType1, entityType2));
 		consumerCaptor.getValue().accept(Lists.newArrayList(entityType3, entityType4));
 
@@ -372,7 +370,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = mock(EntityType.class);
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(delegateRepository.findOne(q)).thenReturn(entityType0);
+		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
 		assertEquals(repo.findOne(q), entityType0);
 	}
 
@@ -384,8 +382,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(delegateRepository.findOne(q)).thenReturn(entityType0);
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
+		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		assertEquals(repo.findOne(q), entityType0);
 	}
 
@@ -397,8 +395,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		@SuppressWarnings("unchecked")
 		Query<EntityType> q = mock(Query.class);
-		when(delegateRepository.findOne(q)).thenReturn(entityType0);
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(false);
+		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOne(q));
 	}
 
@@ -420,7 +418,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		Object id = "0";
-		when(delegateRepository.findOneById(id)).thenReturn(entityType0);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
 		assertEquals(repo.findOneById(id), entityType0);
 	}
 
@@ -431,8 +429,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
-		when(delegateRepository.findOneById(id)).thenReturn(entityType0);
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		assertEquals(repo.findOneById(id), entityType0);
 	}
 
@@ -443,8 +441,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
-		when(delegateRepository.findOneById(id)).thenReturn(entityType0);
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(false);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOneById(id));
 	}
 
@@ -466,7 +464,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		Object id = "0";
-		when(delegateRepository.findOneById(id)).thenReturn(entityType0);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
 		assertEquals(repo.findOneById(id), entityType0);
 	}
 
@@ -478,8 +476,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
 		Fetch fetch = mock(Fetch.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entityType0);
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
 		assertEquals(repo.findOneById(id, fetch), entityType0);
 	}
 
@@ -491,8 +489,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
 		Fetch fetch = mock(Fetch.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entityType0);
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(false);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOneById(id, fetch));
 	}
 
@@ -515,7 +513,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
 		Stream<Object> ids = Stream.of("0", "1");
-		when(delegateRepository.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1));
+		when(decoratedRepo.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1));
 		assertEquals(repo.findAll(ids).collect(toList()), asList(entityType0, entityType1));
 	}
 
@@ -530,10 +528,10 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
 		Stream<Object> ids = Stream.of("0", "1");
-		when(delegateRepository.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntityType(entityType1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityType2Name, READ)).thenReturn(true);
+		when(decoratedRepo.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(ids).collect(toList()), asList(entityType0, entityType2));
 	}
 
@@ -557,7 +555,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType1 = mock(EntityType.class);
 		Stream<Object> ids = Stream.of("0", "1");
 		Fetch fetch = mock(Fetch.class);
-		when(delegateRepository.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1));
+		when(decoratedRepo.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1));
 		assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityType0, entityType1));
 	}
 
@@ -573,10 +571,10 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
 		Stream<Object> ids = Stream.of("0", "1");
 		Fetch fetch = mock(Fetch.class);
-		when(delegateRepository.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
-		when(permissionService.hasPermissionOnEntityType(entityType0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntityType(entityType1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntityType(entityType2Name, READ)).thenReturn(true);
+		when(decoratedRepo.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
 		assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityType0, entityType2));
 	}
 
@@ -598,7 +596,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		AggregateResult aggregateResult = mock(AggregateResult.class);
-		when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResult);
+		when(decoratedRepo.aggregate(aggregateQuery)).thenReturn(aggregateResult);
 		assertEquals(repo.aggregate(aggregateQuery), aggregateResult);
 	}
 
@@ -669,8 +667,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType.getId()).thenReturn("entity").getMock();
 		when(entityType.getLabel()).thenReturn("entity").getMock();
 		repo.delete(entityType);
-		verify(delegateRepository).delete(entityType);
-		verifyNoMoreInteractions(delegateRepository);
+		verify(decoratedRepo).delete(entityType);
+		verifyNoMoreInteractions(decoratedRepo);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
@@ -708,8 +706,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType.getId()).thenReturn("entity").getMock();
 		when(entityType.getLabel()).thenReturn("entity").getMock();
 		repo.update(entityType);
-		verify(delegateRepository).update(entityType);
-		verifyNoMoreInteractions(delegateRepository);
+		verify(decoratedRepo).update(entityType);
+		verifyNoMoreInteractions(decoratedRepo);
 	}
 
 	static class Config

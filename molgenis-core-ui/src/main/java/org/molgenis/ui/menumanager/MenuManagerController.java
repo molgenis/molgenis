@@ -102,6 +102,11 @@ public class MenuManagerController extends MolgenisPluginController
 
 	/**
 	 * Upload a new molgenis logo
+	 *
+	 * @param part
+	 * @param model
+	 * @return model
+	 * @throws IOException
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/upload-logo", method = RequestMethod.POST)

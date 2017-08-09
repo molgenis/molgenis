@@ -1,6 +1,6 @@
 package org.molgenis.ui;
 
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.ui.XmlMolgenisUiTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +43,7 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public XmlMolgenisUi xmlMolgenisUi() throws IOException
 		{
-			return new XmlMolgenisUi(xmlMolgenisUiLoader(), permissionService());
+			return new XmlMolgenisUi(xmlMolgenisUiLoader(), molgenisPermissionService());
 		}
 
 		@Bean
@@ -59,9 +59,9 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public PermissionService permissionService()
+		public MolgenisPermissionService molgenisPermissionService()
 		{
-			return mock(PermissionService.class);
+			return mock(MolgenisPermissionService.class);
 		}
 	}
 }

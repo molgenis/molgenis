@@ -55,6 +55,9 @@ public class SecurityUtils
 
 	/**
 	 * Returns whether the current user has at least one of the given roles
+	 *
+	 * @param roles
+	 * @return
 	 */
 	public static boolean currentUserHasRole(String... roles)
 	{
@@ -87,6 +90,8 @@ public class SecurityUtils
 
 	/**
 	 * Returns whether the current user is a super user
+	 *
+	 * @return
 	 */
 	public static boolean currentUserIsSu()
 	{
@@ -95,6 +100,8 @@ public class SecurityUtils
 
 	/**
 	 * Returns whether the current user is the system user.
+	 *
+	 * @return
 	 */
 	public static boolean currentUserIsSystem()
 	{
@@ -103,6 +110,8 @@ public class SecurityUtils
 
 	/**
 	 * Returns whether the current user is authenticated and not the anonymous user
+	 *
+	 * @return
 	 */
 	public static boolean currentUserIsAuthenticated()
 	{
@@ -112,6 +121,9 @@ public class SecurityUtils
 
 	/**
 	 * Returns the default (su, read, write) roles related to a plugin
+	 *
+	 * @param pluginIds
+	 * @return
 	 */
 	public static String[] defaultPluginAuthorities(String... pluginIds)
 	{
@@ -156,6 +168,7 @@ public class SecurityUtils
 	/**
 	 * Checks if client session is expired (by checking the requested sessionId).
 	 *
+	 * @param request
 	 * @return true if session is expired
 	 */
 	public static boolean isSessionExpired(HttpServletRequest request)

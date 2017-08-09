@@ -29,6 +29,9 @@ public class ChartVisualizationServiceFactory
 	 * Gets a visualizationservice for a charttype
 	 * <p>
 	 * Throws MolgenisChartException if no service can be found for this charttype
+	 *
+	 * @param chartType
+	 * @return
 	 */
 	public ChartVisualizationService getVisualizationService(MolgenisChartType chartType)
 	{

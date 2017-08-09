@@ -70,6 +70,8 @@ public class NGramDistanceAlgorithm
 	/**
 	 * create n-grams tokens of the string.
 	 *
+	 * @param inputQuery
+	 * @param removeStopWords
 	 * @return a map of ngram tokens with the corresponding frequency
 	 */
 
@@ -118,6 +120,10 @@ public class NGramDistanceAlgorithm
 
 	/**
 	 * Calculate the ngram distance
+	 *
+	 * @param inputStringTokens
+	 * @param ontologyTermTokens
+	 * @return
 	 */
 	private static double calculateScore(Map<String, Integer> inputStringTokens,
 			Map<String, Integer> ontologyTermTokens)

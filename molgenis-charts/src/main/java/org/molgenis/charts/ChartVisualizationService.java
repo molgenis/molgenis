@@ -14,6 +14,8 @@ public interface ChartVisualizationService
 {
 	/**
 	 * Gets the chart types this service can render
+	 *
+	 * @return
 	 */
 	List<MolgenisChartType> getCapabilities();
 

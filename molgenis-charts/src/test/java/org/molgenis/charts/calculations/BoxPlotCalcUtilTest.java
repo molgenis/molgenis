@@ -15,7 +15,9 @@ public class BoxPlotCalcUtilTest
 	public void testCalcPlotBoxValuesEven()
 	{
 		List<Double> sortedDataAscendingOrder = new ArrayList<>();
-		sortedDataAscendingOrder.addAll(Arrays.asList(0d, 1d, 1d, 3d, 3d, 4d, 5d, 6d, 8d, 15d, 20d));
+		sortedDataAscendingOrder.addAll(
+				Arrays.asList(0d, 1d, 1d, 3d, 3d, 4d,
+						5d, 6d, 8d, 15d, 20d));
 		Double[] plotBoxValues = BoxPlotCalcUtil.calcBoxPlotValues(sortedDataAscendingOrder);
 		assertEquals(plotBoxValues[0], 0d);
 		assertEquals(plotBoxValues[1], 2d);
@@ -28,7 +30,8 @@ public class BoxPlotCalcUtilTest
 	public void testCalcPlotBoxValuesNonEven()
 	{
 		List<Double> sortedDataAscendingOrder = new ArrayList<>();
-		sortedDataAscendingOrder.addAll(Arrays.asList(0.5, 1.5, 1.5, 3.5, 3.5, 4.5, 5.5, 5.5, 6.5, 8.5, 15.5, 20.5));
+		sortedDataAscendingOrder.addAll(
+				Arrays.asList(0.5, 1.5, 1.5, 3.5, 3.5, 4.5, 5.5, 5.5, 6.5, 8.5, 15.5, 20.5));
 		Double[] plotBoxValues = BoxPlotCalcUtil.calcBoxPlotValues(sortedDataAscendingOrder);
 		assertEquals(plotBoxValues[0], 0.5);
 		assertEquals(plotBoxValues[1], 2.5);

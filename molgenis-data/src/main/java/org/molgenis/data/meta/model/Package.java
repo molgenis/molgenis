@@ -159,6 +159,8 @@ public class Package extends StaticEntity
 
 	/**
 	 * Add a {@link Tag} to this {@link Package}
+	 *
+	 * @param tag
 	 */
 	public void addTag(Tag tag)
 	{
@@ -167,6 +169,8 @@ public class Package extends StaticEntity
 
 	/**
 	 * Remove a {@link Tag} from this {@link Package}
+	 *
+	 * @param tag
 	 */
 	public void removeTag(Tag tag)
 	{
@@ -214,6 +218,9 @@ public class Package extends StaticEntity
 	 *     public abstract List<Tag> getTags();
 	 * }
 	 * </code></pre>
+	 *
+	 * @param o
+	 * @return
 	 */
 	@Override
 	public boolean equals(Object o)
@@ -243,6 +250,8 @@ public class Package extends StaticEntity
 	 *     public abstract String getId();
 	 * }
 	 * </code></pre>
+	 *
+	 * @return
 	 */
 	@Override
 	public int hashCode()

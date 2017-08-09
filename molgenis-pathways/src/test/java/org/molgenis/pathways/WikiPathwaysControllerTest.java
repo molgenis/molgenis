@@ -112,7 +112,8 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 				+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
 				+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>";
 
-		assertEquals(controller.analyzeGPML(gpml), ImmutableMultimap.of("TUSC2", "cf7548", "IPO4", "d9af5"));
+		assertEquals(controller.analyzeGPML(gpml),
+				ImmutableMultimap.of("TUSC2", "cf7548", "IPO4", "d9af5"));
 	}
 
 	@Test
@@ -165,7 +166,8 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
 		when(serviceMock.getColoredPathwayImage("WP1234",
-				ImmutableMap.of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn("<svg>WP1234</svg>");
+				ImmutableMap.of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn(
+				"<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
 	}
 

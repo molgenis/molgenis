@@ -1,6 +1,6 @@
 package org.molgenis.ui;
 
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -14,20 +14,20 @@ import static java.util.Objects.requireNonNull;
 public class XmlMolgenisUi implements MolgenisUi
 {
 	private final Molgenis molgenisUi;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, PermissionService permissionService)
+	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, MolgenisPermissionService molgenisPermissionService)
 			throws IOException
 	{
 		this.molgenisUi = requireNonNull(xmlMolgenisUiLoader).load();
-		this.permissionService = requireNonNull(permissionService);
+		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 	}
 
 	@Override
 	public MolgenisUiMenu getMenu()
 	{
-		return new XmlMolgenisUiMenu(molgenisUi.getMenu(), permissionService);
+		return new XmlMolgenisUiMenu(molgenisUi.getMenu(), molgenisPermissionService);
 	}
 
 	@Override

@@ -7,6 +7,10 @@ import router from './router'
 // You can use both the components found @https://bootstrap-vue.github.io/
 import BootstrapVue from 'bootstrap-vue/dist/bootstrap-vue.esm'
 
+// Or use manual bootstrap 4 from @https://v4-alpha.getbootstrap.com/getting-started/introduction/
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
 import 'font-awesome/css/font-awesome.min.css'
 
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'

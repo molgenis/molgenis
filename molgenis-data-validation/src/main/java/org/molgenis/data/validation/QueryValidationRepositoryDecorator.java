@@ -18,12 +18,19 @@ import static java.util.Objects.requireNonNull;
  */
 public class QueryValidationRepositoryDecorator<E extends Entity> extends AbstractRepositoryDecorator<E>
 {
+	private final Repository<E> decoratedRepo;
 	private final QueryValidator queryValidator;
 
-	public QueryValidationRepositoryDecorator(Repository<E> delegateRepository, QueryValidator queryValidator)
+	public QueryValidationRepositoryDecorator(Repository<E> decoratedRepo, QueryValidator queryValidator)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.queryValidator = requireNonNull(queryValidator);
+	}
+
+	@Override
+	protected Repository<E> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override

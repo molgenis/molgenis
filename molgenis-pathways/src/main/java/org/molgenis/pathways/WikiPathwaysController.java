@@ -127,6 +127,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 *
 	 * @param searchTerm string to search for
 	 * @return {@link Collection} of all {@link Pathway}s found for searchTerm
+	 * @throws RemoteException
+	 * @throws ExecutionException
 	 */
 	@RequestMapping(value = "/filteredPathways", method = POST)
 	@ResponseBody

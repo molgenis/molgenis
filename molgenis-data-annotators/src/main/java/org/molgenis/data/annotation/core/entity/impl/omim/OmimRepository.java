@@ -140,6 +140,9 @@ public class OmimRepository extends AbstractRepository
 
 	/**
 	 * Uses the map containing the parsed OMIM map to create a list of {@link Entity}
+	 *
+	 * @param omimEntriesByGeneSymbol
+	 * @param geneSymbol
 	 */
 	private void addEntityToGeneEntityList(Map<String, List<List<String>>> omimEntriesByGeneSymbol, String geneSymbol)
 	{

@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
@@ -27,9 +28,17 @@ import static org.molgenis.security.owned.OwnedEntityType.OWNED;
  */
 public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
-	public OwnedEntityRepositoryDecorator(Repository<Entity> delegateRepository)
+	private final Repository<Entity> decoratedRepo;
+
+	public OwnedEntityRepositoryDecorator(Repository<Entity> decoratedRepo)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override
@@ -42,7 +51,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	public Iterator<Entity> iterator()
 	{
 		if (mustAddRowLevelSecurity()) return findAll(new QueryImpl<>()).iterator();
-		return delegate().iterator();
+		return decoratedRepo.iterator();
 	}
 
 	@Override
@@ -52,7 +61,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 		{
 			fetch.field(OwnedEntityType.OWNER_USERNAME);
 		}
-		delegate().forEachBatched(fetch, entities ->
+		decoratedRepo.forEachBatched(fetch, entities ->
 		{
 			if (mustAddRowLevelSecurity())
 			{
@@ -71,14 +80,14 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	public long count()
 	{
 		if (mustAddRowLevelSecurity()) return count(new QueryImpl<>());
-		return delegate().count();
+		return decoratedRepo.count();
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return delegate().count(q);
+		return decoratedRepo.count(q);
 	}
 
 	@Override
@@ -88,20 +97,20 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 		{
 			addRowLevelSecurity(q);
 		}
-		return delegate().findAll(q);
+		return decoratedRepo.findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query<Entity> q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return delegate().findOne(q);
+		return decoratedRepo.findOne(q);
 	}
 
 	@Override
 	public Entity findOneById(Object id)
 	{
-		Entity e = delegate().findOneById(id);
+		Entity e = decoratedRepo.findOneById(id);
 
 		if (mustAddRowLevelSecurity())
 		{
@@ -118,7 +127,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 		{
 			fetch.field(OwnedEntityType.OWNER_USERNAME);
 		}
-		Entity e = delegate().findOneById(id, fetch);
+		Entity e = decoratedRepo.findOneById(id, fetch);
 
 		if (mustAddRowLevelSecurity())
 		{
@@ -131,7 +140,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		Stream<Entity> entities = delegate().findAll(ids);
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
 		if (mustAddRowLevelSecurity())
 		{
 			entities = entities.filter(OwnedEntityRepositoryDecorator::currentUserIsOwner);
@@ -146,7 +155,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 		{
 			fetch.field(OwnedEntityType.OWNER_USERNAME);
 		}
-		Stream<Entity> entities = delegate().findAll(ids, fetch);
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		if (mustAddRowLevelSecurity())
 		{
 			entities = entities.filter(OwnedEntityRepositoryDecorator::currentUserIsOwner);
@@ -158,7 +167,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(aggregateQuery.getQuery());
-		return delegate().aggregate(aggregateQuery);
+		return decoratedRepo.aggregate(aggregateQuery);
 	}
 
 	@Override
@@ -166,7 +175,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	{
 		if (isOwnedEntityType() && (mustAddRowLevelSecurity() || entity.get(OwnedEntityType.OWNER_USERNAME) == null))
 			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-		delegate().update(entity);
+		decoratedRepo.update(entity);
 	}
 
 	@Override
@@ -186,14 +195,14 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 			});
 		}
 
-		delegate().update(entities);
+		decoratedRepo.update(entities);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
 		if (mustAddRowLevelSecurity() && !currentUserIsOwner(entity)) return;
-		delegate().delete(entity);
+		decoratedRepo.delete(entity);
 	}
 
 	@Override
@@ -204,7 +213,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 			entities = entities.filter(OwnedEntityRepositoryDecorator::currentUserIsOwner);
 		}
 
-		delegate().delete(entities);
+		decoratedRepo.delete(entities);
 	}
 
 	@Override
@@ -216,7 +225,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 			if ((entity != null) && !currentUserIsOwner(entity)) return;
 		}
 
-		delegate().deleteById(id);
+		decoratedRepo.deleteById(id);
 	}
 
 	@Override
@@ -224,11 +233,11 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(delegate().findAll(ids));
+			delete(decoratedRepo.findAll(ids));
 		}
 		else
 		{
-			delegate().deleteAll(ids);
+			decoratedRepo.deleteAll(ids);
 		}
 	}
 
@@ -237,11 +246,11 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delegate().forEachBatched(entities -> delete(entities.stream()), 1000);
+			decoratedRepo.forEachBatched(entities -> delete(entities.stream()), 1000);
 		}
 		else
 		{
-			delegate().deleteAll();
+			decoratedRepo.deleteAll();
 		}
 	}
 
@@ -253,7 +262,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
 
-		delegate().add(entity);
+		decoratedRepo.add(entity);
 	}
 
 	@Override
@@ -273,7 +282,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 			});
 		}
 
-		return delegate().add(entities);
+		return decoratedRepo.add(entities);
 	}
 
 	private boolean mustAddRowLevelSecurity()

@@ -50,6 +50,7 @@ public class MetadataManagerController extends MolgenisPluginController
 		this.metadataManagerService = requireNonNull(metadataManagerService);
 	}
 
+	// Place '/**' annotation on method instead of class to avoid wrongly matching of URLs with a path variable
 	@RequestMapping(value = "/**", method = GET)
 	public String init(Model model)
 	{

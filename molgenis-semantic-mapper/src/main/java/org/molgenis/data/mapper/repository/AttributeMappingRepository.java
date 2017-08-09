@@ -41,6 +41,8 @@ public interface AttributeMappingRepository
 	 * Translates an algorithm to a list of {@link Attribute} based on the algorithm, and the
 	 * {@link EntityType} of the source entity
 	 *
+	 * @param algorithm
+	 * @param sourceEntityType
 	 * @return a list of {@link Attribute}
 	 */
 	List<Attribute> retrieveAttributesFromAlgorithm(String algorithm, EntityType sourceEntityType);

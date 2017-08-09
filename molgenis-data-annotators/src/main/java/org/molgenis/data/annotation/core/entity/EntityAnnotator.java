@@ -23,7 +23,7 @@ public interface EntityAnnotator extends Annotator
 	Iterable<Entity> annotateEntity(Entity sourceEntity, boolean updateMode);
 
 	/**
-	 * @return the {@link List} that must be present in the source entity.
+	 * @return the {@link List< Attribute >} that must be present in the source entity.
 	 */
 	List<Attribute> getRequiredAttributes();
 

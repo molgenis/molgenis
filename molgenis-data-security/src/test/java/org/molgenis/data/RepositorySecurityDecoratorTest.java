@@ -24,7 +24,7 @@ public class RepositorySecurityDecoratorTest
 {
 	private String entityTypeId;
 	private String entityId;
-	private Repository<Entity> delegateRepository;
+	private Repository<Entity> decoratedRepository;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
 
 	@SuppressWarnings("unchecked")
@@ -36,11 +36,11 @@ public class RepositorySecurityDecoratorTest
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
 		when(entityType.getLabel()).thenReturn(entityTypeId);
-		delegateRepository = mock(Repository.class);
-		when(delegateRepository.getName()).thenReturn(entityTypeId);
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		decoratedRepository = mock(Repository.class);
+		when(decoratedRepository.getName()).thenReturn(entityTypeId);
+		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 		when(entityType.getId()).thenReturn("entityID");
-		repositorySecurityDecorator = new RepositorySecurityDecorator(delegateRepository);
+		repositorySecurityDecorator = new RepositorySecurityDecorator(decoratedRepository);
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Stream<Entity> entities = Stream.empty();
-		when(delegateRepository.add(entities)).thenReturn(123);
+		when(decoratedRepository.add(entities)).thenReturn(123);
 		assertEquals(repositorySecurityDecorator.add(entities), Integer.valueOf(123));
 	}
 
@@ -71,8 +71,8 @@ public class RepositorySecurityDecoratorTest
 		}
 		catch (MolgenisDataAccessException e)
 		{
-			verify(delegateRepository, times(1)).getEntityType();
-			verifyNoMoreInteractions(delegateRepository);
+			verify(decoratedRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(decoratedRepository);
 			throw e;
 		}
 	}
@@ -90,9 +90,9 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0, entity1);
-		when(delegateRepository.findAll(ids, fetch)).thenReturn(Stream.of(entity0, entity1));
+		when(decoratedRepository.findAll(ids, fetch)).thenReturn(Stream.of(entity0, entity1));
 		assertEquals(entities.collect(toList()), repositorySecurityDecorator.findAll(ids, fetch).collect(toList()));
-		verify(delegateRepository, times(1)).findAll(ids, fetch);
+		verify(decoratedRepository, times(1)).findAll(ids, fetch);
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class RepositorySecurityDecoratorTest
 
 		Stream<Entity> entities = Stream.empty();
 		repositorySecurityDecorator.delete(entities);
-		verify(delegateRepository, times(1)).delete(entities);
+		verify(decoratedRepository, times(1)).delete(entities);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -123,8 +123,8 @@ public class RepositorySecurityDecoratorTest
 		}
 		catch (MolgenisDataAccessException e)
 		{
-			verify(delegateRepository, times(1)).getEntityType();
-			verifyNoMoreInteractions(delegateRepository);
+			verify(decoratedRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(decoratedRepository);
 			throw e;
 		}
 	}
@@ -141,7 +141,7 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0);
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		doNothing().when(delegateRepository).update(captor.capture());
+		doNothing().when(decoratedRepository).update(captor.capture());
 		repositorySecurityDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(entity0));
 	}
@@ -161,8 +161,8 @@ public class RepositorySecurityDecoratorTest
 		}
 		catch (MolgenisDataAccessException e)
 		{
-			verify(delegateRepository, times(1)).getEntityType();
-			verifyNoMoreInteractions(delegateRepository);
+			verify(decoratedRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(decoratedRepository);
 			throw e;
 		}
 	}
@@ -180,7 +180,7 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = repositorySecurityDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -197,7 +197,7 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		repositorySecurityDecorator.findAll(entityIds);
 	}
 
@@ -215,7 +215,7 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = repositorySecurityDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -233,7 +233,7 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		repositorySecurityDecorator.findAll(entityIds, fetch);
 	}
 
@@ -247,7 +247,7 @@ public class RepositorySecurityDecoratorTest
 		Stream<Object> ids = Stream.of(0, 1);
 		Fetch fetch = new Fetch();
 		Stream<Entity> entities = Stream.of(mock(Entity.class), mock(Entity.class));
-		when(delegateRepository.findAll(ids, fetch)).thenReturn(entities);
+		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
 		repositorySecurityDecorator.findAll(ids, fetch);
 	}
 
@@ -262,9 +262,9 @@ public class RepositorySecurityDecoratorTest
 		Object id = 0;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
-		assertEquals(entity, delegateRepository.findOneById(id, fetch));
-		verify(delegateRepository, times(1)).findOneById(id, fetch);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(entity, decoratedRepository.findOneById(id, fetch));
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -277,7 +277,7 @@ public class RepositorySecurityDecoratorTest
 		Object id = 0;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
 		repositorySecurityDecorator.findOneById(id, fetch);
 	}
 
@@ -292,7 +292,7 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
-		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), singletonList(entity0));
 	}
@@ -307,7 +307,7 @@ public class RepositorySecurityDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
-		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), singletonList(entity0));
 	}
@@ -325,7 +325,7 @@ public class RepositorySecurityDecoratorTest
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
 
-		verify(delegateRepository).forEachBatched(fetch, consumer, 1000);
+		verify(decoratedRepository).forEachBatched(fetch, consumer, 1000);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -340,7 +340,7 @@ public class RepositorySecurityDecoratorTest
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
 
-		verifyZeroInteractions(delegateRepository);
+		verifyZeroInteractions(decoratedRepository);
 	}
 
 	@Test

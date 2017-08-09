@@ -80,6 +80,7 @@ public class WikiPathwaysService
 	 *
 	 * @param searchTerm string to search for
 	 * @return Map with all matching pathway ids mapped to pathway name
+	 * @throws RemoteException
 	 */
 	public Collection<Pathway> getFilteredPathways(String searchTerm, String species) throws RemoteException
 	{
@@ -93,6 +94,7 @@ public class WikiPathwaysService
 	 *
 	 * @param pathwayId ID of the pathway in WikiPathways
 	 * @return String containing the pathway GPML
+	 * @throws RemoteException
 	 */
 	public String getPathwayGPML(String pathwayId) throws RemoteException
 	{
@@ -102,7 +104,8 @@ public class WikiPathwaysService
 	/**
 	 * Retrieves a colored pathway image
 	 *
-	 * @param pathwayId ID of the pathway from WikiPathways
+	 * @param pathwayId        ID of the pathway from WikiPathways
+	 * @param impactPerGraphId
 	 * @return String containing the pathway svg
 	 * @throws ExecutionException if loading of the cache fails
 	 */

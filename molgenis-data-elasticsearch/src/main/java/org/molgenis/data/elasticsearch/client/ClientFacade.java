@@ -592,7 +592,8 @@ public class ClientFacade implements Closeable
 		{
 			LOG.error(Arrays.stream(indexResponse.getShardInfo().getFailures())
 							//FIXME: logs Object.toString()
-							.map(ReplicationResponse.ShardInfo.Failure::toString).collect(joining("\n")));
+							.map(ReplicationResponse.ShardInfo.Failure::toString)
+							.collect(joining("\n")));
 			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 

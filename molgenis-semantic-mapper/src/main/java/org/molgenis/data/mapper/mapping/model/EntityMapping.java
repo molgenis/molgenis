@@ -96,6 +96,7 @@ public class EntityMapping
 	/**
 	 * Adds a new empty attribute mapping to a target attribute
 	 *
+	 * @param targetAttributeName
 	 * @return the newly created attribute mapping.
 	 */
 	public AttributeMapping addAttributeMapping(String targetAttributeName)

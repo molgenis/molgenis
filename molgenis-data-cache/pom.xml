@@ -12,6 +12,10 @@
 
     <name>data-cache</name>
 
+    <properties>
+        <caffeine.version>2.3.5</caffeine.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -32,10 +36,12 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>guava</artifactId>
+            <version>${caffeine.version}</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>

@@ -8,6 +8,8 @@ public interface IndexManagerService
 {
 	/**
 	 * Returns all indexed entity meta data sorted by entity label
+	 *
+	 * @return
 	 */
 	List<EntityType> getIndexedEntities();
 

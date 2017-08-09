@@ -6,12 +6,10 @@ The components needed to run MOLGENIS locally or on a server are:
 You can download, install and use MOLGENIS for free under license [LGPLv3]().
 **
 
-* [Java Platform (JDK) 8u144](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-* [Apache Tomcat v7.0.79](http://tomcat.apache.org/)
+* [Java Platform (JDK) 8u131](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* [Apache Tomcat v7.0.78](http://tomcat.apache.org/)
 * [PostgreSQL v9.6.3](https://www.postgresql.org/download/)
-* [Elasticsearch v5.5.1](https://www.elastic.co/downloads/elasticsearch)
-* [OpenCPU 2.0](https://www.opencpu.org/download.html) (R script execution)
-* [Python 3.6.2](https://www.python.org/downloads/) (Python script execution)
+* [Elasticsearch v5.4.1](https://www.elastic.co/downloads/elasticsearch)
 * [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
 
@@ -36,7 +34,6 @@ db_password=molgenis
 db_uri=jdbc\:postgresql\://localhost/molgenis
 admin.password=admin
 user.password=admin
-python_script_executable=<python3_executable_path>
 ```
 
 Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in PostgreSQL. This effectively means that whatever you call your database, your db_uri should point to it.

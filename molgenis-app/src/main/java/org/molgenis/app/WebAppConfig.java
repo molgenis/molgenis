@@ -12,7 +12,6 @@ import org.molgenis.util.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -24,7 +23,6 @@ import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
-@EnableAspectJAutoProxy
 @EnableWebMvc
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis")
@@ -44,6 +42,10 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	/**
 	 * Configures Freemarker
+	 *
+	 * @return
+	 * @throws IOException
+	 * @throws TemplateException
 	 */
 	@Override
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException

@@ -34,7 +34,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 
 	private EntityTypeRepositoryDecorator repo;
 	@Mock
-	private Repository<EntityType> delegateRepository;
+	private Repository<EntityType> decoratedRepo;
 	@Mock
 	private DataService dataService;
 	@Mock
@@ -75,7 +75,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(metaDataService.getBackend(entityType3)).thenReturn(repositoryCollection);
 		when(metaDataService.getBackend(backend)).thenReturn(repositoryCollection);
 
-		repo = new EntityTypeRepositoryDecorator(delegateRepository, dataService, entityTypeDependencyResolver);
+		repo = new EntityTypeRepositoryDecorator(decoratedRepo, dataService, entityTypeDependencyResolver);
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		when(entityType1.getAttributes()).thenReturn(emptyList());
 		repo.add(entityType1);
-		verify(delegateRepository).add(entityType1);
+		verify(decoratedRepo).add(entityType1);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Unknown backend \\[backend\\]")
@@ -92,7 +92,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(entityType1.getAttributes()).thenReturn(emptyList());
 		when(metaDataService.getBackend(entityType1)).thenReturn(null);
 		repo.add(entityType1);
-		verify(delegateRepository).add(entityType1);
+		verify(decoratedRepo).add(entityType1);
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 
 		repo.delete(entityType1);
 
-		verify(delegateRepository).delete(entityType1);
+		verify(decoratedRepo).delete(entityType1);
 		verify(repositoryCollection).deleteRepository(entityType1);
 
 		@SuppressWarnings("unchecked")
@@ -129,7 +129,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 
 		repo.delete(entityType1);
 
-		verify(delegateRepository).delete(entityType1);
+		verify(decoratedRepo).delete(entityType1);
 		verify(repositoryCollection, times(0)).deleteRepository(entityType1); // entity is abstract
 
 		@SuppressWarnings("unchecked")
@@ -145,9 +145,9 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		EntityType currentEntityType2 = mock(EntityType.class);
 		EntityType currentEntityType3 = mock(EntityType.class);
 		when(systemEntityTypeRegistry.getSystemEntityType(entityTypeId1)).thenReturn(null);
-		when(delegateRepository.findOneById(entityTypeId1)).thenReturn(currentEntityType);
-		when(delegateRepository.findOneById(entityTypeId2)).thenReturn(currentEntityType2);
-		when(delegateRepository.findOneById(entityTypeId3)).thenReturn(currentEntityType3);
+		when(decoratedRepo.findOneById(entityTypeId1)).thenReturn(currentEntityType);
+		when(decoratedRepo.findOneById(entityTypeId2)).thenReturn(currentEntityType2);
+		when(decoratedRepo.findOneById(entityTypeId3)).thenReturn(currentEntityType3);
 
 		Attribute attributeStays = mock(Attribute.class);
 		when(attributeStays.getName()).thenReturn("attributeStays");
@@ -182,7 +182,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 	public void updateConcreteEntityType()
 	{
 		when(entityType1.isAbstract()).thenReturn(false);
-		when(delegateRepository.findOneById(entityTypeId1)).thenReturn(entityType1);
+		when(decoratedRepo.findOneById(entityTypeId1)).thenReturn(entityType1);
 		when(entityType1.getOwnAllAttributes()).thenReturn(emptyList());
 
 		EntityType updatedEntityType1 = mock(EntityType.class);
@@ -204,14 +204,14 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(entityType2.getMappedByAttributes()).thenReturn(Stream.empty());
 		when(entityTypeDependencyResolver.resolve(any())).thenReturn(asList(entityType1, entityType2));
 		InOrder repositoryCollectionInOrder = inOrder(repositoryCollection);
-		InOrder decoratedRepoInOrder = inOrder(delegateRepository);
+		InOrder decoratedRepoInOrder = inOrder(decoratedRepo);
 
 		repo.delete(Stream.of(entityType1, entityType2));
 
 		verify(dataService).delete(ATTRIBUTE_META_DATA, mappedByAttribute);
 		repositoryCollectionInOrder.verify(repositoryCollection).deleteRepository(entityType2);
 		repositoryCollectionInOrder.verify(repositoryCollection).deleteRepository(entityType1);
-		decoratedRepoInOrder.verify(delegateRepository).delete(entityType2);
-		decoratedRepoInOrder.verify(delegateRepository).delete(entityType1);
+		decoratedRepoInOrder.verify(decoratedRepo).delete(entityType2);
+		decoratedRepoInOrder.verify(decoratedRepo).delete(entityType1);
 	}
 }

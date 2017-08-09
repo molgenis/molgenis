@@ -30,7 +30,7 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 	@Mock
 	private JobScheduler jobScheduler;
 	@Mock
-	private Repository<ScheduledJob> delegateRepository;
+	private Repository<ScheduledJob> decoratedRepo;
 	@Mock
 	private ScheduledJob scheduledJob;
 	@Mock
@@ -52,15 +52,21 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		reset(jobScheduler, delegateRepository, scheduledJob, jsonValidator);
+		reset(jobScheduler, decoratedRepo, scheduledJob, jsonValidator);
 
 		ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
 		when(scheduledJobType.getSchema()).thenReturn(schema);
 		when(scheduledJob.getParameters()).thenReturn(parameters);
 		when(scheduledJob.getType()).thenReturn(scheduledJobType);
 
-		scheduledJobRepositoryDecorator = new ScheduledJobRepositoryDecorator(delegateRepository, jobScheduler,
+		scheduledJobRepositoryDecorator = new ScheduledJobRepositoryDecorator(decoratedRepo, jobScheduler,
 				jsonValidator);
+	}
+
+	@Test
+	public void testDelegate() throws Exception
+	{
+		assertEquals(scheduledJobRepositoryDecorator.delegate(), decoratedRepo);
 	}
 
 	@Test
@@ -74,7 +80,7 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 	{
 		scheduledJobRepositoryDecorator.update(scheduledJob);
 		verify(jsonValidator).validate(parameters, schema);
-		verify(delegateRepository).update(scheduledJob);
+		verify(decoratedRepo).update(scheduledJob);
 		verify(jobScheduler).schedule(scheduledJob);
 	}
 
@@ -83,14 +89,14 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 	{
 		when(scheduledJob.getId()).thenReturn("id");
 		scheduledJobRepositoryDecorator.delete(scheduledJob);
-		verify(delegateRepository).delete(scheduledJob);
+		verify(decoratedRepo).delete(scheduledJob);
 		verify(jobScheduler).unschedule("id");
 	}
 
 	@Test
 	public void testDeleteFails()
 	{
-		doThrow(new MolgenisDataException("Failed")).when(delegateRepository).delete(scheduledJob);
+		doThrow(new MolgenisDataException("Failed")).when(decoratedRepo).delete(scheduledJob);
 		when(scheduledJob.getId()).thenReturn("id");
 		try
 		{
@@ -129,7 +135,7 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 			Stream<ScheduledJob> jobStream = invocation.getArgument(0);
 			jobStream.collect(Collectors.toList());
 			throw new MolgenisDataException("Failed");
-		}).when(delegateRepository).delete(any(Stream.class));
+		}).when(decoratedRepo).delete(any(Stream.class));
 		when(scheduledJob.getId()).thenReturn("id");
 		try
 		{

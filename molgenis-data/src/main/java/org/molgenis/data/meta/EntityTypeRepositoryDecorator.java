@@ -34,15 +34,22 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
  */
 public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<EntityType>
 {
+	private final Repository<EntityType> decoratedRepo;
 	private final DataService dataService;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-	public EntityTypeRepositoryDecorator(Repository<EntityType> delegateRepository, DataService dataService,
+	public EntityTypeRepositoryDecorator(Repository<EntityType> decoratedRepo, DataService dataService,
 			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
 		this.entityTypeDependencyResolver = entityTypeDependencyResolver;
+	}
+
+	@Override
+	protected Repository<EntityType> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override
@@ -116,7 +123,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private void addEntityType(EntityType entityType)
 	{
 		// add row to entities table
-		delegate().add(entityType);
+		decoratedRepo.add(entityType);
 		if (!entityType.isAbstract() && !MetaDataService.isMetaEntityType(entityType))
 		{
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType);
@@ -133,12 +140,12 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 		addAndRemoveAttributesInBackend(newEntityType);
 		updateEntityTypeInBackend(newEntityType);
 		// update entity
-		delegate().update(newEntityType);
+		decoratedRepo.update(newEntityType);
 	}
 
 	private void updateEntityTypeInBackend(EntityType updatedEntityType)
 	{
-		EntityType existingEntityType = delegate().findOneById(updatedEntityType.getId());
+		EntityType existingEntityType = decoratedRepo.findOneById(updatedEntityType.getId());
 		if (!existingEntityType.isAbstract())
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(existingEntityType);
@@ -155,14 +162,14 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	 */
 	private void addAndRemoveAttributesInBackend(EntityType entityType)
 	{
-		EntityType existingEntityType = delegate().findOneById(entityType.getId());
+		EntityType existingEntityType = decoratedRepo.findOneById(entityType.getId());
 		Map<String, Attribute> attrsMap = toAttributesMap(entityType);
 		Map<String, Attribute> existingAttrsMap = toAttributesMap(existingEntityType);
 
 		dataService.getMeta().getConcreteChildren(entityType).forEach(concreteEntityType ->
 		{
 			RepositoryCollection backend = dataService.getMeta().getBackend(concreteEntityType);
-			EntityType concreteExistingEntityType = delegate().findOneById(concreteEntityType.getId());
+			EntityType concreteExistingEntityType = decoratedRepo.findOneById(concreteEntityType.getId());
 
 			addNewAttributesInBackend(attrsMap, existingAttrsMap, backend, concreteExistingEntityType);
 			deleteRemovedAttributesInBackend(attrsMap, existingAttrsMap, backend, concreteExistingEntityType);
@@ -225,7 +232,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 		deleteEntityAttributes(entityType);
 
 		// delete row from entities table
-		delegate().delete(entityType);
+		decoratedRepo.delete(entityType);
 	}
 
 	private void deleteEntityAttributes(EntityType entityType)

@@ -6,8 +6,7 @@
     - [Run in Tomcat](quickstart/guide-tomcat.md)
     - [Compile code](quickstart/guide-local-compile.md)
 - User Documentation
-    - [Quick data upload](user_documentation/guide-quick-upload.md)
-    - [Advanced data upload](user_documentation/guide-upload.md)
+    - [Uploading data](user_documentation/guide-upload.md)
         - [EMX format](user_documentation/ref-emx.md)
     - [Exploring data](user_documentation/guide-explore.md)
     - [Admin features](user_documentation/guide-admin.md)

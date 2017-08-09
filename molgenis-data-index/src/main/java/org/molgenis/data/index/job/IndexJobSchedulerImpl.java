@@ -26,7 +26,7 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.*;
 import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class IndexJobSchedulerImpl implements IndexJobScheduler
 {

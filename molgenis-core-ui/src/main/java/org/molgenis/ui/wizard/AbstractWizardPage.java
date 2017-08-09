@@ -21,6 +21,8 @@ public abstract class AbstractWizardPage implements WizardPage
 	/**
 	 * Name of the freemarker template (including the ftl) that holds the piece of html for this wizard page that is
 	 * pasted into the wizard html template
+	 *
+	 * @return
 	 */
 	@Override
 	public String getFreemarkerTemplateName()
@@ -35,6 +37,7 @@ public abstract class AbstractWizardPage implements WizardPage
 	 * <p>
 	 * Returns the successmessage, if you don't have a successmessage return null
 	 *
+	 * @param request
 	 * @return message to show the user (success message)
 	 */
 	@Override

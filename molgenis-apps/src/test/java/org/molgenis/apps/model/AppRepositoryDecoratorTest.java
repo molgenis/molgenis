@@ -25,7 +25,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	private static final String APP_NAME = "appName";
 
 	@Mock
-	private Repository<App> delegateRepository;
+	private Repository<App> appRepository;
 
 	@Mock
 	private FileStore fileStore;
@@ -35,7 +35,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		appRepositoryDecorator = new AppRepositoryDecorator(delegateRepository, fileStore);
+		appRepositoryDecorator = new AppRepositoryDecorator(appRepository, fileStore);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -45,11 +45,17 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
+	public void testDelegate()
+	{
+		assertEquals(appRepositoryDecorator.delegate(), appRepository);
+	}
+
+	@Test
 	public void testAddInactiveNoResourceZip()
 	{
 		App app = getMockApp("id", false);
 		appRepositoryDecorator.add(app);
-		verify(delegateRepository).add(app);
+		verify(appRepository).add(app);
 	}
 
 	@Test
@@ -57,7 +63,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App app = getMockApp("id", true);
 		appRepositoryDecorator.add(app);
-		verify(delegateRepository).add(app);
+		verify(appRepository).add(app);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'app-invalid.zip' is not a valid zip file.")
@@ -65,7 +71,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App app = getMockApp("id", false, "app-invalid.zip");
 		appRepositoryDecorator.add(app);
-		verify(delegateRepository).add(app);
+		verify(appRepository).add(app);
 	}
 
 	@Test
@@ -73,7 +79,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App app = getMockApp("id", false, "app-valid.zip");
 		appRepositoryDecorator.add(app);
-		verify(delegateRepository).add(app);
+		verify(appRepository).add(app);
 		//noinspection ResultOfMethodCallIgnored
 		verify(fileStore, never()).getStorageDir();
 	}
@@ -83,7 +89,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App app = getMockApp("id", true, "app-valid.zip");
 		appRepositoryDecorator.add(app);
-		verify(delegateRepository).add(app);
+		verify(appRepository).add(app);
 		//noinspection ResultOfMethodCallIgnored
 		verify(fileStore).getStorageDir();
 	}
@@ -100,7 +106,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).add(captor.capture());
+		verify(appRepository).add(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(app0, app1, app2, app3, app4));
 
 		//noinspection ResultOfMethodCallIgnored
@@ -112,9 +118,9 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App existingApp = getMockApp("id", true, "app-valid.zip");
 		App app = getMockApp("id", true, "app-valid-update.zip");
-		when(delegateRepository.findOneById("id")).thenReturn(existingApp);
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
-		verify(delegateRepository).update(app);
+		verify(appRepository).update(app);
 		verify(fileStore).deleteDirectory(anyString());
 		//noinspection ResultOfMethodCallIgnored
 		verify(fileStore).getStorageDir();
@@ -125,9 +131,9 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App existingApp = getMockApp("id", false, "app-valid.zip");
 		App app = getMockApp("id", false, "app-valid.zip");
-		when(delegateRepository.findOneById("id")).thenReturn(existingApp);
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
-		verify(delegateRepository).update(app);
+		verify(appRepository).update(app);
 		//noinspection ResultOfMethodCallIgnored
 		verify(fileStore, never()).getStorageDir();
 	}
@@ -137,7 +143,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App existingApp = getMockApp("id", false, "app-valid.zip");
 		App app = getMockApp("id", false, "app-invalid.zip");
-		when(delegateRepository.findOneById("id")).thenReturn(existingApp);
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
 	}
 
@@ -146,7 +152,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App existingApp = getMockApp("id", false);
 		App app = getMockApp("id", false, "app-invalid.zip");
-		when(delegateRepository.findOneById("id")).thenReturn(existingApp);
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(app);
 	}
 
@@ -155,11 +161,11 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	{
 		App existingApp = getMockApp("id", true, "app-valid.zip");
 		App app = getMockApp("id", true, "app-valid-update.zip");
-		when(delegateRepository.findOneById("id")).thenReturn(existingApp);
+		when(appRepository.findOneById("id")).thenReturn(existingApp);
 		appRepositoryDecorator.update(Stream.of(app));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).update(captor.capture());
+		verify(appRepository).update(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), singletonList(app));
 		verify(fileStore).deleteDirectory(anyString());
 		//noinspection ResultOfMethodCallIgnored
@@ -192,7 +198,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<App>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).delete(captor.capture());
+		verify(appRepository).delete(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(app0, app1, app2));
 
 		verify(fileStore, times(2)).deleteDirectory(anyString());
@@ -202,7 +208,7 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDeleteById() throws IOException
 	{
 		App app = getMockApp("id", true, "app-valid.zip");
-		when(delegateRepository.findOneById("id")).thenReturn(app);
+		when(appRepository.findOneById("id")).thenReturn(app);
 		appRepositoryDecorator.deleteById("id");
 		verify(fileStore).deleteDirectory(anyString());
 	}

@@ -32,6 +32,10 @@ public class MenuUtils
 
 	/**
 	 * Return URI path to menu item of the given id or null if item does not exist.
+	 *
+	 * @param id
+	 * @param menu
+	 * @return
 	 */
 	public static String findMenuItemPath(String id, Menu menu)
 	{

@@ -322,7 +322,8 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		Iterable<Object> values = Arrays.asList(Boolean.TRUE, Boolean.FALSE);
 		Query<Entity> q = new QueryImpl<>().in(boolAttrName, values);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-		QueryBuilder expectedQuery = constantScoreQuery(termsQuery(boolAttrName, Boolean.TRUE, Boolean.FALSE));
+		QueryBuilder expectedQuery = constantScoreQuery(
+				termsQuery(boolAttrName, Boolean.TRUE, Boolean.FALSE));
 		assertQueryBuilderEquals(query, expectedQuery);
 	}
 

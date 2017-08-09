@@ -143,12 +143,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
 		metaDataService = mock(MetaDataService.class);
-		when(metaDataService.createRepository(
-				argThat(obj -> obj != null && obj.getId().equals(hopMetaData.getId())))).thenReturn(hopRepo);
-		when(metaDataService.createRepository(
-				argThat(obj -> obj != null && obj.getId().equals(geneMetaData.getId())))).thenReturn(geneRepo);
-		when(metaDataService.createRepository(
-				argThat(obj -> obj != null && obj.getId().equals(SOURCE_EXON_ENTITY)))).thenReturn(exonRepo);
+		when(metaDataService.createRepository(argThat(obj -> obj != null && obj.getId().equals(hopMetaData.getId()))))
+				.thenReturn(hopRepo);
+		when(metaDataService.createRepository(argThat(obj -> obj != null && obj.getId().equals(geneMetaData.getId()))))
+				.thenReturn(geneRepo);
+		when(metaDataService.createRepository(argThat(obj -> obj != null && obj.getId().equals(SOURCE_EXON_ENTITY))))
+				.thenReturn(exonRepo);
 
 		when(hopRepo.getName()).thenReturn(TARGET_HOP_ENTITY);
 		when(hopRepo.getEntityType()).thenReturn(hopMetaData);
@@ -306,8 +306,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
 
 		when(addEntityRepo.getEntityType()).thenReturn(targetMeta);
-		when(metaDataService.createRepository(argThat(obj -> obj.getId().equals(entityTypeId)))).thenReturn(
-				addEntityRepo);
+		when(metaDataService.createRepository(argThat(obj -> obj.getId().equals(entityTypeId))))
+				.thenReturn(addEntityRepo);
 
 		// add an entity to the source
 		List<Entity> sourceGeneEntities = newArrayList();
@@ -364,8 +364,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.getRepository(entityTypeId)).thenReturn(updateEntityRepo);
 
 		when(updateEntityRepo.getEntityType()).thenReturn(targetMeta);
-		when(metaDataService.createRepository(argThat(obj -> obj.getLabel().equals(entityTypeId)))).thenReturn(
-				updateEntityRepo);
+		when(metaDataService.createRepository(argThat(obj -> obj.getLabel().equals(entityTypeId))))
+				.thenReturn(updateEntityRepo);
 
 		// add an entity to the source
 		List<Entity> sourceGeneEntities = newArrayList();

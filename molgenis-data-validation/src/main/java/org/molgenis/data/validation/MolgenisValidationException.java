@@ -38,6 +38,8 @@ public class MolgenisValidationException extends MolgenisDataException
 
 	/**
 	 * renumber the violation row indices with the actual row numbers
+	 *
+	 * @param actualIndices
 	 */
 	public void renumberViolationRowIndices(List<Integer> actualIndices)
 	{

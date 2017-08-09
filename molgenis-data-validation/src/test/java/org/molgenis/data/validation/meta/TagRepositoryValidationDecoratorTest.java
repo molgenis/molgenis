@@ -21,16 +21,16 @@ public class TagRepositoryValidationDecoratorTest
 {
 
 	private TagRepositoryValidationDecorator tagRepositoryValidationDecorator;
-	private Repository<Tag> delegateRepository;
+	private Repository<Tag> decoratedRepo;
 	private TagValidator tagValidator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		delegateRepository = mock(Repository.class);
+		decoratedRepo = mock(Repository.class);
 		tagValidator = mock(TagValidator.class);
-		tagRepositoryValidationDecorator = new TagRepositoryValidationDecorator(delegateRepository, tagValidator);
+		tagRepositoryValidationDecorator = new TagRepositoryValidationDecorator(decoratedRepo, tagValidator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -40,13 +40,19 @@ public class TagRepositoryValidationDecoratorTest
 	}
 
 	@Test
+	public void testDelegate() throws Exception
+	{
+		assertEquals(tagRepositoryValidationDecorator.delegate(), decoratedRepo);
+	}
+
+	@Test
 	public void testUpdateValid() throws Exception
 	{
 		Tag tag = mock(Tag.class);
 		doNothing().when(tagValidator).validate(tag);
 		tagRepositoryValidationDecorator.update(tag);
 		verify(tagValidator).validate(tag);
-		verify(delegateRepository).update(tag);
+		verify(decoratedRepo).update(tag);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
@@ -64,7 +70,7 @@ public class TagRepositoryValidationDecoratorTest
 		doNothing().when(tagValidator).validate(tag);
 		tagRepositoryValidationDecorator.add(tag);
 		verify(tagValidator).validate(tag);
-		verify(delegateRepository).add(tag);
+		verify(decoratedRepo).add(tag);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class)
@@ -85,7 +91,7 @@ public class TagRepositoryValidationDecoratorTest
 		tagRepositoryValidationDecorator.update(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).update(tagCaptor.capture());
+		verify(decoratedRepo).update(tagCaptor.capture());
 		assertEquals(tagCaptor.getValue().collect(toList()), asList(tag0, tag1));
 		verify(tagValidator).validate(tag0);
 		verify(tagValidator).validate(tag1);
@@ -101,7 +107,7 @@ public class TagRepositoryValidationDecoratorTest
 		tagRepositoryValidationDecorator.update(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).update(tagCaptor.capture());
+		verify(decoratedRepo).update(tagCaptor.capture());
 		tagCaptor.getValue().count(); // consume stream
 	}
 
@@ -115,7 +121,7 @@ public class TagRepositoryValidationDecoratorTest
 		tagRepositoryValidationDecorator.add(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).add(tagCaptor.capture());
+		verify(decoratedRepo).add(tagCaptor.capture());
 		assertEquals(tagCaptor.getValue().collect(toList()), asList(tag0, tag1));
 		verify(tagValidator).validate(tag0);
 		verify(tagValidator).validate(tag1);
@@ -131,7 +137,7 @@ public class TagRepositoryValidationDecoratorTest
 		tagRepositoryValidationDecorator.add(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).add(tagCaptor.capture());
+		verify(decoratedRepo).add(tagCaptor.capture());
 		tagCaptor.getValue().count(); // consume stream
 	}
 }

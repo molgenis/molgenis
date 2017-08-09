@@ -261,7 +261,10 @@ public class ChartDataServiceImpl implements ChartDataService
 	/**
 	 * Get a map containing keys to different data lists
 	 *
-	 * @param split (String) if null or empty String will not split
+	 * @param entityType
+	 * @param iterable
+	 * @param attributeName
+	 * @param split         (String) if null or empty String will not split
 	 * @return map (Map<String, List<Double>>)
 	 */
 	private Map<String, List<Double>> getBoxPlotDataListMap(EntityType entityType, Iterable<Entity> iterable,
@@ -302,6 +305,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @param repo         (Repository<? extends Entity>) the repository where the data exists
 	 * @param queryRules   (List<QueryRule>) the query rules to be used getting the data from the repo
 	 * @param sort         (Sort)
+	 * @return
 	 */
 
 	private Iterable<Entity> getIterable(String entityTypeId, Repository<Entity> repo, List<QueryRule> queryRules,
@@ -329,6 +333,9 @@ public class ChartDataServiceImpl implements ChartDataService
 	/**
 	 * retrieves the value of the designated column as attributeJavaType
 	 *
+	 * @param entity
+	 * @param attributeName
+	 * @param attributeFieldTypeEnum
 	 * @return value (Object)
 	 */
 	private Object getJavaValue(Entity entity, String attributeName, AttributeType attributeFieldTypeEnum)

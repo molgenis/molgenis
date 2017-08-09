@@ -26,6 +26,8 @@ public class PackageSearchResultItem
 
 	/**
 	 * A description of what was matched, package, entity or attribute
+	 *
+	 * @return
 	 */
 	public String getMatchDescription()
 	{

@@ -20,25 +20,32 @@ import static java.util.Objects.requireNonNull;
  */
 public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<Attribute>
 {
+	private final Repository<Attribute> decoratedRepo;
 	private final DataService dataService;
 
-	public AttributeRepositoryDecorator(Repository<Attribute> delegateRepository, DataService dataService)
+	public AttributeRepositoryDecorator(Repository<Attribute> decoratedRepo, DataService dataService)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
+	}
+
+	@Override
+	protected Repository<Attribute> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override
 	public void update(Attribute attr)
 	{
 		updateBackend(attr);
-		delegate().update(attr);
+		decoratedRepo.update(attr);
 	}
 
 	@Override
 	public void update(Stream<Attribute> attrs)
 	{
-		delegate().update(attrs.filter(attr ->
+		decoratedRepo.update(attrs.filter(attr ->
 		{
 			updateBackend(attr);
 			return true;
@@ -64,7 +71,7 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 		}
 
 		// remove this attribute
-		delegate().delete(attr);
+		decoratedRepo.delete(attr);
 	}
 
 	@Override

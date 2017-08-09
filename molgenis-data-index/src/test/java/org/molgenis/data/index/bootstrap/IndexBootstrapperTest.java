@@ -1,6 +1,7 @@
 package org.molgenis.data.index.bootstrap;
 
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -12,9 +13,7 @@ import org.molgenis.data.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -30,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
@@ -100,13 +98,10 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
 		IndexAction action = mock(IndexAction.class);
 		when(action.getEntityTypeId()).thenReturn("myEntityTypeName");
-		when(action.getEntityId()).thenReturn("1");
+		when(action.getEntityId()).thenReturn("myEntityId");
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn("myEntityTypeName");
 		when(entityTypeFactory.create("myEntityTypeName")).thenReturn(entityType);
-		Attribute idAttribute = mock(Attribute.class);
-		when(idAttribute.getDataType()).thenReturn(AttributeType.INT);
-		when(entityType.getIdAttribute()).thenReturn(idAttribute);
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
 				IndexJobExecution.class)).thenReturn(Stream.of(indexJobExecution));
@@ -119,7 +114,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		//verify that we are not passing through the "missing index" code
 		verify(metaDataService, never()).getRepositories();
 		//verify that a new job is registered for the failed one
-		verify(indexActionRegisterService).register(entityType, 1);
+		verify(indexActionRegisterService).register(entityType, "myEntityId");
 	}
 
 	@Test
@@ -133,7 +128,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		indexBootstrapper.bootstrap();
 
 		//verify that no new jobs are registered
-		verify(indexActionRegisterService, never()).register(any(EntityType.class), any());
+		verify(indexActionRegisterService, never()).register(any(EntityType.class), Mockito.anyString());
 	}
 
 	@Configuration

@@ -1,7 +1,7 @@
 package org.molgenis.ui.security;
 
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.util.ApplicationContextProvider;
@@ -21,9 +21,9 @@ public class MolgenisAccessDecisionVoterTest
 	@BeforeMethod
 	public void setUp()
 	{
-		PermissionService permissionService = mock(PermissionService.class);
-		when(permissionService.hasPermissionOnPlugin("plugingranted", Permission.READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnPlugin("plugindenied", Permission.READ)).thenReturn(false);
+		MolgenisPermissionService molgenisPermissionService = mock(MolgenisPermissionService.class);
+		when(molgenisPermissionService.hasPermissionOnPlugin("plugingranted", Permission.READ)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnPlugin("plugindenied", Permission.READ)).thenReturn(false);
 
 		MolgenisUi molgenisUi = mock(MolgenisUi.class);
 		MolgenisUiMenu menu = mock(MolgenisUiMenu.class);
@@ -31,7 +31,7 @@ public class MolgenisAccessDecisionVoterTest
 		when(molgenisUi.getMenu("menudenied")).thenReturn(null);
 
 		ApplicationContext ctx = mock(ApplicationContext.class);
-		when(ctx.getBean(PermissionService.class)).thenReturn(permissionService);
+		when(ctx.getBean(MolgenisPermissionService.class)).thenReturn(molgenisPermissionService);
 		when(ctx.getBean(MolgenisUi.class)).thenReturn(molgenisUi);
 
 		new ApplicationContextProvider().setApplicationContext(ctx);

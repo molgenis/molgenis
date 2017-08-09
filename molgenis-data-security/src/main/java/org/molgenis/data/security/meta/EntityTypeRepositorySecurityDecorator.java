@@ -8,8 +8,8 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.util.Iterator;
@@ -39,18 +39,25 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
  */
 public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDecorator<EntityType>
 {
+	private final Repository<EntityType> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final PermissionService permissionService;
+	private final MolgenisPermissionService permissionService;
 	private final DataService dataService;
 
-	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
+	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> decoratedRepo,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
 			DataService dataService)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);
+	}
+
+	@Override
+	protected Repository<EntityType> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override
@@ -58,11 +65,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().count();
+			return decoratedRepo.count();
 		}
 		else
 		{
-			Stream<EntityType> EntityTypes = StreamSupport.stream(delegate().spliterator(), false);
+			Stream<EntityType> EntityTypes = StreamSupport.stream(decoratedRepo.spliterator(), false);
 			return filterCountPermission(EntityTypes).count();
 		}
 	}
@@ -72,14 +79,14 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().count(q);
+			return decoratedRepo.count(q);
 		}
 		else
 		{
 			// ignore query offset and page size
 			Query<EntityType> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<EntityType> EntityTypes = delegate().findAll(qWithoutLimitOffset);
+			Stream<EntityType> EntityTypes = decoratedRepo.findAll(qWithoutLimitOffset);
 			return filterCountPermission(EntityTypes).count();
 		}
 	}
@@ -89,13 +96,13 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findAll(q);
+			return decoratedRepo.findAll(q);
 		}
 		else
 		{
 			Query<EntityType> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<EntityType> EntityTypes = delegate().findAll(qWithoutLimitOffset);
+			Stream<EntityType> EntityTypes = decoratedRepo.findAll(qWithoutLimitOffset);
 			Stream<EntityType> filteredEntityTypes = filterReadPermission(EntityTypes);
 			if (q.getOffset() > 0)
 			{
@@ -114,11 +121,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().iterator();
+			return decoratedRepo.iterator();
 		}
 		else
 		{
-			Stream<EntityType> EntityTypeStream = StreamSupport.stream(delegate().spliterator(), false);
+			Stream<EntityType> EntityTypeStream = StreamSupport.stream(decoratedRepo.spliterator(), false);
 			return filterReadPermission(EntityTypeStream).iterator();
 		}
 	}
@@ -128,12 +135,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			delegate().forEachBatched(fetch, consumer, batchSize);
+			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 		}
 		else
 		{
 			FilteredConsumer filteredConsumer = new FilteredConsumer(consumer, permissionService);
-			delegate().forEachBatched(fetch, filteredConsumer::filter, batchSize);
+			decoratedRepo.forEachBatched(fetch, filteredConsumer::filter, batchSize);
 		}
 	}
 
@@ -142,12 +149,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findOne(q);
+			return decoratedRepo.findOne(q);
 		}
 		else
 		{
 			// ignore query offset and page size
-			return filterReadPermission(delegate().findOne(q));
+			return filterReadPermission(decoratedRepo.findOne(q));
 		}
 	}
 
@@ -156,11 +163,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findOneById(id);
+			return decoratedRepo.findOneById(id);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findOneById(id));
+			return filterReadPermission(decoratedRepo.findOneById(id));
 		}
 	}
 
@@ -169,11 +176,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findOneById(id, fetch);
+			return decoratedRepo.findOneById(id, fetch);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findOneById(id, fetch));
+			return filterReadPermission(decoratedRepo.findOneById(id, fetch));
 		}
 	}
 
@@ -182,11 +189,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findAll(ids);
+			return decoratedRepo.findAll(ids);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids));
+			return filterReadPermission(decoratedRepo.findAll(ids));
 		}
 	}
 
@@ -195,11 +202,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().findAll(ids, fetch);
+			return decoratedRepo.findAll(ids, fetch);
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids, fetch));
+			return filterReadPermission(decoratedRepo.findAll(ids, fetch));
 		}
 	}
 
@@ -208,7 +215,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return delegate().aggregate(aggregateQuery);
+			return decoratedRepo.aggregate(aggregateQuery);
 		}
 		else
 		{
@@ -395,15 +402,15 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
 	{
 		return EntityTypeStream.filter(
-				entityType -> permissionService.hasPermissionOnEntityType(entityType.getId(), permission));
+				entityType -> permissionService.hasPermissionOnEntity(entityType.getId(), permission));
 	}
 
 	private static class FilteredConsumer
 	{
 		private final Consumer<List<EntityType>> consumer;
-		private final PermissionService permissionService;
+		private final MolgenisPermissionService permissionService;
 
-		FilteredConsumer(Consumer<List<EntityType>> consumer, PermissionService permissionService)
+		FilteredConsumer(Consumer<List<EntityType>> consumer, MolgenisPermissionService permissionService)
 		{
 			this.consumer = requireNonNull(consumer);
 			this.permissionService = requireNonNull(permissionService);
@@ -412,7 +419,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		void filter(List<EntityType> entityTypes)
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
-															  .filter(entityType -> permissionService.hasPermissionOnEntityType(
+															  .filter(entityType -> permissionService.hasPermissionOnEntity(
 																	  entityType.getId(), READ))
 															  .collect(toList());
 			consumer.accept(filteredEntityTypes);

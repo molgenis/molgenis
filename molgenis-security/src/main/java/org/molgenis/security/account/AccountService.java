@@ -11,6 +11,8 @@ public interface AccountService
 
 	/**
 	 * Activate a registered user
+	 *
+	 * @param activationCode
 	 */
 	void activateUser(String activationCode);
 

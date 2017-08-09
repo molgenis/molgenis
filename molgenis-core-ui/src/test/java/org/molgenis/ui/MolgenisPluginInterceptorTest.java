@@ -1,7 +1,7 @@
 package org.molgenis.ui;
 
 import org.molgenis.data.DataService;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,14 +19,14 @@ import static org.testng.Assert.*;
 public class MolgenisPluginInterceptorTest
 {
 	private MolgenisUi molgenisUi;
-	private PermissionService permissionService;
+	private MolgenisPermissionService molgenisPermissionService;
 	private Authentication authentication;
 
 	@BeforeMethod
 	public void setUp()
 	{
 		molgenisUi = mock(MolgenisUi.class);
-		permissionService = mock(PermissionService.class);
+		molgenisPermissionService = mock(MolgenisPermissionService.class);
 		authentication = mock(Authentication.class);
 		when(authentication.getPrincipal()).thenReturn("username");
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -47,7 +47,7 @@ public class MolgenisPluginInterceptorTest
 		when(handlerMethod.getBean()).thenReturn(molgenisPlugin);
 
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi,
-				permissionService);
+				molgenisPermissionService);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		assertTrue(molgenisPluginInterceptor.preHandle(request, null, handlerMethod));
@@ -63,7 +63,7 @@ public class MolgenisPluginInterceptorTest
 		when(handlerMethod.getBean()).thenReturn(molgenisPlugin);
 
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi,
-				permissionService);
+				molgenisPermissionService);
 
 		String contextUri = "/plugin/not-test";
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -77,7 +77,7 @@ public class MolgenisPluginInterceptorTest
 	public void postHandle() throws Exception
 	{
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi,
-				permissionService);
+				molgenisPermissionService);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -92,7 +92,7 @@ public class MolgenisPluginInterceptorTest
 	public void postHandle_pluginIdExists() throws Exception
 	{
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi,
-				permissionService);
+				molgenisPermissionService);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject(MolgenisPluginAttributes.KEY_PLUGIN_ID, "plugin_id");
@@ -108,7 +108,7 @@ public class MolgenisPluginInterceptorTest
 	public void postHandlePluginidWithQueryString() throws Exception
 	{
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi,
-				permissionService);
+				molgenisPermissionService);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "plugin_id_test";
 
 		HttpServletRequest mockHttpServletRequest = mock(HttpServletRequest.class);
@@ -133,7 +133,7 @@ public class MolgenisPluginInterceptorTest
 		when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi,
-				permissionService);
+				molgenisPermissionService);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -154,7 +154,7 @@ public class MolgenisPluginInterceptorTest
 		when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi,
-				permissionService);
+				molgenisPermissionService);
 		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);

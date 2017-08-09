@@ -23,8 +23,8 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -115,7 +115,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Autowired
-	private PermissionService permissionService;
+	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
@@ -623,7 +623,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
-		when(permissionService.hasPermissionOnEntityType("entity", Permission.READ)).thenReturn(false);
+		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
 		ResultActions resultActions = mockMvc.perform(
@@ -672,7 +672,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(permissionService.hasPermissionOnEntityType("entity", Permission.READ)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
@@ -688,6 +688,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_NO_ENTITIES
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testCreateEntitiesExceptions1() throws Exception
@@ -698,6 +700,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testCreateEntitiesExceptions2() throws Exception
@@ -708,6 +712,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityException
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testCreateEntitiesExceptions3() throws Exception
@@ -718,6 +724,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
+	 *
+	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
@@ -768,7 +776,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testUpdateEntitiesMolgenisValidationException() throws Exception
 	{
-		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5L)));
+		Exception e = new MolgenisValidationException(
+				Collections.singleton(new ConstraintViolation("Message", 5L)));
 		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
@@ -783,6 +792,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_NO_ENTITIES
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesExceptions1() throws Exception
@@ -793,6 +804,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesExceptions2() throws Exception
@@ -803,6 +816,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityException
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesExceptions3() throws Exception
@@ -828,6 +843,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_NO_ENTITIES
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions1() throws Exception
@@ -838,6 +855,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions2() throws Exception
@@ -848,6 +867,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityException
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
@@ -858,6 +879,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownAttributeException
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
@@ -868,6 +891,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataAccessExceptionReadOnlyAttribute
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions5() throws Exception
@@ -993,6 +1018,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataExceptionIdentifierAndValue
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
@@ -1004,6 +1031,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception
@@ -1015,6 +1044,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	/**
 	 * createUnknownEntityExceptionNotValidId
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception
@@ -1100,9 +1131,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public PermissionService permissionService()
+		public MolgenisPermissionService molgenisPermissionService()
 		{
-			return mock(PermissionService.class);
+			return mock(MolgenisPermissionService.class);
 		}
 
 		@Bean
@@ -1162,7 +1193,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		@Bean
 		public RestControllerV2 restController()
 		{
-			return new RestControllerV2(dataService(), permissionService(),
+			return new RestControllerV2(dataService(), molgenisPermissionService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService(), permissionSystemService(),
 					repositoryCopier(), localizationService());

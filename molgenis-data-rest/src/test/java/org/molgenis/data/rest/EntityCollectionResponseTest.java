@@ -4,7 +4,7 @@ import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -18,7 +18,7 @@ import static org.testng.Assert.assertNull;
 public class EntityCollectionResponseTest
 {
 	private EntityType entityType;
-	private PermissionService permissionService;
+	private MolgenisPermissionService permissionService;
 	private DataService dataService;
 	private LanguageService languageService;
 
@@ -27,7 +27,7 @@ public class EntityCollectionResponseTest
 	{
 		entityType = Mockito.mock(EntityType.class);
 		when(entityType.getAttributes()).thenReturn(Collections.emptyList());
-		permissionService = mock(PermissionService.class);
+		permissionService = mock(MolgenisPermissionService.class);
 		dataService = mock(DataService.class);
 		languageService = mock(LanguageService.class);
 	}

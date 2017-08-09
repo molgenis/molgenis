@@ -11,7 +11,7 @@ import org.molgenis.ontology.controller.SortaServiceController;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.ui.menu.MenuReaderService;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class SortaJobProcessor
 
 	public void process()
 	{
-		RunAsSystemAspect.runAsSystem(() ->
+		RunAsSystemProxy.runAsSystem(() ->
 		{
 			long maxCount = dataService.count(inputRepositoryName, new QueryImpl<>());
 			progress.status(

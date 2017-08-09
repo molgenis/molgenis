@@ -50,7 +50,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private L3Cache l3Cache;
 
 	@Mock
-	private Repository<Entity> delegateRepository;
+	private Repository<Entity> decoratedRepository;
 
 	@Mock
 	private TransactionInformation transactionInformation;
@@ -93,16 +93,16 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		entity3.set(ID, 3);
 		entity3.set(COUNTRY, "GB");
 
-		when(delegateRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE));
-		l3CacheRepositoryDecorator = new L3CacheRepositoryDecorator(delegateRepository, l3Cache,
+		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE));
+		l3CacheRepositoryDecorator = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache,
 				transactionInformation);
-		verify(delegateRepository).getCapabilities();
+		verify(decoratedRepository).getCapabilities();
 		query = new QueryImpl<>().eq(COUNTRY, "GB");
 		query.pageSize(10);
 		query.sort(new Sort().on(COUNTRY));
 		query.setFetch(fetch);
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
-		when(delegateRepository.getName()).thenReturn(repositoryName);
+		when(decoratedRepository.getEntityType()).thenReturn(entityType);
+		when(decoratedRepository.getName()).thenReturn(repositoryName);
 	}
 
 	@Test
@@ -110,20 +110,20 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
 		Query<Entity> queryWithPageSizeOne = new QueryImpl<>(query).pageSize(1);
-		when(l3Cache.get(delegateRepository, queryWithPageSizeOne)).thenReturn(singletonList(3));
-		when(delegateRepository.findOneById(3, fetch)).thenReturn(entity3);
+		when(l3Cache.get(decoratedRepository, queryWithPageSizeOne)).thenReturn(singletonList(3));
+		when(decoratedRepository.findOneById(3, fetch)).thenReturn(entity3);
 
 		assertEquals(l3CacheRepositoryDecorator.findOne(queryWithPageSizeOne), entity3);
-		verify(delegateRepository, times(1)).findOneById(3, fetch);
-		verify(delegateRepository, atLeast(0)).getEntityType();
-		verifyNoMoreInteractions(delegateRepository);
+		verify(decoratedRepository, times(1)).findOneById(3, fetch);
+		verify(decoratedRepository, atLeast(0)).getEntityType();
+		verifyNoMoreInteractions(decoratedRepository);
 	}
 
 	@Test
 	public void testFindOneRepositoryDirty()
 	{
 		when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(false);
-		when(delegateRepository.findOne(query)).thenReturn(entity3);
+		when(decoratedRepository.findOne(query)).thenReturn(entity3);
 
 		assertEquals(l3CacheRepositoryDecorator.findOne(query), entity3);
 		verifyNoMoreInteractions(l3Cache);
@@ -137,8 +137,8 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		List<Object> ids = asList(1, 2);
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
 
-		when(l3Cache.get(delegateRepository, query)).thenReturn(ids);
-		when(delegateRepository.findAll(entityIdCaptor.capture(), eq(query.getFetch()))).thenReturn(
+		when(l3Cache.get(decoratedRepository, query)).thenReturn(ids);
+		when(decoratedRepository.findAll(entityIdCaptor.capture(), eq(query.getFetch()))).thenReturn(
 				expectedEntities.stream());
 
 		Stream<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(query);
@@ -155,7 +155,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
 
-		when(delegateRepository.findAll(largeQuery)).thenReturn(expectedEntities.stream());
+		when(decoratedRepository.findAll(largeQuery)).thenReturn(expectedEntities.stream());
 
 		List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(largeQuery).collect(toList());
 
@@ -171,7 +171,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
 
-		when(delegateRepository.findAll(largeQuery)).thenReturn(expectedEntities.stream());
+		when(decoratedRepository.findAll(largeQuery)).thenReturn(expectedEntities.stream());
 
 		List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(largeQuery).collect(toList());
 
@@ -190,7 +190,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 		List<Entity> expectedEntities = newArrayList(entity1, entity2);
 
-		when(delegateRepository.findAll(query)).thenReturn(expectedEntities.stream());
+		when(decoratedRepository.findAll(query)).thenReturn(expectedEntities.stream());
 
 		List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(query).collect(toList());
 

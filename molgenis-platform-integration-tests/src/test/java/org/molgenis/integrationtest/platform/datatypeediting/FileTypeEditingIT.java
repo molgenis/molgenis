@@ -16,7 +16,7 @@ import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class FileTypeEditingIT extends AbstractTestNGSpringContextTests

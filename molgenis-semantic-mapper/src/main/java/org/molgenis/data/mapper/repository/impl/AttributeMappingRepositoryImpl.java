@@ -69,8 +69,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 			EntityType sourceEntityType, EntityType targetEntityType)
 	{
 		return Lists.transform(attributeMappingEntities,
-				attributeMappingEntity -> toAttributeMapping(attributeMappingEntity, sourceEntityType,
-						targetEntityType));
+				attributeMappingEntity -> toAttributeMapping(attributeMappingEntity, sourceEntityType, targetEntityType));
 
 	}
 

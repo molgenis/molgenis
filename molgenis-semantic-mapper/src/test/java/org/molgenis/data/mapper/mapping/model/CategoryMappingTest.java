@@ -22,8 +22,8 @@ public class CategoryMappingTest
 	private CategoryMapping<String, String> mappingWithNullValue = CategoryMapping.create("blah",
 			ImmutableMap.of("Human", "1", "Orc", "2"), "3", "5");
 
-	private CategoryMapping<String, String> mappingWithNullValueEqualsNull = CategoryMapping.create("blah",
-			ImmutableMap.of("Human", "1", "Orc", "2"), "3", null);
+	private CategoryMapping<String, String> mappingWithNullValueEqualsNull = CategoryMapping.create(
+			"blah", ImmutableMap.of("Human", "1", "Orc", "2"), "3", null);
 
 	@Test
 	public void testCreateFromAlgorithm()

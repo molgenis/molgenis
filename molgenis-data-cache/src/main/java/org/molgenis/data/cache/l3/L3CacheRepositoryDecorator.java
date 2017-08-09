@@ -25,18 +25,25 @@ public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
 	private final L3Cache l3Cache;
 	private final boolean cacheable;
+	private final Repository<Entity> decoratedRepository;
 
 	private final TransactionInformation transactionInformation;
 
 	private static final int MAX_PAGE_SIZE = 1000;
 
-	public L3CacheRepositoryDecorator(Repository<Entity> delegateRepository, L3Cache l3Cache,
+	public L3CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L3Cache l3Cache,
 			TransactionInformation transactionInformation)
 	{
-		super(delegateRepository);
+		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l3Cache = requireNonNull(l3Cache);
-		this.cacheable = delegateRepository.getCapabilities().containsAll(newArrayList(CACHEABLE));
+		this.cacheable = decoratedRepository.getCapabilities().containsAll(newArrayList(CACHEABLE));
 		this.transactionInformation = requireNonNull(transactionInformation);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decoratedRepository;
 	}
 
 	/**

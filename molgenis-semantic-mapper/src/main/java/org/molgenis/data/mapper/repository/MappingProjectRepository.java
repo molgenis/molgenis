@@ -10,26 +10,38 @@ public interface MappingProjectRepository
 {
 	/**
 	 * Adds a {@link MappingProject} to the {@link MappingProjectRepository}
+	 *
+	 * @param mappingProject
 	 */
 	void add(MappingProject mappingProject);
 
 	/**
 	 * Update an existing {@link MappingProject}
+	 *
+	 * @param mappingProject
 	 */
 	void update(MappingProject mappingProject);
 
 	/**
 	 * Get a {@link MappingProject} object based on the project identifier
+	 *
+	 * @param identifier
+	 * @return
 	 */
 	MappingProject getMappingProject(String identifier);
 
 	/**
 	 * Get a list of all {@link MappingProject}
+	 *
+	 * @return
 	 */
 	List<MappingProject> getAllMappingProjects();
 
 	/**
 	 * Get a list of {@link MappingProject} based on a query
+	 *
+	 * @param q
+	 * @return
 	 */
 	List<MappingProject> getMappingProjects(Query<Entity> q);
 

@@ -19,12 +19,19 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
 {
 	private static final Logger LOG = LoggerFactory.getLogger(FileMetaRepositoryDecorator.class);
 
+	private final Repository<FileMeta> decoratedRepo;
 	private final FileStore fileStore;
 
-	public FileMetaRepositoryDecorator(Repository<FileMeta> delegateRepository, FileStore fileStore)
+	public FileMetaRepositoryDecorator(Repository<FileMeta> decoratedRepo, FileStore fileStore)
 	{
-		super(delegateRepository);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.fileStore = requireNonNull(fileStore);
+	}
+
+	@Override
+	protected Repository<FileMeta> delegate()
+	{
+		return decoratedRepo;
 	}
 
 	@Override

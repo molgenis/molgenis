@@ -16,19 +16,18 @@ public class QueryValidationRepositoryDecoratorTest
 {
 	private QueryValidationRepositoryDecorator<Entity> queryValidationRepositoryDecorator;
 	private EntityType entityType;
-	private Repository<Entity> delegateRepository;
+	private Repository<Entity> decoratedRepo;
 	private QueryValidator queryValidator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		delegateRepository = mock(Repository.class);
+		decoratedRepo = mock(Repository.class);
 		entityType = mock(EntityType.class);
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		queryValidator = mock(QueryValidator.class);
-		queryValidationRepositoryDecorator = new QueryValidationRepositoryDecorator<>(delegateRepository,
-				queryValidator);
+		queryValidationRepositoryDecorator = new QueryValidationRepositoryDecorator<>(decoratedRepo, queryValidator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -38,12 +37,18 @@ public class QueryValidationRepositoryDecoratorTest
 	}
 
 	@Test
+	public void testDelegate()
+	{
+		assertEquals(queryValidationRepositoryDecorator.delegate(), decoratedRepo);
+	}
+
+	@Test
 	public void testCountQueryValid()
 	{
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		long count = 123L;
-		when(delegateRepository.count(query)).thenReturn(count);
+		when(decoratedRepo.count(query)).thenReturn(count);
 		assertEquals(count, queryValidationRepositoryDecorator.count(query));
 		verify(queryValidator).validate(query, entityType);
 	}
@@ -64,7 +69,7 @@ public class QueryValidationRepositoryDecoratorTest
 		Query<Entity> query = mock(Query.class);
 		@SuppressWarnings("unchecked")
 		Stream<Entity> entityStream = mock(Stream.class);
-		when(delegateRepository.findAll(query)).thenReturn(entityStream);
+		when(decoratedRepo.findAll(query)).thenReturn(entityStream);
 		assertEquals(entityStream, queryValidationRepositoryDecorator.findAll(query));
 		verify(queryValidator).validate(query, entityType);
 	}
@@ -84,7 +89,7 @@ public class QueryValidationRepositoryDecoratorTest
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		Entity entity = mock(Entity.class);
-		when(delegateRepository.findOne(query)).thenReturn(entity);
+		when(decoratedRepo.findOne(query)).thenReturn(entity);
 		assertEquals(entity, queryValidationRepositoryDecorator.findOne(query));
 		verify(queryValidator).validate(query, entityType);
 	}

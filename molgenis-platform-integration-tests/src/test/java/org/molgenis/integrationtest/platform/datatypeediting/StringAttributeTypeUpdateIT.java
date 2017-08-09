@@ -53,6 +53,7 @@ public class StringAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param valueToConvert  The value that will be converted
 	 * @param typeToConvertTo The type to convert to
 	 * @param convertedValue  The expected value after converting the type
+	 * @throws ParseException
 	 */
 	@Test(dataProvider = "validConversionData")
 	public void testValidConversion(String valueToConvert, AttributeType typeToConvertTo, Object convertedValue)

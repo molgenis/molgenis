@@ -16,7 +16,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @Service
 public class LanguageService
@@ -49,6 +49,8 @@ public class LanguageService
 	 * "en": is default
 	 * "xx": is a placeholder for having your own language
 	 * "nl", "de", "es", "it", "pt", "fr": are extra languages
+	 *
+	 * @return
 	 */
 	public static Stream<String> getLanguageCodes()
 	{

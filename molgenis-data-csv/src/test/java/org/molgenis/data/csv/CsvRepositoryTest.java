@@ -126,6 +126,8 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 
 	/**
 	 * Test based on au.com.bytecode.opencsv.CSVReaderTest
+	 *
+	 * @throws IOException
 	 */
 	@Test
 	public void iterator() throws IOException

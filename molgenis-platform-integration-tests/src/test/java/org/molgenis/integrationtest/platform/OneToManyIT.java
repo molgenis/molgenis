@@ -40,7 +40,7 @@ import static org.molgenis.data.OneToManyTestHarness.*;
 import static org.molgenis.data.OneToManyTestHarness.TestCaseType.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.integrationtest.platform.PlatformIT.*;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
