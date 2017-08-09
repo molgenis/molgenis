@@ -27,7 +27,7 @@ import java.time.Instant;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 

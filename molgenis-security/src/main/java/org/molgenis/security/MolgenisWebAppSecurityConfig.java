@@ -215,7 +215,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 			}
 		})
 
-				.logoutSuccessHandler((req, res, auth) -> {
+				.logoutSuccessHandler((req, res, auth) ->
+				{
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{

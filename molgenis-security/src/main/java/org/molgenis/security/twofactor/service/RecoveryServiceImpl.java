@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.meta.RecoveryCodeMetadata.*;
 
 @Service
@@ -87,7 +87,8 @@ public class RecoveryServiceImpl implements RecoveryService
 
 	private void deleteOldRecoveryCodes(String userId)
 	{
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			Stream<RecoveryCode> recoveryCodes = dataService.findAll(RECOVERY_CODE,
 					new QueryImpl<RecoveryCode>().eq(USER_ID, userId), RecoveryCode.class);
 			dataService.delete(RECOVERY_CODE, recoveryCodes);

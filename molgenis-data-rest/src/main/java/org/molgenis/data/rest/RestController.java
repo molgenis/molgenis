@@ -66,7 +66,7 @@ import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -104,7 +104,7 @@ public class RestController
 
 	@Autowired
 	public RestController(AppSettings appSettings, DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, MolgenisPermissionService permissionService,
+			AuthenticationManager authenticationManager, PermissionService permissionService,
 			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService,
 			LanguageService languageService)
 	{
@@ -112,7 +112,6 @@ public class RestController
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
 		this.authenticationManager = requireNonNull(authenticationManager);
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.permissionService = requireNonNull(permissionService);
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);

@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.meta.RecoveryCodeMetadata.*;
 import static org.testng.Assert.assertEquals;
 

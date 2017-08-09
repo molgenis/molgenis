@@ -28,6 +28,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { TwoFactorAuthenticationFilterTest.Config.class })
 public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringContextTests

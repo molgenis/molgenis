@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.meta.UserSecretMetaData.USER_ID;
 import static org.molgenis.security.twofactor.meta.UserSecretMetaData.USER_SECRET;
 
