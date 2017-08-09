@@ -32,7 +32,7 @@ import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
 @Component
 public class StyleServiceImpl implements StyleService
 {
-	private static final String BOOTSTRAP_FALL_BACK_THEME = "bootstrap-basic.min.css";
+	public static final String BOOTSTRAP_FALL_BACK_THEME = "bootstrap-basic.min.css";
 	private final AppSettings appSettings;
 	private final IdGenerator idGenerator;
 	private final FileStore fileStore;
@@ -62,7 +62,7 @@ public class StyleServiceImpl implements StyleService
 	}
 
 	@Override
-	public Style addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
+	public Style addStyle(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
 			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException
 	{
 		if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null)
@@ -168,26 +168,23 @@ public class StyleServiceImpl implements StyleService
 		}
 
 		// Fetch the theme file from the store.
-		File file;
+		FileMeta fileMeta;
 		if (bootstrapVersion.equals(BOOTSTRAP_VERSION_3))
 		{
-			FileMeta fileMeta = styleSheet.getBootstrap3Theme();
-			file = fileStore.getFile(fileMeta.getId());
+			fileMeta = styleSheet.getBootstrap3Theme();
 		}
 		else
 		{
-			FileMeta fileMeta = styleSheet.getBootstrap4Theme();
+			fileMeta = styleSheet.getBootstrap4Theme();
 			// If no bootstrap 4 theme was set fetch the default theme from the resources folder
 			if (fileMeta == null)
 			{
 				StyleSheet fallBackTheme = findThemeByName(BOOTSTRAP_FALL_BACK_THEME);
 				fileMeta = fallBackTheme.getBootstrap4Theme();
 			}
-
-			file = fileStore.getFile(fileMeta.getId());
-
 		}
 
+		File file = fileStore.getFile(fileMeta.getId());
 		return new FileSystemResource(file);
 	}
 

@@ -25,7 +25,7 @@ public interface StyleService
 	 * @param bootstrap4FileName  the name to use as fileName for the bootstrap 4 file, this is optional
 	 * @param bootstrap4StyleData the bootstrap 4 style data, this is optional
 	 */
-	Style addStyles(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
+	Style addStyle(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
 			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException;
 
 	/**

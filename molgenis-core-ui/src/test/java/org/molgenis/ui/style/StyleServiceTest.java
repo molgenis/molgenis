@@ -1,25 +1,38 @@
 package org.molgenis.ui.style;
 
 import com.google.common.collect.Iterables;
+import org.apache.commons.io.IOUtils;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
+import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
+import static org.molgenis.ui.style.StyleServiceImpl.BOOTSTRAP_FALL_BACK_THEME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -33,6 +46,18 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	private StyleService styleService;
 
 	@Autowired
+	private StyleSheetFactory styleSheetFactory;
+
+	@Autowired
+	private IdGenerator idGenerator;
+
+	@Autowired
+	private FileMetaFactory fileMetaFactory;
+
+	@Autowired
+	private FileStore fileStore;
+
+	@Autowired
 	private AppSettings appSettings;
 
 	@Autowired
@@ -41,7 +66,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		reset(appSettings, dataService);
+		reset(appSettings, dataService, styleSheetFactory, idGenerator, fileMetaFactory, fileStore);
 		when(appSettings.getBootstrapTheme()).thenReturn(THEME_MOLGENIS);
 	}
 
@@ -95,6 +120,181 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(StyleMetadata.STYLE_SHEET, StyleSheet.class)).thenReturn(styleSheets.stream());
 
 		assertEquals(styleService.getSelectedStyle().getName(), THEME_MOLGENIS_NAME);
+	}
+
+	@Test(expectedExceptions = MolgenisStyleException.class)
+	public void addStylesWithExistingId() throws IOException, MolgenisStyleException
+	{
+		String styleId = "style";
+		String bs3FileName = "any";
+		String bs4FileName = "any";
+		InputStream bs3Data = IOUtils.toInputStream("any", "UTF-8");
+		InputStream bs4Data = IOUtils.toInputStream("any", "UTF-8");
+
+		StyleSheet styleSheet = mock(StyleSheet.class);
+		Repository styleSheetRepository = mock(Repository.class);
+		when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
+		when(styleSheetRepository.findOneById(styleId)).thenReturn(styleSheet);
+		styleService.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
+	}
+
+	@Test
+	public void addBootstrap3And4Styles() throws IOException, MolgenisStyleException
+	{
+		// setup
+		String styleId = "my-style.min.css";
+		String bs3FileName = "bs3FileName";
+		String bs4FileName = "bs4FileName";
+		InputStream bs3Data = IOUtils.toInputStream("bs 3 data", "UTF-8");
+		InputStream bs4Data = IOUtils.toInputStream("bs 4 data", "UTF-8");
+
+		Repository styleSheetRepository = mock(Repository.class);
+		when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
+		when(styleSheetRepository.findOneById(styleId)).thenReturn(null);
+
+		String generatedId = "my-id";
+		when(idGenerator.generateId()).thenReturn(generatedId);
+
+		StyleSheet styleSheet = mock(StyleSheet.class);
+		when(styleSheet.getName()).thenReturn(styleId);
+		when(styleSheetFactory.create(styleId)).thenReturn(styleSheet);
+
+		FileMeta fileMeta = mock(FileMeta.class);
+		when(fileMetaFactory.create(generatedId)).thenReturn(fileMeta);
+
+		File storedFile = mock(File.class);
+		when(storedFile.length()).thenReturn(123L);
+		when(fileStore.getFile(generatedId)).thenReturn(storedFile);
+
+		// execute
+		styleService.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
+
+		// verify
+		verify(styleSheet).setName(styleId);
+		verify(dataService, times(1)).add(STYLE_SHEET, styleSheet);
+		verify(fileStore, times(1)).store(bs3Data, generatedId);
+		verify(fileStore, times(1)).store(bs4Data, generatedId);
+		// two times, once for each style file
+		verify(dataService, times(2)).add(FileMetaMetaData.FILE_META, fileMeta);
+	}
+
+	@Test
+	public void addBootstrap3StyleOnly() throws IOException, MolgenisStyleException
+	{
+		// setup
+		String styleId = "my-style.min.css";
+		String bs3FileName = "bs3FileName";
+		InputStream bs3Data = IOUtils.toInputStream("bs 3 data", "UTF-8");
+
+		Repository styleSheetRepository = mock(Repository.class);
+		when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
+		when(styleSheetRepository.findOneById(styleId)).thenReturn(null);
+
+		String generatedId = "my-id";
+		when(idGenerator.generateId()).thenReturn(generatedId);
+
+		StyleSheet styleSheet = mock(StyleSheet.class);
+		when(styleSheet.getName()).thenReturn(styleId);
+		when(styleSheetFactory.create(styleId)).thenReturn(styleSheet);
+
+		FileMeta fileMeta = mock(FileMeta.class);
+		when(fileMetaFactory.create(generatedId)).thenReturn(fileMeta);
+
+		File storedFile = mock(File.class);
+		when(storedFile.length()).thenReturn(123L);
+		when(fileStore.getFile(generatedId)).thenReturn(storedFile);
+
+		// execute
+		styleService.addStyle(styleId, bs3FileName, bs3Data, null, null );
+
+		// verify
+		verify(styleSheet).setName(styleId);
+		verify(dataService, times(1)).add(STYLE_SHEET, styleSheet);
+		verify(fileStore, times(1)).store(bs3Data, generatedId);
+		verify(dataService, times(1)).add(FileMetaMetaData.FILE_META, fileMeta);
+	}
+
+	@Test(expectedExceptions = MolgenisStyleException.class)
+	public void getUnknownThemeData() throws MolgenisStyleException
+	{
+		String styleName = "no-body";
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(null);
+
+		BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
+		styleService.getThemeData(styleName, version);
+	}
+
+	@Test
+	public void getBootstrap3ThemeData() throws MolgenisStyleException
+	{
+		String styleName = "my-style";
+		StyleSheet styleSheet = mock(StyleSheet.class);
+		when(styleSheet.getId()).thenReturn(styleName);
+		FileMeta fileMeta = mock(FileMeta.class);
+		String fileId = "fileId";
+		when(fileMeta.getId()).thenReturn(fileId);
+		when(styleSheet.getBootstrap3Theme()).thenReturn(fileMeta);
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
+		File styleFile = mock(File.class);
+		String mockFilePath = "mock/file/path";
+		when(styleFile.getPath()).thenReturn(mockFilePath);
+		when(fileStore.getFile(fileId)).thenReturn(styleFile);
+		BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
+
+		FileSystemResource themeData = styleService.getThemeData(styleName, version);
+
+		assertEquals(themeData.getPath(), mockFilePath);
+	}
+
+	@Test
+	public void getBootstrap4ThemeData() throws MolgenisStyleException
+	{
+		String styleName = "my-style";
+		StyleSheet styleSheet = mock(StyleSheet.class);
+		when(styleSheet.getId()).thenReturn(styleName);
+		FileMeta fileMeta = mock(FileMeta.class);
+		String fileId = "fileId";
+		when(fileMeta.getId()).thenReturn(fileId);
+		when(styleSheet.getBootstrap4Theme()).thenReturn(fileMeta);
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
+		File styleFile = mock(File.class);
+		String mockFilePath = "mock/file/path";
+		when(styleFile.getPath()).thenReturn(mockFilePath);
+		when(fileStore.getFile(fileId)).thenReturn(styleFile);
+		BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_4;
+
+		FileSystemResource themeData = styleService.getThemeData(styleName, version);
+
+		assertEquals(themeData.getPath(), mockFilePath);
+	}
+
+	@Test
+	public void getBootstrap4FallBackThemeData() throws MolgenisStyleException
+	{
+		String styleName = "my-style";
+		StyleSheet styleSheet = mock(StyleSheet.class);
+		StyleSheet fallBackTheme = mock(StyleSheet.class);
+		FileMeta fileMeta = mock(FileMeta.class);
+		String fileId = "fileId";
+		when(fileMeta.getId()).thenReturn(fileId);
+		when(styleSheet.getBootstrap4Theme()).thenReturn(null);
+		when(fallBackTheme.getBootstrap4Theme()).thenReturn(fileMeta);
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		Query<StyleSheet> fallBackQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, BOOTSTRAP_FALL_BACK_THEME);
+		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
+		when(dataService.findOne(STYLE_SHEET, fallBackQuery, StyleSheet.class)).thenReturn(fallBackTheme);
+		File styleFile = mock(File.class);
+		String mockFilePath = "mock/file/path";
+		when(styleFile.getPath()).thenReturn(mockFilePath);
+		when(fileStore.getFile(fileId)).thenReturn(styleFile);
+		BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_4;
+
+		FileSystemResource themeData = styleService.getThemeData(styleName, version);
+
+		assertEquals(themeData.getPath(), mockFilePath);
 	}
 
 	@Configuration

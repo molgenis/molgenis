@@ -82,7 +82,7 @@ public class ThemeManagerController extends MolgenisPluginController
 				bs4InputStream = bootstrap4Style.getInputStream();
 			}
 			return styleService
-					.addStyles(styleIdentifier, bootstrap3Style.getOriginalFilename(), bootstrap3Style.getInputStream(),
+					.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(), bootstrap3Style.getInputStream(),
 							bs4FileName, bs4InputStream);
 		}
 		catch (IOException e)

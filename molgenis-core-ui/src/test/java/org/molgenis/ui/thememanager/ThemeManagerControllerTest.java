@@ -52,13 +52,13 @@ public class ThemeManagerControllerTest
 	public void addBootstrap3ThemeOnly() throws Exception
 	{
 		Style newStyle = Style.createLocal("new-style");
-		when(styleService.addStyles(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), any(), any()))
+		when(styleService.addStyle(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), any(), any()))
 				.thenReturn(newStyle);
 
 		mockMvc.perform(fileUpload(ThemeManagerController.URI + "/add-bootstrap-theme").file(bs3File))
 				.andExpect(status().isOk());
 
-		verify(styleService).addStyles(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), any(), any());
+		verify(styleService).addStyle(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), any(), any());
 
 	}
 
@@ -67,7 +67,7 @@ public class ThemeManagerControllerTest
 	{
 		Style newStyle = Style.createLocal("new-style");
 		when(styleService
-				.addStyles(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), eq(bootstrap4FileName), any()))
+				.addStyle(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), eq(bootstrap4FileName), any()))
 				.thenReturn(newStyle);
 
 		mockMvc.perform(fileUpload(ThemeManagerController.URI + "/add-bootstrap-theme").file(bs3File).file(bs4File)
@@ -75,7 +75,7 @@ public class ThemeManagerControllerTest
 				andExpect(status().isOk());
 
 		verify(styleService)
-				.addStyles(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), eq(bootstrap4FileName), any());
+				.addStyle(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), eq(bootstrap4FileName), any());
 
 	}
 }

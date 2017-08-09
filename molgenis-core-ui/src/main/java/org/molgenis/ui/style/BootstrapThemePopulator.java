@@ -71,7 +71,7 @@ public class BootstrapThemePopulator
 					bootstrap4Data = bootstrap4resource.getInputStream();
 				}
 
-				styleService.addStyles(bootstrap3FileName, bootstrap3FileName, bootstrap3Data, bootstrap4FileName,
+				styleService.addStyle(bootstrap3FileName, bootstrap3FileName, bootstrap3Data, bootstrap4FileName,
 						bootstrap4Data);
 			}
 		}
