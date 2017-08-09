@@ -1,17 +1,13 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.gson.Gson;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LocalizationService;
-import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
@@ -183,28 +179,37 @@ public class RestControllerV2
 
 	@RequestMapping(value = "/searchall", method = GET)
 	@ResponseBody
-	public String findAll()
+	public Result findAll(@RequestParam(value = "term") String searchterm)
 	{
-		//TODO: search in current i18n desc and label
-		//TODO: return matching packages
-		String term = "#CHROM";
-		Map<String, Result> results = new HashMap<>();
-		Stream<EntityType> entityTypes = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class)
-													.filter(entityType -> isSystemEntity(entityType));
-		entityTypes.forEach(entityType -> results.put(entityType.getId(), getResult(entityType, term)));
-		return new Gson().toJson(results);
+		List<Package> packages = dataService.findAll(PackageMetadata.PACKAGE, Package.class)
+											.filter(aPackage -> !isSystemPackage(aPackage))
+											.filter(aPackage -> isMatchingMetadata(aPackage, searchterm))
+											.collect(toList());
+		List<EntityTypeResult> entityTypeMatches = new ArrayList<>();
+
+		Stream<EntityType> entityTypeStream = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+				EntityType.class).filter(entityType -> !isSystemEntity(entityType));
+
+		entityTypeStream.forEach(entityType -> searchSingleEntityType(searchterm, entityTypeMatches, entityType));
+
+		return Result.create(entityTypeMatches, packages);
 	}
 
-	private Result getResult(EntityType entityType, String term)
+	private void searchSingleEntityType(String searchterm, List<EntityTypeResult> entityTypeMatches,
+			EntityType entityType)
 	{
-		List<Entity> rows = dataService.findAll(entityType.getEntityType().getId(), new QueryImpl<>().search(term))
-									   .collect(toList());
-		boolean isLabelMatch = entityType.getLabel() == null ? entityType.getLabel().contains(term) : false;
-		boolean isDescMatch = entityType.getDescription() == null ? entityType.getDescription().contains(term) : false;
-		List<Attribute> attrs = StreamSupport.stream(entityType.getAllAttributes().spliterator(), false)
-											 .filter(attr -> isMatchingMetadata(attr, term))
-											 .collect(toList());
-		return new Result(entityType, attrs, rows, isLabelMatch, isDescMatch);
+		boolean metadataMatch = isMatchingMetadata(entityType, searchterm);
+		List<Attribute> matchingAttributes = StreamSupport.stream(entityType.getAllAttributes().spliterator(), false)
+														  .filter(attribute -> isMatchingMetadata(attribute,
+																  searchterm))
+														  .collect(toList());
+		List<Entity> matchingEntities = dataService.findAll(entityType.getIdValue().toString(),
+				new QueryImpl<>().search(searchterm)).collect(toList());
+		if (metadataMatch || matchingAttributes.size() > 0 || matchingEntities.size() > 0)
+		{
+			entityTypeMatches.add(
+					EntityTypeResult.create(entityType, metadataMatch, matchingAttributes, matchingEntities));
+		}
 	}
 
 	private boolean isMatchingMetadata(Entity metadataEntity, String term)
@@ -212,7 +217,7 @@ public class RestControllerV2
 		boolean isLabelMatch = metadataEntity.getLabelValue().toString().contains(term);
 		boolean isDescMatch = metadataEntity.getString(DESCRIPTION) != null ? metadataEntity.getString(DESCRIPTION)
 																							.contains(term) : false;
-		return isDescMatch && isLabelMatch;
+		return isDescMatch || isLabelMatch;
 	}
 
 	private static boolean isSystemEntity(EntityType entityType)
