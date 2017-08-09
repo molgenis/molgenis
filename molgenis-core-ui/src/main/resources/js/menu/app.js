@@ -22,15 +22,15 @@ webpackJsonp([1], {
       name: 'molgenis-menu',
       data: function () {
         return {
-          menu: window.molgenismenu.menu,
-          topLogo: window.molgenismenu.topLogo,
-          navBarLogo: window.molgenismenu.navBarLogo,
-          helpLink: window.molgenismenu.helpLink,
-          authenticated: window.molgenismenu.authenticated,
-          selectedPlugin: window.molgenismenu.selectedPlugin,
-          showLanguageDropdown: window.molgenismenu.showLanguageDropdown,
-          logoutFunction: window.molgenismenu.logoutFunction,
-          googleSignIn: window.molgenismenu.googleSignIn,
+          menu: window.molgenisMenu.menu,
+          topLogo: window.molgenisMenu.topLogo,
+          navBarLogo: window.molgenisMenu.navBarLogo,
+          helpLink: window.molgenisMenu.helpLink,
+          authenticated: window.molgenisMenu.authenticated,
+          selectedPlugin: window.molgenisMenu.selectedPlugin,
+          showLanguageDropdown: window.molgenisMenu.showLanguageDropdown,
+          logoutFunction: window.molgenisMenu.logoutFunction,
+          googleSignIn: window.molgenisMenu.googleSignIn,
           collapse: !0,
           selectedIndex: {default: -1, type: Number}
         }

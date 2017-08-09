@@ -10,7 +10,7 @@
             <div id="footer"></div>
 
             <script type=text/javascript>
-                window.molgenisfooter = {
+                window.molgenisFooter = {
                         <#if app_settings.footer??>additionalMessage: '${app_settings.footer}'</#if>
                     <#if app_settings.footer?? && (molgenis_version??||molgenis_build_date??)>,</#if>
                         <#if molgenis_version??>version: '${molgenis_version}'</#if>
