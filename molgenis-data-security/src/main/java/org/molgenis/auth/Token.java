@@ -4,6 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 
 import static java.time.Instant.now;
@@ -57,6 +58,7 @@ public class Token extends StaticEntity
 		set(TOKEN_ATTR, token);
 	}
 
+	@Nullable
 	public Instant getExpirationDate()
 	{
 		return getInstant(EXPIRATIONDATE);
@@ -77,6 +79,7 @@ public class Token extends StaticEntity
 		set(CREATIONDATE, creationDate);
 	}
 
+	@Nullable
 	public String getDescription()
 	{
 		return getString(DESCRIPTION);
