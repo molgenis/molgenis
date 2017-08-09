@@ -23,7 +23,7 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 	}
 
 	@Override
-	public void afterCommitTransaction(String transactionId)
+	public void commitTransaction(String transactionId)
 	{
 		try
 		{
