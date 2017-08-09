@@ -1,5 +1,7 @@
 <#include "resource-macros.ftl">
 <#include "theme-macros.ftl">
+<#include "molgenis-header.ftl">
+<#include "molgenis-footer.ftl">
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,9 +16,6 @@
     <link href="<@resource_href "/css/metadata-manager/app.css" />" rel="stylesheet">
 </head>
 <body>
-<#include "molgenis-header.ftl">
-<#include "molgenis-footer.ftl">
-
 <#assign js = []>
 <#assign css = ["metadata-manager/app.css"]>
 <#assign version = 2>

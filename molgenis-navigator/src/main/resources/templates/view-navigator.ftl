@@ -1,5 +1,7 @@
-<#include "resource-macros.ftl"><#include "resource-macros.ftl">
+<#include "resource-macros.ftl">
 <#include "theme-macros.ftl">
+<#include "molgenis-header.ftl">
+<#include "molgenis-footer.ftl">
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,6 +16,10 @@
     <link href="<@resource_href "/css/navigator/app.css" />" rel="stylesheet">
 </head>
 <body>
+<#assign js = []>
+<#assign css = ["navigator/app.css"]>
+<#assign version = 2>
+<@header css js version/>
     <div id="app"></div>
 
     <script type="text/javascript">
@@ -23,14 +29,7 @@
             fallbackLng: '${fallbackLng}'
         }
     </script>
-<#include "resource-macros.ftl">
-<#include "molgenis-header.ftl">
-<#include "molgenis-footer.ftl">
 
-<#assign js = []>
-<#assign css = ["navigator/app.css"]>
-<#assign version = 2>
-<@header css js version/>
 <div id="app"></div>
 <script type="text/javascript">
     window.__INITIAL_STATE__ = {

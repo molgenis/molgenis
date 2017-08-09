@@ -25,18 +25,8 @@
         <link rel="stylesheet" href="<@theme_href "/css/theme/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css"
               id="bootstrap-theme">
     <#else>
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-        <#if resource_utils.resourceExists("/css/bootstrap-4/" + app_settings.bootstrapTheme) >
-            <link rel="stylesheet"
-                  href="<@resource_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>"
-                  type="text/css"
-                  id="bootstrap-theme">
-        <#else >
-            <link rel="stylesheet"
-                  href="<@resource_href "/css/bootstrap-4/bootstrap.min.css" />"
-                  type="text/css"
-                  id="bootstrap-theme">
-        </#if>
+        <link rel="stylesheet" href="<@theme_href "/css/theme/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css"
+              id="bootstrap-theme">
     </#if>
 
     <#if app_settings.logoTopHref?has_content>
