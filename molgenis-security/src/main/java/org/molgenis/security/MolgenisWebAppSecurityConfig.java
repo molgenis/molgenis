@@ -20,7 +20,13 @@ import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
+import org.molgenis.security.twofactor.auth.*;
+import org.molgenis.security.twofactor.service.OTPService;
+import org.molgenis.security.twofactor.service.RecoveryService;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +42,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.GrantedAuthority;
@@ -85,6 +92,18 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Autowired
 	private GroupMemberFactory groupMemberFactory;
 
+	@Autowired
+	private OTPService otpService;
+
+	@Autowired
+	private TwoFactorAuthenticationService twoFactorAuthenticationService;
+
+	@Autowired
+	private RecoveryService recoveryService;
+
+	@Autowired
+	private UserAccountService userAccountService;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
@@ -122,6 +141,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
+		http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisChangePasswordFilter.class);
+		http.authenticationProvider(twoFactorAuthenticationProvider());
+		http.authenticationProvider(recoveryAuthenticationProvider());
+
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
@@ -129,6 +152,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		expressionInterceptUrlRegistry
 
 				.antMatchers("/login").permitAll()
+
+				.antMatchers(TwoFactorAuthenticationController.URI + "/**").permitAll()
 
 				.antMatchers(GOOGLE_AUTHENTICATION_URL).permitAll()
 
@@ -182,28 +207,37 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
-		{
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
 			if (req.getSession(false) != null
 					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 			{
 				req.setAttribute("continueWithUnsupportedBrowser", true);
 			}
-		}).logoutSuccessHandler((req, res, auth) ->
-		{
-			StringBuilder logoutSuccessUrl = new StringBuilder("/");
-			if (req.getAttribute("continueWithUnsupportedBrowser") != null)
-			{
-				logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
-			}
-			SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-			logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
-			logoutSuccessHandler.onLogoutSuccess(req, res, auth);
 		})
 
-				.and()
+				.logoutSuccessHandler((req, res, auth) -> {
+					StringBuilder logoutSuccessUrl = new StringBuilder("/");
+					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
+					{
+						logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+					}
+					SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+				}).and()
 
 				.csrf().disable();
+
+	}
+
+	@Override
+	public void configure(WebSecurity web) throws Exception
+	{
+		web.ignoring()
+		   .antMatchers(PATTERN_CSS)
+		   .antMatchers(PATTERN_IMG)
+		   .antMatchers(PATTERN_JS)
+		   .antMatchers(PATTERN_FONTS);
 	}
 
 	@Bean
@@ -277,6 +311,25 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
+	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
+	{
+		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService, redirectStrategy(),
+				userAccountService);
+	}
+
+	@Bean
+	public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
+	{
+		return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService, otpService, recoveryService);
+	}
+
+	@Bean
+	public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
+	{
+		return new RecoveryAuthenticationProviderImpl(recoveryService);
+	}
+
+	@Bean
 	public RedirectStrategy redirectStrategy()
 	{
 		return new DefaultRedirectStrategy();
@@ -331,12 +384,11 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		try
 		{
 			auth.userDetailsService(userDetailsServiceBean());
-
-			DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-			daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-			daoAuthenticationProvider.setUserDetailsService(userDetailsServiceBean());
-			daoAuthenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
-			auth.authenticationProvider(daoAuthenticationProvider);
+			DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+			authenticationProvider.setPasswordEncoder(passwordEncoder());
+			authenticationProvider.setUserDetailsService(userDetailsServiceBean());
+			authenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
+			auth.authenticationProvider(authenticationProvider);
 		}
 		catch (Exception e)
 		{

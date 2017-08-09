@@ -128,7 +128,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		if (email == null)
 		{
 			throw new AuthenticationServiceException(
-					"Google ID token is missing required [email] claim, did you forget to specify scope [email]?");
+					"Google URI token is missing required [email] claim, did you forget to specify scope [email]?");
 		}
 		Boolean emailVerified = payload.getEmailVerified();
 		if (emailVerified != null && emailVerified == false)

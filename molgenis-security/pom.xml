@@ -106,6 +106,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- Google 2 factor authentication -->
+        <dependency>
+            <groupId>org.jboss.aerogear</groupId>
+            <artifactId>aerogear-otp-java</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -114,6 +124,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
         <!-- test dependencies -->
         <dependency>
             <groupId>org.springframework.security</groupId>
