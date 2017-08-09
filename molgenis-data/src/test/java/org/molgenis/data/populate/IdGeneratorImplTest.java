@@ -22,7 +22,7 @@ public class IdGeneratorImplTest
 	public Object[][] generateIdDataProvider()
 	{
 		return new Object[][] { { SEQUENTIAL_UUID, 1000000, 26 }, { SHORT_RANDOM, 1000, 8 },
-				{ SECURE_RANDOM, 1000, 26 }, { SHORT_SECURE_RANDOM, 1000, 8 } };
+				{ SECURE_RANDOM, 1000, 32 }, { SHORT_SECURE_RANDOM, 1000, 8 } };
 	}
 
 	@Test(dataProvider = "generateIdDataProvider")
