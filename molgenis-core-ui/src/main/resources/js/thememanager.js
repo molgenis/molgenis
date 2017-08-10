@@ -90,6 +90,8 @@
 						.append(newThemeOption)
 						.val(theme.location)
 						.prop('disabled', false);
+
+          updatePageTheme();
         },
 				error: function(response) {
 
