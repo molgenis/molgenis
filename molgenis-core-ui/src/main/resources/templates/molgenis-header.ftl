@@ -18,10 +18,10 @@
         <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
     </#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
+
+    <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-
         <link rel="stylesheet" href="<@theme_href "/css/theme/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css"
               id="bootstrap-theme">
     <#else>
