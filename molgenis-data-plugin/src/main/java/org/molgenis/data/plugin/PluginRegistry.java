@@ -7,4 +7,9 @@ public interface PluginRegistry extends Iterable<Plugin>
 	void registerPluginFactory(PluginFactory molgenisPluginFactory);
 
 	Plugin getPlugin(String id);
+
+	default Iterable<Plugin> getPlugins()
+	{
+		return this;
+	}
 }
