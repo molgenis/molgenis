@@ -58,11 +58,4 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <legend>Component overview</legend>
-        <p>TODO: Overview of all the different bootstrap components to showcase the new style</p>
-    </div>
-</div>
-
 <@footer/>
