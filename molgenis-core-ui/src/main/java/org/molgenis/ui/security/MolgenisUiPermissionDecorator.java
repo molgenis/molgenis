@@ -3,6 +3,7 @@ package org.molgenis.ui.security;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
+import org.molgenis.ui.menu.MenuUtils;
 
 import static java.util.Objects.requireNonNull;
 
@@ -29,5 +30,10 @@ public class MolgenisUiPermissionDecorator implements MolgenisUi
 	{
 		MolgenisUiMenu menu = molgenisUi.getMenu(menuId);
 		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, permissionService) : null;
+	}
+
+	public String getMenuJson()
+	{
+		return MenuUtils.getMenuJson(getMenu());
 	}
 }

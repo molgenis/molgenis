@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 public class GenomeBrowserAttributes extends StaticEntity implements Comparable<GenomeBrowserAttributes>
 {
 	public GenomeBrowserAttributes(Entity entity)
@@ -41,6 +43,7 @@ public class GenomeBrowserAttributes extends StaticEntity implements Comparable<
 		set(GenomeBrowserAttributesMetadata.DEFAULT, isDefault);
 	}
 
+	@Nullable
 	public Integer getOrder()
 	{
 		return getInt(GenomeBrowserAttributesMetadata.ORDER);
@@ -71,6 +74,7 @@ public class GenomeBrowserAttributes extends StaticEntity implements Comparable<
 		set(GenomeBrowserAttributesMetadata.CHROM, chrom);
 	}
 
+	@Nullable
 	public String getRef()
 	{
 		return getString(GenomeBrowserAttributesMetadata.REF);
@@ -81,6 +85,7 @@ public class GenomeBrowserAttributes extends StaticEntity implements Comparable<
 		set(GenomeBrowserAttributesMetadata.REF, ref);
 	}
 
+	@Nullable
 	public String getAlt()
 	{
 		return getString(GenomeBrowserAttributesMetadata.ALT);
@@ -91,6 +96,7 @@ public class GenomeBrowserAttributes extends StaticEntity implements Comparable<
 		set(GenomeBrowserAttributesMetadata.ALT, alt);
 	}
 
+	@Nullable
 	public String getStop()
 	{
 		return getString(GenomeBrowserAttributesMetadata.STOP);

@@ -31,6 +31,12 @@ public class XmlMolgenisUi implements MolgenisUi
 	}
 
 	@Override
+	public String getMenuJson()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public MolgenisUiMenu getMenu(String menuId)
 	{
 		return getMenuRecursive(getMenu(), menuId);

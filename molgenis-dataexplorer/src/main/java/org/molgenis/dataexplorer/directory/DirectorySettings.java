@@ -8,6 +8,8 @@ import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
+
 @Component
 public class DirectorySettings extends DefaultSettingsEntity
 {
@@ -58,21 +60,25 @@ public class DirectorySettings extends DefaultSettingsEntity
 		}
 	}
 
+	@Nullable
 	public String getUsername()
 	{
 		return getString(USERNAME);
 	}
 
+	@Nullable
 	public String getPassword()
 	{
 		return getString(PASSWORD);
 	}
 
+	@Nullable
 	public String getNegotiatorURL()
 	{
 		return getString(NEGOTIATOR_URL);
 	}
 
+	@Nullable
 	public EntityType getCollectionEntityType()
 	{
 		return getEntity(COLLECTION_ENTITY, EntityType.class);

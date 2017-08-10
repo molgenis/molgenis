@@ -5,6 +5,8 @@ import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
 
+import javax.annotation.Nullable;
+
 public class AmazonBucketJobExecution extends JobExecution
 {
 	public AmazonBucketJobExecution(Entity entity)
@@ -55,6 +57,7 @@ public class AmazonBucketJobExecution extends JobExecution
 		set(AmazonBucketJobExecutionMetaData.EXPRESSION, expression);
 	}
 
+	@Nullable
 	public FileMeta getFile()
 	{
 		return getEntity(AmazonBucketJobExecutionMetaData.FILE, FileMeta.class);
@@ -65,6 +68,7 @@ public class AmazonBucketJobExecution extends JobExecution
 		set(AmazonBucketJobExecutionMetaData.FILE, value);
 	}
 
+	@Nullable
 	public String getTargetEntityId()
 	{
 		return getString(AmazonBucketJobExecutionMetaData.TARGET_ENTITY_ID);
@@ -110,6 +114,7 @@ public class AmazonBucketJobExecution extends JobExecution
 		set(AmazonBucketJobExecutionMetaData.EXTENSION, extension);
 	}
 
+	@Nullable
 	public String getExtension()
 	{
 		return getString(AmazonBucketJobExecutionMetaData.EXTENSION);

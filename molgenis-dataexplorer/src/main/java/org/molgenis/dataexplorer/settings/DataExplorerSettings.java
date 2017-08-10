@@ -9,6 +9,7 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.ui.PluginMetadata;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
@@ -422,6 +423,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		set(Meta.GENERAL_HEADER_ABBREVIATE, headerAbbreviate);
 	}
 
+	@Nullable
 	public URI getGalaxyUrl()
 	{
 		String galaxyUrl = getString(Meta.DATA_GALAXY_URL);
@@ -521,11 +523,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		set(Meta.AGGREGATES_DISTINCT_SELECT, aggregatesDistinctSelect);
 	}
 
+	@Nullable
 	public String getEntityReports()
 	{
 		return getString(Meta.REPORTS_ENTITIES);
 	}
 
+	@Nullable
 	public String getEntityReport(String entityTypeId)
 	{
 		Map<String, String> entityReports = getEntityReportsAsMap();

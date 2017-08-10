@@ -27,6 +27,7 @@
 
 body>.container-fluid {
 	padding-top: 55px;
+    margin-bottom: 3rem;
 }
 
 /* Application CSS - end */
@@ -37,17 +38,11 @@ html {
 	min-height: 100%;
 }
 
-body {
-	/* Margin bottom by footer height */
-	margin-bottom: 40px;
-}
-
 .footer {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-	/* Set the fixed height of the footer here */
-	height: 40px;
+    font-size: 12px;
 }
 
 .footer p {
