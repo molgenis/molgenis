@@ -1,9 +1,9 @@
 package org.molgenis.ui.thememanager;
 
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.style.MolgenisStyleException;
 import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
+import org.molgenis.web.PluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,10 +24,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)
-public class ThemeManagerController extends MolgenisPluginController
+public class ThemeManagerController extends PluginController
 {
 	public static final String ID = "thememanager";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final StyleService styleService;
 

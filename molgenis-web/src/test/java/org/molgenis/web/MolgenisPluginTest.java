@@ -1,4 +1,4 @@
-package org.molgenis.ui;
+package org.molgenis.web;
 
 import org.testng.annotations.Test;
 
@@ -10,7 +10,7 @@ public class MolgenisPluginTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void MolgenisPlugin()
 	{
-		new MolgenisPluginController("/invalidprefix/test")
+		new PluginController("/invalidprefix/test")
 		{
 		};
 	}
@@ -18,8 +18,8 @@ public class MolgenisPluginTest
 	@Test
 	public void getId()
 	{
-		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
-		MolgenisPluginController molgenisPlugin = new MolgenisPluginController(uri)
+		String uri = PluginController.PLUGIN_URI_PREFIX + "test";
+		PluginController molgenisPlugin = new PluginController(uri)
 		{
 		};
 		assertEquals(molgenisPlugin.getId(), "test");
@@ -28,8 +28,8 @@ public class MolgenisPluginTest
 	@Test
 	public void getUri()
 	{
-		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
-		MolgenisPluginController molgenisPlugin = new MolgenisPluginController(uri)
+		String uri = PluginController.PLUGIN_URI_PREFIX + "test";
+		PluginController molgenisPlugin = new PluginController(uri)
 		{
 		};
 		assertEquals(molgenisPlugin.getUri(), uri);

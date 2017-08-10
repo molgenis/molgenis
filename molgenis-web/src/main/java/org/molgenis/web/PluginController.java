@@ -1,11 +1,11 @@
-package org.molgenis.ui;
+package org.molgenis.web;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.PluginFactory;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginFactory;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,7 +14,7 @@ import javax.annotation.PostConstruct;
 /**
  * Abstract base class for all MOLGENIS plugin controllers
  */
-public abstract class MolgenisPluginController
+public abstract class PluginController
 {
 	public static final String PLUGIN_URI_PREFIX = "/plugin/";
 
@@ -22,21 +22,21 @@ public abstract class MolgenisPluginController
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisPluginRegistry molgenisPluginRegistry;
+	private PluginRegistry molgenisPluginRegistry;
 
 	/**
 	 * Base URI for a plugin
 	 */
 	private final String uri;
 
-	private final MolgenisPluginFactory molgenisPluginFactory;
+	private final PluginFactory molgenisPluginFactory;
 
-	public MolgenisPluginController(String uri)
+	public PluginController(String uri)
 	{
 		this(uri, null);
 	}
 
-	public MolgenisPluginController(String uri, MolgenisPluginFactory molgenisPluginFactory)
+	public PluginController(String uri, PluginFactory molgenisPluginFactory)
 	{
 		if (uri == null) throw new IllegalArgumentException("uri is null");
 		if (!uri.startsWith(PLUGIN_URI_PREFIX))
@@ -82,7 +82,7 @@ public abstract class MolgenisPluginController
 	@PostConstruct
 	private void registerPlugin()
 	{
-		molgenisPluginRegistry.registerPlugin(new MolgenisPlugin(getId(), getId(), "", "")); // FIXME
+		molgenisPluginRegistry.registerPlugin(new Plugin(getId(), getId(), "", "")); // FIXME
 		if (molgenisPluginFactory != null)
 		{
 			molgenisPluginRegistry.registerPluginFactory(molgenisPluginFactory);

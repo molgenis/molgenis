@@ -1,6 +1,10 @@
 package org.molgenis.ui;
 
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.web.Ui;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItem;
+import org.molgenis.web.UiMenuItemType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -11,7 +15,7 @@ import static java.util.Objects.requireNonNull;
  * @deprecated use {@link org.molgenis.ui.menu.MenuMolgenisUi} instead
  */
 @Deprecated
-public class XmlMolgenisUi implements MolgenisUi
+public class XmlMolgenisUi implements Ui
 {
 	private final Molgenis molgenisUi;
 	private final PermissionService permissionService;
@@ -25,7 +29,7 @@ public class XmlMolgenisUi implements MolgenisUi
 	}
 
 	@Override
-	public MolgenisUiMenu getMenu()
+	public UiMenu getMenu()
 	{
 		return new XmlMolgenisUiMenu(molgenisUi.getMenu(), permissionService);
 	}
@@ -37,20 +41,20 @@ public class XmlMolgenisUi implements MolgenisUi
 	}
 
 	@Override
-	public MolgenisUiMenu getMenu(String menuId)
+	public UiMenu getMenu(String menuId)
 	{
 		return getMenuRecursive(getMenu(), menuId);
 	}
 
-	private MolgenisUiMenu getMenuRecursive(MolgenisUiMenu menu, String menuId)
+	private UiMenu getMenuRecursive(UiMenu menu, String menuId)
 	{
 		if (menu.getId().equals(menuId)) return menu;
 
-		for (MolgenisUiMenuItem menuItem : menu.getItems())
+		for (UiMenuItem menuItem : menu.getItems())
 		{
-			if (menuItem.getType() == MolgenisUiMenuItemType.MENU)
+			if (menuItem.getType() == UiMenuItemType.MENU)
 			{
-				MolgenisUiMenu requestedMenu = getMenuRecursive((MolgenisUiMenu) menuItem, menuId);
+				UiMenu requestedMenu = getMenuRecursive((UiMenu) menuItem, menuId);
 				if (requestedMenu != null) return requestedMenu;
 			}
 		}

@@ -7,9 +7,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,11 +34,11 @@ import static org.molgenis.auth.UserMetaData.USER;
 public class PermissionManagerServiceImpl implements PermissionManagerService
 {
 	private final DataService dataService;
-	private final MolgenisPluginRegistry molgenisPluginRegistry;
+	private final PluginRegistry molgenisPluginRegistry;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
 	@Autowired
-	public PermissionManagerServiceImpl(DataService dataService, MolgenisPluginRegistry molgenisPluginRegistry,
+	public PermissionManagerServiceImpl(DataService dataService, PluginRegistry molgenisPluginRegistry,
 			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
@@ -67,7 +67,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public List<MolgenisPlugin> getPlugins()
+	public List<Plugin> getPlugins()
 	{
 		return Lists.newArrayList(molgenisPluginRegistry);
 	}
@@ -261,12 +261,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		switch (authorityPrefix)
 		{
 			case SecurityUtils.AUTHORITY_PLUGIN_PREFIX:
-				List<MolgenisPlugin> plugins = this.getPlugins();
+				List<Plugin> plugins = this.getPlugins();
 				if (plugins != null)
 				{
-					plugins.sort(Comparator.comparing(MolgenisPlugin::getName));
+					plugins.sort(Comparator.comparing(Plugin::getName));
 					Map<String, String> pluginMap = new LinkedHashMap<>();
-					for (MolgenisPlugin plugin : plugins)
+					for (Plugin plugin : plugins)
 						pluginMap.put(plugin.getId(), plugin.getName());
 					permissions.setEntityIds(pluginMap);
 				}

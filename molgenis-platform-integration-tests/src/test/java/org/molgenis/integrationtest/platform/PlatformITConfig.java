@@ -16,6 +16,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
+import org.molgenis.data.plugin.PluginRegistryImpl;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
@@ -23,7 +24,6 @@ import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
-import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
@@ -86,7 +86,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
-		MolgenisPluginRegistryImpl.class, SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class,
+		PluginRegistryImpl.class, SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class,
 		JobFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {

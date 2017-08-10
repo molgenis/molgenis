@@ -13,10 +13,10 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.plugin.PluginRegistryImpl;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.molgenis.ontology.OntologyDataConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
@@ -175,7 +175,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	}
 
 	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class, OntologyDataConfig.class,
-			OntologyTestConfig.class, OntologyImportService.class, MolgenisPluginRegistryImpl.class,
+			OntologyTestConfig.class, OntologyImportService.class, PluginRegistryImpl.class,
 			CsvDataConfig.class })
 	static class Config
 	{

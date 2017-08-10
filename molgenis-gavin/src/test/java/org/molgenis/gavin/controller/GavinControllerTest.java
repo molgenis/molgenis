@@ -10,8 +10,8 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.jobs.JobExecutionUpdater;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.gavin.config.GavinTestConfig;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
@@ -219,9 +219,9 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		MolgenisPluginRegistry pluginRegistry()
+		PluginRegistry pluginRegistry()
 		{
-			return mock(MolgenisPluginRegistry.class);
+			return mock(PluginRegistry.class);
 		}
 
 		@Bean

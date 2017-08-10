@@ -1,9 +1,9 @@
 package org.molgenis.ui.menumanager;
 
 import com.google.gson.GsonBuilder;
+import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.ui.MenuType;
 import org.molgenis.ui.Molgenis;
 import org.molgenis.ui.PluginType;
@@ -30,11 +30,11 @@ public class MenuManagerServiceImpl implements MenuManagerService
 
 	private final MenuReaderService menuReaderService;
 	private final AppSettings appSettings;
-	private final MolgenisPluginRegistry molgenisPluginRegistry;
+	private final PluginRegistry molgenisPluginRegistry;
 
 	@Autowired
 	public MenuManagerServiceImpl(MenuReaderService menuReaderService, AppSettings appSettings,
-			MolgenisPluginRegistry molgenisPluginRegistry)
+			PluginRegistry molgenisPluginRegistry)
 	{
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.appSettings = requireNonNull(appSettings);
@@ -52,7 +52,7 @@ public class MenuManagerServiceImpl implements MenuManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_READ_menumanager')")
 	@Transactional(readOnly = true)
-	public Iterable<MolgenisPlugin> getPlugins()
+	public Iterable<Plugin> getPlugins()
 	{
 		return molgenisPluginRegistry;
 	}

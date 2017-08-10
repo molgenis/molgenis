@@ -1,18 +1,18 @@
-package org.molgenis.ui;
+package org.molgenis.web;
 
-public interface MolgenisUi
+public interface Ui
 {
 	/**
 	 * Returns the main menu
 	 */
-	MolgenisUiMenu getMenu();
+	UiMenu getMenu();
 
 	/**
 	 * Returns the menu with the given id
 	 *
 	 * @return menu or null if menu does not exist or is not accessible to user
 	 */
-	MolgenisUiMenu getMenu(String menuId);
+	UiMenu getMenu(String menuId);
 
 	String getMenuJson();
 }

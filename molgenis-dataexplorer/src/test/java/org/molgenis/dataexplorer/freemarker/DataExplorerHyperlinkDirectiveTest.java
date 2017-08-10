@@ -7,9 +7,9 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import org.molgenis.data.DataService;
+import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,9 +31,9 @@ public class DataExplorerHyperlinkDirectiveTest
 	@BeforeMethod
 	public void setUp()
 	{
-		MolgenisPluginRegistry mpr = mock(MolgenisPluginRegistry.class);
+		PluginRegistry mpr = mock(PluginRegistry.class);
 		when(mpr.getPlugin(DataExplorerController.ID)).thenReturn(
-				new MolgenisPlugin("dataex", "dataex", "dataex", "/menu/data/dataex"));
+				new Plugin("dataex", "dataex", "dataex", "/menu/data/dataex"));
 
 		dataService = mock(DataService.class);
 		when(dataService.hasRepository("thedataset")).thenReturn(true);

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,10 +19,10 @@ import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Controller
 @RequestMapping(URI)
-public class CatalogueController extends MolgenisPluginController
+public class CatalogueController extends PluginController
 {
 	public static final String ID = "catalogue";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_NAME = "view-catalogue";
 	private final DataService dataService;
 

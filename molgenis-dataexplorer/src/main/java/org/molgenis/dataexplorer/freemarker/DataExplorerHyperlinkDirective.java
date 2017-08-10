@@ -4,9 +4,9 @@ import freemarker.core.Environment;
 import freemarker.template.*;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
+import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -22,10 +22,10 @@ import java.util.Map;
  */
 public class DataExplorerHyperlinkDirective implements TemplateDirectiveModel
 {
-	private final MolgenisPluginRegistry molgenisPluginRegistry;
+	private final PluginRegistry molgenisPluginRegistry;
 	private final DataService dataService;
 
-	public DataExplorerHyperlinkDirective(MolgenisPluginRegistry molgenisPluginRegistry, DataService dataService)
+	public DataExplorerHyperlinkDirective(PluginRegistry molgenisPluginRegistry, DataService dataService)
 	{
 		this.molgenisPluginRegistry = molgenisPluginRegistry;
 		this.dataService = dataService;
@@ -37,7 +37,7 @@ public class DataExplorerHyperlinkDirective implements TemplateDirectiveModel
 	{
 		if (!params.containsKey("entityTypeId")) throw new TemplateModelException("Missing 'entityTypeId' parameter");
 		String dataset = DataConverter.toString(params.get("entityTypeId"));
-		MolgenisPlugin dataexplorer = molgenisPluginRegistry.getPlugin(DataExplorerController.ID);
+		Plugin dataexplorer = molgenisPluginRegistry.getPlugin(DataExplorerController.ID);
 		Writer w = env.getOut();
 
 		if (dataService.hasRepository(dataset) && (dataexplorer != null))

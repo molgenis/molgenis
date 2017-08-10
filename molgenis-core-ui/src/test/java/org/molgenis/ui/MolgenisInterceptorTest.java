@@ -5,6 +5,7 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.util.TemplateResourceUtils;
+import org.molgenis.web.PluginAttributes;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -55,10 +56,10 @@ public class MolgenisInterceptorTest
 		molgenisInterceptor.postHandle(request, response, handler, modelAndView);
 
 		Map<String, Object> model = modelAndView.getModel();
-		assertEquals(model.get(MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY),
+		assertEquals(model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY),
 				resourceFingerprintRegistry);
-		assertEquals(model.get(MolgenisPluginAttributes.KEY_APP_SETTINGS), appSettings);
-		assertEquals(model.get(MolgenisPluginAttributes.KEY_ENVIRONMENT), environment);
-		assertTrue(model.containsKey(MolgenisPluginAttributes.KEY_I18N));
+		assertEquals(model.get(PluginAttributes.KEY_APP_SETTINGS), appSettings);
+		assertEquals(model.get(PluginAttributes.KEY_ENVIRONMENT), environment);
+		assertTrue(model.containsKey(PluginAttributes.KEY_I18N));
 	}
 }

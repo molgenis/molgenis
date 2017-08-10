@@ -8,8 +8,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.pathways.service.WikiPathwaysService;
@@ -62,9 +62,9 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
+		public PluginRegistry molgenisPluginRegistry()
 		{
-			return mock(MolgenisPluginRegistry.class);
+			return mock(PluginRegistry.class);
 		}
 	}
 

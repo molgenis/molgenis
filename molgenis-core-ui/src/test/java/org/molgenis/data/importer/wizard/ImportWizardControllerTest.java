@@ -15,10 +15,10 @@ import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.PermissionManagerServiceImpl;
@@ -426,9 +426,9 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
+		public PluginRegistry molgenisPluginRegistry()
 		{
-			return mock(MolgenisPluginRegistry.class);
+			return mock(PluginRegistry.class);
 		}
 
 		@Bean

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.MolgenisPluginAttributes.*;
+import static org.molgenis.web.PluginAttributes.*;
 
 /**
  * Interceptor that adds default model objects to all requests that return a view.

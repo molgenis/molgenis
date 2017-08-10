@@ -1,13 +1,13 @@
-package org.molgenis.framework.ui;
+package org.molgenis.data.plugin;
 
-public class MolgenisPlugin
+public class Plugin
 {
 	private final String id;
 	private final String name;
 	private final String uri;
 	private final String fullUri;
 
-	public MolgenisPlugin(String id, String name, String uri, String fullUri)
+	public Plugin(String id, String name, String uri, String fullUri)
 	{
 		if (id == null) throw new IllegalArgumentException("id is null");
 		if (name == null) throw new IllegalArgumentException("name is null");
@@ -54,7 +54,7 @@ public class MolgenisPlugin
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		MolgenisPlugin other = (MolgenisPlugin) obj;
+		Plugin other = (Plugin) obj;
 		if (id == null)
 		{
 			if (other.id != null) return false;

@@ -4,7 +4,7 @@ import org.molgenis.auth.Group;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthority;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.data.plugin.Plugin;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface PermissionManagerService
 
 	List<Group> getGroups();
 
-	List<MolgenisPlugin> getPlugins();
+	List<Plugin> getPlugins();
 
 	List<Object> getEntityClassIds();
 

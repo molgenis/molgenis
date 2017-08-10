@@ -7,9 +7,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +55,9 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		}
 
 		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
+		public PluginRegistry molgenisPluginRegistry()
 		{
-			return mock(MolgenisPluginRegistry.class);
+			return mock(PluginRegistry.class);
 		}
 
 		@Bean
@@ -74,13 +74,13 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisPluginRegistry molgenisPluginRegistry;
+	private PluginRegistry molgenisPluginRegistry;
 
 	private GroupAuthority groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority;
 	private UserAuthority userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority;
 	private User user1, user2, user3;
 	private Group group1;
-	private MolgenisPlugin plugin1, plugin2, plugin3;
+	private Plugin plugin1, plugin2, plugin3;
 
 	@BeforeMethod
 	public void setUp()
@@ -158,13 +158,13 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 				UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 
-		plugin1 = when(mock(MolgenisPlugin.class).getId()).thenReturn("1").getMock();
+		plugin1 = when(mock(Plugin.class).getId()).thenReturn("1").getMock();
 		when(plugin1.getName()).thenReturn("plugin1");
 		when(plugin1.getId()).thenReturn("plugin1");
-		plugin2 = when(mock(MolgenisPlugin.class).getId()).thenReturn("2").getMock();
+		plugin2 = when(mock(Plugin.class).getId()).thenReturn("2").getMock();
 		when(plugin2.getName()).thenReturn("plugin2");
 		when(plugin1.getId()).thenReturn("plugin2");
-		plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
+		plugin3 = when(mock(Plugin.class).getId()).thenReturn("3").getMock();
 		when(plugin3.getName()).thenReturn("plugin3");
 		when(plugin1.getId()).thenReturn("plugin3");
 		when(molgenisPluginRegistry.iterator()).thenReturn(Arrays.asList(plugin1, plugin2, plugin3).iterator());
