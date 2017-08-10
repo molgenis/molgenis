@@ -7,7 +7,6 @@ import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
