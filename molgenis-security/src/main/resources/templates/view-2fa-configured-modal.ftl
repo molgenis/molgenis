@@ -3,31 +3,7 @@
 <html>
 <head>
     <title>MOLGENIS - 2 factor authentication</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
-    <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-    <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-    <link rel="stylesheet" href="<@resource_href "/css/bootstrap-pincode-input.css"/>" type="text/css">
-    <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
-    <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
-    <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
-    <script src="<@resource_href "/js/bootstrap-pincode-input.js"/>"></script>
-    <script src="<@resource_href "/js/qrcode.min.js"/>"></script>
-    <script type="application/javascript">
-        $(function () {
-            var modal = $('#2fa-configured-modal')
-            modal.modal()
-
-        <#-- modal events -->
-            modal.on('hide.bs.modal', function (e) {
-                e.stopPropagation()
-                form[0].reset()
-                $('.text-error', modal).remove()
-                $('.alert', modal).remove()
-            })
-        })
-    </script>
+<#include "view-2fa-imports.ftl">
     <style>
         .modal-container-padding {
             padding: 0%;
@@ -40,13 +16,16 @@
     <#if errorMessage??>
         $('#alert-container').html($('<div class="alert alert-block alert-danger alert-dismissable fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong>Warning!</strong> ${errorMessage?html}</div>'))
     </#if>
+    <#if isRecoverMode??>
+        $('.verification-form-toggle').collapse('toggle')
+    </#if>
     })
 </script>
-<div class="modal" id="2fa-configured-modal" tabindex="-1" aria-labelledby="2fa-activation-modal-label">
+<div class="modal" id="2fa-modal" tabindex="-1" aria-labelledby="2fa-modal-label">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header" id="2fa-configured-modal-header">
-                <h4 class="modal-title" id="2fa-configured-modal-label">
+            <div class="modal-header" id="2fa-modal-header">
+                <h4 class="modal-title" id="2fa-modal-label">
                     Verification code
                 </h4>
             </div>
@@ -78,7 +57,8 @@
                         <p>
                             Don't have your phone?
                             <br/>
-                            <a href=".verification-form-toggle" data-toggle="collapse">Enter a recovery code</a>
+                            <a href=".verification-form-toggle" data-toggle="collapse">Enter
+                                a recovery code</a>
                         </p>
                     </div>
 

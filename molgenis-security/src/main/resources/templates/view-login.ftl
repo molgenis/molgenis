@@ -22,7 +22,7 @@
 <#if googleSignIn>
 <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
     <script>
-        function onLoad () {
+        function onLoad() {
             gapi.load('auth2', function () {
                 gapi.auth2.init()
             })

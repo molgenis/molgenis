@@ -753,13 +753,14 @@ public class RestController
 		{
 			throw new HttpMessageNotReadableException("Missing login");
 		}
-		if (userIs2fa())
+		if (isUser2fa())
 		{
 			throw new BadCredentialsException(
-					"two factor authentication is enabled, you cannot use /login via the RESTAPI anymore");
+					"Login using /api/v1/login is disabled, two factor authentication is enabled");
 		}
 
-		return runAsSystem(() -> {
+		return runAsSystem(() ->
+		{
 			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(login.getUsername(),
 					login.getPassword());
 
@@ -779,12 +780,12 @@ public class RestController
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 
 			// Generate a new token for the user
-			String token = tokenService.generateAndStoreToken(authentication.getName(), "Rest api login");
+			String token = tokenService.generateAndStoreToken(authentication.getName(), "REST API login");
 			return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
 		});
 	}
 
-	private boolean userIs2fa()
+	private boolean isUser2fa()
 	{
 		boolean userIs2fa = false;
 		if (TwoFactorAuthenticationSetting.ENFORCED.toString().equals(appSettings.getTwoFactorAuthentication()))
@@ -793,7 +794,7 @@ public class RestController
 		}
 		else if (TwoFactorAuthenticationSetting.ENABLED.toString().equals(appSettings.getTwoFactorAuthentication()))
 		{
-			if (userAccountService.getCurrentUser().getTwoFactorAuthentication())
+			if (userAccountService.getCurrentUser().isTwoFactorAuthentication())
 			{
 				userIs2fa = true;
 			}

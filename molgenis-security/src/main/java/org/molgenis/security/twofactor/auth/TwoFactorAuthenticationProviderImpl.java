@@ -1,6 +1,6 @@
 package org.molgenis.security.twofactor.auth;
 
-import org.molgenis.security.twofactor.service.OTPService;
+import org.molgenis.security.twofactor.service.OtpService;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,11 +21,11 @@ import static java.util.Objects.requireNonNull;
 public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticationProvider
 {
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private final OTPService otpService;
-	private RecoveryService recoveryService;
+	private final OtpService otpService;
+	private final RecoveryService recoveryService;
 
 	public TwoFactorAuthenticationProviderImpl(TwoFactorAuthenticationService twoFactorAuthenticationService,
-			OTPService otpService, RecoveryService recoveryService)
+			OtpService otpService, RecoveryService recoveryService)
 	{
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.otpService = requireNonNull(otpService);
@@ -36,7 +36,9 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException
 	{
 		if (!supports(authentication.getClass()))
+		{
 			throw new IllegalArgumentException("Only TwoFactorAuthenticationToken is supported");
+		}
 
 		TwoFactorAuthenticationToken authToken = (TwoFactorAuthenticationToken) authentication;
 
@@ -76,7 +78,7 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 			}
 			else
 			{
-				throw new BadCredentialsException("Invalid verificationcode entered");
+				throw new BadCredentialsException("Invalid verification code entered");
 			}
 		}
 

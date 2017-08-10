@@ -91,7 +91,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 
 	private boolean userUsesTwoFactorAuthentication()
 	{
-		return userAccountService.getCurrentUser().getTwoFactorAuthentication();
+		return userAccountService.getCurrentUser().isTwoFactorAuthentication();
 	}
 
 	private boolean isUserTwoFactorAuthenticated()

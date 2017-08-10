@@ -7,24 +7,28 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * AuthenticationProvider that offers the possibility to authenticate users with a recovery code. Used in conjunction
  * with Two Factor Authentication and prevents users from being locked out of their account when they lose their phone.
  */
 public class RecoveryAuthenticationProviderImpl implements RecoveryAuthenticationProvider
 {
-	private RecoveryService recoveryService;
+	private final RecoveryService recoveryService;
 
 	public RecoveryAuthenticationProviderImpl(RecoveryService recoveryService)
 	{
-		this.recoveryService = recoveryService;
+		this.recoveryService = requireNonNull(recoveryService);
 	}
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException
 	{
 		if (!supports(authentication.getClass()))
+		{
 			throw new IllegalArgumentException("Only RecoveryAuthenticationToken is supported");
+		}
 
 		RecoveryAuthenticationToken authToken = (RecoveryAuthenticationToken) authentication;
 

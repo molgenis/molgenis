@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor.meta;
+package org.molgenis.security.twofactor.model;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

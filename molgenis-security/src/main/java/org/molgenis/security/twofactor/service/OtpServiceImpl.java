@@ -2,12 +2,10 @@ package org.molgenis.security.twofactor.service;
 
 import org.jboss.aerogear.security.otp.Totp;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -15,15 +13,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 @Service
-public class OTPServiceImpl implements OTPService
+public class OtpServiceImpl implements OtpService
 {
 
-	private final static Logger LOG = LoggerFactory.getLogger(OTPServiceImpl.class);
+	private final static Logger LOG = LoggerFactory.getLogger(OtpServiceImpl.class);
 
 	private final AppSettings appSettings;
 
-	@Autowired
-	public OTPServiceImpl(AppSettings appSettings)
+	public OtpServiceImpl(AppSettings appSettings)
 	{
 		this.appSettings = appSettings;
 	}
@@ -48,7 +45,7 @@ public class OTPServiceImpl implements OTPService
 				}
 				else
 				{
-					throw new InvalidVerificationCodeException("Invalid verificationcode entered");
+					throw new InvalidVerificationCodeException("Invalid verification code entered");
 
 				}
 			}
@@ -56,7 +53,7 @@ public class OTPServiceImpl implements OTPService
 		}
 		else
 		{
-			throw new InvalidVerificationCodeException("2 factor authentication secret key is not available");
+			throw new InvalidVerificationCodeException("Two factor authentication secret key is not available");
 		}
 		return isValid;
 	}
@@ -64,16 +61,15 @@ public class OTPServiceImpl implements OTPService
 	@Override
 	public String getAuthenticatorURI(String secretKey) throws IllegalStateException
 	{
-		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String userName = SecurityUtils.getCurrentUsername();
 
-		String appName = appSettings.getTitle() == null ? "MOLGENIS" : appSettings.getTitle();
-		if (userDetails == null)
+		String appName = appSettings.getTitle();
+		if (userName == null)
 		{
 			String errorMessage = "User is not available";
 			LOG.error(errorMessage);
-			throw new IllegalStateException();
+			throw new IllegalStateException(errorMessage);
 		}
-		String userName = userDetails.getUsername();
 		String normalizedBase32Key = secretKey.replace(" ", "").toUpperCase();
 		try
 		{

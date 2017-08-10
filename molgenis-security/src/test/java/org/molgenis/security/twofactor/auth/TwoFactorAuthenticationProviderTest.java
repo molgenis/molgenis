@@ -24,42 +24,10 @@ public class TwoFactorAuthenticationProviderTest extends AbstractTestNGSpringCon
 
 	private final static String USERNAME = "admin";
 	private final static String ROLE_SU = "SU";
-
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
-		{
-			return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), otpService(),
-					recoveryService());
-		}
-
-		@Bean
-		public TwoFactorAuthenticationService twoFactorAuthenticationService()
-		{
-			return mock(TwoFactorAuthenticationServiceImpl.class);
-		}
-
-		@Bean
-		public RecoveryService recoveryService()
-		{
-			return mock(RecoveryServiceImpl.class);
-		}
-
-		@Bean
-		public OTPService otpService()
-		{
-			return mock(OTPServiceImpl.class);
-		}
-	}
-
 	@Autowired
-	private OTPService otpService;
-
+	private OtpService otpService;
 	@Autowired
 	private TwoFactorAuthenticationProvider twoFactorAuthenticationProvider;
-
 	@Autowired
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
@@ -104,5 +72,34 @@ public class TwoFactorAuthenticationProviderTest extends AbstractTestNGSpringCon
 	{
 		twoFactorAuthenticationProvider.authenticate(
 				new UsernamePasswordAuthenticationToken("123456", "dsda545ds4dsa456"));
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider()
+		{
+			return new TwoFactorAuthenticationProviderImpl(twoFactorAuthenticationService(), otpService(),
+					recoveryService());
+		}
+
+		@Bean
+		public TwoFactorAuthenticationService twoFactorAuthenticationService()
+		{
+			return mock(TwoFactorAuthenticationServiceImpl.class);
+		}
+
+		@Bean
+		public RecoveryService recoveryService()
+		{
+			return mock(RecoveryServiceImpl.class);
+		}
+
+		@Bean
+		public OtpService otpService()
+		{
+			return mock(OtpServiceImpl.class);
+		}
 	}
 }

@@ -76,20 +76,27 @@ If at any time you want to edit an existing user, you can click the icon in the 
 Managing your users is quick and easy. And opens up way to our next big security item, setting permissions for your data.
 
 # Authentication
-In MOLGENIS you can configure two authentication methods:
- * Default MOLGENIS-authentication
- * Google-Authentication
+When you are a superuse in MOLGENIS, you can configure three authentication methods: 
+ * Username/password sigin *(default)*
+ * Google-sigin
+ * Token-authentication
  
-**Default-authentication**  
+**Username/password sigin (default)**  
 In the App Settings:
  * Set user-moderation to user can sign up
  * Set two factor authentication: 
-   * Disabled: user CAN NOT use two factor authentication
-   * Enforced: users MUST two factor authentication
-   * Enabled: users can decide for themselves if they want to use two factor authentication  
+   * Disabled: users CAN NOT use two-factor-authentication
+   * Enforced: users MUST use two-factor-authentication
+   * Enabled: users CAN use two-factor-authentication
+   
+**prompted:** The default setting for tow-factor-authentication for a fresh installation *"Disabled"*. When two-factor-authentication is *"Enabled"* it is default disabled for the users.  
 
-**Google-authentication**  
-The Google-authentication method is used to enable the possibility for users to login with their Google-account. 
+**Google-sigin**  
+The Google-sigin setting is used to enable the possibility for users to login with their Google-account. 
+ 
+**Token-authentication**
+No specific superuser settings are necessary for the implementation of token-authentication.
+ 
  
 # Permissions
 For the scientific community, the need for data security is very large. We tried to meet this demand by implementing an extensive permission system. The system allows for the setting of count, read and write permissions on the different datasets 

@@ -13,35 +13,21 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-@ContextConfiguration(classes = { OTPServiceImplTest.Config.class })
+@ContextConfiguration(classes = { OtpServiceImplTest.Config.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class OTPServiceImplTest extends AbstractTestNGSpringContextTests
+public class OtpServiceImplTest extends AbstractTestNGSpringContextTests
 {
 
 	private final static String USERNAME = "molgenisUser";
 	private final static String ROLE_SU = "SU";
 
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public OTPService otpService()
-		{
-			return new OTPServiceImpl(appSettings());
-		}
-
-		@Bean
-		public AppSettings appSettings()
-		{
-			return mock(AppSettings.class);
-		}
-
-	}
-
 	@Autowired
-	private OTPService otpService;
+	private OtpService otpService;
+	@Autowired
+	private AppSettings appSettings;
 
 	@Test(expectedExceptions = InvalidVerificationCodeException.class)
 	public void testTryVerificationKeyFailed()
@@ -54,8 +40,26 @@ public class OTPServiceImplTest extends AbstractTestNGSpringContextTests
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
 	public void testGetAuthenticatorURI()
 	{
+		when(appSettings.getTitle()).thenReturn("MOLGENIS");
 		String uri = otpService.getAuthenticatorURI("secretKey");
 		assertEquals(true, !uri.isEmpty());
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		public OtpService otpService()
+		{
+			return new OtpServiceImpl(appSettings());
+		}
+
+		@Bean
+		public AppSettings appSettings()
+		{
+			return mock(AppSettings.class);
+		}
+
 	}
 
 }
