@@ -1,10 +1,9 @@
-// @flow
-import type { State } from './utils/flow.types'
-
 export const SET_MESSAGE = '__SET_MESSAGE__'
 
+export const SET_SEARCHTERM = 'SET_SEARCHTERM'
+
 export default {
-  [SET_MESSAGE] (state: State, message: string) {
-    state.message = message
+  [SET_SEARCHTERM] (state, searchterm) {
+    state.searchterm = searchterm
   }
 }

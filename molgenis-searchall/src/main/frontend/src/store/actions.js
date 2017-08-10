@@ -1,21 +1,32 @@
 import { get } from '@molgenis/molgenis-api-client'
 
-export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
+export const SEARCH_ALL = 'SEARCH_ALL'
+
+function queryPackages (query) {
+  return new Promise((resolve, reject) => {
+    const uri = '/api/v2/seachall?term=' + query
+    get(uri).then((response) => {
+      resolve(response.items)
+    }).catch((error) => {
+      reject(error)
+    })
+  })
+}
 
 export default {
-  /**
-   * Example action for retrieving all EntityTypes from the server
-   */
-    [GET_ENTITY_TYPES] ({commit}) {
-    /**
-     * Pass options to the fetch like body, method, x-molgenis-token etc...
-     * @type {{}}
-     */
-    const options = {}
-    get('/api/v2/sys_md_EntityTypes?num=1000', options).then(response => {
-      console.log(response)
-    }, error => {
-      console.log(error)
+  [SEARCH_ALL] ({commit}, query) {
+    return new Promise((resolve, reject) => {
+      if (!query) {
+        // FIXME
+      } else {
+        queryPackages().then(results => {
+          // commit(SET_RESULTS, results)
+          resolve()
+        }, errorMessage => {
+          // commit(SET_ERROR, errorMessage)
+          reject()
+        })
+      }
     })
   }
 }

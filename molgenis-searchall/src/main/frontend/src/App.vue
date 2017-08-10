@@ -8,6 +8,6 @@
 
 <script>
   export default {
-    name: 'molgenis-app'
+    name: 'search-all'
   }
 </script>
