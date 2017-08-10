@@ -1,6 +1,5 @@
-package org.molgenis.framework.ui;
+package org.molgenis.ui;
 
-import org.molgenis.ui.MolgenisPluginController;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
