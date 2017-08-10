@@ -92,7 +92,11 @@
     </#list>
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
-<body>
+    <#if version?? || version == 1>
+    <body style="padding: 55px;">
+    <#else>
+    <body>
+    </#if>
     <#if !(version??) || version == 1>
     <#-- Navbar menu -->
         <#if menu_id??>
