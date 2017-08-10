@@ -17,6 +17,15 @@
 		
 		$('#bootstrap-theme-select').on('change', updatePageTheme);
 
+		function toggleAddBtn () {
+      var disableBtn = $('#bootstrap3-file').val() == '';
+      $('#add-themes-btn').prop('disabled', disableBtn);
+    }
+
+    $('#bootstrap3-file').on('change', function () {
+      toggleAddBtn();
+    });
+
 		$('#save-selected-bootstrap-theme').on('click', function(event) {
 			event.preventDefault();
 			updatePageTheme();
@@ -38,6 +47,7 @@
       $('#save-selected-bootstrap-theme').prop('disabled', true);
       $('#show-add-theme-btn').prop('disabled', true);
 			$('#add-theme-container').show();
+      toggleAddBtn();
     });
 
     $('#cancel-add-themes-btn').on('click', function() {
@@ -83,10 +93,10 @@
         },
 				error: function(response) {
 
-        	var detailMessage = response.responseJSON.errors[0].message;
+        	var detailMessage = response.responseJSON ? " :" + response.responseJSON.errors[0].message : ".";
 
           molgenis.createAlert([ {
-            'message' : 'Could not add theme: ' + detailMessage
+            'message' : 'Error adding theme' + detailMessage
           } ], 'error');
 				}
       });
