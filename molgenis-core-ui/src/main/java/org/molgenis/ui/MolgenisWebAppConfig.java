@@ -26,6 +26,8 @@ import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
+import org.molgenis.ui.style.StyleService;
+import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
@@ -83,6 +85,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	private LanguageService languageService;
+
+	@Autowired
+	private StyleService styleService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -176,6 +181,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public ThemeFingerprintRegistry themeFingerprintRegistry()
+	{
+		return new ThemeFingerprintRegistry(styleService);
+	}
+
+	@Bean
 	public TemplateResourceUtils templateResourceUtils()
 	{
 		return new TemplateResourceUtils();
@@ -184,7 +195,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), templateResourceUtils(), appSettings,
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(), templateResourceUtils(), appSettings,
 				languageService, environment);
 	}
 

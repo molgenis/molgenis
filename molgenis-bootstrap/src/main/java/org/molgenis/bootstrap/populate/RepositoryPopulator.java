@@ -3,6 +3,7 @@ package org.molgenis.bootstrap.populate;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.SettingsPopulator;
 import org.molgenis.script.ScriptTypePopulator;
+import org.molgenis.ui.style.BootstrapThemePopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
