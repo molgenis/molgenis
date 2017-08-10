@@ -47,7 +47,7 @@ public class StyleControllerTest
 				.thenReturn(themeResource);
 
 		mockMvc.perform(
-				get("/css/theme/bootstrap-3/bootstrap-molgenis.min.css").with(anonymous())
+				get("/css/bootstrap-3/bootstrap-molgenis.min.css").with(anonymous())
 		).
 				andExpect(status().isOk());
 
@@ -63,7 +63,7 @@ public class StyleControllerTest
 				.thenReturn(themeResource);
 
 		mockMvc.perform(
-				get("/css/theme/bootstrap-4/bootstrap-molgenis.min.css").with(anonymous())
+				get("/css/bootstrap-4/bootstrap-molgenis.min.css").with(anonymous())
 		).
 				andExpect(status().isOk());
 

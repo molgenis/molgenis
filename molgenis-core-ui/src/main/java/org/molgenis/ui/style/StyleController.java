@@ -30,7 +30,7 @@ public class StyleController
 		this.styleService = requireNonNull(styleService);
 	}
 
-	@RequestMapping(value = "/css/theme/{bootstrap-version}/{theme}", method = RequestMethod.GET)
+	@RequestMapping(value = "/css/bootstrap-{bootstrap-version}/{theme}", method = RequestMethod.GET)
 	public ResponseEntity getThemeCss(@PathVariable("bootstrap-version") String bootstrapVersion,
 			@PathVariable("theme") String theme, HttpServletResponse response)
 			throws MolgenisStyleException
@@ -40,7 +40,7 @@ public class StyleController
 
 		final String themeName = theme.endsWith(".css") ? theme : theme + ".css";
 
-		BootstrapVersion version = bootstrapVersion.equals("bootstrap-4") ? BOOTSTRAP_VERSION_4 : BOOTSTRAP_VERSION_3;
+		BootstrapVersion version = bootstrapVersion.equals("4") ? BOOTSTRAP_VERSION_4 : BOOTSTRAP_VERSION_3;
 		Resource styleSheetResource = styleService.getThemeData(themeName, version);
 
 		try

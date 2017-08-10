@@ -22,10 +22,10 @@
     <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@theme_href "/css/theme/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css"
+        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css"
               id="bootstrap-theme">
     <#else>
-        <link rel="stylesheet" href="<@theme_href "/css/theme/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css"
+        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css"
               id="bootstrap-theme">
     </#if>
 

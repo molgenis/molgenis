@@ -9,7 +9,7 @@
 			var cssLocation = $('#bootstrap-theme-select').val();
 			var link = $('<link />').attr('id', 'bootstrap-theme').attr('rel', 'stylesheet').attr('type', 'text/css');
 
-			$(link).attr('href', "/css/theme/bootstrap-3/" + cssLocation);
+			$(link).attr('href', "/css/bootstrap-3/" + cssLocation);
 
 			$('#bootstrap-theme').remove(); // Remove existing preview theme
 			$('head').append(link); // Set new preview theme
