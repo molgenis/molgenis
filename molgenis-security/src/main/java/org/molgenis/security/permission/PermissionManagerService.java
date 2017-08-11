@@ -4,7 +4,7 @@ import org.molgenis.auth.Group;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthority;
-import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.model.Plugin;
 
 import java.util.List;
 

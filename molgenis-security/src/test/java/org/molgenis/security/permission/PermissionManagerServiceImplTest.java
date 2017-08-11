@@ -7,8 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.plugin.Plugin;
-import org.molgenis.data.plugin.PluginRegistry;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
@@ -33,6 +32,7 @@ import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })
@@ -44,20 +44,13 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(),
-					grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService(), grantedAuthoritiesMapper());
 		}
 
 		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
-		}
-
-		@Bean
-		public PluginRegistry molgenisPluginRegistry()
-		{
-			return mock(PluginRegistry.class);
 		}
 
 		@Bean
@@ -72,9 +65,6 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private PluginRegistry molgenisPluginRegistry;
 
 	private GroupAuthority groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority;
 	private UserAuthority userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority;
@@ -132,9 +122,16 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(userEntity3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity3");
 		when(userEntity3Authority.getUser()).thenReturn(user1);
 
-		when(dataService.findAll(GROUP, Group.class)).thenReturn(Stream.of(group1));
+		plugin1 = when(mock(Plugin.class).getId()).thenReturn("1").getMock();
+		when(plugin1.getId()).thenReturn("plugin1");
+		plugin2 = when(mock(Plugin.class).getId()).thenReturn("2").getMock();
+		when(plugin1.getId()).thenReturn("plugin2");
+		plugin3 = when(mock(Plugin.class).getId()).thenReturn("3").getMock();
+		when(plugin1.getId()).thenReturn("plugin3");
 
+		when(dataService.findAll(GROUP, Group.class)).thenReturn(Stream.of(group1));
 		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user1));
+		when(dataService.findAll(PLUGIN, Plugin.class)).thenReturn(Stream.of(plugin1, plugin2, plugin3));
 
 		when(dataService.findOneById(GROUP, group1Id, Group.class)).thenReturn(group1);
 		when(dataService.findOneById(USER, user1Id, User.class)).thenReturn(user1);
@@ -158,27 +155,16 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 				UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 
-		plugin1 = when(mock(Plugin.class).getId()).thenReturn("1").getMock();
-		when(plugin1.getName()).thenReturn("plugin1");
-		when(plugin1.getId()).thenReturn("plugin1");
-		plugin2 = when(mock(Plugin.class).getId()).thenReturn("2").getMock();
-		when(plugin2.getName()).thenReturn("plugin2");
-		when(plugin1.getId()).thenReturn("plugin2");
-		plugin3 = when(mock(Plugin.class).getId()).thenReturn("3").getMock();
-		when(plugin3.getName()).thenReturn("plugin3");
-		when(plugin1.getId()).thenReturn("plugin3");
-		when(molgenisPluginRegistry.iterator()).thenReturn(Arrays.asList(plugin1, plugin2, plugin3).iterator());
-
 		when(dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(Stream.empty());
 		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
 				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)),
 				eq(EntityType.class))).thenReturn(Stream.empty());
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void PluginPermissionManagerServiceImpl()
 	{
-		new PermissionManagerServiceImpl(null, null, null);
+		new PermissionManagerServiceImpl(null, null);
 	}
 
 	@Test

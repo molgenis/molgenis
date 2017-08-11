@@ -3,13 +3,12 @@ package org.molgenis.ui;
 import com.google.common.collect.Maps;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import org.molgenis.data.DataService;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
-import org.molgenis.data.plugin.PluginRegistry;
-import org.molgenis.data.plugin.PluginRegistryImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
@@ -74,6 +73,9 @@ import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 @Import({ PlatformConfig.class, RdfConverter.class })
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
+	@Autowired
+	private DataService dataService;
+
 	@Autowired
 	private AppSettings appSettings;
 
@@ -334,7 +336,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MenuManagerService menuManagerService()
 	{
-		return new MenuManagerServiceImpl(menuReaderService(), appSettings, molgenisPluginRegistry());
+		return new MenuManagerServiceImpl(menuReaderService(), appSettings, dataService);
 	}
 
 	@Bean
@@ -342,12 +344,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		Ui molgenisUi = new MenuMolgenisUi(menuReaderService());
 		return new MolgenisUiPermissionDecorator(molgenisUi, permissionService);
-	}
-
-	@Bean
-	public PluginRegistry molgenisPluginRegistry()
-	{
-		return new PluginRegistryImpl();
 	}
 
 	@Bean

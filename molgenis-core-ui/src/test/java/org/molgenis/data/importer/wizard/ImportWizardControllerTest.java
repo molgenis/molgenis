@@ -15,7 +15,6 @@ import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -416,19 +415,13 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService, molgenisPluginRegistry(), grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService, grantedAuthoritiesMapper());
 		}
 
 		@Bean
 		public MetaDataService metaDataService()
 		{
 			return mock(MetaDataService.class);
-		}
-
-		@Bean
-		public PluginRegistry molgenisPluginRegistry()
-		{
-			return mock(PluginRegistry.class);
 		}
 
 		@Bean

@@ -5,8 +5,6 @@ import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.plugin.PluginRegistry;
-import org.molgenis.data.plugin.PluginRegistryImpl;
 import org.molgenis.security.permission.PermissionManagerService;
 import org.molgenis.ui.admin.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.util.GsonConfig;
@@ -55,12 +53,6 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		{
 			return new PermissionManagerController(permissionManagerService(), userAuthorityFactory(),
 					groupAuthorityFactory());
-		}
-
-		@Bean
-		public PluginRegistry molgenisPluginRegistry()
-		{
-			return new PluginRegistryImpl();
 		}
 
 		@Bean

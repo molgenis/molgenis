@@ -2,7 +2,6 @@ package org.molgenis.app.controller;
 
 import org.molgenis.app.controller.ContentControllersTest.Config;
 import org.molgenis.data.DataService;
-import org.molgenis.data.plugin.PluginRegistry;
 import org.molgenis.file.FileStore;
 import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.util.GsonConfig;
@@ -242,12 +241,6 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		public FileStore fileStore()
 		{
 			return mock(FileStore.class);
-		}
-
-		@Bean
-		public PluginRegistry molgenisPluginRegistry()
-		{
-			return mock(PluginRegistry.class);
 		}
 
 		@Bean

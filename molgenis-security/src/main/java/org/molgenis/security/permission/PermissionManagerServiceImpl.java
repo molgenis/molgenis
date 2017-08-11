@@ -7,8 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.plugin.Plugin;
-import org.molgenis.data.plugin.PluginRegistry;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,30 +22,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 
 @Service
 public class PermissionManagerServiceImpl implements PermissionManagerService
 {
 	private final DataService dataService;
-	private final PluginRegistry molgenisPluginRegistry;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
 	@Autowired
-	public PermissionManagerServiceImpl(DataService dataService, PluginRegistry molgenisPluginRegistry,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
+	public PermissionManagerServiceImpl(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (molgenisPluginRegistry == null) throw new IllegalArgumentException("Molgenis plugin registry is null");
-		if (grantedAuthoritiesMapper == null) throw new IllegalArgumentException("Granted authorities mapper is null");
-		this.dataService = dataService;
-		this.molgenisPluginRegistry = molgenisPluginRegistry;
-		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
+		this.dataService = requireNonNull(dataService);
+		this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper);
 	}
 
 	@Override
@@ -67,9 +62,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
 	public List<Plugin> getPlugins()
 	{
-		return Lists.newArrayList(molgenisPluginRegistry);
+		return dataService.findAll(PLUGIN, Plugin.class).collect(toList());
 	}
 
 	@Override
@@ -264,10 +260,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				List<Plugin> plugins = this.getPlugins();
 				if (plugins != null)
 				{
-					plugins.sort(Comparator.comparing(Plugin::getName));
+					plugins.sort(Comparator.comparing(Plugin::getId));
 					Map<String, String> pluginMap = new LinkedHashMap<>();
 					for (Plugin plugin : plugins)
-						pluginMap.put(plugin.getId(), plugin.getName());
+						pluginMap.put(plugin.getId(), plugin.getId());
 					permissions.setEntityIds(pluginMap);
 				}
 				break;

@@ -3,7 +3,7 @@ package org.molgenis.ui.menumanager;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeTraverser;
-import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.ui.menu.Menu;

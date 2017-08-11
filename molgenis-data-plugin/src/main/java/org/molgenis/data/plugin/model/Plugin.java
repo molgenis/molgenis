@@ -44,25 +44,14 @@ public class Plugin extends StaticEntity
 		return this;
 	}
 
-	public String getUri()
+	public String getDescription()
 	{
-		return getString(PluginMetadata.URI);
+		return getString(PluginMetadata.DESCRIPTION);
 	}
 
-	public Plugin setUri(String uri)
+	public Plugin setDescription(String description)
 	{
-		set(PluginMetadata.URI, uri);
-		return this;
-	}
-
-	public String getFullUri()
-	{
-		return getString(PluginMetadata.FULL_URI);
-	}
-
-	public Plugin setFullUri(String uri)
-	{
-		set(PluginMetadata.FULL_URI, uri);
+		set(PluginMetadata.DESCRIPTION, description);
 		return this;
 	}
 }

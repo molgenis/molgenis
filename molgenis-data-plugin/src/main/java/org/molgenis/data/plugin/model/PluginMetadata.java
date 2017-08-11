@@ -15,8 +15,7 @@ public class PluginMetadata extends SystemEntityType
 
 	public static final String ID = "id";
 	public static final String LABEL = "label";
-	public static final String URI = "uri";
-	public static final String FULL_URI = "fullUri";
+	public static final String DESCRIPTION = "description";
 
 	PluginMetadata()
 	{
@@ -30,7 +29,6 @@ public class PluginMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setUnique(true).setLabel("Label");
-		addAttribute(URI).setLabel("URI");
-		addAttribute(FULL_URI).setLabel("Full URI");
+		addAttribute(DESCRIPTION, ROLE_LOOKUP).setLabel("Description");
 	}
 }

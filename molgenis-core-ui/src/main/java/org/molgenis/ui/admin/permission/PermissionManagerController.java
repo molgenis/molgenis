@@ -6,7 +6,7 @@ import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.data.plugin.Plugin;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerService;

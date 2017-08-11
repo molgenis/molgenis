@@ -1,9 +1,11 @@
 package org.molgenis.ui.menumanager;
 
 import com.google.gson.GsonBuilder;
-import org.molgenis.data.plugin.Plugin;
-import org.molgenis.data.plugin.PluginRegistry;
+import org.molgenis.data.DataService;
+import org.molgenis.data.plugin.model.Plugin;
+import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.MenuType;
 import org.molgenis.ui.Molgenis;
 import org.molgenis.ui.PluginType;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 public class MenuManagerServiceImpl implements MenuManagerService
 {
@@ -30,15 +33,14 @@ public class MenuManagerServiceImpl implements MenuManagerService
 
 	private final MenuReaderService menuReaderService;
 	private final AppSettings appSettings;
-	private final PluginRegistry molgenisPluginRegistry;
+	private final DataService dataService;
 
 	@Autowired
-	public MenuManagerServiceImpl(MenuReaderService menuReaderService, AppSettings appSettings,
-			PluginRegistry molgenisPluginRegistry)
+	public MenuManagerServiceImpl(MenuReaderService menuReaderService, AppSettings appSettings, DataService dataService)
 	{
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.appSettings = requireNonNull(appSettings);
-		this.molgenisPluginRegistry = requireNonNull(molgenisPluginRegistry);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -50,11 +52,12 @@ public class MenuManagerServiceImpl implements MenuManagerService
 	}
 
 	@Override
+	@RunAsSystem
 	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_READ_menumanager')")
 	@Transactional(readOnly = true)
 	public Iterable<Plugin> getPlugins()
 	{
-		return molgenisPluginRegistry;
+		return dataService.findAll(PluginMetadata.PLUGIN, Plugin.class).collect(toList());
 	}
 
 	@Override
