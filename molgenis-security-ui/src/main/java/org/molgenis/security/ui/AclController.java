@@ -2,8 +2,8 @@ package org.molgenis.security.ui;
 
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +14,7 @@ import static org.molgenis.security.ui.AclController.URI;
 
 @Controller
 @RequestMapping(URI + "/**")
-public class AclController extends MolgenisPluginController
+public class AclController extends PluginController
 {
 	public static final String ACL = "acl";
 	public static final String URI = PLUGIN_URI_PREFIX + ACL;

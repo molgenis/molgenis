@@ -11,12 +11,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.bootstrap.populate.UsersGroupsAuthoritiesPopulatorImpl.ROLE_USER_ID;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
-import static org.molgenis.ui.PluginMetadata.PLUGIN;
 
 @Component
 public class PermissionPopulatorImpl implements PermissionPopulator

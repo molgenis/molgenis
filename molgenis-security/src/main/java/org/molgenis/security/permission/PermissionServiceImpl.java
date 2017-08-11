@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
-import static org.molgenis.ui.PluginMetadata.PLUGIN;
 
 @Component
 public class PermissionServiceImpl implements PermissionService

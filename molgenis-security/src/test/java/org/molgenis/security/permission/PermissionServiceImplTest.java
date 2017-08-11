@@ -15,8 +15,8 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.security.core.Permission.*;
-import static org.molgenis.ui.PluginMetadata.PLUGIN;
 import static org.testng.Assert.assertEquals;
 
 public class PermissionServiceImplTest extends AbstractMockitoTest
