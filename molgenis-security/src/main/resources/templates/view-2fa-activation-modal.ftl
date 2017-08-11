@@ -19,7 +19,7 @@
 <script type="application/javascript">
     $(function () {
     <#if errorMessage??>
-        $('#alert-container').html($('<div class="alert alert-block alert-danger alert-dismissable fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong>Warning!</strong> ${errorMessage?html}</div>'))
+        $('#alert-container').html($('<div class="alert alert-block alert-danger alert-dismissable fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong>Error!</strong> ${errorMessage?html}</div>'))
     </#if>
     })
 </script>

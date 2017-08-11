@@ -32,9 +32,11 @@ import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_SECR
 public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticationService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationService.class);
+
 	private final static int MAX_FAILED_LOGIN_ATTEMPTS = 3;
 	private final static int FAILED_LOGIN_ATTEMPT_ITERATION = 1;
 	private final static int BLOCKED_USER_INTERVAL = 30;
+
 	private final OtpService otpService;
 	private final DataService dataService;
 	private final UserService userService;
@@ -92,9 +94,9 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 								.plus(Duration.ofSeconds(BLOCKED_USER_INTERVAL))
 								.toEpochMilli()))
 			{
-				throw new TooManyLoginAttemptsException(String.format(
-						"You entered the wrong verification code %d times, please wait 30 seconds before you try again",
-						MAX_FAILED_LOGIN_ATTEMPTS));
+				throw new TooManyLoginAttemptsException(
+						format("You entered the wrong verification code %d times, please wait for %d seconds before you try again",
+								MAX_FAILED_LOGIN_ATTEMPTS, BLOCKED_USER_INTERVAL));
 			}
 		}
 		return false;
@@ -216,7 +218,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		else
 		{
 			throw new InternalAuthenticationServiceException(
-					format("Secret not found, user: [ {0} ] is not configured for 2 factor authentication",
+					format("Secret not found, user: [ %d ] is not configured for 2 factor authentication",
 							user.getUsername()));
 		}
 
@@ -232,7 +234,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 		else
 		{
-			throw new UsernameNotFoundException(format("Can't find user: [ {0} ]", SecurityUtils.getCurrentUsername()));
+			throw new UsernameNotFoundException(format("Can't find user: [ %d ]", SecurityUtils.getCurrentUsername()));
 		}
 	}
 }
