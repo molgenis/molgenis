@@ -7,17 +7,17 @@
 <#assign version = 2>
 <@header css js version/>
 
-    <div id="app"></div>
+<div id="app"></div>
 
-    <script type="text/javascript">
-        window.__INITIAL_STATE__ = {
-            baseUrl: '${baseUrl}',
-            lng: '${lng}',
-            fallbackLng: '${fallbackLng}'
-        }
-    </script>
+<script type="text/javascript">
+    window.__INITIAL_STATE__ = {
+        baseUrl: '${baseUrl}',
+        lng: '${lng}',
+        fallbackLng: '${fallbackLng}'
+    }
+</script>
 
-    <script type=text/javascript src="<@resource_href "/js/navigator/manifest.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/js/navigator/vendor.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/js/navigator/app.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/js/navigator/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/js/navigator/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/js/navigator/app.js"/>"></script>
 <@footer/>

@@ -3,8 +3,8 @@ package org.molgenis.ui.thememanager;
 import org.molgenis.ui.style.MolgenisStyleException;
 import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
-import org.molgenis.web.PluginController;
 import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -81,9 +80,8 @@ public class ThemeManagerController extends PluginController
 				bs4FileName = bootstrap4Style.getOriginalFilename();
 				bs4InputStream = bootstrap4Style.getInputStream();
 			}
-			return styleService
-					.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(), bootstrap3Style.getInputStream(),
-							bs4FileName, bs4InputStream);
+			return styleService.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(),
+					bootstrap3Style.getInputStream(), bs4FileName, bs4InputStream);
 		}
 		catch (IOException e)
 		{

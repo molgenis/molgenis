@@ -48,7 +48,8 @@
                     <div class="form-group">
                         <label for="bootstrap4-file">Bootstrap 4 file</label>
                         <input type="file" id="bootstrap4-file" accept=".css, .min.css">
-                        <p class="help-block">If you do not include a bootstrap 4 variant the 'default' bootstrap theme will be used.</p>
+                        <p class="help-block">If you do not include a bootstrap 4 variant the 'default' bootstrap theme
+                            will be used.</p>
                     </div>
                     <button id="cancel-add-themes-btn" type="button" class="btn btn-default">Cancel</button>
                     <button id="add-themes-btn" type="button" class="btn btn-success">Add theme</button>

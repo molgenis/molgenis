@@ -3,7 +3,6 @@ package org.molgenis.ui.style;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -205,7 +204,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		when(fileStore.getFile(generatedId)).thenReturn(storedFile);
 
 		// execute
-		styleService.addStyle(styleId, bs3FileName, bs3Data, null, null );
+		styleService.addStyle(styleId, bs3FileName, bs3Data, null, null);
 
 		// verify
 		verify(styleSheet).setName(styleId);

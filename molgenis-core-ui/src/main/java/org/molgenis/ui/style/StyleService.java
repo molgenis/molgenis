@@ -1,9 +1,7 @@
 package org.molgenis.ui.style;
 
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
@@ -49,16 +47,17 @@ public interface StyleService
 
 	/**
 	 * Get the styleSheet data for a given theme and bootstrap version ( 3 or 4 )
-	 * @param styleName the theme identifier
+	 *
+	 * @param styleName        the theme identifier
 	 * @param bootstrapVersion the bootstrap version ( 3 or 4)
 	 * @return The theme data, as setting the bootstrap 4 theme is optional the fallback bootstrap 4 theme data is
 	 * returned in case there is not theme data for the bootstrap 4 version.
 	 */
-	FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-			throws MolgenisStyleException;
+	FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion) throws MolgenisStyleException;
 
 	/**
 	 * Find the styleSheet for a given theme name
+	 *
 	 * @param themeName the name of the theme
 	 * @return The styleSheet entity or null in case no theme matching the given name is found
 	 */

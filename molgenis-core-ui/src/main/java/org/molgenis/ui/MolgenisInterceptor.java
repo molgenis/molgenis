@@ -29,7 +29,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	private final LanguageService languageService;
 
 	@Autowired
-	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry, ThemeFingerprintRegistry themeFingerprintRegistry,
+	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry,
+			ThemeFingerprintRegistry themeFingerprintRegistry,
 			TemplateResourceUtils templateResourceUtils, AppSettings appSettings, LanguageService languageService,
 			@Value("${environment}") String environment)
 	{
