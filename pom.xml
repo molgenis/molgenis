@@ -873,6 +873,7 @@
         <module>molgenis-data-index</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-data-platform</module>
+        <module>molgenis-data-plugin</module>
         <module>molgenis-data-postgresql</module>
         <module>molgenis-data-rest-client</module>
         <module>molgenis-data-rest</module>
@@ -909,5 +910,6 @@
         <module>molgenis-swagger</module>
         <module>molgenis-test</module>
         <module>molgenis-util</module>
+        <module>molgenis-web</module>
     </modules>
 </project>

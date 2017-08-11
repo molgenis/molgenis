@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core-ui</artifactId>
+            <artifactId>molgenis-web</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- third party dependencies -->

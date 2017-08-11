@@ -6,8 +6,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.system.core.FreemarkerTemplate;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.file.FileStore;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +36,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class AppsController extends MolgenisPluginController
+public class AppsController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AppsController.class);
 
 	public static final String ID = "apps";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String VIEW_NAME = "view-apps";
 

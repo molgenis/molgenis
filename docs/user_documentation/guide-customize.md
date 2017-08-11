@@ -63,7 +63,10 @@ Using the Theme manager, you can select between multiple bootstrap styles.
 
 To get the feel of how certain styles look, you can select it in the dropdown menu. The style will not be applied to the application unless you press the 'Save current theme' button.
 
-For an overview of all the different themes offered, visit the [Bootswatch](https://bootswatch.com/) website. It is currently not yet possible to submit your own CSS sheets to update the styling. We do however plan to implement this in the future, giving you even more control to add your own personal style to your MOLGENIS research database.
+For an overview of all the different themes offered, visit the [Bootswatch](https://bootswatch.com/) website. 
+
+### Adding a new theme
+It is possible to submit your own CSS sheets to update the styling. By selecting the 'Add theme' option a new theme file may be added. As molgenis currently uses both bootstrap version 3 and bootstrap version 4 classes for styling the interface, theme's for both versions may be added. It is mandatory to add a bootstrap version 3 theme file. Adding a bootstrap version 4 theme file is optional (but recommended). If a theme is selected for which no bootstrap 4 theme file was set, the 'default' bootstrap 4 theme will be used.
 
 # Homepage
 The home page is one of the most important part of your MOLGENIS application. It is a doorway to the rest of your application, and as it is such, it should look nice! When you are logged in as administrator, the home page contains an *edit* button. Clicking this button will open up an editor. 

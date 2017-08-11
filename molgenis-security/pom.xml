@@ -36,6 +36,11 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-plugin</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-postgresql</artifactId>
             <version>${project.version}</version>
         </dependency>

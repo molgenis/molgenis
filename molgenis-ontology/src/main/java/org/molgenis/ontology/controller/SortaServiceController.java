@@ -39,8 +39,8 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +83,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class SortaServiceController extends MolgenisPluginController
+public class SortaServiceController extends PluginController
 {
 	static final int BATCH_SIZE = 1000;
 	private final OntologyService ontologyService;
@@ -107,7 +107,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
 	public static final String ID = "sortaservice";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private static final double DEFAULT_THRESHOLD = 100.0;
 
 	private static final Logger LOG = LoggerFactory.getLogger(SortaServiceController.class);

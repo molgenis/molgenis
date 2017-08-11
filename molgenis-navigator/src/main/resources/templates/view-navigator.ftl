@@ -6,13 +6,14 @@
 <#assign css = ["navigator/app.css"]>
 <#assign version = 2>
 <@header css js version/>
+
 <div id="app"></div>
+
 <script type="text/javascript">
     window.__INITIAL_STATE__ = {
         baseUrl: '${baseUrl}',
         lng: '${lng}',
-        fallbackLng: '${fallbackLng}',
-        message: 'test-message'
+        fallbackLng: '${fallbackLng}'
     }
 </script>
 

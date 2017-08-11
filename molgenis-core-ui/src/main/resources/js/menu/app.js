@@ -8,10 +8,10 @@ webpackJsonp([1], {
   121: function (e, t, n) {
     'use strict'
     Object.defineProperty(t, '__esModule', {value: !0})
-    var a = n(116), s = (n.n(a), n(115)), l = (n.n(s), n(120)), o = n.n(l), i = n(119), r = n.n(i), u = n(117),
+      var a = n(116), s = (n.n(a), n(115)), o = (n.n(s), n(120)), l = n.n(o), i = n(119), r = n.n(i), u = n(117),
       c = (n.n(u), n(118))
     n.n(c)
-    new o.a({el: '#molgenis-menu', template: '<MolgenisMenu />', components: {MolgenisMenu: r.a}})
+      new l.a({el: '#molgenis-menu', template: '<MolgenisMenu />', components: {MolgenisMenu: r.a}})
   },
   122: function (e, t, n) {
     'use strict'
@@ -84,7 +84,7 @@ webpackJsonp([1], {
             border: '0',
             height: '150'
           }
-        })])])] : e._e(), e._v(' '), n('nav', {staticClass: 'navbar navbar-toggleable-md navbar-light bg-faded'}, [n('button', {
+        })])])] : e._e(), e._v(' '), n('nav', {staticClass: 'navbar navbar-toggleable-md navbar-light bg-faded fixed-top'}, [n('button', {
           staticClass: 'navbar-toggler navbar-toggler-right',
           attrs: {
             type: 'button',
