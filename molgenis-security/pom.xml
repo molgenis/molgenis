@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -106,7 +106,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <!-- Google 2 factor authentication -->
         <dependency>
             <groupId>org.jboss.aerogear</groupId>
@@ -114,8 +113,6 @@
             <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
-
-
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -124,7 +121,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-
         <!-- test dependencies -->
         <dependency>
             <groupId>org.springframework.security</groupId>

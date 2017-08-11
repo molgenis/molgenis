@@ -7,12 +7,9 @@ import java.util.Collection;
 
 public class RecoveryAuthenticationToken extends UsernamePasswordAuthenticationToken
 {
-	private final String recoveryCode;
+	private static final long serialVersionUID = 1L;
 
-	public String getRecoveryCode()
-	{
-		return recoveryCode;
-	}
+	private final String recoveryCode;
 
 	public RecoveryAuthenticationToken(Object principal, Object credentials,
 			Collection<? extends GrantedAuthority> authorities, String recoveryCode)
@@ -25,5 +22,10 @@ public class RecoveryAuthenticationToken extends UsernamePasswordAuthenticationT
 	{
 		super("N/A", "N/A");
 		this.recoveryCode = recoveryCode;
+	}
+
+	public String getRecoveryCode()
+	{
+		return recoveryCode;
 	}
 }

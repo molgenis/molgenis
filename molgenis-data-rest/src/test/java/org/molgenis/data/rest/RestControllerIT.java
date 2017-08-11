@@ -1,9 +1,9 @@
 package org.molgenis.data.rest;
 
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
-import net.minidev.json.JSONObject;
 import org.molgenis.data.rest.convert.RestTestUtils;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
@@ -136,12 +139,13 @@ public class RestControllerIT
 							  .then();
 			response.statusCode(OKE);
 
-			JSONObject loginBody = new JSONObject();
+			Gson gson = new Gson();
+			Map<String, String> loginBody = new HashMap<>();
 			loginBody.put("username", REST_TEST_USER);
 			loginBody.put("password", REST_TEST_USER_PASSWORD);
 
 			response = given().contentType(APPLICATION_JSON)
-							  .body(loginBody.toJSONString())
+							  .body(gson.toJson(loginBody))
 							  .when()
 							  .post(PATH + "login")
 							  .then();
@@ -173,12 +177,13 @@ public class RestControllerIT
 							  .then();
 			response.statusCode(OKE);
 
-			JSONObject loginBody = new JSONObject();
+			Gson gson = new Gson();
+			Map<String, String> loginBody = new HashMap<>();
 			loginBody.put("username", REST_TEST_USER);
 			loginBody.put("password", REST_TEST_USER_PASSWORD);
 
 			response = given().contentType(APPLICATION_JSON)
-							  .body(loginBody.toJSONString())
+							  .body(gson.toJson(loginBody))
 							  .when()
 							  .post(PATH + "login")
 							  .then();

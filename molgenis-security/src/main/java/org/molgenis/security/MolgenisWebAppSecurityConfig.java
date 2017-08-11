@@ -22,7 +22,7 @@ import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.auth.*;
-import org.molgenis.security.twofactor.service.OTPService;
+import org.molgenis.security.twofactor.service.OtpService;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
@@ -93,7 +93,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	private GroupMemberFactory groupMemberFactory;
 
 	@Autowired
-	private OTPService otpService;
+	private OtpService otpService;
 
 	@Autowired
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
@@ -207,7 +207,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
+		{
 			if (req.getSession(false) != null
 					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 			{

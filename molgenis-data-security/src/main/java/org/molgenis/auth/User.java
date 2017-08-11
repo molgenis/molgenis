@@ -64,7 +64,7 @@ public class User extends StaticEntity
 		set(ACTIVATIONCODE, activationCode);
 	}
 
-	public boolean getTwoFactorAuthentication()
+	public boolean isTwoFactorAuthentication()
 	{
 		Boolean twoFactorAuthentication = getBoolean(TWO_FACTOR_AUTHENTICATION);
 		if (twoFactorAuthentication == null)

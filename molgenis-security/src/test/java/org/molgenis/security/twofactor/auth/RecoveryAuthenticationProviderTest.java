@@ -26,25 +26,8 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 	private final static String USERNAME = "admin";
 	private final static String ROLE_SU = "SU";
 
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
-		{
-			return new RecoveryAuthenticationProviderImpl(recoveryService());
-		}
-
-		@Bean
-		public RecoveryService recoveryService()
-		{
-			return mock(RecoveryServiceImpl.class);
-		}
-	}
-
 	@Autowired
 	private RecoveryAuthenticationProvider recoveryAuthenticationProvider;
-
 	@Autowired
 	private RecoveryService recoveryService;
 
@@ -67,6 +50,22 @@ public class RecoveryAuthenticationProviderTest extends AbstractTestNGSpringCont
 		assertNotNull(auth);
 		assertTrue(auth.isAuthenticated());
 		assertEquals(auth.getName(), "admin");
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		public RecoveryAuthenticationProvider recoveryAuthenticationProvider()
+		{
+			return new RecoveryAuthenticationProviderImpl(recoveryService());
+		}
+
+		@Bean
+		public RecoveryService recoveryService()
+		{
+			return mock(RecoveryServiceImpl.class);
+		}
 	}
 
 }

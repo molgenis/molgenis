@@ -5,11 +5,10 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
-import org.molgenis.security.twofactor.meta.UserSecret;
-import org.molgenis.security.twofactor.meta.UserSecretFactory;
-import org.molgenis.security.twofactor.meta.UserSecretMetaData;
+import org.molgenis.security.twofactor.model.UserSecret;
+import org.molgenis.security.twofactor.model.UserSecretFactory;
+import org.molgenis.security.twofactor.model.UserSecretMetaData;
 import org.molgenis.security.user.UserService;
 import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +24,7 @@ import org.testng.annotations.Test;
 
 import java.time.Instant;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -37,79 +34,28 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 {
 	private final static String USERNAME = "molgenisUser";
 	private final static String ROLE_SU = "SU";
-
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public TwoFactorAuthenticationService twoFactorAuthenticationService()
-		{
-			return new TwoFactorAuthenticationServiceImpl(otpService(), dataService(), userService(), idGenerator(),
-					userSecretFactory());
-		}
-
-		@Bean
-		public OTPService otpService()
-		{
-			return new OTPServiceImpl(appSettings());
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataServiceImpl.class);
-		}
-
-		@Bean
-		public UserService userService()
-		{
-			return mock(UserServiceImpl.class);
-		}
-
-		@Bean
-		public IdGenerator idGenerator()
-		{
-			return new IdGeneratorImpl();
-		}
-
-		@Bean
-		public AppSettings appSettings()
-		{
-			return mock(AppSettings.class);
-		}
-
-		@Bean
-		public UserSecretFactory userSecretFactory()
-		{
-			return mock(UserSecretFactory.class);
-		}
-
-	}
-
 	@Autowired
 	private DataService dataService;
-
 	@Autowired
 	private UserService userService;
-
 	@Autowired
 	private UserSecretFactory userSecretFactory;
-
 	@Autowired
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-
 	private org.molgenis.auth.User molgenisUser = mock(org.molgenis.auth.User.class);
 	private UserSecret userSecret = mock(UserSecret.class);
 
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)
 	@BeforeMethod
+	@SuppressWarnings("unchecked")
 	public void setUpBeforeMethod()
 	{
 		when(molgenisUser.getUsername()).thenReturn(USERNAME);
+		when(molgenisUser.getId()).thenReturn("1324");
 		when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
-		when(runAsSystem(() -> dataService.findOne(UserSecretMetaData.USER_SECRET,
-				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
-				UserSecret.class))).thenReturn(userSecret);
+		when(dataService.query(UserSecretMetaData.USER_SECRET, UserSecret.class)
+						.eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
+						.findOne()).thenReturn(userSecret);
 	}
 
 	@Test
@@ -159,9 +105,57 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	public void testDisableForUser()
 	{
 		when(userService.getUser(molgenisUser.getUsername())).thenReturn(molgenisUser);
-		when(dataService.findOne(UserSecretMetaData.USER_SECRET,
-				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
-				UserSecret.class)).thenReturn(userSecret);
+		when(dataService.query(UserSecretMetaData.USER_SECRET, UserSecret.class)
+						.eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
+						.findOne()).thenReturn(userSecret);
 		twoFactorAuthenticationService.disableForUser();
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		public TwoFactorAuthenticationService twoFactorAuthenticationService()
+		{
+			return new TwoFactorAuthenticationServiceImpl(otpService(), dataService(), userService(), idGenerator(),
+					userSecretFactory());
+		}
+
+		@Bean
+		public OtpService otpService()
+		{
+			return new OtpServiceImpl(appSettings());
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataServiceImpl.class, RETURNS_DEEP_STUBS);
+		}
+
+		@Bean
+		public UserService userService()
+		{
+			return mock(UserServiceImpl.class);
+		}
+
+		@Bean
+		public IdGenerator idGenerator()
+		{
+			return new IdGeneratorImpl();
+		}
+
+		@Bean
+		public AppSettings appSettings()
+		{
+			return mock(AppSettings.class);
+		}
+
+		@Bean
+		public UserSecretFactory userSecretFactory()
+		{
+			return mock(UserSecretFactory.class);
+		}
+
 	}
 }

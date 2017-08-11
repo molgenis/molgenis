@@ -20,40 +20,21 @@ import static org.testng.Assert.*;
 @ContextConfiguration(classes = { Config.class })
 public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public UserAccountServiceImpl userAccountServiceImpl()
-		{
-			return new UserAccountServiceImpl();
-		}
-
-		@Bean
-		public PasswordEncoder passwordEncoder()
-		{
-			return mock(PasswordEncoder.class);
-		}
-
-		@Bean
-		public UserService molgenisUserService()
-		{
-			return mock(UserService.class);
-		}
-	}
-
 	private static final String USERNAME_USER = "username";
 	private static Authentication AUTHENTICATION_PREVIOUS;
 	private Authentication authentication;
-
 	@Autowired
 	private UserAccountServiceImpl userAccountServiceImpl;
-
 	@Autowired
 	private UserService userService;
-
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+	}
 
 	@BeforeClass
 	public void setUpBeforeClass()
@@ -62,12 +43,6 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		authentication = mock(Authentication.class);
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass()
-	{
-		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
 	}
 
 	@Test
@@ -145,5 +120,27 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(passwordEncoder.matches("password", "encrypted-password")).thenReturn(true);
 		assertTrue(userAccountServiceImpl.validateCurrentUserPassword("password"));
 		assertFalse(userAccountServiceImpl.validateCurrentUserPassword("wrong-password"));
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		public UserAccountServiceImpl userAccountServiceImpl()
+		{
+			return new UserAccountServiceImpl();
+		}
+
+		@Bean
+		public PasswordEncoder passwordEncoder()
+		{
+			return mock(PasswordEncoder.class);
+		}
+
+		@Bean
+		public UserService molgenisUserService()
+		{
+			return mock(UserService.class);
+		}
 	}
 }

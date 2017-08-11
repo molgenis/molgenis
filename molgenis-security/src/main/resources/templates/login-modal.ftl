@@ -28,7 +28,7 @@
                                  data-onsuccess="onSignIn"></div>
                         </form>
                         <script>
-                            function onSignIn (googleUser) {
+                            function onSignIn(googleUser) {
                                 <#if !(errorMessage??)>
                                     $('#google-id-token').val(googleUser.getAuthResponse().id_token)
                                     $('#login-google-form').submit()

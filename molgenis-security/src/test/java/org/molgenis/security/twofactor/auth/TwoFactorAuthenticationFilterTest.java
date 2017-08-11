@@ -34,60 +34,10 @@ import static org.testng.Assert.assertEquals;
 public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringContextTests
 {
 
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
-		{
-			return new TwoFactorAuthenticationFilter(appSettings(), twoFactorAuthenticationService(),
-					redirectStrategy(), userAccountService());
-		}
-
-		@Bean
-		public TwoFactorAuthenticationService twoFactorAuthenticationService()
-		{
-			return mock(TwoFactorAuthenticationServiceImpl.class);
-		}
-
-		@Bean
-		public AppSettings appSettings()
-		{
-			return mock(AppSettings.class);
-		}
-
-		@Bean
-		public RedirectStrategy redirectStrategy()
-		{
-			return new DefaultRedirectStrategy();
-		}
-
-		@Bean
-		public UserAccountService userAccountService()
-		{
-			return mock(UserAccountServiceImpl.class);
-		}
-
-		@Bean
-		public UserService userService()
-		{
-			return mock(UserServiceImpl.class);
-		}
-
-		@Bean
-		public PasswordEncoder passwordEncoder()
-		{
-			return new BCryptPasswordEncoder();
-		}
-
-	}
-
 	@Autowired
 	private AppSettings appSettings;
-
 	@Autowired
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-
 	@Autowired
 	private TwoFactorAuthenticationFilter filter;
 
@@ -149,6 +99,54 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 
 		filter.doFilterInternal(request, response, chain);
 		verify(chain).doFilter(request, response);
+
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
+		{
+			return new TwoFactorAuthenticationFilter(appSettings(), twoFactorAuthenticationService(),
+					redirectStrategy(), userAccountService());
+		}
+
+		@Bean
+		public TwoFactorAuthenticationService twoFactorAuthenticationService()
+		{
+			return mock(TwoFactorAuthenticationServiceImpl.class);
+		}
+
+		@Bean
+		public AppSettings appSettings()
+		{
+			return mock(AppSettings.class);
+		}
+
+		@Bean
+		public RedirectStrategy redirectStrategy()
+		{
+			return new DefaultRedirectStrategy();
+		}
+
+		@Bean
+		public UserAccountService userAccountService()
+		{
+			return mock(UserAccountServiceImpl.class);
+		}
+
+		@Bean
+		public UserService userService()
+		{
+			return mock(UserServiceImpl.class);
+		}
+
+		@Bean
+		public PasswordEncoder passwordEncoder()
+		{
+			return new BCryptPasswordEncoder();
+		}
 
 	}
 }

@@ -7,11 +7,11 @@ import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationProvider;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationToken;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
-import org.molgenis.security.twofactor.service.OTPService;
+import org.molgenis.security.twofactor.service.OtpService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -29,25 +29,23 @@ public class TwoFactorAuthenticationController
 	public static final String URI = "/2fa";
 	public static final String TWO_FACTOR_CONFIGURED_URI = "/configured";
 	public static final String TWO_FACTOR_ACTIVATION_URI = "/activation";
+	public static final String ATTRIBUTE_2FA_RECOVER_MODE = "isRecoverMode";
+	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
+	public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
 	private static final String TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI = TWO_FACTOR_ACTIVATION_URI + "/authenticate";
 	private static final String TWO_FACTOR_VALIDATION_URI = "/validate";
 	private static final String TWO_FACTOR_RECOVER_URI = "/recover";
-
-	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
-	public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
-
 	private static final String VIEW_2FA_ACTIVATION_MODAL = "view-2fa-activation-modal";
 	private static final String VIEW_2FA_CONFIGURED_MODAL = "view-2fa-configured-modal";
 
 	private final TwoFactorAuthenticationProvider authenticationProvider;
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private final RecoveryAuthenticationProvider recoveryAuthenticationProvider;
-	private final OTPService otpService;
+	private final OtpService otpService;
 
-	@Autowired
 	public TwoFactorAuthenticationController(TwoFactorAuthenticationProvider authenticationProvider,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
-			RecoveryAuthenticationProvider recoveryAuthenticationProvider, OTPService otpService)
+			RecoveryAuthenticationProvider recoveryAuthenticationProvider, OtpService otpService)
 	{
 		this.authenticationProvider = requireNonNull(authenticationProvider);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
@@ -71,7 +69,7 @@ public class TwoFactorAuthenticationController
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		catch (Exception err)
+		catch (AuthenticationException err)
 		{
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(err));
 			redirectUri = VIEW_2FA_CONFIGURED_MODAL;
@@ -108,7 +106,7 @@ public class TwoFactorAuthenticationController
 			Authentication authentication = authenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		catch (Exception err)
+		catch (AuthenticationException err)
 		{
 			model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
 			model.addAttribute(ATTRIBUTE_2FA_AUTHENTICATOR_URI, otpService.getAuthenticatorURI(secretKey));
@@ -130,8 +128,9 @@ public class TwoFactorAuthenticationController
 			Authentication authentication = recoveryAuthenticationProvider.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		catch (Exception e)
+		catch (AuthenticationException e)
 		{
+			model.addAttribute(ATTRIBUTE_2FA_RECOVER_MODE, true);
 			model.addAttribute(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE, determineErrorMessage(e));
 			redirectUrl = VIEW_2FA_CONFIGURED_MODAL;
 		}

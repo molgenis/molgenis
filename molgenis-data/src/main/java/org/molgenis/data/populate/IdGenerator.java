@@ -28,7 +28,10 @@ public interface IdGenerator
 	SHORT_RANDOM, /**
 	 * Cryptographically safe random IDs, usable as a password. 8 characters long, base32 encoded
 	 */
-	SHORT_SECURE_RANDOM
+	SHORT_SECURE_RANDOM, /**
+	 * Cryptographically safe random IDs, usable as a password. 20 characters long, base32 encoded
+	 */
+	LONG_SECURE_RANDOM
 	}
 
 	/**

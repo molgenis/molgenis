@@ -1,9 +1,8 @@
-package org.molgenis.security.twofactor.meta;
+package org.molgenis.security.twofactor.model;
 
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -17,18 +16,15 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 @Component
 public class UserSecretMetaData extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "UserSecret";
-	public static final String USER_SECRET = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
-
 	public static final String ID = "id";
-	public static final String USER_ID = "user_id";
+	public static final String USER_ID = "userId";
 	public static final String SECRET = "secret";
 	public static final String LAST_FAILED_AUTHENICATION = "last_failed_authentication";
 	public static final String FAILED_LOGIN_ATTEMPTS = "failed_login_attempts";
-
+	private static final String SIMPLE_NAME = "UserSecret";
+	public static final String USER_SECRET = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 	private final SecurityPackage securityPackage;
 
-	@Autowired
 	public UserSecretMetaData(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
@@ -43,8 +39,8 @@ public class UserSecretMetaData extends SystemEntityType
 
 		setDescription("Secret that is used to authenticate user with 2 factor authentication");
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("ID");
-		addAttribute(USER_ID).setNillable(false).setUnique(true).setLabel("User ID");
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifer");
+		addAttribute(USER_ID).setNillable(false).setUnique(true).setLabel("User identifier");
 		addAttribute(SECRET).setNillable(false).setLabel("Secret");
 		addAttribute(LAST_FAILED_AUTHENICATION).setDataType(AttributeType.DATE_TIME)
 											   .setNillable(true)

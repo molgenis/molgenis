@@ -204,12 +204,12 @@
         </div>
 
         <div role="tabpanel" class="tab-pane" id="security">
-        <#if two_factor_authentication_app == "Enabled" || two_factor_authentication_app == "Enforced">
+        <#if two_factor_authentication_app_option == "Enabled" || two_factor_authentication_app_option == "Enforced">
             <div id="two-factor-authentication" class="row">
                 <div class="col-md-8 col-md-offset-2">
                     <legend>Two Factor Authentication</legend>
                     <div class="row">
-                        <#if two_factor_authentication_user == false && two_factor_authentication_app != "Enforced">
+                        <#if two_factor_authentication_user_enabled == false && two_factor_authentication_app_option != "Enforced">
                             <div class="col-md-6">
                                 <h4><span class="label label-danger">Disabled</span></h4>
                                 <em>You haven't configured two factor authentication yet.</em>
@@ -217,7 +217,7 @@
                             <div class="col-md-6">
                                 <form id="enable-two-factor-authentication-form" class="form-horizontal"
                                       role="form"
-                                      action="${context_url?html}/enableTwoFactorAuthentication"
+                                      action="${context_url?html}/2fa/enable"
                                       method="POST">
                                     <button type="submit" class="btn btn-primary btn-block">Enable two factor
                                         authentication
@@ -230,12 +230,12 @@
                                 <em>You have configured two factor authentication.</em>
                             </div>
                             <div class="col-md-6">
-                                <#if two_factor_authentication_app != "Enforced">
+                                <#if two_factor_authentication_app_option != "Enforced">
                                     <div class="row">
                                         <div class="col-md-12">
                                             <form id="enable-two-factor-authentication-form" class="form-horizontal"
                                                   role="form"
-                                                  action="${context_url?html}/disableTwoFactorAuthentication"
+                                                  action="${context_url?html}/2fa/disable"
                                                   method="POST">
                                                 <button type="submit" class="btn btn-danger btn-block">Disable two
                                                     factor
@@ -250,7 +250,7 @@
                                     <div class="col-md-12">
                                         <form id="enable-two-factor-authentication-form" class="form-horizontal"
                                               role="form"
-                                              action="${context_url?html}/resetTwoFactorAuthentication"
+                                              action="${context_url?html}/2fa/reset"
                                               method="POST">
                                             <button type="submit" class="btn btn-primary btn-block">Reconfigure two
                                                 factor
@@ -264,7 +264,7 @@
                     </div>
                 </div>
             </div>
-            <#if two_factor_authentication_app == "Enforced" || (two_factor_authentication_app == "Enabled" && two_factor_authentication_user == true)>
+            <#if two_factor_authentication_app_option == "Enforced" || (two_factor_authentication_app_option == "Enabled" && two_factor_authentication_user_enabled == true)>
                 <div id="recovery-codes" class="row">
                     <div class="col-md-8 col-md-offset-2">
                         <legend>Recovery Codes</legend>
@@ -275,7 +275,7 @@
                                     access
                                     to your
                                     device
-                                    and cannot receive two-factor authentication codes.
+                                    and cannot receive two-factor-authentication codes.
                                 </p>
                             </div>
                         </div>
@@ -403,7 +403,7 @@
             }
         })
 
-        function listRecoveryCodes (codes) {
+        function listRecoveryCodes(codes) {
             let listItems = []
             const listTagOpen = '<li class="list-group-item">'
             const listTagClose = '</li>'
@@ -413,9 +413,9 @@
             $('#recovery-codes-list').html(listItems.join(''))
         }
 
-        function showRecoveryCodes () {
+        function showRecoveryCodes() {
             $.get('${context_url?html}/recoveryCodes', function (codes) {
-                listRecoveryCodes(codes)
+                listRecoveryCodes(codes['recoveryCodes'])
             })
             $('.recovery-code-list-toggle').collapse('toggle')
         }
@@ -424,7 +424,7 @@
 
         generateCodesBtn.click(function (e) {
             $.get('${context_url?html}/generateRecoveryCodes', function (codes) {
-                listRecoveryCodes(codes)
+                listRecoveryCodes(codes['recoveryCodes'])
             })
         })
     })

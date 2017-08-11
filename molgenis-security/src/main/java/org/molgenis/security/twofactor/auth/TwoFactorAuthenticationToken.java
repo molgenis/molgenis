@@ -10,20 +10,10 @@ import java.util.Collection;
  */
 public class TwoFactorAuthenticationToken extends UsernamePasswordAuthenticationToken
 {
-	private static final long serialVersionUID = 340142428848970352L;
+	private static final long serialVersionUID = 1L;
 
 	private final String verificationCode;
 	private final String secretKey;
-
-	public String getVerificationCode()
-	{
-		return verificationCode;
-	}
-
-	public String getSecretKey()
-	{
-		return secretKey;
-	}
 
 	public TwoFactorAuthenticationToken(Object principal, Object credentials,
 			Collection<? extends GrantedAuthority> authorities, String verificationCode, String secretKey)
@@ -38,6 +28,16 @@ public class TwoFactorAuthenticationToken extends UsernamePasswordAuthentication
 		super("N/A", "N/A");
 		this.verificationCode = verificationCode;
 		this.secretKey = secretKey;
+	}
+
+	public String getVerificationCode()
+	{
+		return verificationCode;
+	}
+
+	public String getSecretKey()
+	{
+		return secretKey;
 	}
 
 }

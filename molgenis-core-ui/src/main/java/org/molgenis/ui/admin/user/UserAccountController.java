@@ -5,7 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.twofactor.meta.RecoveryCode;
+import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
+import org.molgenis.security.twofactor.model.RecoveryCode;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
@@ -16,7 +17,6 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +28,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -53,7 +55,6 @@ public class UserAccountController extends MolgenisPluginController
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private final AppSettings appSettings;
 
-	@Autowired
 	public UserAccountController(UserAccountService userAccountService, LanguageService languageService,
 			RecoveryService recoveryService, TwoFactorAuthenticationService twoFactorAuthenticationService,
 			AppSettings appSettings)
@@ -70,14 +71,15 @@ public class UserAccountController extends MolgenisPluginController
 	public String showAccount(Model model, @RequestParam(defaultValue = "false") boolean showCodes)
 	{
 		String twoFactorAuthenticationApp = appSettings.getTwoFactorAuthentication();
-		boolean twoFactorAuthenticationUser = userAccountService.getCurrentUser().getTwoFactorAuthentication();
+		boolean isTwoFactorAuthenticationEnableForUser = userAccountService.getCurrentUser()
+																		   .isTwoFactorAuthentication();
 
 		model.addAttribute("user", userAccountService.getCurrentUser());
 		model.addAttribute("countries", CountryCodes.get());
 		model.addAttribute("groups", Lists.newArrayList(userAccountService.getCurrentUserGroups()));
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
-		model.addAttribute("two_factor_authentication_app", twoFactorAuthenticationApp);
-		model.addAttribute("two_factor_authentication_user", twoFactorAuthenticationUser);
+		model.addAttribute("two_factor_authentication_app_option", twoFactorAuthenticationApp);
+		model.addAttribute("two_factor_authentication_user_enabled", isTwoFactorAuthenticationEnableForUser);
 		model.addAttribute("show_recovery_codes", showCodes);
 		return "view-useraccount";
 	}
@@ -162,7 +164,7 @@ public class UserAccountController extends MolgenisPluginController
 		userAccountService.updateCurrentUser(user);
 	}
 
-	@RequestMapping(value = "enableTwoFactorAuthentication", method = POST)
+	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/enable", method = POST)
 	public String enableTwoFactorAuthentication()
 	{
 		twoFactorAuthenticationService.enableForUser();
@@ -170,7 +172,7 @@ public class UserAccountController extends MolgenisPluginController
 		return "redirect:/login";
 	}
 
-	@RequestMapping(value = "disableTwoFactorAuthentication", method = POST)
+	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/disable", method = POST)
 	public String disableTwoFactorAuthentication(Model model)
 	{
 		twoFactorAuthenticationService.disableForUser();
@@ -179,7 +181,7 @@ public class UserAccountController extends MolgenisPluginController
 		return showAccount(model, false);
 	}
 
-	@RequestMapping(value = "resetTwoFactorAuthentication", method = POST)
+	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/reset", method = POST)
 	public String resetTwoFactorAuthentication()
 	{
 		twoFactorAuthenticationService.resetSecretForUser();
@@ -200,17 +202,31 @@ public class UserAccountController extends MolgenisPluginController
 
 	@RequestMapping(value = "recoveryCodes", method = GET)
 	@ResponseBody
-	public List<String> getRecoveryCodes()
+	public Map<String, List<String>> getRecoveryCodes()
 	{
-		return recoveryService.getRecoveryCodes().map(RecoveryCode::getCode).collect(toList());
+		return convertToRecoveryCodesMap(
+				recoveryService.getRecoveryCodes().map(RecoveryCode::getCode).collect(toList()));
 	}
 
 	@RequestMapping(value = "generateRecoveryCodes", method = GET)
 	@ResponseBody
-	public List<String> generateRecoveryCodes()
+	public Map<String, List<String>> generateRecoveryCodes()
 	{
 		Stream<RecoveryCode> recoveryCodes = recoveryService.generateRecoveryCodes();
-		return recoveryCodes.map(RecoveryCode::getCode).collect(toList());
+		return convertToRecoveryCodesMap(recoveryCodes.map(RecoveryCode::getCode).collect(toList()));
+	}
+
+	/**
+	 * Convert the list from the recoveryService to a Map for usability in client
+	 *
+	 * @param recoveryCodesList list from recoveryService
+	 * @return Map<String, List<String>>
+	 */
+	private Map<String, List<String>> convertToRecoveryCodesMap(List<String> recoveryCodesList)
+	{
+		Map<String, List<String>> recoveryCodes = new HashMap<>();
+		recoveryCodes.put("recoveryCodes", recoveryCodesList);
+		return recoveryCodes;
 	}
 
 	@ExceptionHandler(MolgenisUserException.class)
