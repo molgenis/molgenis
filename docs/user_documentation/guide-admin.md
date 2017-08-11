@@ -1,5 +1,5 @@
 **
-Once you have a server running and data loaded, you are probably eager to share your data with the world. However, you might want to only show your data to a select few. In the following paragraphs we explain on how to define groups and permissions.
+Once you have a server running and data loaded, you are probably eager to share your data with the world. However, you might want to only show your data to a select few. In the following paragraphs we explain how to define groups and permissions.
 **
 
 # Mail settings
@@ -75,6 +75,29 @@ If at any time you want to edit an existing user, you can click the icon in the 
 
 Managing your users is quick and easy. And opens up way to our next big security item, setting permissions for your data.
 
+# Authentication
+When you are a superuse in MOLGENIS, you can configure three authentication methods: 
+ * Username/password sigin *(default)*
+ * Google-sigin
+ * Token-authentication
+ 
+**Username/password sigin (default)**  
+In the App Settings:
+ * Set user-moderation to user can sign up
+ * Set two factor authentication: 
+   * Disabled: users CAN NOT use two-factor-authentication
+   * Enforced: users MUST use two-factor-authentication
+   * Enabled: users CAN use two-factor-authentication
+   
+**prompted:** The default setting for tow-factor-authentication for a fresh installation *"Disabled"*. When two-factor-authentication is *"Enabled"* it is default disabled for the users.  
+
+**Google-sigin**  
+The Google-sigin setting is used to enable the possibility for users to login with their Google-account. 
+ 
+**Token-authentication**
+No specific superuser settings are necessary for the implementation of token-authentication.
+ 
+ 
 # Permissions
 For the scientific community, the need for data security is very large. We tried to meet this demand by implementing an extensive permission system. The system allows for the setting of count, read and write permissions on the different datasets 
 and modules present in MOLGENIS. These permissions can be set either for specific users, or entire user groups.
@@ -101,3 +124,4 @@ Congratulations! The molgenis_user account should now be able to use the data ex
 Note that if you are creating more complex data sets that have references to other data sets, that you should also consider giving permissions to those reference tables.
 
 And if you are wondering about the Entity permissions menu, that is reserved for when we implement row level security.
+

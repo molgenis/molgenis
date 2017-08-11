@@ -209,6 +209,18 @@ public class TestAppSettings implements AppSettings
 	}
 
 	@Override
+	public void setTwoFactorAuthentication(String twoFactorAuthentication)
+	{
+
+	}
+
+	@Override
+	public String getTwoFactorAuthentication()
+	{
+		return null;
+	}
+
+	@Override
 	public void setCustomJavascript(String customJavascript)
 	{
 

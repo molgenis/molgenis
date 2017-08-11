@@ -15,16 +15,18 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -64,6 +66,7 @@ import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -88,22 +91,28 @@ public class RestController
 
 	static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
+
+	private final AppSettings appSettings;
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
 	private final PermissionService permissionService;
+	private final UserAccountService userAccountService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
 	private final LanguageService languageService;
 
 	@Autowired
-	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, PermissionService permissionService, MolgenisRSQL molgenisRSQL,
-			RestService restService, LanguageService languageService)
+	public RestController(AppSettings appSettings, DataService dataService, TokenService tokenService,
+			AuthenticationManager authenticationManager, PermissionService permissionService,
+			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService,
+			LanguageService languageService)
 	{
+		this.appSettings = requireNonNull(appSettings);
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
 		this.authenticationManager = requireNonNull(authenticationManager);
+		this.userAccountService = requireNonNull(userAccountService);
 		this.permissionService = requireNonNull(permissionService);
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 		this.restService = requireNonNull(restService);
@@ -738,35 +747,59 @@ public class RestController
 	 */
 	@RequestMapping(value = "/login", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@RunAsSystem
 	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
 	{
 		if (login == null)
 		{
 			throw new HttpMessageNotReadableException("Missing login");
 		}
-
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(login.getUsername(),
-				login.getPassword());
-		authToken.setDetails(new WebAuthenticationDetails(request));
-
-		// Authenticate the login
-		Authentication authentication = authenticationManager.authenticate(authToken);
-		if (!authentication.isAuthenticated())
+		if (isUser2fa())
 		{
-			throw new BadCredentialsException("Unknown username or password");
+			throw new BadCredentialsException(
+					"Login using /api/v1/login is disabled, two factor authentication is enabled");
 		}
 
-		User user = dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()),
-				User.class);
+		return runAsSystem(() ->
+		{
+			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(login.getUsername(),
+					login.getPassword());
 
-		// User authenticated, log the user in
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+			authToken.setDetails(new WebAuthenticationDetails(request));
 
-		// Generate a new token for the user
-		String token = tokenService.generateAndStoreToken(authentication.getName(), "Rest api login");
+			// Authenticate the login
+			Authentication authentication = authenticationManager.authenticate(authToken);
+			if (!authentication.isAuthenticated())
+			{
+				throw new BadCredentialsException("Unknown username or password");
+			}
 
-		return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
+			User user = dataService.findOne(USER,
+					new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()), User.class);
+
+			// User authenticated, log the user in
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+
+			// Generate a new token for the user
+			String token = tokenService.generateAndStoreToken(authentication.getName(), "REST API login");
+			return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
+		});
+	}
+
+	private boolean isUser2fa()
+	{
+		boolean userIs2fa = false;
+		if (TwoFactorAuthenticationSetting.ENFORCED.toString().equals(appSettings.getTwoFactorAuthentication()))
+		{
+			userIs2fa = true;
+		}
+		else if (TwoFactorAuthenticationSetting.ENABLED.toString().equals(appSettings.getTwoFactorAuthentication()))
+		{
+			if (userAccountService.getCurrentUser().isTwoFactorAuthentication())
+			{
+				userIs2fa = true;
+			}
+		}
+		return userIs2fa;
 	}
 
 	@RequestMapping("/logout")
