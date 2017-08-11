@@ -8,7 +8,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.pathways.service.WikiPathwaysService;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +49,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class WikiPathwaysController extends MolgenisPluginController
+public class WikiPathwaysController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WikiPathwaysController.class);
 
 	private static final String ID = "pathways";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private static final Pattern EFFECT_PATTERN = Pattern.compile(
 			"([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 

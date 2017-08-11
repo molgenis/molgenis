@@ -1,7 +1,7 @@
 package org.molgenis.ontology.controller;
 
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,10 +17,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
 @RequestMapping(URI)
-public class OntologyManagerController extends MolgenisPluginController
+public class OntologyManagerController extends PluginController
 {
 	public static final String ID = "ontologymanager";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String VIEW_ONTOLOGY_MANAGER = "ontology-manager-view";
 
 	@Autowired

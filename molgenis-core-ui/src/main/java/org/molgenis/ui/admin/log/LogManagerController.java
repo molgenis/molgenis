@@ -5,7 +5,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.util.ContextInitializer;
 import ch.qos.logback.core.joran.spi.JoranException;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +27,12 @@ import static org.molgenis.ui.admin.log.LogManagerController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class LogManagerController extends MolgenisPluginController
+public class LogManagerController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(LogManagerController.class);
 
 	public static final String ID = "logmanager";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final List<Level> LOG_LEVELS;
 

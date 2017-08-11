@@ -6,10 +6,10 @@ import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +28,12 @@ import static org.molgenis.ui.admin.user.UserAccountController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class UserAccountController extends MolgenisPluginController
+public class UserAccountController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(UserAccountController.class);
 
 	public static final String ID = "useraccount";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final UserAccountService userAccountService;
 	private final LanguageService languageService;

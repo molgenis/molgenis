@@ -1,8 +1,8 @@
 package org.molgenis.ui.menu;
 
-import org.molgenis.ui.MolgenisUiMenu;
-import org.molgenis.ui.MolgenisUiMenuItem;
-import org.molgenis.ui.MolgenisUiMenuItemType;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItem;
+import org.molgenis.web.UiMenuItemType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -55,33 +55,33 @@ public class MenuUtilsTest
 	@Test
 	public void getMenuJson()
 	{
-		MolgenisUiMenu menu = mock(MolgenisUiMenu.class);
-		when(menu.getType()).thenReturn(MolgenisUiMenuItemType.MENU);
+		UiMenu menu = mock(UiMenu.class);
+		when(menu.getType()).thenReturn(UiMenuItemType.MENU);
 		when(menu.getId()).thenReturn("main");
 		when(menu.getName()).thenReturn("mainmenu");
 		when(menu.getUrl()).thenReturn("/main");
-		MolgenisUiMenu submenu = mock(MolgenisUiMenu.class);
-		when(submenu.getType()).thenReturn(MolgenisUiMenuItemType.MENU);
+		UiMenu submenu = mock(UiMenu.class);
+		when(submenu.getType()).thenReturn(UiMenuItemType.MENU);
 		when(submenu.getId()).thenReturn("sub");
 		when(submenu.getName()).thenReturn("submenu");
 		when(submenu.getUrl()).thenReturn("/sub");
-		MolgenisUiMenuItem menuItem1 = mock(MolgenisUiMenuItem.class);
-		when(menuItem1.getType()).thenReturn(MolgenisUiMenuItemType.PLUGIN);
+		UiMenuItem menuItem1 = mock(UiMenuItem.class);
+		when(menuItem1.getType()).thenReturn(UiMenuItemType.PLUGIN);
 		when(menuItem1.getId()).thenReturn("item1");
 		when(menuItem1.getName()).thenReturn("label1");
 		when(menuItem1.getUrl()).thenReturn("/item1?test=test");
-		MolgenisUiMenuItem menuItem2 = mock(MolgenisUiMenuItem.class);
-		when(menuItem2.getType()).thenReturn(MolgenisUiMenuItemType.PLUGIN);
+		UiMenuItem menuItem2 = mock(UiMenuItem.class);
+		when(menuItem2.getType()).thenReturn(UiMenuItemType.PLUGIN);
 		when(menuItem2.getId()).thenReturn("item2");
 		when(menuItem2.getName()).thenReturn("label2");
 		when(menuItem2.getUrl()).thenReturn("/item2");
-		MolgenisUiMenuItem submenuItem1 = mock(MolgenisUiMenuItem.class);
-		when(submenuItem1.getType()).thenReturn(MolgenisUiMenuItemType.PLUGIN);
+		UiMenuItem submenuItem1 = mock(UiMenuItem.class);
+		when(submenuItem1.getType()).thenReturn(UiMenuItemType.PLUGIN);
 		when(submenuItem1.getId()).thenReturn("subitem1");
 		when(submenuItem1.getName()).thenReturn("sub2");
 		when(submenuItem1.getUrl()).thenReturn("/sub2");
-		MolgenisUiMenuItem menuItem3 = mock(MolgenisUiMenuItem.class);
-		when(menuItem3.getType()).thenReturn(MolgenisUiMenuItemType.PLUGIN);
+		UiMenuItem menuItem3 = mock(UiMenuItem.class);
+		when(menuItem3.getType()).thenReturn(UiMenuItemType.PLUGIN);
 		when(menuItem3.getId()).thenReturn("item3");
 		when(menuItem3.getName()).thenReturn("label3");
 		when(menuItem3.getUrl()).thenReturn("/item3");

@@ -30,14 +30,8 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core-ui</artifactId>
+            <artifactId>molgenis-web</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.molgenis</groupId>
-                    <artifactId>molgenis-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>

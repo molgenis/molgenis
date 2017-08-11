@@ -2,6 +2,7 @@ package org.molgenis.ui;
 
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.ui.XmlMolgenisUiTest.Config;
+import org.molgenis.web.UiMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,7 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 		MenuType menuType = new MenuType();
 		menuType.setName(menuId);
 		when(molgenis.getMenu()).thenReturn(menuType);
-		MolgenisUiMenu menu = xmlMolgenisUi.getMenu();
+		UiMenu menu = xmlMolgenisUi.getMenu();
 		assertEquals(menu.getId(), menuId);
 	}
 

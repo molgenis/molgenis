@@ -7,7 +7,8 @@ import static org.testng.Assert.assertEquals;
 public class StyleTest
 {
 	@Test
-	public void createLocal(){
+	public void createLocal()
+	{
 		assertEquals(Style.createLocal("bootstrap.min.css").getName(), "bootstrap");
 		assertEquals(Style.createLocal("bootstrap-yeti.min.css").getName(), "yeti");
 		assertEquals(Style.createLocal("mystyle.css").getName(), "mystyle");

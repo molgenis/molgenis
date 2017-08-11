@@ -1,9 +1,9 @@
-package org.molgenis.ui;
+package org.molgenis.web;
 
 /**
  * Model attributes used in plugin views
  */
-public class MolgenisPluginAttributes
+public class PluginAttributes
 {
 	public static final String KEY_CONTEXT_URL = "context_url";
 	public static final String KEY_PLUGIN_ID = "plugin_id";
@@ -25,7 +25,7 @@ public class MolgenisPluginAttributes
 	public static final String KEY_PLUGIN_SETTINGS_CAN_WRITE = "plugin_settings_can_write";
 	public static final String KEY_I18N = "i18n";
 
-	private MolgenisPluginAttributes()
+	private PluginAttributes()
 	{
 	}
 }

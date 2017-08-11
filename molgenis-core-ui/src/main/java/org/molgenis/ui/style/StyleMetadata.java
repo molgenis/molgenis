@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -42,21 +41,12 @@ public class StyleMetadata extends SystemEntityType
 		setLabel("StyleSheet");
 		setPackage(settingsPackage);
 
-		addAttribute(ID, ROLE_ID).setAuto(true)
-			.setVisible(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 
-		addAttribute(NAME, ROLE_LABEL)
-				.setNillable(false)
-				.setDataType(STRING);
+		addAttribute(NAME, ROLE_LABEL).setNillable(false).setDataType(STRING);
 
-		addAttribute(BOOTSTRAP_3_THEME)
-				.setNillable(false)
-				.setDataType(FILE)
-				.setRefEntity(fileMetaMetaData);
+		addAttribute(BOOTSTRAP_3_THEME).setNillable(false).setDataType(FILE).setRefEntity(fileMetaMetaData);
 
-		addAttribute(BOOTSTRAP_4_THEME)
-				.setNillable(true)
-				.setDataType(FILE)
-				.setRefEntity(fileMetaMetaData);
+		addAttribute(BOOTSTRAP_4_THEME).setNillable(true).setDataType(FILE).setRefEntity(fileMetaMetaData);
 	}
 }

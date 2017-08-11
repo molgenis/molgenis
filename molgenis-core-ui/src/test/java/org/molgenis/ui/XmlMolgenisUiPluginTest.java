@@ -2,6 +2,8 @@ package org.molgenis.ui;
 
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItemType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -16,7 +18,7 @@ public class XmlMolgenisUiPluginTest
 {
 	private PermissionService permissionService;
 	private Authentication authentication;
-	private MolgenisUiMenu molgenisUiMenu;
+	private UiMenu molgenisUiMenu;
 
 	@BeforeMethod
 	public void setUp()
@@ -24,7 +26,7 @@ public class XmlMolgenisUiPluginTest
 		permissionService = mock(PermissionService.class);
 		authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		molgenisUiMenu = mock(MolgenisUiMenu.class);
+		molgenisUiMenu = mock(UiMenu.class);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -77,7 +79,7 @@ public class XmlMolgenisUiPluginTest
 	{
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu,
 				permissionService);
-		assertEquals(xmlMolgenisUiPlugin.getType(), MolgenisUiMenuItemType.PLUGIN);
+		assertEquals(xmlMolgenisUiPlugin.getType(), UiMenuItemType.PLUGIN);
 	}
 
 	@Test

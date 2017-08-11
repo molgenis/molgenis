@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.MolgenisPluginAttributes.*;
+import static org.molgenis.web.PluginAttributes.*;
 
 /**
  * Interceptor that adds default model objects to all requests that return a view.
@@ -29,7 +29,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	private final LanguageService languageService;
 
 	@Autowired
-	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry, ThemeFingerprintRegistry themeFingerprintRegistry,
+	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry,
+			ThemeFingerprintRegistry themeFingerprintRegistry,
 			TemplateResourceUtils templateResourceUtils, AppSettings appSettings, LanguageService languageService,
 			@Value("${environment}") String environment)
 	{

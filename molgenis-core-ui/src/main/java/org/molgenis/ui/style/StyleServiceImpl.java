@@ -40,9 +40,8 @@ public class StyleServiceImpl implements StyleService
 	private final StyleSheetFactory styleSheetFactory;
 	private final DataService dataService;
 
-
 	@Autowired
-	public StyleServiceImpl(AppSettings appSettings, IdGenerator idGenerator,FileStore fileStore,
+	public StyleServiceImpl(AppSettings appSettings, IdGenerator idGenerator, FileStore fileStore,
 			FileMetaFactory fileMetaFactory, StyleSheetFactory styleSheetFactory, DataService dataService)
 	{
 		this.appSettings = requireNonNull(appSettings);
@@ -78,7 +77,8 @@ public class StyleServiceImpl implements StyleService
 		styleSheet.setBootstrap3Theme(bootstrap3ThemeFileMeta);
 
 		// Setting the bootstrap 4 style is optional
-		if(bootstrap4FileName != null && bootstrap4StyleData != null) {
+		if (bootstrap4FileName != null && bootstrap4StyleData != null)
+		{
 			FileMeta bootstrap4ThemeFileMeta = createStyleSheetFileMeta(bootstrap4FileName, bootstrap4StyleData);
 			styleSheet.setBootstrap4Theme(bootstrap4ThemeFileMeta);
 		}
@@ -206,7 +206,8 @@ public class StyleServiceImpl implements StyleService
 		{
 			ServletUriComponentsBuilder currentRequest = ServletUriComponentsBuilder.fromCurrentRequest();
 			UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + fileId)
-					.replaceQuery(null).build();
+													  .replaceQuery(null)
+													  .build();
 			return downloadUri.toUriString();
 		}
 		else

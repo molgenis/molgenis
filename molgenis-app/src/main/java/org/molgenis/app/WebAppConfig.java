@@ -5,7 +5,6 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
-import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.freemarker.RepositoryTemplateLoader;
 import org.molgenis.util.GsonConfig;
@@ -20,7 +19,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
@@ -34,13 +32,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
 	private DataService dataService;
-
-	@Override
-	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
-	{
-		freemarkerVariables.put("dataExplorerLink",
-				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
-	}
 
 	/**
 	 * Configures Freemarker

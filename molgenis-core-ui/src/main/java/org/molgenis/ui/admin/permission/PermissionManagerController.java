@@ -6,12 +6,12 @@ import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerService;
 import org.molgenis.security.permission.Permissions;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +31,11 @@ import static org.molgenis.ui.admin.permission.PermissionManagerController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class PermissionManagerController extends MolgenisPluginController
+public class PermissionManagerController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "permissionmanager";
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "permissionmanager";
 
 	private final PermissionManagerService pluginPermissionManagerService;
 	private final UserAuthorityFactory userAuthorityFactory;
@@ -97,7 +97,7 @@ public class PermissionManagerController extends MolgenisPluginController
 	public void updateGroupPluginPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
 		List<GroupAuthority> authorities = new ArrayList<>();
-		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
+		for (Plugin plugin : pluginPermissionManagerService.getPlugins())
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
@@ -140,7 +140,7 @@ public class PermissionManagerController extends MolgenisPluginController
 	public void updateUserPluginPermissions(@RequestParam String userId, WebRequest webRequest)
 	{
 		List<UserAuthority> authorities = new ArrayList<>();
-		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
+		for (Plugin plugin : pluginPermissionManagerService.getPlugins())
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);

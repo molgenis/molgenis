@@ -1,6 +1,6 @@
 package org.molgenis.data.index.admin;
 
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -20,10 +20,10 @@ import static org.molgenis.data.index.admin.IndexManagerController.URI;
  */
 @Controller
 @RequestMapping(URI)
-public class IndexManagerController extends MolgenisPluginController
+public class IndexManagerController extends PluginController
 {
 	public static final String ID = "indexmanager";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
 	private IndexManagerService indexManagerService;

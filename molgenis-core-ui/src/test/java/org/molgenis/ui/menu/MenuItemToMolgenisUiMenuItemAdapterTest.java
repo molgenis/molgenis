@@ -1,6 +1,6 @@
 package org.molgenis.ui.menu;
 
-import org.molgenis.ui.MolgenisUiMenuItemType;
+import org.molgenis.web.UiMenuItemType;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -36,7 +36,7 @@ public class MenuItemToMolgenisUiMenuItemAdapterTest
 	{
 		MenuItem menuItem = new MenuItem();
 		menuItem.setType(MenuItemType.MENU);
-		assertEquals(new MenuItemToMolgenisUiMenuItemAdapter(menuItem).getType(), MolgenisUiMenuItemType.MENU);
+		assertEquals(new MenuItemToMolgenisUiMenuItemAdapter(menuItem).getType(), UiMenuItemType.MENU);
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public class MenuItemToMolgenisUiMenuItemAdapterTest
 	{
 		MenuItem menuItem = new MenuItem();
 		menuItem.setType(MenuItemType.PLUGIN);
-		assertEquals(new MenuItemToMolgenisUiMenuItemAdapter(menuItem).getType(), MolgenisUiMenuItemType.PLUGIN);
+		assertEquals(new MenuItemToMolgenisUiMenuItemAdapter(menuItem).getType(), UiMenuItemType.PLUGIN);
 	}
 
 	@Test

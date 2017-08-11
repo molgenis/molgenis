@@ -3,7 +3,7 @@ package org.molgenis.questionnaires;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
  */
 @Controller
 @RequestMapping(ThankYouPageEditorController.URI)
-public class ThankYouPageEditorController extends MolgenisPluginController
+public class ThankYouPageEditorController extends PluginController
 {
 	public static final String ID = "questionnaireThankYouPage";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final ThankYouTextService thankYouTextService;
 	private final DataService dataService;

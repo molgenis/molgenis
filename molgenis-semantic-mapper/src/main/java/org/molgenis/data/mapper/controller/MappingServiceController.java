@@ -31,10 +31,10 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,12 +70,12 @@ import static org.springframework.http.ResponseEntity.created;
 
 @Controller
 @RequestMapping(URI)
-public class MappingServiceController extends MolgenisPluginController
+public class MappingServiceController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
 	public static final String ID = "mappingservice";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_MAPPING_PROJECTS = "view-mapping-projects";
 	private static final String VIEW_ATTRIBUTE_MAPPING = "view-attribute-mapping";
 	private static final String VIEW_SINGLE_MAPPING_PROJECT = "view-single-mapping-project";

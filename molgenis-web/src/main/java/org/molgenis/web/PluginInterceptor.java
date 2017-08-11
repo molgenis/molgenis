@@ -1,4 +1,4 @@
-package org.molgenis.ui;
+package org.molgenis.web;
 
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.Permission;
@@ -13,18 +13,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.MolgenisPluginAttributes.*;
 
 /**
  * Interceptor that adds default model objects to all plugin requests that return a view.
  */
-public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
+public class PluginInterceptor extends HandlerInterceptorAdapter
 {
-	private final MolgenisUi molgenisUi;
+	private final Ui molgenisUi;
 	private final PermissionService permissionService;
 
 	@Autowired
-	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, PermissionService permissionService)
+	public PluginInterceptor(Ui molgenisUi, PermissionService permissionService)
 	{
 		this.molgenisUi = requireNonNull(molgenisUi);
 		this.permissionService = requireNonNull(permissionService);
@@ -33,13 +32,13 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
 	{
-		MolgenisPluginController molgenisPlugin = validateHandler(handler);
+		PluginController molgenisPlugin = validateHandler(handler);
 
 		// determine context url for this plugin if no context exists
-		String contextUrl = (String) request.getAttribute(MolgenisPluginAttributes.KEY_CONTEXT_URL);
+		String contextUrl = (String) request.getAttribute(PluginAttributes.KEY_CONTEXT_URL);
 		if (contextUrl == null)
 		{
-			request.setAttribute(MolgenisPluginAttributes.KEY_CONTEXT_URL, molgenisPlugin.getUri());
+			request.setAttribute(PluginAttributes.KEY_CONTEXT_URL, molgenisPlugin.getUri());
 		}
 
 		return true;
@@ -51,13 +50,13 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	{
 		if (modelAndView != null)
 		{
-			MolgenisPluginController molgenisPlugin = validateHandler(handler);
+			PluginController molgenisPlugin = validateHandler(handler);
 			String pluginId = molgenisPlugin.getId();
 
 			// allow controllers that handle multiple plugins to set their plugin id
-			if (!modelAndView.getModel().containsKey(KEY_PLUGIN_ID))
+			if (!modelAndView.getModel().containsKey(PluginAttributes.KEY_PLUGIN_ID))
 			{
-				modelAndView.addObject(KEY_PLUGIN_ID, pluginId);
+				modelAndView.addObject(PluginAttributes.KEY_PLUGIN_ID, pluginId);
 			}
 
 			Entity pluginSettings = molgenisPlugin.getPluginSettings();
@@ -73,27 +72,27 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				pluginSettingsCanWrite = null;
 			}
 
-			modelAndView.addObject(KEY_PLUGIN_SETTINGS, pluginSettings);
-			modelAndView.addObject(KEY_PLUGIN_SETTINGS_CAN_WRITE, pluginSettingsCanWrite);
-			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
-			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
-			modelAndView.addObject(KEY_PLUGIN_ID_WITH_QUERY_STRING, getPluginIdWithQueryString(request, pluginId));
+			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS, pluginSettings);
+			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS_CAN_WRITE, pluginSettingsCanWrite);
+			modelAndView.addObject(PluginAttributes.KEY_MOLGENIS_UI, molgenisUi);
+			modelAndView.addObject(PluginAttributes.KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
+			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING,
+					getPluginIdWithQueryString(request, pluginId));
 		}
 	}
 
-	public MolgenisPluginController validateHandler(Object handler)
+	public PluginController validateHandler(Object handler)
 	{
 		if (!(handler instanceof HandlerMethod))
 		{
 			throw new RuntimeException("handler is not of type " + HandlerMethod.class.getSimpleName());
 		}
 		Object bean = ((HandlerMethod) handler).getBean();
-		if (!(bean instanceof MolgenisPluginController))
+		if (!(bean instanceof PluginController))
 		{
-			throw new RuntimeException(
-					"controller does not implement " + MolgenisPluginController.class.getSimpleName());
+			throw new RuntimeException("controller does not implement " + PluginController.class.getSimpleName());
 		}
-		return (MolgenisPluginController) bean;
+		return (PluginController) bean;
 	}
 
 	private String getPluginIdWithQueryString(HttpServletRequest request, String pluginId)
