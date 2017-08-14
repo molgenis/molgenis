@@ -75,7 +75,7 @@ public class RecoveryServiceImpl implements RecoveryService
 		}
 		else
 		{
-			throw new BadCredentialsException("Invalid recovery code");
+			throw new BadCredentialsException("Invalid recovery code or code already used");
 		}
 	}
 
