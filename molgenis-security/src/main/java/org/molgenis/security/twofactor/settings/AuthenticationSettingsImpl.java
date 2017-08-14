@@ -75,10 +75,10 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity implements
 											  .setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
 			addAttribute(SIGN_IN_2FA).setDataType(ENUM)
 									 .setNillable(false)
-									 .setDefaultValue(TwoFactorAuthenticationSetting.DISABLED.toString())
-									 .setEnumOptions(asList(TwoFactorAuthenticationSetting.DISABLED.toString(),
-											 TwoFactorAuthenticationSetting.ENABLED.toString(),
-											 TwoFactorAuthenticationSetting.ENFORCED.toString()))
+									 .setDefaultValue(TwoFactorAuthenticationSetting.DISABLED.getLabel())
+									 .setEnumOptions(asList(TwoFactorAuthenticationSetting.DISABLED.getLabel(),
+											 TwoFactorAuthenticationSetting.ENABLED.getLabel(),
+											 TwoFactorAuthenticationSetting.ENFORCED.getLabel()))
 									 .setLabel("Two Factor Authentication")
 									 .setDescription(
 											 "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.")
@@ -149,14 +149,14 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity implements
 	}
 
 	@Override
-	public void setTwoFactorAuthentication(String twoFactorAuthentication)
+	public void setTwoFactorAuthentication(TwoFactorAuthenticationSetting twoFactorAuthentication)
 	{
-		set(Meta.SIGN_IN_2FA, twoFactorAuthentication);
+		set(Meta.SIGN_IN_2FA, twoFactorAuthentication.getLabel());
 	}
 
 	@Override
-	public String getTwoFactorAuthentication()
+	public TwoFactorAuthenticationSetting getTwoFactorAuthentication()
 	{
-		return getString(Meta.SIGN_IN_2FA);
+		return TwoFactorAuthenticationSetting.fromLabel(getString(Meta.SIGN_IN_2FA));
 	}
 }

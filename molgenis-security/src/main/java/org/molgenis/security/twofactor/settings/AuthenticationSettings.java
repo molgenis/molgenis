@@ -1,5 +1,7 @@
 package org.molgenis.security.twofactor.settings;
 
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
+
 public interface AuthenticationSettings
 {
 	/**
@@ -45,10 +47,10 @@ public interface AuthenticationSettings
 	/**
 	 * @param twoFactorAuthentication whether two factor authentication is disabled, enabled or enforced
 	 */
-	void setTwoFactorAuthentication(String twoFactorAuthentication);
+	void setTwoFactorAuthentication(TwoFactorAuthenticationSetting twoFactorAuthentication);
 
 	/**
 	 * @return <code>enabled</code> or <code>enforced</code> if two factor authentication is optional or mandatory, <code>disabled</code> when it is off
 	 */
-	String getTwoFactorAuthentication();
+	TwoFactorAuthenticationSetting getTwoFactorAuthentication();
 }

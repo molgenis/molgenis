@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.security.twofactor.model.RecoveryCode;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
@@ -70,7 +71,7 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String showAccount(Model model, @RequestParam(defaultValue = "false") boolean showCodes)
 	{
-		String twoFactorAuthenticationApp = authenticationSettings.getTwoFactorAuthentication();
+		TwoFactorAuthenticationSetting twoFactorAuthenticationApp = authenticationSettings.getTwoFactorAuthentication();
 		boolean isTwoFactorAuthenticationEnableForUser = userAccountService.getCurrentUser()
 																		   .isTwoFactorAuthentication();
 

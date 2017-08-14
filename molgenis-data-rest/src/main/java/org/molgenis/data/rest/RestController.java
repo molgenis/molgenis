@@ -24,7 +24,6 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.token.TokenExtractor;
-import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -67,6 +66,8 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -788,13 +789,11 @@ public class RestController
 	private boolean isUser2fa()
 	{
 		boolean userIs2fa = false;
-		if (TwoFactorAuthenticationSetting.ENFORCED.toString()
-												   .equals(authenticationSettings.getTwoFactorAuthentication()))
+		if (authenticationSettings.getTwoFactorAuthentication() == ENFORCED)
 		{
 			userIs2fa = true;
 		}
-		else if (TwoFactorAuthenticationSetting.ENABLED.toString()
-													   .equals(authenticationSettings.getTwoFactorAuthentication()))
+		else if (authenticationSettings.getTwoFactorAuthentication() == ENABLED)
 		{
 			if (userAccountService.getCurrentUser().isTwoFactorAuthentication())
 			{

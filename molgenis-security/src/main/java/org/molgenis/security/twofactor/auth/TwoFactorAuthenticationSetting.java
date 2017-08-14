@@ -1,7 +1,5 @@
 package org.molgenis.security.twofactor.auth;
 
-import static org.apache.commons.lang3.StringUtils.capitalize;
-
 /**
  * <p>You can have tw-factor-authentication in three different states in your system</p>
  * <ul>
@@ -12,11 +10,22 @@ import static org.apache.commons.lang3.StringUtils.capitalize;
  */
 public enum TwoFactorAuthenticationSetting
 {
-	ENABLED, DISABLED, ENFORCED;
+	ENABLED("Enabled"), DISABLED("Disabled"), ENFORCED("Enforced");
 
-	@Override
-	public String toString()
+	private final String label;
+
+	TwoFactorAuthenticationSetting(String label)
 	{
-		return capitalize(name().toLowerCase());
+		this.label = label;
+	}
+
+	public String getLabel()
+	{
+		return label;
+	}
+
+	public static TwoFactorAuthenticationSetting fromLabel(String label)
+	{
+		return valueOf(label.toUpperCase());
 	}
 }

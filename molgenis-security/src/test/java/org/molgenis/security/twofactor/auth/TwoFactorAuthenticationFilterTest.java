@@ -28,6 +28,8 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 import static org.mockito.Mockito.*;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { TwoFactorAuthenticationFilterTest.Config.class })
@@ -53,8 +55,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		when(token.isAuthenticated()).thenReturn(true);
 
 		request.setRequestURI("/login");
-		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(
-				TwoFactorAuthenticationSetting.ENFORCED.toString());
+		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
 
 		filter.doFilterInternal(request, response, chain);
@@ -77,8 +78,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		SecurityContextHolder.getContext().setAuthentication(token);
 
 		request.setRequestURI("/login");
-		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(
-				TwoFactorAuthenticationSetting.ENFORCED.toString());
+		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(false);
 
 		filter.doFilterInternal(request, response, chain);
@@ -97,8 +97,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		FilterChain chain = mock(FilterChain.class);
 
 		request.setRequestURI("/login");
-		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(
-				TwoFactorAuthenticationSetting.DISABLED.toString());
+		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(DISABLED);
 
 		filter.doFilterInternal(request, response, chain);
 		verify(chain).doFilter(request, response);

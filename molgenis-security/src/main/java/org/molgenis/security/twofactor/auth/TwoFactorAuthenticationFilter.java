@@ -77,12 +77,12 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 
 	private boolean isTwoFactorAuthenticationEnabled()
 	{
-		return !authenticationSettings.getTwoFactorAuthentication().equals(DISABLED.toString());
+		return !(authenticationSettings.getTwoFactorAuthentication() == DISABLED);
 	}
 
 	private boolean isTwoFactorAuthenticationEnforced()
 	{
-		return authenticationSettings.getTwoFactorAuthentication().equals(ENFORCED.toString());
+		return authenticationSettings.getTwoFactorAuthentication() == ENFORCED;
 	}
 
 	private boolean userUsesTwoFactorAuthentication()

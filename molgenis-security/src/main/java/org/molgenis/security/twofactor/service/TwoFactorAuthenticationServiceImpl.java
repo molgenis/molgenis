@@ -218,7 +218,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		else
 		{
 			throw new InternalAuthenticationServiceException(
-					format("Secret not found, user: [ %d ] is not configured for 2 factor authentication",
+					format("Secret not found, user: [ %s ] is not configured for 2 factor authentication",
 							user.getUsername()));
 		}
 
@@ -234,7 +234,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 		else
 		{
-			throw new UsernameNotFoundException(format("Can't find user: [ %d ]", SecurityUtils.getCurrentUsername()));
+			throw new UsernameNotFoundException(format("Can't find user: [ %s ]", SecurityUtils.getCurrentUsername()));
 		}
 	}
 }
