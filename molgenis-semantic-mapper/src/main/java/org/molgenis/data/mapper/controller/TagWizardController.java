@@ -20,8 +20,8 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +44,12 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 
 @Controller
 @RequestMapping(URI)
-public class TagWizardController extends MolgenisPluginController
+public class TagWizardController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TagWizardController.class);
 
 	public static final String ID = "tagwizard";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String VIEW_TAG_WIZARD = "view-tag-wizard";
 

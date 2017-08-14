@@ -5,7 +5,6 @@ import org.molgenis.auth.UserFactory;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.UserService;
@@ -245,12 +244,6 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 		public MailSender mailSender()
 		{
 			return mock(MailSender.class);
-		}
-
-		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
-		{
-			return mock(MolgenisPluginRegistry.class);
 		}
 
 		@Bean

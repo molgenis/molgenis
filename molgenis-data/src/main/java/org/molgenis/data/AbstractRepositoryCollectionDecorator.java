@@ -7,14 +7,26 @@ import org.molgenis.data.meta.model.EntityType;
 import java.util.Iterator;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Abstract superclass for {@link RepositoryCollection} decorators that delegates everything to the
  * decorated repository collection.
  */
 public abstract class AbstractRepositoryCollectionDecorator extends ForwardingObject implements RepositoryCollection
 {
+	private final RepositoryCollection delegateRepositoryCollection;
+
+	public AbstractRepositoryCollectionDecorator(RepositoryCollection delegateRepositoryCollection)
+	{
+		this.delegateRepositoryCollection = requireNonNull(delegateRepositoryCollection);
+	}
+
 	@Override
-	protected abstract RepositoryCollection delegate();
+	protected RepositoryCollection delegate()
+	{
+		return delegateRepositoryCollection;
+	}
 
 	@Override
 	public String getName()
@@ -68,6 +80,12 @@ public abstract class AbstractRepositoryCollectionDecorator extends ForwardingOb
 	public void deleteRepository(EntityType entityType)
 	{
 		delegate().deleteRepository(entityType);
+	}
+
+	@Override
+	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
+	{
+		delegate().updateRepository(entityType, updatedEntityType);
 	}
 
 	@Override

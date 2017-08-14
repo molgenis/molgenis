@@ -11,7 +11,6 @@ import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.gavin.config.GavinTestConfig;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
@@ -216,12 +215,6 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		UserAccountService userAccountService()
 		{
 			return mock(UserAccountService.class);
-		}
-
-		@Bean
-		MolgenisPluginRegistry pluginRegistry()
-		{
-			return mock(MolgenisPluginRegistry.class);
 		}
 
 		@Bean

@@ -2,7 +2,8 @@
 <#--   css (optional) list of additional stylesheets to include -->
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
-<#macro header css=[] js=[]>
+<#include "theme-macros.ftl">
+<#macro header css=[] js=[] version=1>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
     <#assign googleSignIn = authentication_settings.googleSignIn && authentication_settings.signUp && !authentication_settings.signUpModeration>
 <!DOCTYPE html>
@@ -17,10 +18,18 @@
         <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
     </#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
-    <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
+
     <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-    <link rel="stylesheet" href="<@resource_href "/css/${app_settings.bootstrapTheme?html}"/>" type="text/css"
-          id="bootstrap-theme">
+    <#if !version?? || version == 1>
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>"
+              type="text/css"
+              id="bootstrap-theme">
+    <#else>
+        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>"
+              type="text/css"
+              id="bootstrap-theme">
+    </#if>
 
     <#if app_settings.logoTopHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
@@ -39,8 +48,10 @@
         </#list>
     </#if>
 <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-    <script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
-    <script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
+    <#if !(version??) || version == 1>
+        <script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
+        <script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
+    </#if>
     <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
     <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
     <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
@@ -83,16 +94,45 @@
     </#list>
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
-<body>
-<#-- Navbar menu -->
-    <#if menu_id??>
-        <#if !(plugin_id??)>
-            <#assign plugin_id="NULL">
-        </#if>
-
-        <@topmenu molgenis_ui.getMenu() plugin_id pluginid_with_query_string/>
+    <#if version?? || version == 1>
+    <body style="padding: 55px;">
+    <#else>
+    <body>
     </#if>
+    <#if !(version??) || version == 1>
+    <#-- Navbar menu -->
+        <#if menu_id??>
+            <#if !(plugin_id??)>
+                <#assign plugin_id="NULL">
+            </#if>
 
+            <@topmenu molgenis_ui.getMenu() plugin_id pluginid_with_query_string/>
+        </#if>
+    <#else>
+        <#assign menu=molgenis_ui.getMenuJson()>
+    <#-- VUE -->
+    <div id="molgenis-menu"></div>
+    <script type="text/javascript">
+        window.molgenisMenu = {
+            menu: ${menu}
+            <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
+            <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>
+            <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
+            , authenticated: '${authenticated?c}'
+            , loginHref: '/login'
+            <#if googleSignIn>, logoutFunction: function () {
+                var auth2 = gapi.auth2.getAuthInstance()
+                auth2.signOut()
+            }</#if>
+            , googleSignIn: ${googleSignIn?c}
+            , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
+        }
+    </script>
+
+    <script type=text/javascript src="<@resource_href "/js/menu/manifest.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/js/menu/vendor.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/js/menu/app.js"/>"></script>
+    </#if>
 <#-- Start application content -->
 <div class="container-fluid">
     <div class="row">

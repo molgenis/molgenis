@@ -1,6 +1,6 @@
 package org.molgenis.ui.admin.usermanager;
 
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -13,9 +13,9 @@ import static org.molgenis.ui.admin.usermanager.UserManagerController.URI;
 @RequestMapping(URI)
 @SessionAttributes("viewState")
 // either users or groups
-public class UserManagerController extends MolgenisPluginController
+public class UserManagerController extends PluginController
 {
-	public final static String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "usermanager";
+	public final static String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
 	private final UserManagerService pluginUserManagerService;
 
 	@Autowired

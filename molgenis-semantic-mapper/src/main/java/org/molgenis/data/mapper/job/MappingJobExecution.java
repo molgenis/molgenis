@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.data.mapper.job.MappingJobExecutionMetadata.*;
 
 public class MappingJobExecution extends JobExecution
@@ -46,6 +48,7 @@ public class MappingJobExecution extends JobExecution
 		set(TARGET_ENTITY_TYPE_ID, targetEntityTypeId);
 	}
 
+	@Nullable
 	public Boolean isAddSourceAttribute()
 	{
 		return getBoolean(ADD_SOURCE_ATTRIBUTE);
@@ -56,6 +59,7 @@ public class MappingJobExecution extends JobExecution
 		set(ADD_SOURCE_ATTRIBUTE, addSourceAttribute);
 	}
 
+	@Nullable
 	public String getPackageId()
 	{
 		return getString(PACKAGE_ID);
@@ -66,6 +70,7 @@ public class MappingJobExecution extends JobExecution
 		set(PACKAGE_ID, packageId);
 	}
 
+	@Nullable
 	public String getLabel()
 	{
 		return getString(LABEL);

@@ -3,6 +3,7 @@ package org.molgenis.ui;
 import com.google.common.collect.Maps;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import org.molgenis.data.DataService;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.i18n.LanguageService;
@@ -10,8 +11,6 @@ import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.PermissionService;
@@ -27,10 +26,15 @@ import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
+import org.molgenis.ui.style.StyleService;
+import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.util.TemplateResourceUtils;
+import org.molgenis.web.PluginController;
+import org.molgenis.web.PluginInterceptor;
+import org.molgenis.web.Ui;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -71,6 +75,9 @@ import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
+	private DataService dataService;
+
+	@Autowired
 	private AppSettings appSettings;
 
 	@Autowired
@@ -87,6 +94,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	private LanguageService languageService;
+
+	@Autowired
+	private StyleService styleService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -161,7 +171,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
+		String pluginInterceptPattern = PluginController.PLUGIN_URI_PREFIX + "**";
 		registry.addInterceptor(molgenisInterceptor());
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 	}
@@ -180,6 +190,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public ThemeFingerprintRegistry themeFingerprintRegistry()
+	{
+		return new ThemeFingerprintRegistry(styleService);
+	}
+
+	@Bean
 	public TemplateResourceUtils templateResourceUtils()
 	{
 		return new TemplateResourceUtils();
@@ -188,8 +204,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), templateResourceUtils(), appSettings,
-				authenticationSettings, languageService, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(), templateResourceUtils(), appSettings,
+				authenticationSettings,languageService, environment);
 	}
 
 	@Bean
@@ -205,9 +221,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	public MolgenisPluginInterceptor molgenisPluginInterceptor()
+	public PluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(molgenisUi(), permissionService);
+		return new PluginInterceptor(molgenisUi(), permissionService);
 	}
 
 	@Bean
@@ -324,20 +340,14 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MenuManagerService menuManagerService()
 	{
-		return new MenuManagerServiceImpl(menuReaderService(), appSettings, molgenisPluginRegistry());
+		return new MenuManagerServiceImpl(menuReaderService(), appSettings, dataService);
 	}
 
 	@Bean
-	public MolgenisUi molgenisUi()
+	public Ui molgenisUi()
 	{
-		MolgenisUi molgenisUi = new MenuMolgenisUi(menuReaderService());
+		Ui molgenisUi = new MenuMolgenisUi(menuReaderService());
 		return new MolgenisUiPermissionDecorator(molgenisUi, permissionService);
-	}
-
-	@Bean
-	public MolgenisPluginRegistry molgenisPluginRegistry()
-	{
-		return new MolgenisPluginRegistryImpl();
 	}
 
 	@Bean

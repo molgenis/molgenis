@@ -8,8 +8,8 @@ import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -33,10 +33,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class JobsController extends MolgenisPluginController
+public class JobsController extends PluginController
 {
 	public static final String ID = "jobs";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private static final int MAX_JOBS_TO_RETURN = 20;
 
 	private final UserAccountService userAccountService;

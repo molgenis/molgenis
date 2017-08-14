@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.data.index.meta.IndexActionMetaData.*;
 
 public class IndexAction extends StaticEntity
@@ -35,6 +37,7 @@ public class IndexAction extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public IndexActionGroup getIndexActionGroup()
 	{
 		return getEntity(INDEX_ACTION_GROUP_ATTR, IndexActionGroup.class);
@@ -68,6 +71,7 @@ public class IndexAction extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public String getEntityId()
 	{
 		return getString(ENTITY_ID);

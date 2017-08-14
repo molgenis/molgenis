@@ -10,9 +10,9 @@ import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,7 +35,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class OneClickImporterController extends MolgenisPluginController
+public class OneClickImporterController extends PluginController
 {
 	public static final String ONE_CLICK_IMPORTER = "one-click-importer";
 	public static final String URI = PLUGIN_URI_PREFIX + ONE_CLICK_IMPORTER;
