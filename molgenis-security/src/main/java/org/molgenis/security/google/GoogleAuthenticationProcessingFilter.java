@@ -6,13 +6,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.login.MolgenisLoginController;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -56,14 +55,14 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private final GooglePublicKeysManager googlePublicKeysManager;
 	private final DataService dataService;
 	private final UserDetailsService userDetailsService;
-	private final AppSettings appSettings;
+	private final AuthenticationSettings authenticationSettings;
 	private final UserFactory userFactory;
 	private final GroupMemberFactory groupMemberFactory;
 
-	@Autowired
 	public GoogleAuthenticationProcessingFilter(GooglePublicKeysManager googlePublicKeysManager,
-			DataService dataService, UserDetailsService userDetailsService, AppSettings appSettings,
-			UserFactory userFactory, GroupMemberFactory groupMemberFactory)
+			DataService dataService, UserDetailsService userDetailsService,
+			AuthenticationSettings authenticationSettings, UserFactory userFactory,
+			GroupMemberFactory groupMemberFactory)
 	{
 		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
 		this.userFactory = requireNonNull(userFactory);
@@ -74,14 +73,14 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		this.googlePublicKeysManager = requireNonNull(googlePublicKeysManager);
 		this.dataService = requireNonNull(dataService);
 		this.userDetailsService = requireNonNull(userDetailsService);
-		this.appSettings = requireNonNull(appSettings);
+		this.authenticationSettings = requireNonNull(authenticationSettings);
 	}
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException
 	{
-		if (appSettings.getGoogleSignIn() == false)
+		if (!authenticationSettings.getGoogleSignIn())
 		{
 			throw new AuthenticationServiceException("Google authentication not available");
 		}
@@ -116,7 +115,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 	private GoogleIdToken verify(String idTokenString) throws GeneralSecurityException, IOException
 	{
-		List<String> audience = Collections.singletonList(appSettings.getGoogleAppClientId());
+		List<String> audience = Collections.singletonList(authenticationSettings.getGoogleAppClientId());
 		GoogleIdTokenVerifier googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(
 				googlePublicKeysManager).setAudience(audience).build();
 		return googleIdTokenVerifier.verify(idTokenString);
@@ -131,7 +130,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 					"Google URI token is missing required [email] claim, did you forget to specify scope [email]?");
 		}
 		Boolean emailVerified = payload.getEmailVerified();
-		if (emailVerified != null && emailVerified == false)
+		if (emailVerified != null && !emailVerified)
 		{
 			throw new AuthenticationServiceException("Google account email is not verified");
 		}
@@ -177,12 +176,12 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private User createMolgenisUser(String username, String email, String givenName, String familyName,
 			String googleAccountId)
 	{
-		if (!appSettings.getSignUp())
+		if (!authenticationSettings.getSignUp())
 		{
 			throw new AuthenticationServiceException("Google authentication not possible: sign up disabled");
 		}
 
-		if (appSettings.getSignUpModeration())
+		if (authenticationSettings.getSignUpModeration())
 		{
 			throw new AuthenticationServiceException("Google authentication not possible: sign up moderation enabled");
 		}

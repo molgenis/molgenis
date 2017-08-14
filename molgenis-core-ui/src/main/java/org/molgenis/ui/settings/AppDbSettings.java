@@ -5,14 +5,12 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
-import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 
@@ -38,11 +36,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String LOGO_NAVBAR_HREF = "logo_href_navbar";
 		private static final String LOGO_TOP_HREF = "logo_href_top";
 		private static final String FOOTER = "footer";
-		private static final String SIGNUP = "signup";
-		private static final String SIGNUP_MODERATION = "signup_moderation";
-		private static final String GOOGLE_SIGN_IN = "google_sign_in";
-		private static final String GOOGLE_APP_CLIENT_ID = "google_app_client_id";
-		private static final String SIGN_IN_2FA = "sign_in_2fa";
 		public static final String MENU = "molgenis_menu";
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
@@ -59,10 +52,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String DEFAULT_TITLE = "MOLGENIS";
 		private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
-		private static final boolean DEFAULT_SIGNUP = false;
-		private static final boolean DEFAULT_SIGNUP_MODERATION = true;
-		private static final boolean DEFAULT_GOOGLE_SIGN_IN = true;
-		private static final String DEFAULT_GOOGLE_APP_CLIENT_ID = "130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com";
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -92,41 +81,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 							   .setDefaultValue(DEFAULT_TITLE)
 							   .setLabel("Application title")
 							   .setDescription("Displayed in browser toolbar.");
-			addAttribute(SIGNUP).setDataType(BOOL)
-								.setNillable(false)
-								.setDefaultValue(String.valueOf(DEFAULT_SIGNUP))
-								.setLabel("Allow users to sign up");
-			addAttribute(SIGNUP_MODERATION).setDataType(BOOL)
-										   .setNillable(false)
-										   .setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION))
-										   .setLabel("Sign up moderation")
-										   .setDescription(
-												   "Admins must accept sign up requests before account activation")
-										   .setVisibleExpression("$('" + SIGNUP + "').eq(true).value()");
-			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL)
-										.setNillable(false)
-										.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN))
-										.setLabel("Enable Google Sign-In")
-										.setDescription("Enable users to sign in with their existing Google account")
-										.setVisibleExpression(
-												"$('" + SIGNUP + "').eq(true).value() && $('" + SIGNUP_MODERATION
-														+ "').eq(false).value()");
-			addAttribute(GOOGLE_APP_CLIENT_ID).setDataType(STRING)
-											  .setNillable(false)
-											  .setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID)
-											  .setLabel("Google app client ID")
-											  .setDescription("Google app client ID used during Google Sign-In")
-											  .setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
-			addAttribute(SIGN_IN_2FA).setDataType(ENUM)
-									 .setNillable(false)
-									 .setDefaultValue(TwoFactorAuthenticationSetting.DISABLED.toString())
-									 .setEnumOptions(asList(TwoFactorAuthenticationSetting.DISABLED.toString(),
-											 TwoFactorAuthenticationSetting.ENABLED.toString(),
-											 TwoFactorAuthenticationSetting.ENFORCED.toString()))
-									 .setLabel("Two Factor Authentication")
-									 .setDescription(
-											 "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.")
-									 .setValidationExpression(getSignIn2FAValidationExpression());
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
 										  .setNillable(true)
 										  .setLabel("Logo in navigation bar")
@@ -220,17 +174,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 													  "JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
 		}
 
-		/**
-		 * SIGN_IN_2FA == DISABLED || !SIGNUP || SIGNUP_MODERATION || !GOOGLE_SIGN_IN
-		 *
-		 * @return true if condition is met
-		 */
-		private static String getSignIn2FAValidationExpression()
-		{
-			return String.format("$('%s').eq('%s').or($('%s').not()).or($('%s')).or($('%s').not()).value()",
-					SIGN_IN_2FA, TwoFactorAuthenticationSetting.DISABLED, SIGNUP, SIGNUP_MODERATION, GOOGLE_SIGN_IN);
-		}
-
 		private String getDefaultMenuValue()
 		{
 			return menuManagerServiceImpl.getDefaultMenuValue();
@@ -283,32 +226,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public void setFooter(String footerText)
 	{
 		set(Meta.FOOTER, footerText);
-	}
-
-	@Override
-	public boolean getSignUp()
-	{
-		Boolean value = getBoolean(Meta.SIGNUP);
-		return value != null ? value : false;
-	}
-
-	@Override
-	public void setSignUp(boolean signUp)
-	{
-		set(Meta.SIGNUP, signUp);
-	}
-
-	@Override
-	public boolean getSignUpModeration()
-	{
-		Boolean value = getBoolean(Meta.SIGNUP_MODERATION);
-		return value != null ? value : false;
-	}
-
-	@Override
-	public void setSignUpModeration(boolean signUpModeration)
-	{
-		set(Meta.SIGNUP_MODERATION, signUpModeration);
 	}
 
 	@Override
@@ -446,43 +363,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	{
 		Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS);
 		return value != null ? value : false;
-	}
-
-	@Override
-	public void setGoogleSignIn(boolean googleSignIn)
-	{
-		set(Meta.GOOGLE_SIGN_IN, googleSignIn);
-	}
-
-	@Override
-	public boolean getGoogleSignIn()
-	{
-		Boolean value = getBoolean(Meta.GOOGLE_SIGN_IN);
-		return value != null ? value : false;
-	}
-
-	@Override
-	public void setGoogleAppClientId(String googleAppClientId)
-	{
-		set(Meta.GOOGLE_APP_CLIENT_ID, googleAppClientId);
-	}
-
-	@Override
-	public String getGoogleAppClientId()
-	{
-		return getString(Meta.GOOGLE_APP_CLIENT_ID);
-	}
-
-	@Override
-	public void setTwoFactorAuthentication(String twoFactorAuthentication)
-	{
-		set(Meta.SIGN_IN_2FA, twoFactorAuthentication);
-	}
-
-	@Override
-	public String getTwoFactorAuthentication()
-	{
-		return getString(Meta.SIGN_IN_2FA);
 	}
 
 	@Override

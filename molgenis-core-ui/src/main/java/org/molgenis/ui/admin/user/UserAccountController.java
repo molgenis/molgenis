@@ -4,11 +4,11 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.model.RecoveryCode;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -53,24 +53,24 @@ public class UserAccountController extends MolgenisPluginController
 	private final LanguageService languageService;
 	private final RecoveryService recoveryService;
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private final AppSettings appSettings;
+	private final AuthenticationSettings authenticationSettings;
 
 	public UserAccountController(UserAccountService userAccountService, LanguageService languageService,
 			RecoveryService recoveryService, TwoFactorAuthenticationService twoFactorAuthenticationService,
-			AppSettings appSettings)
+			AuthenticationSettings authenticationSettings)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.languageService = requireNonNull(languageService);
 		this.recoveryService = requireNonNull(recoveryService);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
-		this.appSettings = requireNonNull(appSettings);
+		this.authenticationSettings = requireNonNull(authenticationSettings);
 	}
 
 	@RequestMapping(method = GET)
 	public String showAccount(Model model, @RequestParam(defaultValue = "false") boolean showCodes)
 	{
-		String twoFactorAuthenticationApp = appSettings.getTwoFactorAuthentication();
+		String twoFactorAuthenticationApp = authenticationSettings.getTwoFactorAuthentication();
 		boolean isTwoFactorAuthenticationEnableForUser = userAccountService.getCurrentUser()
 																		   .isTwoFactorAuthentication();
 
