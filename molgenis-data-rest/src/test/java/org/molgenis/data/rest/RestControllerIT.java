@@ -151,7 +151,7 @@ public class RestControllerIT
 							  .then();
 			response.statusCode(UNAUTHORIZED)
 					.body("errors.message[0]",
-							equalTo("2 factor authentication is [ Enforced ], you cannot login via the RESTAPI anymore"));
+							equalTo("Login using /api/v1/login is disabled, two factor authentication is enabled"));
 		}
 		finally
 		{
