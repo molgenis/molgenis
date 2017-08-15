@@ -177,68 +177,6 @@ public class RestControllerV2
 		return getEntityResponse(entityTypeId, untypedId, attributeFilter);
 	}
 
-	@RequestMapping(value = "/searchall", method = GET)
-	@ResponseBody
-	public Result findAll(@RequestParam(value = "term") String searchterm)
-	{
-		List<Package> packages = dataService.findAll(PackageMetadata.PACKAGE, Package.class)
-											.filter(aPackage -> !isSystemPackage(aPackage))
-											.filter(aPackage -> isMatchingMetadata(aPackage, searchterm))
-											.collect(toList());
-		List<EntityTypeResult> entityTypeMatches = new ArrayList<>();
-
-		Stream<EntityType> entityTypeStream = dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-				EntityType.class).filter(entityType -> !isSystemEntity(entityType));
-
-		entityTypeStream.forEach(entityType -> searchSingleEntityType(searchterm, entityTypeMatches, entityType));
-
-		return Result.create(entityTypeMatches, packages);
-	}
-
-	private void searchSingleEntityType(String searchterm, List<EntityTypeResult> entityTypeMatches,
-			EntityType entityType)
-	{
-		boolean metadataMatch = isMatchingMetadata(entityType, searchterm);
-		List<Attribute> matchingAttributes = StreamSupport.stream(entityType.getAllAttributes().spliterator(), false)
-														  .filter(attribute -> isMatchingMetadata(attribute,
-																  searchterm))
-														  .collect(toList());
-		List<Entity> matchingEntities = dataService.findAll(entityType.getIdValue().toString(),
-				new QueryImpl<>().search(searchterm)).collect(toList());
-		if (metadataMatch || matchingAttributes.size() > 0 || matchingEntities.size() > 0)
-		{
-			entityTypeMatches.add(
-					EntityTypeResult.create(entityType, metadataMatch, matchingAttributes, matchingEntities));
-		}
-	}
-
-	private boolean isMatchingMetadata(Entity metadataEntity, String term)
-	{
-		boolean isLabelMatch = metadataEntity.getLabelValue().toString().contains(term);
-		boolean isDescMatch = metadataEntity.getString(DESCRIPTION) != null ? metadataEntity.getString(DESCRIPTION)
-																							.contains(term) : false;
-		return isDescMatch || isLabelMatch;
-	}
-
-	private static boolean isSystemEntity(EntityType entityType)
-	{
-		return isSystemPackage(entityType.getPackage());
-	}
-
-	private static boolean isSystemPackage(Package package_)
-	{
-		if (package_ == null)
-		{
-			return false;
-		}
-		if (package_.getId().equals(PACKAGE_SYSTEM))
-		{
-			return true;
-		}
-		Package rootPackage = package_.getRootPackage();
-		return rootPackage != null && rootPackage.getId().equals(PACKAGE_SYSTEM);
-	}
-
 	/**
 	 * Tunnel retrieveEntity through a POST request
 	 */
