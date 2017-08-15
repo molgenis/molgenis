@@ -48,6 +48,13 @@ If you are unfamiliar with PostgreSQL, follow one of their [PostgreSQL installat
 - Add a user 'molgenis' (password 'molgenis') under Login Roles
 - Add 'can create databases' privilege to user 'molgenis'
 
+For example, in psql terminal type:
+```
+CREATE DATABASE molgenis;
+CREATE USER molgenis WITH PASSWORD 'molgenis';
+ALTER USER molgenis CREATEDB;
+```
+
 **Configuring Elasticsearch**  
 Open elasticsearch.yml in the Elasticsearch config directory and set the following properties:
 ```
