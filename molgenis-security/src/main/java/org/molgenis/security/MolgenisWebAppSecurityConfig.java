@@ -9,7 +9,6 @@ import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.TokenFactory;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
@@ -25,6 +24,7 @@ import org.molgenis.security.twofactor.auth.*;
 import org.molgenis.security.twofactor.service.OtpService;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
@@ -81,7 +81,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	private UserService userService;
 
 	@Autowired
-	private AppSettings appSettings;
+	private AuthenticationSettings authenticationSettings;
 
 	@Autowired
 	private TokenFactory tokenFactory;
@@ -300,8 +300,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public Filter googleAuthenticationProcessingFilter() throws Exception
 	{
 		GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(
-				googlePublicKeysManager(), dataService, (UserDetailsService) userDetailsService(), appSettings,
-				userFactory, groupMemberFactory);
+				googlePublicKeysManager(), dataService, (UserDetailsService) userDetailsService(),
+				authenticationSettings, userFactory, groupMemberFactory);
 		googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
 		return googleAuthenticationProcessingFilter;
 	}
@@ -315,8 +315,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
 	{
-		return new TwoFactorAuthenticationFilter(appSettings, twoFactorAuthenticationService, redirectStrategy(),
-				userAccountService);
+		return new TwoFactorAuthenticationFilter(authenticationSettings, twoFactorAuthenticationService,
+				redirectStrategy(), userAccountService);
 	}
 
 	@Bean

@@ -27,7 +27,7 @@ import static java.util.Objects.requireNonNull;
 public class TwoFactorAuthenticationController
 {
 	public static final String URI = "/2fa";
-	public static final String TWO_FACTOR_CONFIGURED_URI = "/configured";
+	public static final String TWO_FACTOR_CONFIGURED_URI = "/authenticate";
 	public static final String TWO_FACTOR_ACTIVATION_URI = "/activation";
 	public static final String ATTRIBUTE_2FA_RECOVER_MODE = "isRecoverMode";
 	public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";

@@ -16,6 +16,7 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.ui.converter.RdfConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;
@@ -78,6 +79,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	private AppSettings appSettings;
+
+	@Autowired
+	private AuthenticationSettings authenticationSettings;
 
 	@Autowired
 	private PermissionService permissionService;
@@ -200,9 +204,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(),
-				templateResourceUtils(), appSettings,
-				languageService, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(), templateResourceUtils(), appSettings,
+				authenticationSettings,languageService, environment);
 	}
 
 	@Bean

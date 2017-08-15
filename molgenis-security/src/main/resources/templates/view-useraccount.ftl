@@ -204,12 +204,12 @@
         </div>
 
         <div role="tabpanel" class="tab-pane" id="security">
-        <#if two_factor_authentication_app_option == "Enabled" || two_factor_authentication_app_option == "Enforced">
+        <#if two_factor_authentication_app_option == "ENABLED" || two_factor_authentication_app_option == "ENFORCED">
             <div id="two-factor-authentication" class="row">
                 <div class="col-md-8 col-md-offset-2">
                     <legend>Two Factor Authentication</legend>
                     <div class="row">
-                        <#if two_factor_authentication_user_enabled == false && two_factor_authentication_app_option != "Enforced">
+                        <#if two_factor_authentication_user_enabled == false && two_factor_authentication_app_option != "ENFORCED">
                             <div class="col-md-6">
                                 <h4><span class="label label-danger">Disabled</span></h4>
                                 <em>You haven't configured two factor authentication yet.</em>
@@ -230,7 +230,7 @@
                                 <em>You have configured two factor authentication.</em>
                             </div>
                             <div class="col-md-6">
-                                <#if two_factor_authentication_app_option != "Enforced">
+                                <#if two_factor_authentication_app_option != "ENFORCED">
                                     <div class="row">
                                         <div class="col-md-12">
                                             <form id="enable-two-factor-authentication-form" class="form-horizontal"
@@ -264,7 +264,7 @@
                     </div>
                 </div>
             </div>
-            <#if two_factor_authentication_app_option == "Enforced" || (two_factor_authentication_app_option == "Enabled" && two_factor_authentication_user_enabled == true)>
+            <#if two_factor_authentication_app_option == "ENFORCED" || (two_factor_authentication_app_option == "ENABLED" && two_factor_authentication_user_enabled == true)>
                 <div id="recovery-codes" class="row">
                     <div class="col-md-8 col-md-offset-2">
                         <legend>Recovery Codes</legend>

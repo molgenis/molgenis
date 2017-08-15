@@ -14,10 +14,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import static org.molgenis.security.login.MolgenisLoginController.URI;
+
 @Controller
-@RequestMapping("/login")
+@RequestMapping(URI)
 public class MolgenisLoginController
 {
+	public static final String URI = "/login";
 	public static final String SESSION_EXPIRED_SESSION_ATTRIBUTE = "sessionExpired";
 	public static final String ERROR_MESSAGE_ATTRIBUTE = "errorMessage";
 

@@ -15,7 +15,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
@@ -25,7 +24,7 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.token.TokenExtractor;
-import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -67,6 +66,8 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -92,7 +93,7 @@ public class RestController
 	static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 
-	private final AppSettings appSettings;
+	private final AuthenticationSettings authenticationSettings;
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
@@ -103,12 +104,12 @@ public class RestController
 	private final LanguageService languageService;
 
 	@Autowired
-	public RestController(AppSettings appSettings, DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, PermissionService permissionService,
+	public RestController(AuthenticationSettings authenticationSettings, DataService dataService,
+			TokenService tokenService, AuthenticationManager authenticationManager, PermissionService permissionService,
 			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService,
 			LanguageService languageService)
 	{
-		this.appSettings = requireNonNull(appSettings);
+		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
 		this.authenticationManager = requireNonNull(authenticationManager);
@@ -788,11 +789,11 @@ public class RestController
 	private boolean isUser2fa()
 	{
 		boolean userIs2fa = false;
-		if (TwoFactorAuthenticationSetting.ENFORCED.toString().equals(appSettings.getTwoFactorAuthentication()))
+		if (authenticationSettings.getTwoFactorAuthentication() == ENFORCED)
 		{
 			userIs2fa = true;
 		}
-		else if (TwoFactorAuthenticationSetting.ENABLED.toString().equals(appSettings.getTwoFactorAuthentication()))
+		else if (authenticationSettings.getTwoFactorAuthentication() == ENABLED)
 		{
 			if (userAccountService.getCurrentUser().isTwoFactorAuthentication())
 			{

@@ -44,7 +44,7 @@ public class RecoveryAuthenticationProviderImpl implements RecoveryAuthenticatio
 		}
 		else
 		{
-			throw new BadCredentialsException("Invalid recovery code entered");
+			throw new BadCredentialsException("Invalid recovery code or code already used");
 		}
 
 		return authToken;

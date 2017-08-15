@@ -49,28 +49,6 @@ public class TestAppSettings implements AppSettings
 	}
 
 	@Override
-	public boolean getSignUp()
-	{
-		return false;
-	}
-
-	@Override
-	public void setSignUp(boolean signUp)
-	{
-	}
-
-	@Override
-	public boolean getSignUpModeration()
-	{
-		return false;
-	}
-
-	@Override
-	public void setSignUpModeration(boolean signUpModeration)
-	{
-	}
-
-	@Override
 	public String getLanguageCode()
 	{
 		return null;
@@ -184,40 +162,6 @@ public class TestAppSettings implements AppSettings
 	public boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis()
 	{
 		return false;
-	}
-
-	@Override
-	public void setGoogleSignIn(boolean signIn)
-	{
-	}
-
-	@Override
-	public boolean getGoogleSignIn()
-	{
-		return false;
-	}
-
-	@Override
-	public void setGoogleAppClientId(String googleAppClientId)
-	{
-	}
-
-	@Override
-	public String getGoogleAppClientId()
-	{
-		return null;
-	}
-
-	@Override
-	public void setTwoFactorAuthentication(String twoFactorAuthentication)
-	{
-
-	}
-
-	@Override
-	public String getTwoFactorAuthentication()
-	{
-		return null;
 	}
 
 	@Override
