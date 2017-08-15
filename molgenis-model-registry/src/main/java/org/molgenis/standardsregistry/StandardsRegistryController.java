@@ -15,10 +15,10 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,10 +35,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class StandardsRegistryController extends MolgenisPluginController
+public class StandardsRegistryController extends PluginController
 {
 	public static final String ID = "standardsregistry";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_NAME = "view-standardsregistry";
 	private static final String VIEW_NAME_DETAILS = "view-standardsregistry_details";
 	private static final String VIEW_NAME_DOCUMENTATION = "view-standardsregistry_docs";

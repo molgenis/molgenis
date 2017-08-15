@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.security.owned.OwnedEntityType.OWNER_USERNAME;
 
 /**
@@ -26,6 +28,7 @@ public abstract class OwnedEntity extends StaticEntity
 		super(id, entityType);
 	}
 
+	@Nullable
 	public String getOwnerUsername()
 	{
 		return getString(OWNER_USERNAME);

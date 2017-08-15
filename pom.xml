@@ -54,7 +54,7 @@
         <jsr305.version>3.0.1</jsr305.version>
         <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
-        <elasticsearch.version>5.4.1</elasticsearch.version>
+        <elasticsearch.version>5.5.1</elasticsearch.version>
         <postgres.version>9.4.1211</postgres.version>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <mockito.version>2.7.22</mockito.version>
@@ -873,6 +873,7 @@
         <module>molgenis-data-index</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-data-platform</module>
+        <module>molgenis-data-plugin</module>
         <module>molgenis-data-postgresql</module>
         <module>molgenis-data-rest-client</module>
         <module>molgenis-data-rest</module>
@@ -909,5 +910,6 @@
         <module>molgenis-swagger</module>
         <module>molgenis-test</module>
         <module>molgenis-util</module>
+        <module>molgenis-web</module>
     </modules>
 </project>

@@ -10,6 +10,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -51,13 +52,16 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 	private AppSettings appSettings;
 
 	@Autowired
+	private AuthenticationSettings authenticationSettings;
+
+	@Autowired
 	private IdGenerator idGenerator;
 
 	@BeforeMethod
 	public void setUp()
 	{
 		when(appSettings.getTitle()).thenReturn("Molgenis title");
-		when(appSettings.getSignUpModeration()).thenReturn(false);
+		when(authenticationSettings.getSignUpModeration()).thenReturn(false);
 
 		Group allUsersGroup = mock(Group.class);
 		@SuppressWarnings("unchecked")
@@ -215,7 +219,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 		public AccountService accountService()
 		{
 			return new AccountServiceImpl(dataService(), mailSender(), molgenisUserService(), appSettings(),
-					molgenisGroupMemberFactory(), idGenerator());
+					authenticationSettings(), molgenisGroupMemberFactory(), idGenerator());
 		}
 
 		@Bean
@@ -234,6 +238,12 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 		public AppSettings appSettings()
 		{
 			return mock(AppSettings.class);
+		}
+
+		@Bean
+		public AuthenticationSettings authenticationSettings()
+		{
+			return mock(AuthenticationSettings.class);
 		}
 
 		@Bean

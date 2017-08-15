@@ -10,6 +10,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
@@ -43,17 +44,20 @@ public class AccountServiceImpl implements AccountService
 	private final MailSender mailSender;
 	private final UserService userService;
 	private final AppSettings appSettings;
+	private final AuthenticationSettings authenticationSettings;
 	private final GroupMemberFactory groupMemberFactory;
 	private final IdGenerator idGenerator;
 
 	@Autowired
 	public AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService,
-			AppSettings appSettings, GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)
+			AppSettings appSettings, AuthenticationSettings authenticationSettings,
+			GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mailSender = requireNonNull(mailSender);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
+		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 		this.idGenerator = requireNonNull(idGenerator);
 	}
@@ -79,7 +83,7 @@ public class AccountServiceImpl implements AccountService
 		// collect activation info
 		String activationCode = idGenerator.generateId(SECURE_RANDOM);
 		List<String> activationEmailAddresses;
-		if (appSettings.getSignUpModeration())
+		if (authenticationSettings.getSignUpModeration())
 		{
 			activationEmailAddresses = userService.getSuEmailAddresses();
 			if (activationEmailAddresses == null || activationEmailAddresses.isEmpty())

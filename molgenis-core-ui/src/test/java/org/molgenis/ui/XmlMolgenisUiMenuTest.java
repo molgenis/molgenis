@@ -1,7 +1,10 @@
 package org.molgenis.ui;
 
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItem;
+import org.molgenis.web.UiMenuItemType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -73,7 +76,7 @@ public class XmlMolgenisUiMenuTest
 	public void getType()
 	{
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(new MenuType(), permissionService);
-		assertEquals(xmlMolgenisUiMenu.getType(), MolgenisUiMenuItemType.MENU);
+		assertEquals(xmlMolgenisUiMenu.getType(), UiMenuItemType.MENU);
 	}
 
 	@Test
@@ -105,7 +108,7 @@ public class XmlMolgenisUiMenuTest
 		when(permissionService.hasPermissionOnPlugin("plugin3", Permission.READ)).thenReturn(true);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, permissionService);
-		Iterator<MolgenisUiMenuItem> it = xmlMolgenisUiMenu.getItems().iterator();
+		Iterator<UiMenuItem> it = xmlMolgenisUiMenu.getItems().iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "plugin1");
 		assertEquals(it.next().getName(), "menu1");
@@ -174,16 +177,16 @@ public class XmlMolgenisUiMenuTest
 	public void getParentMenu()
 	{
 		assertNull(new XmlMolgenisUiMenu(new MenuType(), permissionService).getParentMenu());
-		MolgenisUiMenu parentMenu = new XmlMolgenisUiMenu(new MenuType(), permissionService);
+		UiMenu parentMenu = new XmlMolgenisUiMenu(new MenuType(), permissionService);
 		assertEquals(new XmlMolgenisUiMenu(new MenuType(), parentMenu, permissionService).getParentMenu(), parentMenu);
 	}
 
 	@Test
 	public void getBreadcrumb()
 	{
-		MolgenisUiMenu menu1 = new XmlMolgenisUiMenu(new MenuType(), permissionService);
-		MolgenisUiMenu menu2 = new XmlMolgenisUiMenu(new MenuType(), menu1, permissionService);
-		MolgenisUiMenu menu3 = new XmlMolgenisUiMenu(new MenuType(), menu2, permissionService);
+		UiMenu menu1 = new XmlMolgenisUiMenu(new MenuType(), permissionService);
+		UiMenu menu2 = new XmlMolgenisUiMenu(new MenuType(), menu1, permissionService);
+		UiMenu menu3 = new XmlMolgenisUiMenu(new MenuType(), menu2, permissionService);
 
 		assertEquals(menu1.getBreadcrumb(), Arrays.asList(menu1));
 		assertEquals(menu2.getBreadcrumb(), Arrays.asList(menu1, menu2));

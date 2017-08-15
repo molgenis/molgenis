@@ -6,6 +6,8 @@ import org.molgenis.data.support.StaticEntity;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.model.FileMeta;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.apps.model.AppMetaData.*;
 
 public class App extends StaticEntity
@@ -46,6 +48,7 @@ public class App extends StaticEntity
 		set(NAME, name);
 	}
 
+	@Nullable
 	public String getDescription()
 	{
 		return getString(DESCRIPTION);
@@ -56,6 +59,7 @@ public class App extends StaticEntity
 		set(DESCRIPTION, description);
 	}
 
+	@Nullable
 	public FileMeta getSourceFiles()
 	{
 		return getEntity(RESOURCE_ZIP, FileMeta.class);
@@ -76,6 +80,7 @@ public class App extends StaticEntity
 		set(IS_ACTIVE, isActive);
 	}
 
+	@Nullable
 	public String getIconHref()
 	{
 		return getString(ICON_HREF);
@@ -96,6 +101,7 @@ public class App extends StaticEntity
 		set(USE_FREEMARKER_TEMPLATE, useFreemarkerTemplate);
 	}
 
+	@Nullable
 	public FreemarkerTemplate getHtmlTemplate()
 	{
 		return getEntity(LANDING_PAGE_HTML_TEMPLATE, FreemarkerTemplate.class);

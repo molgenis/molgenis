@@ -16,8 +16,7 @@ public class AggregateAnonymizerRepositoryDecorator<E extends Entity> extends Ab
 	private final AppSettings appSettings;
 
 	public AggregateAnonymizerRepositoryDecorator(Repository<E> delegateRepository,
-			AggregateAnonymizer aggregateAnonymizer,
-			AppSettings appSettings)
+			AggregateAnonymizer aggregateAnonymizer, AppSettings appSettings)
 	{
 		super(delegateRepository);
 		this.appSettings = requireNonNull(appSettings);

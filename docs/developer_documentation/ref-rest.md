@@ -394,6 +394,8 @@ DELETE http://molgenis.mydomain.example/api/v1/dataset/meta
 ```
 
 # Authentication
+The login route generates a MOLGENIS-token which you can use to access the RESTAPI. When 2-factor-authentication is enabled this route
+will be disabled if the current user is 2 factor authenticated. For more a detailed description go to [2 factor authentication](../user_documentation/guide-authentication.md).
 
 ## Login
 *Request*

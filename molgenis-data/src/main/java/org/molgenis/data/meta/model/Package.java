@@ -3,6 +3,8 @@ package org.molgenis.data.meta.model;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
@@ -82,6 +84,7 @@ public class Package extends StaticEntity
 	 *
 	 * @return parent package or <tt>null</tt>
 	 */
+	@Nullable
 	public Package getParent()
 	{
 		return getEntity(PackageMetadata.PARENT, Package.class);
@@ -124,6 +127,7 @@ public class Package extends StaticEntity
 	 *
 	 * @return package description or <tt>null</tt>
 	 */
+	@Nullable
 	public String getDescription()
 	{
 		return getString(PackageMetadata.DESCRIPTION);

@@ -1,6 +1,8 @@
 package org.molgenis.ui.menu;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import org.molgenis.web.UiMenu;
 
 import java.util.List;
 import java.util.Stack;
@@ -97,5 +99,10 @@ public class MenuUtils
 			}
 		}
 		return newMenu;
+	}
+
+	public static String getMenuJson(UiMenu menu)
+	{
+		return new Gson().toJson(org.molgenis.ui.menu.json.MenuItem.create(menu));
 	}
 }

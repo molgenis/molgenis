@@ -23,6 +23,7 @@
     - [Biobank Directory](user_documentation/biobank-directory.md)
     - [Biobanking](user_documentation/biobanking.md)
     - [Metadata Manager](user_documentation/guide-metadata-manager.md)
+    - [Authentication methods](user_documentation/guide-authentication.md)
 - Developer documentation
     - [REST](developer_documentation/guide-rest.md)
         - [REST api V1](developer_documentation/ref-rest.md)

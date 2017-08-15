@@ -10,8 +10,8 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 * [Apache Tomcat v7.0.79](http://tomcat.apache.org/)
 * [PostgreSQL v9.6.3](https://www.postgresql.org/download/)
 * [Elasticsearch v5.5.1](https://www.elastic.co/downloads/elasticsearch)
-* [OpenCPU 2.0](https://www.opencpu.org/download.html) (R script execution)
-* [Python 3.6.2](https://www.python.org/downloads/) (Python script execution)
+* Optional: [OpenCPU 2.0](https://www.opencpu.org/download.html) (enables R scripting feature)
+* Optional: [Python 3.6.2](https://www.python.org/downloads/) (enables Python scripting feature)
 * [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
 

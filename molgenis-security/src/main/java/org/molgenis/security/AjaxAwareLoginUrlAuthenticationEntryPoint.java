@@ -39,7 +39,7 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 			if (SecurityUtils.isSessionExpired(request))
 			{
 				// Signal that 'session expired' message must be shown to the user
-				request.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTR, true);
+				request.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTRIBUTE, true);
 			}
 
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");

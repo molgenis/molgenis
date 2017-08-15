@@ -15,9 +15,11 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -637,6 +639,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public static class RestControllerConfig extends WebMvcConfigurerAdapter
 	{
 		@Bean
+		public AuthenticationSettings authenticationSettings()
+		{
+			return mock(AuthenticationSettings.class);
+		}
+
+		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
@@ -664,6 +672,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public PermissionService permissionService()
 		{
 			return mock(PermissionService.class);
+		}
+
+		@Bean
+		public UserAccountService userAccountService()
+		{
+			return mock(UserAccountService.class);
 		}
 
 		@Bean
@@ -705,8 +719,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), tokenService(), authenticationManager(), permissionService(),
-					new MolgenisRSQL(),
+			return new RestController(authenticationSettings(), dataService(), tokenService(), authenticationManager(),
+					permissionService(), userAccountService(), new MolgenisRSQL(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService());
 		}

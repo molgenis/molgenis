@@ -1,10 +1,10 @@
 package org.molgenis.ui.security;
 
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.ui.MolgenisUi;
-import org.molgenis.ui.MolgenisUiMenu;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.web.Ui;
+import org.molgenis.web.UiMenu;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
@@ -49,7 +49,7 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		if (menuMatcher.matches())
 		{
 			String menuId = menuMatcher.group(1);
-			MolgenisUiMenu menu = getMolgenisUi().getMenu(menuId);
+			UiMenu menu = getMolgenisUi().getMenu(menuId);
 			return menu != null ? ACCESS_GRANTED : ACCESS_DENIED;
 		}
 
@@ -67,8 +67,8 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 	/**
 	 * Can't be autowired due to circular dependency resolving
 	 */
-	private MolgenisUi getMolgenisUi()
+	private Ui getMolgenisUi()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean(MolgenisUi.class);
+		return ApplicationContextProvider.getApplicationContext().getBean(Ui.class);
 	}
 }
