@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.v2;
+package org.molgenis.searchall.model;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;

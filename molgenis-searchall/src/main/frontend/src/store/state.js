@@ -1,8 +1,9 @@
-export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
+export const searchall = window.searchall || {}
 
 const state = {
-  packages: [],
-  entities: []
+  query: '',
+  result: {},
+  error: ''
 }
 
 export default state

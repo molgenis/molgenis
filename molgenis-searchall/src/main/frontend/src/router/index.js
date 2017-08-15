@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import SearchAll from 'components/SearchAll'
-import { INITIAL_STATE } from '../store/state'
+import { searchall } from '../store/state'
 
 Vue.use(Router)
 export default new Router({
   mode: 'history',
-  base: INITIAL_STATE.baseUrl,
+  base: searchall.baseUrl,
   routes: [
     {
       path: '/',

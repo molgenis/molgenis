@@ -1,12 +1,13 @@
 import { get } from '@molgenis/molgenis-api-client'
+import { SET_RESULTS, SET_ERRORS } from '../store/mutations'
 
 export const SEARCH_ALL = 'SEARCH_ALL'
 
 function queryPackages (query) {
   return new Promise((resolve, reject) => {
-    const uri = '/api/v2/seachall?term=' + query
+    const uri = '/api/searchall/search?term=' + query
     get(uri).then((response) => {
-      resolve(response.items)
+      resolve(response)
     }).catch((error) => {
       reject(error)
     })
@@ -17,13 +18,13 @@ export default {
   [SEARCH_ALL] ({commit}, query) {
     return new Promise((resolve, reject) => {
       if (!query) {
-        // FIXME
+        commit(SET_ERRORS, 'No searchterm')
       } else {
-        queryPackages().then(results => {
-          // commit(SET_RESULTS, results)
+        queryPackages(query).then(results => {
+          commit(SET_RESULTS, results)
           resolve()
         }, errorMessage => {
-          // commit(SET_ERROR, errorMessage)
+          commit(SET_ERRORS, errorMessage)
           reject()
         })
       }
