@@ -23,7 +23,7 @@ Now that your Apache Tomcat is running and MOLGENIS is deployed, you will notice
 The properties file supplies information to the application regarding the database URL, and the initial administrator password. To make it clear to Tomcat where to find your properties file, you have to edit the setenv.sh file in the apache-tomcat folder.
 
 ```
-echo 'CATALINA_OPTS="-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Dmolgenis.home=${molgenis_home_folder}"' > ${apache-tomcat_folder}/bin/setenv.sh
+echo 'CATALINA_OPTS="-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Dmolgenis.home=<put your molgenis home here>"' > <path to tomcat>/bin/setenv.sh
 ```
 
 The **-Dmolgenis.home** property tells tomcat where to find your properties file. Replace the ${molgenis_home_folder} with the location of your molgenis home. Note that you should **NOT** use relative paths in your apache-tomcat configuration. Always use absolute paths to point to your molgenis-server.properties.
