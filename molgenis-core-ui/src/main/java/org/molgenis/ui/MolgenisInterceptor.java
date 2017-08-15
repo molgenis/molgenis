@@ -12,6 +12,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.web.PluginAttributes.*;
@@ -30,8 +32,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	private final LanguageService languageService;
 
 	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry,
-			ThemeFingerprintRegistry themeFingerprintRegistry, TemplateResourceUtils templateResourceUtils, AppSettings appSettings,
-			AuthenticationSettings authenticationSettings, LanguageService languageService,
+			ThemeFingerprintRegistry themeFingerprintRegistry, TemplateResourceUtils templateResourceUtils,
+			AppSettings appSettings, AuthenticationSettings authenticationSettings, LanguageService languageService,
 			@Value("${environment}") String environment)
 	{
 		this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
@@ -52,10 +54,59 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 			modelAndView.addObject(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
 			modelAndView.addObject(KEY_THEME_FINGERPRINT_REGISTRY, themeFingerprintRegistry);
 			modelAndView.addObject(KEY_RESOURCE_UTILS, templateResourceUtils);
-			modelAndView.addObject(KEY_ENVIRONMENT, environment);
 			modelAndView.addObject(KEY_APP_SETTINGS, appSettings);
+			modelAndView.addObject(KEY_ENVIRONMENT, getEnvironmentAttributes());
+			modelAndView.addObject(KEY_AUTHENTICATION_SETTINGS, authenticationSettings);
 			modelAndView.addObject(KEY_AUTHENTICATION_SETTINGS, authenticationSettings);
 			modelAndView.addObject(KEY_I18N, languageService.getBundle());
 		}
 	}
+
+	/**
+	 * <p>When you use the "redirect:/" pattern from Spring something strange happens when you redirect to "/".</p>
+	 * <p>
+	 * <ul>You can choose 3 ways of solving this issue.
+	 * <li>You can make sure Spring does not add the attribute to the url, by making the environment object an {@link Object} instead of a {@link String}
+	 * <pre>
+	 * {@code
+	 * Map<String, String> environmentAttributes = new HashMap<>();
+	 * environmentAttributes.put("environmentType", environment);
+	 * return environmentAttributes;
+	 * }
+	 * </pre>
+	 * </li>
+	 * <li>You can return the {@link org.springframework.web.servlet.view.RedirectView} in your Controller and check on that view in the interceptor.
+	 * <pre>
+	 * {@code
+	 * if (modelAndView.getView() instanceof RedirectView)
+	 * {
+	 *      return;
+	 * }
+	 * }
+	 * </pre>
+	 * </li>
+	 * <li>You can use {@link org.springframework.web.servlet.FlashMap} to make sure the attributes of a redirect request are interpreted and removed from
+	 * the uri when the request is finished.
+	 * <pre>
+	 * {@code
+	 * FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
+	 * flashMap.put(KEY_ENVIRONMENT, environment);
+	 * FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
+	 * flashMapManager.saveOutputFlashMap(flashMap, request, response);
+	 * }
+	 * </pre>
+	 * But this does not work in the intercepter for some reason. This would be the preferable way to deal with {@link org.springframework.web.servlet.mvc.support.RedirectAttributes}.
+	 * </li>
+	 * </ul>
+	 * <p>We decided to go for the environment attribute map. We could not oversee the consequences when we implement the RedirectView-strategy.</p>
+	 *
+	 * @return environmentAttributeMap
+	 */
+	private Map<String, String> getEnvironmentAttributes()
+	{
+		Map<String, String> environmentAttributes = new HashMap<>();
+		environmentAttributes.put("environmentType", environment);
+		return environmentAttributes;
+	}
+
 }
