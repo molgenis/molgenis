@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.security.twofactor.model.RecoveryCode;
@@ -170,7 +171,7 @@ public class UserAccountController extends PluginController
 	{
 		twoFactorAuthenticationService.enableForUser();
 
-		return "redirect:/login";
+		return "redirect:" + MolgenisLoginController.URI;
 	}
 
 	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/disable", method = POST)
@@ -187,7 +188,8 @@ public class UserAccountController extends PluginController
 	{
 		twoFactorAuthenticationService.resetSecretForUser();
 
-		return "redirect:/2fa/activation";
+		return "redirect:" + TwoFactorAuthenticationController.URI
+				+ TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI;
 	}
 
 	/**
