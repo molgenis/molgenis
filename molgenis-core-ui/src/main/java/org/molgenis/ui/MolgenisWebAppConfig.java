@@ -16,7 +16,7 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.ui.converter.RdfConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;

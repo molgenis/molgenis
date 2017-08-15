@@ -10,7 +10,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.account.AccountControllerTest.Config;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
 import org.molgenis.util.GsonHttpMessageConverter;

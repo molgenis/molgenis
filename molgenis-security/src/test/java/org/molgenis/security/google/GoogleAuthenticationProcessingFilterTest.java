@@ -5,7 +5,7 @@ import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.token.UnknownTokenException;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserDetailsService;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;

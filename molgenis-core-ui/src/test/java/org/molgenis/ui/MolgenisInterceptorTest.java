@@ -2,7 +2,7 @@ package org.molgenis.ui;
 
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.util.TemplateResourceUtils;

@@ -3,7 +3,7 @@ package org.molgenis.security.twofactor.auth;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserAccountServiceImpl;
 import org.molgenis.security.user.UserService;

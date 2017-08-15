@@ -10,7 +10,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
