@@ -1,4 +1,4 @@
-package org.molgenis.security.twofactor.settings;
+package org.molgenis.security.settings;
 
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 

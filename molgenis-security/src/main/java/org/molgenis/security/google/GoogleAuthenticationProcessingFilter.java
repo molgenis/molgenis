@@ -8,7 +8,7 @@ import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.login.MolgenisLoginController;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

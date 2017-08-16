@@ -1,8 +1,9 @@
 package org.molgenis.ui;
 
+import com.google.gson.Gson;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.twofactor.settings.AuthenticationSettings;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.util.TemplateResourceUtils;
@@ -13,6 +14,7 @@ import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
@@ -47,11 +49,13 @@ public class MolgenisInterceptorTest
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void postHandle() throws Exception
 	{
 		String environment = "development";
 		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry,
-				themeFingerprintRegistry, templateResourceUtils, appSettings, authenticationSettings, languageService, environment);
+				themeFingerprintRegistry, templateResourceUtils, appSettings, authenticationSettings, languageService,
+				environment);
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		Object handler = mock(Object.class);
@@ -59,10 +63,14 @@ public class MolgenisInterceptorTest
 		molgenisInterceptor.postHandle(request, response, handler, modelAndView);
 
 		Map<String, Object> model = modelAndView.getModel();
-		assertEquals(model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY),
-				resourceFingerprintRegistry);
+		assertEquals(model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY), resourceFingerprintRegistry);
+
+		Gson gson = new Gson();
+		Map<String, String> environmentAttributes = gson.fromJson(
+				String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
+
 		assertEquals(model.get(PluginAttributes.KEY_APP_SETTINGS), appSettings);
-		assertEquals(model.get(PluginAttributes.KEY_ENVIRONMENT), environment);
+		assertEquals(environmentAttributes.get(MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE), environment);
 		assertTrue(model.containsKey(PluginAttributes.KEY_I18N));
 	}
 }
