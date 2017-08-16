@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.molgenis.data.csv.CsvRepositoryCollection.MAC_ZIP;
 
@@ -77,14 +78,14 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 			if (csvReader == null)
 			{
-				throw new UnknownEntityException("Unknown entity [" + repositoryName + "] ");
+				throw new UnknownEntityException(format("Unknown entity [ %s ]", repositoryName));
 			}
 
 			colNamesMap = toColNamesMap(csvReader.readNext());
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisDataException("Exception reading [" + file.getAbsolutePath() + "]", e);
+			throw new MolgenisDataException(format("Exception reading [ %s ]", file.getAbsolutePath()), e);
 		}
 	}
 
@@ -105,14 +106,15 @@ public class CsvIterator implements CloseableIterator<Entity>
 				long skippedBytes = bomInputStream.skip(bomInputStream.getBOM().length());
 				if (skippedBytes < 0)
 				{
-					throw new MolgenisDataException("Could not skip BOM from this file [" + fileName + "]");
+					throw new MolgenisDataException(format("Could not skip BOM from this file [ %s ]", fileName));
 				}
 			}
 			return bomInputStream;
 		}
 		catch (IOException err)
 		{
-			throw new MolgenisDataException("Could not determine if BOM is attached to file [" + fileName + "]", err);
+			throw new MolgenisDataException(format("Could not determine if BOM is attached to file [ %s ]", fileName),
+					err);
 		}
 	}
 
@@ -177,7 +179,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 			}
 			catch (IOException e)
 			{
-				throw new MolgenisDataException("Exception reading line of csv file [" + repositoryName + "]", e);
+				throw new MolgenisDataException(format("Exception reading line of csv file [ %s ]", repositoryName), e);
 			}
 		}
 
@@ -203,7 +205,6 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 	private CSVReader createCSVReader(String fileName, InputStream in)
 	{
-
 		Reader reader = new InputStreamReader(in, UTF_8);
 
 		if (null == separator)
@@ -221,7 +222,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 				return new CSVReader(reader, '\t');
 			}
 
-			throw new MolgenisDataException("Unknown file type: [" + fileName + "] for csv repository");
+			throw new MolgenisDataException(format("Unknown file type: [ %s ] for csv repository", fileName));
 		}
 
 		return new CSVReader(reader, this.separator);
@@ -229,7 +230,10 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 	private Map<String, Integer> toColNamesMap(String[] headers)
 	{
-		if ((headers == null) || (headers.length == 0)) return Collections.emptyMap();
+		if ((headers == null) || (headers.length == 0))
+		{
+			return Collections.emptyMap();
+		}
 
 		int capacity = (int) (headers.length / 0.75) + 1;
 		Map<String, Integer> columnIdx = new LinkedHashMap<>(capacity);
