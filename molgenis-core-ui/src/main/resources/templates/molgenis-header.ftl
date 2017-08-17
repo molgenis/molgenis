@@ -15,7 +15,7 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <#if googleSignIn>
-        <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
+        <meta name="google-signin-client_id" content="${authentication_settings.googleAppClientId?html}">
     </#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
 
