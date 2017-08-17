@@ -9,7 +9,7 @@
 		<plugin id="navigator" name="Navigator" url="navigator"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<menu label="Data Integration" name="dataintegration">
-			<plugin id="metadata-manager" name="Metadata Manager - BETA" url="metadata-manager"/>
+			<plugin id="metadata-manager" name="Metadata Manager" url="metadata-manager"/>
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
 			<plugin id="sortaservice" name="SORTA" url="sortaservice"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
