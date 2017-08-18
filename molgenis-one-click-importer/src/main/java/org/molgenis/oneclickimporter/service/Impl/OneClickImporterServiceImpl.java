@@ -53,11 +53,11 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	}
 
 	@Override
-	public DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String> lines)
+	public DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String[]> lines)
 	{
 		List<Column> columns = newArrayList();
 
-		String[] headers = csvService.splitLineOnSeparator(lines.get(0));
+		String[] headers = lines.get(0);
 		lines.remove(0); // Remove the header
 
 		int columnIndex = 0;
@@ -151,17 +151,17 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return castedValue;
 	}
 
-	private Column createColumnFromLine(String header, int columnIndex, List<String> lines)
+	private Column createColumnFromLine(String header, int columnIndex, List<String[]> lines)
 	{
 		return Column.create(header, columnIndex, getColumnDataFromLines(lines, columnIndex));
 	}
 
-	private List<Object> getColumnDataFromLines(List<String> lines, int columnIndex)
+	private List<Object> getColumnDataFromLines(List<String[]> lines, int columnIndex)
 	{
 		List<Object> dataValues = newLinkedList();
 		lines.forEach(line ->
 		{
-			String[] tokens = csvService.splitLineOnSeparator(line);
+			String[] tokens = line;
 			dataValues.add(getPartValue(tokens[columnIndex]));
 		});
 		return dataValues;
