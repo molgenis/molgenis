@@ -95,7 +95,7 @@
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
     <#if version?? || version == 1>
-    <body style="padding: 55px;">
+    <body>
     <#else>
     <body>
     </#if>
