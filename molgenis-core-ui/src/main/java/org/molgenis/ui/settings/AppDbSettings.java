@@ -120,7 +120,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 										   .setNillable(true)
 										   .setLabel("Custom javascript headers")
 										   .setDescription(
-												   "Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.");
+												   "Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers. Values not ending with the extension 'js' will be ignored");
 
 			// tracking settings
 			Attribute trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
