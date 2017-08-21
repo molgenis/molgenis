@@ -63,6 +63,17 @@
                   </div>
                 </div>
                 <div class="row mt-1">
+                  <div class="col-lg-4"><b>Data</b></div>
+                  <div class="col-lg-8"><a v-if="enityTypeResult.nrOfMatchingEntities > 0"
+                                           :href="dataExplorerBaseUrl + '?entity=' + enityTypeResult.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+query"
+                                           class="card-link"><i
+                    class="fa fa-align-justify" aria-hidden="true"></i>
+                    {{enityTypeResult.nrOfMatchingEntities}} rows</a>
+                    <span v-else><i
+                      class="fa fa-align-justify" aria-hidden="true"></i>
+                      0 rows</span></div>
+                </div>
+                <div class="row mt-1">
                   <div class="col-lg-4"><b>Attributes</b></div>
                   <div class="col-lg-8"><span
                     v-if="enityTypeResult.getAttributes.length === 0"><i>0 attributes found</i></span>
@@ -73,17 +84,6 @@
                       </li>
                     </ul>
                   </div>
-                </div>
-                <div class="row mt-1">
-                  <div class="col-lg-4"><b>Data</b></div>
-                  <div class="col-lg-8"><a v-if="enityTypeResult.nrOfMatchingEntities > 0"
-                                           :href="dataExplorerBaseUrl + '?entity=' + enityTypeResult.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+query"
-                                           class="card-link"><i
-                    class="fa fa-align-justify" aria-hidden="true"></i>
-                    {{enityTypeResult.nrOfMatchingEntities}} rows</a>
-                    <span v-else><i
-                      class="fa fa-align-justify" aria-hidden="true"></i>
-                      0 rows</span></div>
                 </div>
               </div>
             </div>
