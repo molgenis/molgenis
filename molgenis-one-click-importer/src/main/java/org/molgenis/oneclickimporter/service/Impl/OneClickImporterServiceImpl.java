@@ -1,9 +1,11 @@
 package org.molgenis.oneclickimporter.service.Impl;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.util.LocaleUtil;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
@@ -187,10 +189,26 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return part;
 	}
 
+	/**
+	 * <p>What do we do with columntypes other than String.</p>
+	 *
+	 * @param sheet worksheet
+	 * @param cell  cell on worksheet
+	 * @return Column
+	 */
 	private Column createColumnFromCell(Sheet sheet, Cell cell)
 	{
-		return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
-				getColumnDataFromSheet(sheet, cell.getColumnIndex()));
+		if (cell.getCellTypeEnum() == CellType.STRING)
+		{
+			return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
+					getColumnDataFromSheet(sheet, cell.getColumnIndex()));
+		}
+		else
+		{
+			throw new MolgenisDataException(
+					String.format("Columntype [%s] is not supported, only STRING-type columns are supported.",
+							cell.getCellTypeEnum()));
+		}
 	}
 
 	private List<Object> getColumnDataFromSheet(Sheet sheet, int columnIndex)
