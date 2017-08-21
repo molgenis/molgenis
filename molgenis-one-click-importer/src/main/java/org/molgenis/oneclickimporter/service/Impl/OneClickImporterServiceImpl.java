@@ -206,8 +206,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		else
 		{
 			throw new MolgenisDataException(
-					String.format("Columntype [%s] is not supported, only STRING-type columns are supported.",
-							cell.getCellTypeEnum()));
+					String.format("Celltype [%s] is not supported for columnheaders", cell.getCellTypeEnum()));
 		}
 	}
 
