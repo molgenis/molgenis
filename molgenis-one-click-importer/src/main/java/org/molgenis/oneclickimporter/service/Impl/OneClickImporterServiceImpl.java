@@ -190,7 +190,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	}
 
 	/**
-	 * <p>What do we do with columntypes other than String.</p>
+	 * <p>Specific columntypes are permitted in the import. The supported columntypes are specified in the method.</p>
 	 *
 	 * @param sheet worksheet
 	 * @param cell  cell on worksheet
