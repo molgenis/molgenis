@@ -14,7 +14,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class StyleMetadata extends SystemEntityType
+public class StyleSheetMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "StyleSheet";
 	public static final String STYLE_SHEET = SettingsPackage.PACKAGE_SETTINGS + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -28,7 +28,7 @@ public class StyleMetadata extends SystemEntityType
 	private final FileMetaMetaData fileMetaMetaData;
 
 	@Autowired
-	public StyleMetadata(SettingsPackage settingsPackage, FileMetaMetaData fileMetaMetaData)
+	public StyleSheetMetadata(SettingsPackage settingsPackage, FileMetaMetaData fileMetaMetaData)
 	{
 		super(SIMPLE_NAME, SettingsPackage.PACKAGE_SETTINGS);
 		this.settingsPackage = requireNonNull(settingsPackage);

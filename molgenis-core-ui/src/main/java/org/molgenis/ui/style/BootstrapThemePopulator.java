@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
+import static org.molgenis.ui.style.StyleSheetMetadata.STYLE_SHEET;
 
 @Component
 public class BootstrapThemePopulator
