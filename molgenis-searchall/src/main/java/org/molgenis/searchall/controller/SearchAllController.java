@@ -78,7 +78,7 @@ public class SearchAllController
 																		attr.getDescription(),
 																		attr.getDataType().toString()))
 																.collect(toList());
-		long nrOfMatchingEntities = dataService.count(entityType.getIdValue().toString(),
+		long nrOfMatchingEntities = dataService.count(entityType.getId().toString(),
 				new QueryImpl<>().search(searchterm));
 		if (isLabelMatch || isDescMatch || matchingAttributes.size() > 0 || nrOfMatchingEntities > 0)
 		{
