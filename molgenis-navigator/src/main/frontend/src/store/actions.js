@@ -89,6 +89,19 @@ function queryPackages (query: string) {
   })
 }
 
+/**
+ *
+ * Validating specific input for searchbox
+ *
+ * @param query
+ */
+function validateQuery (query: string) {
+  // Quote validation
+  if (query.indexOf('"') > -1) {
+    throw new Error('Double quotes are allowed in queries, please use single quotes.')
+  }
+}
+
 export default {
   [QUERY_PACKAGES] ({commit}: { commit: Function }, query: ?string) {
     return new Promise((resolve, reject) => {
@@ -101,13 +114,19 @@ export default {
           reject()
         })
       } else {
-        queryPackages(query).then(packages => {
-          commit(SET_PACKAGES, packages)
-          resolve()
-        }, errorMessage => {
-          commit(SET_ERROR, errorMessage)
+        try {
+          validateQuery(query)
+          queryPackages(query).then(packages => {
+            commit(SET_PACKAGES, packages)
+            resolve()
+          }, errorMessage => {
+            commit(SET_ERROR, errorMessage)
+            reject()
+          })
+        } catch (err) {
+          commit(SET_ERROR, err.message)
           reject()
-        })
+        }
       }
     })
   },
@@ -116,14 +135,20 @@ export default {
       if (!query) {
         resolve()
       } else {
-        api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + query + '",description=q="' + query + '");isAbstract==false').then((response) => {
-          const entities = response.items.map(toEntity)
-          commit(SET_ENTITIES, entities)
-          resolve()
-        }).catch((error) => {
-          commit(SET_ERROR, error)
+        try {
+          validateQuery(query)
+          api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + query + '",description=q="' + query + '");isAbstract==false').then((response) => {
+            const entities = response.items.map(toEntity)
+            commit(SET_ENTITIES, entities)
+            resolve()
+          }).catch((error) => {
+            commit(SET_ERROR, error)
+            reject()
+          })
+        } catch (err) {
+          commit(SET_ERROR, err.message)
           reject()
-        })
+        }
       }
     })
   },
@@ -150,7 +175,9 @@ export default {
       })
     })
   },
-  [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, selectedPackageId: ?string) {
+  [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: {
+    commit: Function, dispatch: Function
+  }, selectedPackageId: ? string) {
     return new Promise((resolve, reject) => {
       getAllPackages().then(allPackages => {
         if (!selectedPackageId) {
