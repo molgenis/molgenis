@@ -1,8 +1,8 @@
 // @flow
-import type {Package} from './state'
+import type { Package } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
-import {SET_PACKAGES, SET_ENTITIES, SET_PATH, RESET_PATH, SET_ERROR} from './mutations'
+import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from './mutations'
 
 export const QUERY_PACKAGES = 'QUERY_PACKAGES'
 export const QUERY_ENTITIES = 'QUERY_ENTITIES'
@@ -49,7 +49,7 @@ function buildPath (packages, currentPackage: Package, path: Array<Package>) {
  * @param item result row form query to backend
  * @returns {{id: *, type: string, label: *, description: *}}
  */
-function toEntity (item:any) {
+function toEntity (item: any) {
   return {
     'id': item.id,
     'type': 'entity',
@@ -80,7 +80,7 @@ function getAllPackages () {
  */
 function queryPackages (query: string) {
   return new Promise((resolve, reject) => {
-    const uri = '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=' + query + ',description=q=' + query + ',label=q=' + query
+    const uri = '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + query + '",description=q="' + query + '",label=q="' + query + '"'
     api.get(uri).then((response) => {
       resolve(response.items)
     }).catch((error) => {
@@ -116,7 +116,7 @@ export default {
       if (!query) {
         resolve()
       } else {
-        api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q=' + query + ',description=q=' + query + ');isAbstract==false').then((response) => {
+        api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + query + '",description=q="' + query + '");isAbstract==false').then((response) => {
           const entities = response.items.map(toEntity)
           commit(SET_ENTITIES, entities)
           resolve()
