@@ -93,12 +93,17 @@ function queryPackages (query: string) {
  *
  * Validating specific input for searchbox
  *
- * @param query
+ * @param query query to send to api/v2
  */
 function validateQuery (query: string) {
-  // Quote validation
   if (query.indexOf('"') > -1) {
-    throw new Error('Double quotes are allowed in queries, please use single quotes.')
+    throw new Error('Double quotes not are allowed in queries, please use single quotes.')
+  } else if (query.indexOf('&') > -1) {
+    throw new Error('Ampersands are not allowed in queries.')
+  } else if (query.indexOf('#') > -1) {
+    throw new Error('Hashtags are not allowed in queries.')
+  } else if (query.indexOf('^') > -1) {
+    throw new Error('Circunflexes are not allowed in queries.')
   }
 }
 
