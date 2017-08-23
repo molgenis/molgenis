@@ -83,6 +83,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Query<EntityType> q)
 	{
@@ -108,6 +110,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Iterator<EntityType> iterator()
 	{
@@ -122,6 +126,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<EntityType>> consumer, int batchSize)
 	{
@@ -136,6 +142,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOne(Query<EntityType> q)
 	{
@@ -150,6 +158,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOneById(Object id)
 	{
@@ -163,6 +173,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOneById(Object id, Fetch fetch)
 	{
@@ -176,6 +188,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids)
 	{
@@ -189,6 +203,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids, Fetch fetch)
 	{

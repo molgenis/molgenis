@@ -72,6 +72,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<Attribute> findAll(Query<Attribute> q)
 	{
@@ -98,6 +100,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Iterator<Attribute> iterator()
 	{
@@ -112,6 +116,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Attribute>> consumer, int batchSize)
 	{
@@ -126,6 +132,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Attribute findOne(Query<Attribute> q)
 	{
@@ -140,6 +148,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Attribute findOneById(Object id)
 	{
@@ -153,6 +163,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Attribute findOneById(Object id, Fetch fetch)
 	{
@@ -166,6 +178,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids)
 	{
@@ -179,6 +193,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids, Fetch fetch)
 	{
