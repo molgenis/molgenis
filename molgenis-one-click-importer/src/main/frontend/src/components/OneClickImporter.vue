@@ -57,7 +57,7 @@
               </span>
 
               <ul class="list-unstyled">
-                <li v-for="table in job.entityTypes">
+                <li v-for="table in JSON.parse(job.entityTypes)">
 
                   <span v-if="dataExplorerBaseUrl">
                     <a target="_blank" :href="dataExplorerBaseUrl + '?entity=' + table.id">
