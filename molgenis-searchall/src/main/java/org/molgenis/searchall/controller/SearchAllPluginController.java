@@ -40,6 +40,7 @@ public class SearchAllPluginController extends PluginController
 	@RequestMapping(value = "/**", method = GET)
 	public String init(Model model)
 	{
+		model.addAttribute("baseUrl", menuReaderService.getMenu().findMenuItemPath(SEARCHALL));
 		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
 		model.addAttribute("navigatorBaseUrl", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR));
@@ -47,4 +48,5 @@ public class SearchAllPluginController extends PluginController
 
 		return "view-search-all";
 	}
+
 }

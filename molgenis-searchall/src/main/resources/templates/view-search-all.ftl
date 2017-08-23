@@ -11,6 +11,7 @@
 
 <script type="text/javascript">
     window.searchall = {
+        baseUrl: '${baseUrl}',
         lng: '${lng}',
         fallbackLng: '${fallbackLng}'<#if navigatorBaseUrl??>,
         navigatorBaseUrl: '${navigatorBaseUrl}'</#if><#if dataExplorerBaseUrl??>,

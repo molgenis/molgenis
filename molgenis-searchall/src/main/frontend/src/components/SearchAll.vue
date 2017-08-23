@@ -3,7 +3,7 @@
 
     <div v-if=false class="alert alert-danger" role="alert">
       <button type="button" class="close"><span aria-hidden="true">&times;</span></button>
-      ---
+      {{error}}
     </div>
 
     <!-- Search element -->
@@ -41,34 +41,34 @@
       </div>
     </div>
 
-    <div class="row mt-1" v-if="this.$store.state.result.entityTypeResults">
-      <div v-if="this.$store.state.result.entityTypeResults.length > 0" class="col-lg-12"><h3>Matching entities</h3>
+    <div class="row mt-1" v-if="this.$store.state.result.entityTypes">
+      <div v-if="this.$store.state.result.entityTypes.length > 0" class="col-lg-12"><h3>Matching entities</h3>
         <div class="row mt-1">
-          <div v-for="enityTypeResult in this.$store.state.result.entityTypeResults"
+          <div v-for="enityType in this.$store.state.result.entityTypes"
                class="col-lg-12 padding-card-bottom">
             <div class='card'>
               <div class="card-header">
-                <h4 v-html="highlight(enityTypeResult.getLabel, query)"></h4>
+                <h4 v-html="highlight(enityType.getLabel, query)"></h4>
                 <a href="#" class="card-link"><i class="fa fa-folder-open-o" aria-hidden="true"></i>
                   Show in Navigator</a>
-                <a :href="dataExplorerBaseUrl + '?entity=' + enityTypeResult.getId" class="card-link"><i
+                <a :href="dataExplorerBaseUrl + '?entity=' + enityType.getId" class="card-link"><i
                   class="fa fa-align-justify" aria-hidden="true"></i>
                   Show in Data Explorer</a>
               </div>
               <div class="container">
-                <div class="row" v-if="enityTypeResult.getDescription">
+                <div class="row" v-if="enityType.getDescription">
                   <div class="col-lg-4"><b>Description</b>
                   </div>
-                  <div class="col-lg-8"><i v-html="highlight(enityTypeResult.getDescription, query)"></i>
+                  <div class="col-lg-8"><i v-html="highlight(enityType.getDescription, query)"></i>
                   </div>
                 </div>
                 <div class="row mt-1">
                   <div class="col-lg-4"><b>Data</b></div>
-                  <div class="col-lg-8"><a v-if="enityTypeResult.nrOfMatchingEntities > 0"
-                                           :href="dataExplorerBaseUrl + '?entity=' + enityTypeResult.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+query"
+                  <div class="col-lg-8"><a v-if="enityType.nrOfMatchingEntities > 0"
+                                           :href="dataExplorerBaseUrl + '?entity=' + enityType.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+query"
                                            class="card-link"><i
                     class="fa fa-align-justify" aria-hidden="true"></i>
-                    {{enityTypeResult.nrOfMatchingEntities}} rows</a>
+                    {{enityType.nrOfMatchingEntities}} rows</a>
                     <span v-else><i
                       class="fa fa-align-justify" aria-hidden="true"></i>
                       0 rows</span></div>
@@ -76,9 +76,9 @@
                 <div class="row mt-1">
                   <div class="col-lg-4"><b>Attributes</b></div>
                   <div class="col-lg-8"><span
-                    v-if="enityTypeResult.getAttributes.length === 0"><i>0 attributes found</i></span>
+                    v-if="enityType.getAttributes.length === 0"><i>0 attributes found</i></span>
                     <ul v-else class="list-unstyled no-margin-bottom">
-                      <li v-for="attr in enityTypeResult.getAttributes"><span
+                      <li v-for="attr in enityType.getAttributes"><span
                         v-html="highlight(attr.label, query)"></span>(<i
                         v-html="highlight(attr.description, query)"></i>)
                       </li>
@@ -112,7 +112,7 @@
   import { SEARCH_ALL } from '../store/actions'
   import { SET_SEARCHTERM } from '../store/mutations'
   export default {
-    name: 'search-all',
+    name: 'SearchAll',
     data () {
       return {
         navigatorBaseUrl: window.searchall.navigatorBaseUrl,

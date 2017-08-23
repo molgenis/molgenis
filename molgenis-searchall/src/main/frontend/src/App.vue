@@ -6,6 +6,6 @@
 
 <script>
   export default {
-    name: 'search-all'
+    name: 'molgenis-searchall'
   }
 </script>
