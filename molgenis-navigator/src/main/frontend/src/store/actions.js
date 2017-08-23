@@ -80,7 +80,7 @@ function getAllPackages () {
  */
 function queryPackages (query: string) {
   return new Promise((resolve, reject) => {
-    const uri = '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + query + '",description=q="' + query + '",label=q="' + query + '"'
+    const uri = '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"'
     api.get(uri).then((response) => {
       resolve(response.items)
     }).catch((error) => {
@@ -98,12 +98,6 @@ function queryPackages (query: string) {
 function validateQuery (query: string) {
   if (query.indexOf('"') > -1) {
     throw new Error('Double quotes not are allowed in queries, please use single quotes.')
-  } else if (query.indexOf('&') > -1) {
-    throw new Error('Ampersands are not allowed in queries.')
-  } else if (query.indexOf('#') > -1) {
-    throw new Error('Hashtags are not allowed in queries.')
-  } else if (query.indexOf('^') > -1) {
-    throw new Error('Circunflexes are not allowed in queries.')
   }
 }
 
@@ -142,7 +136,7 @@ export default {
       } else {
         try {
           validateQuery(query)
-          api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + query + '",description=q="' + query + '");isAbstract==false').then((response) => {
+          api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '");isAbstract==false').then((response) => {
             const entities = response.items.map(toEntity)
             commit(SET_ENTITIES, entities)
             resolve()
