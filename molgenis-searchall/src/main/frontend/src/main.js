@@ -7,14 +7,11 @@ import { sync } from 'vuex-router-sync'
 import { searchall } from './store/state'
 
 import App from './App'
-import VueSweetAlert from 'vue-sweetalert'
 
 import 'bootstrap/dist/css/bootstrap.css' // Bootstrap import
 import 'font-awesome/css/font-awesome.min.css' // Font awesome import
 
 sync(store, router)
-
-Vue.use(VueSweetAlert)
 
 Vue.use(i18n, {
   lng: searchall.lng,

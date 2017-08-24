@@ -811,7 +811,7 @@ babel-register@^6.22.0, babel-register@^6.24.1:
     mkdirp "^0.5.1"
     source-map-support "^0.4.2"
 
-babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0:
+babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0:
   version "6.25.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.25.0.tgz#33b98eaa5d482bb01a8d1aa6b437ad2b01aec41c"
   dependencies:
@@ -2511,6 +2511,10 @@ flat-cache@^1.2.1:
 flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
+
+flow@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/flow/-/flow-0.2.3.tgz#f8da65efa249127ec99376a28896572a9795d1af"
 
 font-awesome@^4.7.0:
   version "4.7.0"
@@ -5694,10 +5698,6 @@ svgo@^0.7.0:
     sax "~1.2.1"
     whet.extend "~0.9.9"
 
-sweetalert2@^6.6.6:
-  version "6.6.6"
-  resolved "https://registry.yarnpkg.com/sweetalert2/-/sweetalert2-6.6.6.tgz#3630279d98f04fb8b89f2e8b098fc42f03bcb555"
-
 table@^3.7.8:
   version "3.8.3"
   resolved "https://registry.yarnpkg.com/table/-/table-3.8.3.tgz#2bbc542f0fda9861a755d3947fefd8b3f513855f"
@@ -6043,14 +6043,6 @@ vue-style-loader@^3.0.0, vue-style-loader@^3.0.1:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
-vue-sweetalert@^0.1.17:
-  version "0.1.18"
-  resolved "https://registry.yarnpkg.com/vue-sweetalert/-/vue-sweetalert-0.1.18.tgz#9c0ed3b5f318b4ba4764d4b07b9f31ef6afc53eb"
-  dependencies:
-    babel-runtime "^6.23.0"
-    sweetalert2 "^6.6.6"
-    vue "^2.2.1"
-
 vue-template-compiler@^2.1.10:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.4.2.tgz#5a45d843f148b098f6c1d1e35ac20c4956d30ad1"
@@ -6062,7 +6054,7 @@ vue-template-es2015-compiler@^1.2.2:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.5.3.tgz#22787de4e37ebd9339b74223bc467d1adee30545"
 
-vue@^2.2.1, vue@^2.2.6:
+vue@^2.2.6:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.4.2.tgz#a9855261f191c978cc0dc1150531b8d08149b58c"
 

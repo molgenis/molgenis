@@ -17,10 +17,10 @@
     "@molgenis/molgenis-api-client": "^1.1.0",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
     "bootstrap": "4.0.0-alpha.6",
+    "flow": "^0.2.3",
     "font-awesome": "^4.7.0",
     "vue": "^2.2.6",
     "vue-router": "^2.3.1",
-    "vue-sweetalert": "^0.1.17",
     "vuex": "^2.2.1",
     "vuex-router-sync": "4.1.2"
   },
