@@ -164,25 +164,12 @@ $.when($,
             }
         }
 
-        function getAttributeFromList(attributesString) {
-            var result;
-            var attrs = getSelectedEntityMeta().attributes;
-            var list = attributesString.split(",");
-            for (var item in list) {
-                result = attrs[list[item]];
-                if (result !== undefined) {
-                    break;
-                }
-            }
-            return result;
-        }
-
         /**
          * @memberOf molgenis.dataexplorer
          */
         function setGenomeAttributes (start, chromosome) {
-            posAttribute = getAttributeFromList(start);
-            chromosomeAttribute = getAttributeFromList(chromosome);
+          posAttribute = start
+          chromosomeAttribute = chromosome
         }
 
         /**
@@ -211,7 +198,7 @@ $.when($,
                                 [{
                                     operator: "NESTED",
                                     nestedRules: [{
-                                        field: chromosomeAttribute.name,
+                                      field: chromosomeAttribute,
                                         operator: "EQUALS",
                                         value: chromosome
                                     }]
@@ -220,7 +207,7 @@ $.when($,
                                 }, {
                                     operator: "NESTED",
                                     nestedRules: [{
-                                        field: posAttribute.name,
+                                      field: posAttribute,
                                         operator: "EQUALS",
                                         value: position
                                     }]
@@ -244,7 +231,7 @@ $.when($,
                                     nestedRules: [{
                                         operator: "NESTED",
                                         nestedRules: [{
-                                            field: chromosomeAttribute.name,
+                                          field: chromosomeAttribute,
                                             operator: "EQUALS",
                                             value: chromosome
                                         }]
@@ -254,13 +241,13 @@ $.when($,
                                 }, {
                                     operator: "NESTED",
                                     nestedRules: [{
-                                        field: posAttribute.name,
+                                      field: posAttribute,
                                         operator: "GREATER_EQUAL",
                                         value: startPosition
                                     }, {
                                         operator: "AND"
                                     }, {
-                                        field: posAttribute.name,
+                                      field: posAttribute,
                                         operator: "LESS_EQUAL",
                                         value: stopPosition
                                     }]
