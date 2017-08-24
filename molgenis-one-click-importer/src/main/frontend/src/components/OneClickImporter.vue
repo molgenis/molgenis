@@ -39,13 +39,12 @@
           <!-- List of finished jobs -->
           <li v-for="job in finishedJobs" :key="job.file" class="upload-item">
 
-            <div v-show="job.status === 'FAILED'">
+            <div v-if="job.status === 'FAILED'">
               <i class="fa fa-times text-danger"></i> {{job.file}}
               <div class="error-message text-muted"><em>{{ 'error-message-prefix' | i18n }}; {{job.progressMessage}}</em></div>
             </div>
 
-            <div v-show="job.status === 'SUCCESS' ">
-
+            <div v-if="job.status === 'SUCCESS' ">
               <span v-if="navigatorBaseUrl">
                 <a target="_blank" :href="navigatorBaseUrl + '/' + job.package">
                   <i class="fa fa-folder-open-o"></i> {{job.package}}
