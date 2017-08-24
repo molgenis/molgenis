@@ -13,10 +13,6 @@ $.when($,
         self.getEntityQuery = getEntityQuery;
         self.createHeader = createHeader;
         self.setGenomeAttributes = setGenomeAttributes;
-        self.getPosAttribute = getPosAttribute;
-        self.getChromosomeAttribute = getChromosomeAttribute;
-        self.getIdentifierAttribute = getIdentifierAttribute;
-        self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
         self.getRSQL = getRSQL;
         self.getnToken = getnToken;
@@ -32,8 +28,6 @@ $.when($,
 
         var posAttribute;
         var chromosomeAttribute;
-        var identifierAttribute;
-        var patientAttribute;
 
         if (settingsXhr[1] !== 'success') {
             molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
@@ -186,27 +180,9 @@ $.when($,
         /**
          * @memberOf molgenis.dataexplorer
          */
-        function setGenomeAttributes(start, chromosome, id, patient) {
+        function setGenomeAttributes (start, chromosome) {
             posAttribute = getAttributeFromList(start);
             chromosomeAttribute = getAttributeFromList(chromosome);
-            identifierAttribute = getAttributeFromList(id);
-            patientAttribute = getAttributeFromList(patient);
-        }
-
-        function getPosAttribute() {
-            return posAttribute
-        }
-
-        function getChromosomeAttribute() {
-            return chromosomeAttribute
-        }
-
-        function getIdentifierAttribute() {
-            return identifierAttribute
-        }
-
-        function getPatientAttribute() {
-            return patientAttribute
         }
 
         /**

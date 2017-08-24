@@ -150,7 +150,7 @@
 </div>
 </div>
 <script>
-
+    molgenis.dataexplorer.setGenomeAttributes('${pos_attr}', '${chrom_attr}')
     <#-- load js dependencies -->
     $.when(
             $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
