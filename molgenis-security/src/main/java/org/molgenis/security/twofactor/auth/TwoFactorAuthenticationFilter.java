@@ -1,10 +1,10 @@
 package org.molgenis.security.twofactor.auth;
 
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
-import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.account.AccountController.CHANGE_PASSWORD_URI;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 
@@ -46,7 +47,10 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		if (isTwoFactorAuthenticationEnabled())
 		{
 			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
-					&& SecurityUtils.currentUserIsAuthenticated())
+					&& SecurityUtils.currentUserIsAuthenticated() && !httpServletRequest.getRequestURI()
+																						.toLowerCase()
+																						.endsWith(
+																								CHANGE_PASSWORD_URI.toLowerCase()))
 			{
 				if (!isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken()
 						&& !isUserRecoveryAuthenticated())
