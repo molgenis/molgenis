@@ -28,9 +28,7 @@ module.exports = {
       'vue$': 'vue/dist/vue.common.js',
       'src': resolve('src'),
       'assets': resolve('src/assets'),
-      'components': resolve('src/components'),
-      'variables': resolve('node_modules/bootstrap/scss/_variables.scss'),
-      'mixins': resolve('node_modules/bootstrap/scss/_mixins.scss')
+      'components': resolve('src/components')
     }
   },
   module: {
@@ -53,10 +51,6 @@ module.exports = {
         test: /\.js$/,
         loader: 'babel-loader',
         include: [resolve('src'), resolve('test')]
-      },
-      {
-        test: /\.s[a|c]ss$/,
-        loader: 'style!css!sass'
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,

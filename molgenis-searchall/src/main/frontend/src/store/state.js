@@ -1,9 +1,38 @@
+// @flow
 export const searchall = window.searchall || {}
 
-const state = {
+export type State = {
+  query: ?string,
+  result: ?Result,
+  error: ?string
+}
+
+const state: State = {
   query: '',
-  result: {},
+  result: null,
   error: ''
+}
+
+export type Result = {
+  packages: Array<Package>,
+  entityTypes: Array<EntityType>,
+}
+
+export type EntityType = {
+  id: string,
+  label: string,
+  attributes: Array<Attribute>,
+  nrOfDataRows: number
+}
+
+export type Package = {
+  id: string,
+  label: string
+}
+
+export type Attribute = {
+  id: string,
+  label: string
 }
 
 export default state
