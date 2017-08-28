@@ -1,3 +1,4 @@
+// @flow
 <template>
   <div class="container">
 
@@ -21,68 +22,70 @@
         </span>
       </div>
     </div>
-    <div class="row  mt-1" v-if="this.$store.state.result.packages">
-      <div class="col-lg-12"><h3>Matching packages</h3>
-        <div class="row">
-          <div class="col-lg-12 padding-card-bottom">
-            <div class='card'>
-              <ul class="list-group list-group-flush">
-                <li v-for="pack in this.$store.state.result.packages" class="list-group-item">
-                  <a href="#"><i class="fa fa-folder-open-o" aria-hidden="true"></i> <span
-                    v-html="highlight(pack.label, query)"></span></a>&nbsp
-                  <small v-if="pack.description" class="text-muted">
-                    <i class="text-small" v-html="highlight(pack.description, query)"></i>
-                  </small>
-                </li>
-              </ul>
+    <div v-if="this.$store.state.result">
+      <div class="row  mt-1" v-if="this.$store.state.result.packages">
+        <div class="col-lg-12"><h3>Matching packages</h3>
+          <div class="row">
+            <div class="col-lg-12 padding-card-bottom">
+              <div class='card'>
+                <ul class="list-group list-group-flush">
+                  <li v-for="pack in this.$store.state.result.packages" class="list-group-item">
+                    <a href="#"><i class="fa fa-folder-open-o" aria-hidden="true"></i> <span
+                      v-html="highlight(pack.label, query)"></span></a>&nbsp
+                    <small v-if="pack.description" class="text-muted">
+                      <i class="text-small" v-html="highlight(pack.description, query)"></i>
+                    </small>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="row mt-1" v-if="this.$store.state.result.entityTypes">
-      <div v-if="this.$store.state.result.entityTypes.length > 0" class="col-lg-12"><h3>Matching entities</h3>
-        <div class="row mt-1">
-          <div v-for="enityType in this.$store.state.result.entityTypes"
-               class="col-lg-12 padding-card-bottom">
-            <div class='card'>
-              <div class="card-header">
-                <h4 v-html="highlight(enityType.getLabel, query)"></h4>
-                <a href="#" class="card-link"><i class="fa fa-folder-open-o" aria-hidden="true"></i>
-                  Show in Navigator</a>
-                <a :href="dataExplorerBaseUrl + '?entity=' + enityType.getId" class="card-link"><i
-                  class="fa fa-align-justify" aria-hidden="true"></i>
-                  Show in Data Explorer</a>
-              </div>
-              <div class="container">
-                <div class="row" v-if="enityType.getDescription">
-                  <div class="col-lg-4"><b>Description</b>
-                  </div>
-                  <div class="col-lg-8"><i v-html="highlight(enityType.getDescription, query)"></i>
-                  </div>
-                </div>
-                <div class="row mt-1">
-                  <div class="col-lg-4"><b>Data</b></div>
-                  <div class="col-lg-8"><a v-if="enityType.nrOfMatchingEntities > 0"
-                                           :href="dataExplorerBaseUrl + '?entity=' + enityType.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+query"
-                                           class="card-link"><i
+      <div class="row mt-1" v-if="this.$store.state.result.entityTypes">
+        <div v-if="this.$store.state.result.entityTypes.length > 0" class="col-lg-12"><h3>Matching entities</h3>
+          <div class="row mt-1">
+            <div v-for="enityType in this.$store.state.result.entityTypes"
+                 class="col-lg-12 padding-card-bottom">
+              <div class='card'>
+                <div class="card-header">
+                  <h4 v-html="highlight(enityType.getLabel, query)"></h4>
+                  <a href="#" class="card-link"><i class="fa fa-folder-open-o" aria-hidden="true"></i>
+                    Show in Navigator</a>
+                  <a :href="dataExplorerBaseUrl + '?entity=' + enityType.getId" class="card-link"><i
                     class="fa fa-align-justify" aria-hidden="true"></i>
-                    {{enityType.nrOfMatchingEntities}} rows</a>
-                    <span v-else><i
-                      class="fa fa-align-justify" aria-hidden="true"></i>
-                      0 rows</span></div>
+                    Show in Data Explorer</a>
                 </div>
-                <div class="row mt-1">
-                  <div class="col-lg-4"><b>Attributes</b></div>
-                  <div class="col-lg-8"><span
-                    v-if="enityType.getAttributes.length === 0"><i>0 attributes found</i></span>
-                    <ul v-else class="list-unstyled no-margin-bottom">
-                      <li v-for="attr in enityType.getAttributes"><span
-                        v-html="highlight(attr.label, query)"></span>(<i
-                        v-html="highlight(attr.description, query)"></i>)
-                      </li>
-                    </ul>
+                <div class="container">
+                  <div class="row" v-if="enityType.getDescription">
+                    <div class="col-lg-4"><b>Description</b>
+                    </div>
+                    <div class="col-lg-8"><i v-html="highlight(enityType.getDescription, query)"></i>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-lg-4"><b>Data</b></div>
+                    <div class="col-lg-8"><a v-if="enityType.nrOfMatchingEntities > 0"
+                                             :href="dataExplorerBaseUrl + '?entity=' + enityType.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+query"
+                                             class="card-link"><i
+                      class="fa fa-align-justify" aria-hidden="true"></i>
+                      {{enityType.nrOfMatchingEntities}} rows</a>
+                      <span v-else><i
+                        class="fa fa-align-justify" aria-hidden="true"></i>
+                      0 rows</span></div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-lg-4"><b>Attributes</b></div>
+                    <div class="col-lg-8"><span
+                      v-if="enityType.getAttributes.length === 0"><i>0 attributes found</i></span>
+                      <ul v-else class="list-unstyled no-margin-bottom">
+                        <li v-for="attr in enityType.getAttributes"><span
+                          v-html="highlight(attr.label, query)"></span>(<i
+                          v-html="highlight(attr.description, query)"></i>)
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -90,9 +93,8 @@
           </div>
         </div>
       </div>
-      <div v-else class="col-lg-12"><h3>No matching entities found</h3></div>
-
     </div>
+    <div v-else-if="query" class="col-lg-12"><h3>No matching entities found</h3></div>
   </div>
 </template>
 
@@ -138,7 +140,7 @@
         get () {
           return this.$store.state.query
         },
-        set (query) {
+        set (query: string) {
           this.$store.commit(SET_SEARCHTERM, query)
         }
       }

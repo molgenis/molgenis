@@ -1,9 +1,11 @@
+// @flow
+// $FlowFixMe
 import { get } from '@molgenis/molgenis-api-client'
-import { SET_RESULTS, SET_ERRORS } from '../store/mutations'
+import { SET_ERRORS, SET_RESULTS } from '../store/mutations'
 
 export const SEARCH_ALL = 'SEARCH_ALL'
 
-function queryPackages (query) {
+function queryPackages (query: string) {
   return new Promise((resolve, reject) => {
     const uri = '/api/searchall/search?term=' + query
     get(uri).then((response) => {
@@ -15,7 +17,7 @@ function queryPackages (query) {
 }
 
 export default {
-  [SEARCH_ALL] ({commit}, query) {
+  [SEARCH_ALL] ({commit}: { commit: Function }, query: string) {
     return new Promise((resolve, reject) => {
       if (!query) {
         commit(SET_ERRORS, 'No searchterm')
