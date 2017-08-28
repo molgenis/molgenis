@@ -4,6 +4,7 @@
 
  body>.container-fluid {
      padding-top: 210px;
+ !important;
  }
 
 #Intro {

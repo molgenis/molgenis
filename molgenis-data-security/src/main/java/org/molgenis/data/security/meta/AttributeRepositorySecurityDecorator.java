@@ -20,7 +20,6 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 /**
@@ -73,6 +72,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<Attribute> findAll(Query<Attribute> q)
 	{
@@ -85,7 +86,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 			Query<Attribute> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
 			Stream<Attribute> attrs = delegate().findAll(qWithoutLimitOffset);
-			Stream<Attribute> filteredAttrs = filterReadPermission(attrs);
+			Stream<Attribute> filteredAttrs = filterCountPermission(attrs);
 			if (q.getOffset() > 0)
 			{
 				filteredAttrs = filteredAttrs.skip(q.getOffset());
@@ -99,6 +100,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Iterator<Attribute> iterator()
 	{
@@ -109,10 +112,12 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		else
 		{
 			Stream<Attribute> attrs = StreamSupport.stream(delegate().spliterator(), false);
-			return filterReadPermission(attrs).iterator();
+			return filterCountPermission(attrs).iterator();
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Attribute>> consumer, int batchSize)
 	{
@@ -127,6 +132,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Attribute findOne(Query<Attribute> q)
 	{
@@ -141,6 +148,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Attribute findOneById(Object id)
 	{
@@ -154,6 +163,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Attribute findOneById(Object id, Fetch fetch)
 	{
@@ -167,6 +178,8 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids)
 	{
@@ -176,10 +189,12 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids));
+			return filterCountPermission(delegate().findAll(ids));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<Attribute> findAll(Stream<Object> ids, Fetch fetch)
 	{
@@ -189,7 +204,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids, fetch));
+			return filterCountPermission(delegate().findAll(ids, fetch));
 		}
 	}
 
@@ -310,12 +325,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	private Attribute filterReadPermission(Attribute attr)
 	{
-		return attr != null ? filterReadPermission(Stream.of(attr)).findFirst().orElse(null) : null;
-	}
-
-	private Stream<Attribute> filterReadPermission(Stream<Attribute> attrs)
-	{
-		return filterPermission(attrs, READ);
+		return attr != null ? filterCountPermission(Stream.of(attr)).findFirst().orElse(null) : null;
 	}
 
 	private Stream<Attribute> filterPermission(Stream<Attribute> attrs, Permission permission)
@@ -334,7 +344,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 		public void filter(List<Attribute> attrs)
 		{
-			Stream<Attribute> filteredAttrs = filterPermission(attrs.stream(), READ);
+			Stream<Attribute> filteredAttrs = filterPermission(attrs.stream(), COUNT);
 			consumer.accept(filteredAttrs.collect(toList()));
 		}
 	}

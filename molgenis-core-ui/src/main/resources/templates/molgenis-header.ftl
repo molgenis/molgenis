@@ -15,7 +15,7 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <#if googleSignIn>
-        <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
+        <meta name="google-signin-client_id" content="${authentication_settings.googleAppClientId?html}">
     </#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
 
@@ -44,7 +44,9 @@
     </#if>
     <#if app_settings.customJavascript?has_content>
         <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
-            <script src="<@resource_href "${js_file_name?html}"/>"></script>
+            <#if js_file_name?ends_with(".js")>
+                <script src="<@resource_href "${js_file_name?html}"/>"></script>
+            </#if>
         </#list>
     </#if>
 <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
@@ -95,7 +97,7 @@
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
     <#if version?? || version == 1>
-    <body style="padding: 55px;">
+    <body>
     <#else>
     <body>
     </#if>

@@ -1,19 +1,13 @@
 package org.molgenis.data.rest;
 
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
-import org.molgenis.data.rest.convert.RestTestUtils;
-import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
@@ -119,80 +113,6 @@ public class RestControllerIT
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
 						equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
-	}
-
-	@Test
-	public void test2faEnforced()
-	{
-		RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
-
-		try
-		{
-			ValidatableResponse response;
-
-			response = given().log()
-							  .all()
-							  .header(X_MOLGENIS_TOKEN, testUserToken)
-							  .contentType(APPLICATION_JSON)
-							  .when()
-							  .get(PATH + "logout")
-							  .then();
-			response.statusCode(OKE);
-
-			Gson gson = new Gson();
-			Map<String, String> loginBody = new HashMap<>();
-			loginBody.put("username", REST_TEST_USER);
-			loginBody.put("password", REST_TEST_USER_PASSWORD);
-
-			response = given().contentType(APPLICATION_JSON)
-							  .body(gson.toJson(loginBody))
-							  .when()
-							  .post(PATH + "login")
-							  .then();
-			response.statusCode(UNAUTHORIZED)
-					.body("errors.message[0]",
-							equalTo("Login using /api/v1/login is disabled, two factor authentication is enabled"));
-		}
-		finally
-		{
-			RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
-		}
-	}
-
-	@Test
-	public void test2faEnabled()
-	{
-		RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
-
-		try
-		{
-			ValidatableResponse response;
-
-			response = given().log()
-							  .all()
-							  .header(X_MOLGENIS_TOKEN, testUserToken)
-							  .contentType(APPLICATION_JSON)
-							  .when()
-							  .get(PATH + "logout")
-							  .then();
-			response.statusCode(OKE);
-
-			Gson gson = new Gson();
-			Map<String, String> loginBody = new HashMap<>();
-			loginBody.put("username", REST_TEST_USER);
-			loginBody.put("password", REST_TEST_USER_PASSWORD);
-
-			response = given().contentType(APPLICATION_JSON)
-							  .body(gson.toJson(loginBody))
-							  .when()
-							  .post(PATH + "login")
-							  .then();
-			response.statusCode(OKE);
-		}
-		finally
-		{
-			RestTestUtils.toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
-		}
 	}
 
 	@Test

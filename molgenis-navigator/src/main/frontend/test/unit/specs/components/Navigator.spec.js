@@ -7,11 +7,11 @@ describe('Navigator', () => {
     })
   })
 
-  describe('submitQuery', () => {
-    it('should clear the query and dispatch a call to fetch all packages', () => {
+  describe('submitQueryWithSpecialCharacters', () => {
+    it('should clear the query and dispatch a call to fetch all packages with special characters', () => {
       Navigator.methods.$store = {
         state: {
-          query: 'my-query'
+          query: 'my-query with spaces and ""'
         },
         dispatch: sinon.spy(),
         commit: sinon.spy()
@@ -20,8 +20,8 @@ describe('Navigator', () => {
       Navigator.methods.submitQuery()
       Navigator.methods.$store.commit.should.have.been.calledWith('SET_PACKAGES', [])
       Navigator.methods.$store.commit.should.have.been.calledWith('RESET_PATH')
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('QUERY_PACKAGES', 'my-query')
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('QUERY_ENTITIES', 'my-query')
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('QUERY_PACKAGES', 'my-query with spaces and ""')
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('QUERY_ENTITIES', 'my-query with spaces and ""')
     })
   })
 
