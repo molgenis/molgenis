@@ -23,7 +23,7 @@
       </div>
     </div>
     <div v-if="this.$store.state.result">
-      <div class="row  mt-1" v-if="this.$store.state.result.packages">
+      <div class="row  mt-1" v-if="this.$store.state.result.packages.length > 0">
         <div class="col-lg-12"><h3>{{'matching-packages-label' | i18n }}</h3>
           <div class="row">
             <div class="col-lg-12 padding-card-bottom">
@@ -42,8 +42,9 @@
           </div>
         </div>
       </div>
+      <div v-else-if="this.submitted">{{'no-matching-packages-label' | i18n }}</div>
 
-      <div class="row mt-1" v-if="this.$store.state.result.entityTypes">
+      <div class="row mt-1" v-if="this.$store.state.result.entityTypes.length > 0">
         <div v-if="this.$store.state.result.entityTypes.length > 0" class="col-lg-12"><h3>
           {{'matching-entitytypes-label' | i18n }}</h3>
           <div class="row mt-1">
@@ -94,8 +95,8 @@
           </div>
         </div>
       </div>
+      <div v-else-if="this.submitted">{{'no-matching-entities-label' | i18n }}</div>
     </div>
-    <div v-else-if="query" class="col-lg-12"><h3>{{'no-results-label' | i18n }}</h3></div>
   </div>
 </template>
 
@@ -119,14 +120,17 @@
     data () {
       return {
         navigatorBaseUrl: window.searchall.navigatorBaseUrl,
-        dataExplorerBaseUrl: window.searchall.dataExplorerBaseUrl
+        dataExplorerBaseUrl: window.searchall.dataExplorerBaseUrl,
+        submitted: false
       }
     },
     methods: {
       submitQuery: _.throttle(function () {
+        this.submitted = true
         this.$store.dispatch(SEARCH_ALL, this.$store.state.query)
       }, 200),
       clearQuery: function () {
+        this.submitted = false
         this.$store.commit(SET_SEARCHTERM, undefined)
       },
       highlight: function (text, query) {
