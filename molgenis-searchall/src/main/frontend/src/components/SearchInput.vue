@@ -24,7 +24,7 @@
     methods: {
       submitQuery: _.throttle(function () {
         this.$store.commit(SET_SUBMITTED, true)
-        this.$store.dispatch(SEARCH_ALL, this.query)
+        this.$store.dispatch(SEARCH_ALL, this.$store.state.query)
       }, 200),
       clearQuery: function () {
         this.$store.commit(SET_SUBMITTED, false)

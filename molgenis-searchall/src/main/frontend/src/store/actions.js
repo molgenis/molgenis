@@ -5,7 +5,7 @@ import { SET_ERRORS, SET_RESULTS } from '../store/mutations'
 
 export const SEARCH_ALL = 'SEARCH_ALL'
 
-function queryPackages (query: string) {
+function searchAllData (query: string) {
   return new Promise((resolve, reject) => {
     const uri = '/api/searchall/search?term=' + query
     get(uri).then((response) => {
@@ -22,7 +22,7 @@ export default {
       if (!query) {
         commit(SET_ERRORS, 'No searchterm')
       } else {
-        queryPackages(query).then(results => {
+        searchAllData(query).then(results => {
           commit(SET_RESULTS, results)
           resolve()
         }, errorMessage => {
