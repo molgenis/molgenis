@@ -197,7 +197,7 @@ public class DataExplorerController extends PluginController
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 				break;
 			case MOD_ENTITIESREPORT:
-				//TODO: figure out if we need to knwo pos and chrom attrs here
+				//TODO: figure out if we need to know pos and chrom attrs here
 				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", getTracksJson(entityTracks));

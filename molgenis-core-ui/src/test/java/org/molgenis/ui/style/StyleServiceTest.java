@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
 import static org.molgenis.ui.style.StyleServiceImpl.BOOTSTRAP_FALL_BACK_THEME;
+import static org.molgenis.ui.style.StyleSheetMetadata.STYLE_SHEET;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -75,7 +75,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		StyleSheet styleSheet = mock(StyleSheet.class);
 		List<StyleSheet> styleSheets = Collections.singletonList(styleSheet);
 		when(styleSheet.getName()).thenReturn(THEME_MOLGENIS);
-		when(dataService.findAll(StyleMetadata.STYLE_SHEET, StyleSheet.class)).thenReturn(styleSheets.stream());
+		when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class)).thenReturn(styleSheets.stream());
 
 		Set<Style> availableStyles = styleService.getAvailableStyles();
 		assertTrue(Iterables.any(availableStyles, style -> style.getName().equals(THEME_MOLGENIS_NAME)));
@@ -101,7 +101,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		StyleSheet yetiSheet = mock(StyleSheet.class);
 		List<StyleSheet> styleSheets = Collections.singletonList(yetiSheet);
 		when(yetiSheet.getName()).thenReturn("bootstrap-" + newTheme + ".min.css");
-		when(dataService.findAll(StyleMetadata.STYLE_SHEET, StyleSheet.class)).thenReturn(styleSheets.stream());
+		when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class)).thenReturn(styleSheets.stream());
 
 		styleService.setSelectedStyle(newTheme);
 
@@ -116,7 +116,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		StyleSheet styleSheet = mock(StyleSheet.class);
 		List<StyleSheet> styleSheets = Collections.singletonList(styleSheet);
 		when(styleSheet.getName()).thenReturn(THEME_MOLGENIS);
-		when(dataService.findAll(StyleMetadata.STYLE_SHEET, StyleSheet.class)).thenReturn(styleSheets.stream());
+		when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class)).thenReturn(styleSheets.stream());
 
 		assertEquals(styleService.getSelectedStyle().getName(), THEME_MOLGENIS_NAME);
 	}
@@ -217,7 +217,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	public void getUnknownThemeData() throws MolgenisStyleException
 	{
 		String styleName = "no-body";
-		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
 		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(null);
 
 		BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
@@ -234,7 +234,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		String fileId = "fileId";
 		when(fileMeta.getId()).thenReturn(fileId);
 		when(styleSheet.getBootstrap3Theme()).thenReturn(fileMeta);
-		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
 		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
 		File styleFile = mock(File.class);
 		String mockFilePath = "mock/file/path";
@@ -257,7 +257,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		String fileId = "fileId";
 		when(fileMeta.getId()).thenReturn(fileId);
 		when(styleSheet.getBootstrap4Theme()).thenReturn(fileMeta);
-		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
 		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
 		File styleFile = mock(File.class);
 		String mockFilePath = "mock/file/path";
@@ -281,8 +281,9 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		when(fileMeta.getId()).thenReturn(fileId);
 		when(styleSheet.getBootstrap4Theme()).thenReturn(null);
 		when(fallBackTheme.getBootstrap4Theme()).thenReturn(fileMeta);
-		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, styleName);
-		Query<StyleSheet> fallBackQuery = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, BOOTSTRAP_FALL_BACK_THEME);
+		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
+		Query<StyleSheet> fallBackQuery = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME,
+				BOOTSTRAP_FALL_BACK_THEME);
 		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
 		when(dataService.findOne(STYLE_SHEET, fallBackQuery, StyleSheet.class)).thenReturn(fallBackTheme);
 		File styleFile = mock(File.class);

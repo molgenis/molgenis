@@ -33,9 +33,9 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationService.class);
 
-	private final static int MAX_FAILED_LOGIN_ATTEMPTS = 3;
-	private final static int FAILED_LOGIN_ATTEMPT_ITERATION = 1;
-	private final static int BLOCKED_USER_INTERVAL = 30;
+	private static final int MAX_FAILED_LOGIN_ATTEMPTS = 3;
+	private static final int FAILED_LOGIN_ATTEMPT_ITERATION = 1;
+	private static final int BLOCKED_USER_INTERVAL = 30;
 
 	private final OtpService otpService;
 	private final DataService dataService;
@@ -95,7 +95,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 								.toEpochMilli()))
 			{
 				throw new TooManyLoginAttemptsException(
-						format("You entered the wrong verification code %d times, please wait for %d seconds before you try again",
+						format("You entered the wrong verification code {0} times, please wait for {1} seconds before you try again",
 								MAX_FAILED_LOGIN_ATTEMPTS, BLOCKED_USER_INTERVAL));
 			}
 		}
@@ -124,10 +124,9 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	public void resetSecretForUser()
 	{
 		User user = getUser();
-		Stream<UserSecret> userSecrets = dataService.query(USER_SECRET, UserSecret.class)
-													.eq(USER_ID, user.getId())
-													.findAll();
-		dataService.delete(USER_SECRET, userSecrets);
+		Stream<UserSecret> userSecrets = runAsSystem(
+				() -> dataService.query(USER_SECRET, UserSecret.class).eq(USER_ID, user.getId()).findAll());
+		runAsSystem(() -> dataService.delete(USER_SECRET, userSecrets));
 	}
 
 	@Override
@@ -218,7 +217,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		else
 		{
 			throw new InternalAuthenticationServiceException(
-					format("Secret not found, user: [ %s ] is not configured for 2 factor authentication",
+					format("Secret not found, user: [{0}] is not configured for two factor authentication",
 							user.getUsername()));
 		}
 
@@ -234,7 +233,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		}
 		else
 		{
-			throw new UsernameNotFoundException(format("Can't find user: [ %s ]", SecurityUtils.getCurrentUsername()));
+			throw new UsernameNotFoundException(format("Can not find user: [{0}]", SecurityUtils.getCurrentUsername()));
 		}
 	}
 }

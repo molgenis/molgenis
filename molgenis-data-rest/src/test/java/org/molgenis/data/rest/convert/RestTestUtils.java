@@ -371,9 +371,9 @@ public class RestTestUtils
 
 		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(APPLICATION_JSON)
-			   .body(state.toString())
+			   .body(state.getLabel())
 			   .when()
-			   .put("api/v1/sys_set_app/app/sign_in_2fa");
+			   .put("api/v1/sys_set_auth/auth/sign_in_2fa");
 	}
 
 }

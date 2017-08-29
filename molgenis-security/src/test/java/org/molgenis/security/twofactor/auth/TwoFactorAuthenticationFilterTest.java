@@ -1,9 +1,9 @@
 package org.molgenis.security.twofactor.auth;
 
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
-import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserAccountServiceImpl;
 import org.molgenis.security.user.UserService;
@@ -60,9 +60,30 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 
 		filter.doFilterInternal(request, response, chain);
 
-		String iniitalRedirectUrl =
+		String initialRedirectUrl =
 				TwoFactorAuthenticationController.URI + TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI;
-		assertEquals(iniitalRedirectUrl, response.getRedirectedUrl());
+		assertEquals(initialRedirectUrl, response.getRedirectedUrl());
+
+	}
+
+	@Test
+	public void testDoFilterInternalIsConfiguredChangePassword() throws IOException, ServletException
+	{
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		UsernamePasswordAuthenticationToken token = mock(UsernamePasswordAuthenticationToken.class);
+		SecurityContextHolder.getContext().setAuthentication(token);
+		when(token.isAuthenticated()).thenReturn(true);
+
+		request.setRequestURI("/account/password/change");
+		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
+		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
+
+		filter.doFilterInternal(request, response, chain);
+
+		assertEquals(null, response.getRedirectedUrl());
 
 	}
 

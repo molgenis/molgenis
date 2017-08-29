@@ -93,7 +93,8 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity implements
 		private static String getSignIn2FAValidationExpression()
 		{
 			return String.format("$('%s').eq('%s').or($('%s').not()).or($('%s')).or($('%s').not()).value()",
-					SIGN_IN_2FA, TwoFactorAuthenticationSetting.DISABLED, SIGNUP, SIGNUP_MODERATION, GOOGLE_SIGN_IN);
+					SIGN_IN_2FA, TwoFactorAuthenticationSetting.DISABLED.getLabel(), SIGNUP, SIGNUP_MODERATION,
+					GOOGLE_SIGN_IN);
 		}
 	}
 

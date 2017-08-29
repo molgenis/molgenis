@@ -25,41 +25,41 @@ public class StyleSheet extends StaticEntity
 
 	public String getId()
 	{
-		return getString(StyleMetadata.ID);
+		return getString(StyleSheetMetadata.ID);
 	}
 
 	public void setId(String id)
 	{
-		set(StyleMetadata.ID, id);
+		set(StyleSheetMetadata.ID, id);
 	}
 
 	public String getName()
 	{
-		return getString(StyleMetadata.NAME);
+		return getString(StyleSheetMetadata.NAME);
 	}
 
 	public void setName(String name)
 	{
-		set(StyleMetadata.NAME, name);
+		set(StyleSheetMetadata.NAME, name);
 	}
 
 	public FileMeta getBootstrap3Theme()
 	{
-		return getEntity(StyleMetadata.BOOTSTRAP_3_THEME, FileMeta.class);
+		return getEntity(StyleSheetMetadata.BOOTSTRAP_3_THEME, FileMeta.class);
 	}
 
 	public void setBootstrap3Theme(FileMeta bootstrap3FileMeta)
 	{
-		set(StyleMetadata.BOOTSTRAP_3_THEME, bootstrap3FileMeta);
+		set(StyleSheetMetadata.BOOTSTRAP_3_THEME, bootstrap3FileMeta);
 	}
 
 	public FileMeta getBootstrap4Theme()
 	{
-		return getEntity(StyleMetadata.BOOTSTRAP_4_THEME, FileMeta.class);
+		return getEntity(StyleSheetMetadata.BOOTSTRAP_4_THEME, FileMeta.class);
 	}
 
 	public void setBootstrap4Theme(FileMeta bootstrap4FileMeta)
 	{
-		set(StyleMetadata.BOOTSTRAP_4_THEME, bootstrap4FileMeta);
+		set(StyleSheetMetadata.BOOTSTRAP_4_THEME, bootstrap4FileMeta);
 	}
 }
