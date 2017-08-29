@@ -4,13 +4,15 @@ export const searchall = window.searchall || {}
 export type State = {
   query: ?string,
   result: ?Result,
-  error: ?string
+  error: ?string,
+  submitted: ?boolean
 }
 
 const state: State = {
   query: '',
   result: null,
-  error: ''
+  error: '',
+  submitted: false
 }
 
 export type Result = {
