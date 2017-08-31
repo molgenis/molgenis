@@ -19,9 +19,7 @@ function searchAllData (query: string) {
 export default {
   [SEARCH_ALL] ({commit}: { commit: Function }, query: string) {
     return new Promise((resolve, reject) => {
-      if (!query) {
-        commit(SET_ERRORS, 'No searchterm')
-      } else {
+      if (query) {
         searchAllData(query).then(results => {
           commit(SET_RESULTS, results)
           resolve()
