@@ -19,14 +19,14 @@
       </div>
       <div class="row mt-1">
         <div class="col-lg-4"><b>{{'data-label' | i18n }}</b></div>
-        <div class="col-lg-8"><a v-if="entityType.nrOfMatchingEntities > 0"
-                                 :href="dataExplorerBaseUrl + '?entity=' + entityType.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+query"
+        <div class="col-lg-8"><a v-if="entityType.nrOfMatchingEntities > 0 && dataexplorer"
+                                 :href="dataexplorer + '?entity=' + entityType.getId +'&query[q][0][operator]=SEARCH&query[q][0][value]='+this.$store.state.query"
                                  class="card-link"><i
           class="fa fa-align-justify" aria-hidden="true"></i>
           {{entityType.nrOfMatchingEntities}} {{'rows-found-label' | i18n }}</a>
           <span v-else><i
             class="fa fa-align-justify" aria-hidden="true"></i>
-                      0 {{'rows-found-label' | i18n }}</span></div>
+                      {{entityType.nrOfMatchingEntities}} {{'rows-found-label' | i18n }}</span></div>
       </div>
       <div class="row mt-1">
         <div class="col-lg-4"><b>{{'attributes-label' | i18n }}</b></div>
