@@ -11,7 +11,7 @@
                 v-html="highlight(pack.label)"></span></a>
               <span v-else
                     v-html="highlight(pack.label)"></span>
-              &nbsp
+              &nbsp;
               <small v-if="pack.description" class="text-muted">
                 <i class="text-small" v-html="highlight(pack.description)"></i>
               </small>
@@ -25,7 +25,7 @@
 
 <script>
   export default {
-    name: 'package-result',
+    name: 'packages-result',
     props: ['package', 'navigator', 'highlight']
   }
 </script>
