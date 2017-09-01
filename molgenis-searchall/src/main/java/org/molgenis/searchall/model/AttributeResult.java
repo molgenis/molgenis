@@ -1,23 +1,22 @@
 package org.molgenis.searchall.model;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.gson.AutoGson;
-
-import javax.annotation.Nullable;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AttributeResult.class)
-public abstract class AttributeResult
+public abstract class AttributeResult implements Described
 {
-	abstract String getLabel();
-
-	@Nullable
-	abstract String getDescription();
-
-	abstract String getDataType();
+	public abstract String getDataType();
 
 	public static AttributeResult create(String label, String description, String datatype)
 	{
 		return new AutoValue_AttributeResult(label, description, datatype);
+	}
+
+	public static AttributeResult create(Attribute attr, String languageCode)
+	{
+		return create(attr.getLabel(languageCode), attr.getDescription(languageCode), attr.getDataType().toString());
 	}
 }

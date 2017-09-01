@@ -1,6 +1,7 @@
 package org.molgenis.searchall.model;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import org.molgenis.gson.AutoGson;
 
 import java.util.List;
@@ -9,12 +10,18 @@ import java.util.List;
 @AutoGson(autoValueClass = AutoValue_Result.class)
 public abstract class Result
 {
-	public abstract List<EntityTypeResult> getEntityTypes();
+	public abstract ImmutableList<EntityTypeResult> getEntityTypes();
 
-	public abstract List<PackageResult> getPackages();
+	public abstract ImmutableList<PackageResult> getPackages();
 
-	public static Result create(List<EntityTypeResult> entityTypes, List<PackageResult> packages)
-	{
-		return new AutoValue_Result(entityTypes, packages);
+	@AutoValue.Builder
+	public abstract static class Builder {
+		public abstract Builder setEntityTypes(List<EntityTypeResult> entityTypes);
+		public abstract Builder setPackages(List<PackageResult> packages);
+		public abstract Result build();
+	}
+
+	public static Builder builder() {
+		return new AutoValue_Result.Builder();
 	}
 }
