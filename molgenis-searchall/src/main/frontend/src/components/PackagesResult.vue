@@ -5,8 +5,8 @@
         <div class='card'>
           <ul class="list-group list-group-flush">
             <li v-for="pack in this.$store.state.result.packages" class="list-group-item">
-              <a v-if="navigator" :href="navigator + '/' + pack.label"><i class="fa fa-folder-open-o"
-                                                                          aria-hidden="true"></i> <span
+              <a v-if="navigator" :href="navigator + '/' + pack.id"><i class="fa fa-folder-open-o"
+                                                                       aria-hidden="true"></i> <span
                 v-html="highlight(pack.label)"></span></a>
               <span v-else
                     v-html="highlight(pack.label)"></span>
