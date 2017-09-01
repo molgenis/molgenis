@@ -1,4 +1,3 @@
-// @flow
 <template>
   <div class="container">
 

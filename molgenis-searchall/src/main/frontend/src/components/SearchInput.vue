@@ -1,4 +1,3 @@
-// @flow
 <template>
   <div class="input-group">
     <input v-model="query" type="text" class="form-control"

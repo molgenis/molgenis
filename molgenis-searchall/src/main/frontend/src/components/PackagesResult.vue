@@ -1,4 +1,3 @@
-// @flow
 <template>
   <div class="col-lg-12"><h3>{{'matching-packages-label' | i18n }}</h3>
     <div class="row">
