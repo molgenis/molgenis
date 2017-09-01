@@ -15,6 +15,7 @@
             <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
 		</menu>
         <menu label="Plugins" name="plugins">
+            <plugin id="searchAll" name="Search all data" url="searchAll"/>
             <plugin id="swagger" name="API documentation" url="swagger"/>
             <plugin id="apps" name="App store" url="apps"/>
 			<plugin id="catalogue" name="Catalogue" url="catalogue"/>

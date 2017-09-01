@@ -9,6 +9,7 @@
     - [Quick data upload](user_documentation/guide-quick-upload.md)
     - [Advanced data upload](user_documentation/guide-upload.md)
         - [EMX format](user_documentation/ref-emx.md)
+    - [Finding data](user_documentation/guide-search.md)
     - [Exploring data](user_documentation/guide-explore.md)
     - [Admin features](user_documentation/guide-admin.md)
     - [Customize your MOLGENIS](user_documentation/guide-customize.md)
