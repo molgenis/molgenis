@@ -2,19 +2,19 @@
 <template>
   <div class='card'>
     <div class="card-header">
-      <h4 v-html="highlight(entityType.getLabel)"></h4>
-      <a v-if="navigator" :href="navigator + '/' + entityType.getPackageId" class="card-link"><i
+      <h4 v-html="highlight(entityType.label)"></h4>
+      <a v-if="navigator" :href="navigator + '/' + entityType.packageId" class="card-link"><i
         class="fa fa-folder-open-o" aria-hidden="true"></i>
         {{'show-in-navigator-link' | i18n }}</a>
-      <a v-if="dataexplorer" :href="dataexplorer + '?entity=' + entityType.getId" class="card-link"><i
+      <a v-if="dataexplorer" :href="dataexplorer + '?entity=' + entityType.id" class="card-link"><i
         class="fa fa-align-justify" aria-hidden="true"></i>
         {{'show-in-dataexplorer-link' | i18n }}</a>
     </div>
     <div class="container">
-      <div class="row" v-if="entityType.getDescription">
+      <div class="row" v-if="entityType.description">
         <div class="col-lg-4"><b>{{'description-label' | i18n }}</b>
         </div>
-        <div class="col-lg-8"><i v-html="highlight(entityType.getDescription)"></i>
+        <div class="col-lg-8"><i v-html="highlight(entityType.description)"></i>
         </div>
       </div>
       <div class="row mt-1">
@@ -31,9 +31,9 @@
       <div class="row mt-1">
         <div class="col-lg-4"><b>{{'attributes-label' | i18n }}</b></div>
         <div class="col-lg-8"><span
-          v-if="entityType.getAttributes.length === 0"><i>{{'no-attributes-found-label' | i18n }}</i></span>
+          v-if="entityType.attributes.length === 0"><i>{{'no-attributes-found-label' | i18n }}</i></span>
           <ul v-else class="list-unstyled no-margin-bottom">
-            <li v-for="attr in entityType.getAttributes"><span
+            <li v-for="attr in entityType.attributes"><span
               v-html="highlight(attr.label)"></span>(<i
               v-html="highlight(attr.description)"></i>)
             </li>

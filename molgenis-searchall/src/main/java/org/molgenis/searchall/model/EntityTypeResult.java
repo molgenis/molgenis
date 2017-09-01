@@ -25,7 +25,7 @@ public abstract class EntityTypeResult
 
 	public abstract List<AttributeResult> getAttributes();
 
-	public abstract long nrOfMatchingEntities();
+	public abstract long getNrOfMatchingEntities();
 
 	public static EntityTypeResult create(String id, String label, String description, String packageId,
 			boolean isLabelMatch, boolean isDescriptionMatch, List<AttributeResult> attributes,
