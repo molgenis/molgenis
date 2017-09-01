@@ -2,7 +2,7 @@
 <template>
   <div class="input-group">
     <input v-model="query" type="text" class="form-control"
-           :placeholder="$t('search-placeholder')">
+           :placeholder="$t('search-placeholder')" v-on:keyup.enter="submitQuery()">
     <span class="input-group-btn">
             <button @click="submitQuery()" class="btn btn-secondary" :disabled="!query"
                     type="button"> {{'search-button-label' | i18n}}</button>
@@ -23,8 +23,10 @@
     props: ['placeholder', 'searchLabel', 'clearLabel'],
     methods: {
       submitQuery: _.throttle(function () {
-        this.$store.commit(SET_SUBMITTED, true)
-        this.$store.dispatch(SEARCH_ALL, this.$store.state.query)
+        if (this.$store.state.query) {
+          this.$store.commit(SET_SUBMITTED, true)
+          this.$store.dispatch(SEARCH_ALL, this.$store.state.query)
+        }
       }, 200),
       clearQuery: function () {
         this.$store.commit(SET_SUBMITTED, false)
