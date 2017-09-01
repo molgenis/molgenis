@@ -9,13 +9,15 @@ import javax.annotation.Nullable;
 @AutoGson(autoValueClass = AutoValue_PackageResult.class)
 public abstract class PackageResult
 {
+	abstract String getId();
+
 	abstract String getLabel();
 
 	@Nullable
 	abstract String getDescription();
 
-	public static PackageResult create(String label, String description)
+	public static PackageResult create(String id, String label, String description)
 	{
-		return new AutoValue_PackageResult(label, description);
+		return new AutoValue_PackageResult(id, label, description);
 	}
 }

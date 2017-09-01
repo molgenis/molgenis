@@ -149,7 +149,8 @@ public class SearchAllServiceTest
 		when(dataService.count("entity id 3", new QueryImpl<>().search("test"))).thenReturn(6L);
 		when(dataService.count("entity id 4", new QueryImpl<>().search("test"))).thenReturn(11L);
 
-		PackageResult packageResult = PackageResult.create("package test nr 1", "package description 1");
+		PackageResult packageResult = PackageResult.create("package id 1", "package test nr 1",
+				"package description 1");
 		AttributeResult attributeResult = AttributeResult.create("attr test nr 1", "attr description 1", "BOOL");
 		EntityTypeResult entityTypeResult1 = EntityTypeResult.create("entity id 1", "entity nr 1",
 				"entity description 1", "package id 2", false, false, Arrays.asList(attributeResult), 2);

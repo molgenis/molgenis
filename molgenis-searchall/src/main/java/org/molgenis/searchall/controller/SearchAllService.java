@@ -38,7 +38,7 @@ public class SearchAllService
 		List<PackageResult> packages = dataService.findAll(PackageMetadata.PACKAGE, Package.class)
 												  .filter(aPackage -> !isSystemPackage(aPackage))
 												  .filter(aPackage -> isMatchingMetadata(aPackage, searchterm))
-												  .map(pack -> PackageResult.create(pack.getLabel(),
+												  .map(pack -> PackageResult.create(pack.getId(), pack.getLabel(),
 														  pack.getDescription()))
 												  .collect(toList());
 		List<EntityTypeResult> entityTypeMatches = new ArrayList<>();
