@@ -63,9 +63,9 @@ describe('actions', () => {
 
     it('should fail and set an error in the state via a mutation', done => {
       const get = td.function('api.get')
-      td.when(get('/api/searchall/search')).thenReject('ERRORRRRR')
+      td.when(get('/api/searchall/search?term=test')).thenReject('ERRORRRRR')
       td.replace(api, 'get', get)
-      testAction(actions.SEARCH_ALL, null, {}, [{type: SET_ERRORS, payload: 'ERRORRRRR'}], [], done)
+      testAction(actions.SEARCH_ALL, 'test', {}, [{type: SET_ERRORS, payload: 'ERRORRRRR'}], [], done)
     })
   })
 })
