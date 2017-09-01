@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container pt-3">
 
     <div v-if=false class="alert alert-danger" role="alert">
       <button type="button" class="close"><span aria-hidden="true">&times;</span></button>
