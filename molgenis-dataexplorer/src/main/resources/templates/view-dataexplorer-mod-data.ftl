@@ -150,7 +150,6 @@
 </div>
 </div>
 <script>
-
     <#-- load js dependencies -->
     $.when(
             $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
@@ -169,6 +168,7 @@
                 ;
                 molgenis.dataexplorer.data.setGenomeBrowserTracks([<#list genomeTracks as genomeTrack>${genomeTrack},</#list>]);
             <#if pos_attr?? && chrom_attr??>
+                molgenis.dataexplorer.setGenomeAttributes('${pos_attr}', '${chrom_attr}')
                 molgenis.dataexplorer.data.setGenomeBrowserAttributes('${pos_attr}', '${chrom_attr}');
             </#if>
                 if (molgenis.dataexplorer.data.doShowGenomeBrowser() === true) {

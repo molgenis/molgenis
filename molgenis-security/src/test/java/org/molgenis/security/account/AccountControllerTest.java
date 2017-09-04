@@ -6,11 +6,11 @@ import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.account.AccountControllerTest.Config;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -53,7 +53,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	private CaptchaService captchaService;
 
 	@Autowired
-	private AppSettings appSettings;
+	private AuthenticationSettings authenticationSettings;
 
 	private MockMvc mockMvc;
 
@@ -67,7 +67,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 										 new GsonHttpMessageConverter(new Gson()))
 								 .build();
 
-		reset(appSettings);
+		reset(authenticationSettings);
 		reset(captchaService);
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
@@ -116,8 +116,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_activationModeUserProxy() throws Exception
 	{
-		when(appSettings.getSignUp()).thenReturn(true);
-		when(appSettings.getSignUpModeration()).thenReturn(false);
+		when(authenticationSettings.getSignUp()).thenReturn(true);
+		when(authenticationSettings.getSignUpModeration()).thenReturn(false);
 
 		this.mockMvc.perform(post("/account/register").header("X-Forwarded-Host", "website.com")
 													  .param("username", "admin")
@@ -140,8 +140,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_activationModeUserProxyWithScheme() throws Exception
 	{
-		when(appSettings.getSignUp()).thenReturn(true);
-		when(appSettings.getSignUpModeration()).thenReturn(false);
+		when(authenticationSettings.getSignUp()).thenReturn(true);
+		when(authenticationSettings.getSignUpModeration()).thenReturn(false);
 
 		this.mockMvc.perform(post("/account/register").header("X-Forwarded-Proto", "https")
 													  .header("X-Forwarded-Host", "website.com")
@@ -165,8 +165,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_activationModeUser() throws Exception
 	{
-		when(appSettings.getSignUp()).thenReturn(true);
-		when(appSettings.getSignUpModeration()).thenReturn(false);
+		when(authenticationSettings.getSignUp()).thenReturn(true);
+		when(authenticationSettings.getSignUpModeration()).thenReturn(false);
 
 		this.mockMvc.perform(post("/account/register").param("username", "admin")
 													  .param("password", "adminpw-invalid")
@@ -185,8 +185,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_activationModeAdmin() throws Exception
 	{
-		when(appSettings.getSignUp()).thenReturn(true);
-		when(appSettings.getSignUpModeration()).thenReturn(true);
+		when(authenticationSettings.getSignUp()).thenReturn(true);
+		when(authenticationSettings.getSignUpModeration()).thenReturn(true);
 
 		this.mockMvc.perform(post("/account/register").param("username", "admin")
 													  .param("password", "adminpw-invalid")
@@ -220,7 +220,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_passwordNotEqualsConfirmPassword() throws Exception
 	{
-		when(appSettings.getSignUp()).thenReturn(true);
+		when(authenticationSettings.getSignUp()).thenReturn(true);
 		this.mockMvc.perform(post("/account/register").param("username", "admin")
 													  .param("password", "adminpw-invalid")
 													  .param("confirmPassword", "adminpw-invalid-typo")
@@ -236,7 +236,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_invalidCaptcha() throws Exception
 	{
-		when(appSettings.getSignUp()).thenReturn(true);
+		when(authenticationSettings.getSignUp()).thenReturn(true);
 		this.mockMvc.perform(post("/account/register").param("username", "admin")
 													  .param("password", "adminpw-invalid")
 													  .param("confirmPassword", "adminpw-invalid")
@@ -276,8 +276,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public AccountController accountController()
 		{
-			return new AccountController(accountService(), captchaService(), redirectStrategy(), appSettings(),
-					molgenisUserFactory());
+			return new AccountController(accountService(), captchaService(), redirectStrategy(),
+					authenticationSettings(), molgenisUserFactory());
 		}
 
 		@Bean
@@ -299,9 +299,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public AppSettings appSettings()
+		public AuthenticationSettings authenticationSettings()
 		{
-			return mock(AppSettings.class);
+			return mock(AuthenticationSettings.class);
 		}
 
 		@SuppressWarnings("unchecked")

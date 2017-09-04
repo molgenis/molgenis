@@ -5,9 +5,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.FileStore;
-import org.molgenis.oneclickimporter.exceptions.EmptyFileException;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
-import org.molgenis.oneclickimporter.exceptions.NoDataException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;
@@ -49,8 +47,7 @@ public class OneClickImportJob
 
 	@Transactional
 	public List<EntityType> getEntityType(Progress progress, String filename)
-			throws UnknownFileTypeException, IOException, InvalidFormatException, NoDataException, EmptySheetException,
-			EmptyFileException
+			throws UnknownFileTypeException, IOException, InvalidFormatException, EmptySheetException
 	{
 		File file = fileStore.getFile(filename);
 		String fileExtension = findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
@@ -70,7 +67,7 @@ public class OneClickImportJob
 		}
 		else if (fileExtension.equals("csv"))
 		{
-			List<String> lines = csvService.buildLinesFromFile(file);
+			List<String[]> lines = csvService.buildLinesFromFile(file);
 			dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(
 					oneClickImporterNamingService.createValidIdFromFileName(filename), lines));
 		}
@@ -82,7 +79,7 @@ public class OneClickImportJob
 				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), newHashSet("csv"));
 				if (fileInZipExtension != null)
 				{
-					List<String> lines = csvService.buildLinesFromFile(fileInZip);
+					List<String[]> lines = csvService.buildLinesFromFile(fileInZip);
 					dataCollections.add(oneClickImporterService.buildDataCollectionFromCsv(
 							oneClickImporterNamingService.createValidIdFromFileName(fileInZip.getName()), lines));
 				}

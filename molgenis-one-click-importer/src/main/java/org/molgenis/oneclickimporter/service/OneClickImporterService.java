@@ -22,7 +22,7 @@ public interface OneClickImporterService
 	 * @param dataCollectionName
 	 * @param lines
 	 */
-	DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String> lines);
+	DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String[]> lines);
 
 	/**
 	 * Test is values are unique within column.

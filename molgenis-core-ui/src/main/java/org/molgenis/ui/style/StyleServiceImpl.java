@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_3;
-import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
+import static org.molgenis.ui.style.StyleSheetMetadata.STYLE_SHEET;
 
 @Component
 public class StyleServiceImpl implements StyleService
@@ -55,7 +55,7 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	public Set<Style> getAvailableStyles()
 	{
-		Stream<StyleSheet> styleEntities = dataService.findAll(StyleMetadata.STYLE_SHEET, StyleSheet.class);
+		Stream<StyleSheet> styleEntities = dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class);
 
 		return styleEntities.map(s -> Style.createLocal(s.getName())).collect(Collectors.toSet());
 	}
@@ -191,8 +191,8 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	public StyleSheet findThemeByName(String themeName)
 	{
-		Query<StyleSheet> findByName = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, themeName);
-		return dataService.findOne(StyleMetadata.STYLE_SHEET, findByName, StyleSheet.class);
+		Query<StyleSheet> findByName = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, themeName);
+		return dataService.findOne(StyleSheetMetadata.STYLE_SHEET, findByName, StyleSheet.class);
 	}
 
 	/**

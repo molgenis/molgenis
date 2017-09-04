@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>5.1.0-SNAPSHOT</version>
+    <version>5.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -23,12 +23,13 @@
         <connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
-         
+
     <developers>
         <developer>
             <name>MOLGENIS development team</name>
             <email>molgenis@gmail.com</email>
-            <organization>University Medical Centre Groningen, System Genetics, Genomics Coordination Centre</organization>
+            <organization>University Medical Centre Groningen, System Genetics, Genomics Coordination Centre
+            </organization>
             <organizationUrl>http://www.molgenis.org</organizationUrl>
         </developer>
     </developers>
@@ -899,6 +900,7 @@
         <module>molgenis-python</module>
         <module>molgenis-questionnaires</module>
         <module>molgenis-r</module>
+        <module>molgenis-searchall</module>
         <module>molgenis-scripts-core</module>
         <module>molgenis-scripts</module>
         <module>molgenis-security-core</module>

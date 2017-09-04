@@ -37,7 +37,7 @@ public class ApiSessionExpirationFilter extends GenericFilterBean
 																									"/api/v2/version"))
 		{
 			// Signal that the 'session expired' message must be shown in the login form
-			httpRequest.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTR, true);
+			httpRequest.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTRIBUTE, true);
 		}
 		chain.doFilter(request, response);
 	}

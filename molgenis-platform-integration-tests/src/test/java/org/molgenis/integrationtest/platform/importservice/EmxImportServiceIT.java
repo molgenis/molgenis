@@ -234,7 +234,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
-			ROLE_READ_TAG, ROLE_READ_OWNED, ROLE_READ_FILE_META })
+			ROLE_READ_TAG, ROLE_READ_OWNED, ROLE_READ_FILE_META, ROLE_COUNT_FILE_META, ROLE_COUNT_OWNED,
+			ROLE_COUNT_TAG })
 	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{

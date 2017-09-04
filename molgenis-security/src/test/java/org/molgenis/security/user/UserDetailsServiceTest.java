@@ -58,7 +58,7 @@ public class UserDetailsServiceTest
 		userDetailsService = new UserDetailsService(dataService, authoritiesMapper);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void MolgenisUserDetailsService()
 	{
 		new UserDetailsService(null, null);

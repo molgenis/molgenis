@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StyleSheetFactory extends AbstractSystemEntityFactory<StyleSheet, StyleMetadata, String>
+public class StyleSheetFactory extends AbstractSystemEntityFactory<StyleSheet, StyleSheetMetadata, String>
 {
 	@Autowired
-	StyleSheetFactory(StyleMetadata styleMetadata, EntityPopulator entityPopulator)
+	StyleSheetFactory(StyleSheetMetadata styleSheetMetadata, EntityPopulator entityPopulator)
 	{
-		super(StyleSheet.class, styleMetadata, entityPopulator);
+		super(StyleSheet.class, styleSheetMetadata, entityPopulator);
 	}
 }
