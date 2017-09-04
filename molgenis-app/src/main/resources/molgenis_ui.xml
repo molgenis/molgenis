@@ -6,10 +6,10 @@
 			<plugin id="one-click-importer" name="Quick data import" url="one-click-importer"/>
         	<plugin id="importwizard" name="Advanced data import" url="importwizard"/>
 		</menu>
-		<plugin id="navigator" name="Navigator" url="navigator"/>
+        <plugin id="navigator" name="Navigator" url="navigator"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<menu label="Data Integration" name="dataintegration">
-			<plugin id="metadata-manager" name="Metadata Manager" url="metadata-manager"/>
+            <plugin id="metadata-manager" name="Metadata Manager" url="metadata-manager"/>
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
             <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>

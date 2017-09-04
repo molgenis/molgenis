@@ -59,10 +59,11 @@
   import SearchInput from './SearchInput'
   import PackagesResult from './PackagesResult'
   import EntityResult from './EntityResult'
+
   export default {
     name: 'SearchAll',
     components: {SearchInput, PackagesResult, EntityResult},
-    data () {
+    data() {
       return {
         navigatorBaseUrl: window.searchall.navigatorBaseUrl,
         dataExplorerBaseUrl: window.searchall.dataExplorerBaseUrl,

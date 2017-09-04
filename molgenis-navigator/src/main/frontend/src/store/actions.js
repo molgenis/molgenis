@@ -1,8 +1,8 @@
 // @flow
-import type { Package } from './state'
+import type {Package} from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from './mutations'
+import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH} from './mutations'
 
 export const QUERY_PACKAGES = 'QUERY_PACKAGES'
 export const QUERY_ENTITIES = 'QUERY_ENTITIES'
@@ -49,7 +49,7 @@ function buildPath (packages, currentPackage: Package, path: Array<Package>) {
  * @param item result row form query to backend
  * @returns {{id: *, type: string, label: *, description: *}}
  */
-function toEntity (item: any) {
+function toEntity(item: any) {
   return {
     'id': item.id,
     'type': 'entity',
@@ -95,7 +95,7 @@ function queryPackages (query: string) {
  *
  * @param query query to send to api/v2
  */
-function validateQuery (query: string) {
+function validateQuery(query: string) {
   if (query.indexOf('"') > -1) {
     throw new Error('Double quotes not are allowed in queries, please use single quotes.')
   }
@@ -174,7 +174,7 @@ export default {
       })
     })
   },
-  [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: {
+  [GET_STATE_FOR_PACKAGE]({commit, dispatch}: {
     commit: Function, dispatch: Function
   }, selectedPackageId: ? string) {
     return new Promise((resolve, reject) => {

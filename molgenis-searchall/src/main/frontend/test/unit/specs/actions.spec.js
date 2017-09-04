@@ -4,7 +4,7 @@ import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 
 import actions from 'store/actions'
-import { SET_ERRORS, SET_RESULTS } from 'store/mutations'
+import {SET_ERRORS, SET_RESULTS} from 'store/mutations'
 
 describe('actions', () => {
   describe('SEARCH_ALL', () => {

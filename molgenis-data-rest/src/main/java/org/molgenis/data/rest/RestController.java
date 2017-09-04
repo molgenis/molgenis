@@ -20,7 +20,6 @@ import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;

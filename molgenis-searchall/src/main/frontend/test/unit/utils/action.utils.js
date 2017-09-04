@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 
 export default (action, payload, state, expectedMutations, expectedActions, done) => {
   let mutationCount = 0
