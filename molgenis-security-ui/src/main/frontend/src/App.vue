@@ -6,12 +6,9 @@
   </div>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-  @import "~mixins";
-
+<style>
   #app {
-    background-color: $white;
+    background-color: white;
   }
 </style>
 
