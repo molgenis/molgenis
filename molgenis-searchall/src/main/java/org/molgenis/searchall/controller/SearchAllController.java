@@ -1,6 +1,7 @@
 package org.molgenis.searchall.controller;
 
 import org.molgenis.searchall.model.Result;
+import org.molgenis.searchall.service.SearchAllService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
