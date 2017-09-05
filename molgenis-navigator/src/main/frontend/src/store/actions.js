@@ -4,11 +4,11 @@ import type { Package } from './state'
 import api from '@molgenis/molgenis-api-client'
 import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from './mutations'
 
-export const QUERY_PACKAGES = 'QUERY_PACKAGES'
-export const QUERY_ENTITIES = 'QUERY_ENTITIES'
-export const RESET_STATE = 'RESET_STATE'
-export const GET_STATE_FOR_PACKAGE = 'GET_STATE_FOR_PACKAGE'
-export const GET_ENTITIES_IN_PACKAGE = 'GET_ENTITIES_IN_PACKAGE'
+export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
+export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
+export const RESET_STATE = '__RESET_STATE__'
+export const GET_STATE_FOR_PACKAGE = '__GET_STATE_FOR_PACKAGE__'
+export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
 
 /**
  * Resets the entire state using the given packages as the package state.
@@ -59,34 +59,21 @@ function toEntity (item: any) {
 }
 
 /**
- * Get all ( first 1000 ) packages from the server
- * @returns {Promise}, on success resolves to list of 'all' packages, on failure resolves to error message
+ * Get a MOLGENIS rest api encoded query for the Package EntityType
+ *
+ * @param query
  */
-function getAllPackages () {
-  return new Promise((resolve, reject) => {
-    const uri = '/api/v2/sys_md_Package?sort=label&num=1000'
-    api.get(uri).then((response) => {
-      resolve(response.items)
-    }).catch((error) => {
-      reject(error)
-    })
-  })
+function getPackageQuery (query: string) {
+  return '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"'
 }
 
 /**
- * Query's the server of ( first 1000 ) packages.
- * Packages are returned if query matches id, description or label
- * @returns {Promise}, on success resolves to list of matching packages, on failure resolves to error message
+ * Get a MOLGENIS rest api encoded query for the EntityType EntityType
+ *
+ * @param query
  */
-function queryPackages (query: string) {
-  return new Promise((resolve, reject) => {
-    const uri = '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"'
-    api.get(uri).then((response) => {
-      resolve(response.items)
-    }).catch((error) => {
-      reject(error)
-    })
-  })
+function getEntityTypeQuery (query: string) {
+  return '/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '");isAbstract==false'
 }
 
 /**
@@ -103,109 +90,83 @@ function validateQuery (query: string) {
 
 export default {
   [QUERY_PACKAGES] ({commit}: { commit: Function }, query: ?string) {
-    return new Promise((resolve, reject) => {
-      if (!query) {
-        getAllPackages().then(packages => {
-          commit(SET_PACKAGES, packages)
-          resolve()
-        }, errorMessage => {
-          commit(SET_ERROR, errorMessage)
-          reject()
-        })
-      } else {
-        try {
-          validateQuery(query)
-          queryPackages(query).then(packages => {
-            commit(SET_PACKAGES, packages)
-            resolve()
-          }, errorMessage => {
-            commit(SET_ERROR, errorMessage)
-            reject()
-          })
-        } catch (err) {
-          commit(SET_ERROR, err.message)
-          reject()
-        }
+    let uri
+
+    if (!query) {
+      uri = '/api/v2/sys_md_Package?sort=label&num=1000'
+    } else {
+      try {
+        validateQuery(query)
+        uri = getPackageQuery(query)
+      } catch (error) {
+        commit(SET_ERROR, error.message)
       }
+    }
+
+    api.get(uri).then(response => {
+      commit(SET_PACKAGES, response.items)
+    }, error => {
+      commit(SET_ERROR, error)
     })
   },
   [QUERY_ENTITIES] ({commit}: { commit: Function }, query: string) {
-    return new Promise((resolve, reject) => {
-      if (!query) {
-        resolve()
-      } else {
-        try {
-          validateQuery(query)
-          api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '");isAbstract==false').then((response) => {
-            const entities = response.items.map(toEntity)
-            commit(SET_ENTITIES, entities)
-            resolve()
-          }).catch((error) => {
-            commit(SET_ERROR, error)
-            reject()
-          })
-        } catch (err) {
-          commit(SET_ERROR, err.message)
-          reject()
-        }
+    if (query) {
+      try {
+        validateQuery(query)
+        api.get(getEntityTypeQuery(query)).then(response => {
+          const entities = response.items.map(toEntity)
+          commit(SET_ENTITIES, entities)
+        }, error => {
+          commit(SET_ERROR, error)
+        })
+      } catch (error) {
+        commit(SET_ERROR, error.message)
       }
-    })
+    }
   },
   [GET_ENTITIES_IN_PACKAGE] ({commit}: { commit: Function }, packageId: string) {
-    return new Promise((resolve, reject) => {
-      api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==' + packageId).then((response) => {
-        const entities = response.items.map(toEntity)
-        commit(SET_ENTITIES, entities)
-        resolve()
-      }).catch((error) => {
-        commit(SET_ERROR, error)
-        reject()
-      })
+    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==' + packageId).then(response => {
+      const entities = response.items.map(toEntity)
+      commit(SET_ENTITIES, entities)
+    }, error => {
+      commit(SET_ERROR, error)
     })
   },
   [RESET_STATE] ({commit}: { commit: Function }) {
-    return new Promise((resolve, reject) => {
-      getAllPackages().then(allPackages => {
-        resetToHome(commit, allPackages)
-        resolve()
-      }, errorMessage => {
-        commit(SET_ERROR, errorMessage)
-        reject()
-      })
+    api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
+      resetToHome(commit, response.items)
+    }, error => {
+      commit(SET_ERROR, error)
     })
   },
-  [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: {
-    commit: Function, dispatch: Function
-  }, selectedPackageId: ? string) {
-    return new Promise((resolve, reject) => {
-      getAllPackages().then(allPackages => {
-        if (!selectedPackageId) {
-          resetToHome(commit, allPackages)
+  [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, selectedPackageId: ?string) {
+    api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
+      const packages = response.items
+
+      if (!selectedPackageId) {
+        resetToHome(commit, packages)
+      } else {
+        const selectedPackage = packages.find(function (packageItem) {
+          return packageItem.id === selectedPackageId
+        })
+
+        if (!selectedPackage) {
+          commit(SET_ERROR, 'couldn\'t find package.')
+          resetToHome(commit, packages)
         } else {
-          const selectedPackage = allPackages.find(function (packageItem) {
-            return packageItem.id === selectedPackageId
+          // Find child packages.
+          const childPackages = packages.filter(function (packageItem) {
+            return packageItem.parent && packageItem.parent.id === selectedPackage.id
           })
+          commit(SET_PACKAGES, childPackages)
 
-          if (!selectedPackage) {
-            commit(SET_ERROR, 'couldn\'t find package.')
-            resetToHome(commit, allPackages)
-            reject()
-          } else {
-            // Find child packages.
-            const childPackages = allPackages.filter(function (packageItem) {
-              return packageItem.parent && packageItem.parent.id === selectedPackage.id
-            })
-            commit(SET_PACKAGES, childPackages)
-
-            const path = buildPath(allPackages, selectedPackage, [])
-            commit(SET_PATH, path)
-            dispatch(GET_ENTITIES_IN_PACKAGE, selectedPackageId).then(resolve)
-          }
+          const path = buildPath(packages, selectedPackage, [])
+          commit(SET_PATH, path)
+          dispatch(GET_ENTITIES_IN_PACKAGE, selectedPackageId)
         }
-      }, errorMessage => {
-        commit(SET_ERROR, errorMessage)
-        reject()
-      })
+      }
+    }, error => {
+      commit(SET_ERROR, error)
     })
   }
 }
