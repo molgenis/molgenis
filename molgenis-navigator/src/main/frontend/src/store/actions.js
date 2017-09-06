@@ -13,6 +13,7 @@ export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
 /**
  * Resets the entire state using the given packages as the package state.
  * Only top level packages are set
+ *
  * @param commit, reference to mutation function
  * @param packages, the complete list of packages
  */
@@ -27,6 +28,7 @@ function resetToHome (commit: Function, packages: Array<Package>) {
 
 /**
  * Recursively build the path, going backwards starting at the currentPackage
+ *
  * @param packages, the complete list of packages
  * @param currentPackage, the tail
  * @param path the path where building
@@ -46,6 +48,7 @@ function buildPath (packages, currentPackage: Package, path: Array<Package>) {
 
 /**
  * Transform the result to an Entity object
+ *
  * @param item result row form query to backend
  * @returns {{id: *, type: string, label: *, description: *}}
  */
@@ -59,7 +62,8 @@ function toEntity (item: any) {
 }
 
 /**
- * Get a MOLGENIS rest api encoded query for the Package EntityType
+ * Get a MOLGENIS rest api encoded query for the Package table
+ * The query retrieves the first 1000 packages
  *
  * @param query
  */
@@ -68,7 +72,8 @@ function getPackageQuery (query: string) {
 }
 
 /**
- * Get a MOLGENIS rest api encoded query for the EntityType EntityType
+ * Get a MOLGENIS rest api encoded query for the EntityType table
+ * The query retrieves the first 1000 EntityTypes
  *
  * @param query
  */
