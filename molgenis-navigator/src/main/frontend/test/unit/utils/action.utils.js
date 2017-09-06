@@ -1,11 +1,18 @@
 import { expect } from 'chai'
 
-export default (action, payload, state, expectedMutations, expectedActions, done) => {
+export default (testSetup, done) => {
+  const action = testSetup.actionToTest
+  const payload = testSetup.actionPayload
+  const state = testSetup.state
+  const expectedMutations = testSetup.expectedMutationsToBeCommited
+  const expectedActions = testSetup.expectedActionsToBeDispatched
+
   let mutationCount = 0
   let actionCount = 0
 
   const commit = (type, payload) => {
     const mutation = expectedMutations[mutationCount]
+
     try {
       expect(mutation.type).to.equal(type)
       if (payload) {
@@ -23,6 +30,7 @@ export default (action, payload, state, expectedMutations, expectedActions, done
 
   const dispatch = (type, payload) => {
     const action = expectedActions[actionCount]
+
     try {
       expect(action.type).to.equal(type)
       if (payload) {
