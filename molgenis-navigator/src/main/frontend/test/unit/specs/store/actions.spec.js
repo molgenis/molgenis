@@ -2,27 +2,10 @@ import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
 import actions, { GET_ENTITIES_IN_PACKAGE } from 'src/store/actions'
 import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from 'src/store/mutations'
-import testAction from '../../utils/action.utils'
+import { testAction } from '../../utils/action.utils'
 
 describe('actions', () => {
-  let testSetup = {
-    'actionToTest': null,
-    'actionPayload': null,
-    'state': {},
-    'expectedMutationsToBeCommited': [],
-    'expectedActionsToBeDispatched': []
-  }
-
-  afterEach(() => {
-    td.reset()
-    testSetup = {
-      'actionToTest': null,
-      'actionPayload': null,
-      'state': {},
-      'expectedMutationsToBeCommited': [],
-      'expectedActionsToBeDispatched': []
-    }
-  })
+  afterEach(() => { td.reset() })
 
   describe('QUERY_PACKAGES', function () {
     it('should fetch the packages and call the SET_PACKAGES mutation', done => {
@@ -35,10 +18,13 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__QUERY_PACKAGES__
-      testSetup.expectedMutationsToBeCommited.push({type: SET_PACKAGES, payload: response.items})
+      const options = {
+        expectedMutations: [
+          {type: SET_PACKAGES, payload: response.items}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__QUERY_PACKAGES__, options, done)
     })
 
     it('should fetch packages with a query and call the SET_PACKAGES mutation', done => {
@@ -51,11 +37,14 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="test",description=q="test",label=q="test"')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__QUERY_PACKAGES__
-      testSetup.actionPayload = 'test'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_PACKAGES, payload: response.items})
+      const options = {
+        payload: 'test',
+        expectedMutations: [
+          {type: SET_PACKAGES, payload: response.items}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__QUERY_PACKAGES__, options, done)
     })
 
     it('should fail creating the URI and call the SET_ERROR mutation', done => {
@@ -65,11 +54,14 @@ describe('actions', () => {
       td.when(get('/undefined')).thenResolve('ignore')
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__QUERY_PACKAGES__
-      testSetup.actionPayload = '"wrong query"'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ERROR, payload: error})
+      const options = {
+        payload: '"wrong query"',
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__QUERY_PACKAGES__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -79,10 +71,13 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenReject(error)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__QUERY_PACKAGES__
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ERROR, payload: error})
+      const options = {
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__QUERY_PACKAGES__, options, done)
     })
   })
 
@@ -103,11 +98,14 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="test",description=q="test");isAbstract==false')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__QUERY_ENTITIES__
-      testSetup.actionPayload = 'test'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ENTITIES, payload: response.items})
+      const options = {
+        payload: 'test',
+        expectedMutations: [
+          {type: SET_ENTITIES, payload: response.items}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__QUERY_ENTITIES__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -117,11 +115,14 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="test",description=q="test");isAbstract==false')).thenReject(error)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__QUERY_ENTITIES__
-      testSetup.actionPayload = 'test'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ERROR, payload: error})
+      const options = {
+        payload: 'test',
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__QUERY_ENTITIES__, options, done)
     })
   })
 
@@ -152,11 +153,14 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==1')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__GET_ENTITIES_IN_PACKAGE__
-      testSetup.actionPayload = '1'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ENTITIES, payload: response.items})
+      const options = {
+        payload: '1',
+        expectedMutations: [
+          {type: SET_ENTITIES, payload: response.items}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -166,11 +170,14 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==1')).thenReject(error)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__GET_ENTITIES_IN_PACKAGE__
-      testSetup.actionPayload = '1'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ERROR, payload: error})
+      const options = {
+        payload: '1',
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
     })
   })
 
@@ -209,12 +216,15 @@ describe('actions', () => {
         }
       ]
 
-      testSetup.actionToTest = actions.__RESET_STATE__
-      testSetup.expectedMutationsToBeCommited.push({type: SET_PACKAGES, payload: payload})
-      testSetup.expectedMutationsToBeCommited.push({type: RESET_PATH, payload: null})
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ENTITIES, payload: []})
+      const options = {
+        expectedMutations: [
+          {type: SET_PACKAGES, payload: payload},
+          {type: RESET_PATH, payload: null},
+          {type: SET_ENTITIES, payload: []}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__RESET_STATE__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -224,10 +234,13 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenReject(error)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__RESET_STATE__
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ERROR, payload: error})
+      const options = {
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__RESET_STATE__, options, done)
     })
   })
 
@@ -250,12 +263,15 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__GET_STATE_FOR_PACKAGE__
-      testSetup.expectedMutationsToBeCommited.push({type: SET_PACKAGES, payload: response.items})
-      testSetup.expectedMutationsToBeCommited.push({type: RESET_PATH, payload: null})
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ENTITIES, payload: []})
+      const options = {
+        expectedMutations: [
+          {type: SET_PACKAGES, payload: response.items},
+          {type: RESET_PATH, payload: null},
+          {type: SET_ENTITIES, payload: []}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
 
     it('should throw an error if the selected package was not found', done => {
@@ -276,14 +292,17 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__GET_STATE_FOR_PACKAGE__
-      testSetup.actionPayload = '3'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ERROR, payload: 'couldn\'t find package.'})
-      testSetup.expectedMutationsToBeCommited.push({type: SET_PACKAGES, payload: response.items})
-      testSetup.expectedMutationsToBeCommited.push({type: RESET_PATH, payload: null})
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ENTITIES, payload: []})
+      const options = {
+        payload: '3',
+        expectedMutations: [
+          {type: SET_ERROR, payload: 'couldn\'t find package.'},
+          {type: SET_PACKAGES, payload: response.items},
+          {type: RESET_PATH, payload: null},
+          {type: SET_ENTITIES, payload: []}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
 
     it('should create a path based on the selected package', done => {
@@ -362,13 +381,18 @@ describe('actions', () => {
         }
       ]
 
-      testSetup.actionToTest = actions.__GET_STATE_FOR_PACKAGE__
-      testSetup.actionPayload = '2'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_PACKAGES, payload: payload})
-      testSetup.expectedMutationsToBeCommited.push({type: SET_PATH, payload: path})
-      testSetup.expectedActionsToBeDispatched.push({type: GET_ENTITIES_IN_PACKAGE, payload: '2'})
+      const options = {
+        payload: '2',
+        expectedMutations: [
+          {type: SET_PACKAGES, payload: payload},
+          {type: SET_PATH, payload: path}
+        ],
+        expectedActions: [
+          {type: GET_ENTITIES_IN_PACKAGE, payload: '2'}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -378,11 +402,14 @@ describe('actions', () => {
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenReject(error)
       td.replace(api, 'get', get)
 
-      testSetup.actionToTest = actions.__GET_STATE_FOR_PACKAGE__
-      testSetup.actionPayload = '1'
-      testSetup.expectedMutationsToBeCommited.push({type: SET_ERROR, payload: error})
+      const options = {
+        payload: '1',
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
 
-      testAction(testSetup, done)
+      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
   })
 })
