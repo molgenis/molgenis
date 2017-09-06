@@ -40,7 +40,8 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { SnpEffRunnerTest.Config.class })
 public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
@@ -745,20 +746,13 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void annotateCountTest()
+	public void annotateCountTest() throws IOException, InterruptedException
 	{
-		try
-		{
-			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
-					"0", "-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
-					ResourceUtils.getFile(getClass(), "/test-edgecases.vcf"))).thenReturn(
-					ResourceUtils.getFile(getClass(), "/snpEffOutputCount.vcf"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
+				"-spliceSiteSize", "5");
+		when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+				ResourceUtils.getFile(getClass(), "/test-edgecases.vcf"))).thenReturn(
+				ResourceUtils.getFile(getClass(), "/snpEffOutputCount.vcf"));
 
 		Iterator<Entity> results = snpEffRunner.getSnpEffects(singleAlleleEntities.iterator(),
 				ResourceUtils.getFile(getClass(), "/test-edgecases.vcf"));
@@ -766,13 +760,11 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void getInputVcfFileTest()
+	public void getInputVcfFileTest() throws IOException
 	{
-		BufferedReader br = null;
-		try
+		File singleAlleleFile = snpEffRunner.getInputVcfFile(singleAlleleEntities.iterator());
+		try (BufferedReader br = new BufferedReader(new FileReader(singleAlleleFile.getAbsolutePath())))
 		{
-			File singleAlleleFile = snpEffRunner.getInputVcfFile(singleAlleleEntities.iterator());
-			br = new BufferedReader(new FileReader(singleAlleleFile.getAbsolutePath()));
 			assertEquals(br.readLine(), "#CHROM	POS ID REF ALT QUAL FILTER INFO".replace(" ", "\t"));
 			assertEquals(br.readLine(), "1 13380 . C G .  . .".replace(" ", "\t"));
 			assertEquals(br.readLine(), "1 13980 . T C .  . .".replace(" ", "\t"));
@@ -782,56 +774,35 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 			assertEquals(br.readLine(), "2 191904021 . G T .  . .".replace(" ", "\t"));
 			assertEquals(br.readLine(), "3 53219680 . G C .  . .".replace(" ", "\t"));
 			assertEquals(br.readLine(), "1 1115548 . G A .  . .".replace(" ", "\t"));
-			br.close();
+		}
 
-			File multiAlleleFile = snpEffRunner.getInputVcfFile(multiAlleleEntities.iterator());
-			br = new BufferedReader(new FileReader(multiAlleleFile.getAbsolutePath()));
+		File multiAlleleFile = snpEffRunner.getInputVcfFile(multiAlleleEntities.iterator());
+		try (BufferedReader br = new BufferedReader(new FileReader(multiAlleleFile.getAbsolutePath())))
+		{
 			assertEquals(br.readLine(), "#CHROM	POS ID REF ALT QUAL FILTER INFO".replace(" ", "\t"));
 			assertEquals(br.readLine(), "1 231094050 . GAA G,GAAA,GA .  . .".replace(" ", "\t"));
 			assertEquals(br.readLine(), "4 69964234 . CT CTT,CTTT,C .  . .".replace(" ", "\t"));
 			assertEquals(br.readLine(), "15 66641732 . G A,C,T .  . .".replace(" ", "\t"));
 			assertEquals(br.readLine(), "21\t45650009\t.\tT\tTG, A, G\t.\t\t.\t.");
-			br.close();
+		}
 
-			File multiGeneFile = snpEffRunner.getInputVcfFile(multiGeneEntities.iterator());
-			br = new BufferedReader(new FileReader(multiGeneFile.getAbsolutePath()));
+		File multiGeneFile = snpEffRunner.getInputVcfFile(multiGeneEntities.iterator());
+		try (BufferedReader br = new BufferedReader(new FileReader(multiGeneFile.getAbsolutePath())))
+		{
 			assertEquals(br.readLine(), "#CHROM	POS ID REF ALT QUAL FILTER INFO".replace(" ", "\t"));
 			assertEquals(br.readLine(), "2 171570151 . C T .  . .".replace(" ", "\t"));
 			assertEquals(br.readLine(), "2 219142023 . G A .  . .".replace(" ", "\t"));
-			br.close();
-		}
-		catch (Exception e)
-		{
-			fail();
-		}
-		finally
-		{
-			try
-			{
-				br.close();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
 		}
 	}
 
 	@Test
-	public void getSnpEffectsSingleAlleleTest()
+	public void getSnpEffectsSingleAlleleTest() throws IOException, InterruptedException
 	{
-		try
-		{
-			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
-					"0", "-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
-					ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
-					ResourceUtils.getFile(getClass(), "/snpeff-single-allele-output.vcf"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
+				"-spliceSiteSize", "5");
+		when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
+				ResourceUtils.getFile(getClass(), "/snpeff-single-allele-output.vcf"));
 
 		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(singleAlleleEntities.iterator(),
 				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
@@ -845,20 +816,13 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void getSnpEffectsMultiAlleleTest()
+	public void getSnpEffectsMultiAlleleTest() throws IOException, InterruptedException
 	{
-		try
-		{
-			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
-					"0", "-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
-					ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
-					ResourceUtils.getFile(getClass(), "/snpeff-multi-allele-output.vcf"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
+				"-spliceSiteSize", "5");
+		when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
+				ResourceUtils.getFile(getClass(), "/snpeff-multi-allele-output.vcf"));
 
 		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(multiAlleleEntities.iterator(),
 				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));
@@ -872,20 +836,13 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void getSnpEffectsMultiGeneTest()
+	public void getSnpEffectsMultiGeneTest() throws IOException, InterruptedException
 	{
-		try
-		{
-			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
-					"0", "-spliceSiteSize", "5");
-			when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
-					ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
-					ResourceUtils.getFile(getClass(), "/snpeff-multi-gene-output.vcf"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
+				"-spliceSiteSize", "5");
+		when(jarRunner.runJar(SnpEffAnnotator.NAME, params,
+				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf"))).thenReturn(
+				ResourceUtils.getFile(getClass(), "/snpeff-multi-gene-output.vcf"));
 
 		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(multiGeneEntities.iterator(),
 				ResourceUtils.getFile(getClass(), "/test-snpeff.vcf")));

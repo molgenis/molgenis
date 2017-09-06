@@ -117,7 +117,7 @@ public class AccountController
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LOG.error("Error changing password", e);
 		}
 	}
 
