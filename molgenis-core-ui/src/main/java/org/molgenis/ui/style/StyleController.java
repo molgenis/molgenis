@@ -32,8 +32,7 @@ public class StyleController
 
 	@RequestMapping(value = "/css/bootstrap-{bootstrap-version}/{theme}", method = RequestMethod.GET)
 	public ResponseEntity getThemeCss(@PathVariable("bootstrap-version") String bootstrapVersion,
-			@PathVariable("theme") String theme, HttpServletResponse response)
-			throws MolgenisStyleException
+			@PathVariable("theme") String theme, HttpServletResponse response) throws MolgenisStyleException
 	{
 		response.setHeader("Content-Type", "text/css");
 		response.setHeader("Cache-Control", "max-age=31536000");
@@ -55,13 +54,12 @@ public class StyleController
 			throw new MolgenisStyleException("Unable to return theme data", e);
 		}
 
-
 		return new ResponseEntity(HttpStatus.OK);
 	}
 
 	@ResponseBody
 	@ResponseStatus(NOT_FOUND)
-	@ExceptionHandler({ MolgenisStyleException.class, IOException.class})
+	@ExceptionHandler({ MolgenisStyleException.class, IOException.class })
 	public ErrorMessageResponse handleStyleException(Exception e)
 	{
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));

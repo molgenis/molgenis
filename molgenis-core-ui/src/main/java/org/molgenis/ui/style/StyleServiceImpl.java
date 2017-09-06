@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_3;
-import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
+import static org.molgenis.ui.style.StyleSheetMetadata.STYLE_SHEET;
 
 @Component
 public class StyleServiceImpl implements StyleService
@@ -40,9 +40,8 @@ public class StyleServiceImpl implements StyleService
 	private final StyleSheetFactory styleSheetFactory;
 	private final DataService dataService;
 
-
 	@Autowired
-	public StyleServiceImpl(AppSettings appSettings, IdGenerator idGenerator,FileStore fileStore,
+	public StyleServiceImpl(AppSettings appSettings, IdGenerator idGenerator, FileStore fileStore,
 			FileMetaFactory fileMetaFactory, StyleSheetFactory styleSheetFactory, DataService dataService)
 	{
 		this.appSettings = requireNonNull(appSettings);
@@ -56,7 +55,7 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	public Set<Style> getAvailableStyles()
 	{
-		Stream<StyleSheet> styleEntities = dataService.findAll(StyleMetadata.STYLE_SHEET, StyleSheet.class);
+		Stream<StyleSheet> styleEntities = dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class);
 
 		return styleEntities.map(s -> Style.createLocal(s.getName())).collect(Collectors.toSet());
 	}
@@ -78,7 +77,8 @@ public class StyleServiceImpl implements StyleService
 		styleSheet.setBootstrap3Theme(bootstrap3ThemeFileMeta);
 
 		// Setting the bootstrap 4 style is optional
-		if(bootstrap4FileName != null && bootstrap4StyleData != null) {
+		if (bootstrap4FileName != null && bootstrap4StyleData != null)
+		{
 			FileMeta bootstrap4ThemeFileMeta = createStyleSheetFileMeta(bootstrap4FileName, bootstrap4StyleData);
 			styleSheet.setBootstrap4Theme(bootstrap4ThemeFileMeta);
 		}
@@ -191,8 +191,8 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	public StyleSheet findThemeByName(String themeName)
 	{
-		Query<StyleSheet> findByName = new QueryImpl<StyleSheet>().eq(StyleMetadata.NAME, themeName);
-		return dataService.findOne(StyleMetadata.STYLE_SHEET, findByName, StyleSheet.class);
+		Query<StyleSheet> findByName = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, themeName);
+		return dataService.findOne(StyleSheetMetadata.STYLE_SHEET, findByName, StyleSheet.class);
 	}
 
 	/**
@@ -206,7 +206,8 @@ public class StyleServiceImpl implements StyleService
 		{
 			ServletUriComponentsBuilder currentRequest = ServletUriComponentsBuilder.fromCurrentRequest();
 			UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + fileId)
-					.replaceQuery(null).build();
+													  .replaceQuery(null)
+													  .build();
 			return downloadUri.toUriString();
 		}
 		else

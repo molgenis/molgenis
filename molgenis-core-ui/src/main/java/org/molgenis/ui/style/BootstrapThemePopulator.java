@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.style.StyleMetadata.STYLE_SHEET;
+import static org.molgenis.ui.style.StyleSheetMetadata.STYLE_SHEET;
 
 @Component
 public class BootstrapThemePopulator
@@ -51,8 +51,9 @@ public class BootstrapThemePopulator
 
 			// filter out themes already stored in the database
 			List<Resource> newThemes = Arrays.stream(bootstrap3Themes)
-					.filter(theme -> dataService.getRepository(STYLE_SHEET).findOneById(theme.getFilename()) == null)
-					.collect(Collectors.toList());
+											 .filter(theme -> dataService.getRepository(STYLE_SHEET)
+																		 .findOneById(theme.getFilename()) == null)
+											 .collect(Collectors.toList());
 
 			for (Resource bootstrap3Resource : newThemes)
 			{
@@ -92,7 +93,8 @@ public class BootstrapThemePopulator
 	private Optional<Resource> guessMatchingBootstrap4File(Resource[] bootstrap4Themes, String bootstrap3ThemeFileName)
 	{
 		return Arrays.stream(bootstrap4Themes)
-				.filter(bootstrap4Theme -> bootstrap3ThemeFileName.equals(bootstrap4Theme.getFilename())).findFirst();
+					 .filter(bootstrap4Theme -> bootstrap3ThemeFileName.equals(bootstrap4Theme.getFilename()))
+					 .findFirst();
 	}
 
 }

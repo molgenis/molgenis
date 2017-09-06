@@ -10,8 +10,8 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 * [Apache Tomcat v7.0.79](http://tomcat.apache.org/)
 * [PostgreSQL v9.6.3](https://www.postgresql.org/download/)
 * [Elasticsearch v5.5.1](https://www.elastic.co/downloads/elasticsearch)
-* [OpenCPU 2.0](https://www.opencpu.org/download.html) (R script execution)
-* [Python 3.6.2](https://www.python.org/downloads/) (Python script execution)
+* Optional: [OpenCPU 2.0](https://www.opencpu.org/download.html) (enables R scripting feature)
+* Optional: [Python 3.6.2](https://www.python.org/downloads/) (enables Python scripting feature)
 * [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
 
@@ -23,7 +23,7 @@ Now that your Apache Tomcat is running and MOLGENIS is deployed, you will notice
 The properties file supplies information to the application regarding the database URL, and the initial administrator password. To make it clear to Tomcat where to find your properties file, you have to edit the setenv.sh file in the apache-tomcat folder.
 
 ```
-echo 'CATALINA_OPTS="-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Dmolgenis.home=${molgenis_home_folder}"' > ${apache-tomcat_folder}/bin/setenv.sh
+echo 'CATALINA_OPTS="-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Dmolgenis.home=<put your molgenis home here>"' > <path to tomcat>/bin/setenv.sh
 ```
 
 The **-Dmolgenis.home** property tells tomcat where to find your properties file. Replace the ${molgenis_home_folder} with the location of your molgenis home. Note that you should **NOT** use relative paths in your apache-tomcat configuration. Always use absolute paths to point to your molgenis-server.properties.
@@ -47,6 +47,13 @@ If you are unfamiliar with PostgreSQL, follow one of their [PostgreSQL installat
 - Add a database 'molgenis'
 - Add a user 'molgenis' (password 'molgenis') under Login Roles
 - Add 'can create databases' privilege to user 'molgenis'
+
+For example, in psql terminal type:
+```
+CREATE DATABASE molgenis;
+CREATE USER molgenis WITH PASSWORD 'molgenis';
+ALTER USER molgenis CREATEDB;
+```
 
 **Configuring Elasticsearch**  
 Open elasticsearch.yml in the Elasticsearch config directory and set the following properties:

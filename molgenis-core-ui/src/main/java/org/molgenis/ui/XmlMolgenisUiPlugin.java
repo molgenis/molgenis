@@ -2,18 +2,21 @@ package org.molgenis.ui;
 
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItem;
+import org.molgenis.web.UiMenuItemType;
 
 /**
  * @deprecated use {@link org.molgenis.ui.menu.MenuItemToMolgenisUiMenuItemAdapter} instead
  */
 @Deprecated
-public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
+public class XmlMolgenisUiPlugin implements UiMenuItem
 {
 	private final PluginType pluginType;
-	private final MolgenisUiMenu parentMenu;
+	private final UiMenu parentMenu;
 	private final PermissionService permissionService;
 
-	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu, PermissionService permissionService)
+	public XmlMolgenisUiPlugin(PluginType pluginType, UiMenu parentMenu, PermissionService permissionService)
 	{
 		if (pluginType == null) throw new IllegalArgumentException("plugin type is null");
 		if (parentMenu == null) throw new IllegalArgumentException("parent menu is null");
@@ -42,9 +45,9 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	}
 
 	@Override
-	public MolgenisUiMenuItemType getType()
+	public UiMenuItemType getType()
 	{
-		return MolgenisUiMenuItemType.PLUGIN;
+		return UiMenuItemType.PLUGIN;
 	}
 
 	@Override
@@ -54,7 +57,7 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	}
 
 	@Override
-	public MolgenisUiMenu getParentMenu()
+	public UiMenu getParentMenu()
 	{
 		return parentMenu;
 	}

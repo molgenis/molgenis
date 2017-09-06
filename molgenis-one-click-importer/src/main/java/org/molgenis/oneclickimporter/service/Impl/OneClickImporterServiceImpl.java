@@ -1,9 +1,11 @@
 package org.molgenis.oneclickimporter.service.Impl;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.util.LocaleUtil;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
@@ -53,11 +55,11 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	}
 
 	@Override
-	public DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String> lines)
+	public DataCollection buildDataCollectionFromCsv(String dataCollectionName, List<String[]> lines)
 	{
 		List<Column> columns = newArrayList();
 
-		String[] headers = csvService.splitLineOnSeparator(lines.get(0));
+		String[] headers = lines.get(0);
 		lines.remove(0); // Remove the header
 
 		int columnIndex = 0;
@@ -151,17 +153,17 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return castedValue;
 	}
 
-	private Column createColumnFromLine(String header, int columnIndex, List<String> lines)
+	private Column createColumnFromLine(String header, int columnIndex, List<String[]> lines)
 	{
 		return Column.create(header, columnIndex, getColumnDataFromLines(lines, columnIndex));
 	}
 
-	private List<Object> getColumnDataFromLines(List<String> lines, int columnIndex)
+	private List<Object> getColumnDataFromLines(List<String[]> lines, int columnIndex)
 	{
 		List<Object> dataValues = newLinkedList();
 		lines.forEach(line ->
 		{
-			String[] tokens = csvService.splitLineOnSeparator(line);
+			String[] tokens = line;
 			dataValues.add(getPartValue(tokens[columnIndex]));
 		});
 		return dataValues;
@@ -187,10 +189,25 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		return part;
 	}
 
+	/**
+	 * <p>Specific columntypes are permitted in the import. The supported columntypes are specified in the method.</p>
+	 *
+	 * @param sheet worksheet
+	 * @param cell  cell on worksheet
+	 * @return Column
+	 */
 	private Column createColumnFromCell(Sheet sheet, Cell cell)
 	{
-		return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
-				getColumnDataFromSheet(sheet, cell.getColumnIndex()));
+		if (cell.getCellTypeEnum() == CellType.STRING)
+		{
+			return Column.create(cell.getStringCellValue(), cell.getColumnIndex(),
+					getColumnDataFromSheet(sheet, cell.getColumnIndex()));
+		}
+		else
+		{
+			throw new MolgenisDataException(
+					String.format("Celltype [%s] is not supported for columnheaders", cell.getCellTypeEnum()));
+		}
 	}
 
 	private List<Object> getColumnDataFromSheet(Sheet sheet, int columnIndex)

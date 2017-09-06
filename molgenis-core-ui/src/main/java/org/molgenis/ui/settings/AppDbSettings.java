@@ -33,10 +33,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String LOGO_NAVBAR_HREF = "logo_href_navbar";
 		private static final String LOGO_TOP_HREF = "logo_href_top";
 		private static final String FOOTER = "footer";
-		private static final String SIGNUP = "signup";
-		private static final String SIGNUP_MODERATION = "signup_moderation";
-		private static final String GOOGLE_SIGN_IN = "google_sign_in";
-		private static final String GOOGLE_APP_CLIENT_ID = "google_app_client_id";
 		public static final String MENU = "molgenis_menu";
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
@@ -53,10 +49,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String DEFAULT_TITLE = "MOLGENIS";
 		private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
-		private static final boolean DEFAULT_SIGNUP = false;
-		private static final boolean DEFAULT_SIGNUP_MODERATION = true;
-		private static final boolean DEFAULT_GOOGLE_SIGN_IN = true;
-		private static final String DEFAULT_GOOGLE_APP_CLIENT_ID = "130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com";
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -86,31 +78,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 							   .setDefaultValue(DEFAULT_TITLE)
 							   .setLabel("Application title")
 							   .setDescription("Displayed in browser toolbar.");
-			addAttribute(SIGNUP).setDataType(BOOL)
-								.setNillable(false)
-								.setDefaultValue(String.valueOf(DEFAULT_SIGNUP))
-								.setLabel("Allow users to sign up");
-			addAttribute(SIGNUP_MODERATION).setDataType(BOOL)
-										   .setNillable(false)
-										   .setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION))
-										   .setLabel("Sign up moderation")
-										   .setDescription(
-												   "Admins must accept sign up requests before account activation")
-										   .setVisibleExpression("$('" + SIGNUP + "').eq(true).value()");
-			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL)
-										.setNillable(false)
-										.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN))
-										.setLabel("Enable Google Sign-In")
-										.setDescription("Enable users to sign in with their existing Google account")
-										.setVisibleExpression(
-												"$('" + SIGNUP + "').eq(true).value() && $('" + SIGNUP_MODERATION
-														+ "').eq(false).value()");
-			addAttribute(GOOGLE_APP_CLIENT_ID).setDataType(STRING)
-											  .setNillable(false)
-											  .setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID)
-											  .setLabel("Google app client ID")
-											  .setDescription("Google app client ID used during Google Sign-In")
-											  .setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
 										  .setNillable(true)
 										  .setLabel("Logo in navigation bar")
@@ -153,7 +120,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 										   .setNillable(true)
 										   .setLabel("Custom javascript headers")
 										   .setDescription(
-												   "Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.");
+												   "Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers. Values not ending with the extension 'js' will be ignored");
 
 			// tracking settings
 			Attribute trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
@@ -256,32 +223,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public void setFooter(String footerText)
 	{
 		set(Meta.FOOTER, footerText);
-	}
-
-	@Override
-	public boolean getSignUp()
-	{
-		Boolean value = getBoolean(Meta.SIGNUP);
-		return value != null ? value : false;
-	}
-
-	@Override
-	public void setSignUp(boolean signUp)
-	{
-		set(Meta.SIGNUP, signUp);
-	}
-
-	@Override
-	public boolean getSignUpModeration()
-	{
-		Boolean value = getBoolean(Meta.SIGNUP_MODERATION);
-		return value != null ? value : false;
-	}
-
-	@Override
-	public void setSignUpModeration(boolean signUpModeration)
-	{
-		set(Meta.SIGNUP_MODERATION, signUpModeration);
 	}
 
 	@Override
@@ -411,31 +352,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	{
 		Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS);
 		return value != null ? value : false;
-	}
-
-	@Override
-	public void setGoogleSignIn(boolean googleSignIn)
-	{
-		set(Meta.GOOGLE_SIGN_IN, googleSignIn);
-	}
-
-	@Override
-	public boolean getGoogleSignIn()
-	{
-		Boolean value = getBoolean(Meta.GOOGLE_SIGN_IN);
-		return value != null ? value : false;
-	}
-
-	@Override
-	public void setGoogleAppClientId(String googleAppClientId)
-	{
-		set(Meta.GOOGLE_APP_CLIENT_ID, googleAppClientId);
-	}
-
-	@Override
-	public String getGoogleAppClientId()
-	{
-		return getString(Meta.GOOGLE_APP_CLIENT_ID);
 	}
 
 	@Override

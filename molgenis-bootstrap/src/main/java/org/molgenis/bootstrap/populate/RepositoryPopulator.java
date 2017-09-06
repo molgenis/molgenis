@@ -3,7 +3,7 @@ package org.molgenis.bootstrap.populate;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.SettingsPopulator;
 import org.molgenis.script.ScriptTypePopulator;
-import org.molgenis.ui.style.BootstrapThemePopulator;
+import org.molgenis.web.bootstrap.PluginPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ public class RepositoryPopulator
 	private final DataService dataService;
 	private final UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator;
 	private final SystemEntityPopulator systemEntityPopulator;
+	private final PluginPopulator pluginPopulator;
 	private final SettingsPopulator settingsPopulator;
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
@@ -31,13 +32,15 @@ public class RepositoryPopulator
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
-			SystemEntityPopulator systemEntityPopulator, SettingsPopulator settingsPopulator,
+			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
+			SettingsPopulator settingsPopulator,
 			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
 			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
 		this.systemEntityPopulator = requireNonNull(systemEntityPopulator);
+		this.pluginPopulator = requireNonNull(pluginPopulator);
 		this.settingsPopulator = requireNonNull(settingsPopulator);
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
@@ -65,6 +68,10 @@ public class RepositoryPopulator
 			genomeBrowserAttributesPopulator.populate();
 			LOG.trace("Populated default genome browser attributes");
 		}
+
+		LOG.trace("Populating plugin entities ...");
+		pluginPopulator.populate(event.getApplicationContext());
+		LOG.trace("Populated plugin entities");
 
 		LOG.trace("Populating settings entities ...");
 		settingsPopulator.initialize(event);

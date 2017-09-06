@@ -1,7 +1,7 @@
 package org.molgenis.script;
 
 import org.molgenis.data.DataService;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,10 +15,10 @@ import static org.molgenis.script.ScriptPluginController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class ScriptPluginController extends MolgenisPluginController
+public class ScriptPluginController extends PluginController
 {
 	public static final String ID = "scripts";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private final DataService dataService;
 
 	@Autowired

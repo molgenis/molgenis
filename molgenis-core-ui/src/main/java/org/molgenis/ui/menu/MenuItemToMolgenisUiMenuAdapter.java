@@ -3,12 +3,12 @@ package org.molgenis.ui.menu;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.ui.MolgenisUiMenu;
-import org.molgenis.ui.MolgenisUiMenuItem;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItem;
 
 import java.util.*;
 
-public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenu
+public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuItemAdapter implements UiMenu
 {
 	private final MenuItem menu;
 	private final MenuItem rootMenu;
@@ -23,11 +23,11 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	}
 
 	@Override
-	public List<MolgenisUiMenuItem> getItems()
+	public List<UiMenuItem> getItems()
 	{
 		List<MenuItem> items = menu.getItems();
 		return items != null ? Lists.newArrayList(
-				Iterables.transform(items, (Function<MenuItem, MolgenisUiMenuItem>) menuItem ->
+				Iterables.transform(items, (Function<MenuItem, UiMenuItem>) menuItem ->
 				{
 					if (menuItem.getType() == MenuItemType.PLUGIN)
 						return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
@@ -50,7 +50,7 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	}
 
 	@Override
-	public MolgenisUiMenuItem getActiveItem()
+	public UiMenuItem getActiveItem()
 	{
 		List<MenuItem> items = menu.getItems();
 		if (items != null)
@@ -64,14 +64,14 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	}
 
 	@Override
-	public List<MolgenisUiMenu> getBreadcrumb()
+	public List<UiMenu> getBreadcrumb()
 	{
 		if (menu.equals(rootMenu)) return Collections.singletonList(this);
 
 		Map<String, MenuItem> menuParentMap = new HashMap<>();
 		createMenuParentMapRec(rootMenu, null, menu, menuParentMap);
 
-		List<MolgenisUiMenu> breadcrumb = new ArrayList<>();
+		List<UiMenu> breadcrumb = new ArrayList<>();
 		MenuItem currentMenu = menu;
 		while (currentMenu != null)
 		{

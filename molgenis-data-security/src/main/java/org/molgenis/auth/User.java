@@ -67,6 +67,21 @@ public class User extends StaticEntity
 		set(ACTIVATIONCODE, activationCode);
 	}
 
+	public boolean isTwoFactorAuthentication()
+	{
+		Boolean twoFactorAuthentication = getBoolean(TWO_FACTOR_AUTHENTICATION);
+		if (twoFactorAuthentication == null)
+		{
+			twoFactorAuthentication = false;
+		}
+		return twoFactorAuthentication;
+	}
+
+	public void setTwoFactorAuthentication(boolean twoFactorAuthentication)
+	{
+		set(TWO_FACTOR_AUTHENTICATION, twoFactorAuthentication);
+	}
+
 	public Boolean isActive()
 	{
 		return getBoolean(ACTIVE);
@@ -271,4 +286,5 @@ public class User extends StaticEntity
 	{
 		set(GOOGLEACCOUNTID, googleAccountId);
 	}
+
 }

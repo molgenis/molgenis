@@ -49,12 +49,14 @@ public class ThemeFingerprintRegistry
 		return BaseEncoding.base64Url().omitPadding().encode(crc32.asBytes());
 	}
 
-	private String extractThemeNameFromThemeUri(String themeUri) {
+	private String extractThemeNameFromThemeUri(String themeUri)
+	{
 		return themeUri.substring(themeUri.lastIndexOf("/") + 1);
 	}
 
-	private BootstrapVersion extractBootstrapVersionFromPath(String themeUri) {
+	private BootstrapVersion extractBootstrapVersionFromPath(String themeUri)
+	{
 		String path = themeUri.substring(0, themeUri.lastIndexOf("/"));
-		return  path.contains("bootstrap-4") ? BOOTSTRAP_VERSION_4 : BOOTSTRAP_VERSION_3;
+		return path.contains("bootstrap-4") ? BOOTSTRAP_VERSION_4 : BOOTSTRAP_VERSION_3;
 	}
 }

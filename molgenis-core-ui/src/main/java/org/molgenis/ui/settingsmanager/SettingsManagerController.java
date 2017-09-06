@@ -1,6 +1,6 @@
 package org.molgenis.ui.settingsmanager;
 
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -9,10 +9,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)
-public class SettingsManagerController extends MolgenisPluginController
+public class SettingsManagerController extends PluginController
 {
 	public static final String ID = "settingsmanager";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	public SettingsManagerController()
 	{

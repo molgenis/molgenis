@@ -25,7 +25,6 @@ import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
@@ -84,6 +83,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Query<EntityType> q)
 	{
@@ -96,7 +97,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 			Query<EntityType> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
 			Stream<EntityType> EntityTypes = delegate().findAll(qWithoutLimitOffset);
-			Stream<EntityType> filteredEntityTypes = filterReadPermission(EntityTypes);
+			Stream<EntityType> filteredEntityTypes = filterCountPermission(EntityTypes);
 			if (q.getOffset() > 0)
 			{
 				filteredEntityTypes = filteredEntityTypes.skip(q.getOffset());
@@ -109,6 +110,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Iterator<EntityType> iterator()
 	{
@@ -119,10 +122,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		else
 		{
 			Stream<EntityType> EntityTypeStream = StreamSupport.stream(delegate().spliterator(), false);
-			return filterReadPermission(EntityTypeStream).iterator();
+			return filterCountPermission(EntityTypeStream).iterator();
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<EntityType>> consumer, int batchSize)
 	{
@@ -137,6 +142,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOne(Query<EntityType> q)
 	{
@@ -147,10 +154,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		else
 		{
 			// ignore query offset and page size
-			return filterReadPermission(delegate().findOne(q));
+			return filterCountPermission(delegate().findOne(q));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOneById(Object id)
 	{
@@ -160,10 +169,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 		else
 		{
-			return filterReadPermission(delegate().findOneById(id));
+			return filterCountPermission(delegate().findOneById(id));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOneById(Object id, Fetch fetch)
 	{
@@ -173,10 +184,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 		else
 		{
-			return filterReadPermission(delegate().findOneById(id, fetch));
+			return filterCountPermission(delegate().findOneById(id, fetch));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids)
 	{
@@ -186,10 +199,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids));
+			return filterCountPermission(delegate().findAll(ids));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids, Fetch fetch)
 	{
@@ -199,7 +214,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 		else
 		{
-			return filterReadPermission(delegate().findAll(ids, fetch));
+			return filterCountPermission(delegate().findAll(ids, fetch));
 		}
 	}
 
@@ -377,14 +392,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		validateDeleteAllowed(entityType);
 	}
 
-	private EntityType filterReadPermission(EntityType entityType)
+	private EntityType filterCountPermission(EntityType entityType)
 	{
-		return entityType != null ? filterReadPermission(Stream.of(entityType)).findFirst().orElse(null) : null;
-	}
-
-	private Stream<EntityType> filterReadPermission(Stream<EntityType> EntityTypeStream)
-	{
-		return filterPermission(EntityTypeStream, READ);
+		return entityType != null ? filterCountPermission(Stream.of(entityType)).findFirst().orElse(null) : null;
 	}
 
 	private Stream<EntityType> filterCountPermission(Stream<EntityType> EntityTypeStream)
@@ -413,7 +423,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
 															  .filter(entityType -> permissionService.hasPermissionOnEntityType(
-																	  entityType.getId(), READ))
+																	  entityType.getId(), COUNT))
 															  .collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}

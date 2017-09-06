@@ -51,26 +51,6 @@ public interface AppSettings
 	void setFooter(String footerText);
 
 	/**
-	 * @return whether sign up is enabled
-	 */
-	boolean getSignUp();
-
-	/**
-	 * @param signUp <code>true</code> if sign up is enabled
-	 */
-	void setSignUp(boolean signUp);
-
-	/**
-	 * @return whether sign up is moderated
-	 */
-	boolean getSignUpModeration();
-
-	/**
-	 * @param signUpModeration <code>true</code> if sign up is moderated
-	 */
-	void setSignUpModeration(boolean signUpModeration);
-
-	/**
 	 * @return application ISO 639 alpha-2 or alpha-3 language code
 	 */
 	String getLanguageCode();
@@ -188,26 +168,6 @@ public interface AppSettings
 	boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis();
 
 	/**
-	 * @param signIn whether sign in is enabled
-	 */
-	void setGoogleSignIn(boolean signIn);
-
-	/**
-	 * @return <code>true</code> if sign in is enabled
-	 */
-	boolean getGoogleSignIn();
-
-	/**
-	 * @param googleAppClientId Google app client ID used during Google Sign-In
-	 */
-	void setGoogleAppClientId(String googleAppClientId);
-
-	/**
-	 * @return Google app client ID used during Google Sign-In
-	 */
-	String getGoogleAppClientId();
-
-	/**
 	 * @param customJavascript Custom JavaScript <script src="..."></script> headers, specified as comma separated list
 	 */
 	void setCustomJavascript(String customJavascript);
@@ -217,4 +177,5 @@ public interface AppSettings
 	 */
 	@Nullable
 	String getCustomJavascript();
+
 }

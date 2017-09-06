@@ -46,8 +46,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
 			RepositoryPopulator repositoryPopulator, JobBootstrapper jobBootstrapper,
 			AnnotatorBootstrapper annotatorBootstrapper, IndexBootstrapper indexBootstrapper,
-			EntityTypeRegistryPopulator entityTypeRegistryPopulator,
-			BootstrapThemePopulator bootstrapThemePopulator)
+			EntityTypeRegistryPopulator entityTypeRegistryPopulator, BootstrapThemePopulator bootstrapThemePopulator)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;

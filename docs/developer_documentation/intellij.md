@@ -2,15 +2,18 @@
 
 A rough guide on how to develop molgenis in IntelliJ IDEA.
 This was created using IntelliJ IDEA 2016.1 Ultimate, courteously provided to us by
-JetBrains on an open source license.
+JetBrains on an open source license. Most of the time we use the latest IntelliJ version.
 
 ## Middleware
 Before you start, make sure the following middleware is installed on your system.
-    * Create a database called omx with a user molgenis that has full permissions on the database.
 * Java 8 JDK (latest version available from Oracle)
 * Maven >= 3.1.0 (The built-in maven version of IntelliJ is too old to compile molgenis.)
 * Apache Tomcat 7 or 8
-* PostGreSQL server. ([How to set up])
+* PostGreSQL server. 
+* ElasticSearch
+See [quickstart](./quickstart/guide-tomcat.html) for details
+
+Create a database called omx with a user molgenis that has full permissions on the database.
 
 ## Molgenis settings
 You'll need a molgenis-server.properties file. In your home dir, create a folder
@@ -58,7 +61,6 @@ Build, Make project should work fine now and spew out no errors, only warnings.
 * In the root folder of the molgenis project, you'll find eclipse-java-molgenis-style.xml.
 Open Settings, Editor, Code Style, and import it as the molgenis profile.
 Select it for the molgenis project.
-* TODO: Other settings (Dennis)
 
 ## Deploy / Run in Tomcat server
 * Run, Edit configurations..., `+`, Tomcat, Local.

@@ -4,10 +4,10 @@ import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
@@ -56,17 +56,17 @@ public class AccountController
 	private final AccountService accountService;
 	private final CaptchaService captchaService;
 	private final RedirectStrategy redirectStrategy;
-	private final AppSettings appSettings;
+	private final AuthenticationSettings authenticationSettings;
 	private final UserFactory userFactory;
 
 	@Autowired
 	public AccountController(AccountService accountService, CaptchaService captchaService,
-			RedirectStrategy redirectStrategy, AppSettings appSettings, UserFactory userFactory)
+			RedirectStrategy redirectStrategy, AuthenticationSettings authenticationSettings, UserFactory userFactory)
 	{
 		this.accountService = requireNonNull(accountService);
 		this.captchaService = requireNonNull(captchaService);
 		this.redirectStrategy = requireNonNull(redirectStrategy);
-		this.appSettings = requireNonNull(appSettings);
+		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.userFactory = requireNonNull(userFactory);
 	}
 
@@ -127,7 +127,7 @@ public class AccountController
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
 			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws Exception
 	{
-		if (appSettings.getSignUp())
+		if (authenticationSettings.getSignUp())
 		{
 			if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
 			{
@@ -154,7 +154,7 @@ public class AccountController
 			}
 			accountService.createUser(user, activationUri);
 
-			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
+			String successMessage = authenticationSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
 			captchaService.removeCaptcha();
 			return Collections.singletonMap("message", successMessage);
 		}

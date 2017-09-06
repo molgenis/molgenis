@@ -43,12 +43,10 @@ public class StyleControllerTest
 		FileSystemResource themeResource = mock(FileSystemResource.class);
 		InputStream inputStream = new ByteArrayInputStream("yo, it's a style, oke ".getBytes(StandardCharsets.UTF_8));
 		when(themeResource.getInputStream()).thenReturn(inputStream);
-		when(styleService.getThemeData("bootstrap-molgenis.min.css", BootstrapVersion.BOOTSTRAP_VERSION_3))
-				.thenReturn(themeResource);
+		when(styleService.getThemeData("bootstrap-molgenis.min.css", BootstrapVersion.BOOTSTRAP_VERSION_3)).thenReturn(
+				themeResource);
 
-		mockMvc.perform(
-				get("/css/bootstrap-3/bootstrap-molgenis.min.css").with(anonymous())
-		).
+		mockMvc.perform(get("/css/bootstrap-3/bootstrap-molgenis.min.css").with(anonymous())).
 				andExpect(status().isOk());
 
 	}
@@ -59,12 +57,10 @@ public class StyleControllerTest
 		FileSystemResource themeResource = mock(FileSystemResource.class);
 		InputStream inputStream = new ByteArrayInputStream("next level style ".getBytes(StandardCharsets.UTF_8));
 		when(themeResource.getInputStream()).thenReturn(inputStream);
-		when(styleService.getThemeData("bootstrap-molgenis.min.css", BootstrapVersion.BOOTSTRAP_VERSION_4))
-				.thenReturn(themeResource);
+		when(styleService.getThemeData("bootstrap-molgenis.min.css", BootstrapVersion.BOOTSTRAP_VERSION_4)).thenReturn(
+				themeResource);
 
-		mockMvc.perform(
-				get("/css/bootstrap-4/bootstrap-molgenis.min.css").with(anonymous())
-		).
+		mockMvc.perform(get("/css/bootstrap-4/bootstrap-molgenis.min.css").with(anonymous())).
 				andExpect(status().isOk());
 
 	}

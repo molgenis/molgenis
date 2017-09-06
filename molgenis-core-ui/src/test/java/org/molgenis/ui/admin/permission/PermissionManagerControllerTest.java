@@ -5,13 +5,11 @@ import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.security.permission.PermissionManagerService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.admin.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,12 +53,6 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		{
 			return new PermissionManagerController(permissionManagerService(), userAuthorityFactory(),
 					groupAuthorityFactory());
-		}
-
-		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
-		{
-			return new MolgenisPluginRegistryImpl();
 		}
 
 		@Bean
@@ -115,7 +107,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Test
 	public void init() throws Exception
 	{
-		this.mockMvc.perform(get(MolgenisPluginController.PLUGIN_URI_PREFIX + "/permissionmanager"))
+		this.mockMvc.perform(get(PluginController.PLUGIN_URI_PREFIX + "/permissionmanager"))
 					.andExpect(status().isOk())
 					.andExpect(view().name("view-permissionmanager"))
 					.andExpect(model().attribute("users", Arrays.asList(user2)))

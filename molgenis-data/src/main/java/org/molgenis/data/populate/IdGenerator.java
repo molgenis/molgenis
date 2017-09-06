@@ -20,7 +20,7 @@ public interface IdGenerator
 		 * The result are mostly ordered unique ids that require no synchronization between machines.
 		 */
 		SEQUENTIAL_UUID, /**
-	 * Cryptographically safe random IDs, usable as a token. 26 characters long, base32 encoded
+	 * Cryptographically safe random IDs, usable as a token. 32 characters long, base32 encoded
 	 */
 	SECURE_RANDOM, /**
 	 * Short IDs. 8 characters long, base32 encoded
@@ -28,7 +28,10 @@ public interface IdGenerator
 	SHORT_RANDOM, /**
 	 * Cryptographically safe random IDs, usable as a password. 8 characters long, base32 encoded
 	 */
-	SHORT_SECURE_RANDOM
+	SHORT_SECURE_RANDOM, /**
+	 * Cryptographically safe random IDs, usable as a password. 20 characters long, base32 encoded
+	 */
+	LONG_SECURE_RANDOM
 	}
 
 	/**
