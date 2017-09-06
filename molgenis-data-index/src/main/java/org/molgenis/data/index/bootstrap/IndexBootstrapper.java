@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
 @Component
@@ -80,15 +81,12 @@ public class IndexBootstrapper
 
 	private void registerIndexAction(IndexAction action)
 	{
-		EntityType entityType = getEntityType(action);
-		Object typedEntityId = getTypedValue(action.getEntityId(), entityType.getIdAttribute());
-		indexActionRegisterService.register(entityType, typedEntityId);
-	}
-
-	private EntityType getEntityType(IndexAction indexAction)
-	{
-		EntityType entityType = entityTypeFactory.create(indexAction.getEntityTypeId());
-		entityType.setId(indexAction.getEntityTypeId());
-		return entityType;
+		String entityTypeId = action.getEntityTypeId();
+		EntityType entityType = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
+		if (entityType != null)
+		{
+			Object typedEntityId = getTypedValue(action.getEntityId(), entityType.getIdAttribute());
+			indexActionRegisterService.register(entityType, typedEntityId);
+		}
 	}
 }
