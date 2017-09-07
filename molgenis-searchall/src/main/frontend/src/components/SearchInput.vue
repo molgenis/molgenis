@@ -17,6 +17,7 @@
   import _ from 'lodash'
   import { SEARCH_ALL } from '../store/actions'
   import { SET_SEARCHTERM, SET_SUBMITTED } from '../store/mutations'
+  
   export default {
     name: 'search-input',
     props: ['placeholder', 'searchLabel', 'clearLabel'],
