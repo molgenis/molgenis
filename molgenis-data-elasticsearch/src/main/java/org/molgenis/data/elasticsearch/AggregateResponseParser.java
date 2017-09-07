@@ -13,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.EntityUtils;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -364,7 +365,11 @@ class AggregateResponseParser
 		{
 			// Get entities for ids
 			// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
-			Stream<Object> idLabelsWithoutNull = idLabels.stream().filter(Objects::nonNull);
+			Stream<Object> idLabelsWithoutNull = idLabels.stream()
+														 .filter(Objects::nonNull)
+														 .map(untypedIdLabel -> EntityUtils.getTypedValue(
+																 untypedIdLabel.toString(),
+																 entityType.getIdAttribute()));
 
 			// Map entity ids to labels
 			Map<String, Entity> idToLabelMap = new HashMap<>();
@@ -376,7 +381,7 @@ class AggregateResponseParser
 				Object id = idLabels.get(i);
 				if (id != null) // missing value label
 				{
-					idLabels.set(i, idToLabelMap.get(id));
+					idLabels.set(i, idToLabelMap.get(id.toString()));
 				}
 			}
 		}
