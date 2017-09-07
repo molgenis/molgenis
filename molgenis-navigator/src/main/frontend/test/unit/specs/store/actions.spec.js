@@ -2,7 +2,7 @@ import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
 import actions, { GET_ENTITIES_IN_PACKAGE } from 'src/store/actions'
 import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from 'src/store/mutations'
-import { testAction } from '../../utils/action.utils'
+import utils from '@molgenis/molgenis-vue-test-utils'
 
 describe('actions', () => {
   afterEach(() => { td.reset() })
@@ -24,7 +24,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__QUERY_PACKAGES__, options, done)
+      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
     })
 
     it('should fetch packages with a query and call the SET_PACKAGES mutation', done => {
@@ -44,7 +44,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__QUERY_PACKAGES__, options, done)
+      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
     })
 
     it('should fail creating the URI and call the SET_ERROR mutation', done => {
@@ -61,7 +61,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__QUERY_PACKAGES__, options, done)
+      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -77,7 +77,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__QUERY_PACKAGES__, options, done)
+      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
     })
   })
 
@@ -105,7 +105,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__QUERY_ENTITIES__, options, done)
+      utils.testAction(actions.__QUERY_ENTITIES__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -122,7 +122,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__QUERY_ENTITIES__, options, done)
+      utils.testAction(actions.__QUERY_ENTITIES__, options, done)
     })
   })
 
@@ -160,7 +160,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
+      utils.testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -177,7 +177,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
+      utils.testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
     })
   })
 
@@ -224,7 +224,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__RESET_STATE__, options, done)
+      utils.testAction(actions.__RESET_STATE__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -240,7 +240,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__RESET_STATE__, options, done)
+      utils.testAction(actions.__RESET_STATE__, options, done)
     })
   })
 
@@ -271,7 +271,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
+      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
 
     it('should throw an error if the selected package was not found', done => {
@@ -302,7 +302,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
+      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
 
     it('should create a path based on the selected package', done => {
@@ -392,7 +392,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
+      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
 
     it('should fail the get and call the SET_ERROR mutation', done => {
@@ -409,7 +409,7 @@ describe('actions', () => {
         ]
       }
 
-      testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
+      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
     })
   })
 })
