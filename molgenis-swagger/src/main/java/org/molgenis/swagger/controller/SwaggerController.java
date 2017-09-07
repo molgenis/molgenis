@@ -1,5 +1,6 @@
 package org.molgenis.swagger.controller;
 
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.swagger.controller.SwaggerController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -84,8 +87,9 @@ public class SwaggerController extends PluginController
 														 .filter(e -> !e.isAbstract())
 														 .map(EntityType::getId)
 														 .sorted()
-														 .collect(Collectors.toList()));
+														 .collect(toList()));
 		model.addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
+		model.addAttribute("languageCodes", getLanguageCodes().collect(toList()));
 		return "view-swagger";
 	}
 }

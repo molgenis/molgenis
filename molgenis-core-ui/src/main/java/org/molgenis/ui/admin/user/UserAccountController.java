@@ -19,7 +19,10 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,10 +38,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -52,18 +57,16 @@ public class UserAccountController extends PluginController
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final UserAccountService userAccountService;
-	private final LanguageService languageService;
 	private final RecoveryService recoveryService;
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private final AuthenticationSettings authenticationSettings;
 
-	public UserAccountController(UserAccountService userAccountService, LanguageService languageService,
-			RecoveryService recoveryService, TwoFactorAuthenticationService twoFactorAuthenticationService,
+	public UserAccountController(UserAccountService userAccountService, RecoveryService recoveryService,
+			TwoFactorAuthenticationService twoFactorAuthenticationService,
 			AuthenticationSettings authenticationSettings)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
-		this.languageService = requireNonNull(languageService);
 		this.recoveryService = requireNonNull(recoveryService);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
@@ -86,58 +89,24 @@ public class UserAccountController extends PluginController
 		return "view-useraccount";
 	}
 
-	@RequestMapping(value = "/language/update", method = POST)
-	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(value = "/language/update", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateUserLanguage(@RequestParam("languageCode") String languageCode)
 	{
-		try
+		if (!LanguageService.hasLanguageCode(languageCode))
 		{
-			if (!languageService.hasLanguageCode(languageCode))
-			{
-				throw new MolgenisUserException("Unknown language code '" + languageCode + "'");
-			}
-			User user = userAccountService.getCurrentUser();
-			user.setLanguageCode(languageCode);
-			userAccountService.updateCurrentUser(user);
+			throw new MolgenisUserException(format("Unknown language code ''{0}''", languageCode));
 		}
-		catch (Exception e)
-		{
-			LOG.error("Error updating user language", e);
-		}
+		User user = userAccountService.getCurrentUser();
+		user.setLanguageCode(languageCode);
+		userAccountService.updateCurrentUser(user);
 	}
 
 	@RequestMapping(value = "/update", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateAccount(@Valid @NotNull AccountUpdateRequest updateRequest)
 	{
-		// validate new password
-		String newPassword = updateRequest.getNewpwd();
-		if (!StringUtils.isEmpty(newPassword))
-		{
-			String oldPassword = updateRequest.getOldpwd();
-			String newPasswordConfirm = updateRequest.getNewpwd2();
-
-			// validate password for current user
-			if (oldPassword == null || oldPassword.isEmpty())
-			{
-				throw new MolgenisUserException("Please enter old password to update your password.");
-			}
-			boolean valid = userAccountService.validateCurrentUserPassword(oldPassword);
-			if (!valid) throw new MolgenisUserException("The password you entered is incorrect.");
-
-			// validate new password against new password confirmation
-			if (!newPassword.equals(newPasswordConfirm))
-			{
-				throw new MolgenisUserException("'New password' does not match 'Repeat new password'.");
-			}
-
-			// TODO implement http://www.molgenis.org/ticket/2145
-			// TODO define minimum password length in one location (org.molgenis.security.account.RegisterRequest)
-			if (newPassword.length() < MIN_PASSWORD_LENGTH)
-			{
-				throw new MolgenisUserException("New password must consist of at least 6 characters.");
-			}
-		}
+		String newPassword = validatePasswordInUpdateRequest(updateRequest);
 
 		// update current user
 		User user = userAccountService.getCurrentUser();
@@ -164,6 +133,38 @@ public class UserAccountController extends PluginController
 		}
 
 		userAccountService.updateCurrentUser(user);
+	}
+
+	private String validatePasswordInUpdateRequest(@Valid @NotNull AccountUpdateRequest updateRequest)
+	{
+		// validate new password
+		String newPassword = updateRequest.getNewpwd();
+		if (!StringUtils.isEmpty(newPassword))
+		{
+			String oldPassword = updateRequest.getOldpwd();
+			String newPasswordConfirm = updateRequest.getNewpwd2();
+
+			// validate password for current user
+			if (oldPassword == null || oldPassword.isEmpty())
+			{
+				throw new MolgenisUserException("Please enter old password to update your password.");
+			}
+			boolean valid = userAccountService.validateCurrentUserPassword(oldPassword);
+			if (!valid) throw new MolgenisUserException("The password you entered is incorrect.");
+
+			// validate new password against new password confirmation
+			if (!newPassword.equals(newPasswordConfirm))
+			{
+				throw new MolgenisUserException("'New password' does not match 'Repeat new password'.");
+			}
+
+			// TODO implement http://www.molgenis.org/ticket/2145
+			if (newPassword.length() < MIN_PASSWORD_LENGTH)
+			{
+				throw new MolgenisUserException("New password must consist of at least 6 characters.");
+			}
+		}
+		return newPassword;
 	}
 
 	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/enable", method = POST)
@@ -223,7 +224,7 @@ public class UserAccountController extends PluginController
 	 * Convert the list from the recoveryService to a Map for usability in client
 	 *
 	 * @param recoveryCodesList list from recoveryService
-	 * @return Map<String, List<String>>
+	 * @return Map&lt;String, List&lt;String&gt;&gt;
 	 */
 	private Map<String, List<String>> convertToRecoveryCodesMap(List<String> recoveryCodesList)
 	{
@@ -241,8 +242,17 @@ public class UserAccountController extends PluginController
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
+	@ExceptionHandler(AccessDeniedException.class)
+	@ResponseStatus(value = HttpStatus.FORBIDDEN)
+	@ResponseBody
+	private ErrorMessageResponse handleAccessDeniedException(AccessDeniedException e){
+		LOG.warn("Access denied", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@Order(Ordered.HIGHEST_PRECEDENCE)
 	@ResponseBody
 	private ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
