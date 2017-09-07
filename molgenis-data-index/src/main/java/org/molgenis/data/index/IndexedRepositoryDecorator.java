@@ -4,6 +4,8 @@ import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.data.index.job.IndexJobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryUtils.*;
@@ -23,23 +26,26 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
  * Decorator for indexed repositories. Sends all queries with operators that are not supported by the decorated
  * repository to the index.
  */
-public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
+class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexedRepositoryDecorator.class);
 	private static final String INDEX_REPOSITORY = "Index Repository";
 	private static final String DECORATED_REPOSITORY = "Decorated Repository";
 
-	private SearchService searchService;
+	private final SearchService searchService;
+	private final IndexJobScheduler indexJobScheduler;
 
 	/**
 	 * Operators NOT supported by the decorated repository.
 	 */
 	private Set<Operator> unsupportedOperators;
 
-	public IndexedRepositoryDecorator(Repository<Entity> delegateRepository, SearchService searchService)
+	IndexedRepositoryDecorator(Repository<Entity> delegateRepository, SearchService searchService,
+			IndexJobScheduler indexJobScheduler)
 	{
 		super(delegateRepository);
 		this.searchService = requireNonNull(searchService);
+		this.indexJobScheduler = requireNonNull(indexJobScheduler);
 		Set<Operator> operators = getQueryOperators();
 		operators.removeAll(delegate().getQueryOperators());
 		unsupportedOperators = Collections.unmodifiableSet(operators);
@@ -58,7 +64,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			Object entityId = searchService.searchOne(getEntityType(), q);
+			Object entityId = indexSearchOne(q);
 			return entityId != null ? delegate().findOneById(entityId, q.getFetch()) : null;
 		}
 
@@ -77,7 +83,7 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			Stream<Object> entityIds = searchService.search(getEntityType(), q);
+			Stream<Object> entityIds = indexSearch(q);
 			return delegate().findAll(entityIds, q.getFetch());
 		}
 	}
@@ -116,14 +122,31 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 		{
 			LOG.debug("public long count({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			return searchService.count(getEntityType(), q);
+			return indexCount(q);
 		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return searchService.aggregate(getEntityType(), aggregateQuery);
+		try
+		{
+			return searchService.aggregate(getEntityType(), aggregateQuery);
+		}
+		catch (UnknownIndexException e)
+		{
+			waitForIndexToBeStable();
+
+			// try again
+			try
+			{
+				return searchService.aggregate(getEntityType(), aggregateQuery);
+			}
+			catch (UnknownIndexException e1)
+			{
+				throw translateUnknownIndexException();
+			}
+		}
 	}
 
 	/**
@@ -134,5 +157,90 @@ public class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityType())
 				&& !containsNestedQueryRuleField(q);
+	}
+
+	private long indexCount(Query<Entity> q)
+	{
+		try
+		{
+			return searchService.count(getEntityType(), q);
+		}
+		catch (UnknownIndexException e)
+		{
+			waitForIndexToBeStable();
+
+			// try again
+			try
+			{
+				return searchService.count(getEntityType(), q);
+			}
+			catch (UnknownIndexException e1)
+			{
+				throw translateUnknownIndexException();
+			}
+		}
+	}
+
+	private Object indexSearchOne(Query<Entity> q)
+	{
+		try
+		{
+			return searchService.searchOne(getEntityType(), q);
+		}
+		catch (UnknownIndexException e)
+		{
+			waitForIndexToBeStable();
+
+			// try again
+			try
+			{
+				return searchService.searchOne(getEntityType(), q);
+			}
+			catch (UnknownIndexException e1)
+			{
+				throw translateUnknownIndexException();
+			}
+		}
+	}
+
+	private Stream<Object> indexSearch(Query<Entity> q)
+	{
+		try
+		{
+			return searchService.search(getEntityType(), q);
+		}
+		catch (UnknownIndexException e)
+		{
+			waitForIndexToBeStable();
+
+			// try again
+			try
+			{
+				return searchService.search(getEntityType(), q);
+			}
+			catch (UnknownIndexException e1)
+			{
+				throw translateUnknownIndexException();
+			}
+		}
+	}
+
+	private void waitForIndexToBeStable()
+	{
+		try
+		{
+			indexJobScheduler.waitForIndexToBeStableIncludingReferences(getEntityType());
+		}
+		catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private MolgenisDataException translateUnknownIndexException()
+	{
+		return new MolgenisDataException(
+				format("Error executing query, index for entity type '%s' with id '%s' does not exist",
+						getEntityType().getLabel(), getEntityType().getId()));
 	}
 }
