@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -64,7 +65,7 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 		{
 			LOG.debug("public Entity findOne({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			Object entityId = indexSearchOne(q);
+			Object entityId = tryTwice(() -> searchService.searchOne(getEntityType(), q));
 			return entityId != null ? delegate().findOneById(entityId, q.getFetch()) : null;
 		}
 
@@ -83,7 +84,7 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 		{
 			LOG.debug("public Entity findAll({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			Stream<Object> entityIds = indexSearch(q);
+			Stream<Object> entityIds = tryTwice(() -> searchService.search(getEntityType(), q));
 			return delegate().findAll(entityIds, q.getFetch());
 		}
 	}
@@ -122,29 +123,43 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 		{
 			LOG.debug("public long count({}) entityTypeId: [{}] repository: [{}]", q, getEntityType().getId(),
 					INDEX_REPOSITORY);
-			return indexCount(q);
+			return tryTwice(() -> searchService.count(getEntityType(), q));
 		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
+		return tryTwice(() -> searchService.aggregate(getEntityType(), aggregateQuery));
+	}
+
+	/**
+	 * Executes an action on an index that may be unstable.
+	 *
+	 * If the Index was unknown, waits for the index to be stable and then tries again.
+	 * @param action the action that gets executed
+	 * @param <R> the result type of the action
+	 * @return the result
+	 * @throws MolgenisDataException if the action still failed when the index was stable, with a translated error message.
+	 */
+	private <R> R tryTwice(Supplier<R> action)
+	{
 		try
 		{
-			return searchService.aggregate(getEntityType(), aggregateQuery);
+			return action.get();
 		}
 		catch (UnknownIndexException e)
 		{
 			waitForIndexToBeStable();
-
-			// try again
 			try
 			{
-				return searchService.aggregate(getEntityType(), aggregateQuery);
+				return action.get();
 			}
 			catch (UnknownIndexException e1)
 			{
-				throw translateUnknownIndexException();
+				throw new MolgenisDataException(
+						format("Error executing query, index for entity type '%s' with id '%s' does not exist",
+								getEntityType().getLabel(), getEntityType().getId()));
 			}
 		}
 	}
@@ -159,72 +174,6 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 				&& !containsNestedQueryRuleField(q);
 	}
 
-	private long indexCount(Query<Entity> q)
-	{
-		try
-		{
-			return searchService.count(getEntityType(), q);
-		}
-		catch (UnknownIndexException e)
-		{
-			waitForIndexToBeStable();
-
-			// try again
-			try
-			{
-				return searchService.count(getEntityType(), q);
-			}
-			catch (UnknownIndexException e1)
-			{
-				throw translateUnknownIndexException();
-			}
-		}
-	}
-
-	private Object indexSearchOne(Query<Entity> q)
-	{
-		try
-		{
-			return searchService.searchOne(getEntityType(), q);
-		}
-		catch (UnknownIndexException e)
-		{
-			waitForIndexToBeStable();
-
-			// try again
-			try
-			{
-				return searchService.searchOne(getEntityType(), q);
-			}
-			catch (UnknownIndexException e1)
-			{
-				throw translateUnknownIndexException();
-			}
-		}
-	}
-
-	private Stream<Object> indexSearch(Query<Entity> q)
-	{
-		try
-		{
-			return searchService.search(getEntityType(), q);
-		}
-		catch (UnknownIndexException e)
-		{
-			waitForIndexToBeStable();
-
-			// try again
-			try
-			{
-				return searchService.search(getEntityType(), q);
-			}
-			catch (UnknownIndexException e1)
-			{
-				throw translateUnknownIndexException();
-			}
-		}
-	}
-
 	private void waitForIndexToBeStable()
 	{
 		try
@@ -237,10 +186,4 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 		}
 	}
 
-	private MolgenisDataException translateUnknownIndexException()
-	{
-		return new MolgenisDataException(
-				format("Error executing query, index for entity type '%s' with id '%s' does not exist",
-						getEntityType().getLabel(), getEntityType().getId()));
-	}
 }
