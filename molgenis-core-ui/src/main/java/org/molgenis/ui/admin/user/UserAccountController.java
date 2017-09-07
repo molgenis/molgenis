@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
@@ -111,23 +112,23 @@ public class UserAccountController extends PluginController
 		// update current user
 		User user = userAccountService.getCurrentUser();
 
-		if (StringUtils.isNotEmpty(newPassword)) user.setPassword(newPassword);
-		if (StringUtils.isNotEmpty(updateRequest.getPhone())) user.setPhone(updateRequest.getPhone());
-		if (StringUtils.isNotEmpty(updateRequest.getFax())) user.setFax(updateRequest.getFax());
-		if (StringUtils.isNotEmpty(updateRequest.getTollFreePhone()))
+		if (isNotEmpty(newPassword)) user.setPassword(newPassword);
+		if (isNotEmpty(updateRequest.getPhone())) user.setPhone(updateRequest.getPhone());
+		if (isNotEmpty(updateRequest.getFax())) user.setFax(updateRequest.getFax());
+		if (isNotEmpty(updateRequest.getTollFreePhone()))
 		{
 			user.setTollFreePhone(updateRequest.getTollFreePhone());
 		}
-		if (StringUtils.isNotEmpty(updateRequest.getAddress())) user.setAddress(updateRequest.getAddress());
-		if (StringUtils.isNotEmpty(updateRequest.getTitle())) user.setTitle(updateRequest.getTitle());
-		if (StringUtils.isNotEmpty(updateRequest.getFirstname())) user.setFirstName(updateRequest.getFirstname());
-		if (StringUtils.isNotEmpty(updateRequest.getMiddleNames())) user.setMiddleNames(updateRequest.getMiddleNames());
-		if (StringUtils.isNotEmpty(updateRequest.getLastname())) user.setLastName(updateRequest.getLastname());
-		if (StringUtils.isNotEmpty(updateRequest.getInstitute())) user.setAffiliation(updateRequest.getInstitute());
-		if (StringUtils.isNotEmpty(updateRequest.getDepartment())) user.setDepartment(updateRequest.getDepartment());
-		if (StringUtils.isNotEmpty(updateRequest.getPosition())) user.setRole(updateRequest.getPosition());
-		if (StringUtils.isNotEmpty(updateRequest.getCity())) user.setCity(updateRequest.getCity());
-		if (StringUtils.isNotEmpty(updateRequest.getCountry()))
+		if (isNotEmpty(updateRequest.getAddress())) user.setAddress(updateRequest.getAddress());
+		if (isNotEmpty(updateRequest.getTitle())) user.setTitle(updateRequest.getTitle());
+		if (isNotEmpty(updateRequest.getFirstname())) user.setFirstName(updateRequest.getFirstname());
+		if (isNotEmpty(updateRequest.getMiddleNames())) user.setMiddleNames(updateRequest.getMiddleNames());
+		if (isNotEmpty(updateRequest.getLastname())) user.setLastName(updateRequest.getLastname());
+		if (isNotEmpty(updateRequest.getInstitute())) user.setAffiliation(updateRequest.getInstitute());
+		if (isNotEmpty(updateRequest.getDepartment())) user.setDepartment(updateRequest.getDepartment());
+		if (isNotEmpty(updateRequest.getPosition())) user.setRole(updateRequest.getPosition());
+		if (isNotEmpty(updateRequest.getCity())) user.setCity(updateRequest.getCity());
+		if (isNotEmpty(updateRequest.getCountry()))
 		{
 			user.setCountry(CountryCodes.get(updateRequest.getCountry()));
 		}
@@ -245,7 +246,8 @@ public class UserAccountController extends PluginController
 	@ExceptionHandler(AccessDeniedException.class)
 	@ResponseStatus(value = HttpStatus.FORBIDDEN)
 	@ResponseBody
-	private ErrorMessageResponse handleAccessDeniedException(AccessDeniedException e){
+	private ErrorMessageResponse handleAccessDeniedException(AccessDeniedException e)
+	{
 		LOG.warn("Access denied", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
@@ -258,201 +260,5 @@ public class UserAccountController extends PluginController
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	private static class AccountUpdateRequest
-	{
-		private String oldpwd;
-		private String newpwd;
-		private String newpwd2;
-		private String phone;
-		private String fax;
-		private String tollFreePhone;
-		private String address;
-		private String title;
-		private String firstname;
-		private String middleNames;
-		private String lastname;
-		private String institute;
-		private String department;
-		private String position;
-		private String city;
-		private String country;
-
-		public String getOldpwd()
-		{
-			return oldpwd;
-		}
-
-		@SuppressWarnings("unused")
-		public void setOldpwd(String oldpwd)
-		{
-			this.oldpwd = oldpwd;
-		}
-
-		public String getNewpwd()
-		{
-			return newpwd;
-		}
-
-		@SuppressWarnings("unused")
-		public void setNewpwd(String newpwd)
-		{
-			this.newpwd = newpwd;
-		}
-
-		public String getNewpwd2()
-		{
-			return newpwd2;
-		}
-
-		@SuppressWarnings("unused")
-		public void setNewpwd2(String newpwd2)
-		{
-			this.newpwd2 = newpwd2;
-		}
-
-		public String getPhone()
-		{
-			return phone;
-		}
-
-		@SuppressWarnings("unused")
-		public void setPhone(String phone)
-		{
-			this.phone = phone;
-		}
-
-		public String getFax()
-		{
-			return fax;
-		}
-
-		@SuppressWarnings("unused")
-		public void setFax(String fax)
-		{
-			this.fax = fax;
-		}
-
-		public String getTollFreePhone()
-		{
-			return tollFreePhone;
-		}
-
-		@SuppressWarnings("unused")
-		public void setTollFreePhone(String tollFreePhone)
-		{
-			this.tollFreePhone = tollFreePhone;
-		}
-
-		public String getAddress()
-		{
-			return address;
-		}
-
-		@SuppressWarnings("unused")
-		public void setAddress(String address)
-		{
-			this.address = address;
-		}
-
-		public String getTitle()
-		{
-			return title;
-		}
-
-		@SuppressWarnings("unused")
-		public void setTitle(String title)
-		{
-			this.title = title;
-		}
-
-		public String getFirstname()
-		{
-			return firstname;
-		}
-
-		@SuppressWarnings("unused")
-		public void setFirstname(String firstname)
-		{
-			this.firstname = firstname;
-		}
-
-		public String getMiddleNames()
-		{
-			return middleNames;
-		}
-
-		@SuppressWarnings("unused")
-		public void setMiddleNames(String middleNames)
-		{
-			this.middleNames = middleNames;
-		}
-
-		public String getLastname()
-		{
-			return lastname;
-		}
-
-		@SuppressWarnings("unused")
-		public void setLastname(String lastname)
-		{
-			this.lastname = lastname;
-		}
-
-		public String getInstitute()
-		{
-			return institute;
-		}
-
-		@SuppressWarnings("unused")
-		public void setInstitute(String institute)
-		{
-			this.institute = institute;
-		}
-
-		public String getDepartment()
-		{
-			return department;
-		}
-
-		@SuppressWarnings("unused")
-		public void setDepartment(String department)
-		{
-			this.department = department;
-		}
-
-		public String getPosition()
-		{
-			return position;
-		}
-
-		@SuppressWarnings("unused")
-		public void setPosition(String position)
-		{
-			this.position = position;
-		}
-
-		public String getCity()
-		{
-			return city;
-		}
-
-		@SuppressWarnings("unused")
-		public void setCity(String city)
-		{
-			this.city = city;
-		}
-
-		public String getCountry()
-		{
-			return country;
-		}
-
-		@SuppressWarnings("unused")
-		public void setCountry(String country)
-		{
-			this.country = country;
-		}
 	}
 }
