@@ -1,5 +1,6 @@
 // @flow
-import type { Package } from './state'
+import type { Package, Entity } from '../flow.types'
+import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
 import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from './mutations'
@@ -9,6 +10,8 @@ export const QUERY_ENTITIES = 'QUERY_ENTITIES'
 export const RESET_STATE = 'RESET_STATE'
 export const GET_STATE_FOR_PACKAGE = 'GET_STATE_FOR_PACKAGE'
 export const GET_ENTITIES_IN_PACKAGE = 'GET_ENTITIES_IN_PACKAGE'
+
+const SYS_PACKAGE_ID = 'sys'
 
 /**
  * Resets the entire state using the given packages as the package state.
@@ -60,13 +63,14 @@ function toEntity (item: any) {
 
 /**
  * Get all ( first 1000 ) packages from the server
+ * If the user is not a super user 'system packages' will be removed from the result set
  * @returns {Promise}, on success resolves to list of 'all' packages, on failure resolves to error message
  */
 function getAllPackages () {
   return new Promise((resolve, reject) => {
     const uri = '/api/v2/sys_md_Package?sort=label&num=1000'
     api.get(uri).then((response) => {
-      resolve(response.items)
+      resolve(filterNonVisiblePackages(response.items))
     }).catch((error) => {
       reject(error)
     })
@@ -75,6 +79,7 @@ function getAllPackages () {
 
 /**
  * Query's the server of ( first 1000 ) packages.
+ * If the user is not a super user 'system entities' will be removed from the result set
  * Packages are returned if query matches id, description or label
  * @returns {Promise}, on success resolves to list of matching packages, on failure resolves to error message
  */
@@ -82,7 +87,7 @@ function queryPackages (query: string) {
   return new Promise((resolve, reject) => {
     const uri = '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"'
     api.get(uri).then((response) => {
-      resolve(response.items)
+      resolve(filterNonVisiblePackages(response.items))
     }).catch((error) => {
       reject(error)
     })
@@ -99,6 +104,34 @@ function validateQuery (query: string) {
   if (query.indexOf('"') > -1) {
     throw new Error('Double quotes not are allowed in queries, please use single quotes.')
   }
+}
+
+/**
+ * Filter out system package unless user is superUser
+ * @param packages
+ * @returns {Array.<Package>}
+ */
+function filterNonVisiblePackages (packages: Array<Package>) {
+  if (INITIAL_STATE.isSuperUser) {
+    return packages
+  }
+
+  return packages
+    .filter(_package => _package.id !== SYS_PACKAGE_ID)
+    .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
+}
+
+/**
+ * Filter out all system entities unless user is superUser
+ * @param entities
+ * @returns {Array.<Entity>}
+ */
+function filterNonVisibleEntities (entities: Array<Entity>) {
+  if (INITIAL_STATE.isSuperUser) {
+    return entities
+  }
+
+  return entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
 export default {
@@ -138,7 +171,7 @@ export default {
           validateQuery(query)
           api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '");isAbstract==false').then((response) => {
             const entities = response.items.map(toEntity)
-            commit(SET_ENTITIES, entities)
+            commit(SET_ENTITIES, filterNonVisibleEntities(entities))
             resolve()
           }).catch((error) => {
             commit(SET_ERROR, error)

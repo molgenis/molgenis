@@ -15,11 +15,14 @@ describe('store', function () {
     })
 
     describe('QUERY_PACKAGES', function () {
-      it('should fetch the packages and store them in the state', function (done) {
+      it('should fetch the packages and store them in the state (filtering out the system packages)', function (done) {
         // mock api call
         const package1 = {id: 'pack1', label: 'packLabel1'}
+        const package2 = {id: 'sys', label: 'system'}
+        const package3 = {id: 'sys_pack2', label: 'packLabel2'}
+        const package4 = {id: 'pack3', label: 'packLabel3'}
         const apiResponse = {
-          items: [package1]
+          items: [package1, package2, package3, package4]
         }
         let getSuccess = Promise.resolve(apiResponse)
         get.onFirstCall().returns(getSuccess)
@@ -28,6 +31,8 @@ describe('store', function () {
         store.dispatch('QUERY_PACKAGES', 'my-test-query')
           .then(function () {
             expect(store.state.packages[0]).to.equal(package1)
+            expect(store.state.packages[1]).to.equal(package4)
+            expect(store.state.packages.length).to.equal(2)
             done()
           })
       })
@@ -47,8 +52,8 @@ describe('store', function () {
     })
 
     describe('QUERY_ENTITIES', function () {
-      it('should query the entities and store result in the state', function (done) {
-        const entities = [{id: 'e1', label: 'el1'}]
+      it('should query the entities and store result in the state (filtering out the system entities)', function (done) {
+        const entities = [{id: 'e1', label: 'el1'}, {id: 'sys_entity', label: 'hide me'}]
         const apiResponse = {
           items: entities
         }

@@ -2,6 +2,7 @@ package org.molgenis.navigator;
 
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
@@ -22,14 +23,16 @@ public class NavigatorController extends PluginController
 	private MenuReaderService menuReaderService;
 	private LanguageService languageService;
 	private AppSettings appSettings;
+	private UserAccountService userAccountService;
 
 	public NavigatorController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings)
+			AppSettings appSettings, UserAccountService userAccountService)
 	{
 		super(URI);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.languageService = requireNonNull(languageService);
 		this.appSettings = requireNonNull(appSettings);
+		this.userAccountService = userAccountService;
 	}
 
 	@RequestMapping(value = "/**", method = GET)
@@ -38,7 +41,7 @@ public class NavigatorController extends PluginController
 		model.addAttribute("baseUrl", getBaseUrl());
 		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
-
+		model.addAttribute("isSuperUser", userAccountService.getCurrentUser().isSuperuser());
 		return "view-navigator";
 	}
 
