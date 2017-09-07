@@ -4,17 +4,6 @@
       </div>
 </template>
 
-<style>
-  .temp-header {
-    background-color: #000000;
-    margin-bottom: 20px;
-  }
-
-  .temp-header  a {
-      color: #ffffff;
-  }
-</style>
-
 <script>
   import OneClickImporter from './components/OneClickImporter'
   export default {

@@ -1,6 +1,6 @@
 // @flow
 <template>
-  <div class="container">
+  <div>
 
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
