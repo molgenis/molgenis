@@ -25,7 +25,7 @@ public class GlobalControllerExceptionHandler
 	@ExceptionHandler(NoHandlerFoundException.class)
 	public Object handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest httpServletRequest)
 	{
-		LOG.error("", e);
+		LOG.info("", e);
 		if (isHtmlRequest(httpServletRequest))
 		{
 			return "forward:" + NotFoundController.URI;
