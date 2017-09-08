@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.web;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +39,11 @@ public class ErrorMessageResponse
 	{
 		if (this.errors == null) errors = new ArrayList<>();
 		this.errors.addAll(errorMessages);
+	}
+
+	public static ErrorMessageResponse create(String errorMessage)
+	{
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(errorMessage));
 	}
 
 	public static class ErrorMessage
