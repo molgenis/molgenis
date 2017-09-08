@@ -237,15 +237,6 @@ public class AccountController
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
 	private User toUser(RegisterRequest request)
 	{
 		User user = userFactory.create();

@@ -926,15 +926,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	@ExceptionHandler(MolgenisReferencedEntityException.class)
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ResponseBody

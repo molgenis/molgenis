@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.admin.permission.PermissionManagerController.URI;
@@ -173,15 +171,5 @@ public class PermissionManagerController extends PluginController
 			}
 		}
 		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, userId);
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }

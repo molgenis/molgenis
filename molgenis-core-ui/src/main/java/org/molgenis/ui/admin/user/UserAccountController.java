@@ -279,14 +279,4 @@ public class UserAccountController extends PluginController
 		LOG.warn("Access denied", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	@ResponseBody
-	private ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
 }
