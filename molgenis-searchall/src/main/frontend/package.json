@@ -16,6 +16,7 @@
   "dependencies": {
     "@molgenis/molgenis-api-client": "^1.1.0",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
+    "@molgenis/molgenis-vue-test-utils": "^1.0.0",
     "babel-preset-flow": "^6.23.0",
     "bootstrap": "4.0.0-alpha.6",
     "flow": "^0.2.3",
