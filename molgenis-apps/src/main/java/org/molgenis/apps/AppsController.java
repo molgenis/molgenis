@@ -8,7 +8,7 @@ import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
