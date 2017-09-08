@@ -12,7 +12,6 @@ import org.molgenis.data.Query;
 import org.molgenis.file.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
@@ -26,7 +25,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.molgenis.charts.ChartController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -143,15 +141,5 @@ public class ChartController
 				MolgenisChartType.HEAT_MAP);
 
 		return (String) service.renderChart(chart, model);
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }
