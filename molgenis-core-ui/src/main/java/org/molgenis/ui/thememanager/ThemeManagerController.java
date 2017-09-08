@@ -3,7 +3,7 @@ package org.molgenis.ui.thememanager;
 import org.molgenis.ui.style.MolgenisStyleException;
 import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
-import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
