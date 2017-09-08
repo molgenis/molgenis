@@ -28,7 +28,8 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static org.molgenis.apps.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
 import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
 
 @Controller
 @RequestMapping(URI)
@@ -176,15 +177,6 @@ public class AppsController extends PluginController
 	public ErrorMessageResponse handleAppsException(AppsException e)
 	{
 		LOG.warn("Apps exception occurred", e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("Runtime exception occurred.", e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
 	}
 }
