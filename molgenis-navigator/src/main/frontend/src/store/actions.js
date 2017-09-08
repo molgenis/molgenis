@@ -140,7 +140,7 @@ export default {
     }
 
     api.get(uri).then(response => {
-      commit(SET_PACKAGES, response.items)
+      commit(SET_PACKAGES, filterNonVisiblePackages(response.items))
     }, error => {
       commit(SET_ERROR, error)
     })
@@ -170,14 +170,14 @@ export default {
   },
   [RESET_STATE] ({commit}: { commit: Function }) {
     api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
-      resetToHome(commit, response.items)
+      resetToHome(commit, filterNonVisiblePackages(response.items))
     }, error => {
       commit(SET_ERROR, error)
     })
   },
   [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, selectedPackageId: ?string) {
     api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
-      const packages = response.items
+      const packages = filterNonVisiblePackages(response.items)
 
       if (!selectedPackageId) {
         resetToHome(commit, packages)
