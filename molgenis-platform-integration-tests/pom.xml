@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-platform-integration-tests</artifactId>
 
@@ -163,6 +163,16 @@
                         <db_user>${it_db_user}</db_user>
                         <db_password>${it_db_password}</db_password>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <!-- The destination file for the code coverage report has to be set to the same value
+                         in the parent pom and in each module pom. Then JaCoCo will add up information in
+                         the same report, so that, it will give the cross-module code coverage. -->
+                    <destFile>${project.basedir}/../target/jacoco-it.exec</destFile>
                 </configuration>
             </plugin>
         </plugins>

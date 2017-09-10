@@ -3,6 +3,8 @@ package org.molgenis.data.meta.model;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 // TODO validate IRI
 // TODO extends typed entity that stores entity and handles get/sets, also apply to other meta data entities
 public class Tag extends StaticEntity
@@ -46,6 +48,7 @@ public class Tag extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public String getObjectIri()
 	{
 		return getString(TagMetadata.OBJECT_IRI);
@@ -90,6 +93,7 @@ public class Tag extends StaticEntity
 		return this;
 	}
 
+	@Nullable
 	public String getCodeSystem()
 	{
 		return getString(TagMetadata.CODE_SYSTEM);
@@ -115,9 +119,6 @@ public class Tag extends StaticEntity
 	 *    {@literal @}Nullable public abstract String getCodeSystem();
 	 * }
 	 * </code></pre>
-	 *
-	 * @param o
-	 * @return
 	 */
 	@Override
 	public boolean equals(Object o)
@@ -149,8 +150,6 @@ public class Tag extends StaticEntity
 	 *     public abstract String getId();
 	 * }
 	 * </code></pre>
-	 *
-	 * @return
 	 */
 	@Override
 	public int hashCode()

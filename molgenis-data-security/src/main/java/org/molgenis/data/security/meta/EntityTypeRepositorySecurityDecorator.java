@@ -8,8 +8,8 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.util.Iterator;
@@ -25,7 +25,6 @@ import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
@@ -39,25 +38,18 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
  */
 public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDecorator<EntityType>
 {
-	private final Repository<EntityType> decoratedRepo;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final MolgenisPermissionService permissionService;
+	private final PermissionService permissionService;
 	private final DataService dataService;
 
-	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> decoratedRepo,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService,
+	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
 			DataService dataService)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);
-	}
-
-	@Override
-	protected Repository<EntityType> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
@@ -65,11 +57,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.count();
+			return delegate().count();
 		}
 		else
 		{
-			Stream<EntityType> EntityTypes = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			Stream<EntityType> EntityTypes = StreamSupport.stream(delegate().spliterator(), false);
 			return filterCountPermission(EntityTypes).count();
 		}
 	}
@@ -79,31 +71,33 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.count(q);
+			return delegate().count(q);
 		}
 		else
 		{
 			// ignore query offset and page size
 			Query<EntityType> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<EntityType> EntityTypes = decoratedRepo.findAll(qWithoutLimitOffset);
+			Stream<EntityType> EntityTypes = delegate().findAll(qWithoutLimitOffset);
 			return filterCountPermission(EntityTypes).count();
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Query<EntityType> q)
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findAll(q);
+			return delegate().findAll(q);
 		}
 		else
 		{
 			Query<EntityType> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<EntityType> EntityTypes = decoratedRepo.findAll(qWithoutLimitOffset);
-			Stream<EntityType> filteredEntityTypes = filterReadPermission(EntityTypes);
+			Stream<EntityType> EntityTypes = delegate().findAll(qWithoutLimitOffset);
+			Stream<EntityType> filteredEntityTypes = filterCountPermission(EntityTypes);
 			if (q.getOffset() > 0)
 			{
 				filteredEntityTypes = filteredEntityTypes.skip(q.getOffset());
@@ -116,97 +110,111 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Iterator<EntityType> iterator()
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.iterator();
+			return delegate().iterator();
 		}
 		else
 		{
-			Stream<EntityType> EntityTypeStream = StreamSupport.stream(decoratedRepo.spliterator(), false);
-			return filterReadPermission(EntityTypeStream).iterator();
+			Stream<EntityType> EntityTypeStream = StreamSupport.stream(delegate().spliterator(), false);
+			return filterCountPermission(EntityTypeStream).iterator();
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<EntityType>> consumer, int batchSize)
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+			delegate().forEachBatched(fetch, consumer, batchSize);
 		}
 		else
 		{
 			FilteredConsumer filteredConsumer = new FilteredConsumer(consumer, permissionService);
-			decoratedRepo.forEachBatched(fetch, filteredConsumer::filter, batchSize);
+			delegate().forEachBatched(fetch, filteredConsumer::filter, batchSize);
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOne(Query<EntityType> q)
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findOne(q);
+			return delegate().findOne(q);
 		}
 		else
 		{
 			// ignore query offset and page size
-			return filterReadPermission(decoratedRepo.findOne(q));
+			return filterCountPermission(delegate().findOne(q));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOneById(Object id)
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findOneById(id);
+			return delegate().findOneById(id);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findOneById(id));
+			return filterCountPermission(delegate().findOneById(id));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public EntityType findOneById(Object id, Fetch fetch)
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findOneById(id, fetch);
+			return delegate().findOneById(id, fetch);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findOneById(id, fetch));
+			return filterCountPermission(delegate().findOneById(id, fetch));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids)
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findAll(ids);
+			return delegate().findAll(ids);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findAll(ids));
+			return filterCountPermission(delegate().findAll(ids));
 		}
 	}
 
+	//Users with COUNT permission on an entity need to be able to READ the METAdata of this entity
+	//see: https://github.com/molgenis/molgenis/issues/6383
 	@Override
 	public Stream<EntityType> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.findAll(ids, fetch);
+			return delegate().findAll(ids, fetch);
 		}
 		else
 		{
-			return filterReadPermission(decoratedRepo.findAll(ids, fetch));
+			return filterCountPermission(delegate().findAll(ids, fetch));
 		}
 	}
 
@@ -215,7 +223,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		if (currentUserIsSuOrSystem())
 		{
-			return decoratedRepo.aggregate(aggregateQuery);
+			return delegate().aggregate(aggregateQuery);
 		}
 		else
 		{
@@ -384,14 +392,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		validateDeleteAllowed(entityType);
 	}
 
-	private EntityType filterReadPermission(EntityType entityType)
+	private EntityType filterCountPermission(EntityType entityType)
 	{
-		return entityType != null ? filterReadPermission(Stream.of(entityType)).findFirst().orElse(null) : null;
-	}
-
-	private Stream<EntityType> filterReadPermission(Stream<EntityType> EntityTypeStream)
-	{
-		return filterPermission(EntityTypeStream, READ);
+		return entityType != null ? filterCountPermission(Stream.of(entityType)).findFirst().orElse(null) : null;
 	}
 
 	private Stream<EntityType> filterCountPermission(Stream<EntityType> EntityTypeStream)
@@ -402,15 +405,15 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
 	{
 		return EntityTypeStream.filter(
-				entityType -> permissionService.hasPermissionOnEntity(entityType.getId(), permission));
+				entityType -> permissionService.hasPermissionOnEntityType(entityType.getId(), permission));
 	}
 
 	private static class FilteredConsumer
 	{
 		private final Consumer<List<EntityType>> consumer;
-		private final MolgenisPermissionService permissionService;
+		private final PermissionService permissionService;
 
-		FilteredConsumer(Consumer<List<EntityType>> consumer, MolgenisPermissionService permissionService)
+		FilteredConsumer(Consumer<List<EntityType>> consumer, PermissionService permissionService)
 		{
 			this.consumer = requireNonNull(consumer);
 			this.permissionService = requireNonNull(permissionService);
@@ -419,8 +422,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		void filter(List<EntityType> entityTypes)
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
-															  .filter(entityType -> permissionService.hasPermissionOnEntity(
-																	  entityType.getId(), READ))
+															  .filter(entityType -> permissionService.hasPermissionOnEntityType(
+																	  entityType.getId(), COUNT))
 															  .collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}

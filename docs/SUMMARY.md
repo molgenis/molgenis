@@ -6,8 +6,10 @@
     - [Run in Tomcat](quickstart/guide-tomcat.md)
     - [Compile code](quickstart/guide-local-compile.md)
 - User Documentation
-    - [Uploading data](user_documentation/guide-upload.md)
+    - [Quick data upload](user_documentation/guide-quick-upload.md)
+    - [Advanced data upload](user_documentation/guide-upload.md)
         - [EMX format](user_documentation/ref-emx.md)
+    - [Finding data](user_documentation/guide-search.md)
     - [Exploring data](user_documentation/guide-explore.md)
     - [Admin features](user_documentation/guide-admin.md)
     - [Customize your MOLGENIS](user_documentation/guide-customize.md)
@@ -22,6 +24,7 @@
     - [Biobank Directory](user_documentation/biobank-directory.md)
     - [Biobanking](user_documentation/biobanking.md)
     - [Metadata Manager](user_documentation/guide-metadata-manager.md)
+    - [Authentication methods](user_documentation/guide-authentication.md)
 - Developer documentation
     - [REST](developer_documentation/guide-rest.md)
         - [REST api V1](developer_documentation/ref-rest.md)

@@ -3,6 +3,8 @@ package org.molgenis.data.meta.model;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
@@ -82,6 +84,7 @@ public class Package extends StaticEntity
 	 *
 	 * @return parent package or <tt>null</tt>
 	 */
+	@Nullable
 	public Package getParent()
 	{
 		return getEntity(PackageMetadata.PARENT, Package.class);
@@ -124,6 +127,7 @@ public class Package extends StaticEntity
 	 *
 	 * @return package description or <tt>null</tt>
 	 */
+	@Nullable
 	public String getDescription()
 	{
 		return getString(PackageMetadata.DESCRIPTION);
@@ -159,8 +163,6 @@ public class Package extends StaticEntity
 
 	/**
 	 * Add a {@link Tag} to this {@link Package}
-	 *
-	 * @param tag
 	 */
 	public void addTag(Tag tag)
 	{
@@ -169,8 +171,6 @@ public class Package extends StaticEntity
 
 	/**
 	 * Remove a {@link Tag} from this {@link Package}
-	 *
-	 * @param tag
 	 */
 	public void removeTag(Tag tag)
 	{
@@ -218,9 +218,6 @@ public class Package extends StaticEntity
 	 *     public abstract List<Tag> getTags();
 	 * }
 	 * </code></pre>
-	 *
-	 * @param o
-	 * @return
 	 */
 	@Override
 	public boolean equals(Object o)
@@ -250,8 +247,6 @@ public class Package extends StaticEntity
 	 *     public abstract String getId();
 	 * }
 	 * </code></pre>
-	 *
-	 * @return
 	 */
 	@Override
 	public int hashCode()

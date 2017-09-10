@@ -6,10 +6,12 @@ The components needed to run MOLGENIS locally or on a server are:
 You can download, install and use MOLGENIS for free under license [LGPLv3]().
 **
 
-* [Java Platform (JDK) 8u131](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-* [Apache Tomcat v7.0.78](http://tomcat.apache.org/)
+* [Java Platform (JDK) 8u144](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* [Apache Tomcat v7.0.79](http://tomcat.apache.org/)
 * [PostgreSQL v9.6.3](https://www.postgresql.org/download/)
-* [Elasticsearch v5.4.1](https://www.elastic.co/downloads/elasticsearch)
+* [Elasticsearch v5.5.1](https://www.elastic.co/downloads/elasticsearch)
+* Optional: [OpenCPU 2.0](https://www.opencpu.org/download.html) (enables R scripting feature)
+* Optional: [Python 3.6.2](https://www.python.org/downloads/) (enables Python scripting feature)
 * [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
 
@@ -21,7 +23,7 @@ Now that your Apache Tomcat is running and MOLGENIS is deployed, you will notice
 The properties file supplies information to the application regarding the database URL, and the initial administrator password. To make it clear to Tomcat where to find your properties file, you have to edit the setenv.sh file in the apache-tomcat folder.
 
 ```
-echo 'CATALINA_OPTS="-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Dmolgenis.home=${molgenis_home_folder}"' > ${apache-tomcat_folder}/bin/setenv.sh
+echo 'CATALINA_OPTS="-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Dmolgenis.home=<put your molgenis home here>"' > <path to tomcat>/bin/setenv.sh
 ```
 
 The **-Dmolgenis.home** property tells tomcat where to find your properties file. Replace the ${molgenis_home_folder} with the location of your molgenis home. Note that you should **NOT** use relative paths in your apache-tomcat configuration. Always use absolute paths to point to your molgenis-server.properties.
@@ -34,6 +36,7 @@ db_password=molgenis
 db_uri=jdbc\:postgresql\://localhost/molgenis
 admin.password=admin
 user.password=admin
+python_script_executable=<python3_executable_path>
 ```
 
 Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in PostgreSQL. This effectively means that whatever you call your database, your db_uri should point to it.
@@ -44,6 +47,13 @@ If you are unfamiliar with PostgreSQL, follow one of their [PostgreSQL installat
 - Add a database 'molgenis'
 - Add a user 'molgenis' (password 'molgenis') under Login Roles
 - Add 'can create databases' privilege to user 'molgenis'
+
+For example, in psql terminal type:
+```
+CREATE DATABASE molgenis;
+CREATE USER molgenis WITH PASSWORD 'molgenis';
+ALTER USER molgenis CREATEDB;
+```
 
 **Configuring Elasticsearch**  
 Open elasticsearch.yml in the Elasticsearch config directory and set the following properties:

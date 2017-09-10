@@ -6,15 +6,11 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-data-cache</artifactId>
 
     <name>data-cache</name>
-
-    <properties>
-        <caffeine.version>2.3.5</caffeine.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -36,12 +32,10 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>${caffeine.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>guava</artifactId>
-            <version>${caffeine.version}</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>

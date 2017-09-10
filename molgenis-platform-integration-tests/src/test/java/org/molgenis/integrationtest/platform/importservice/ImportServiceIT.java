@@ -16,12 +16,11 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.molgenis.ontology.OntologyDataConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.importer.OntologyImportService;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +63,11 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	static final String ROLE_READ_ENTITY_TYPE = "ENTITY_READ_sys_md_EntityType";
 	static final String ROLE_READ_ATTRIBUTE = "ENTITY_READ_sys_md_Attribute";
 	static final String ROLE_READ_TAG = "ENTITY_READ_sys_md_Tag";
+	static final String ROLE_COUNT_TAG = "ENTITY_COUNT_sys_md_Tag";
 	static final String ROLE_READ_OWNED = "ENTITY_READ_sys_sec_Owned";
+	static final String ROLE_COUNT_OWNED = "ENTITY_COUNT_sys_sec_Owned";
 	static final String ROLE_READ_FILE_META = "ENTITY_READ_sys_FileMeta";
+	static final String ROLE_COUNT_FILE_META = "ENTITY_COUNT_sys_FileMeta";
 
 	@Autowired
 	UserFactory userFactory;
@@ -88,7 +90,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
 		Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
 		importServiceRegistrar.register(contextRefreshedEvent);
-		RunAsSystemProxy.runAsSystem(() -> dataService.add(USER, getTestUser()));
+		RunAsSystemAspect.runAsSystem(() -> dataService.add(USER, getTestUser()));
 	}
 
 	abstract User getTestUser();
@@ -175,8 +177,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	}
 
 	@Import(value = { VcfDataConfig.class, VcfImporterService.class, VcfAttributes.class, OntologyDataConfig.class,
-			OntologyTestConfig.class, OntologyImportService.class, MolgenisPluginRegistryImpl.class,
-			CsvDataConfig.class })
+			OntologyTestConfig.class, OntologyImportService.class, CsvDataConfig.class })
 	static class Config
 	{
 

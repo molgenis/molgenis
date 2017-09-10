@@ -1,6 +1,6 @@
 package org.molgenis.ui.controller;
 
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public abstract class AbstractStaticContentController extends MolgenisPluginController
+public abstract class AbstractStaticContentController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractStaticContentController.class);
 
@@ -62,8 +62,7 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	}
 
 	@RequestMapping(value = "/edit", method = RequestMethod.POST)
-	public String submitContent(@RequestParam(value = "content") final String content,
-			final Model model)
+	public String submitContent(@RequestParam(value = "content") final String content, final Model model)
 	{
 		this.staticContentService.checkPermissions(this.uniqueReference);
 		try

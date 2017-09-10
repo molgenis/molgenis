@@ -2,19 +2,19 @@ package org.molgenis.navigator;
 
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.navigator.NavigatorController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
-@RequestMapping(URI + "/**")
-public class NavigatorController extends MolgenisPluginController
+@RequestMapping(URI)
+public class NavigatorController extends PluginController
 {
 	public static final String NAVIGATOR = "navigator";
 	public static final String URI = PLUGIN_URI_PREFIX + NAVIGATOR;
@@ -32,7 +32,7 @@ public class NavigatorController extends MolgenisPluginController
 		this.appSettings = requireNonNull(appSettings);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(value = "/**", method = GET)
 	public String init(Model model)
 	{
 		model.addAttribute("baseUrl", getBaseUrl());

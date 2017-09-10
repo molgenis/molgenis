@@ -20,7 +20,7 @@ import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -48,7 +48,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class SortaServiceAnonymousController extends MolgenisPluginController
+public class SortaServiceAnonymousController extends PluginController
 {
 	@Autowired
 	private SortaService sortaService;
@@ -67,7 +67,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	public static final String VIEW_NAME = "sorta-match-anonymous-view";
 	public static final String ID = "sorta_anonymous";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	public SortaServiceAnonymousController()
 	{
@@ -83,8 +83,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match")
 	public String match(@RequestParam(value = "selectOntologies") String ontologyIri,
-			@RequestParam(value = "inputTerms") String inputTerms,
-			HttpServletRequest httpServletRequest, Model model) throws UnsupportedEncodingException, IOException
+			@RequestParam(value = "inputTerms") String inputTerms, HttpServletRequest httpServletRequest, Model model)
+			throws UnsupportedEncodingException, IOException
 	{
 		String fileName = httpServletRequest.getSession().getId() + "_input.txt";
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), fileName);
@@ -96,8 +96,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/upload")
 	public String upload(@RequestParam(value = "selectOntologies") String ontologyIri,
-			@RequestParam(value = "file") Part file, HttpServletRequest httpServletRequest,
-			Model model) throws UnsupportedEncodingException, IOException
+			@RequestParam(value = "file") Part file, HttpServletRequest httpServletRequest, Model model)
+			throws UnsupportedEncodingException, IOException
 	{
 
 		String fileName = httpServletRequest.getSession().getId() + "_input.csv";

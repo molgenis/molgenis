@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-dataexplorer</artifactId>
     <packaging>jar</packaging>
@@ -50,6 +50,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-genomebrowser</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- third party dependencies -->

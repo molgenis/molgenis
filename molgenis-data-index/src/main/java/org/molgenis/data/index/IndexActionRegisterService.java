@@ -19,10 +19,9 @@ public interface IndexActionRegisterService
 	/**
 	 * Log and create locks for an add/update/delete operation on a Repository
 	 *
-	 * @param entityType
-	 * @param entityId   the ID of the entity, may be null to indicate change to entire repository
+	 * @param entityId the ID of the entity, may be null to indicate change to entire repository
 	 */
-	void register(EntityType entityType, String entityId);
+	void register(EntityType entityType, Object entityId);
 
 	/**
 	 * Stores the index actions in the repository.

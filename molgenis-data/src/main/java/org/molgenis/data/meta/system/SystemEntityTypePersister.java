@@ -8,6 +8,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -91,7 +92,7 @@ public class SystemEntityTypePersister
 	{
 		// get all system entities
 		List<EntityType> removedSystemEntityMetas = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-															   .filter(SystemEntityTypePersister::isSystemEntity)
+															   .filter(EntityUtils::isSystemEntity)
 															   .filter(this::isNotExists)
 															   .collect(toList());
 
@@ -101,29 +102,10 @@ public class SystemEntityTypePersister
 	private void removeNonExistingSystemPackages()
 	{
 		Stream<Package> systemPackages = dataService.findAll(PACKAGE, Package.class)
-													.filter(SystemEntityTypePersister::isSystemPackage)
+													.filter(EntityUtils::isSystemPackage)
 													.filter(this::isNotExists);
 
 		dataService.delete(PACKAGE, systemPackages);
-	}
-
-	private static boolean isSystemEntity(EntityType entityType)
-	{
-		return isSystemPackage(entityType.getPackage());
-	}
-
-	private static boolean isSystemPackage(Package package_)
-	{
-		if (package_ == null)
-		{
-			return false;
-		}
-		if (package_.getId().equals(PACKAGE_SYSTEM))
-		{
-			return true;
-		}
-		Package rootPackage = package_.getRootPackage();
-		return rootPackage != null && rootPackage.getId().equals(PACKAGE_SYSTEM);
 	}
 
 	private boolean isNotExists(EntityType entityType)

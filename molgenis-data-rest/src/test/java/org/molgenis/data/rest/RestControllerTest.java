@@ -15,9 +15,11 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +75,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	private RestController restController;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private DataService dataService;
@@ -92,7 +94,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		reset(molgenisPermissionService);
+		reset(permissionService);
 		reset(dataService);
 		reset(metaDataService);
 		when(dataService.getMeta()).thenReturn(metaDataService);
@@ -266,7 +268,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeWritable() throws Exception
 	{
-		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))
@@ -281,7 +283,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeNotWritable() throws Exception
 	{
-		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))
@@ -637,6 +639,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public static class RestControllerConfig extends WebMvcConfigurerAdapter
 	{
 		@Bean
+		public AuthenticationSettings authenticationSettings()
+		{
+			return mock(AuthenticationSettings.class);
+		}
+
+		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
@@ -661,9 +669,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisPermissionService molgenisPermissionService()
+		public PermissionService permissionService()
 		{
-			return mock(MolgenisPermissionService.class);
+			return mock(PermissionService.class);
+		}
+
+		@Bean
+		public UserAccountService userAccountService()
+		{
+			return mock(UserAccountService.class);
 		}
 
 		@Bean
@@ -705,8 +719,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), tokenService(), authenticationManager(),
-					molgenisPermissionService(), new MolgenisRSQL(),
+			return new RestController(authenticationSettings(), dataService(), tokenService(), authenticationManager(),
+					permissionService(), userAccountService(), new MolgenisRSQL(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService());
 		}

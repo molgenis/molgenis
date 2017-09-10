@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-app</artifactId>
     <packaging>war</packaging>
@@ -99,6 +99,11 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-plugin</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-excel</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -126,6 +131,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-r</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-searchall</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -167,17 +177,6 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-elasticsearch</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-das</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -231,6 +230,11 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-genomebrowser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -277,6 +281,16 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-metadata-manager</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-one-click-importer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-web</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

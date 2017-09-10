@@ -12,10 +12,10 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileExtensionUtils;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 public class ImportWizardController extends AbstractWizardController
 {
 	public static final String ID = "importwizard";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final UploadWizardPage uploadWizardPage;
 	private final OptionsWizardPage optionsWizardPage;
@@ -367,8 +367,7 @@ public class ImportWizardController extends AbstractWizardController
 	/**
 	 * Imports entities present in the submitted file
 	 *
-	 * @param url   URL from which a file is downloaded
-	 * @param @Link importFile
+	 * @param url URL from which a file is downloaded
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/importByUrl")
 	@ResponseBody
@@ -408,8 +407,6 @@ public class ImportWizardController extends AbstractWizardController
 	 * @param action       Specifies the import method. Supported: ADD, ADD_UPDATE
 	 * @param notify       Should admin be notified when the import fails?
 	 * @return ResponseEntity containing the API URL with the current import status
-	 * @throws IOException
-	 * @throws URISyntaxException
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/importFile")
 	public ResponseEntity<String> importFile(HttpServletRequest request,

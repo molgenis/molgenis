@@ -49,6 +49,17 @@ Files stored in an [Amazon Bucket](http://docs.aws.amazon.com/AmazonS3/latest/de
 | targetEntityId | the name of the entity to import to, this is an optional field used for files that have a different sheet name instead of the targeted entityType |
 | extension      | file extension, this is an optional paramater that is needed in case of a different format than excel |
 
+For example:
+```json
+ {
+    "bucket":"[BUCKET NAME]",
+    "key":"testplan/emx", 
+    "expression":false, 
+    "accessKey":"[ACCESS_KEY]", 
+    "secretKey":"[SECRET_KEY]",
+    "region":"eu-west-1"
+ }        
+```
 ### Mapping
 Runs an existing Mapping Service project.
 #### parameters
@@ -59,6 +70,16 @@ Runs an existing Mapping Service project.
 | addSourceAttribute | Indicates if a source attribute should be added to the EntityType, ignored when mapping to an existing EntityType |
 | packageId          | The ID of the target package, ignored when mapping to an existing EntityType |
 | label              | The label of the target EntityType, ignored when mapping to an existing EntityType |
+For instance:
+```json
+{
+    "mappingProjectId": "<mapping project id>",
+    "targetEntityTypeId": "new_target_entity",
+    "packageId": "base",
+    "label": "Scheduled Mapping Job Target",
+    "addSourceAttribute": true
+}
+```
 
 ### Script
 Runs an existing Script, defined in the Script plugin.

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-data-rest</artifactId>
 
@@ -128,6 +128,12 @@
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-one-click-importer</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

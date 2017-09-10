@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,16 +25,16 @@ import static org.molgenis.questionnaires.QuestionnaireMetaData.ATTR_STATUS;
 import static org.molgenis.questionnaires.QuestionnaireStatus.NOT_STARTED;
 import static org.molgenis.questionnaires.QuestionnaireStatus.OPEN;
 import static org.molgenis.questionnaires.QuestionnaireUtils.findQuestionnairesMetaData;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 import static org.molgenis.security.owned.OwnedEntityType.OWNER_USERNAME;
 
 @Controller
 @RequestMapping(QuestionnairePluginController.URI)
-public class QuestionnairePluginController extends MolgenisPluginController
+public class QuestionnairePluginController extends PluginController
 {
 	public static final String ID = "questionnaires";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final DataService dataService;
 	private final ThankYouTextService thankYouTextService;

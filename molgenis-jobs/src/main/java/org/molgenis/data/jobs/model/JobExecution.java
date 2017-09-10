@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -102,6 +103,7 @@ public class JobExecution extends StaticEntity
 		set(SUBMISSION_DATE, value);
 	}
 
+	@Nullable
 	public Instant getStartDate()
 	{
 		return getInstant(START_DATE);
@@ -112,6 +114,7 @@ public class JobExecution extends StaticEntity
 		set(START_DATE, value);
 	}
 
+	@Nullable
 	public Instant getEndDate()
 	{
 		return getInstant(END_DATE);
@@ -122,6 +125,7 @@ public class JobExecution extends StaticEntity
 		set(END_DATE, value);
 	}
 
+	@Nullable
 	public Integer getProgressInt()
 	{
 		return getInt(PROGRESS_INT);
@@ -132,6 +136,7 @@ public class JobExecution extends StaticEntity
 		set(PROGRESS_INT, value);
 	}
 
+	@Nullable
 	public String getProgressMessage()
 	{
 		return getString(PROGRESS_MESSAGE);
@@ -142,6 +147,7 @@ public class JobExecution extends StaticEntity
 		set(PROGRESS_MESSAGE, StringUtils.abbreviate(value, MAX_PROGRESS_MESSAGE_LENGTH));
 	}
 
+	@Nullable
 	public Integer getProgressMax()
 	{
 		return getInt(PROGRESS_MAX);
@@ -152,6 +158,7 @@ public class JobExecution extends StaticEntity
 		set(PROGRESS_MAX, value);
 	}
 
+	@Nullable
 	public String getLog()
 	{
 		return getString(LOG);
@@ -162,6 +169,7 @@ public class JobExecution extends StaticEntity
 		set(LOG, value);
 	}
 
+	@Nullable
 	public String getResultUrl()
 	{
 		return getString(RESULT_URL);
@@ -207,6 +215,7 @@ public class JobExecution extends StaticEntity
 		set(SCHEDULED_JOB_ID, scheduledJobId);
 	}
 
+	@Nullable
 	public String getScheduledJobId()
 	{
 		return getString(SCHEDULED_JOB_ID);

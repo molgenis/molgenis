@@ -75,7 +75,6 @@ public final class IntermediateParseResults
 	 * Gets a specific package
 	 *
 	 * @param name the name of the package
-	 * @return
 	 */
 	public Package getPackage(String name)
 	{

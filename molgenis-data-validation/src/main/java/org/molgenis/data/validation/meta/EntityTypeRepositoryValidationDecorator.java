@@ -13,33 +13,26 @@ import static java.util.Objects.requireNonNull;
  */
 public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryDecorator<EntityType>
 {
-	private final Repository<EntityType> decoratedRepo;
 	private final EntityTypeValidator entityTypeValidator;
 
-	public EntityTypeRepositoryValidationDecorator(Repository<EntityType> decoratedRepo,
+	public EntityTypeRepositoryValidationDecorator(Repository<EntityType> delegateRepository,
 			EntityTypeValidator entityTypeValidator)
 	{
-		this.decoratedRepo = requireNonNull(decoratedRepo);
+		super(delegateRepository);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
-	}
-
-	@Override
-	public Repository<EntityType> delegate()
-	{
-		return decoratedRepo;
 	}
 
 	@Override
 	public void update(EntityType entityType)
 	{
 		entityTypeValidator.validate(entityType);
-		decoratedRepo.update(entityType);
+		delegate().update(entityType);
 	}
 
 	@Override
 	public void update(Stream<EntityType> entities)
 	{
-		decoratedRepo.update(entities.filter(entityType ->
+		delegate().update(entities.filter(entityType ->
 		{
 			entityTypeValidator.validate(entityType);
 			return true;
@@ -50,13 +43,13 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	public void add(EntityType entityType)
 	{
 		entityTypeValidator.validate(entityType);
-		decoratedRepo.add(entityType);
+		delegate().add(entityType);
 	}
 
 	@Override
 	public Integer add(Stream<EntityType> entities)
 	{
-		return decoratedRepo.add(entities.filter(entityType ->
+		return delegate().add(entities.filter(entityType ->
 		{
 			entityTypeValidator.validate(entityType);
 			return true;

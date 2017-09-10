@@ -134,7 +134,7 @@ public class LocalizationService
 				String message = messageSource.getMessage(languageCode, messageID);
 				if (message != null && isNullOrEmpty(i18nString.getString(languageCode)))
 				{
-					LOG.info("Setting {}.{}.{} to {}", namespace, messageID, languageCode, message);
+					LOG.debug("Setting {}.{}.{} to {}", namespace, messageID, languageCode, message);
 					i18nString.set(languageCode, message);
 				}
 			}
@@ -168,7 +168,7 @@ public class LocalizationService
 			try
 			{
 				dataService.add(L10N_STRING, entities);
-				LOG.info("Added message IDs to namespace '{}' : {}.", namespace, messageIDs);
+				LOG.debug("Added message IDs to namespace '{}' : {}.", namespace, messageIDs);
 			}
 			catch (MolgenisDataAccessException ex)
 			{
@@ -191,8 +191,6 @@ public class LocalizationService
 
 	/**
 	 * Deletes all localization strings for a given namespace
-	 *
-	 * @param namespace
 	 */
 	@Transactional
 	@RunAsSystem

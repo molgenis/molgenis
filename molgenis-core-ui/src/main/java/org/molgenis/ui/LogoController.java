@@ -27,12 +27,6 @@ public class LogoController
 
 	/**
 	 * Get a file from the logo subdirectory of the filestore
-	 *
-	 * @param out
-	 * @param name
-	 * @param extension
-	 * @param response
-	 * @throws IOException
 	 */
 	@RequestMapping("/logo/{name}.{extension}")
 	public void getLogo(OutputStream out, @PathVariable("name") String name,

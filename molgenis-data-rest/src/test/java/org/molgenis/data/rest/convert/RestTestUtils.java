@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -91,7 +92,7 @@ public class RestTestUtils
 		createTestUserBody.put("changePassword", false);
 		createTestUserBody.put("Email", userName + "@example.com");
 
-		given().header("x-molgenis-token", adminToken)
+		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(createTestUserBody.toJSONString())
 			   .when()
@@ -243,6 +244,25 @@ public class RestTestUtils
 	}
 
 	/**
+	 * Grant user read right on given plugin
+	 *
+	 * @param adminToken the token to use for signin
+	 * @param userId     the ID (not the name) of the user that needs to get the rights
+	 * @param plugin     the name of the plugin
+	 */
+	public static void grantPluginRights(String adminToken, String userId, String plugin)
+	{
+		String right = "ROLE_PLUGIN_READ_" + plugin;
+		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
+
+		given().header("x-molgenis-token", adminToken)
+			   .contentType(APPLICATION_JSON)
+			   .body(body.toJSONString())
+			   .when()
+			   .post("api/v1/" + "sys_sec_UserAuthority");
+	}
+
+	/**
 	 * Grant user rights on non-system entity.
 	 *
 	 * @param adminToken the token to use for signin
@@ -286,6 +306,13 @@ public class RestTestUtils
 			   .delete("api/v1/sys_sec_UserAuthority/" + permissionId);
 	}
 
+	public static void removePackage(String adminToken, String packageName)
+	{
+		given().header("x-molgenis-token", adminToken)
+			   .contentType(APPLICATION_JSON)
+			   .delete("api/v1/sys_md_Package/" + packageName);
+	}
+
 	public static void removeEntity(String adminToken, String entityId)
 	{
 		given().header("x-molgenis-token", adminToken)
@@ -293,11 +320,15 @@ public class RestTestUtils
 			   .delete("api/v1/" + entityId + "/meta");
 	}
 
+	public static void removeImportJob(String adminToken, String jobId)
+	{
+		given().header("x-molgenis-token", adminToken)
+			   .contentType(APPLICATION_JSON)
+			   .delete("api/v2/sys_job_OneClickImportJobExecution/" + jobId);
+	}
+
 	/**
 	 * Removes permissions from UserAuthority table for a given user identifier
-	 *
-	 * @param adminToken
-	 * @param testUserId
 	 */
 	public static void removeRightsForUser(String adminToken, String testUserId)
 	{
@@ -328,4 +359,21 @@ public class RestTestUtils
 			   .body(requestBody)
 			   .delete("api/v2/sys_sec_UserAuthority");
 	}
+
+	/**
+	 * Enable or disable 2 factor authentication
+	 *
+	 * @param adminToken admin token for login in RESTAPI
+	 * @param state      state of 2 factor authentication (can be Enforced, Enabled, Disabled)
+	 */
+	public static void toggle2fa(String adminToken, TwoFactorAuthenticationSetting state)
+	{
+
+		given().header(X_MOLGENIS_TOKEN, adminToken)
+			   .contentType(APPLICATION_JSON)
+			   .body(state.getLabel())
+			   .when()
+			   .put("api/v1/sys_set_auth/auth/sign_in_2fa");
+	}
+
 }

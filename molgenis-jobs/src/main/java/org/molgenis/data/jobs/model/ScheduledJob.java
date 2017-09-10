@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.data.jobs.model.ScheduledJobMetadata.*;
 
 public class ScheduledJob extends StaticEntity
@@ -39,6 +41,7 @@ public class ScheduledJob extends StaticEntity
 		return getString(NAME);
 	}
 
+	@Nullable
 	public String getDescription()
 	{
 		return getString(DESCRIPTION);
@@ -55,16 +58,19 @@ public class ScheduledJob extends StaticEntity
 		return active != null && active;
 	}
 
+	@Nullable
 	public String getFailureEmail()
 	{
 		return getString(FAILURE_EMAIL);
 	}
 
+	@Nullable
 	public String getSuccessEmail()
 	{
 		return getString(SUCCESS_EMAIL);
 	}
 
+	@Nullable
 	public String getUser()
 	{
 		return getString(USER);

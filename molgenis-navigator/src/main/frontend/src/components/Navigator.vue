@@ -1,6 +1,6 @@
 // @flow
 <template>
-  <div class="container">
+  <div>
 
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
@@ -61,15 +61,13 @@
   </div>
 </template>
 
-<style lang="scss">
+<style>
   .navigator-path {
     margin-top: 2rem;
   }
 
-  .navigator-path {
-    .breadcrumb {
-      background-color: transparent;
-    }
+  .navigator-path .breadcrumb{
+    background-color: transparent;
   }
 
   .navigator-search {

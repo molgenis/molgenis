@@ -86,9 +86,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 	/**
 	 * Creates a new {@link SortV1} instance.
-	 *
-	 * @param direction
-	 * @param properties
 	 */
 	public SortV1(DirectionV1 direction, List<String> properties)
 	{
@@ -111,7 +108,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 	 * given ones.
 	 *
 	 * @param sort can be {@literal null}.
-	 * @return
 	 */
 	public SortV1 and(SortV1 sort)
 	{
@@ -133,9 +129,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 	/**
 	 * Returns the order registered for the given property.
-	 *
-	 * @param property
-	 * @return
 	 */
 	public OrderV1 getOrderFor(String property)
 	{
@@ -222,9 +215,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Returns the {@link DirectionV1} enum for the given {@link String} value.
-		 *
-		 * @param value
-		 * @return
 		 */
 		public static DirectionV1 fromString(String value)
 		{
@@ -303,8 +293,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Returns the order the property shall be sorted for.
-		 *
-		 * @return
 		 */
 		public DirectionV1 getDirection()
 		{
@@ -313,8 +301,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Returns the property to order for.
-		 *
-		 * @return
 		 */
 		public String getProperty()
 		{
@@ -323,8 +309,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Returns whether sorting for this property shall be ascending.
-		 *
-		 * @return
 		 */
 		public boolean isAscending()
 		{
@@ -333,9 +317,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Returns a new {@link OrderV1} with the given {@link OrderV1}.
-		 *
-		 * @param order
-		 * @return
 		 */
 		public OrderV1 with(DirectionV1 order)
 		{
@@ -344,9 +325,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Returns a new {@link SortV1} instance for the given properties.
-		 *
-		 * @param properties
-		 * @return
 		 */
 		public SortV1 withProperties(String... properties)
 		{

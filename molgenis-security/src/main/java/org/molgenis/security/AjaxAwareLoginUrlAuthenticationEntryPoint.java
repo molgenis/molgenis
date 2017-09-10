@@ -39,7 +39,7 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 			if (SecurityUtils.isSessionExpired(request))
 			{
 				// Signal that 'session expired' message must be shown to the user
-				request.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTR, true);
+				request.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTRIBUTE, true);
 			}
 
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -58,9 +58,6 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	/**
 	 * Checks if this is a X-domain pre-flight request.
-	 *
-	 * @param request
-	 * @return
 	 */
 	private boolean isPreflight(HttpServletRequest request)
 	{
@@ -69,9 +66,6 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	/**
 	 * Checks if it is a rest request
-	 *
-	 * @param request
-	 * @return
 	 */
 	protected boolean isRestRequest(HttpServletRequest request)
 	{

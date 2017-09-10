@@ -7,21 +7,21 @@ describe('Navigator', () => {
     })
   })
 
-  describe('submitQuery', () => {
-    it('should clear the query and dispatch a call to fetch all packages', () => {
+  describe('submitQueryWithSpecialCharacters', () => {
+    it('should clear the query and dispatch a call to fetch all packages with special characters', () => {
       Navigator.methods.$store = {
         state: {
-          query: 'my-query'
+          query: 'my-query with spaces and ""'
         },
         dispatch: sinon.spy(),
         commit: sinon.spy()
       }
 
       Navigator.methods.submitQuery()
-      Navigator.methods.$store.commit.should.have.been.calledWith('SET_PACKAGES', [])
-      Navigator.methods.$store.commit.should.have.been.calledWith('RESET_PATH')
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('QUERY_PACKAGES', 'my-query')
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('QUERY_ENTITIES', 'my-query')
+      Navigator.methods.$store.commit.should.have.been.calledWith('__SET_PACKAGES__', [])
+      Navigator.methods.$store.commit.should.have.been.calledWith('__RESET_PATH__')
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_PACKAGES__', 'my-query with spaces and ""')
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_ENTITIES__', 'my-query with spaces and ""')
     })
   })
 
@@ -33,8 +33,8 @@ describe('Navigator', () => {
       }
 
       Navigator.methods.clearQuery('foobar')
-      Navigator.methods.$store.commit.should.have.been.calledWith('SET_QUERY', undefined)
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('QUERY_PACKAGES')
+      Navigator.methods.$store.commit.should.have.been.calledWith('__SET_QUERY__', undefined)
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_PACKAGES__')
     })
   })
 
@@ -47,8 +47,8 @@ describe('Navigator', () => {
 
     it('should clear the query and fetch the package by id', () => {
       Navigator.methods.selectPackage('foobar')
-      Navigator.methods.$store.commit.should.have.been.calledWith('SET_QUERY', undefined)
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('GET_STATE_FOR_PACKAGE', 'foobar')
+      Navigator.methods.$store.commit.should.have.been.calledWith('__SET_QUERY__', undefined)
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('__GET_STATE_FOR_PACKAGE__', 'foobar')
     })
   })
 

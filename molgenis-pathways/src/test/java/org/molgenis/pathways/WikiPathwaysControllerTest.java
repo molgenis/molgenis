@@ -9,7 +9,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.pathways.service.WikiPathwaysService;
@@ -60,12 +59,6 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		{
 			return new WikiPathwaysController(serviceMock());
 		}
-
-		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
-		{
-			return mock(MolgenisPluginRegistry.class);
-		}
 	}
 
 	@Autowired
@@ -112,8 +105,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 				+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
 				+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>";
 
-		assertEquals(controller.analyzeGPML(gpml),
-				ImmutableMultimap.of("TUSC2", "cf7548", "IPO4", "d9af5"));
+		assertEquals(controller.analyzeGPML(gpml), ImmutableMultimap.of("TUSC2", "cf7548", "IPO4", "d9af5"));
 	}
 
 	@Test
@@ -166,8 +158,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
 		when(serviceMock.getColoredPathwayImage("WP1234",
-				ImmutableMap.of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn(
-				"<svg>WP1234</svg>");
+				ImmutableMap.of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn("<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
 	}
 

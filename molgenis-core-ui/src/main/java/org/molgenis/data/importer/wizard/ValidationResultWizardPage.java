@@ -7,7 +7,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.*;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +64,6 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	}
 
 	@Override
-	@Transactional
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
 		ImportWizardUtil.validateImportWizard(wizard);
@@ -108,7 +106,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		if (!userAccountService.getCurrentUser().isSuperuser())
 		{
 			String username = SecurityUtils.getCurrentUsername();
-			groups = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
+			groups = RunAsSystemAspect.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
 		}
 		else
 		{

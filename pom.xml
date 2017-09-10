@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>5.1.0-SNAPSHOT</version>
+    <version>5.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -23,12 +23,13 @@
         <connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
-         
+
     <developers>
         <developer>
             <name>MOLGENIS development team</name>
             <email>molgenis@gmail.com</email>
-            <organization>University Medical Centre Groningen, System Genetics, Genomics Coordination Centre</organization>
+            <organization>University Medical Centre Groningen, System Genetics, Genomics Coordination Centre
+            </organization>
             <organizationUrl>http://www.molgenis.org</organizationUrl>
         </developer>
     </developers>
@@ -38,11 +39,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
         <logback.version>1.2.2</logback.version>
-        <spring.version>4.3.7.RELEASE</spring.version>
-        <spring.security.version>4.2.0.RELEASE</spring.security.version>
+        <spring.version>4.3.10.RELEASE</spring.version>
+        <spring.security.version>4.2.3.RELEASE</spring.security.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
-        <httpclient.version>4.5.1</httpclient.version>
-        <google.auto-value.version>1.3</google.auto-value.version>
+        <httpclient.version>4.5.3</httpclient.version>
+        <google.auto-value.version>1.4.1</google.auto-value.version>
+        <caffeine.version>2.3.5</caffeine.version>
         <google.guava.version>21.0</google.guava.version>
         <google.gson.version>2.2.4</google.gson.version>
         <apache.commons.lang.version>3.1</apache.commons.lang.version>
@@ -53,8 +55,9 @@
         <jsr305.version>3.0.1</jsr305.version>
         <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
-        <elasticsearch.version>5.4.1</elasticsearch.version>
+        <elasticsearch.version>5.5.1</elasticsearch.version>
         <postgres.version>9.4.1211</postgres.version>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <mockito.version>2.7.22</mockito.version>
     </properties>
 
@@ -235,30 +238,6 @@
                                 </resources>
                             </configuration>
                         </execution>
-                        <!--
-                            Copying the das server config to the war ROOT
-                            the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
-                            its placed in the normal WEB-INF/classes folder
-                        -->
-                        <execution>
-                            <id>copy-resources</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>target/${project.artifactId}-${project.version}</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>src/main/resources/</directory>
-                                        <includes>
-                                            <include>MydasServerConfig.xml</include>
-                                        </includes>
-                                        <filtering>true</filtering>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
                     </executions>
                 </plugin>
                 <!-- specify plugin version -->
@@ -431,6 +410,12 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
                     <version>1.0-alpha-2</version>
+                </plugin>
+                <!-- specify plugin version -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.7.2.201409121644</version>
                 </plugin>
                 <!-- Eclipse m2e mappings -->
                 <plugin>
@@ -646,12 +631,27 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.6.201602180812</version>
+                <configuration>
+                    <append>true</append>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>amend-unit-test-java-agent-option</id>
+                        <id>agent-for-ut</id>
                         <goals>
                             <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>agent-for-it</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -665,12 +665,6 @@
 
     <reporting>
         <plugins>
-            <!-- code coverage -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.6.201602180812</version>
-            </plugin>
             <!-- code analysis -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -704,6 +698,11 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpmime</artifactId>
                 <version>${httpclient.version}</version>
             </dependency>
             <dependency>
@@ -763,6 +762,16 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${google.guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>guava</artifactId>
+                <version>${caffeine.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
@@ -853,7 +862,6 @@
         <module>molgenis-charts</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
-        <module>molgenis-das</module>
         <module>molgenis-data-annotators</module>
         <module>molgenis-data-cache</module>
         <module>molgenis-data-csv</module>
@@ -866,6 +874,7 @@
         <module>molgenis-data-index</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-data-platform</module>
+        <module>molgenis-data-plugin</module>
         <module>molgenis-data-postgresql</module>
         <module>molgenis-data-rest-client</module>
         <module>molgenis-data-rest</module>
@@ -877,11 +886,13 @@
         <module>molgenis-fair</module>
         <module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
+        <module>molgenis-genomebrowser</module>
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>
         <module>molgenis-metadata-manager</module>
         <module>molgenis-model-registry</module>
         <module>molgenis-navigator</module>
+        <module>molgenis-one-click-importer</module>
         <module>molgenis-ontology-core</module>
         <module>molgenis-ontology</module>
         <module>molgenis-pathways</module>
@@ -889,6 +900,7 @@
         <module>molgenis-python</module>
         <module>molgenis-questionnaires</module>
         <module>molgenis-r</module>
+        <module>molgenis-searchall</module>
         <module>molgenis-scripts-core</module>
         <module>molgenis-scripts</module>
         <module>molgenis-security-core</module>
@@ -899,5 +911,6 @@
         <module>molgenis-swagger</module>
         <module>molgenis-test</module>
         <module>molgenis-util</module>
+        <module>molgenis-web</module>
     </modules>
 </project>

@@ -13,11 +13,6 @@ public class RestAuthenticationToken extends UsernamePasswordAuthenticationToken
 	private static final long serialVersionUID = 340142428848970352L;
 	private final String token;
 
-	public String getToken()
-	{
-		return token;
-	}
-
 	public RestAuthenticationToken(Object principal, Object credentials,
 			Collection<? extends GrantedAuthority> authorities, String token)
 	{
@@ -29,6 +24,11 @@ public class RestAuthenticationToken extends UsernamePasswordAuthenticationToken
 	{
 		super("N/A", "N/A");
 		this.token = token;
+	}
+
+	public String getToken()
+	{
+		return token;
 	}
 
 }

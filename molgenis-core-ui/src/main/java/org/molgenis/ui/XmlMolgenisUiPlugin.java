@@ -1,27 +1,29 @@
 package org.molgenis.ui;
 
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItem;
+import org.molgenis.web.UiMenuItemType;
 
 /**
  * @deprecated use {@link org.molgenis.ui.menu.MenuItemToMolgenisUiMenuItemAdapter} instead
  */
 @Deprecated
-public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
+public class XmlMolgenisUiPlugin implements UiMenuItem
 {
 	private final PluginType pluginType;
-	private final MolgenisUiMenu parentMenu;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final UiMenu parentMenu;
+	private final PermissionService permissionService;
 
-	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu,
-			MolgenisPermissionService molgenisPermissionService)
+	public XmlMolgenisUiPlugin(PluginType pluginType, UiMenu parentMenu, PermissionService permissionService)
 	{
 		if (pluginType == null) throw new IllegalArgumentException("plugin type is null");
 		if (parentMenu == null) throw new IllegalArgumentException("parent menu is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
+		if (permissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.pluginType = pluginType;
 		this.parentMenu = parentMenu;
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.permissionService = permissionService;
 	}
 
 	@Override
@@ -43,19 +45,19 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	}
 
 	@Override
-	public MolgenisUiMenuItemType getType()
+	public UiMenuItemType getType()
 	{
-		return MolgenisUiMenuItemType.PLUGIN;
+		return UiMenuItemType.PLUGIN;
 	}
 
 	@Override
 	public boolean isAuthorized()
 	{
-		return molgenisPermissionService.hasPermissionOnPlugin(getId(), Permission.READ);
+		return permissionService.hasPermissionOnPlugin(getId(), Permission.READ);
 	}
 
 	@Override
-	public MolgenisUiMenu getParentMenu()
+	public UiMenu getParentMenu()
 	{
 		return parentMenu;
 	}

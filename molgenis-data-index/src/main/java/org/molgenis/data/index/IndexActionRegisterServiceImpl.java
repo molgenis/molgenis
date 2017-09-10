@@ -1,7 +1,7 @@
 package org.molgenis.data.index;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
@@ -14,7 +14,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +21,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Multimaps.synchronizedListMultimap;
-import static java.util.Collections.emptyList;
+import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
+import static com.google.common.collect.Streams.mapWithIndex;
+import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.index.Impact.createSingleEntityImpact;
 import static org.molgenis.data.index.IndexDependencyModel.ENTITY_TYPE_FETCH;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
@@ -51,8 +52,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	private static final int LOG_EVERY = 1000;
 	private static final int ENTITY_FETCH_PAGE_SIZE = 1000;
 
-	private final Multimap<String, IndexAction> indexActionsPerTransaction = synchronizedListMultimap(
-			ArrayListMultimap.create());
+	private final SetMultimap<String, Impact> changesPerTransaction = synchronizedSetMultimap(HashMultimap.create());
 
 	private final DataService dataService;
 	private final IndexActionFactory indexActionFactory;
@@ -82,26 +82,25 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 	@Transactional
 	@Override
-	public synchronized void register(EntityType entityType, String entityId)
+	public synchronized void register(EntityType entityType, Object entityId)
 	{
 		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 		if (transactionId != null)
 		{
-			LOG.debug("register(entityFullName: [{}], entityId: [{}])", entityType.getId(), entityId);
-			final int actionOrder = indexActionsPerTransaction.get(transactionId).size();
-			if (actionOrder >= LOG_EVERY && actionOrder % LOG_EVERY == 0)
+			Impact impact = createSingleEntityImpact(entityType.getId(), entityId);
+			LOG.debug("register({})", impact);
+
+			final boolean newlyRegistered = changesPerTransaction.put(transactionId, impact);
+			if (newlyRegistered && LOG.isWarnEnabled())
 			{
-				LOG.warn(
-						"Transaction {} has caused {} IndexActions to be created. Consider streaming your data manipulations.",
-						transactionId, actionOrder);
+				final int size = changesPerTransaction.get(transactionId).size();
+				if (size >= LOG_EVERY && size % LOG_EVERY == 0)
+				{
+					LOG.warn(
+							"Transaction {} has caused {} IndexActions to be created. Consider streaming your data manipulations.",
+							transactionId, size);
+				}
 			}
-			IndexAction indexAction = indexActionFactory.create()
-														.setIndexActionGroup(
-																indexActionGroupFactory.create(transactionId))
-														.setEntityTypeId(entityType.getId())
-														.setEntityId(entityId)
-														.setIndexStatus(PENDING);
-			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
 		else
 		{
@@ -114,46 +113,40 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
-		Collection<IndexAction> indexActionsForCurrentTransaction = getIndexActionsForCurrentTransaction();
-		if (indexActionsForCurrentTransaction.isEmpty())
+		Set<Impact> changes = getChangesForCurrentTransaction();
+		if (changes.isEmpty())
 		{
 			return;
 		}
-		IndexActionGroup indexActionGroup = indexActionsForCurrentTransaction.iterator().next().getIndexActionGroup();
-		Set<Impact> changes = indexActionsForCurrentTransaction.stream()
-															   .map(indexAction -> Impact.createSingleEntityImpact(
-																	   indexAction.getEntityTypeId(),
-																	   indexAction.getEntityId()))
-															   .collect(toSet());
+		IndexActionGroup indexActionGroup = indexActionGroupFactory.create(transactionId);
 		IndexDependencyModel dependencyModel = new IndexDependencyModel(getEntityTypes());
-		List<IndexAction> indexActions = indexingStrategy.determineImpact(changes, dependencyModel)
-														 .stream()
-														 .filter(key -> !excludedEntities.contains(
-																 key.getEntityTypeId()))
-														 .map(key -> createIndexAction(indexActionGroup, key))
+		Stream<Impact> impactStream = indexingStrategy.determineImpact(changes, dependencyModel)
+													  .stream()
+													  .filter(key -> !excludedEntities.contains(key.getEntityTypeId()));
+		List<IndexAction> indexActions = mapWithIndex(impactStream,
+				(key, actionOrder) -> createIndexAction(indexActionGroup, key, (int) actionOrder))
 														 .collect(toList());
 		if (indexActions.isEmpty())
 		{
 			return;
 		}
-		for (int i = 0; i < indexActions.size(); i++)
-		{
-			indexActions.get(i).setActionOrder(i);
-		}
-
 		LOG.debug("Store index actions for transaction {}", transactionId);
 		dataService.add(INDEX_ACTION_GROUP,
 				indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
 		dataService.add(INDEX_ACTION, indexActions.stream());
 	}
 
-	private IndexAction createIndexAction(IndexActionGroup indexActionGroup, Impact key)
+	private IndexAction createIndexAction(IndexActionGroup indexActionGroup, Impact key, int actionOrder)
 	{
 		IndexAction indexAction = indexActionFactory.create();
 		indexAction.setIndexStatus(PENDING);
-		indexAction.setEntityId((String) key.getId());
+		if (key.getId() != null)
+		{
+			indexAction.setEntityId(key.getId().toString());
+		}
 		indexAction.setEntityTypeId(key.getEntityTypeId());
 		indexAction.setIndexActionGroup(indexActionGroup);
+		indexAction.setActionOrder(actionOrder);
 		return indexAction;
 	}
 
@@ -183,16 +176,16 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean forgetIndexActions(String transactionId)
 	{
 		LOG.debug("Forget index actions for transaction {}", transactionId);
-		return indexActionsPerTransaction.removeAll(transactionId)
-										 .stream()
-										 .anyMatch(indexAction -> !excludedEntities.contains(
-												 indexAction.getEntityTypeId()));
+		return !changesPerTransaction.removeAll(transactionId)
+									 .stream()
+									 .map(Impact::getEntityTypeId)
+									 .allMatch(excludedEntities::contains);
 	}
 
-	private Collection<IndexAction> getIndexActionsForCurrentTransaction()
+	private Set<Impact> getChangesForCurrentTransaction()
 	{
 		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
-		return Optional.of(indexActionsPerTransaction.get(transactionId)).orElse(emptyList());
+		return Optional.of(changesPerTransaction.get(transactionId)).orElse(emptySet());
 	}
 
 	/* TransactionInformation implementation */
@@ -200,66 +193,48 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@Override
 	public boolean isEntityDirty(EntityKey entityKey)
 	{
-		return getIndexActionsForCurrentTransaction().stream()
-													 .anyMatch(indexAction -> indexAction.getEntityId() != null
-															 && indexAction.getEntityTypeId()
-																		   .equals(entityKey.getEntityTypeId())
-															 && indexAction.getEntityId()
-																		   .equals(entityKey.getId().toString()));
+		return getChangesForCurrentTransaction().stream()
+												.filter(Impact::isSingleEntity)
+												.map(Impact::toEntityKey)
+												.anyMatch(entityKey::equals);
 	}
 
 	@Override
 	public boolean isEntireRepositoryDirty(EntityType entityType)
 	{
-		return getIndexActionsForCurrentTransaction().stream()
-													 .anyMatch(indexAction -> indexAction.getEntityId() == null
-															 && indexAction.getEntityTypeId()
-																		   .equals(entityType.getId()));
+		return getChangesForCurrentTransaction().stream()
+												.filter(Impact::isWholeRepository)
+												.map(Impact::getEntityTypeId)
+												.anyMatch(entityType.getId()::equals);
 	}
 
 	@Override
 	public boolean isRepositoryCompletelyClean(EntityType entityType)
 	{
-		return getIndexActionsForCurrentTransaction().stream()
-													 .noneMatch(indexAction -> indexAction.getEntityTypeId()
-																						  .equals(entityType.getId()));
+		return !getDirtyRepositories().contains(entityType.getId());
 	}
 
 	@Override
 	public Set<EntityKey> getDirtyEntities()
 	{
-		return getIndexActionsForCurrentTransaction().stream()
-													 .filter(indexAction -> indexAction.getEntityId() != null)
-													 .map(this::createEntityKey)
-													 .collect(toSet());
+		return getChangesForCurrentTransaction().stream()
+												.filter(Impact::isSingleEntity)
+												.map(Impact::toEntityKey)
+												.collect(toSet());
 	}
 
 	@Override
 	public Set<String> getEntirelyDirtyRepositories()
 	{
-		return getIndexActionsForCurrentTransaction().stream()
-													 .filter(indexAction -> indexAction.getEntityId() == null)
-													 .map(IndexAction::getEntityTypeId)
-													 .collect(toSet());
+		return getChangesForCurrentTransaction().stream()
+												.filter(Impact::isWholeRepository)
+												.map(Impact::getEntityTypeId)
+												.collect(toSet());
 	}
 
 	@Override
 	public Set<String> getDirtyRepositories()
 	{
-		return getIndexActionsForCurrentTransaction().stream().map(IndexAction::getEntityTypeId).collect(toSet());
+		return getChangesForCurrentTransaction().stream().map(Impact::getEntityTypeId).collect(toSet());
 	}
-
-	/**
-	 * Create an EntityKey
-	 * Attention! MOLGENIS supports multiple id object types and the Entity id from the index registry s always a String
-	 *
-	 * @return EntityKey
-	 */
-	private EntityKey createEntityKey(IndexAction indexAction)
-	{
-		return EntityKey.create(indexAction.getEntityTypeId(),
-				indexAction.getEntityId() != null ? EntityUtils.getTypedValue(indexAction.getEntityId(),
-						dataService.getEntityType(indexAction.getEntityTypeId()).getIdAttribute()) : null);
-	}
-
 }

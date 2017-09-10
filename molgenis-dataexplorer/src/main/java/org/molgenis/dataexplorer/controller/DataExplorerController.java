@@ -3,27 +3,28 @@ package org.molgenis.dataexplorer.controller;
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
-import org.molgenis.dataexplorer.service.GenomeBrowserService;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.genomebrowser.GenomeBrowserTrack;
+import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,8 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
@@ -63,12 +62,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 @RequestMapping(URI)
 @SessionAttributes({ ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
-public class DataExplorerController extends MolgenisPluginController
+public class DataExplorerController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataExplorerController.class);
 
 	public static final String ID = "dataexplorer";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	static final String ATTR_GALAXY_URL = "galaxyUrl";
 	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
@@ -80,16 +79,13 @@ public class DataExplorerController extends MolgenisPluginController
 	private DataExplorerSettings dataExplorerSettings;
 
 	@Autowired
-	private GenomicDataSettings genomicDataSettings;
-
-	@Autowired
 	private DirectoryController directoryController;
 
 	@Autowired
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private PermissionService permissionService;
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
@@ -114,7 +110,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Show the explorer page
 	 *
-	 * @param model
 	 * @return the view name
 	 */
 	@RequestMapping(method = GET)
@@ -160,8 +155,7 @@ public class DataExplorerController extends MolgenisPluginController
 			StringBuilder message)
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
-		boolean hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName,
-				Permission.COUNT);
+		boolean hasEntityPermission = permissionService.hasPermissionOnEntityType(selectedEntityName, Permission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -184,16 +178,29 @@ public class DataExplorerController extends MolgenisPluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityTypeId,
 			Model model)
 	{
+		EntityType selectedEntityType;
+		Map<String, GenomeBrowserTrack> entityTracks;
 		switch (moduleId)
 		{
 			case MOD_DATA:
-				model.addAttribute("genomicDataSettings", genomicDataSettings);
-				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
+				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
+				//if multiple tracks are available we assume chrom and pos attribute are the same
+				if (!entityTracks.isEmpty())
+				{
+					//FIXME: how to do this cleaner
+					GenomeBrowserTrack track = entityTracks.entrySet().iterator().next().getValue();
+					model.addAttribute("pos_attr", track.getGenomeBrowserAttrs().getPos());
+					model.addAttribute("chrom_attr", track.getGenomeBrowserAttrs().getChrom());
+				}
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 				break;
 			case MOD_ENTITIESREPORT:
-				model.addAttribute("genomicDataSettings", genomicDataSettings);
-				model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+				//TODO: figure out if we need to know pos and chrom attrs here
+				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
+				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 
 				model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
@@ -202,7 +209,7 @@ public class DataExplorerController extends MolgenisPluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.WRITEMETA))
+				if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
 					throw new MolgenisDataAccessException(
 							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
@@ -223,15 +230,12 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ) && dataService.getCapabilities(
+		return permissionService.hasPermissionOnEntityType(entityTypeId, READ) && dataService.getCapabilities(
 				entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
 	/**
 	 * Returns modules configuration for this entity based on current user permissions.
-	 *
-	 * @param entityTypeId
-	 * @return
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
@@ -250,9 +254,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, WRITE)) pluginPermission = WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, READ)) pluginPermission = READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityTypeId, Permission.COUNT))
+		if (permissionService.hasPermissionOnEntityType(entityTypeId, WRITE)) pluginPermission = WRITE;
+		else if (permissionService.hasPermissionOnEntityType(entityTypeId, READ)) pluginPermission = READ;
+		else if (permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
@@ -307,24 +311,17 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
-	 * TODO Improve performance by rewriting to query that returns all genomic entities instead of retrieving all entities and determining which one is genomic
 	 * Get readable genome entities
-	 *
-	 * @return
 	 */
-	private Map<String, String> getGenomeBrowserEntities()
+	private List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks)
 	{
-		Map<String, String> genomeEntities = new HashMap<>();
-		genomeBrowserService.getGenomeBrowserEntities().forEach(entityType ->
+		Map<String, GenomeBrowserTrack> allTracks = new HashMap<>();
+		allTracks.putAll(entityTracks);
+		for (GenomeBrowserTrack track : entityTracks.values())
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getId(), WRITE);
-			if (canRead || canWrite)
-			{
-				genomeEntities.put(entityType.getId(), entityType.getLabel());
-			}
-		});
-		return genomeEntities;
+			allTracks.putAll(genomeBrowserService.getReferenceTracks(track));
+		}
+		return allTracks.values().stream().map(track -> track.toTrackJson()).collect(Collectors.toList());
 	}
 
 	@RequestMapping(value = "/download", method = POST)
@@ -403,9 +400,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
 	 *
-	 * @param entityTypeId
-	 * @param entityId
-	 * @param model
 	 * @return entity report view
 	 * @throws Exception if an entity name or id is not found
 	 */
@@ -431,9 +425,6 @@ public class DataExplorerController extends MolgenisPluginController
 	/**
 	 * Builds a model containing one entity and returns standalone report ftl view
 	 *
-	 * @param entityTypeId
-	 * @param entityId
-	 * @param model
 	 * @return standalone report view
 	 * @throws Exception                   if an entity name or id is not found
 	 * @throws MolgenisDataAccessException if an EntityType does not exist

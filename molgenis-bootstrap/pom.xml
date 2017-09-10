@@ -5,7 +5,7 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -57,6 +57,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-genomebrowser</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- third party dependencies -->

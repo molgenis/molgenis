@@ -304,8 +304,6 @@ public class EntityTypeUtils
 	/**
 	 * Builds and returns an entity full name based on a package and a simpleName
 	 *
-	 * @param package_
-	 * @param simpleName
 	 * @return String entity full name
 	 */
 	public static String buildFullName(Package package_, String simpleName)

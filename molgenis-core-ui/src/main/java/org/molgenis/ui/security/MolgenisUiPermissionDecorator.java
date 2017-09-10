@@ -1,33 +1,39 @@
 package org.molgenis.ui.security;
 
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.ui.MolgenisUi;
-import org.molgenis.ui.MolgenisUiMenu;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.ui.menu.MenuUtils;
+import org.molgenis.web.Ui;
+import org.molgenis.web.UiMenu;
 
 import static java.util.Objects.requireNonNull;
 
-public class MolgenisUiPermissionDecorator implements MolgenisUi
+public class MolgenisUiPermissionDecorator implements Ui
 {
-	private final MolgenisUi molgenisUi;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final Ui molgenisUi;
+	private final PermissionService permissionService;
 
-	public MolgenisUiPermissionDecorator(MolgenisUi molgenisUi, MolgenisPermissionService molgenisPermissionService)
+	public MolgenisUiPermissionDecorator(Ui molgenisUi, PermissionService permissionService)
 	{
 		this.molgenisUi = requireNonNull(molgenisUi);
-		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
-	public MolgenisUiMenu getMenu()
+	public UiMenu getMenu()
 	{
-		MolgenisUiMenu menu = molgenisUi.getMenu();
-		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, molgenisPermissionService) : null;
+		UiMenu menu = molgenisUi.getMenu();
+		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, permissionService) : null;
 	}
 
 	@Override
-	public MolgenisUiMenu getMenu(String menuId)
+	public UiMenu getMenu(String menuId)
 	{
-		MolgenisUiMenu menu = molgenisUi.getMenu(menuId);
-		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, molgenisPermissionService) : null;
+		UiMenu menu = molgenisUi.getMenu(menuId);
+		return menu != null ? new MolgenisUiMenuPermissionDecorator(menu, permissionService) : null;
+	}
+
+	public String getMenuJson()
+	{
+		return MenuUtils.getMenuJson(getMenu());
 	}
 }

@@ -8,9 +8,9 @@ import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -28,7 +28,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class MetadataManagerController extends MolgenisPluginController
+public class MetadataManagerController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerController.class);
 
@@ -50,7 +50,6 @@ public class MetadataManagerController extends MolgenisPluginController
 		this.metadataManagerService = requireNonNull(metadataManagerService);
 	}
 
-	// Place '/**' annotation on method instead of class to avoid wrongly matching of URLs with a path variable
 	@RequestMapping(value = "/**", method = GET)
 	public String init(Model model)
 	{

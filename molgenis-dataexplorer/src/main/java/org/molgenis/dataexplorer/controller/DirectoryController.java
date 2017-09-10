@@ -3,11 +3,11 @@ package org.molgenis.dataexplorer.controller;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.directory.DirectorySettings;
 import org.molgenis.dataexplorer.directory.NegotiatorQuery;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +28,18 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class DirectoryController extends MolgenisPluginController
+public class DirectoryController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DirectoryController.class);
 	public static final String ID = "directory";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final DirectorySettings settings;
 	private final RestTemplate restTemplate;
-	private final MolgenisPermissionService permissions;
+	private final PermissionService permissions;
 
 	@Autowired
-	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate,
-			MolgenisPermissionService permissions)
+	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate, PermissionService permissions)
 	{
 		super(URI);
 		this.settings = requireNonNull(settings);

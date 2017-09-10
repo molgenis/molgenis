@@ -22,6 +22,42 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /api/searchall/search:
+    get:
+      tags:
+        - Search All
+      description: Searches for a search term in all data and metadata
+      parameters:
+        - in: query
+          name: term
+          type: string
+          description: search term
+          required: true
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Returns search results
+          schema:
+            $ref: "#/definitions/SearchAllResult"
+  /plugin/one-click-importer/upload:
+    post:
+      tags:
+        - OneClickImporter
+      summary: Upload files without metadata.
+      description: Upload files without metadata. Metadata is guessed based on the values in the file. Able to guess String, Numbers and Dates. Supports Excel, CSV, or zip containing CSV files
+      consumes:
+        - multipart/form-data
+      produces:
+        - text/html
+      parameters:
+        - in: formData
+          name: file
+          type: file
+          description: The file you want to upload
+      responses:
+        200:
+          description: Returns the Job ID of the scheduled OneClickImportJob
   /scripts/{name}/start:
     get:
       tags:
@@ -490,6 +526,70 @@ paths:
               type: string
               format: uri
 definitions:
+  SearchAllResult:
+    type: object
+    properties:
+      entityTypes:
+        type: array
+        items:
+          $ref: "#/definitions/SearchAllEntityTypeResult"
+      packages:
+        type: array
+        items:
+          $ref: "#/definitions/SearchAllPackageResult"
+    required:
+      - entityTypes
+      - packages
+  SearchAllEntityTypeResult:
+    type: object
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      description:
+        type: string
+      packageId:
+        type: string
+      labelMatch:
+        type: boolean
+      descriptionMatch:
+        type: boolean
+      attributes:
+        type: array
+        items:
+          $ref: "#/definitions/SearchAllAttributeResult"
+    required:
+      - id
+      - label
+      - packageId
+      - labelMatch
+      - descriptionMatch
+      - attributes
+  SearchAllAttributeResult:
+    type: object
+    properties:
+      label:
+        type: string
+      description:
+        type: string
+      dataType:
+        type: string
+    required:
+      - label
+      - dataType
+  SearchAllPackageResult:
+    type: object
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      description:
+        type: string
+    required:
+      - id
+      - label
   CopyEntityRequest:
     type: object
     properties:

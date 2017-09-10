@@ -3,6 +3,9 @@ package org.molgenis.data.index;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -29,7 +32,7 @@ public class IndexedRepositoryDecoratorTest
 {
 	private IndexedRepositoryDecorator indexedRepositoryDecorator;
 	private SearchService searchService;
-	private Repository<Entity> decoratedRepo;
+	private Repository<Entity> delegateRepository;
 	private EntityType repositoryEntityType;
 	private String idAttrName;
 	private Query<Entity> query;
@@ -40,20 +43,24 @@ public class IndexedRepositoryDecoratorTest
 	public void setUp() throws IOException
 	{
 		searchService = mock(SearchService.class);
-		decoratedRepo = mock(Repository.class);
+		delegateRepository = mock(Repository.class);
 		String entityTypeId = "entity";
 		repositoryEntityType = mock(EntityType.class);
 		when(repositoryEntityType.getId()).thenReturn(entityTypeId);
+		when(repositoryEntityType.getLabel()).thenReturn("My entity type");
 		idAttrName = "id";
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 
 		when(idAttr.getExpression()).thenReturn(null);
 		when(repositoryEntityType.getIdAttribute()).thenReturn(idAttr);
-		when(decoratedRepo.getEntityType()).thenReturn(repositoryEntityType);
-		when(decoratedRepo.getName()).thenReturn("entity");
-		when(decoratedRepo.getCapabilities()).thenReturn(EnumSet.of(QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
-		when(decoratedRepo.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
-		indexedRepositoryDecorator = new IndexedRepositoryDecorator(decoratedRepo, searchService);
+		when(delegateRepository.getEntityType()).thenReturn(repositoryEntityType);
+		when(delegateRepository.getName()).thenReturn("entity");
+		when(delegateRepository.getCapabilities()).thenReturn(
+				EnumSet.of(QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
+		when(delegateRepository.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
+		IndexJobScheduler indexJobScheduler = mock(IndexJobScheduler.class);
+		indexedRepositoryDecorator = new IndexedRepositoryDecorator(delegateRepository, searchService,
+				indexJobScheduler);
 
 		when(repositoryEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
 
@@ -75,9 +82,9 @@ public class IndexedRepositoryDecoratorTest
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = NullPointerException.class)
-	public void ElasticSearchRepository()
+	public void indexedRepositoryDecorator()
 	{
-		new IndexedRepositoryDecorator(null, null);
+		new IndexedRepositoryDecorator(null, null, null);
 	}
 
 	@Test
@@ -86,7 +93,7 @@ public class IndexedRepositoryDecoratorTest
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 		indexedRepositoryDecorator.add(entity);
-		verify(decoratedRepo).add(entity);
+		verify(delegateRepository).add(entity);
 
 		verifyZeroInteractions(searchService);
 	}
@@ -96,7 +103,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		indexedRepositoryDecorator.add(entities);
-		verify(decoratedRepo, times(1)).add(entities);
+		verify(delegateRepository, times(1)).add(entities);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -120,10 +127,30 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
+	public void aggregateUnknownIndexExceptionRecoverable()
+	{
+		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
+		AggregateResult aggregateResult = mock(AggregateResult.class);
+		when(searchService.aggregate(repositoryEntityType, aggregateQuery)).thenThrow(new UnknownIndexException("msg"))
+																		   .thenReturn(aggregateResult);
+
+		assertEquals(indexedRepositoryDecorator.aggregate(aggregateQuery), aggregateResult);
+		verify(delegateRepository, never()).count(unsupportedQuery);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void aggregateUnknownIndexExceptionUnrecoverable()
+	{
+		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
+		when(searchService.aggregate(repositoryEntityType, aggregateQuery)).thenThrow(new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.aggregate(aggregateQuery);
+	}
+
+	@Test
 	public void close() throws IOException
 	{
 		indexedRepositoryDecorator.close();
-		verify(decoratedRepo).close();
+		verify(delegateRepository).close();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -131,7 +158,7 @@ public class IndexedRepositoryDecoratorTest
 	public void count()
 	{
 		indexedRepositoryDecorator.count();
-		verify(decoratedRepo).count();
+		verify(delegateRepository).count();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -139,7 +166,7 @@ public class IndexedRepositoryDecoratorTest
 	public void countQuery()
 	{
 		indexedRepositoryDecorator.count(query);
-		verify(decoratedRepo).count(query);
+		verify(delegateRepository).count(query);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -148,7 +175,24 @@ public class IndexedRepositoryDecoratorTest
 	{
 		indexedRepositoryDecorator.count(unsupportedQuery);
 		verify(searchService).count(repositoryEntityType, unsupportedQuery);
-		verify(decoratedRepo, never()).count(unsupportedQuery);
+		verify(delegateRepository, never()).count(unsupportedQuery);
+	}
+
+	@Test
+	public void countUnknownIndexExceptionRecoverable()
+	{
+		when(searchService.count(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"))
+																		 .thenReturn(5L);
+
+		assertEquals(indexedRepositoryDecorator.count(unsupportedQuery), 5L);
+		verify(delegateRepository, never()).count(unsupportedQuery);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void countUnknownIndexExceptionUnrecoverable()
+	{
+		when(searchService.count(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.count(unsupportedQuery);
 	}
 
 	@Test
@@ -157,7 +201,7 @@ public class IndexedRepositoryDecoratorTest
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 		indexedRepositoryDecorator.delete(entity);
-		verify(decoratedRepo).delete(entity);
+		verify(delegateRepository).delete(entity);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -166,7 +210,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		indexedRepositoryDecorator.delete(entities);
-		verify(decoratedRepo, times(1)).delete(entities);
+		verify(delegateRepository, times(1)).delete(entities);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -174,7 +218,7 @@ public class IndexedRepositoryDecoratorTest
 	public void deleteAll()
 	{
 		indexedRepositoryDecorator.deleteAll();
-		verify(decoratedRepo).deleteAll();
+		verify(delegateRepository).deleteAll();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -183,7 +227,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Object id = "0";
 		indexedRepositoryDecorator.deleteById(id);
-		verify(decoratedRepo).deleteById(id);
+		verify(delegateRepository).deleteById(id);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -191,7 +235,7 @@ public class IndexedRepositoryDecoratorTest
 	public void findOneQuery()
 	{
 		indexedRepositoryDecorator.findOne(query);
-		verify(decoratedRepo).findOne(query);
+		verify(delegateRepository).findOne(query);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -203,7 +247,26 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
 		verify(searchService).searchOne(repositoryEntityType, unsupportedQuery);
-		verify(decoratedRepo).findOneById(any(Object.class), isNull());
+		verify(delegateRepository).findOneById(any(Object.class), isNull());
+	}
+
+	@Test
+	public void findOneUnknownIndexExceptionRecoverable()
+	{
+		Entity entity0 = mock(Entity.class);
+		when(searchService.searchOne(repositoryEntityType, unsupportedQuery)).thenThrow(
+				new UnknownIndexException("msg")).thenReturn(entity0);
+		indexedRepositoryDecorator.findOne(unsupportedQuery);
+		verify(searchService, times(2)).searchOne(repositoryEntityType, unsupportedQuery);
+		verify(delegateRepository).findOneById(any(Object.class), isNull());
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void findOneUnknownIndexExceptionUnrecoverable()
+	{
+		when(searchService.searchOne(repositoryEntityType, unsupportedQuery)).thenThrow(
+				new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.findOne(unsupportedQuery);
 	}
 
 	@Test
@@ -211,7 +274,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Object id = mock(Object.class);
 		indexedRepositoryDecorator.findOneById(id);
-		verify(decoratedRepo).findOneById(id);
+		verify(delegateRepository).findOneById(id);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -222,9 +285,9 @@ public class IndexedRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
+		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
 		assertEquals(indexedRepositoryDecorator.findOneById(id, fetch), entity);
-		verify(decoratedRepo, times(1)).findOneById(id, fetch);
+		verify(delegateRepository, times(1)).findOneById(id, fetch);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -246,7 +309,7 @@ public class IndexedRepositoryDecoratorTest
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 		indexedRepositoryDecorator.update(entity);
-		verify(decoratedRepo).update(entity);
+		verify(delegateRepository).update(entity);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -255,7 +318,7 @@ public class IndexedRepositoryDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		indexedRepositoryDecorator.update(entities);
-		verify(decoratedRepo, times(1)).update(entities);
+		verify(delegateRepository, times(1)).update(entities);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -267,7 +330,7 @@ public class IndexedRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 		verifyZeroInteractions(searchService);
@@ -282,7 +345,7 @@ public class IndexedRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 		verifyZeroInteractions(searchService);
@@ -292,7 +355,7 @@ public class IndexedRepositoryDecoratorTest
 	public void findAllQuery()
 	{
 		indexedRepositoryDecorator.findAll(query);
-		verify(decoratedRepo, times(1)).findAll(query);
+		verify(delegateRepository, times(1)).findAll(query);
 		verifyZeroInteractions(searchService);
 	}
 
@@ -302,7 +365,25 @@ public class IndexedRepositoryDecoratorTest
 	{
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
 		verify(searchService).search(repositoryEntityType, unsupportedQuery);
-		verify(decoratedRepo).findAll(any(Stream.class), isNull());
+		verify(delegateRepository).findAll(any(Stream.class), isNull());
+	}
+
+	@Test
+	public void findAllUnknownIndexExceptionRecoverable()
+	{
+		Stream<Object> entityStream = mock(Stream.class);
+		when(searchService.search(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"))
+																		  .thenReturn(entityStream);
+		indexedRepositoryDecorator.findAll(unsupportedQuery);
+		verify(searchService, times(2)).search(repositoryEntityType, unsupportedQuery);
+		verify(delegateRepository).findAll(any(Stream.class), isNull());
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void findAllUnknownIndexExceptionUnrecoverable()
+	{
+		when(searchService.search(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.findAll(unsupportedQuery);
 	}
 
 	@Test
@@ -312,14 +393,14 @@ public class IndexedRepositoryDecoratorTest
 		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		indexedRepositoryDecorator.forEachBatched(fetch, consumer, 12);
-		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 12);
+		verify(delegateRepository, times(1)).forEachBatched(fetch, consumer, 12);
 	}
 
 	@Test
 	public void iterator()
 	{
 		indexedRepositoryDecorator.iterator();
-		verify(decoratedRepo, times(1)).iterator();
+		verify(delegateRepository, times(1)).iterator();
 		verifyZeroInteractions(searchService);
 	}
 
@@ -369,7 +450,7 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(repositoryEntityType, q);
-		verify(decoratedRepo, never()).count(q);
+		verify(delegateRepository, never()).count(q);
 	}
 
 	@Test
@@ -398,7 +479,7 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(repositoryEntityType, q);
-		verify(decoratedRepo, never()).count(q);
+		verify(delegateRepository, never()).count(q);
 	}
 
 	@Test
@@ -420,6 +501,6 @@ public class IndexedRepositoryDecoratorTest
 		when(q.getRules()).thenReturn(singletonList(queryRule));
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(repositoryEntityType, q);
-		verify(decoratedRepo, never()).count(q);
+		verify(delegateRepository, never()).count(q);
 	}
 }
