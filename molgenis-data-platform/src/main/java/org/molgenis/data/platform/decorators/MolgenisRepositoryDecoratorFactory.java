@@ -15,12 +15,12 @@ import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.security.EntitySecurityRepositoryDecorator;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.security.acl.EntityAclManager;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.*;
-import org.molgenis.security.core.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -126,7 +126,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, permissionService);
 
 		// 1.5
-		if (repository.getEntityType().isEntityLevelSecurity())
+		if (permissionService.isEntityLevelSecurity(repository.getEntityType().getId()))
 		{
 			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, entityAclManager);
 		}

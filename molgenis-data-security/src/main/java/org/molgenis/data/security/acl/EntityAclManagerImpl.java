@@ -96,6 +96,18 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	public boolean hasAclClass(EntityType entityType)
+	{
+		throw new UnsupportedOperationException("FIXME"); // FIXME implement
+	}
+
+	@Override
+	public String getAclClassParent(EntityType entityType)
+	{
+		throw new UnsupportedOperationException("FIXME"); // FIXME implement
+	}
+
+	@Override
 	@Transactional
 	public void createAclClass(EntityType entityType)
 	{
@@ -176,7 +188,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 			ObjectIdentity objectIdentity = toObjectIdentity(entity);
 			acl = aclService.createAcl(objectIdentity);
 		}
-		Attribute attribute = entity.getEntityType().getEntityLevelSecurityInheritance();
+		String aclClassParent = getAclClassParent(entity.getEntityType());
+		Attribute attribute = entity.getEntityType().getAttribute(aclClassParent);
 		Entity inheritedEntity = attribute != null ? entity.getEntity(attribute.getName()) : null;
 
 		Acl parentAcl;

@@ -3,7 +3,7 @@ package org.molgenis.security.freemarker;
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateException;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.PermissionService;
 
 import java.io.IOException;
 

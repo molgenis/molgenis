@@ -105,8 +105,6 @@ public class RepositoryCopierTest extends AbstractMockitoTest
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.TAGS)).thenReturn(mrefAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.INDEXING_DEPTH)).thenReturn(intAttr);
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.IS_ENTITY_LEVEL_SECURITY)).thenReturn(boolAttr);
-		when(entityTypeMeta.getAttribute(EntityTypeMetadata.ENTITY_LEVEL_SECURITY_INHERITANCE)).thenReturn(strAttr);
 		return entityTypeMeta;
 	}
 }

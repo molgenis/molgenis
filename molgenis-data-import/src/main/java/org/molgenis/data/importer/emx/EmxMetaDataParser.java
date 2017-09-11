@@ -668,11 +668,6 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					entityType.setTags(toTags(intermediateResults, tagIdentifiers));
 				}
-
-				if(emxEntityRowSecurity != null && !emxEntityRowSecurity.isEmpty())
-				{
-					entityType.setEntityLevelSecurity(parseBoolean(emxEntityRowSecurity, i, EMX_ENTITIES_ROW_SECURITY));
-				}
 			}
 		}
 	}

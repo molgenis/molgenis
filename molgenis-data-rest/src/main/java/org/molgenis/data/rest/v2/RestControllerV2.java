@@ -12,10 +12,12 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -73,6 +75,7 @@ public class RestControllerV2
 
 	private final DataService dataService;
 	private final RestService restService;
+	private final PermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
@@ -129,12 +132,14 @@ public class RestControllerV2
 
 	@Autowired
 	public RestControllerV2(DataService dataService, RestService restService, LanguageService languageService,
-			PermissionSystemService permissionSystemService, RepositoryCopier repoCopier,
+			PermissionService permissionService, PermissionSystemService permissionSystemService,
+			RepositoryCopier repoCopier,
 			LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.restService = requireNonNull(restService);
 		this.languageService = requireNonNull(languageService);
+		this.permissionService = requireNonNull(permissionService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.repoCopier = requireNonNull(repoCopier);
 		this.localizationService = requireNonNull(localizationService);
@@ -856,6 +861,9 @@ public class RestControllerV2
 				}
 			}
 		}
-		responseData.put("writable", entity.isWritable());
+
+		// TODO expose all permissions
+		EnumSet<Permission> entityPermissions = permissionService.getPermissions(entity.getIdValue());
+		responseData.put("writable", entityPermissions.contains(Permission.WRITE));
 	}
 }

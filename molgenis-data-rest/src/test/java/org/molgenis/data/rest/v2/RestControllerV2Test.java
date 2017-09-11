@@ -16,6 +16,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
@@ -1099,6 +1100,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public PermissionService permissionService()
+		{
+			return mock(PermissionService.class);
+		}
+
+		@Bean
 		public RepositoryCopier repositoryCopier()
 		{
 			return mock(RepositoryCopier.class);
@@ -1151,7 +1158,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		{
 			return new RestControllerV2(dataService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
-							servletUriComponentsBuilderFactory()), languageService(), permissionSystemService(),
+							servletUriComponentsBuilderFactory()), languageService(), permissionService(),
+					permissionSystemService(),
 					repositoryCopier(), localizationService());
 		}
 

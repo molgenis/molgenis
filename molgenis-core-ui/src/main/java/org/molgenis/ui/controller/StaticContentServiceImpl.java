@@ -65,7 +65,7 @@ public class StaticContentServiceImpl implements StaticContentService
 		try
 		{
 			StaticContent staticContent = getStaticContent(pluginId);
-			return staticContent != null && staticContent.isWritable();
+			return staticContent != null; // FIXME use permission service to determine writable status
 		}
 		catch (MolgenisDataAccessException e)
 		{

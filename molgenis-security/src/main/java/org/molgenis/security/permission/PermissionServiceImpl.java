@@ -1,10 +1,12 @@
 package org.molgenis.security.permission;
 
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.security.acl.EntityAclService;
 import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.springframework.stereotype.Component;
+
+import java.util.EnumSet;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -19,6 +21,24 @@ public class PermissionServiceImpl implements PermissionService
 	public PermissionServiceImpl(EntityAclService entityAclService)
 	{
 		this.entityAclService = requireNonNull(entityAclService);
+	}
+
+	@Override
+	public boolean isEntityLevelSecurity(String entityTypeId)
+	{
+		throw new UnsupportedOperationException("FIXME"); // FIXME implement
+	}
+
+	@Override
+	public String getEntityLevelSecurityInheritance(String entityTypeId)
+	{
+		throw new UnsupportedOperationException("FIXME"); // FIXME implement
+	}
+
+	@Override
+	public EnumSet<Permission> getPermissions(Object entityId)
+	{
+		throw new UnsupportedOperationException("FIXME"); // FIXME implement
 	}
 
 	@Override

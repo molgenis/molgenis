@@ -191,18 +191,6 @@ public class DynamicEntity implements Entity
 		values.getAttributeNames().forEach(attrName -> set(attrName, values.get(attrName)));
 	}
 
-	@Override
-	public void setWritable(boolean writable)
-	{
-		this.writable = writable;
-	}
-
-	@Override
-	public boolean isWritable()
-	{
-		return writable;
-	}
-
 	/**
 	 * Validate is value is of the type defined by the attribute data type.
 	 *

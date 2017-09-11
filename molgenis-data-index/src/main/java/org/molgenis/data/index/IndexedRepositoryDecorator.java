@@ -135,10 +135,11 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 
 	/**
 	 * Executes an action on an index that may be unstable.
-	 *
+	 * <p>
 	 * If the Index was unknown, waits for the index to be stable and then tries again.
+	 *
 	 * @param action the action that gets executed
-	 * @param <R> the result type of the action
+	 * @param <R>    the result type of the action
 	 * @return the result
 	 * @throws MolgenisDataException if the action still failed when the index was stable, with a translated error message.
 	 */

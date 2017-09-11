@@ -11,6 +11,13 @@ import java.util.Collection;
 public interface EntityAclManager extends EntityAclService
 {
 	/**
+	 * Returns whether an ACL class exists for the given entity type.
+	 */
+	boolean hasAclClass(EntityType entityType);
+
+	String getAclClassParent(EntityType entityType); // TODO docs and check whether this is good enough
+
+	/**
 	 * Create entity access control list class.
 	 */
 	void createAclClass(EntityType entityType);

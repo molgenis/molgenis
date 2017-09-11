@@ -10,14 +10,16 @@ import static java.util.Objects.requireNonNull;
 public class RepositoryCollectionSecurityDecoratorFactory
 {
 	private final EntityAclManager entityAclManager;
+	private final PermissionService permissionService;
 
-	RepositoryCollectionSecurityDecoratorFactory(EntityAclManager entityAclManager)
+	RepositoryCollectionSecurityDecoratorFactory(EntityAclManager entityAclManager, PermissionService permissionService)
 	{
 		this.entityAclManager = requireNonNull(entityAclManager);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	public RepositoryCollectionSecurityDecorator create(RepositoryCollection repositoryCollection)
 	{
-		return new RepositoryCollectionSecurityDecorator(repositoryCollection, entityAclManager);
+		return new RepositoryCollectionSecurityDecorator(repositoryCollection, entityAclManager, permissionService);
 	}
 }

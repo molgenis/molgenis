@@ -1,6 +1,6 @@
 package org.molgenis.ui.security;
 
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.ui.menu.MenuUtils;
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
