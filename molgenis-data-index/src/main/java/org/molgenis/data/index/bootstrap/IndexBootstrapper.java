@@ -36,19 +36,17 @@ public class IndexBootstrapper
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final DataService dataService;
 	private final AttributeMetadata attrMetadata;
-	private final EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	public IndexBootstrapper(MetaDataService metaDataService, IndexService indexService,
 			IndexActionRegisterService indexActionRegisterService, DataService dataService,
-			AttributeMetadata attrMetadata, EntityTypeFactory entityTypeFactory)
+			AttributeMetadata attrMetadata)
 	{
 		this.metaDataService = metaDataService;
 		this.indexService = indexService;
 		this.indexActionRegisterService = indexActionRegisterService;
 		this.dataService = dataService;
 		this.attrMetadata = attrMetadata;
-		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
 	public void bootstrap()
