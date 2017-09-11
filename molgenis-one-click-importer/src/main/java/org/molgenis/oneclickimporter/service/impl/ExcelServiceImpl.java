@@ -1,4 +1,4 @@
-package org.molgenis.oneclickimporter.service.Impl;
+package org.molgenis.oneclickimporter.service.impl;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;

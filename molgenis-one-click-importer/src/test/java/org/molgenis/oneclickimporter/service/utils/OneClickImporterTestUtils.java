@@ -6,8 +6,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.ExcelService;
-import org.molgenis.oneclickimporter.service.Impl.CsvServiceImpl;
-import org.molgenis.oneclickimporter.service.Impl.ExcelServiceImpl;
+import org.molgenis.oneclickimporter.service.impl.CsvServiceImpl;
+import org.molgenis.oneclickimporter.service.impl.ExcelServiceImpl;
 
 import java.io.File;
 import java.io.IOException;

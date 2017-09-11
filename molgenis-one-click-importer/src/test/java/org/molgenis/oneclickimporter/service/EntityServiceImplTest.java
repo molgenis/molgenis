@@ -10,7 +10,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.Impl.EntityServiceImpl;
+import org.molgenis.oneclickimporter.service.impl.EntityServiceImpl;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
