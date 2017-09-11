@@ -102,7 +102,7 @@ public class UserAccountController extends PluginController
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LOG.error("Error updating user language", e);
 		}
 	}
 

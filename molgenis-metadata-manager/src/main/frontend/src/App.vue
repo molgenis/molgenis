@@ -6,14 +6,6 @@
 
 <style>
 
-  .temp-header {
-    background-color: #000000;
-  }
-
-  .temp-header a {
-    color: #ffffff;
-  }
-
   .app-container {
     padding-top: 40px
   }

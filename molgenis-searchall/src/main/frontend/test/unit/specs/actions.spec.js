@@ -1,5 +1,4 @@
-/* eslint-disable no-undef */
-import testAction from '../utils/action.utils'
+import utils from '@molgenis/molgenis-vue-test-utils'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 
@@ -7,10 +6,9 @@ import actions from 'store/actions'
 import {SET_ERRORS, SET_RESULTS} from 'store/mutations'
 
 describe('actions', () => {
-  describe('SEARCH_ALL', () => {
-    afterEach(() => td.reset())
+  afterEach(() => td.reset())
 
-    /*eslint-disable*/
+  describe('SEARCH_ALL', () => {
     const response = {
       entityTypes: [
         {
@@ -51,21 +49,35 @@ describe('actions', () => {
         }
       ]
     }
-    /*eslint-enable*/
 
     it('should call search all endpoint and store results in the state via a mutation', done => {
       const get = td.function('api.get')
       td.when(get('/api/searchall/search?term=test')).thenResolve(response)
       td.replace(api, 'get', get)
 
-      testAction(actions.SEARCH_ALL, 'test', {}, [{type: SET_RESULTS, payload: response}], [], done)
+      const options = {
+        payload: 'test',
+        expectedMutations: [
+          {type: SET_RESULTS, payload: response}
+        ]
+      }
+
+      utils.testAction(actions.__SEARCH_ALL__, options, done)
     })
 
     it('should fail and set an error in the state via a mutation', done => {
       const get = td.function('api.get')
       td.when(get('/api/searchall/search?term=test')).thenReject('ERRORRRRR')
       td.replace(api, 'get', get)
-      testAction(actions.SEARCH_ALL, 'test', {}, [{type: SET_ERRORS, payload: 'ERRORRRRR'}], [], done)
+
+      const options = {
+        payload: 'test',
+        expectedMutations: [
+          {type: SET_ERRORS, payload: 'ERRORRRRR'}
+        ]
+      }
+
+      utils.testAction(actions.__SEARCH_ALL__, options, done)
     })
   })
 })

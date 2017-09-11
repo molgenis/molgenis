@@ -78,8 +78,7 @@ public class BootstrapThemePopulator
 		}
 		catch (MolgenisStyleException | IOException e)
 		{
-			LOG.error("error populating bootstrap themes");
-			e.printStackTrace();
+			LOG.error("error populating bootstrap themes", e);
 		}
 
 	}

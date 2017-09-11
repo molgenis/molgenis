@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
 import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests each endpoint of the V1 Rest Api through http calls
@@ -351,42 +350,36 @@ public class RestControllerV1APIIT
 	@Test
 	public void testCreateFromFormPostMultiPart() throws URISyntaxException
 	{
-		try
-		{
-			URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
-			File file = new File(new URI(resourceUrl.toString()).getPath());
+		URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
+		File file = new File(new URI(resourceUrl.toString()).getPath());
 
-			given().log()
-				   .all()
-				   .header(X_MOLGENIS_TOKEN, testUserToken)
-				   .contentType("multipart/form-data")
-				   .multiPart("id", "6")
-				   .multiPart(file)
-				   .when()
-				   .post(API_V1 + "base_ApiTestFile")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(CREATED);
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .contentType("multipart/form-data")
+			   .multiPart("id", "6")
+			   .multiPart(file)
+			   .when()
+			   .post(API_V1 + "base_ApiTestFile")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(CREATED);
 
-			given().log()
-				   .all()
-				   .header(X_MOLGENIS_TOKEN, testUserToken)
-				   .contentType(APPLICATION_JSON)
-				   .when()
-				   .get(API_V1 + "base_ApiTestFile/6")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(OKE)
-				   .body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6"), "file.href",
-						   equalTo("/api/v1/base_ApiTestFile/6/file"));
-		}
-		catch (NullPointerException e)
-		{
-			e.printStackTrace();
-			assertTrue(false);
-		}
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .contentType(APPLICATION_JSON)
+			   .when()
+			   .get(API_V1 + "base_ApiTestFile/6")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(OKE)
+			   .body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6"), "file.href",
+					   equalTo("/api/v1/base_ApiTestFile/6/file"));
+
+		// test passes if no exception occured
 	}
 
 	@Test
