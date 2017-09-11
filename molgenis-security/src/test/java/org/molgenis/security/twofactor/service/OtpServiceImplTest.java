@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 @ContextConfiguration(classes = { OtpServiceImplTest.Config.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
@@ -33,7 +33,7 @@ public class OtpServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testTryVerificationKeyFailed()
 	{
 		boolean isValid = otpService.tryVerificationCode("", "secretKey");
-		assertEquals(false, isValid);
+		assertFalse(isValid);
 	}
 
 	@Test
@@ -42,7 +42,7 @@ public class OtpServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		when(appSettings.getTitle()).thenReturn("MOLGENIS");
 		String uri = otpService.getAuthenticatorURI("secretKey");
-		assertEquals(true, !uri.isEmpty());
+		assertFalse(uri.isEmpty());
 	}
 
 	@Configuration
