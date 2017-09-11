@@ -22,6 +22,7 @@ import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.web.PluginController;
@@ -74,6 +75,7 @@ public class DataExplorerController extends PluginController
 	public static final String MOD_ANNOTATORS = "annotators";
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
+	public static final String NAVIGATOR = "navigator";
 
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
@@ -101,6 +103,9 @@ public class DataExplorerController extends PluginController
 
 	@Autowired
 	private GenomeBrowserService genomeBrowserService;
+
+	@Autowired
+	private MenuReaderService menuReaderService;
 
 	public DataExplorerController()
 	{
@@ -147,6 +152,12 @@ public class DataExplorerController extends PluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
+
+		String navigatorMenuPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
+		if(navigatorMenuPath != null )
+		{
+			model.addAttribute("navigatorBaseUrl", navigatorMenuPath);
+		}
 
 		return "view-dataexplorer";
 	}
