@@ -47,8 +47,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 	@Autowired
 	private AttributeMetadata attributeMetadata;
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
 
 	private IndexBootstrapper indexBootstrapper;
 
@@ -58,7 +56,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		config.resetMocks();
 
 		indexBootstrapper = new IndexBootstrapper(metaDataService, indexService, indexActionRegisterService,
-				dataService, attributeMetadata, entityTypeFactory);
+				dataService, attributeMetadata);
 	}
 
 	@Test
@@ -178,9 +176,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		@Mock
 		AttributeMetadata attributeMetadata;
 
-		@Mock
-		EntityTypeFactory entityTypeFactory;
-
 		public Config()
 		{
 			initMocks(this);
@@ -204,15 +199,9 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 			return metaDataService;
 		}
 
-		@Bean
-		public EntityTypeFactory entityTypeFactory()
-		{
-			return entityTypeFactory;
-		}
-
 		void resetMocks()
 		{
-			reset(indexService, indexActionRegisterService, metaDataService, attributeMetadata, entityTypeFactory);
+			reset(indexService, indexActionRegisterService, metaDataService, attributeMetadata);
 		}
 	}
 }
