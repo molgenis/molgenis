@@ -508,7 +508,7 @@ var TableBody = React.createClass({
     _createCols: function (item, entity) {
         var Cols = [];
         if (this.props.enableEdit === true) {
-            if(item.writable) {
+            if (item._permissions.indexOf("WRITE") >= 0 || item._permissions.indexOf("WRITEMETA") >= 0) {
                 var EntityEditBtn = EntityEditBtnFactory({
                     name: entity.name,
                     id: item[entity.idAttribute],
@@ -520,7 +520,7 @@ var TableBody = React.createClass({
             }
         }
         if (this.props.enableDelete === true) {
-            if(item.writable) {
+            if (item._permissions.indexOf("WRITE") >= 0 || item._permissions.indexOf("WRITEMETA") >= 0) {
                 var EntityDeleteBtn = EntityDeleteBtnFactory({
                     name: entity.name,
                     id: item[entity.idAttribute],

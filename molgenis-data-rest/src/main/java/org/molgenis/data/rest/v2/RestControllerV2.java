@@ -863,7 +863,7 @@ public class RestControllerV2
 		}
 
 		// TODO expose all permissions
-		EnumSet<Permission> entityPermissions = permissionService.getPermissions(entity.getIdValue());
-		responseData.put("writable", entityPermissions.contains(Permission.WRITE));
+		Set<Permission> entityPermissions = permissionService.getPermissions(entity);
+		responseData.put("_permissions", entityPermissions);
 	}
 }

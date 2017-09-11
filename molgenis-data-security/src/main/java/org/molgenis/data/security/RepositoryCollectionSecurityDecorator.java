@@ -38,7 +38,7 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		if (permissionService.isEntityLevelSecurity(entityType.getId()))
+		if (permissionService.isEntityLevelSecurity(entityType))
 		{
 			enableEntityLevelSecurity(entityType, false);
 		}
@@ -48,7 +48,7 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 	@Override
 	public void deleteRepository(EntityType entityType)
 	{
-		if (permissionService.isEntityLevelSecurity(entityType.getId()))
+		if (permissionService.isEntityLevelSecurity(entityType))
 		{
 			disableEntityLevelSecurity(entityType);
 		}
@@ -58,13 +58,13 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 	@Override
 	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
 	{
-		if (!permissionService.isEntityLevelSecurity(entityType.getId()) && permissionService.isEntityLevelSecurity(
-				updatedEntityType.getId()))
+		if (!permissionService.isEntityLevelSecurity(entityType) && permissionService.isEntityLevelSecurity(
+				updatedEntityType))
 		{
 			enableEntityLevelSecurity(entityType, true);
 		}
-		else if (permissionService.isEntityLevelSecurity(entityType.getId())
-				&& !permissionService.isEntityLevelSecurity(updatedEntityType.getId()))
+		else if (permissionService.isEntityLevelSecurity(entityType) && !permissionService.isEntityLevelSecurity(
+				updatedEntityType))
 		{
 			disableEntityLevelSecurity(entityType);
 		}
@@ -93,15 +93,9 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 
 	private void updateEntityLevelSecurityInheritance(EntityType entityType, EntityType updatedEntityType)
 	{
-		//TODO replace unelegant code with elegant code
-		String entityLevelSecurityInheritanceId = permissionService.getEntityLevelSecurityInheritance(
-				entityType.getId());
-		Attribute entityLevelSecurityInheritance = entityType.getAttribute(entityLevelSecurityInheritanceId);
-
-		String updatedEntityLevelSecurityInheritanceId = permissionService.getEntityLevelSecurityInheritance(
-				updatedEntityType.getId());
-		Attribute updatedEntityLevelSecurityInheritance = updatedEntityType.getAttribute(
-				updatedEntityLevelSecurityInheritanceId);
+		Attribute entityLevelSecurityInheritance = permissionService.getEntityLevelSecurityInheritance(entityType);
+		Attribute updatedEntityLevelSecurityInheritance = permissionService.getEntityLevelSecurityInheritance(
+				updatedEntityType);
 
 		if (EntityUtils.equals(entityLevelSecurityInheritance, updatedEntityLevelSecurityInheritance))
 		{

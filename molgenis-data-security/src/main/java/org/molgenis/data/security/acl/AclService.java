@@ -16,6 +16,10 @@ import java.util.List;
  */
 public class AclService extends JdbcMutableAclService
 {
+	private static final String CLASS_EXISTS_PRIMARY_KEY_SQL = "select exists(select id from acl_class where class=?)";
+	private static final String SELECT_CLASS_PRIMARY_KEY_SQL = "select id from acl_class where class=?";
+	private static final String INSERT_CLASS_SQL = "insert into acl_class (class) values (?, ?)";
+
 	private static final String DEFAULT_SELECT_ACL_WITH_PARENT_SQL =
 			"select obj.object_id_identity as obj_id, class.class as class "
 					+ "from acl_object_identity obj, acl_object_identity parent, acl_class class "
@@ -28,6 +32,19 @@ public class AclService extends JdbcMutableAclService
 	public AclService(DataSource dataSource, LookupStrategy lookupStrategy, AclCache aclCache)
 	{
 		super(dataSource, lookupStrategy, aclCache);
+		setClassPrimaryKeyQuery(SELECT_CLASS_PRIMARY_KEY_SQL);
+		setInsertClassSql(INSERT_CLASS_SQL);
+	}
+
+	public boolean hasClass(String classId)
+	{
+		Boolean exists = jdbcTemplate.queryForObject(CLASS_EXISTS_PRIMARY_KEY_SQL, Boolean.class, classId);
+		return exists != null ? exists : false;
+	}
+
+	public String getInheritanceAttribute(String classId)
+	{
+		return null;
 	}
 
 	@Override

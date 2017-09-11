@@ -189,7 +189,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 
 	private void validateCurrentUserPermission(EntityType entityType, Permission permission)
 	{
-		boolean granted = permissionService.hasPermissionOnEntityType(entityType.getId(), permission);
+		boolean granted = permissionService.hasPermissionOnEntityType(entityType, permission);
 		if (!granted)
 		{
 			throw new MolgenisDataAccessException(

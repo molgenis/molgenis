@@ -2,8 +2,10 @@ package org.molgenis.app;
 
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.security.acl.*;
 import org.molgenis.ui.admin.user.UserAccountController;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -27,16 +29,24 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 	}
 
 	@Override
-	public void populate()
+	public void populate(ApplicationContext ctx)
 	{
+		// TODO handle removed system entity types
+		// TODO handle updated system entity types including updates of isEntityLevelSecurity
+		ctx.getBeansOfType(SystemEntityType.class)
+		   .values()
+		   .stream()
+		   .filter(SystemEntityType::isEntityLevelSecurity)
+		   .forEach(entityAclManager::createAclClass);
+
 		SecurityId roleUserSecurityId = SecurityId.createForAuthority(ROLE_USER_ID);
 		EntityAce roleUserReadAce = EntityAce.create(newHashSet(READ), roleUserSecurityId, true);
 
 		// allow user role to see system package
 		// FIXME enable system package ACL population once we solved 'max_locks_per_transaction' issue
-//		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
-//		entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
-//		entityAclManager.updateAcl(entityTypeAcl);
+		//		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
+		//		entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
+		//		entityAclManager.updateAcl(entityTypeAcl);
 
 		// allow anonymous user and user role to see the home plugin
 		EntityAcl homePluginAcl = entityAclManager.readAcl(EntityIdentity.create(PLUGIN, HomeController.ID));

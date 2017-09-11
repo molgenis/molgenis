@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
@@ -98,13 +97,17 @@ public class EntityAclManagerImpl implements EntityAclManager
 	@Override
 	public boolean hasAclClass(EntityType entityType)
 	{
-		throw new UnsupportedOperationException("FIXME"); // FIXME implement
+		return aclService.hasClass(entityType.getId());
 	}
 
 	@Override
 	public String getAclClassParent(EntityType entityType)
 	{
-		throw new UnsupportedOperationException("FIXME"); // FIXME implement
+		if (entityType.equals(EntityTypeMetadata.ENTITY_TYPE_META_DATA)) return EntityTypeMetadata.PACKAGE;
+		if (entityType.equals(PackageMetadata.PACKAGE)) return PackageMetadata.PARENT;
+		if (entityType.equals(AttributeMetadata.ATTRIBUTE_META_DATA)) return AttributeMetadata.ENTITY;
+		if (entityType.equals("sys_set_dataexplorer")) return "plugin";
+		return null;
 	}
 
 	@Override

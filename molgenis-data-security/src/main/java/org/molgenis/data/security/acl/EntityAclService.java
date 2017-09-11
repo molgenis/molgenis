@@ -1,6 +1,6 @@
 package org.molgenis.data.security.acl;
 
-import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 
 import java.util.Collection;
@@ -32,4 +32,11 @@ public interface EntityAclService
 	 * @return <tt>true</tt> if authorization is granted
 	 */
 	boolean isGranted(EntityIdentity entityIdentity, Permission permission);
+
+	/**
+	 * Returns whether an ACL class exists for the given entity type.
+	 */
+	boolean hasAclClass(EntityType entityType);
+
+	String getAclClassParent(EntityType entityType); // TODO docs and check whether this is good enough
 }

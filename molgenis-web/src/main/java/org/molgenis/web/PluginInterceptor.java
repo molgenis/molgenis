@@ -63,8 +63,7 @@ public class PluginInterceptor extends HandlerInterceptorAdapter
 			Boolean pluginSettingsCanWrite;
 			if (pluginSettings != null)
 			{
-				String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
-				pluginSettingsCanWrite = permissionService.hasPermissionOnEntityType(pluginSettingsEntityName,
+				pluginSettingsCanWrite = permissionService.hasPermissionOnEntityType(pluginSettings.getEntityType(),
 						Permission.WRITE);
 			}
 			else

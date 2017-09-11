@@ -90,7 +90,7 @@ public class RepositoryPopulator
 		if (!databasePopulated)
 		{
 			LOG.trace("Populating database permissions ...");
-			permissionPopulator.populate();
+			permissionPopulator.populate(event.getApplicationContext());
 			LOG.trace("Populated database with permissions");
 		}
 	}

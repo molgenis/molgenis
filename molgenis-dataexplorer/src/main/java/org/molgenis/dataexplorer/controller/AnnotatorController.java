@@ -133,8 +133,9 @@ public class AnnotatorController
 				map.put("outputAttributeTypes", toMap(annotator.getOutputAttributes()));
 
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
+				EntityType settingsEntityType = dataService.getMeta().getEntityType(settingsEntityName);
 				map.put("showSettingsButton",
-						permissionService.hasPermissionOnEntityType(settingsEntityName, Permission.WRITE));
+						permissionService.hasPermissionOnEntityType(settingsEntityType, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}

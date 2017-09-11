@@ -126,7 +126,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, permissionService);
 
 		// 1.5
-		if (permissionService.isEntityLevelSecurity(repository.getEntityType().getId()))
+		if (permissionService.isEntityLevelSecurity(repository.getEntityType()))
 		{
 			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, entityAclManager);
 		}
