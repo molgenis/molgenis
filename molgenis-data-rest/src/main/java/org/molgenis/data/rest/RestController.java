@@ -788,19 +788,9 @@ public class RestController
 
 	private boolean isUser2fa()
 	{
-		boolean userIs2fa = false;
-		if (authenticationSettings.getTwoFactorAuthentication() == ENFORCED)
-		{
-			userIs2fa = true;
-		}
-		else if (authenticationSettings.getTwoFactorAuthentication() == ENABLED)
-		{
-			if (userAccountService.getCurrentUser().isTwoFactorAuthentication())
-			{
-				userIs2fa = true;
-			}
-		}
-		return userIs2fa;
+		return authenticationSettings.getTwoFactorAuthentication() == ENFORCED || (
+				authenticationSettings.getTwoFactorAuthentication() == ENABLED && userAccountService.getCurrentUser()
+																									.isTwoFactorAuthentication());
 	}
 
 	@RequestMapping("/logout")
