@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -44,8 +41,6 @@ import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.pathways.WikiPathwaysController.URI;
 import static org.molgenis.util.stream.MultimapCollectors.toArrayListMultimap;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -79,7 +74,7 @@ public class WikiPathwaysController extends PluginController
 	 * @param model the {@link Model} to fill
 	 * @return the view name
 	 */
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("entitiesMeta", getVCFEntities());
@@ -115,7 +110,7 @@ public class WikiPathwaysController extends PluginController
 	 * @return {@link Collection} of all {@link Pathway}s.
 	 * @throws ExecutionException if load from cache fails
 	 */
-	@RequestMapping(value = "/allPathways", method = POST)
+	@PostMapping("/allPathways")
 	@ResponseBody
 	public Collection<Pathway> getAllPathways() throws ExecutionException
 	{
@@ -128,7 +123,7 @@ public class WikiPathwaysController extends PluginController
 	 * @param searchTerm string to search for
 	 * @return {@link Collection} of all {@link Pathway}s found for searchTerm
 	 */
-	@RequestMapping(value = "/filteredPathways", method = POST)
+	@PostMapping("/filteredPathways")
 	@ResponseBody
 	public Collection<Pathway> getFilteredPathways(@RequestBody String searchTerm)
 			throws RemoteException, ExecutionException
@@ -147,7 +142,7 @@ public class WikiPathwaysController extends PluginController
 	 * @return single-line svg string of the pathway image
 	 * @throws ExecutionException if load from cache fails
 	 */
-	@RequestMapping(value = "/pathwayViewer/{pathwayId}", method = GET)
+	@GetMapping("/pathwayViewer/{pathwayId}")
 	@ResponseBody
 	public String getPathway(@PathVariable String pathwayId) throws ExecutionException
 	{
@@ -212,7 +207,7 @@ public class WikiPathwaysController extends PluginController
 	 * @return {@link Collection} of {@link Pathway}s found for genes in the VCF
 	 * @throws ExecutionException if the loading from cache fails
 	 */
-	@RequestMapping(value = "/pathwaysByGenes", method = POST)
+	@PostMapping("/pathwaysByGenes")
 	@ResponseBody
 	public Collection<Pathway> getListOfPathwayNamesByGenes(@Valid @RequestBody String selectedVcf)
 			throws ExecutionException
@@ -253,7 +248,7 @@ public class WikiPathwaysController extends PluginController
 	 * @throws SAXException                 If any parse errors occur when parsing the GPML
 	 * @throws ExecutionException           if the loading of the colored pathway from cache fails
 	 */
-	@RequestMapping(value = "/getColoredPathway/{selectedVcf}/{pathwayId}", method = GET)
+	@GetMapping("/getColoredPathway/{selectedVcf}/{pathwayId}")
 	@ResponseBody
 	public String getColoredPathway(@PathVariable String selectedVcf, @PathVariable String pathwayId)
 			throws ParserConfigurationException, SAXException, IOException, ExecutionException

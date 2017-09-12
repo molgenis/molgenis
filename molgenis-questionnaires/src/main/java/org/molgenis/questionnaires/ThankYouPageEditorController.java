@@ -7,8 +7,9 @@ import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
@@ -37,7 +38,7 @@ public class ThankYouPageEditorController extends PluginController
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String view(@RequestParam(value = "questionnaireName", required = false) String questionnaireName,
 			@RequestParam(value = "edit", required = false, defaultValue = "false") String edit, Model model,
 			HttpServletResponse response) throws IOException
@@ -64,7 +65,7 @@ public class ThankYouPageEditorController extends PluginController
 		return "view-thank-you-text";
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	public String save(@RequestParam("questionnaireName") String questionnaireName,
 			@RequestParam("content") String content, Model model)
 	{

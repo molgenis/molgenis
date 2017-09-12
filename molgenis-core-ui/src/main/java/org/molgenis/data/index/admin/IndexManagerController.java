@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -33,14 +30,14 @@ public class IndexManagerController extends PluginController
 		super(URI);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("entities", indexManagerService.getIndexedEntities());
 		return "view-indexmanager";
 	}
 
-	@RequestMapping(value = "/reindex", method = RequestMethod.POST)
+	@PostMapping("/reindex")
 	@ResponseStatus(value = HttpStatus.OK)
 	public void reindexType(@Valid @ModelAttribute ReindexRequest reindexRequest)
 	{

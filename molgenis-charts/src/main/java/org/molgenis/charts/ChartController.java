@@ -60,7 +60,7 @@ public class ChartController
 		this.fileStore = fileStore;
 	}
 
-	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/xydatachart", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
 	{
@@ -81,7 +81,7 @@ public class ChartController
 		return (Options) service.renderChart(xYDataChart, model);
 	}
 
-	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/boxplot", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
 	{
@@ -103,7 +103,7 @@ public class ChartController
 	 * <p>
 	 * User can only view his own files he created with the charts module
 	 */
-	@RequestMapping("/get/{name}.{extension}")
+	@GetMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name") String name,
 			@PathVariable("extension") String extension, HttpServletResponse response) throws IOException
 	{
@@ -127,7 +127,7 @@ public class ChartController
 	 * <p>
 	 * The page must have an element with id named 'container'. The svg image will be added to this container element.
 	 */
-	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/heatmap", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model)
 			throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError

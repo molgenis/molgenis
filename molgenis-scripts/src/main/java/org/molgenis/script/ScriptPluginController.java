@@ -5,8 +5,8 @@ import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.script.ScriptMetaData.SCRIPT;
@@ -28,7 +28,7 @@ public class ScriptPluginController extends PluginController
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String listScripts(Model model)
 	{
 

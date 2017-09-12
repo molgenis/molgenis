@@ -126,7 +126,7 @@ public class MappingServiceController extends PluginController
 	 * @param model the model to initialized
 	 * @return view name of the mapping projects list
 	 */
-	@RequestMapping
+	@GetMapping
 	public String viewMappingProjects(Model model)
 	{
 		model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
@@ -144,7 +144,7 @@ public class MappingServiceController extends PluginController
 	 * @param targetEntity name of the project's first {@link MappingTarget}'s target entity
 	 * @return redirect URL for the newly created mapping project
 	 */
-	@RequestMapping(value = "/addMappingProject", method = RequestMethod.POST)
+	@PostMapping("/addMappingProject")
 	public String addMappingProject(@RequestParam("mapping-project-name") String name,
 			@RequestParam("target-entity") String targetEntity)
 	{
@@ -158,7 +158,7 @@ public class MappingServiceController extends PluginController
 	 * @param mappingProjectId the ID of the mapping project
 	 * @return redirect url to the same page to force a refresh
 	 */
-	@RequestMapping(value = "/removeMappingProject", method = RequestMethod.POST)
+	@PostMapping("/removeMappingProject")
 	public String deleteMappingProject(@RequestParam() String mappingProjectId)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
@@ -178,7 +178,7 @@ public class MappingServiceController extends PluginController
 	 * @param source           the source entity
 	 * @param attribute        the attribute that is mapped
 	 */
-	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST)
+	@PostMapping("/removeAttributeMapping")
 	public String removeAttributeMapping(@RequestParam() String mappingProjectId, @RequestParam() String target,
 			@RequestParam() String source, @RequestParam() String attribute)
 	{
@@ -199,7 +199,7 @@ public class MappingServiceController extends PluginController
 	 * @param mappingProjectId the ID of the {@link MappingTarget}'s {@link MappingProject}
 	 * @return redirect URL for the mapping project
 	 */
-	@RequestMapping(value = "/addEntityMapping", method = RequestMethod.POST)
+	@PostMapping("/addEntityMapping")
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		EntityType sourceEntityType = dataService.getEntityType(source);
@@ -227,7 +227,7 @@ public class MappingServiceController extends PluginController
 	 * @param source           entity name of the mapping source
 	 * @return redirect url of the mapping project's page
 	 */
-	@RequestMapping(value = "/removeEntityMapping", method = RequestMethod.POST)
+	@PostMapping("/removeEntityMapping")
 	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
@@ -239,7 +239,7 @@ public class MappingServiceController extends PluginController
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
 	}
 
-	@RequestMapping(value = "/validateAttrMapping", method = RequestMethod.POST)
+	@PostMapping("/validateAttrMapping")
 	@ResponseBody
 	public AttributeMappingValidationReport validateAttributeMapping(
 			@Valid @RequestBody MappingServiceRequest mappingServiceRequest)
@@ -333,7 +333,7 @@ public class MappingServiceController extends PluginController
 	 * @param algorithm        the mapping algorithm
 	 * @return redirect URL for the attributemapping
 	 */
-	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
+	@PostMapping("/saveattributemapping")
 	public String saveAttributeMapping(@RequestParam() String mappingProjectId, @RequestParam() String target,
 			@RequestParam() String source, @RequestParam() String targetAttribute, @RequestParam() String algorithm,
 			@RequestParam() AlgorithmState algorithmState)
@@ -370,7 +370,7 @@ public class MappingServiceController extends PluginController
 	 * @param target              name of the target entity
 	 * @param skipAlgorithmStates the mapping algorithm states that should skip
 	 */
-	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST)
+	@PostMapping("/firstattributemapping")
 	@ResponseBody
 	public FirstAttributeMappingInfo getFirstAttributeMappingInfo(@RequestParam() String mappingProjectId,
 			@RequestParam() String target,
@@ -425,7 +425,7 @@ public class MappingServiceController extends PluginController
 	 * @param model      the model
 	 * @return View name for a single mapping project
 	 */
-	@RequestMapping("/mappingproject/{id}")
+	@GetMapping("/mappingproject/{id}")
 	public String viewMappingProject(@PathVariable("id") String identifier, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(identifier);
@@ -443,7 +443,7 @@ public class MappingServiceController extends PluginController
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
 
-	@RequestMapping(value = "/mappingproject/clone", method = RequestMethod.POST)
+	@PostMapping("/mappingproject/clone")
 	public String cloneMappingProject(@RequestParam("mappingProjectId") String mappingProjectId)
 	{
 		mappingService.cloneMappingProject(mappingProjectId);
@@ -459,7 +459,7 @@ public class MappingServiceController extends PluginController
 	 * If string terms are sent to the SemanticSearchService, they will be first of all converted to the ontologyTerms
 	 * using findTag method
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public List<ExplainedAttribute> getSemanticSearchAttributeMapping(@RequestBody Map<String, String> requestBody)
 	{
@@ -501,7 +501,7 @@ public class MappingServiceController extends PluginController
 		return newArrayList(relevantAttributes.values());
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/attributemapping/algorithm", consumes = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/attributemapping/algorithm", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getSuggestedAlgorithm(@RequestBody GenerateAlgorithmRequest generateAlgorithmRequest)
 	{
@@ -526,7 +526,7 @@ public class MappingServiceController extends PluginController
 	 * Checks if an entityTypeID already exists.
 	 * Used to validate ID field in the "New dataset" tab when creating a new integrated dataset.
 	 */
-	@RequestMapping("/isNewEntity")
+	@GetMapping("/isNewEntity")
 	@ResponseBody
 	public boolean isNewEntity(@RequestParam String targetEntityTypeId)
 	{
@@ -567,7 +567,7 @@ public class MappingServiceController extends PluginController
 	 * @param packageId          ID of the package to put the newly created entity in
 	 * @return the href of the created MappingJobExecution
 	 */
-	@RequestMapping(value = "/map", method = RequestMethod.POST, produces = TEXT_PLAIN_VALUE)
+	@PostMapping(value = "/map", produces = TEXT_PLAIN_VALUE)
 	public ResponseEntity<String> scheduleMappingJob(@RequestParam String mappingProjectId,
 			@RequestParam String targetEntityTypeId, @RequestParam(required = false) String label,
 			@RequestParam(required = false, name = "package") String packageId,
@@ -641,7 +641,7 @@ public class MappingServiceController extends PluginController
 	 * @param source           name of the source entity
 	 * @param targetAttribute  name of the target attribute
 	 */
-	@RequestMapping("/attributeMapping")
+	@GetMapping("/attributeMapping")
 	public String viewAttributeMapping(@RequestParam() String mappingProjectId, @RequestParam() String target,
 			@RequestParam() String source, @RequestParam() String targetAttribute, Model model)
 	{
@@ -678,7 +678,7 @@ public class MappingServiceController extends PluginController
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST)
+	@PostMapping("/attributemappingfeedback")
 	public String attributeMappingFeedback(@RequestParam() String mappingProjectId, @RequestParam() String target,
 			@RequestParam() String source, @RequestParam() String targetAttribute, @RequestParam() String algorithm,
 			Model model)
@@ -755,7 +755,7 @@ public class MappingServiceController extends PluginController
 	/**
 	 * Returns a view that allows the user to edit mappings involving xrefs / categoricals / strings
 	 */
-	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.POST)
+	@PostMapping("/advancedmappingeditor")
 	public String advancedMappingEditor(@RequestParam() String mappingProjectId, @RequestParam() String target,
 			@RequestParam() String source, @RequestParam() String targetAttribute,
 			@RequestParam() String sourceAttribute, @RequestParam String algorithm, Model model)
@@ -884,7 +884,7 @@ public class MappingServiceController extends PluginController
 		return VIEW_CATEGORY_MAPPING_EDITOR;
 	}
 
-	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST)
+	@PostMapping("/savecategorymapping")
 	@ResponseBody
 	public void saveCategoryMapping(@RequestParam() String mappingProjectId, @RequestParam() String target,
 			@RequestParam() String source, @RequestParam() String targetAttribute, @RequestParam() String algorithm)
@@ -911,7 +911,7 @@ public class MappingServiceController extends PluginController
 	 * @param mappingServiceRequest the {@link MappingServiceRequest} sent by the client
 	 * @return Map with the results and size of the source
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{

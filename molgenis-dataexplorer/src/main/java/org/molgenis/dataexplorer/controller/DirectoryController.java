@@ -24,7 +24,6 @@ import java.util.Base64;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.dataexplorer.controller.DirectoryController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -58,7 +57,7 @@ public class DirectoryController extends PluginController
 		return collectionEntityType != null && collectionEntityType.getId().equals(selectedEntityName);
 	}
 
-	@RequestMapping(value = "/export", method = POST)
+	@PostMapping("/export")
 	@ResponseBody
 	public String exportToNegotiator(@RequestBody NegotiatorQuery query) throws Exception
 	{

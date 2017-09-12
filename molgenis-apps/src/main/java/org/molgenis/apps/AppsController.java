@@ -30,8 +30,6 @@ import static org.molgenis.apps.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
 import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -58,7 +56,7 @@ public class AppsController extends PluginController
 		this.permissionService = requireNonNull(permissionService);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("appEntityTypeId", APP);
@@ -78,7 +76,7 @@ public class AppsController extends PluginController
 		return apps;
 	}
 
-	@RequestMapping(value = "/{appId}/**", method = GET)
+	@GetMapping(value = "/{appId}/**")
 	public String viewApp(@PathVariable("appId") String appId, Model model, HttpServletResponse response)
 	{
 		App app = dataService.findOneById(APP, appId, App.class);
@@ -108,7 +106,7 @@ public class AppsController extends PluginController
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{appId}/activate", method = POST)
+	@PostMapping("/{appId}/activate")
 	@ResponseStatus(OK)
 	public void activateApp(@PathVariable("appId") String appId)
 	{
@@ -126,7 +124,7 @@ public class AppsController extends PluginController
 		dataService.update(APP, app);
 	}
 
-	@RequestMapping(value = "/{appId}/deactivate", method = POST)
+	@PostMapping("/{appId}/deactivate")
 	@ResponseStatus(OK)
 	public void deactivateApp(@PathVariable("appId") String appId, Model model)
 	{
