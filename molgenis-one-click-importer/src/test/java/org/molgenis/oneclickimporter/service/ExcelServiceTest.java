@@ -3,7 +3,7 @@ package org.molgenis.oneclickimporter.service;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
-import org.molgenis.oneclickimporter.service.Impl.ExcelServiceImpl;
+import org.molgenis.oneclickimporter.service.impl.ExcelServiceImpl;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
