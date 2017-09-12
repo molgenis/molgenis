@@ -28,6 +28,7 @@ import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -197,6 +198,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
+								 .setControllerAdvice(new GlobalControllerExceptionHandler())
 								 .build();
 	}
 
