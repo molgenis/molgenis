@@ -78,7 +78,7 @@ public class AppsController extends PluginController
 		return apps;
 	}
 
-	@RequestMapping(value = "/{appId}", method = GET)
+	@RequestMapping(value = "/{appId}/**", method = GET)
 	public String viewApp(@PathVariable("appId") String appId, Model model, HttpServletResponse response)
 	{
 		App app = dataService.findOneById(APP, appId, App.class);
