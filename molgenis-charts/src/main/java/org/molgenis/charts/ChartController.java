@@ -1,6 +1,5 @@
 package org.molgenis.charts;
 
-import freemarker.template.TemplateException;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.data.DataMatrix;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -130,7 +128,7 @@ public class ChartController
 	@PostMapping(value = "/heatmap", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model)
-			throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+			throws FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());

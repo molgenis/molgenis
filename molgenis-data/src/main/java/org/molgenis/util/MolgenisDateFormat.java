@@ -21,7 +21,7 @@ public class MolgenisDateFormat
 	 * @return the parsed {@link LocalDate}
 	 * @throws DateTimeParseException if parsing fails
 	 */
-	public static LocalDate parseLocalDate(String value) throws DateTimeParseException
+	public static LocalDate parseLocalDate(String value)
 	{
 		TemporalAccessor temporalAccessor = DateTimeFormatter.ofPattern(LOOSE_PARSER_FORMAT)
 															 .parseBest(value, ZonedDateTime::from, LocalDate::from);
@@ -42,7 +42,7 @@ public class MolgenisDateFormat
 	 * @return the parsed {@link Instant}
 	 * @throws DateTimeParseException if parsing fails
 	 */
-	public static Instant parseInstant(String value) throws DateTimeParseException
+	public static Instant parseInstant(String value)
 	{
 		TemporalAccessor temporalAccessor = DateTimeFormatter.ofPattern(LOOSE_PARSER_FORMAT)
 															 .parseBest(value, ZonedDateTime::from, LocalDateTime::from,

@@ -7,8 +7,6 @@ import org.molgenis.util.BaseHttpMessageConverter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -25,8 +23,7 @@ public class CsvHttpMessageConverter extends BaseHttpMessageConverter<EntityColl
 	}
 
 	@Override
-	protected void writeInternal(EntityCollection entities, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException
+	protected void writeInternal(EntityCollection entities, HttpOutputMessage outputMessage) throws IOException
 	{
 		OutputStreamWriter out = new OutputStreamWriter(outputMessage.getBody(),
 				getCharset(outputMessage.getHeaders()));
@@ -50,7 +47,7 @@ public class CsvHttpMessageConverter extends BaseHttpMessageConverter<EntityColl
 
 	@Override
 	protected EntityCollection readInternal(Class<? extends EntityCollection> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException
+			throws IOException
 	{
 		throw new UnsupportedOperationException();
 	}

@@ -33,7 +33,6 @@ import javax.servlet.http.Part;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -80,7 +79,7 @@ public class SortaServiceAnonymousController extends PluginController
 	@PostMapping("/match")
 	public String match(@RequestParam(value = "selectOntologies") String ontologyIri,
 			@RequestParam(value = "inputTerms") String inputTerms, HttpServletRequest httpServletRequest, Model model)
-			throws UnsupportedEncodingException, IOException
+			throws IOException
 	{
 		String fileName = httpServletRequest.getSession().getId() + "_input.txt";
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), fileName);
@@ -93,7 +92,7 @@ public class SortaServiceAnonymousController extends PluginController
 	@PostMapping("/match/upload")
 	public String upload(@RequestParam(value = "selectOntologies") String ontologyIri,
 			@RequestParam(value = "file") Part file, HttpServletRequest httpServletRequest, Model model)
-			throws UnsupportedEncodingException, IOException
+			throws IOException
 	{
 
 		String fileName = httpServletRequest.getSession().getId() + "_input.csv";
@@ -106,8 +105,7 @@ public class SortaServiceAnonymousController extends PluginController
 
 	@GetMapping("/retrieve")
 	@ResponseBody
-	public List<Map<String, Object>> matchResult(HttpServletRequest httpServletRequest)
-			throws UnsupportedEncodingException, IOException
+	public List<Map<String, Object>> matchResult(HttpServletRequest httpServletRequest) throws IOException
 	{
 		Object filePath = httpServletRequest.getSession().getAttribute("filePath");
 		Object ontologyIriObject = httpServletRequest.getSession().getAttribute("ontologyIri");
@@ -128,8 +126,7 @@ public class SortaServiceAnonymousController extends PluginController
 	}
 
 	@GetMapping("/download")
-	public void download(HttpServletRequest httpServletRequest, HttpServletResponse response)
-			throws UnsupportedEncodingException, IOException
+	public void download(HttpServletRequest httpServletRequest, HttpServletResponse response) throws IOException
 	{
 		CsvWriter csvWriter = null;
 		try

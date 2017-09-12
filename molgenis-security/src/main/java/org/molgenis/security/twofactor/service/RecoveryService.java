@@ -25,7 +25,7 @@ public interface RecoveryService
 	 * @param recoveryCode the code to validate
 	 * @throws BadCredentialsException if the recovery code is incorrect
 	 */
-	void useRecoveryCode(String recoveryCode) throws BadCredentialsException;
+	void useRecoveryCode(String recoveryCode);
 
 	/**
 	 * Get the recovery codes (if any) of the current user.

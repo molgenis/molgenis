@@ -112,7 +112,7 @@ public class DataExplorerController extends PluginController
 	 */
 	@GetMapping
 	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model) throws Exception
+			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model)
 	{
 		StringBuilder message = new StringBuilder("");
 
@@ -403,7 +403,7 @@ public class DataExplorerController extends PluginController
 	 */
 	@PostMapping("/details")
 	public String viewEntityDetails(@RequestParam(value = "entityTypeId") String entityTypeId,
-			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
+			@RequestParam(value = "entityId") String entityId, Model model)
 	{
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		Object id = getTypedValue(entityId, entityType.getIdAttribute());

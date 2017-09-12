@@ -53,7 +53,6 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory, Visibility visibility)
-			throws IOException, ServiceException
 	{
 		this.spreadsheetService = requireNonNull(spreadsheetService);
 		this.spreadsheetKey = requireNonNull(spreadsheetKey);

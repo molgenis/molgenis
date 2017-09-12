@@ -72,9 +72,7 @@ public class OneClickImporterController extends PluginController
 
 	@ResponseBody
 	@PostMapping(value = "/upload", produces = MediaType.TEXT_HTML_VALUE)
-	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile)
-
-			throws UnknownFileTypeException, IOException, InvalidFormatException
+	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile) throws IOException
 	{
 		String filename = multipartFile.getOriginalFilename();
 		fileStore.store(multipartFile.getInputStream(), filename);
