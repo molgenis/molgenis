@@ -9,7 +9,7 @@ const state: State = {
   },
   sidType: 'role',
   roles: [],
-  selectedRole: null,
+  selectedSid: null,
   users: null,
   groups: null,
   doCreateRole: false,

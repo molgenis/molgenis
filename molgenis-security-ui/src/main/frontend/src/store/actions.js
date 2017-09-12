@@ -83,7 +83,7 @@ export default {
   [UPDATE_ROLE] ({state, commit, dispatch}, role) {
     post('/api/v2/sys_sec_Role/', {
       body: JSON.stringify({
-        entities: [{...role, id: state.selectedRole}]
+        entities: [{...role, id: state.selectedSid}]
       }),
       headers: {
         'Content-Type': 'application/json'

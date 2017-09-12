@@ -1,5 +1,5 @@
 <template>
-  <div v-if="selectedRole">
+  <div v-if="selectedSid">
     <h3 class="pt-3">{{'MEMBERS' | i18n}}</h3>
     <template v-if="users && groups">
       <ul class="fa-ul" v-if="users.length + groups.length">
@@ -19,7 +19,7 @@
 
   export default {
     computed: {
-      ...mapState(['selectedRole', 'users', 'groups'])
+      ...mapState(['selectedSid', 'users', 'groups'])
     }
   }
 </script>

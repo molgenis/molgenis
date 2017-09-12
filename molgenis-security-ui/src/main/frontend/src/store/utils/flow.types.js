@@ -53,7 +53,7 @@ export type SidType = 'role' | 'user'
 export type State = {
   me: PrincipalSid,
   roles: Array<Role>,
-  selectedRole: ?string,
+  selectedSid: ?string,
   users: ?Array<string>,
   groups: ?Array<string>,
   permissions: Array<string>,

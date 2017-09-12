@@ -16,7 +16,7 @@
         <div class="tab-content">
           <div class="tab-pane active pt-3">
             <roles :roles="roles" :sidType="sidType"
-                   :selectedRole="selectedRole"
+                   :selectedRole="selectedSid"
                    :selectRole="selectRole" :createRole="createRole" :updateRole="updateRole"
                    :onUpdateRole="onUpdateRole" :onDeleteRole="onDeleteRole"></roles>
             <role-members v-if="sidType==='role'"></role-members>
@@ -34,7 +34,7 @@
                    :initialDescription="role.description"
                    :cancel="cancelUpdateRole"
                    :submit="onUpdateRole"></role-form>
-        <div v-else-if="selectedRole">
+        <div v-else-if="selectedSid">
           <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
                        selectLabel="" deselectLabel="" :placeholder="'SELECT_AN_ENTITY'|i18n"></multiselect>
@@ -111,7 +111,7 @@
       }
     },
     computed: {
-      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
+      ...mapState(['roles', 'selectedSid', 'doCreateRole', 'doUpdateRole', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
       ...mapGetters(['tableRows']),
       selectedEntityType: {
         get () {
@@ -124,7 +124,7 @@
       },
       role: {
         get () {
-          return this.roles.find(role => role.id === this.selectedRole)
+          return this.roles.find(role => role.id === this.selectedSid)
         }
       },
       sidType: {

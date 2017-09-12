@@ -45,10 +45,10 @@ function togglePermission (ace, permission) {
 export default {
   [TOGGLE_PERMISSION] (state: State, payload: { rowIndex: number, aceIndex: number, permission: string }) {
     let {rowIndex, aceIndex, permission} = payload
-    if (!state.selectedRole) {
+    if (!state.selectedSid) {
       return
     }
-    const sid: Sid = state.sidType === 'role' ? {authority: state.selectedRole} : {username: state.selectedRole}
+    const sid: Sid = state.sidType === 'role' ? {authority: state.selectedSid} : {username: state.selectedSid}
     const acl: ACL = state.rows[rowIndex].acl
     if (aceIndex === -1) {
       const ace: ACE = {
@@ -67,10 +67,10 @@ export default {
   },
   [TOGGLE_GRANTING] (state: State, payload: { rowIndex: number, aceIndex: number }) {
     let {rowIndex, aceIndex} = payload
-    if (!state.selectedRole) {
+    if (!state.selectedSid) {
       return
     }
-    const sid: Sid = state.sidType === 'role' ? {authority: state.selectedRole} : {username: state.selectedRole}
+    const sid: Sid = state.sidType === 'role' ? {authority: state.selectedSid} : {username: state.selectedSid}
     const acl: ACL = state.rows[rowIndex].acl
     if (aceIndex === -1) {
       const ace: ACE = {
@@ -88,13 +88,13 @@ export default {
     state.rows = rows
   },
   [SET_SELECTED_ROLE] (state: State, role: string) {
-    state.selectedRole = role
+    state.selectedSid = role
     state.doCreateRole = false
     state.users = null
     state.groups = null
   },
   [CREATE_ROLE] (state: State) {
-    state.selectedRole = null
+    state.selectedSid = null
     state.doCreateRole = true
   },
   [CANCEL_CREATE_ROLE] (state: State) {
