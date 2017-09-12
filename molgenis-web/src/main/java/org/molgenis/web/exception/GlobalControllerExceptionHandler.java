@@ -50,7 +50,7 @@ public class GlobalControllerExceptionHandler
 		{
 			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(
 					InternalServerErrorController.ERROR_MESSAGE);
-			return new ResponseEntity<>(errorMessageResponse, NOT_FOUND);
+			return new ResponseEntity<>(errorMessageResponse, INTERNAL_SERVER_ERROR);
 		}
 	}
 
