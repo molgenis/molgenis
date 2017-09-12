@@ -1,5 +1,6 @@
 // @flow
-import type { Package } from './state'
+import type { Package, Entity } from '../flow.types'
+import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
 import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from './mutations'
@@ -9,6 +10,8 @@ export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
 export const RESET_STATE = '__RESET_STATE__'
 export const GET_STATE_FOR_PACKAGE = '__GET_STATE_FOR_PACKAGE__'
 export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
+
+const SYS_PACKAGE_ID = 'sys'
 
 /**
  * Resets the entire state using the given packages as the package state.
@@ -93,6 +96,34 @@ function validateQuery (query: string) {
   }
 }
 
+/**
+ * Filter out system package unless user is superUser
+ * @param packages
+ * @returns {Array.<Package>}
+ */
+function filterNonVisiblePackages (packages: Array<Package>) {
+  if (INITIAL_STATE.isSuperUser) {
+    return packages
+  }
+
+  return packages
+    .filter(_package => _package.id !== SYS_PACKAGE_ID)
+    .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
+}
+
+/**
+ * Filter out all system entities unless user is superUser
+ * @param entities
+ * @returns {Array.<Entity>}
+ */
+function filterNonVisibleEntities (entities: Array<Entity>) {
+  if (INITIAL_STATE.isSuperUser) {
+    return entities
+  }
+
+  return entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
+}
+
 export default {
   [QUERY_PACKAGES] ({commit}: { commit: Function }, query: ?string) {
     let uri
@@ -109,7 +140,7 @@ export default {
     }
 
     api.get(uri).then(response => {
-      commit(SET_PACKAGES, response.items)
+      commit(SET_PACKAGES, filterNonVisiblePackages(response.items))
     }, error => {
       commit(SET_ERROR, error)
     })
@@ -120,7 +151,7 @@ export default {
         validateQuery(query)
         api.get(getEntityTypeQuery(query)).then(response => {
           const entities = response.items.map(toEntity)
-          commit(SET_ENTITIES, entities)
+          commit(SET_ENTITIES, filterNonVisibleEntities(entities))
         }, error => {
           commit(SET_ERROR, error)
         })
@@ -139,14 +170,14 @@ export default {
   },
   [RESET_STATE] ({commit}: { commit: Function }) {
     api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
-      resetToHome(commit, response.items)
+      resetToHome(commit, filterNonVisiblePackages(response.items))
     }, error => {
       commit(SET_ERROR, error)
     })
   },
   [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, selectedPackageId: ?string) {
     api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
-      const packages = response.items
+      const packages = filterNonVisiblePackages(response.items)
 
       if (!selectedPackageId) {
         resetToHome(commit, packages)
