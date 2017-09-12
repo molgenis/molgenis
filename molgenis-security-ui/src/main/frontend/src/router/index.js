@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import PermissionManager from 'components/PermissionManager'
-import { INITIAL_STATE } from '../store/state'
+import ResourcePermissionManager from 'components/ResourcePermissionManager'
+import {INITIAL_STATE} from '../store/state'
 
 Vue.use(Router)
 export default new Router({
@@ -34,7 +35,8 @@ export default new Router({
       path: '/resource/:entityType/'
     },
     {
-      path: '/resource/:entityType/:id'
+      path: '/resource/:entityType/:id',
+      component: ResourcePermissionManager
     }
   ]
 })

@@ -8,7 +8,8 @@ import {
   SET_ROLES,
   SET_ROWS,
   SET_SELECTED_ROLE,
-  SET_USERS
+  SET_USERS,
+  SET_ACL
 } from './mutations'
 import {debounce} from 'lodash'
 
@@ -23,6 +24,7 @@ export const SAVE_ACL = '__SAVE_ACL__'
 export const SAVE_CREATE_ROLE = '__SAVE_CREATE_ROLE__'
 export const UPDATE_ROLE = '__UPDATE_ROLE__'
 export const DELETE_ROLE = '__DELETE_ROLE__'
+export const GET_ACL = '__GET_ACL__'
 
 export default {
   [INITIALIZED] ({dispatch}) {
@@ -113,6 +115,16 @@ export default {
     }
     get(url, {}).then(response => {
       commit(SET_ROWS, response)
+    }, error => {
+      console.log(error)
+    })
+  },
+  [GET_ACL] ({state: {route: {params: {entityType, id}}}, commit}) {
+    console.log('GET_ACL!!')
+    // TODO: urlencode id!
+    let url = `/permission/acl?entityTypeId=${entityType}&entityId=${id}`
+    get(url, {}).then(response => {
+      commit(SET_ACL, response)
     }, error => {
       console.log(error)
     })

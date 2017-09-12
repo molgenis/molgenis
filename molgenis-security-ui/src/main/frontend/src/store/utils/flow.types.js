@@ -63,5 +63,6 @@ export type State = {
   rows: Array<Row>,
   filter: ?string,
   doCreateRole: ?boolean,
-  doUpdateRole: ?boolean
+  doUpdateRole: ?boolean,
+  acl: ?ACL
 }

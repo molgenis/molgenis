@@ -16,6 +16,7 @@ export const CREATE_ROLE = '__CREATE_ROLE__'
 export const CANCEL_CREATE_ROLE = '__CANCEL_CREATE_ROLE__'
 export const UPDATE_ROLE = '__UPDATE_ROLE__'
 export const CANCEL_UPDATE_ROLE = '__CANCEL_UPDATE_ROLE__'
+export const SET_ACL = '__SET_ACL__'
 
 const toRemove = {
   WRITEMETA: ['WRITEMETA'],
@@ -86,6 +87,9 @@ export default {
   },
   [SET_ROWS] (state: State, rows: Array<Row>) {
     state.rows = rows
+  },
+  [SET_ACL] (state: State, acl: ACL) {
+    state.acl = acl
   },
   [SET_SELECTED_ROLE] (state: State, role: string) {
     state.selectedSid = role

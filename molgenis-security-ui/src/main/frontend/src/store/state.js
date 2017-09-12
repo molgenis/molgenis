@@ -18,7 +18,8 @@ const state: State = {
   permissions: ['DELETE', 'WRITE', 'READ'],
   filter: '',
   rows: [],
-  entityTypes: []
+  entityTypes: [],
+  acl: null
 }
 
 export default state
