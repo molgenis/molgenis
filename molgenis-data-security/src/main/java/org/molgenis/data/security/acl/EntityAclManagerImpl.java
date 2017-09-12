@@ -355,6 +355,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 				return BasePermission.READ;
 			case WRITE:
 				return BasePermission.WRITE;
+			case DELETE:
+				return BasePermission.DELETE;
 			case NONE:
 				throw new IllegalArgumentException(String.format("Illegal permission '%s'", permission.toString()));
 			case WRITEMETA:
@@ -374,6 +376,10 @@ public class EntityAclManagerImpl implements EntityAclManager
 		if ((permission.getMask() & BasePermission.WRITE.getMask()) > 0)
 		{
 			result.add(Permission.WRITE);
+		}
+		if ((permission.getMask() & BasePermission.DELETE.getMask()) > 0)
+		{
+			result.add(Permission.DELETE);
 		}
 		//TODO still relevant?
 		if ((permission.getMask() & BasePermission.ADMINISTRATION.getMask()) > 0)

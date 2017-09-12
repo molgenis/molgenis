@@ -1,5 +1,5 @@
 // @flow
-import type { ACE, ACL, EntityType, Role, Row, Sid, SidType, State } from './utils/flow.types'
+import type {ACE, ACL, EntityType, Role, Row, Sid, SidType, State} from './utils/flow.types'
 
 export const SET_SELECTED_ROLE = '__SET_SELECTED_ROLE__'
 export const SET_USERS = '__SET_USERS__'
@@ -19,13 +19,15 @@ export const CANCEL_UPDATE_ROLE = '__CANCEL_UPDATE_ROLE__'
 
 const toRemove = {
   WRITEMETA: ['WRITEMETA'],
-  WRITE: ['WRITEMETA', 'WRITE'],
-  READ: ['WRITEMETA', 'WRITE', 'READ'],
-  COUNT: ['WRITEMETA', 'WRITE', 'READ', 'COUNT']
+  DELETE: ['WRITEMETA', 'DELETE'],
+  WRITE: ['WRITEMETA', 'DELETE', 'WRITE'],
+  READ: ['WRITEMETA', 'DELETE', 'WRITE', 'READ'],
+  COUNT: ['WRITEMETA', 'DELETE', 'WRITE', 'READ', 'COUNT']
 }
 
 const toSet = {
-  WRITEMETA: ['WRITEMETA', 'WRITE', 'READ', 'COUNT'],
+  WRITEMETA: ['WRITEMETA', 'DELETE', 'WRITE', 'READ', 'COUNT'],
+  DELETE: ['DELETE', 'WRITE', 'READ', 'COUNT'],
   WRITE: ['WRITE', 'READ', 'COUNT'],
   READ: ['READ', 'COUNT'],
   COUNT: ['COUNT']
