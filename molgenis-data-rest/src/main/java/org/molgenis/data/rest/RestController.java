@@ -776,6 +776,12 @@ public class RestController
 			User user = dataService.findOne(USER,
 					new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()), User.class);
 
+			if (user.isChangePassword())
+			{
+				throw new BadCredentialsException(
+						"Unable to log in because a password reset is required. Sign in to the website to reset your password.");
+			}
+
 			// User authenticated, log the user in
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 
