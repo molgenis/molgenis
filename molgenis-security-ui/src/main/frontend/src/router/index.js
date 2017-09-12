@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import PermissionManager from 'components/PermissionManager'
-import {INITIAL_STATE} from '../store/state'
+import { INITIAL_STATE } from '../store/state'
 
 Vue.use(Router)
 export default new Router({
@@ -11,6 +11,30 @@ export default new Router({
     {
       path: '/',
       component: PermissionManager
+    },
+    {
+      path: '/user/:id/'
+    },
+    {
+      path: '/user/:id/:entityType'
+    },
+    {
+      path: '/role/'
+    },
+    {
+      path: '/role/:userId/'
+    },
+    {
+      path: '/role/:sid/edit'
+    },
+    {
+      path: '/role/:roleId/:entityType'
+    },
+    {
+      path: '/resource/:entityType/'
+    },
+    {
+      path: '/resource/:entityType/:id'
     }
   ]
 })
