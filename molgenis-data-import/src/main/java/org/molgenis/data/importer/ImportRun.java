@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ValueLabel;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,7 @@ public class ImportRun extends StaticEntity
 		set(STARTDATE, startDate);
 	}
 
+	@Nullable
 	public Instant getEndDate()
 	{
 		return getInstant(ENDDATE);
@@ -94,6 +96,7 @@ public class ImportRun extends StaticEntity
 		set(STATUS, status);
 	}
 
+	@Nullable
 	public String getMessage()
 	{
 		return getString(MESSAGE);
@@ -115,6 +118,7 @@ public class ImportRun extends StaticEntity
 		set(PROGRESS, progress);
 	}
 
+	@Nullable
 	public String getImportedEntities()
 	{
 		return getString(IMPORTEDENTITIES);

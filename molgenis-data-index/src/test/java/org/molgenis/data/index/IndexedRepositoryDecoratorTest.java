@@ -3,6 +3,9 @@ package org.molgenis.data.index;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
+import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -44,6 +47,7 @@ public class IndexedRepositoryDecoratorTest
 		String entityTypeId = "entity";
 		repositoryEntityType = mock(EntityType.class);
 		when(repositoryEntityType.getId()).thenReturn(entityTypeId);
+		when(repositoryEntityType.getLabel()).thenReturn("My entity type");
 		idAttrName = "id";
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
 
@@ -54,7 +58,9 @@ public class IndexedRepositoryDecoratorTest
 		when(delegateRepository.getCapabilities()).thenReturn(
 				EnumSet.of(QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
 		when(delegateRepository.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
-		indexedRepositoryDecorator = new IndexedRepositoryDecorator(delegateRepository, searchService);
+		IndexJobScheduler indexJobScheduler = mock(IndexJobScheduler.class);
+		indexedRepositoryDecorator = new IndexedRepositoryDecorator(delegateRepository, searchService,
+				indexJobScheduler);
 
 		when(repositoryEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
 
@@ -76,9 +82,9 @@ public class IndexedRepositoryDecoratorTest
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = NullPointerException.class)
-	public void ElasticSearchRepository()
+	public void indexedRepositoryDecorator()
 	{
-		new IndexedRepositoryDecorator(null, null);
+		new IndexedRepositoryDecorator(null, null, null);
 	}
 
 	@Test
@@ -121,6 +127,26 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
+	public void aggregateUnknownIndexExceptionRecoverable()
+	{
+		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
+		AggregateResult aggregateResult = mock(AggregateResult.class);
+		when(searchService.aggregate(repositoryEntityType, aggregateQuery)).thenThrow(new UnknownIndexException("msg"))
+																		   .thenReturn(aggregateResult);
+
+		assertEquals(indexedRepositoryDecorator.aggregate(aggregateQuery), aggregateResult);
+		verify(delegateRepository, never()).count(unsupportedQuery);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void aggregateUnknownIndexExceptionUnrecoverable()
+	{
+		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
+		when(searchService.aggregate(repositoryEntityType, aggregateQuery)).thenThrow(new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.aggregate(aggregateQuery);
+	}
+
+	@Test
 	public void close() throws IOException
 	{
 		indexedRepositoryDecorator.close();
@@ -150,6 +176,23 @@ public class IndexedRepositoryDecoratorTest
 		indexedRepositoryDecorator.count(unsupportedQuery);
 		verify(searchService).count(repositoryEntityType, unsupportedQuery);
 		verify(delegateRepository, never()).count(unsupportedQuery);
+	}
+
+	@Test
+	public void countUnknownIndexExceptionRecoverable()
+	{
+		when(searchService.count(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"))
+																		 .thenReturn(5L);
+
+		assertEquals(indexedRepositoryDecorator.count(unsupportedQuery), 5L);
+		verify(delegateRepository, never()).count(unsupportedQuery);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void countUnknownIndexExceptionUnrecoverable()
+	{
+		when(searchService.count(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.count(unsupportedQuery);
 	}
 
 	@Test
@@ -205,6 +248,25 @@ public class IndexedRepositoryDecoratorTest
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
 		verify(searchService).searchOne(repositoryEntityType, unsupportedQuery);
 		verify(delegateRepository).findOneById(any(Object.class), isNull());
+	}
+
+	@Test
+	public void findOneUnknownIndexExceptionRecoverable()
+	{
+		Entity entity0 = mock(Entity.class);
+		when(searchService.searchOne(repositoryEntityType, unsupportedQuery)).thenThrow(
+				new UnknownIndexException("msg")).thenReturn(entity0);
+		indexedRepositoryDecorator.findOne(unsupportedQuery);
+		verify(searchService, times(2)).searchOne(repositoryEntityType, unsupportedQuery);
+		verify(delegateRepository).findOneById(any(Object.class), isNull());
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void findOneUnknownIndexExceptionUnrecoverable()
+	{
+		when(searchService.searchOne(repositoryEntityType, unsupportedQuery)).thenThrow(
+				new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.findOne(unsupportedQuery);
 	}
 
 	@Test
@@ -304,6 +366,24 @@ public class IndexedRepositoryDecoratorTest
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
 		verify(searchService).search(repositoryEntityType, unsupportedQuery);
 		verify(delegateRepository).findAll(any(Stream.class), isNull());
+	}
+
+	@Test
+	public void findAllUnknownIndexExceptionRecoverable()
+	{
+		Stream<Object> entityStream = mock(Stream.class);
+		when(searchService.search(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"))
+																		  .thenReturn(entityStream);
+		indexedRepositoryDecorator.findAll(unsupportedQuery);
+		verify(searchService, times(2)).search(repositoryEntityType, unsupportedQuery);
+		verify(delegateRepository).findAll(any(Stream.class), isNull());
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
+	public void findAllUnknownIndexExceptionUnrecoverable()
+	{
+		when(searchService.search(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"));
+		indexedRepositoryDecorator.findAll(unsupportedQuery);
 	}
 
 	@Test

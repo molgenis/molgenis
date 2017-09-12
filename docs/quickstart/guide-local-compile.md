@@ -16,7 +16,7 @@ open terminal (mkdir if needed) and type
 Optionally select stable molgenis version:
 
     git fetch --tags origin
-    git checkout -b <tag name: see https://github.com/molgenis/molgenis/releases>
+    git checkout <tag name: see https://github.com/molgenis/molgenis/releases>
 
 More information about forking can be found here: https://help.github.com/articles/fork-a-repo
 

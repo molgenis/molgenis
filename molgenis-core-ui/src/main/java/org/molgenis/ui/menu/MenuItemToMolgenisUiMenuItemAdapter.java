@@ -1,10 +1,10 @@
 package org.molgenis.ui.menu;
 
-import org.molgenis.ui.MolgenisUiMenu;
-import org.molgenis.ui.MolgenisUiMenuItem;
-import org.molgenis.ui.MolgenisUiMenuItemType;
+import org.molgenis.web.UiMenu;
+import org.molgenis.web.UiMenuItem;
+import org.molgenis.web.UiMenuItemType;
 
-public class MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenuItem
+public class MenuItemToMolgenisUiMenuItemAdapter implements UiMenuItem
 {
 	private final MenuItem menuItem;
 
@@ -34,21 +34,21 @@ public class MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenuItem
 	}
 
 	@Override
-	public MolgenisUiMenuItemType getType()
+	public UiMenuItemType getType()
 	{
 		switch (menuItem.getType())
 		{
 			case MENU:
-				return MolgenisUiMenuItemType.MENU;
+				return UiMenuItemType.MENU;
 			case PLUGIN:
-				return MolgenisUiMenuItemType.PLUGIN;
+				return UiMenuItemType.PLUGIN;
 			default:
 				throw new RuntimeException("Unknown MolgenisUiMenuItemType [" + menuItem.getType() + "]");
 		}
 	}
 
 	@Override
-	public MolgenisUiMenu getParentMenu()
+	public UiMenu getParentMenu()
 	{
 		throw new UnsupportedOperationException();
 	}

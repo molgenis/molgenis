@@ -25,6 +25,8 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 	private RepositoryCollection delegateRepositoryCollection;
 	@Mock
 	private EntityAclManager entityAclManager;
+	@Mock
+	private PermissionService permissionService;
 
 	private RepositoryCollectionSecurityDecorator repositoryCollectionSecurityDecorator;
 
@@ -37,7 +39,7 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 		Attribute idAttribute = mock(Attribute.class);
 		when(entityType.getIdAttribute()).thenReturn(idAttribute);
 		repositoryCollectionSecurityDecorator = new RepositoryCollectionSecurityDecorator(delegateRepositoryCollection,
-				entityAclManager);
+				entityAclManager, permissionService);
 	}
 
 	@Test
@@ -46,8 +48,8 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repository = mock(Repository.class);
 		when(delegateRepositoryCollection.createRepository(entityType)).thenReturn(repository);
-		when(entityType.isEntityLevelSecurity()).thenReturn(true);
-
+		//		when(entityType.isEntityLevelSecurity()).thenReturn(true);
+		if (1 == 1) throw new UnsupportedOperationException("FIXE");
 		assertEquals(repositoryCollectionSecurityDecorator.createRepository(entityType), repository);
 		verify(entityAclManager).createAclClass(entityType);
 	}
@@ -58,8 +60,8 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repository = mock(Repository.class);
 		when(delegateRepositoryCollection.createRepository(entityType)).thenReturn(repository);
-		when(entityType.isEntityLevelSecurity()).thenReturn(false);
-
+		//		when(entityType.isEntityLevelSecurity()).thenReturn(false);
+		if (1 == 1) throw new UnsupportedOperationException("FIXE");
 		assertEquals(repositoryCollectionSecurityDecorator.createRepository(entityType), repository);
 		verifyZeroInteractions(entityAclManager);
 	}
@@ -67,7 +69,8 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 	@Test
 	public void testDeleteRepositoryEntitySecurityTrue()
 	{
-		when(entityType.isEntityLevelSecurity()).thenReturn(true);
+		//		when(entityType.isEntityLevelSecurity()).thenReturn(true);
+		if (1 == 1) throw new UnsupportedOperationException("FIXE");
 
 		repositoryCollectionSecurityDecorator.deleteRepository(entityType);
 		verify(entityAclManager).deleteAclClass(entityType);
@@ -77,7 +80,8 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 	@Test
 	public void testDeleteRepositoryEntitySecurityFalse()
 	{
-		when(entityType.isEntityLevelSecurity()).thenReturn(false);
+		//		when(entityType.isEntityLevelSecurity()).thenReturn(false);
+		if (1 == 1) throw new UnsupportedOperationException("FIXE");
 
 		repositoryCollectionSecurityDecorator.deleteRepository(entityType);
 		verifyZeroInteractions(entityAclManager);
@@ -87,8 +91,10 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 	@Test
 	public void testUpdateRepositoryEnableEntitySecurity()
 	{
-		when(entityType.isEntityLevelSecurity()).thenReturn(false);
-		EntityType updatedEntityType = when(mock(EntityType.class).isEntityLevelSecurity()).thenReturn(true).getMock();
+		//		when(entityType.isEntityLevelSecurity()).thenReturn(false);
+		EntityType updatedEntityType = null;//when(mock(EntityType.class).isEntityLevelSecurity()).thenReturn(true).getMock();
+		if (1 == 1) throw new UnsupportedOperationException("FIXME");
+
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repository = mock(Repository.class);
 		@SuppressWarnings("unchecked")
@@ -107,9 +113,10 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 	@Test
 	public void testUpdateRepositoryDisableEntitySecurity()
 	{
-		when(entityType.isEntityLevelSecurity()).thenReturn(true);
-		EntityType updatedEntityType = when(mock(EntityType.class).isEntityLevelSecurity()).thenReturn(false).getMock();
-
+		//		when(entityType.isEntityLevelSecurity()).thenReturn(true);
+		//		EntityType updatedEntityType = when(mock(EntityType.class).isEntityLevelSecurity()).thenReturn(false).getMock();
+		EntityType updatedEntityType = null;
+		if (1 == 1) throw new UnsupportedOperationException("FIXME");
 		repositoryCollectionSecurityDecorator.updateRepository(entityType, updatedEntityType);
 		verify(entityAclManager).deleteAclClass(entityType);
 		verify(delegateRepositoryCollection).updateRepository(entityType, updatedEntityType);

@@ -1,12 +1,12 @@
 package org.molgenis.ui.menu;
 
-import org.molgenis.ui.MolgenisUi;
-import org.molgenis.ui.MolgenisUiMenu;
+import org.molgenis.web.Ui;
+import org.molgenis.web.UiMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static java.util.Objects.requireNonNull;
 
-public class MenuMolgenisUi implements MolgenisUi
+public class MenuMolgenisUi implements Ui
 {
 	private final MenuReaderService menuReaderService;
 
@@ -17,14 +17,14 @@ public class MenuMolgenisUi implements MolgenisUi
 	}
 
 	@Override
-	public MolgenisUiMenu getMenu()
+	public UiMenu getMenu()
 	{
 		Menu menu = menuReaderService.getMenu();
 		return new MenuItemToMolgenisUiMenuAdapter(menu, menu);
 	}
 
 	@Override
-	public MolgenisUiMenu getMenu(String menuId)
+	public UiMenu getMenu(String menuId)
 	{
 		Menu rootMenu = menuReaderService.getMenu();
 		MenuItem menu = findMenu(rootMenu, menuId);
@@ -46,5 +46,10 @@ public class MenuMolgenisUi implements MolgenisUi
 			}
 		}
 		return null;
+	}
+
+	public String getMenuJson()
+	{
+		return MenuUtils.getMenuJson(getMenu());
 	}
 }

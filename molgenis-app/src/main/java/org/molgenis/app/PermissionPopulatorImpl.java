@@ -2,8 +2,10 @@ package org.molgenis.app;
 
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.security.acl.*;
 import org.molgenis.ui.admin.user.UserAccountController;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -11,12 +13,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.bootstrap.populate.UsersGroupsAuthoritiesPopulatorImpl.ROLE_USER_ID;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
-import static org.molgenis.ui.PluginMetadata.PLUGIN;
 
 @Component
 public class PermissionPopulatorImpl implements PermissionPopulator
@@ -29,16 +29,24 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 	}
 
 	@Override
-	public void populate()
+	public void populate(ApplicationContext ctx)
 	{
+		// TODO handle removed system entity types
+		// TODO handle updated system entity types including updates of isEntityLevelSecurity
+		ctx.getBeansOfType(SystemEntityType.class)
+		   .values()
+		   .stream()
+		   .filter(SystemEntityType::isEntityLevelSecurity)
+		   .forEach(entityAclManager::createAclClass);
+
 		SecurityId roleUserSecurityId = SecurityId.createForAuthority(ROLE_USER_ID);
 		EntityAce roleUserReadAce = EntityAce.create(newHashSet(READ), roleUserSecurityId, true);
 
 		// allow user role to see system package
 		// FIXME enable system package ACL population once we solved 'max_locks_per_transaction' issue
-//		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
-//		entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
-//		entityAclManager.updateAcl(entityTypeAcl);
+		//		EntityAcl entityTypeAcl = entityAclManager.readAcl(EntityIdentity.create(PACKAGE, PACKAGE_SYSTEM));
+		//		entityTypeAcl = entityTypeAcl.toBuilder().setEntries(singletonList(roleUserReadAce)).build();
+		//		entityAclManager.updateAcl(entityTypeAcl);
 
 		// allow anonymous user and user role to see the home plugin
 		EntityAcl homePluginAcl = entityAclManager.readAcl(EntityIdentity.create(PLUGIN, HomeController.ID));

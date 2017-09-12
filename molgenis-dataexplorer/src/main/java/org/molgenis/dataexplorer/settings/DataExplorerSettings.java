@@ -3,12 +3,13 @@ package org.molgenis.dataexplorer.settings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.ui.PluginMetadata;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
@@ -422,6 +423,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		set(Meta.GENERAL_HEADER_ABBREVIATE, headerAbbreviate);
 	}
 
+	@Nullable
 	public URI getGalaxyUrl()
 	{
 		String galaxyUrl = getString(Meta.DATA_GALAXY_URL);
@@ -521,11 +523,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		set(Meta.AGGREGATES_DISTINCT_SELECT, aggregatesDistinctSelect);
 	}
 
+	@Nullable
 	public String getEntityReports()
 	{
 		return getString(Meta.REPORTS_ENTITIES);
 	}
 
+	@Nullable
 	public String getEntityReport(String entityTypeId)
 	{
 		Map<String, String> entityReports = getEntityReportsAsMap();

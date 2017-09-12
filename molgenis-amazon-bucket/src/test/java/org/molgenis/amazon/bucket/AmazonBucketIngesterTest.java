@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,16 +125,16 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 			AmazonS3Client client = mock(AmazonS3Client.class);
 
 			AmazonBucketClient amazonBucketClient = mock(AmazonBucketClient.class);
-			try
-			{
 				File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
 				when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
+			try
+			{
 				when(amazonBucketClient.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"),
 						any(), eq(true), any())).thenReturn(file);
 			}
-			catch (Exception e)
+			catch (IOException e)
 			{
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			return amazonBucketClient;
 		}

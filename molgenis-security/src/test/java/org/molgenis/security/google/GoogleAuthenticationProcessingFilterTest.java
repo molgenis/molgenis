@@ -4,8 +4,8 @@ import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import org.molgenis.auth.GroupMemberFactory;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserDetailsService;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -23,21 +23,21 @@ import static org.mockito.Mockito.when;
 public class GoogleAuthenticationProcessingFilterTest
 {
 	private GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter;
-	private AppSettings appSettings;
+	private AuthenticationSettings authenticationSettings;
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		appSettings = mock(AppSettings.class);
+		authenticationSettings = mock(AuthenticationSettings.class);
 		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		DataService dataService = mock(DataService.class);
 		GooglePublicKeysManager googlePublicKeysManager = mock(GooglePublicKeysManager.class);
 		UserFactory userFactory = mock(UserFactory.class);
 		GroupMemberFactory groupMemberFactory = mock(GroupMemberFactory.class);
 		googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(googlePublicKeysManager,
-				dataService, userDetailsService, appSettings, userFactory, groupMemberFactory);
+				dataService, userDetailsService, authenticationSettings, userFactory, groupMemberFactory);
 		request = mock(HttpServletRequest.class);
 		response = mock(HttpServletResponse.class);
 	}
@@ -52,14 +52,14 @@ public class GoogleAuthenticationProcessingFilterTest
 	public void attemptAuthenticationGoogleSignInDisabled()
 			throws AuthenticationException, IOException, ServletException
 	{
-		when(appSettings.getGoogleSignIn()).thenReturn(false);
+		when(authenticationSettings.getGoogleSignIn()).thenReturn(false);
 		googleAuthenticationProcessingFilter.attemptAuthentication(request, response);
 	}
 
 	@Test(expectedExceptions = UnknownTokenException.class)
 	public void attemptAuthenticationMissingToken() throws AuthenticationException, IOException, ServletException
 	{
-		when(appSettings.getGoogleSignIn()).thenReturn(true);
+		when(authenticationSettings.getGoogleSignIn()).thenReturn(true);
 		when(request.getParameter(GoogleAuthenticationProcessingFilter.PARAM_ID_TOKEN)).thenReturn(null);
 		googleAuthenticationProcessingFilter.attemptAuthentication(request, response);
 	}

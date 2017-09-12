@@ -1,6 +1,3 @@
-import 'es6-promise/auto'
-import 'babel-polyfill'
-
 import Vue from 'vue'
 import store from './store'
 import router from './router'
@@ -10,8 +7,8 @@ import VueSweetAlert from 'vue-sweetalert'
 import Toaster from 'v-toaster'
 
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
-import { sync } from 'vuex-router-sync'
-import { INITIAL_STATE } from './store/state'
+import {sync} from 'vuex-router-sync'
+import {INITIAL_STATE} from './store/state'
 
 import 'font-awesome/css/font-awesome.min.css'
 import 'v-toaster/dist/v-toaster.css'

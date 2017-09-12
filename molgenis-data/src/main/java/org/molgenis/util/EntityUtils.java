@@ -22,6 +22,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.util.MolgenisDateFormat.*;
 
 public class EntityUtils
@@ -284,20 +285,8 @@ public class EntityUtils
 		{
 			if (!tags.get(i).getId().equals(otherTags.get(i).getId())) return false;
 		}
-		// compare entity level security
-		if (!Objects.equals(entityType.isEntityLevelSecurity(), otherEntityType.isEntityLevelSecurity())) return false;
 
-		// compare entity level security inheritance attribute
-		Attribute entityLevelSecurityInheritanceAttribute = entityType.getEntityLevelSecurityInheritance();
-		Attribute otherEntityLevelSecurityInheritanceAttribute = otherEntityType.getEntityLevelSecurityInheritance();
-		if (entityLevelSecurityInheritanceAttribute == null && otherEntityLevelSecurityInheritanceAttribute != null)
-			return false;
-		if (entityLevelSecurityInheritanceAttribute != null && otherEntityLevelSecurityInheritanceAttribute == null)
-			return false;
-		if (entityLevelSecurityInheritanceAttribute != null && otherEntityLevelSecurityInheritanceAttribute != null
-				&& !Objects.equals(entityLevelSecurityInheritanceAttribute.getIdentifier(),
-				otherEntityLevelSecurityInheritanceAttribute.getIdentifier())) return false;
-		return entityType.getIndexingDepth() == otherEntityType.getIndexingDepth();// FIXME add RLS attribute checks
+		return entityType.getIndexingDepth() == otherEntityType.getIndexingDepth();
 	}
 
 	/**
@@ -582,5 +571,24 @@ public class EntityUtils
 			if (!equals(entity, otherIt.next())) return false;
 		}
 		return true;
+	}
+
+	public static boolean isSystemEntity(EntityType entityType)
+	{
+		return isSystemPackage(entityType.getPackage());
+	}
+
+	public static boolean isSystemPackage(Package pack)
+	{
+		if (pack == null)
+		{
+			return false;
+		}
+		if (pack.getId().equals(PACKAGE_SYSTEM))
+		{
+			return true;
+		}
+		Package rootPackage = pack.getRootPackage();
+		return rootPackage != null && rootPackage.getId().equals(PACKAGE_SYSTEM);
 	}
 }

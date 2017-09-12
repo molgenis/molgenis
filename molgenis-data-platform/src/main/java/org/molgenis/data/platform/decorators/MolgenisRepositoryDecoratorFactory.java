@@ -11,17 +11,16 @@ import org.molgenis.data.cache.l3.L3Cache;
 import org.molgenis.data.cache.l3.L3CacheRepositoryDecorator;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryDecorator;
-import org.molgenis.data.index.IndexedRepositoryDecorator;
-import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.security.EntitySecurityRepositoryDecorator;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.security.acl.EntityAclManager;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.*;
-import org.molgenis.security.core.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -39,7 +38,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final ExpressionValidator expressionValidator;
 	private final SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry;
 	private final IndexActionRegisterService indexActionRegisterService;
-	private final SearchService searchService;
+	private final IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory;
 	private final L1Cache l1Cache;
 	private final EntityListenersService entityListenersService;
 	private final L2Cache l2Cache;
@@ -55,9 +54,10 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
 			AppSettings appSettings, DataService dataService, ExpressionValidator expressionValidator,
 			SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			IndexActionRegisterService indexActionRegisterService, SearchService searchService, L1Cache l1Cache,
-			L2Cache l2Cache, TransactionInformation transactionInformation,
-			EntityListenersService entityListenersService, L3Cache l3Cache,
+			IndexActionRegisterService indexActionRegisterService,
+			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
+			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
+			L3Cache l3Cache,
 			PlatformTransactionManager transactionManager, QueryValidator queryValidator,
 			EntityAclManager entityAclManager, PermissionService permissionService)
 
@@ -70,7 +70,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.expressionValidator = requireNonNull(expressionValidator);
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
-		this.searchService = requireNonNull(searchService);
+		this.indexedRepositoryDecoratorFactory = requireNonNull(indexedRepositoryDecoratorFactory);
 		this.l1Cache = requireNonNull(l1Cache);
 		this.entityListenersService = requireNonNull(entityListenersService);
 		this.l2Cache = requireNonNull(l2Cache);
@@ -94,7 +94,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
 		// 12. Route specific queries to the index
-		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
+		decoratedRepository = indexedRepositoryDecoratorFactory.create(decoratedRepository);
 
 		// 11. Query the L3 cache before querying the index
 		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
@@ -126,7 +126,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, permissionService);
 
 		// 1.5
-		if (repository.getEntityType().isEntityLevelSecurity())
+		if (permissionService.isEntityLevelSecurity(repository.getEntityType()))
 		{
 			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, entityAclManager);
 		}

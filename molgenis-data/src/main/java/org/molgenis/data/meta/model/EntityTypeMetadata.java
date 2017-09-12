@@ -92,13 +92,6 @@ public class EntityTypeMetadata extends SystemEntityType
 									.setNillable(false)
 									.setDefaultValue(String.valueOf(1))
 									.setRangeMin(1L);
-		addAttribute(IS_ENTITY_LEVEL_SECURITY).setDataType(BOOL)
-											  .setNillable(false)
-											  .setLabel("Entity-level security")
-											  .setDefaultValue(FALSE.toString());
-		addAttribute(ENTITY_LEVEL_SECURITY_INHERITANCE).setDataType(STRING)
-													   .setLabel(
-															   "Entity-level security inheritance"); // FIXME how to make this into a XREF?
 
 		setEntityLevelSecurityInheritance(packageAttr);
 	}

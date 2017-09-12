@@ -1,6 +1,6 @@
 package org.molgenis.ui.wizard;
 
-import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.web.PluginController;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,11 +13,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
+import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-public abstract class AbstractWizardController extends MolgenisPluginController
+public abstract class AbstractWizardController extends PluginController
 {
 	private static final String VIEW_NAME = "view-wizard";
 	private final String wizardName;

@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
@@ -96,6 +95,22 @@ public class EntityAclManagerImpl implements EntityAclManager
 	}
 
 	@Override
+	public boolean hasAclClass(EntityType entityType)
+	{
+		return aclService.hasClass(entityType.getId());
+	}
+
+	@Override
+	public String getAclClassParent(EntityType entityType)
+	{
+		if (entityType.equals(EntityTypeMetadata.ENTITY_TYPE_META_DATA)) return EntityTypeMetadata.PACKAGE;
+		if (entityType.equals(PackageMetadata.PACKAGE)) return PackageMetadata.PARENT;
+		if (entityType.equals(AttributeMetadata.ATTRIBUTE_META_DATA)) return AttributeMetadata.ENTITY;
+		if (entityType.equals("sys_set_dataexplorer")) return "plugin";
+		return null;
+	}
+
+	@Override
 	@Transactional
 	public void createAclClass(EntityType entityType)
 	{
@@ -176,7 +191,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 			ObjectIdentity objectIdentity = toObjectIdentity(entity);
 			acl = aclService.createAcl(objectIdentity);
 		}
-		Attribute attribute = entity.getEntityType().getEntityLevelSecurityInheritance();
+		String aclClassParent = getAclClassParent(entity.getEntityType());
+		Attribute attribute = entity.getEntityType().getAttribute(aclClassParent);
 		Entity inheritedEntity = attribute != null ? entity.getEntity(attribute.getName()) : null;
 
 		Acl parentAcl;
@@ -339,6 +355,8 @@ public class EntityAclManagerImpl implements EntityAclManager
 				return BasePermission.READ;
 			case WRITE:
 				return BasePermission.WRITE;
+			case DELETE:
+				return BasePermission.DELETE;
 			case NONE:
 				throw new IllegalArgumentException(String.format("Illegal permission '%s'", permission.toString()));
 			case WRITEMETA:
@@ -358,6 +376,10 @@ public class EntityAclManagerImpl implements EntityAclManager
 		if ((permission.getMask() & BasePermission.WRITE.getMask()) > 0)
 		{
 			result.add(Permission.WRITE);
+		}
+		if ((permission.getMask() & BasePermission.DELETE.getMask()) > 0)
+		{
+			result.add(Permission.DELETE);
 		}
 		//TODO still relevant?
 		if ((permission.getMask() & BasePermission.ADMINISTRATION.getMask()) > 0)

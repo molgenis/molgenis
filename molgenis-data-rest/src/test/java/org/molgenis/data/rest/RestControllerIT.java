@@ -56,7 +56,6 @@ public class RestControllerIT
 
 		testUserId = getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
-
 		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", Permission.WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", Permission.READ);
 		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", Permission.COUNT);
@@ -260,4 +259,3 @@ public class RestControllerIT
 	}
 
 }
-

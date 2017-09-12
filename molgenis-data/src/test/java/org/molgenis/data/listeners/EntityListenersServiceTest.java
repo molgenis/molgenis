@@ -166,7 +166,7 @@ public class EntityListenersServiceTest
 			}
 			catch (InterruptedException e)
 			{
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		});
 

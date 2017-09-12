@@ -25,18 +25,20 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 	private static final int BATCH_SIZE = 1000;
 
 	private final EntityAclManager entityAclManager;
+	private final PermissionService permissionService; // TODO can we use only PermissionService?
 
 	RepositoryCollectionSecurityDecorator(RepositoryCollection delegateRepositoryCollection,
-			EntityAclManager entityAclManager)
+			EntityAclManager entityAclManager, PermissionService permissionService)
 	{
 		super(delegateRepositoryCollection);
 		this.entityAclManager = requireNonNull(entityAclManager);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		if (entityType.isEntityLevelSecurity())
+		if (permissionService.isEntityLevelSecurity(entityType))
 		{
 			enableEntityLevelSecurity(entityType, false);
 		}
@@ -46,7 +48,7 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 	@Override
 	public void deleteRepository(EntityType entityType)
 	{
-		if (entityType.isEntityLevelSecurity())
+		if (permissionService.isEntityLevelSecurity(entityType))
 		{
 			disableEntityLevelSecurity(entityType);
 		}
@@ -56,11 +58,13 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 	@Override
 	public void updateRepository(EntityType entityType, EntityType updatedEntityType)
 	{
-		if (!entityType.isEntityLevelSecurity() && updatedEntityType.isEntityLevelSecurity())
+		if (!permissionService.isEntityLevelSecurity(entityType) && permissionService.isEntityLevelSecurity(
+				updatedEntityType))
 		{
 			enableEntityLevelSecurity(entityType, true);
 		}
-		else if (entityType.isEntityLevelSecurity() && !updatedEntityType.isEntityLevelSecurity())
+		else if (permissionService.isEntityLevelSecurity(entityType) && !permissionService.isEntityLevelSecurity(
+				updatedEntityType))
 		{
 			disableEntityLevelSecurity(entityType);
 		}
@@ -89,8 +93,10 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 
 	private void updateEntityLevelSecurityInheritance(EntityType entityType, EntityType updatedEntityType)
 	{
-		Attribute entityLevelSecurityInheritance = entityType.getEntityLevelSecurityInheritance();
-		Attribute updatedEntityLevelSecurityInheritance = updatedEntityType.getEntityLevelSecurityInheritance();
+		Attribute entityLevelSecurityInheritance = permissionService.getEntityLevelSecurityInheritance(entityType);
+		Attribute updatedEntityLevelSecurityInheritance = permissionService.getEntityLevelSecurityInheritance(
+				updatedEntityType);
+
 		if (EntityUtils.equals(entityLevelSecurityInheritance, updatedEntityLevelSecurityInheritance))
 		{
 			return;
@@ -113,8 +119,7 @@ class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCollection
 		Collection<EntityAcl> entityAcls = entityAclManager.readAcls(entityIdentityEntityMap.keySet());
 		List<EntityAcl> updatedEntityAcls = entityAcls.stream()
 													  .map(entityAcl -> createEntityAclParent(entityAcl,
-															  inheritanceAttribute,
-															  entityIdentityEntityMap))
+															  inheritanceAttribute, entityIdentityEntityMap))
 													  .collect(toList());
 		entityAclManager.updateAcls(updatedEntityAcls);
 	}

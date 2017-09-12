@@ -3,8 +3,8 @@ package org.molgenis.security.freemarker;
 import freemarker.core.Environment;
 import freemarker.template.*;
 import org.molgenis.data.DataConverter;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 
 import java.io.IOException;
 import java.util.Map;

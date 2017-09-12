@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
@@ -33,10 +34,8 @@ public class UserDetailsService implements org.springframework.security.core.use
 	@Autowired
 	public UserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (grantedAuthoritiesMapper == null) throw new IllegalArgumentException("Granted authorities mapper is null");
-		this.dataService = dataService;
-		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
+		this.dataService = requireNonNull(dataService, "DataService is null");
+		this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper, "Granted authorities mapper is null");
 	}
 
 	@Override

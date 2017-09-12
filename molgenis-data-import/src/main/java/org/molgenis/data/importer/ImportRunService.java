@@ -64,14 +64,11 @@ public class ImportRunService
 		ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
 		try
 		{
-			if (importRun != null)
-			{
-				importRun.setStatus(ImportStatus.FINISHED.toString());
-				importRun.setEndDate(now());
-				importRun.setMessage(message);
-				importRun.setImportedEntities(importedEntities);
-				dataService.update(IMPORT_RUN, importRun);
-			}
+			importRun.setStatus(ImportStatus.FINISHED.toString());
+			importRun.setEndDate(now());
+			importRun.setMessage(message);
+			importRun.setImportedEntities(importedEntities);
+			dataService.update(IMPORT_RUN, importRun);
 		}
 		catch (Exception e)
 		{

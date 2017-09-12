@@ -13,10 +13,6 @@ $.when($,
         self.getEntityQuery = getEntityQuery;
         self.createHeader = createHeader;
         self.setGenomeAttributes = setGenomeAttributes;
-        self.getPosAttribute = getPosAttribute;
-        self.getChromosomeAttribute = getChromosomeAttribute;
-        self.getIdentifierAttribute = getIdentifierAttribute;
-        self.getPatientAttribute = getPatientAttribute;
         self.getSelectedModule = getSelectedModule;
         self.getRSQL = getRSQL;
         self.getnToken = getnToken;
@@ -32,8 +28,6 @@ $.when($,
 
         var posAttribute;
         var chromosomeAttribute;
-        var identifierAttribute;
-        var patientAttribute;
 
         if (settingsXhr[1] !== 'success') {
             molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
@@ -170,43 +164,12 @@ $.when($,
             }
         }
 
-        function getAttributeFromList(attributesString) {
-            var result;
-            var attrs = getSelectedEntityMeta().attributes;
-            var list = attributesString.split(",");
-            for (var item in list) {
-                result = attrs[list[item]];
-                if (result !== undefined) {
-                    break;
-                }
-            }
-            return result;
-        }
-
         /**
          * @memberOf molgenis.dataexplorer
          */
-        function setGenomeAttributes(start, chromosome, id, patient) {
-            posAttribute = getAttributeFromList(start);
-            chromosomeAttribute = getAttributeFromList(chromosome);
-            identifierAttribute = getAttributeFromList(id);
-            patientAttribute = getAttributeFromList(patient);
-        }
-
-        function getPosAttribute() {
-            return posAttribute
-        }
-
-        function getChromosomeAttribute() {
-            return chromosomeAttribute
-        }
-
-        function getIdentifierAttribute() {
-            return identifierAttribute
-        }
-
-        function getPatientAttribute() {
-            return patientAttribute
+        function setGenomeAttributes(start, chromosome) {
+            posAttribute = start
+            chromosomeAttribute = chromosome
         }
 
         /**
@@ -235,7 +198,7 @@ $.when($,
                                 [{
                                     operator: "NESTED",
                                     nestedRules: [{
-                                        field: chromosomeAttribute.name,
+                                        field: chromosomeAttribute,
                                         operator: "EQUALS",
                                         value: chromosome
                                     }]
@@ -244,7 +207,7 @@ $.when($,
                                 }, {
                                     operator: "NESTED",
                                     nestedRules: [{
-                                        field: posAttribute.name,
+                                        field: posAttribute,
                                         operator: "EQUALS",
                                         value: position
                                     }]
@@ -268,7 +231,7 @@ $.when($,
                                     nestedRules: [{
                                         operator: "NESTED",
                                         nestedRules: [{
-                                            field: chromosomeAttribute.name,
+                                            field: chromosomeAttribute,
                                             operator: "EQUALS",
                                             value: chromosome
                                         }]
@@ -278,13 +241,13 @@ $.when($,
                                 }, {
                                     operator: "NESTED",
                                     nestedRules: [{
-                                        field: posAttribute.name,
+                                        field: posAttribute,
                                         operator: "GREATER_EQUAL",
                                         value: startPosition
                                     }, {
                                         operator: "AND"
                                     }, {
-                                        field: posAttribute.name,
+                                        field: posAttribute,
                                         operator: "LESS_EQUAL",
                                         value: stopPosition
                                     }]

@@ -4,7 +4,6 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.security.acl.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.support.NoOpCache;
-import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -29,13 +28,13 @@ import java.sql.Statement;
 /**
  * TODO Replace AclCache.NoOpCache with another cache implementation
  * TODO Extract ACL table population to other class
+ * TODO get rid of 100 limits in SQL
  */
 @Import(DatabaseConfig.class)
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class AclConfig extends GlobalMethodSecurityConfiguration
 {
-
 	public static final String ROLE_ACL_ADMIN = "ROLE_ACL_ADMIN";
 	private static final String SQL_CREATE_TABLE_ACL_SID =
 			"CREATE TABLE IF NOT EXISTS acl_sid(\n" + "id BIGSERIAL NOT NULL PRIMARY KEY,\n"
@@ -43,7 +42,8 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 					+ "CONSTRAINT unique_uk_1 UNIQUE(sid,principal)\n" + ");";
 	private static final String SQL_CREATE_TABLE_ACL_CLASS =
 			"CREATE TABLE IF NOT EXISTS acl_class(\n" + "id BIGSERIAL NOT NULL PRIMARY KEY,\n"
-					+ "class VARCHAR(100) NOT NULL,\n" + "CONSTRAINT unique_uk_2 UNIQUE(class)\n" + ");";
+					+ "class VARCHAR(100) NOT NULL,\n" + "\"inheritanceAttribute\" VARCHAR(100) NOT NULL,\n"
+					+ "CONSTRAINT unique_uk_2 UNIQUE(class)\n" + ");";
 
 	// acl_object_identity.object_id_identity
 	private static final String SQL_CREATE_TABLE_ACL_OBJECT_IDENTITY =

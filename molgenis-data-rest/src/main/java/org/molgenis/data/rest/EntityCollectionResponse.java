@@ -3,7 +3,6 @@ package org.molgenis.data.rest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
 import java.util.Map;

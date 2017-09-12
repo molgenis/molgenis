@@ -3,12 +3,12 @@ package org.molgenis.ui.menumanager;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeTraverser;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.ui.*;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.util.FileUploadUtils;
+import org.molgenis.web.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -33,20 +33,20 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  */
 @Controller
 @RequestMapping(URI)
-public class MenuManagerController extends MolgenisPluginController
+public class MenuManagerController extends PluginController
 {
 	public static final String ID = "menumanager";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final MenuManagerService menuManagerService;
 	private final FileStore fileStore;
-	private final MolgenisUi molgenisUi;
+	private final Ui molgenisUi;
 	private final AppSettings appSettings;
 
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
 
 	@Autowired
-	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, MolgenisUi molgenisUi,
+	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, Ui molgenisUi,
 			AppSettings appSettings)
 	{
 		super(URI);
@@ -63,23 +63,23 @@ public class MenuManagerController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		List<MolgenisUiMenuItem> menus = new TreeTraverser<MolgenisUiMenuItem>()
+		List<UiMenuItem> menus = new TreeTraverser<UiMenuItem>()
 		{
 			@Override
-			public Iterable<MolgenisUiMenuItem> children(MolgenisUiMenuItem root)
+			public Iterable<UiMenuItem> children(UiMenuItem root)
 			{
-				if (root.getType() == MolgenisUiMenuItemType.MENU)
+				if (root.getType() == UiMenuItemType.MENU)
 				{
-					MolgenisUiMenu menu = (MolgenisUiMenu) root;
+					UiMenu menu = (UiMenu) root;
 					return Iterables.filter(menu.getItems(),
-							molgenisUiMenuItem -> molgenisUiMenuItem.getType() == MolgenisUiMenuItemType.MENU);
+							molgenisUiMenuItem -> molgenisUiMenuItem.getType() == UiMenuItemType.MENU);
 				}
 				else return Collections.emptyList();
 			}
 		}.preOrderTraversal(molgenisUi.getMenu()).toList();
 
-		List<MolgenisPlugin> plugins = Lists.newArrayList(menuManagerService.getPlugins());
-		plugins.sort(Comparator.comparing(MolgenisPlugin::getId));
+		List<Plugin> plugins = Lists.newArrayList(menuManagerService.getPlugins());
+		plugins.sort(Comparator.comparing(Plugin::getId));
 
 		model.addAttribute("menus", menus);
 		model.addAttribute("plugins", plugins);

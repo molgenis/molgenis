@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class Script extends StaticEntity
 		set(CONTENT, content);
 	}
 
+	@Nullable
 	public String getResultFileExtension()
 	{
 		return getString(RESULT_FILE_EXTENSION);

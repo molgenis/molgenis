@@ -3,6 +3,7 @@ package org.molgenis.bootstrap.populate;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.SettingsPopulator;
 import org.molgenis.script.ScriptTypePopulator;
+import org.molgenis.web.bootstrap.PluginPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class RepositoryPopulator
 		}
 
 		LOG.trace("Populating plugin entities ...");
-		pluginPopulator.populate();
+		pluginPopulator.populate(event.getApplicationContext());
 		LOG.trace("Populated plugin entities");
 
 		LOG.trace("Populating settings entities ...");
@@ -89,7 +90,7 @@ public class RepositoryPopulator
 		if (!databasePopulated)
 		{
 			LOG.trace("Populating database permissions ...");
-			permissionPopulator.populate();
+			permissionPopulator.populate(event.getApplicationContext());
 			LOG.trace("Populated database with permissions");
 		}
 	}

@@ -3,8 +3,8 @@ package org.molgenis.data;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -189,7 +189,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 
 	private void validateCurrentUserPermission(EntityType entityType, Permission permission)
 	{
-		boolean granted = permissionService.hasPermissionOnEntityType(entityType.getId(), permission);
+		boolean granted = permissionService.hasPermissionOnEntityType(entityType, permission);
 		if (!granted)
 		{
 			throw new MolgenisDataAccessException(

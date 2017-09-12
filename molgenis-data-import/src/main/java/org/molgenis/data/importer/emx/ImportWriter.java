@@ -15,11 +15,11 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.HugeSet;
@@ -113,11 +113,10 @@ public class ImportWriter
 
 	private void validateEntityTypePermission(EntityType entityType)
 	{
-		String entityTypeName = entityType.getId();
-		if (!permissionService.hasPermissionOnEntityType(entityTypeName, Permission.READ))
+		if (!permissionService.hasPermissionOnEntityType(entityType, Permission.READ))
 		{
-			throw new MolgenisValidationException(
-					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Permission denied on existing entity type [%s]", entityType.getId())));
 		}
 	}
 

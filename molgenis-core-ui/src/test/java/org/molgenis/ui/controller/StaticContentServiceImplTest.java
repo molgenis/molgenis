@@ -81,18 +81,22 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void testIsCurrentUserCanEditWritePermission()
 	{
 		String key = "key";
-		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(true).getMock();
+		StaticContent staticContent = mock(StaticContent.class);
 		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
 		assertTrue(staticContentServiceImpl.isCurrentUserCanEdit(key));
+		//		StaticContent staticContent = mock(StaticContent.class).isWritable()).thenReturn(true).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
 	@Test
 	public void testIsCurrentUserCanEditReadPermission()
 	{
 		String key = "key";
-		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(false).getMock();
+		StaticContent staticContent = mock(StaticContent.class);
 		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
 		assertFalse(staticContentServiceImpl.isCurrentUserCanEdit(key));
+		//		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(false).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
 	@Test
@@ -108,18 +112,22 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void testCheckPermissionWritePermission()
 	{
 		String key = "key";
-		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(true).getMock();
+		StaticContent staticContent = mock(StaticContent.class);
 		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
 		staticContentServiceImpl.checkPermissions(key); // no exception == test success
+		//		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(true).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void testCheckPermissionReadPermission()
 	{
 		String key = "key";
-		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(false).getMock();
+		StaticContent staticContent = mock(StaticContent.class);
 		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
 		staticContentServiceImpl.checkPermissions(key);
+		//		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(false).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)

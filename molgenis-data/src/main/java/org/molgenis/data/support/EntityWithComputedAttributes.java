@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.ExpressionEvaluatorFactory.createExpressionEvaluator;
@@ -209,18 +208,6 @@ public class EntityWithComputedAttributes implements Entity
 	public void set(Entity values)
 	{
 		decoratedEntity.set(values);
-	}
-
-	@Override
-	public void setWritable(boolean writable)
-	{
-		decoratedEntity.setWritable(writable);
-	}
-
-	@Override
-	public boolean isWritable()
-	{
-		return decoratedEntity.isWritable();
 	}
 
 	@Override

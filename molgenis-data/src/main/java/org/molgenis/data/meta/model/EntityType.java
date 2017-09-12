@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -201,6 +202,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return entity description
 	 */
+	@Nullable
 	public String getDescription()
 	{
 		return getString(DESCRIPTION);
@@ -211,6 +213,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return entity description
 	 */
+	@Nullable
 	public String getDescription(String languageCode)
 	{
 		String i18nDescription = getString(getI18nAttributeName(DESCRIPTION, languageCode));
@@ -250,6 +253,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return package
 	 */
+	@Nullable
 	public Package getPackage()
 	{
 		return getEntity(PACKAGE, Package.class);
@@ -428,6 +432,7 @@ public class EntityType extends StaticEntity
 	 *
 	 * @return parent entity
 	 */
+	@Nullable
 	public EntityType getExtends()
 	{
 		return getEntity(EXTENDS, EntityType.class);
@@ -703,30 +708,6 @@ public class EntityType extends StaticEntity
 		return getInt(INDEXING_DEPTH);
 	}
 
-	public EntityType setEntityLevelSecurity(boolean entityLevelSecurity)
-	{
-		set(IS_ENTITY_LEVEL_SECURITY, entityLevelSecurity);
-		return this;
-	}
-
-	public boolean isEntityLevelSecurity()
-	{
-		Boolean entityLevelSecurity = getBoolean(IS_ENTITY_LEVEL_SECURITY);
-		return entityLevelSecurity != null ? entityLevelSecurity : false;
-	}
-
-	public EntityType setEntityLevelSecurityInheritance(Attribute attribute)
-	{
-		set(ENTITY_LEVEL_SECURITY_INHERITANCE, attribute != null ? attribute.getName() : null);
-		return this;
-	}
-
-	public Attribute getEntityLevelSecurityInheritance()
-	{
-		String attributeName = getString(ENTITY_LEVEL_SECURITY_INHERITANCE);
-		return attributeName != null ? getAttribute(attributeName) : null;
-	}
-
 	public void setReadOnly(boolean readOnly)
 	{
 		this.readOnly = readOnly;
@@ -799,7 +780,6 @@ public class EntityType extends StaticEntity
 	{
 		setAbstract(false);
 		setIndexingDepth(1);
-		setEntityLevelSecurity(false);
 	}
 
 	private Map<String, Attribute> getCachedOwnAttrs()

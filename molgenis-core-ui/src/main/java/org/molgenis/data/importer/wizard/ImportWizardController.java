@@ -5,10 +5,10 @@ import org.molgenis.data.importer.*;
 import org.molgenis.data.support.Href;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileExtensionUtils;
+import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 public class ImportWizardController extends AbstractWizardController
 {
 	public static final String ID = "importwizard";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final UploadWizardPage uploadWizardPage;
 	private final OptionsWizardPage optionsWizardPage;
