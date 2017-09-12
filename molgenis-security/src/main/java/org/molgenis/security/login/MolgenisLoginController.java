@@ -7,8 +7,8 @@ import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +31,7 @@ public class MolgenisLoginController
 
 	public static final String VIEW_LOGIN = "view-login";
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String getLoginPage(Model model, HttpSession session)
 	{
 		if (session.getAttribute(SESSION_EXPIRED_SESSION_ATTRIBUTE) != null)
@@ -42,7 +42,7 @@ public class MolgenisLoginController
 		return VIEW_LOGIN;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, params = "error")
+	@GetMapping(params = "error")
 	public String getLoginErrorPage(Model model, HttpServletRequest request, HttpServletResponse response)
 	{
 		String errorMessage;

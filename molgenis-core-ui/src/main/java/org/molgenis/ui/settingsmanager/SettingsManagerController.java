@@ -2,10 +2,10 @@ package org.molgenis.ui.settingsmanager;
 
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import static org.molgenis.ui.settingsmanager.SettingsManagerController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)
@@ -19,7 +19,7 @@ public class SettingsManagerController extends PluginController
 		super(URI);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init()
 	{
 		return "view-settingsmanager";

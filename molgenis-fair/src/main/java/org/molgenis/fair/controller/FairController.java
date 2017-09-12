@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.fair.controller.FairController.BASE_URI;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 /**
  * Serves metadata for the molgenis FAIR DataPoint.
@@ -48,7 +47,7 @@ public class FairController
 		return ServletUriComponentsBuilder.fromCurrentContextPath().path(BASE_URI);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE)
+	@GetMapping(produces = TEXT_TURTLE_VALUE)
 	@ResponseBody
 	@RunAsSystem
 	public Model getMetadata()
@@ -58,7 +57,7 @@ public class FairController
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}")
+	@GetMapping(produces = TEXT_TURTLE_VALUE, value = "/{catalogID}")
 	@ResponseBody
 	@RunAsSystem
 	public Model getCatalog(@PathVariable("catalogID") String catalogID)
@@ -72,7 +71,7 @@ public class FairController
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}/{datasetID}")
+	@GetMapping(produces = TEXT_TURTLE_VALUE, value = "/{catalogID}/{datasetID}")
 	@ResponseBody
 	@RunAsSystem
 	public Model getDataset(@PathVariable("catalogID") String catalogID, @PathVariable("datasetID") String datasetID)
@@ -82,7 +81,7 @@ public class FairController
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
-	@RequestMapping(method = GET, produces = TEXT_TURTLE_VALUE, value = "/{catalogID}/{datasetID}/{distributionID}")
+	@GetMapping(produces = TEXT_TURTLE_VALUE, value = "/{catalogID}/{datasetID}/{distributionID}")
 	@ResponseBody
 	@RunAsSystem
 	public Model getDistribution(@PathVariable("catalogID") String catalogID,

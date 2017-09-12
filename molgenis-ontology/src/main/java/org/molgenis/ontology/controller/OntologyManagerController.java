@@ -5,8 +5,9 @@ import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Collections;
@@ -31,21 +32,21 @@ public class OntologyManagerController extends PluginController
 		super(URI);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(Model model) throws Exception
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return VIEW_ONTOLOGY_MANAGER;
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	public String delete(Model model) throws Exception
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return VIEW_ONTOLOGY_MANAGER;
 	}
 
-	@RequestMapping(value = "/ontology", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/ontology", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> getAllOntologies()
 	{
