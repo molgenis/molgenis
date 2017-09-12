@@ -7,15 +7,16 @@
     <div>
       <p>entityType: {{$route.params.entityType}}</p>
       <p>id: {{$route.params.id}}</p>
+      <code v-if="acl">{{acl | json}}</code>
       <p>
-        <router-link :to="'/resource/sys_md_EntityType/sys_md_EntityType#'">click?</router-link>
+        <router-link :to="'/resource/sys_md_Package/sys'">click?</router-link>
       </p>
     </div>
   </div>
 </template>
 
 <script>
-  import { mapActions } from 'vuex'
+  import { mapActions, mapState } from 'vuex'
   import {GET_ACL} from '../store/actions'
 
   export default {
@@ -23,22 +24,23 @@
     methods: {
       ...mapActions({
         getAcl: GET_ACL
-      }),
-      test () {
-        console.log('test')
-      }
+      })
     },
-    computed: {},
+    computed: {
+      ...mapState(['acl'])
+    },
     components: {},
-    filters: {},
-    beforeRouteUpdate (to, from, next) {
-      this.test()
-
-      next()
+    mounted () {
+      this.getAcl()
     },
     watch: {
       '$route' (to, from) {
         this.getAcl()
+      }
+    },
+    filters: {
+      json (object) {
+        return JSON.stringify(object, null, 2)
       }
     }
   }
