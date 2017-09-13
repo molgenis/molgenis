@@ -2,7 +2,6 @@ package org.molgenis.file;
 
 import org.molgenis.data.DataService;
 import org.molgenis.file.model.FileMeta;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -28,7 +27,6 @@ public class FileDownloadController
 	private final FileStore fileStore;
 	private final DataService dataService;
 
-	@Autowired
 	public FileDownloadController(FileStore fileStore, DataService dataService)
 	{
 		this.fileStore = fileStore;

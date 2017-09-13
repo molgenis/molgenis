@@ -13,7 +13,6 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
@@ -35,7 +34,6 @@ public class UnitResolverImpl implements UnitResolver
 
 	private final OntologyService ontologyService;
 
-	@Autowired
 	public UnitResolverImpl(OntologyService ontologyService)
 	{
 		this.ontologyService = requireNonNull(ontologyService);

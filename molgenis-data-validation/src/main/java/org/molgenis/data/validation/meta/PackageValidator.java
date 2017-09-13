@@ -8,7 +8,6 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -23,7 +22,6 @@ public class PackageValidator
 
 	private final static Logger LOG = LoggerFactory.getLogger(PackageValidator.class);
 
-	@Autowired
 	public PackageValidator(SystemPackageRegistry systemPackageRegistry)
 	{
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);

@@ -3,7 +3,6 @@ package org.molgenis.r;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
 import org.molgenis.script.ScriptUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,7 +17,6 @@ public class RScriptRunner implements ScriptRunner
 
 	private final RScriptExecutor rScriptExecutor;
 
-	@Autowired
 	public RScriptRunner(RScriptExecutor rScriptExecutor)
 	{
 		this.rScriptExecutor = requireNonNull(rScriptExecutor);

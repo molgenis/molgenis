@@ -10,7 +10,6 @@ import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.script.ScriptRunnerRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +34,6 @@ public class RegistryBootstrapper
 	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
 	private final JobFactoryRegistrar jobFactoryRegistrar;
 
-	@Autowired
 	public RegistryBootstrapper(RepositoryCollectionBootstrapper repoCollectionBootstrapper,
 			SystemEntityTypeRegistrar systemEntityTypeRegistrar, SystemPackageRegistrar systemPackageRegistrar,
 			EntityFactoryRegistrar entityFactoryRegistrar,

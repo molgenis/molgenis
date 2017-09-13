@@ -1,7 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
 import org.molgenis.file.FileStore;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -18,7 +17,6 @@ public class FileStoreDownloadImpl implements FileStoreDownload
 {
 	private final FileStore fileStore;
 
-	@Autowired
 	public FileStoreDownloadImpl(FileStore fileStore)
 	{
 		this.fileStore = fileStore;

@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -18,10 +17,8 @@ class AttributeReferenceMapper
 	private final AttributeMetadata attributeMetadata;
 	private final DataService dataService;
 
-	@Autowired
 	AttributeReferenceMapper(AttributeMetadata attributeMetadata, DataService dataService)
 	{
-
 		this.attributeMetadata = requireNonNull(attributeMetadata);
 		this.dataService = requireNonNull(dataService);
 	}

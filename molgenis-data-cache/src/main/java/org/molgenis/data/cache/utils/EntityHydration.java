@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,7 +30,6 @@ public class EntityHydration
 	private static final Logger LOG = LoggerFactory.getLogger(EntityHydration.class);
 	private final EntityManager entityManager;
 
-	@Autowired
 	public EntityHydration(EntityManager entityManager)
 	{
 		this.entityManager = requireNonNull(entityManager);

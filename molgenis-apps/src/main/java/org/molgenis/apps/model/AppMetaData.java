@@ -3,7 +3,6 @@ package org.molgenis.apps.model;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.system.core.FreemarkerTemplateMetaData;
 import org.molgenis.file.model.FileMetaMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -30,7 +29,6 @@ public class AppMetaData extends SystemEntityType
 	private final FileMetaMetaData fileMetaMetaData;
 	private final FreemarkerTemplateMetaData freemarkerTemplateMetaData;
 
-	@Autowired
 	public AppMetaData(FileMetaMetaData fileMetaMetaData, FreemarkerTemplateMetaData freemarkerTemplateMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);

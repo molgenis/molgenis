@@ -2,7 +2,6 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.LazyEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -14,10 +13,8 @@ public class EntityReferenceCreatorImpl implements EntityReferenceCreator
 	private final DataService dataService;
 	private final EntityFactoryRegistry entityFactoryRegistry;
 
-	@Autowired
 	public EntityReferenceCreatorImpl(DataService dataService, EntityFactoryRegistry entityFactoryRegistry)
 	{
-
 		this.dataService = requireNonNull(dataService);
 		this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);
 	}

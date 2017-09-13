@@ -1,7 +1,6 @@
 package org.molgenis.ui;
 
 import org.molgenis.file.FileStore;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +18,6 @@ public class LogoController
 {
 	private final FileStore fileStore;
 
-	@Autowired
 	public LogoController(FileStore fileStore)
 	{
 		this.fileStore = fileStore;

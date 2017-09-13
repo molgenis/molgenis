@@ -5,7 +5,6 @@ import org.molgenis.auth.*;
 import org.molgenis.bootstrap.populate.SystemEntityRegistry;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -30,7 +29,6 @@ public class WebAppSystemEntityRegistry implements SystemEntityRegistry
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final GroupAuthorityFactory groupAuthorityFactory;
 
-	@Autowired
 	public WebAppSystemEntityRegistry(DataService dataService, UserAuthorityFactory userAuthorityFactory,
 			GroupAuthorityFactory groupAuthorityFactory)
 	{

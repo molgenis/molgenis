@@ -21,7 +21,6 @@ public class JavaMailPropertyType extends SystemEntityType
 	private final PropertyType propertyType;
 	public static final String MAIL_SETTINGS_REF = "mailSettings";
 
-	@Autowired
 	public JavaMailPropertyType(MailPackage mailPackage, PropertyType propertyType)
 	{
 		super(SIMPLE_NAME, MailPackage.PACKAGE_MAIL);

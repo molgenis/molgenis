@@ -2,7 +2,6 @@ package org.molgenis.migrate.version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,6 @@ public class MolgenisVersionService
 
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
 
-	@Autowired
 	public MolgenisVersionService(DataSource dataSource)
 	{
 		if (MigrationUtils.getVersion() == null)

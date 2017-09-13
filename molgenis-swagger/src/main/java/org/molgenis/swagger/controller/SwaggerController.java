@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +35,6 @@ public class SwaggerController extends PluginController
 	private final MetaDataService metaDataService;
 	private final TokenService tokenService;
 
-	@Autowired
 	public SwaggerController(MetaDataService metaDataService, TokenService tokenService) throws IOException
 	{
 		super(URI);

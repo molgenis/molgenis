@@ -19,7 +19,6 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +48,6 @@ public class StandardsRegistryController extends PluginController
 	private final PermissionService permissionService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
 
-	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
 			PermissionService permissionService, TagService<LabeledResource, LabeledResource> tagService,
 			MetaDataSearchService metaDataSearchService)

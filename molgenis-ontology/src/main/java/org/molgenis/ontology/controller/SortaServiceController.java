@@ -43,7 +43,6 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -112,7 +111,6 @@ public class SortaServiceController extends PluginController
 
 	private static final Logger LOG = LoggerFactory.getLogger(SortaServiceController.class);
 
-	@Autowired
 	public SortaServiceController(OntologyService ontologyService, SortaService sortaService,
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
 			FileStore fileStore, PermissionService permissionService, DataService dataService,

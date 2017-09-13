@@ -9,7 +9,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +38,6 @@ public class JobBootstrapper
 	private static final Logger LOGGER = LoggerFactory.getLogger(JobBootstrapper.class);
 
 	@Lazy
-	@Autowired
 	public JobBootstrapper(SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService,
 			JobScheduler jobScheduler, List<ScheduledJobType> scheduledJobTypes)
 	{

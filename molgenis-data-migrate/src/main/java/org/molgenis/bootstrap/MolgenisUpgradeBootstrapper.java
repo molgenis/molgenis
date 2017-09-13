@@ -2,7 +2,6 @@ package org.molgenis.bootstrap;
 
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.framework.MolgenisUpgradeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -15,7 +14,6 @@ public class MolgenisUpgradeBootstrapper
 {
 	private final MolgenisUpgradeService upgradeService;
 
-	@Autowired
 	public MolgenisUpgradeBootstrapper(MolgenisUpgradeService upgradeService)
 	{
 		this.upgradeService = requireNonNull(upgradeService);

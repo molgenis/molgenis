@@ -10,7 +10,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.support.PartialEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -41,7 +40,6 @@ public class EntityManagerImpl implements EntityManager
 	private final EntityPopulator entityPopulator;
 	private final EntityReferenceCreator entityReferenceCreator;
 
-	@Autowired
 	public EntityManagerImpl(DataService dataService, EntityFactoryRegistry entityFactoryRegistry,
 			EntityPopulator entityPopulator, EntityReferenceCreator entityReferenceCreator)
 	{
