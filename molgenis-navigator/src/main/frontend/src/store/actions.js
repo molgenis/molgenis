@@ -10,12 +10,13 @@ export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
 export const RESET_STATE = '__RESET_STATE__'
 export const GET_STATE_FOR_PACKAGE = '__GET_STATE_FOR_PACKAGE__'
 export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
+export const GET_ENTITY_PACKAGES = '__GET_ENTITY_PACKAGES__'
 
 const SYS_PACKAGE_ID = 'sys'
 
 /**
  * Resets the entire state using the given packages as the package state.
- * Only top level packages are set
+ * Only top level packages are set.
  *
  * @param commit, reference to mutation function
  * @param packages, the complete list of packages
@@ -171,6 +172,19 @@ export default {
   [RESET_STATE] ({commit}: { commit: Function }) {
     api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
       resetToHome(commit, filterNonVisiblePackages(response.items))
+    }, error => {
+      commit(SET_ERROR, error)
+    })
+  },
+  [GET_ENTITY_PACKAGES] ({commit, dispatch}: { commit: Function, dispatch: Function }, lookupId: string) {
+    api.get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
+      // At the moment each entity is stored in either a single package, or no package at all
+      if (response.items.length > 0) {
+        const entityType = response.items[0]
+        dispatch(GET_STATE_FOR_PACKAGE, entityType['package'].id)
+      } else {
+        dispatch(RESET_STATE)
+      }
     }, error => {
       commit(SET_ERROR, error)
     })

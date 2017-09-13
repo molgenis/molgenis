@@ -1,6 +1,6 @@
 import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
-import actions, { GET_ENTITIES_IN_PACKAGE } from 'src/store/actions'
+import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, RESET_STATE } from 'src/store/actions'
 import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from 'src/store/mutations'
 import utils from '@molgenis/molgenis-vue-test-utils'
 
@@ -428,6 +428,73 @@ describe('actions', () => {
       }
 
       utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
+    })
+  })
+
+  describe('GET_ENTITY_PACKAGES', () => {
+    it('should find the package id given a entityId', done => {
+      const entityId = 'my-entity-id'
+      const packageId = 'my-package-id'
+      const entity = {
+        'id': entityId,
+        'label': 'my entity in a package',
+        'package': {
+          id: packageId
+        }
+      }
+
+      const response = {
+        items: [entity]
+      }
+
+      const get = td.function('api.get')
+      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenResolve(response)
+      td.replace(api, 'get', get)
+
+      const options = {
+        payload: entityId,
+        expectedActions: [
+          {type: GET_STATE_FOR_PACKAGE, payload: packageId}
+        ]
+      }
+
+      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
+    })
+
+    it('should reset the state if no package could be found', done => {
+      const entityId = 'my-entity-id'
+      const response = { items: [] }
+      const get = td.function('api.get')
+
+      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenResolve(response)
+      td.replace(api, 'get', get)
+
+      const options = {
+        payload: entityId,
+        expectedActions: [
+          {type: RESET_STATE}
+        ]
+      }
+
+      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
+    })
+
+    it('should call the SET_ERROR mutation in case the rest request fails', done => {
+      const entityId = 'my-entity-id'
+      const error = 'failed to get'
+
+      const get = td.function('api.get')
+      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenReject(error)
+      td.replace(api, 'get', get)
+
+      const options = {
+        payload: entityId,
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
+
+      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
     })
   })
 })
