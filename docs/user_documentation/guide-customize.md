@@ -218,11 +218,12 @@ Missing translations will show up in English in the user interface.
 3. Push the plus icon.
 4. Fill in the form according to which plugin you would like to add a description to.
 
-Example for the importwizard plugin
+Example for the importwizard plugin, the pluginId is 'importwizard'. 
+The plugin ID can be found in the URL, the sys_Plugin table, or in the menu manager.
 
 <code>
-    msgid: importwizard_description_text
-    namespace: importwizard
+    msgid: [pluginId]_description_text
+    namespace: [pluginId]
     description: the i18n entry for the importwizard description text
     en: Import wizard. Use the EMX format to create excel files for import
 </code>
