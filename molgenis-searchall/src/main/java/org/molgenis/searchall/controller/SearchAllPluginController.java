@@ -6,11 +6,11 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.searchall.controller.SearchAllPluginController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)
@@ -35,7 +35,7 @@ public class SearchAllPluginController extends PluginController
 		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
-	@RequestMapping(value = "/**", method = GET)
+	@GetMapping("/**")
 	public String init(Model model)
 	{
 		model.addAttribute("baseUrl", menuReaderService.getMenu().findMenuItemPath(SEARCHALL));

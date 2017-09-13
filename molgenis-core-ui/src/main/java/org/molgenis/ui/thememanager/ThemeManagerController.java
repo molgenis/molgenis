@@ -18,7 +18,6 @@ import java.io.InputStream;
 import static java.util.Collections.singletonList;
 import static org.molgenis.ui.thememanager.ThemeManagerController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)
@@ -36,7 +35,7 @@ public class ThemeManagerController extends PluginController
 		this.styleService = styleService;
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		if (styleService.getSelectedStyle() != null)
@@ -50,7 +49,7 @@ public class ThemeManagerController extends PluginController
 	 * Set a new bootstrap theme
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	@PostMapping(value = "/set-bootstrap-theme", produces = "application/json", consumes = "application/json")
 	public @ResponseBody
 	void setBootstrapTheme(@Valid @RequestBody String styleName)
 	{
@@ -62,7 +61,7 @@ public class ThemeManagerController extends PluginController
 	 * It is mandatory to pass a bootstrap3 style file but optional to pass a bootstrap 4 style file
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@RequestMapping(value = "/add-bootstrap-theme", method = RequestMethod.POST)
+	@PostMapping(value = "/add-bootstrap-theme")
 	public @ResponseBody
 	Style addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
 			@RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style)

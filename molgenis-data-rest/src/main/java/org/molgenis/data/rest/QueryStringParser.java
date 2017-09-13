@@ -1,6 +1,5 @@
 package org.molgenis.data.rest;
 
-import cz.jirutka.rsql.parser.RSQLParserException;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -38,7 +37,7 @@ public class QueryStringParser
 		this.molgenisRSQL = molgenisRSQL;
 	}
 
-	public Query<Entity> parseQueryString(Map<String, String[]> parameterMap) throws RSQLParserException
+	public Query<Entity> parseQueryString(Map<String, String[]> parameterMap)
 	{
 		QueryImpl<Entity> q = new QueryImpl<>();
 

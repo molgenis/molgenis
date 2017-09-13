@@ -24,8 +24,6 @@ import java.util.List;
 
 import static org.molgenis.ui.menumanager.MenuManagerController.URI;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Plugin to view and modify the app UI menu
@@ -58,7 +56,7 @@ public class MenuManagerController extends PluginController
 		this.appSettings = appSettings;
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		List<UiMenuItem> menus = new TreeTraverser<UiMenuItem>()
@@ -85,14 +83,14 @@ public class MenuManagerController extends PluginController
 		return "view-menumanager";
 	}
 
-	@RequestMapping(value = "/save", method = POST)
+	@PostMapping("/save")
 	@ResponseStatus(OK)
 	public void save(@Valid @RequestBody Menu molgenisMenu)
 	{
 		menuManagerService.saveMenu(molgenisMenu);
 	}
 
-	@RequestMapping(value = "logo", method = POST)
+	@PostMapping("logo")
 	public void uploadLogo(@Valid @RequestBody File newLogo)
 	{
 		System.out.println(newLogo.getName());
@@ -102,7 +100,7 @@ public class MenuManagerController extends PluginController
 	 * Upload a new molgenis logo
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@RequestMapping(value = "/upload-logo", method = RequestMethod.POST)
+	@PostMapping("/upload-logo")
 	public String uploadLogo(@RequestParam("logo") Part part, Model model) throws IOException
 	{
 		String contentType = part.getContentType();

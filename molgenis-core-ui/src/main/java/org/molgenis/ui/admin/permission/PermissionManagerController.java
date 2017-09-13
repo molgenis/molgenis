@@ -49,7 +49,7 @@ public class PermissionManagerController extends PluginController
 		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("users",
@@ -62,35 +62,35 @@ public class PermissionManagerController extends PluginController
 		return "view-permissionmanager";
 	}
 
-	@RequestMapping(value = "/plugin/group/{groupId}", method = RequestMethod.GET)
+	@GetMapping("/plugin/group/{groupId}")
 	@ResponseBody
 	public Permissions getGroupPluginPermissions(@PathVariable String groupId)
 	{
 		return pluginPermissionManagerService.getGroupPluginPermissions(groupId);
 	}
 
-	@RequestMapping(value = "/entityclass/group/{groupId}", method = RequestMethod.GET)
+	@GetMapping("/entityclass/group/{groupId}")
 	@ResponseBody
 	public Permissions getGroupEntityClassPermissions(@PathVariable String groupId)
 	{
 		return pluginPermissionManagerService.getGroupEntityClassPermissions(groupId);
 	}
 
-	@RequestMapping(value = "/plugin/user/{userId}", method = RequestMethod.GET)
+	@GetMapping("/plugin/user/{userId}")
 	@ResponseBody
 	public Permissions getUserPluginPermissions(@PathVariable String userId)
 	{
 		return pluginPermissionManagerService.getUserPluginPermissions(userId);
 	}
 
-	@RequestMapping(value = "/entityclass/user/{userId}", method = RequestMethod.GET)
+	@GetMapping("/entityclass/user/{userId}")
 	@ResponseBody
 	public Permissions getUserEntityClassPermissions(@PathVariable String userId)
 	{
 		return pluginPermissionManagerService.getUserEntityClassPermissions(userId);
 	}
 
-	@RequestMapping(value = "/update/plugin/group", method = RequestMethod.POST)
+	@PostMapping("/update/plugin/group")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateGroupPluginPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
@@ -112,7 +112,7 @@ public class PermissionManagerController extends PluginController
 		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, groupId);
 	}
 
-	@RequestMapping(value = "/update/entityclass/group", method = RequestMethod.POST)
+	@PostMapping("/update/entityclass/group")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
@@ -133,7 +133,7 @@ public class PermissionManagerController extends PluginController
 		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, groupId);
 	}
 
-	@RequestMapping(value = "/update/plugin/user", method = RequestMethod.POST)
+	@PostMapping("/update/plugin/user")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserPluginPermissions(@RequestParam String userId, WebRequest webRequest)
 	{
@@ -154,7 +154,7 @@ public class PermissionManagerController extends PluginController
 		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, userId);
 	}
 
-	@RequestMapping(value = "/update/entityclass/user", method = RequestMethod.POST)
+	@PostMapping("/update/entityclass/user")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserEntityClassPermissions(@RequestParam String userId, WebRequest webRequest)
 	{

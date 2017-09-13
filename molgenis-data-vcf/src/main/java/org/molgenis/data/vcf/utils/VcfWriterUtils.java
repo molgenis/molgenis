@@ -95,7 +95,7 @@ public class VcfWriterUtils
 	/**
 	 * Overload of writeToVcf to support a simpler call with only Entity and Writer.
 	 */
-	public static void writeToVcf(Entity vcfEntity, BufferedWriter writer) throws MolgenisDataException, IOException
+	public static void writeToVcf(Entity vcfEntity, BufferedWriter writer) throws IOException
 	{
 		writeToVcf(vcfEntity, new ArrayList<>(), new ArrayList<>(), writer);
 	}
@@ -105,7 +105,7 @@ public class VcfWriterUtils
 	 * attributesToInclude is empty
 	 */
 	public static void writeToVcf(Entity vcfEntity, List<Attribute> addedAttributes, List<String> attributesToInclude,
-			BufferedWriter writer) throws MolgenisDataException, IOException
+			BufferedWriter writer) throws IOException
 	{
 		addStandardFieldsToVcf(vcfEntity, writer);
 		writeInfoData(vcfEntity, writer, addedAttributes, attributesToInclude);
@@ -362,7 +362,7 @@ public class VcfWriterUtils
 		return refEntityInfoFields.toString();
 	}
 
-	private static String getInfoFieldString(Entity vcfEntity, Attribute attribute) throws IOException
+	private static String getInfoFieldString(Entity vcfEntity, Attribute attribute)
 	{
 		String infoFieldValue = null;
 

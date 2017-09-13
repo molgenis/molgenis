@@ -44,7 +44,6 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors)
-			throws MolgenisInvalidFormatException, IOException
 	{
 		super(CsvFileExtensions.getCSV(), cellProcessors);
 		this.file = file;

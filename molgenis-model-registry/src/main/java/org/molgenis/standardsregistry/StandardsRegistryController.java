@@ -29,8 +29,6 @@ import javax.validation.constraints.Min;
 import java.util.*;
 
 import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -64,7 +62,7 @@ public class StandardsRegistryController extends PluginController
 		this.tagService = tagService;
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound,
 			Model model)
 	{
@@ -76,7 +74,7 @@ public class StandardsRegistryController extends PluginController
 		return VIEW_NAME;
 	}
 
-	@RequestMapping(value = "/documentation", method = GET)
+	@GetMapping("/documentation")
 	public String getModelDocumentation(Model model)
 	{
 		List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
@@ -85,7 +83,7 @@ public class StandardsRegistryController extends PluginController
 		return VIEW_NAME_DOCUMENTATION;
 	}
 
-	@RequestMapping(value = "/documentation/{packageName}", method = GET)
+	@GetMapping("/documentation/{packageName}")
 	public String getModelDocumentation(@PathVariable("packageName") String packageName,
 			@RequestParam(value = "embed", required = false) Boolean embed, Model model)
 	{
@@ -95,7 +93,7 @@ public class StandardsRegistryController extends PluginController
 		return VIEW_NAME_DOCUMENTATION_EMBED;
 	}
 
-	@RequestMapping(value = "/search", method = GET)
+	@GetMapping("/search")
 	public String search(@RequestParam("packageSearchValue") String packageSearchValue, Model model)
 	{
 		Gson gson = new Gson();
@@ -113,7 +111,7 @@ public class StandardsRegistryController extends PluginController
 		return VIEW_NAME;
 	}
 
-	@RequestMapping(value = "/search", method = POST)
+	@PostMapping("/search")
 	@ResponseBody
 	public PackageSearchResponse search(@Valid @RequestBody PackageSearchRequest packageSearchRequest, Model model)
 	{
@@ -170,7 +168,7 @@ public class StandardsRegistryController extends PluginController
 		return packageSearchResponse;
 	}
 
-	@RequestMapping(value = "/details", method = GET)
+	@GetMapping("/details")
 	public String showView(@RequestParam(value = "package", required = false) String selectedPackageName, Model model)
 	{
 		if (selectedPackageName == null)
@@ -185,7 +183,7 @@ public class StandardsRegistryController extends PluginController
 		return VIEW_NAME_DETAILS;
 	}
 
-	@RequestMapping(value = "/uml", method = GET)
+	@GetMapping("/uml")
 	public String getUml(@RequestParam(value = "package") String selectedPackageName, Model model)
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
@@ -198,7 +196,7 @@ public class StandardsRegistryController extends PluginController
 		return "view-standardsregistry_uml";
 	}
 
-	@RequestMapping(value = "/getPackage", method = GET)
+	@GetMapping("/getPackage")
 	@ResponseBody
 	public PackageResponse getPackage(@RequestParam(value = "package") String packageName)
 	{
@@ -211,7 +209,7 @@ public class StandardsRegistryController extends PluginController
 	}
 
 	/* PACKAGE TREE */
-	@RequestMapping(value = "/getTreeData", method = GET)
+	@GetMapping("/getTreeData")
 	@ResponseBody
 	public Collection<PackageTreeNode> getTree(@RequestParam(value = "package") String packageName)
 	{

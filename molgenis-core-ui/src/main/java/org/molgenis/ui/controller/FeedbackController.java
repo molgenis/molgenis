@@ -19,11 +19,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class FeedbackController extends AbstractStaticContentController
 	 * Serves feedback form.
 	 */
 	@Override
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(final Model model)
 	{
 		super.init(model);
@@ -84,7 +84,7 @@ public class FeedbackController extends AbstractStaticContentController
 	 *
 	 * @throws CaptchaException if no valid captcha is supplied
 	 */
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	public String submitFeedback(@Valid FeedbackForm form, @Valid @ModelAttribute CaptchaRequest captchaRequest)
 			throws CaptchaException
 	{
@@ -100,11 +100,6 @@ public class FeedbackController extends AbstractStaticContentController
 			mailSender.send(message);
 			form.setSubmitted(true);
 			captchaService.removeCaptcha();
-		}
-		catch (MessagingException e)
-		{
-			LOG.warn("Unable to create mime message for feedback form.", e);
-			form.setErrorMessage(MESSAGING_EXCEPTION_MESSAGE);
 		}
 		catch (MailAuthenticationException e)
 		{
@@ -122,7 +117,7 @@ public class FeedbackController extends AbstractStaticContentController
 	/**
 	 * Creates a MimeMessage based on a FeedbackForm.
 	 */
-	private SimpleMailMessage createFeedbackMessage(FeedbackForm form) throws MessagingException
+	private SimpleMailMessage createFeedbackMessage(FeedbackForm form)
 	{
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setTo(userService.getSuEmailAddresses().toArray(new String[] {}));

@@ -66,7 +66,7 @@ public class AnnotatorController
 	 *
 	 * @return annotatorMap
 	 */
-	@RequestMapping(value = "/get-available-annotators", method = RequestMethod.POST)
+	@PostMapping("/get-available-annotators")
 	@ResponseBody
 	public Map<String, Map<String, Object>> getMapOfAvailableAnnotators(@RequestBody String dataSetName)
 	{
@@ -80,7 +80,7 @@ public class AnnotatorController
 	 *
 	 * @return repositoryName
 	 */
-	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
+	@PostMapping("/annotate-data")
 	@ResponseBody
 	public String annotateData(HttpServletRequest request,
 			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,

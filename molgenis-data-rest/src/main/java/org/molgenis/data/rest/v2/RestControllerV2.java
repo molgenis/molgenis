@@ -60,7 +60,6 @@ import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @Controller
 @RequestMapping(BASE_URI)
@@ -144,7 +143,7 @@ public class RestControllerV2
 	}
 
 	@Autowired
-	@RequestMapping(value = "/version", method = GET)
+	@GetMapping("/version")
 	@ResponseBody
 	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
 			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
@@ -165,7 +164,7 @@ public class RestControllerV2
 	/**
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = GET)
+	@GetMapping("/{entityTypeId}/{id:.+}")
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
@@ -177,7 +176,7 @@ public class RestControllerV2
 	/**
 	 * Tunnel retrieveEntity through a POST request
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = POST, params = "_method=GET")
+	@PostMapping(value = "/{entityTypeId}/{id:.+}", params = "_method=GET")
 	@ResponseBody
 	public Map<String, Object> retrieveEntityPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
@@ -205,7 +204,7 @@ public class RestControllerV2
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId:^(?!i18n).+}/{id:.+}", method = DELETE)
+	@DeleteMapping("/{entityTypeId:^(?!i18n).+}/{id:.+}")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId)
 	{
@@ -225,7 +224,7 @@ public class RestControllerV2
 	/**
 	 * Delete multiple entities of the given entity type
 	 */
-	@RequestMapping(value = "/{entityTypeId}", method = DELETE)
+	@DeleteMapping("/{entityTypeId}")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestBody @Valid EntityCollectionDeleteRequestV2 request)
@@ -244,7 +243,7 @@ public class RestControllerV2
 	/**
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
 	 */
-	@RequestMapping(value = "/{entityTypeId}", method = GET)
+	@GetMapping("/{entityTypeId}")
 	@ResponseBody
 	public EntityCollectionResponseV2 retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
@@ -252,7 +251,7 @@ public class RestControllerV2
 		return createEntityCollectionResponse(entityTypeId, request, httpRequest);
 	}
 
-	@RequestMapping(value = "/{entityTypeId}", method = POST, params = "_method=GET")
+	@PostMapping(value = "/{entityTypeId}", params = "_method=GET")
 	@ResponseBody
 	public EntityCollectionResponseV2 retrieveEntityCollectionPost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
@@ -263,7 +262,7 @@ public class RestControllerV2
 	/**
 	 * Retrieve attribute meta data
 	 */
-	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{entityTypeId}/meta/{attributeName}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AttributeResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName)
@@ -271,7 +270,7 @@ public class RestControllerV2
 		return createAttributeResponse(entityTypeId, attributeName);
 	}
 
-	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{entityTypeId}/meta/{attributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AttributeResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName)
@@ -288,7 +287,7 @@ public class RestControllerV2
 	 * @return EntityCollectionCreateResponseBodyV2
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}", method = POST, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
@@ -353,7 +352,7 @@ public class RestControllerV2
 	 * @return String name of the new entity
 	 */
 	@Transactional
-	@RequestMapping(value = "copy/{entityTypeId}", method = POST, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "copy/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String copyEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestBody @Valid CopyEntityRequestV2 request, HttpServletResponse response) throws Exception
@@ -407,7 +406,7 @@ public class RestControllerV2
 	 * @param request      EntityCollectionCreateRequestV2
 	 * @param response     HttpServletResponse
 	 */
-	@RequestMapping(value = "/{entityTypeId}", method = PUT)
+	@PutMapping("/{entityTypeId}")
 	public synchronized void updateEntities(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
@@ -443,7 +442,7 @@ public class RestControllerV2
 	 * @param request       EntityCollectionBatchRequestV2
 	 * @param response      HttpServletResponse
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{attributeName}", method = PUT)
+	@PutMapping("/{entityTypeId}/{attributeName}")
 	@ResponseStatus(OK)
 	public synchronized void updateAttribute(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName,
@@ -510,7 +509,7 @@ public class RestControllerV2
 	/**
 	 * Get all l10n resource strings in the language of the current user
 	 */
-	@RequestMapping(value = "/i18n", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/i18n", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, String> getL10nStrings()
 	{
@@ -529,7 +528,7 @@ public class RestControllerV2
 	 * Get the localization resource strings for a specific language and namespace.
 	 * Will *not* provide fallback values if the specified language is not available.
 	 */
-	@RequestMapping(value = "/i18n/{namespace}/{language}", method = GET, produces = APPLICATION_JSON_VALUE
+	@GetMapping(value = "/i18n/{namespace}/{language}", produces = APPLICATION_JSON_VALUE
 			+ ";charset=UTF-8")
 	@ResponseBody
 	public Map<String, String> getL10nStrings(@PathVariable String namespace, @PathVariable String language)
@@ -540,7 +539,7 @@ public class RestControllerV2
 	/**
 	 * Get a properties file to put on your classpath.
 	 */
-	@RequestMapping(value = "/i18n/{namespace}_{language}.properties", method = GET, produces = TEXT_PLAIN_VALUE
+	@GetMapping(value = "/i18n/{namespace}_{language}.properties", produces = TEXT_PLAIN_VALUE
 			+ ";charset=UTF-8 ")
 	@ResponseBody
 	public String getL10nProperties(@PathVariable String namespace, @PathVariable String language) throws IOException
@@ -558,7 +557,7 @@ public class RestControllerV2
 	 * Used by XHR backend of i18next.
 	 * User needs permissions on the entity to add the values, otherwise they'll only be logged.
 	 */
-	@RequestMapping(value = "/i18n/{namespace}", method = POST)
+	@PostMapping("/i18n/{namespace}")
 	@ResponseStatus(CREATED)
 	public void registerMissingResourceStrings(@PathVariable String namespace, HttpServletRequest request)
 	{
@@ -571,7 +570,7 @@ public class RestControllerV2
 		localizationService.addMissingMessageIDs(namespace, messageIDs);
 	}
 
-	@RequestMapping(value = "/i18n/{namespace}", method = DELETE)
+	@DeleteMapping("/i18n/{namespace}")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteNamespace(@PathVariable String namespace)
 	{

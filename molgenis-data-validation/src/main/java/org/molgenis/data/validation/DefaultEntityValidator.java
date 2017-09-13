@@ -38,7 +38,6 @@ public class DefaultEntityValidator implements EntityValidator
 
 	@Override
 	public void validate(Iterable<? extends Entity> entities, EntityType meta, DatabaseAction dbAction)
-			throws MolgenisValidationException
 	{
 		Set<ConstraintViolation> violations = checkNotNull(entities, meta);
 		violations.addAll(checkUniques(entities, meta, dbAction));

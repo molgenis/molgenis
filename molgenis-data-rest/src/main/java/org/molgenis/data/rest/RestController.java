@@ -70,7 +70,6 @@ import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSettin
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 /**
  * Rest endpoint for the DataService
@@ -121,7 +120,7 @@ public class RestController
 	/**
 	 * Checks if an entity exists.
 	 */
-	@RequestMapping(value = "/{entityTypeId}/exist", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{entityTypeId}/exist", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public boolean entityExists(@PathVariable("entityTypeId") String entityTypeId)
 	{
@@ -143,7 +142,7 @@ public class RestController
 	 *
 	 * @return EntityType
 	 */
-	@RequestMapping(value = "/{entityTypeId}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{entityTypeId}/meta", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityTypeResponse retrieveEntityType(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
@@ -164,7 +163,7 @@ public class RestController
 	 *
 	 * @return EntityType
 	 */
-	@RequestMapping(value = "/{entityTypeId}/meta", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{entityTypeId}/meta", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityTypeResponse retrieveEntityTypePost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid @RequestBody EntityTypeRequest request)
@@ -182,7 +181,7 @@ public class RestController
 	 *
 	 * @return EntityType
 	 */
-	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{entityTypeId}/meta/{attributeName}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AttributeResponse retrieveEntityAttributeMeta(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName,
@@ -200,7 +199,7 @@ public class RestController
 	 *
 	 * @return EntityType
 	 */
-	@RequestMapping(value = "/{entityTypeId}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{entityTypeId}/meta/{attributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AttributeResponse retrieveEntityAttributeMetaPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName, @Valid @RequestBody EntityTypeRequest request)
@@ -218,7 +217,7 @@ public class RestController
 	 * <p>
 	 * /api/v1/person/99 Retrieves a person with id 99
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{entityTypeId}/{id:.+}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
@@ -246,7 +245,7 @@ public class RestController
 	/**
 	 * Same as retrieveEntity (GET) only tunneled through POST.
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{id:.+}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{entityTypeId}/{id:.+}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @Valid @RequestBody EntityTypeRequest request)
@@ -273,7 +272,7 @@ public class RestController
 	 * <p>
 	 * /api/v1/person/99/address
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Object retrieveEntityAttribute(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
@@ -295,7 +294,7 @@ public class RestController
 	 * <p>
 	 * /api/v1/person/99/address
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Object retrieveEntityAttributePost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
@@ -313,7 +312,7 @@ public class RestController
 	 * <p>
 	 * Returns json
 	 */
-	@RequestMapping(value = "/{entityTypeId}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequest request,
@@ -333,7 +332,7 @@ public class RestController
 	 * <p>
 	 * Returns json
 	 */
-	@RequestMapping(value = "/{entityTypeId}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{entityTypeId}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid @RequestBody EntityCollectionRequest request)
@@ -360,7 +359,7 @@ public class RestController
 	 * <p>
 	 * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
 	 */
-	@RequestMapping(value = "/csv/{entityTypeId}", method = GET, produces = "text/csv")
+	@GetMapping(value = "/csv/{entityTypeId}", produces = "text/csv")
 	@ResponseBody
 	public EntityCollection retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestParam(value = "attributes", required = false) String[] attributes, HttpServletRequest req,
@@ -455,7 +454,7 @@ public class RestController
 	 * Creates a new entity from a html form post.
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@PostMapping(value = "/{entityTypeId}", headers = "Content-Type=application/x-www-form-urlencoded")
 	public void createFromFormPost(@PathVariable("entityTypeId") String entityTypeId, HttpServletRequest request,
 			HttpServletResponse response)
 	{
@@ -477,7 +476,7 @@ public class RestController
 	 * Creates a new entity from a html form post.
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}", method = POST, headers = "Content-Type=multipart/form-data")
+	@PostMapping(value = "/{entityTypeId}", headers = "Content-Type=multipart/form-data")
 	public void createFromFormPostMultiPart(@PathVariable("entityTypeId") String entityTypeId,
 			MultipartHttpServletRequest request, HttpServletResponse response)
 	{
@@ -507,7 +506,7 @@ public class RestController
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}", method = POST)
+	@PostMapping("/{entityTypeId}")
 	public void create(@PathVariable("entityTypeId") String entityTypeId, @RequestBody Map<String, Object> entityMap,
 			HttpServletResponse response)
 	{
@@ -525,7 +524,7 @@ public class RestController
 	 * Example url: /api/v1/person/99
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}/{id}", method = PUT)
+	@PutMapping("/{entityTypeId}/{id}")
 	@ResponseStatus(OK)
 	public void update(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId,
 			@RequestBody Map<String, Object> entityMap)
@@ -539,7 +538,7 @@ public class RestController
 	 * Example url: /api/v1/person/99?_method=PUT
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=PUT")
+	@PostMapping(value = "/{entityTypeId}/{id}", params = "_method=PUT")
 	@ResponseStatus(OK)
 	public void updatePost(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId,
 			@RequestBody Map<String, Object> entityMap)
@@ -547,7 +546,7 @@ public class RestController
 		updateInternal(entityTypeId, untypedId, entityMap);
 	}
 
-	@RequestMapping(value = "/{entityTypeId}/{id}/{attributeName}", method = PUT)
+	@PutMapping(value = "/{entityTypeId}/{id}/{attributeName}")
 	@ResponseStatus(OK)
 	public void updateAttributePut(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") String untypedId,
@@ -557,7 +556,7 @@ public class RestController
 	}
 
 	// TODO alternative for synchronization, for example by adding updatAttribute methods to the REST api
-	@RequestMapping(value = "/{entityTypeId}/{id}/{attributeName}", method = POST, params = "_method=PUT")
+	@PostMapping(value = "/{entityTypeId}/{id}/{attributeName}", params = "_method=PUT")
 	@ResponseStatus(OK)
 	public synchronized void updateAttribute(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") String untypedId,
@@ -603,7 +602,7 @@ public class RestController
 	 * Example url: /api/v1/person/99?_method=PUT
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=multipart/form-data")
+	@PostMapping(value = "/{entityTypeId}/{id}", params = "_method=PUT", headers = "Content-Type=multipart/form-data")
 	@ResponseStatus(NO_CONTENT)
 	public void updateFromFormPostMultiPart(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, MultipartHttpServletRequest request)
@@ -638,7 +637,7 @@ public class RestController
 	 * Example url: /api/v1/person/99?_method=PUT
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
+	@PostMapping(value = "/{entityTypeId}/{id}", params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
 	public void updateFromFormPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, HttpServletRequest request)
@@ -658,7 +657,7 @@ public class RestController
 	 * Deletes an entity by it's id
 	 */
 	@Transactional
-	@RequestMapping(value = "/{entityTypeId}/{id}", method = DELETE)
+	@DeleteMapping("/{entityTypeId}/{id}")
 	@ResponseStatus(NO_CONTENT)
 	public void delete(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId)
 	{
@@ -680,7 +679,7 @@ public class RestController
 	 * <p>
 	 * Example url: /api/v1/person/99?_method=DELETE
 	 */
-	@RequestMapping(value = "/{entityTypeId}/{id}", method = POST, params = "_method=DELETE")
+	@PostMapping(value = "/{entityTypeId}/{id}", params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
 	public void deletePost(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId)
 	{
@@ -690,7 +689,7 @@ public class RestController
 	/**
 	 * Deletes all entities for the given entity name
 	 */
-	@RequestMapping(value = "/{entityTypeId}", method = DELETE)
+	@DeleteMapping("/{entityTypeId}")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteAll(@PathVariable("entityTypeId") String entityTypeId)
 	{
@@ -700,7 +699,7 @@ public class RestController
 	/**
 	 * Deletes all entities for the given entity name but tunnels DELETE through POST
 	 */
-	@RequestMapping(value = "/{entityTypeId}", method = POST, params = "_method=DELETE")
+	@PostMapping(value = "/{entityTypeId}", params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteAllPost(@PathVariable("entityTypeId") String entityTypeId)
 	{
@@ -710,7 +709,7 @@ public class RestController
 	/**
 	 * Deletes all entities and entity meta data for the given entity name
 	 */
-	@RequestMapping(value = "/{entityTypeId}/meta", method = DELETE)
+	@DeleteMapping(value = "/{entityTypeId}/meta")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteMeta(@PathVariable("entityTypeId") String entityTypeId)
 	{
@@ -720,7 +719,7 @@ public class RestController
 	/**
 	 * Deletes all entities and entity meta data for the given entity name but tunnels DELETE through POST
 	 */
-	@RequestMapping(value = "/{entityTypeId}/meta", method = POST, params = "_method=DELETE")
+	@PostMapping(value = "/{entityTypeId}/meta", params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteMetaPost(@PathVariable("entityTypeId") String entityTypeId)
 	{
@@ -744,7 +743,7 @@ public class RestController
 	 * <p>
 	 * Response: {token: b4fd94dc-eae6-4d9a-a1b7-dd4525f2f75d}
 	 */
-	@RequestMapping(value = "/login", method = POST, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/login", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
 	{
@@ -775,6 +774,12 @@ public class RestController
 			User user = dataService.findOne(USER,
 					new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()), User.class);
 
+			if (user.isChangePassword())
+			{
+				throw new BadCredentialsException(
+						"Unable to log in because a password reset is required. Sign in to the website to reset your password.");
+			}
+
 			// User authenticated, log the user in
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -786,22 +791,12 @@ public class RestController
 
 	private boolean isUser2fa()
 	{
-		boolean userIs2fa = false;
-		if (authenticationSettings.getTwoFactorAuthentication() == ENFORCED)
-		{
-			userIs2fa = true;
-		}
-		else if (authenticationSettings.getTwoFactorAuthentication() == ENABLED)
-		{
-			if (userAccountService.getCurrentUser().isTwoFactorAuthentication())
-			{
-				userIs2fa = true;
-			}
-		}
-		return userIs2fa;
+		return authenticationSettings.getTwoFactorAuthentication() == ENFORCED || (
+				authenticationSettings.getTwoFactorAuthentication() == ENABLED && userAccountService.getCurrentUser()
+																									.isTwoFactorAuthentication());
 	}
 
-	@RequestMapping("/logout")
+	@PostMapping("/logout")
 	@ResponseStatus(OK)
 	public void logout(HttpServletRequest request)
 	{

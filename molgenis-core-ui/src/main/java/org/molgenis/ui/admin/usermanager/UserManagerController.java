@@ -27,7 +27,7 @@ public class UserManagerController extends PluginController
 		this.pluginUserManagerService = pluginUserManagerService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
@@ -38,14 +38,14 @@ public class UserManagerController extends PluginController
 		return "view-usermanager";
 	}
 
-	@RequestMapping(value = "/setViewState/{viewState}", method = RequestMethod.PUT)
+	@PutMapping("/setViewState/{viewState}")
 	@ResponseStatus(HttpStatus.OK)
 	public void setViewState(@PathVariable String viewState, Model model)
 	{
 		model.addAttribute("viewState", viewState);
 	}
 
-	@RequestMapping(value = "/activation", method = RequestMethod.PUT)
+	@PutMapping("/activation")
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
 	ActivationResponse activation(@RequestBody Activation activation)
@@ -169,7 +169,7 @@ public class UserManagerController extends PluginController
 		}
 	}
 
-	@RequestMapping(value = "/changeGroupMembership", method = RequestMethod.PUT)
+	@PutMapping("/changeGroupMembership")
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
 	GroupMembershipResponse changeGroupMembership(@RequestBody GroupMembership groupMembership)

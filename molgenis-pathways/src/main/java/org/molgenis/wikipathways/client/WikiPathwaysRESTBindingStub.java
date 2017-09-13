@@ -688,7 +688,6 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
 			throw new RemoteException(e.getMessage(), e.getCause());
 		}
 		return false;
@@ -725,7 +724,6 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
 			throw new RemoteException(e.getMessage(), e.getCause());
 		}
 	}

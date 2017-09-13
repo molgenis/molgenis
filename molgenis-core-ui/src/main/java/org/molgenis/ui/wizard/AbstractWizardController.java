@@ -3,7 +3,9 @@ package org.molgenis.ui.wizard;
 import org.molgenis.web.PluginController;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,8 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 public abstract class AbstractWizardController extends PluginController
 {
@@ -55,7 +55,7 @@ public abstract class AbstractWizardController extends PluginController
 		return wizard;
 	}
 
-	@RequestMapping(value = "/**", method = GET)
+	@GetMapping(value = "/**")
 	public String init(HttpServletRequest request)
 	{
 		onInit(request);
@@ -67,7 +67,7 @@ public abstract class AbstractWizardController extends PluginController
 		// in case you want to do something in the beginning
 	}
 
-	@RequestMapping(value = "/next", method = POST)
+	@PostMapping("/next")
 	public String next(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("wizard") Wizard wizard, BindingResult result, Model model) throws IOException
 	{
@@ -88,7 +88,7 @@ public abstract class AbstractWizardController extends PluginController
 		return VIEW_NAME;
 	}
 
-	@RequestMapping(value = "/previous", method = POST)
+	@PostMapping("/previous")
 	public String previous(HttpServletResponse response, @ModelAttribute("wizard") Wizard wizard) throws IOException
 	{
 		if (wizard.isFirstPage())

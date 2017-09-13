@@ -30,8 +30,7 @@ public class SVGEditor
 	/**
 	 * Creates a new instance of SVGEditor.
 	 */
-	public SVGEditor(File inFile, File outFile)
-			throws FileNotFoundException, XMLStreamException, FactoryConfigurationError
+	public SVGEditor(File inFile, File outFile) throws FactoryConfigurationError
 	{
 		this.inFile = inFile;
 		this.outFile = outFile;

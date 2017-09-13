@@ -1,6 +1,6 @@
 package org.molgenis.oneclickimporter.service;
 
-import org.molgenis.oneclickimporter.service.Impl.AttributeTypeServiceImpl;
+import org.molgenis.oneclickimporter.service.impl.AttributeTypeServiceImpl;
 import org.testng.annotations.Test;
 
 import java.util.List;

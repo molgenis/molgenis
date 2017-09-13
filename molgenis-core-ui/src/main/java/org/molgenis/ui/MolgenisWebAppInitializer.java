@@ -25,16 +25,14 @@ public class MolgenisWebAppInitializer
 			throws ServletException
 	{
 		// no maximum field size provided? default to 32 Mb
-		onStartup(servletContext, appConfig, isDasUsed, 32);
+		onStartup(servletContext, appConfig, 32);
 	}
 
 	/**
 	 * A Molgenis common web application initializer
 	 *
-	 * @param isDasUsed is the molgenis-das module used?
 	 */
-	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed, int maxFileSize)
-			throws ServletException
+	protected void onStartup(ServletContext servletContext, Class<?> appConfig, int maxFileSize)
 	{
 		// Create the 'root' Spring application context
 		AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
@@ -53,8 +51,6 @@ public class MolgenisWebAppInitializer
 		else
 		{
 			final long maxSize = (long) maxFileSize * MB;
-			int loadOnStartup = (isDasUsed ? 2 : 1);
-			dispatcherServlet.setLoadOnStartup(loadOnStartup);
 			dispatcherServlet.addMapping("/");
 			dispatcherServlet.setMultipartConfig(
 					new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));

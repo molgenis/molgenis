@@ -1,6 +1,6 @@
 // @flow
 <template>
-  <div class="container">
+  <div>
 
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
@@ -47,7 +47,7 @@
     <b-table bordered :items="items" :fields="fields" :filter="filter" class="text-left">
       <template slot="label" scope="label">
         <span v-if="label.item.type === 'entity'">
-            <a :href="'/menu/main/dataexplorer?entity=' + label.item.id" target="_blank">
+            <a :href="'/menu/main/dataexplorer?entity=' + label.item.id + '&hideselect=true'">
               <i class="fa fa-list" aria-hidden="true"></i> {{label.item.label}}
             </a>
           </span>
@@ -77,7 +77,7 @@
 
 <script>
   import _ from 'lodash'
-  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE } from '../store/actions'
+  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE, GET_ENTITY_PACKAGES } from '../store/actions'
   import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
   import { Package } from '../store/state'
   import { mapState } from 'vuex'
@@ -145,7 +145,13 @@
       }
     },
     mounted: function () {
-      this.$route.params.package ? this.selectPackage(this.$route.params.package) : this.$store.dispatch(RESET_STATE)
+      const route = this.$route
+      if (route.query.lookup && route.query.lookup !== '') {
+        const lookupEntityId = route.query.lookup
+        this.$store.dispatch(GET_ENTITY_PACKAGES, lookupEntityId)
+      } else {
+        route.params.package ? this.selectPackage(route.params.package) : this.$store.dispatch(RESET_STATE)
+      }
     },
     watch: {
       '$route' (to, from) {
