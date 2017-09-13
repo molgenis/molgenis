@@ -221,12 +221,12 @@ Missing translations will show up in English in the user interface.
 Example for the importwizard plugin, the pluginId is 'importwizard'. 
 The plugin ID can be found in the URL, the sys_Plugin table, or in the menu manager.
 
-<code>
-    msgid: [pluginId]_description_text
-    namespace: [pluginId]
-    description: the i18n entry for the importwizard description text
-    en: Import wizard. Use the EMX format to create excel files for import
-</code>
+```
+	msgid: [pluginId]_description_text
+    	namespace: [pluginId]
+    	description: the i18n entry for the importwizard description text
+    	en: Import wizard. Use the EMX format to create excel files for import
+```
 
 After saving, the importwizard plugin will now have a description at the top when the english language is selected.
 This is an admin only feature and allows the admin to use HTML.
