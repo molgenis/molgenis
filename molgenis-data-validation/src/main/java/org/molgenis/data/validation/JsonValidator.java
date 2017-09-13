@@ -23,7 +23,7 @@ public class JsonValidator
 	 * @return loaded {@link Schema}
 	 * @throws MolgenisDataException if the schema fails to load
 	 */
-	public Schema loadSchema(String schema) throws MolgenisDataException
+	public Schema loadSchema(String schema)
 	{
 		try
 		{
@@ -65,7 +65,7 @@ public class JsonValidator
 	 * @throws MolgenisDataException       if the JSON schema cannot be loaded
 	 * @throws MolgenisValidationException if the JSON string doesn't conform to the schema
 	 */
-	public void validate(String json, String schemaJson) throws MolgenisDataException
+	public void validate(String json, String schemaJson)
 	{
 		Schema schema = loadSchema(schemaJson);
 		validate(json, schema);

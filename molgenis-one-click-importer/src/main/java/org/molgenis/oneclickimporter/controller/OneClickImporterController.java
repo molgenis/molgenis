@@ -30,8 +30,6 @@ import static org.molgenis.oneclickimporter.controller.OneClickImporterControlle
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -60,7 +58,7 @@ public class OneClickImporterController extends PluginController
 		this.jobExecutor = requireNonNull(jobExecutor);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
@@ -73,10 +71,8 @@ public class OneClickImporterController extends PluginController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/upload", method = POST, produces = MediaType.TEXT_HTML_VALUE)
-	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile)
-
-			throws UnknownFileTypeException, IOException, InvalidFormatException
+	@PostMapping(value = "/upload", produces = MediaType.TEXT_HTML_VALUE)
+	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile) throws IOException
 	{
 		String filename = multipartFile.getOriginalFilename();
 		fileStore.store(multipartFile.getInputStream(), filename);

@@ -53,8 +53,6 @@ import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWN
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Controller class for the data explorer.
@@ -112,9 +110,9 @@ public class DataExplorerController extends PluginController
 	 *
 	 * @return the view name
 	 */
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model) throws Exception
+			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model)
 	{
 		StringBuilder message = new StringBuilder("");
 
@@ -174,7 +172,7 @@ public class DataExplorerController extends PluginController
 		}
 	}
 
-	@RequestMapping(value = "/module/{moduleId}", method = GET)
+	@GetMapping("/module/{moduleId}")
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityTypeId,
 			Model model)
 	{
@@ -226,7 +224,7 @@ public class DataExplorerController extends PluginController
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
 
-	@RequestMapping(value = "/copy", method = GET)
+	@GetMapping("/copy")
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
@@ -237,7 +235,7 @@ public class DataExplorerController extends PluginController
 	/**
 	 * Returns modules configuration for this entity based on current user permissions.
 	 */
-	@RequestMapping(value = "/modules", method = GET)
+	@GetMapping("/modules")
 	@ResponseBody
 	public ModulesConfigResponse getModules(@RequestParam("entity") String entityTypeId)
 	{
@@ -324,7 +322,7 @@ public class DataExplorerController extends PluginController
 		return allTracks.values().stream().map(track -> track.toTrackJson()).collect(Collectors.toList());
 	}
 
-	@RequestMapping(value = "/download", method = POST)
+	@PostMapping("/download")
 	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
 			throws IOException
 	{
@@ -365,7 +363,7 @@ public class DataExplorerController extends PluginController
 		return String.format("%s_%s.%s", entityTypeId, timestamp, downloadType == DOWNLOAD_TYPE_CSV ? "csv" : "xlsx");
 	}
 
-	@RequestMapping(value = "/galaxy/export", method = POST)
+	@PostMapping("/galaxy/export")
 	@ResponseStatus(HttpStatus.OK)
 	public void exportToGalaxy(@Valid @RequestBody GalaxyDataExportRequest galaxyDataExportRequest, Model model)
 			throws IOException
@@ -403,9 +401,9 @@ public class DataExplorerController extends PluginController
 	 * @return entity report view
 	 * @throws Exception if an entity name or id is not found
 	 */
-	@RequestMapping(value = "/details", method = POST)
+	@PostMapping("/details")
 	public String viewEntityDetails(@RequestParam(value = "entityTypeId") String entityTypeId,
-			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
+			@RequestParam(value = "entityId") String entityId, Model model)
 	{
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		Object id = getTypedValue(entityId, entityType.getIdAttribute());
@@ -429,7 +427,7 @@ public class DataExplorerController extends PluginController
 	 * @throws Exception                   if an entity name or id is not found
 	 * @throws MolgenisDataAccessException if an EntityType does not exist
 	 */
-	@RequestMapping(value = "/details/{entityTypeId}/{entityId}", method = GET)
+	@GetMapping("/details/{entityTypeId}/{entityId}")
 	public String viewEntityDetailsById(@PathVariable(value = "entityTypeId") String entityTypeId,
 			@PathVariable(value = "entityId") String entityId, Model model) throws Exception
 	{

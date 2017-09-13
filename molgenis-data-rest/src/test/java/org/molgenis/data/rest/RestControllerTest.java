@@ -1,5 +1,7 @@
 package org.molgenis.data.rest;
 
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
@@ -24,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -40,6 +44,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -83,6 +88,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private EntityManager entityManager;
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
 	private MockMvc mockMvc;
 
@@ -185,6 +193,28 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
 								 .build();
+	}
+
+	@Test
+	public void loginPasswordReset() throws Exception
+	{
+		String username = "henk";
+		String password = "123henk";
+
+		Authentication authentication = mock(Authentication.class);
+		when(authentication.isAuthenticated()).thenReturn(true);
+		when(authentication.getName()).thenReturn(username);
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(
+				authentication);
+
+		User user = mock(User.class);
+		when(user.isChangePassword()).thenReturn(true);
+		when(dataService.findOne(USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
+				User.class)).thenReturn(user);
+
+		mockMvc.perform(
+				post(BASE_URI + "/login").content(String.format("{username: '%s', password: '%s'}", username, password))
+										 .contentType(APPLICATION_JSON)).andExpect(status().isUnauthorized());
 	}
 
 	@Test

@@ -3,9 +3,8 @@ package org.molgenis.ui.jobs;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(ScheduledJobsController.URI)
@@ -20,7 +19,7 @@ public class ScheduledJobsController extends PluginController
 		super(URI);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init()
 	{
 		return "view-scheduled-jobs";

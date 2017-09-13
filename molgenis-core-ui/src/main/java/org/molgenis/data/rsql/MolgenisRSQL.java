@@ -1,7 +1,6 @@
 package org.molgenis.data.rsql;
 
 import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.RSQLParserException;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -20,7 +19,7 @@ public class MolgenisRSQL
 {
 	private final RSQLParser rsqlParser = new RSQLParser();
 
-	public Query<Entity> createQuery(String rsql, EntityType entityType) throws RSQLParserException
+	public Query<Entity> createQuery(String rsql, EntityType entityType)
 	{
 		Node rootNode = rsqlParser.parse(rsql);
 		MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(entityType);

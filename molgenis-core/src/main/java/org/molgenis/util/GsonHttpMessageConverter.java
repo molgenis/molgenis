@@ -109,8 +109,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	}
 
 	@Override
-	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException
 	{
 		Reader json = new InputStreamReader(inputMessage.getBody(), getCharset(inputMessage.getHeaders()));
 		try
@@ -149,8 +148,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	}
 
 	@Override
-	protected void writeInternal(Object o, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException
+	protected void writeInternal(Object o, HttpOutputMessage outputMessage) throws IOException
 	{
 
 		OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(),

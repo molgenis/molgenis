@@ -77,7 +77,7 @@ public class TagWizardController extends PluginController
 	 * @param model  the model
 	 * @return name of the tag wizard view
 	 */
-	@RequestMapping
+	@GetMapping
 	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
 		List<String> entityTypeIds = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
@@ -121,7 +121,7 @@ public class TagWizardController extends PluginController
 	 *
 	 * @param request the {@link AddTagRequest} containing the entityTypeId, attributeName, relationIRI and ontologyTermIRIs
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
+	@PostMapping("/tagattribute")
 	public @ResponseBody
 	OntologyTag addTagAttribute(@Valid @RequestBody AddTagRequest request)
 	{
@@ -134,7 +134,7 @@ public class TagWizardController extends PluginController
 	 *
 	 * @param request the {@link RemoveTagRequest} containing entityTypeId, attributeName, relationIRI and ontologyTermIRI
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/deletesingletag")
+	@PostMapping("/deletesingletag")
 	public @ResponseBody
 	void deleteSingleTag(@Valid @RequestBody RemoveTagRequest request)
 	{
@@ -147,7 +147,7 @@ public class TagWizardController extends PluginController
 	 *
 	 * @param entityTypeId The name of the {@link Entity}
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
+	@PostMapping("/clearalltags")
 	public @ResponseBody
 	void clearAllTags(@RequestParam String entityTypeId)
 	{
@@ -161,7 +161,7 @@ public class TagWizardController extends PluginController
 	 * @param request containing the entityTypeId and selected ontology identifiers
 	 * @return A {@link Map} containing Attribute name and a Map of Tag iri and label
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
+	@PostMapping("/autotagattributes")
 	public @ResponseBody
 	Map<String, OntologyTag> autoTagAttributes(@Valid @RequestBody AutoTagRequest request)
 	{
@@ -178,7 +178,7 @@ public class TagWizardController extends PluginController
 	 * @param request Containing ontology identifiers and a search term
 	 * @return A {@link List} of {@link OntologyTerm}s
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/getontologyterms")
+	@PostMapping("/getontologyterms")
 	public @ResponseBody
 	List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{

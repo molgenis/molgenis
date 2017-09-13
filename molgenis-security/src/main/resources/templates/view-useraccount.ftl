@@ -3,6 +3,7 @@
 
 <@header/>
 <div class="container">
+<#if two_factor_authentication_app_option != "DISABLED">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <ul class="nav nav-tabs" role="tablist">
@@ -15,6 +16,7 @@
             </ul>
         </div>
     </div>
+</#if>
 
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane active" id="account">

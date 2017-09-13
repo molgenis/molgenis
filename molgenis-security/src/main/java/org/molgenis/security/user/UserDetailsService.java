@@ -40,7 +40,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 
 	@Override
 	@RunAsSystem
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
+	public UserDetails loadUserByUsername(String username)
 	{
 		try
 		{

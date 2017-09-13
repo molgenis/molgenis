@@ -97,7 +97,7 @@ webpackJsonp([1], {
         }, [n('span', {staticClass: 'navbar-toggler-icon'})]), e._v(' '), e.navBarLogo ? n('a', {
           staticClass: 'navbar-brand',
           attrs: {href: '/menu/main/' + e.menu.items[0].href}
-          }, [n('img', {attrs: {src: e.navBarLogo, height: '30'}})]) : n('a', {
+          }, [n('img', {attrs: {src: e.navBarLogo, style: "max-height: 30px"}})]) : n('a', {
           staticClass: 'navbar-brand',
           attrs: {href: '#'}
         }), e._v(' '), n('div', {

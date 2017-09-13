@@ -17,7 +17,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -50,8 +50,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 	@Autowired
 	private AttributeMetadata attributeMetadata;
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
 
 	private IndexBootstrapper indexBootstrapper;
 
@@ -61,7 +59,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		config.resetMocks();
 
 		indexBootstrapper = new IndexBootstrapper(metaDataService, indexService, indexActionRegisterService,
-				dataService, attributeMetadata, entityTypeFactory);
+				dataService, attributeMetadata);
 	}
 
 	@Test
@@ -102,8 +100,8 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		when(action.getEntityTypeId()).thenReturn("myEntityTypeName");
 		when(action.getEntityId()).thenReturn("1");
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn("myEntityTypeName");
-		when(entityTypeFactory.create("myEntityTypeName")).thenReturn(entityType);
+		when(dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA, "myEntityTypeName",
+				EntityType.class)).thenReturn(entityType);
 		Attribute idAttribute = mock(Attribute.class);
 		when(idAttribute.getDataType()).thenReturn(AttributeType.INT);
 		when(entityType.getIdAttribute()).thenReturn(idAttribute);
@@ -120,6 +118,36 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		verify(metaDataService, never()).getRepositories();
 		//verify that a new job is registered for the failed one
 		verify(indexActionRegisterService).register(entityType, 1);
+	}
+
+	@Test
+	public void testStartupFailedIndexJobsUnknownEntityType()
+	{
+		when(indexService.hasIndex(attributeMetadata)).thenReturn(true);
+		IndexJobExecution indexJobExecution = mock(IndexJobExecution.class);
+		when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
+		IndexAction action = mock(IndexAction.class);
+		when(action.getEntityTypeId()).thenReturn("myEntityTypeName");
+		when(action.getEntityId()).thenReturn("1");
+		EntityType entityType = mock(EntityType.class);
+		when(dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA, "myEntityTypeName",
+				EntityType.class)).thenReturn(null);
+		Attribute idAttribute = mock(Attribute.class);
+		when(idAttribute.getDataType()).thenReturn(AttributeType.INT);
+		when(entityType.getIdAttribute()).thenReturn(idAttribute);
+		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
+				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
+				IndexJobExecution.class)).thenReturn(Stream.of(indexJobExecution));
+		when(dataService.findAll(IndexActionMetaData.INDEX_ACTION,
+				new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, "id"),
+				IndexAction.class)).thenReturn(Stream.of(action));
+
+		indexBootstrapper.bootstrap();
+
+		//verify that we are not passing through the "missing index" code
+		verify(metaDataService, never()).getRepositories();
+		//verify that a new job is registered for the failed one
+		verify(indexActionRegisterService, times(0)).register(entityType, 1);
 	}
 
 	@Test
@@ -151,9 +179,6 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		@Mock
 		AttributeMetadata attributeMetadata;
 
-		@Mock
-		EntityTypeFactory entityTypeFactory;
-
 		public Config()
 		{
 			initMocks(this);
@@ -177,15 +202,9 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 			return metaDataService;
 		}
 
-		@Bean
-		public EntityTypeFactory entityTypeFactory()
-		{
-			return entityTypeFactory;
-		}
-
 		void resetMocks()
 		{
-			reset(indexService, indexActionRegisterService, metaDataService, attributeMetadata, entityTypeFactory);
+			reset(indexService, indexActionRegisterService, metaDataService, attributeMetadata);
 		}
 	}
 }

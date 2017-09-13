@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.core.utils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -22,7 +21,7 @@ public class JsonReader
 		return sb.toString();
 	}
 
-	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException
+	public static JSONObject readJsonFromUrl(String url) throws IOException
 	{
 		try (InputStream is = new URL(url).openStream())
 		{
@@ -33,7 +32,7 @@ public class JsonReader
 		}
 	}
 
-	public static void main(String[] args) throws IOException, JSONException
+	public static void main(String[] args) throws IOException
 	{
 		String geneNetworkUrl = "http://molgenis58.target.rug.nl/api/v1/prioritization/HP:0000707,HP:0001300,HP:0002015?verbose&genes=BRCA1,BRCA2";
 		JSONObject geneNetworkJsonCallback = JsonReader.readJsonFromUrl(geneNetworkUrl);

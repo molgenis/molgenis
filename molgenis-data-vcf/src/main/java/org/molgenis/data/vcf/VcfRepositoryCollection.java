@@ -39,7 +39,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	private final File file;
 	private final String entityTypeId;
 
-	public VcfRepositoryCollection(File file) throws IOException
+	public VcfRepositoryCollection(File file)
 	{
 		super(EXTENSIONS);
 		this.file = requireNonNull(file);
@@ -79,14 +79,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public Repository<Entity> getRepository(String name)
 	{
 		if (!entityTypeId.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
-		try
-		{
-			return new VcfRepository(file, name, vcfAttributes, entityTypeFactory, attrMetaFactory);
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException(e);
-		}
+		return new VcfRepository(file, name, vcfAttributes, entityTypeFactory, attrMetaFactory);
 	}
 
 	@Override

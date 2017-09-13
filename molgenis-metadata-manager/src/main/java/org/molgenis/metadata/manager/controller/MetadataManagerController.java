@@ -23,8 +23,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.metadata.manager.controller.MetadataManagerController.URI;
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -50,7 +48,7 @@ public class MetadataManagerController extends PluginController
 		this.metadataManagerService = requireNonNull(metadataManagerService);
 	}
 
-	@RequestMapping(value = "/**", method = GET)
+	@GetMapping("/**")
 	public String init(Model model)
 	{
 		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
@@ -60,35 +58,35 @@ public class MetadataManagerController extends PluginController
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/editorPackages", method = GET, produces = "application/json")
+	@GetMapping(value = "/editorPackages", produces = "application/json")
 	public List<EditorPackageIdentifier> getEditorPackages()
 	{
 		return metadataManagerService.getEditorPackages();
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/entityType/{id:.*}", method = GET, produces = "application/json")
+	@GetMapping(value = "/entityType/{id:.*}", produces = "application/json")
 	public EditorEntityTypeResponse getEditorEntityType(@PathVariable("id") String id)
 	{
 		return metadataManagerService.getEditorEntityType(id);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/create/entityType", method = GET, produces = "application/json")
+	@GetMapping(value = "/create/entityType", produces = "application/json")
 	public EditorEntityTypeResponse createEditorEntityType()
 	{
 		return metadataManagerService.createEditorEntityType();
 	}
 
 	@ResponseStatus(OK)
-	@RequestMapping(value = "/entityType", method = POST, consumes = "application/json")
+	@PostMapping(value = "/entityType", consumes = "application/json")
 	public void upsertEntityType(@RequestBody EditorEntityType editorEntityType)
 	{
 		metadataManagerService.upsertEntityType(editorEntityType);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/create/attribute", method = GET, produces = "application/json")
+	@GetMapping(value = "/create/attribute", produces = "application/json")
 	public EditorAttributeResponse createEditorAttribute()
 	{
 		return metadataManagerService.createEditorAttribute();

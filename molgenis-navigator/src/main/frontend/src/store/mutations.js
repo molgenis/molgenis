@@ -1,6 +1,5 @@
 // @flow
-import type {Entity, Package, State} from './state'
-
+import type {Entity, Package, State} from '../flow.types'
 export const SET_PACKAGES = '__SET_PACKAGES__'
 export const SET_ENTITIES = '__SET_ENTITIES__'
 export const SET_PATH = '__SET_PATH__'

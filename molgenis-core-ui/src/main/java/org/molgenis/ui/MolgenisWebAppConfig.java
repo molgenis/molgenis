@@ -292,7 +292,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
 	 */
 	@Bean
-	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
+	public FreeMarkerConfigurer freeMarkerConfigurer()
 	{
 		FreeMarkerConfigurer result = new FreeMarkerConfigurer()
 		{

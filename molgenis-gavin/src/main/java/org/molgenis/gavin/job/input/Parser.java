@@ -254,7 +254,7 @@ public class Parser
 		return VcfVariant.create(chrom, pos, id, ref, alt);
 	}
 
-	private Double parseDouble(String doubleString) throws NumberFormatException
+	private Double parseDouble(String doubleString)
 	{
 		return isEmpty(doubleString) ? null : Double.parseDouble(doubleString);
 	}

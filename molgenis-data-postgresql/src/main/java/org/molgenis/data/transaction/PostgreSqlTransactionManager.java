@@ -52,7 +52,7 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 	}
 
 	@Override
-	protected Object doGetTransaction() throws TransactionException
+	protected Object doGetTransaction()
 	{
 		Object dataSourceTransactionManager = super.doGetTransaction();
 
@@ -70,7 +70,7 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 	}
 
 	@Override
-	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException
+	protected void doBegin(Object transaction, TransactionDefinition definition)
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
 		if (LOG.isDebugEnabled())
@@ -88,7 +88,7 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 	}
 
 	@Override
-	protected void doCommit(DefaultTransactionStatus status) throws TransactionException
+	protected void doCommit(DefaultTransactionStatus status)
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
 		if (LOG.isDebugEnabled())
@@ -121,7 +121,7 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 	}
 
 	@Override
-	protected void doRollback(DefaultTransactionStatus status) throws TransactionException
+	protected void doRollback(DefaultTransactionStatus status)
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
 		if (LOG.isDebugEnabled())

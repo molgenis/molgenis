@@ -110,7 +110,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		return null;
 	}
 
-	private String validateInput(File file, ImportWizard wizard, BindingResult result) throws Exception
+	private String validateInput(File file, ImportWizard wizard, BindingResult result)
 	{
 
 		// decide what importer to use...

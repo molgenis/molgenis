@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import java.net.MalformedURLException;
-
 @Configuration
 @Import(HttpClientConfig.class)
 public class PathwaysConfig
@@ -19,7 +17,7 @@ public class PathwaysConfig
 	private HttpClient httpClient;
 
 	@Bean
-	public WikiPathwaysPortType service() throws MalformedURLException
+	public WikiPathwaysPortType service()
 	{
 		return new WikiPathwaysRESTBindingStub(httpClient, "http://webservice.wikipathways.org");
 	}

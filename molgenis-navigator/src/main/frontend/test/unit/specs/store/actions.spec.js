@@ -10,10 +10,13 @@ describe('actions', () => {
   })
 
   describe('QUERY_PACKAGES', function () {
-    it('should fetch the packages and call the SET_PACKAGES mutation', done => {
+    it('should fetch the packages, filter out the system packages and call the SET_PACKAGES mutation', done => {
       const package1 = {id: 'pack1', label: 'packLabel1'}
+      const sysPackage = {id: 'sys', label: 'sys package'}
+      const sysChildPackage = {id: 'sys_child', label: 'sys child package'}
+      const package2 = {id: 'pack2', label: 'packLabel2'}
       const response = {
-        items: [package1]
+        items: [package1, sysPackage, sysChildPackage, package2]
       }
 
       const get = td.function('api.get')
@@ -22,7 +25,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: SET_PACKAGES, payload: response.items}
+          {type: SET_PACKAGES, payload: [package1, package2]}
         ]
       }
 
@@ -31,8 +34,10 @@ describe('actions', () => {
 
     it('should fetch packages with a query and call the SET_PACKAGES mutation', done => {
       const package1 = {id: 'pack1', label: 'packLabel1'}
+      const sysPackage = {id: 'sys', label: 'sys package'}
+      const sysChildPackage = {id: 'sys_child', label: 'sys child package'}
       const response = {
-        items: [package1]
+        items: [package1, sysPackage, sysChildPackage]
       }
 
       const get = td.function('api.get')
@@ -42,7 +47,7 @@ describe('actions', () => {
       const options = {
         payload: 'test',
         expectedMutations: [
-          {type: SET_PACKAGES, payload: response.items}
+          {type: SET_PACKAGES, payload: [package1]}
         ]
       }
 
@@ -84,17 +89,30 @@ describe('actions', () => {
   })
 
   describe('QUERY_ENTITIES', () => {
-    it('should fetch entities and call the SET_ENTITIES mutation', done => {
+    it('should fetch entities, map the result to entity types, filter out system entities and call the SET_ENTITIES mutation', done => {
       const response = {
         items: [
           {
             'id': '1',
-            'type': 'entity',
             'label': 'test',
             'description': 'test'
+          },
+          {
+            'id': 'sys_entity',
+            'label': 'system entity',
+            'description': 'test2'
           }
         ]
       }
+
+      const expectedEntities = [
+        {
+          'id': '1',
+          'type': 'entity',
+          'label': 'test',
+          'description': 'test'
+        }
+      ]
 
       const get = td.function('api.get')
       td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="test",description=q="test");isAbstract==false')).thenResolve(response)
@@ -103,7 +121,7 @@ describe('actions', () => {
       const options = {
         payload: 'test',
         expectedMutations: [
-          {type: SET_ENTITIES, payload: response.items}
+          {type: SET_ENTITIES, payload: expectedEntities}
         ]
       }
 

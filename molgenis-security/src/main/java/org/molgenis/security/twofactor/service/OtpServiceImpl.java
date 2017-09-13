@@ -27,7 +27,6 @@ public class OtpServiceImpl implements OtpService
 
 	@Override
 	public boolean tryVerificationCode(String verificationCode, String secretKey)
-			throws InvalidVerificationCodeException
 	{
 		boolean isValid;
 		if (StringUtils.hasText(secretKey))
@@ -59,7 +58,7 @@ public class OtpServiceImpl implements OtpService
 	}
 
 	@Override
-	public String getAuthenticatorURI(String secretKey) throws IllegalStateException
+	public String getAuthenticatorURI(String secretKey)
 	{
 		String userName = SecurityUtils.getCurrentUsername();
 
