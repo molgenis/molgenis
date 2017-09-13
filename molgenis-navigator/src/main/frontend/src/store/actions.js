@@ -15,8 +15,8 @@ export const GET_ENTITY_PACKAGES = '__GET_ENTITY_PACKAGES__'
 const SYS_PACKAGE_ID = 'sys'
 
 /**
- * Resets the entire stat1 using the given packages as the package state.
- * Only top level packages are set
+ * Resets the entire state using the given packages as the package state.
+ * Only top level packages are set.
  *
  * @param commit, reference to mutation function
  * @param packages, the complete list of packages

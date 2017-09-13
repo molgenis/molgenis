@@ -428,8 +428,8 @@ $.when($,
         }
 
         /**
-         * Sets the href for the link to the Navigator plugin
-         * The link href to the Navigator is appended with a 'lookup' query that resutls in the navigator opening  in
+         * Sets the href for the link to the Navigator plugin.
+         * The link href to the Navigator is appended with a 'lookup' query that results in the navigator opening in
          * the correct package.
          *
          * @memberOf molgenis.dataexplorer
