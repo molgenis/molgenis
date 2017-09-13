@@ -7,7 +7,6 @@ import org.molgenis.web.PluginController;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,28 +30,22 @@ public class PluginPopulator
 
 	public void populate(ApplicationContext ctx)
 	{
-		Map<String, Plugin> newOrChangedPluginMap = getPlugins(ctx);
-		List<Plugin> deletedPlugins = new ArrayList<>();
+		Map<String, Plugin> allPlugins = getPlugins(ctx); // Plugins from context
+		Map<String, Plugin> allExistingPlugins = dataService.findAll(PLUGIN, Plugin.class) // Plugins from DB
+															.collect(toMap(Plugin::getId, Function.identity()));
 
-		Map<String, Plugin> existingPluginMap = dataService.findAll(PLUGIN, Plugin.class)
-														   .collect(toMap(Plugin::getId, Function.identity()));
-
-		existingPluginMap.forEach((pluginId, plugin) ->
-		{
-			if (newOrChangedPluginMap.get(pluginId) == null)
+		List<String> pluginIdsToDelete = newArrayList();
+		allExistingPlugins.forEach((pluginId, plugin) -> {
+			if (allPlugins.get(pluginId) == null)
 			{
-				deletedPlugins.add(plugin);
+				pluginIdsToDelete.add(pluginId);
+				dataService.delete(PLUGIN, plugin);
 			}
 		});
+		pluginIdsToDelete.forEach(allExistingPlugins::remove);
+		allPlugins.forEach(allExistingPlugins::putIfAbsent);
 
-		if (!newOrChangedPluginMap.isEmpty())
-		{
-			dataService.getRepository(PLUGIN, Plugin.class).upsertBatch(newArrayList(newOrChangedPluginMap.values()));
-		}
-		if (!deletedPlugins.isEmpty())
-		{
-			dataService.delete(PLUGIN, deletedPlugins.stream());
-		}
+		dataService.getRepository(PLUGIN, Plugin.class).upsertBatch(newArrayList(allExistingPlugins.values()));
 	}
 
 	private Map<String, Plugin> getPlugins(ApplicationContext ctx)
