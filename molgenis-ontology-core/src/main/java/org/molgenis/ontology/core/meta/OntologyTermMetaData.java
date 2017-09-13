@@ -2,7 +2,6 @@ package org.molgenis.ontology.core.meta;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.ontology.core.model.OntologyPackage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -32,7 +31,6 @@ public class OntologyTermMetaData extends SystemEntityType
 	private final OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
 	private final OntologyMetaData ontologyMetaData;
 
-	@Autowired
 	public OntologyTermMetaData(OntologyPackage ontologyPackage,
 			OntologyTermSynonymMetaData ontologyTermSynonymMetaData,
 			OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData,

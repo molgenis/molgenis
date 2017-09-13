@@ -5,7 +5,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -61,8 +60,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private final MenuManagerServiceImpl menuManagerServiceImpl;
 
-		@Autowired
-		public Meta(@SuppressWarnings("SpringJavaAutowiringInspection") MenuManagerServiceImpl menuManagerServiceImpl)
+		public Meta(MenuManagerServiceImpl menuManagerServiceImpl)
 		{
 			super(ID);
 			this.menuManagerServiceImpl = requireNonNull(menuManagerServiceImpl);

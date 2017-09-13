@@ -2,7 +2,6 @@ package org.molgenis.util.mail;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
@@ -17,8 +16,7 @@ public class MailSenderImpl implements MailSender
 	private final MailSettings mailSettings;
 	private final MailSenderFactory mailSenderFactory;
 
-	@Autowired
-	public MailSenderImpl(MailSettings mailSettings, MailSenderFactory mailSenderFactory)
+	public MailSenderImpl(MailSettings mailSettings, MailSenderFactory mailSenderFactory) 
 	{
 		this.mailSettings = requireNonNull(mailSettings);
 		this.mailSenderFactory = requireNonNull(mailSenderFactory);

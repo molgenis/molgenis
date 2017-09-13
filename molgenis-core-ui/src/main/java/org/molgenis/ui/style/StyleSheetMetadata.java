@@ -3,7 +3,6 @@ package org.molgenis.ui.style;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.settings.SettingsPackage;
 import org.molgenis.file.model.FileMetaMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -27,7 +26,6 @@ public class StyleSheetMetadata extends SystemEntityType
 
 	private final FileMetaMetaData fileMetaMetaData;
 
-	@Autowired
 	public StyleSheetMetadata(SettingsPackage settingsPackage, FileMetaMetaData fileMetaMetaData)
 	{
 		super(SIMPLE_NAME, SettingsPackage.PACKAGE_SETTINGS);

@@ -2,7 +2,6 @@ package org.molgenis.searchall.controller;
 
 import org.molgenis.searchall.model.Result;
 import org.molgenis.searchall.service.SearchAllService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +19,6 @@ public class SearchAllController
 	public static final String BASE_URI = "/api/searchall/";
 	private final SearchAllService searchAllService;
 
-	@Autowired
 	public SearchAllController(SearchAllService searchAllService)
 	{
 		this.searchAllService = requireNonNull(searchAllService);

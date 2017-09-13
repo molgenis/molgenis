@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Package;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ public class PackagePersister
 
 	private final DataService dataService;
 
-	@Autowired
 	public PackagePersister(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);

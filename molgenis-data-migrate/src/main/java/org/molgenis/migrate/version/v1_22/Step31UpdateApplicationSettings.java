@@ -4,7 +4,6 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -18,7 +17,6 @@ public class Step31UpdateApplicationSettings extends MolgenisUpgrade
 	private final JdbcTemplate jdbcTemplate;
 	private final IdGenerator idGenerator;
 
-	@Autowired
 	public Step31UpdateApplicationSettings(DataSource dataSource, IdGenerator idGenerator)
 	{
 		super(30, 31);

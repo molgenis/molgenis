@@ -16,7 +16,6 @@ import org.molgenis.ui.menu.MenuItemType;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +34,6 @@ public class MenuManagerServiceImpl implements MenuManagerService
 	private final AppSettings appSettings;
 	private final DataService dataService;
 
-	@Autowired
 	public MenuManagerServiceImpl(MenuReaderService menuReaderService, AppSettings appSettings, DataService dataService)
 	{
 		this.menuReaderService = requireNonNull(menuReaderService);

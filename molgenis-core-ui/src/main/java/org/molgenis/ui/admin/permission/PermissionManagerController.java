@@ -14,7 +14,6 @@ import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,7 +40,6 @@ public class PermissionManagerController extends PluginController
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final GroupAuthorityFactory groupAuthorityFactory;
 
-	@Autowired
 	public PermissionManagerController(PermissionManagerService pluginPermissionManagerService,
 			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory)
 	{

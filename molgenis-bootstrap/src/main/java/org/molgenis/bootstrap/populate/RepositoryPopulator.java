@@ -6,7 +6,6 @@ import org.molgenis.script.ScriptTypePopulator;
 import org.molgenis.web.bootstrap.PluginPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,6 @@ public class RepositoryPopulator
 	private final ScriptTypePopulator scriptTypePopulator;
 	private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
 
-	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
 			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
 			SettingsPopulator settingsPopulator,

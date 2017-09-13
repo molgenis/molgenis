@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -48,7 +47,6 @@ public class JobExecutor
 	private final JobFactoryRegistry jobFactoryRegistry;
 	private final Gson gson;
 
-	@Autowired
 	public JobExecutor(DataService dataService, EntityManager entityManager, UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
 			JobFactoryRegistry jobFactoryRegistry)

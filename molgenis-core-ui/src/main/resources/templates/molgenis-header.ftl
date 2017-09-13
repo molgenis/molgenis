@@ -201,8 +201,12 @@
         </div>
     </#if>
 <div class="row">
-    <div class="col-md-12">
-        <div id="plugin-container">
+<div class="col-md-12">
+<div id="plugin-container">
+    <#assign plugin_description_key = plugin_id + '_description_text'>
+    <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
+        ${i18n[plugin_description_key]}
+    </#if>
 </#macro>
 
 <#macro breadcrumb activePlugin version parent = {}>

@@ -9,7 +9,6 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,7 +22,6 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
 
-	@Autowired
 	public MetaDataSearchServiceImpl(DataService dataService, MetaDataService metaDataService)
 	{
 		this.dataService = dataService;

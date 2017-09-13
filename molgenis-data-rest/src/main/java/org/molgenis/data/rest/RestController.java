@@ -30,7 +30,6 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -102,7 +101,6 @@ public class RestController
 	private final RestService restService;
 	private final LanguageService languageService;
 
-	@Autowired
 	public RestController(AuthenticationSettings authenticationSettings, DataService dataService,
 			TokenService tokenService, AuthenticationManager authenticationManager, PermissionService permissionService,
 			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService,

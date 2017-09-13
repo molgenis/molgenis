@@ -13,7 +13,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
@@ -36,7 +35,6 @@ public class CrudRepositoryAnnotator
 	private EntityType targetMetaData;
 	private AttributeFactory attributeFactory;
 
-	@Autowired
 	public CrudRepositoryAnnotator(DataService dataService, PermissionSystemService permissionSystemService,
 			AttributeFactory attributeFactory)
 	{

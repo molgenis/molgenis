@@ -11,7 +11,6 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.style.BootstrapThemePopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.PriorityOrdered;
@@ -40,7 +39,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
 	private final BootstrapThemePopulator bootstrapThemePopulator;
 
-	@Autowired
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
 			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,

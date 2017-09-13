@@ -5,7 +5,6 @@ import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
@@ -20,7 +19,6 @@ public class XmlMolgenisUi implements Ui
 	private final Molgenis molgenisUi;
 	private final PermissionService permissionService;
 
-	@Autowired
 	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, PermissionService permissionService)
 			throws IOException
 	{

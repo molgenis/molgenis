@@ -2,7 +2,6 @@ package org.molgenis.data.importer;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.security.owned.OwnedEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -33,7 +32,6 @@ public class ImportRunMetaData extends SystemEntityType
 
 	private final OwnedEntityType ownedEntityType;
 
-	@Autowired
 	ImportRunMetaData(OwnedEntityType ownedEntityType)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);

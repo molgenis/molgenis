@@ -2,7 +2,6 @@ package org.molgenis.file.model;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.security.owned.OwnedEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -28,7 +27,6 @@ public class FileMetaMetaData extends SystemEntityType
 
 	private final OwnedEntityType ownedEntityType;
 
-	@Autowired
 	FileMetaMetaData(OwnedEntityType ownedEntityType)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);

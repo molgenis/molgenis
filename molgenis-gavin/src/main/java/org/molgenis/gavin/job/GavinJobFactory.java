@@ -11,7 +11,6 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,7 +44,6 @@ public class GavinJobFactory
 	private MenuReaderService menuReaderService;
 	private AnnotatorRunner annotatorRunner;
 
-	@Autowired
 	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
 			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,

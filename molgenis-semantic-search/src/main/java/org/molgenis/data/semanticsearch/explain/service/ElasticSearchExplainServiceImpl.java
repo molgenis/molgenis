@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -25,7 +24,6 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 	private final ElasticsearchService elasticsearchService;
 	private final ExplainServiceHelper explainServiceHelper;
 
-	@Autowired
 	public ElasticSearchExplainServiceImpl(ElasticsearchService elasticsearchService,
 			ExplainServiceHelper explainServiceHelper)
 	{

@@ -1,7 +1,6 @@
 package org.molgenis.script;
 
 import org.molgenis.data.DataService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -21,7 +20,6 @@ public class ScriptTypePopulator
 	private final DataService dataService;
 	private final ScriptTypeFactory scriptTypeFactory;
 
-	@Autowired
 	public ScriptTypePopulator(ScriptRunnerFactory scriptRunnerFactory, DataService dataService,
 			ScriptTypeFactory scriptTypeFactory)
 	{

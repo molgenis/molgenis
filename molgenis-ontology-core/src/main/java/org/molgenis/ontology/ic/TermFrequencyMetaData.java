@@ -2,7 +2,6 @@ package org.molgenis.ontology.ic;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.ontology.core.model.OntologyPackage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -24,7 +23,6 @@ public class TermFrequencyMetaData extends SystemEntityType
 
 	private final OntologyPackage ontologyPackage;
 
-	@Autowired
 	TermFrequencyMetaData(OntologyPackage ontologyPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);

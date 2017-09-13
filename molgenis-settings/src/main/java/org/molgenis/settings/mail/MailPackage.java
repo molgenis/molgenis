@@ -17,7 +17,6 @@ public class MailPackage extends SystemPackage
 
 	private RootSystemPackage rootSystemPackage;
 
-	@Autowired
 	public MailPackage(PackageMetadata packageMetadata)
 	{
 		super(PACKAGE_MAIL, packageMetadata);
