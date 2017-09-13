@@ -286,7 +286,7 @@ public class EntitySecurityRepositoryDecorator extends AbstractRepositoryDecorat
 		{
 			return;
 		}
-		validateCurrentUserCanAccessEntity(entity, Permission.WRITE);
+		validateCurrentUserCanAccessEntity(entity, Permission.DELETE);
 	}
 
 	private void validateCurrentUserCanDeleteEntityById(Object entityId)
