@@ -77,7 +77,13 @@
 
 <script>
   import _ from 'lodash'
-  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE, GET_ENTITY_PACKAGES } from '../store/actions'
+  import {
+    QUERY_PACKAGES,
+    QUERY_ENTITIES,
+    RESET_STATE,
+    GET_STATE_FOR_PACKAGE,
+    GET_ENTITY_PACKAGES
+  } from '../store/actions'
   import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
   import { Package } from '../store/state'
   import { mapState } from 'vuex'

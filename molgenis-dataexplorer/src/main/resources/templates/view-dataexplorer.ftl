@@ -87,22 +87,22 @@
                     </div>
                 </div>
             </div>
-            <#if navigatorBaseUrl?? && plugin_settings.show_navigator_link?? && plugin_settings.get("show_navigator_link") == true>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h4 class="panel-title"></h4>
-                            </div>
-                            <div class="panel-body">
-                                <a id="navigator-link" href="${navigatorBaseUrl}?lookup=">
-                                    <span class="glyphicon glyphicon-link"></span> ${i18n.dataexplorer_navigator_link_label}
-                                </a>
-                            </div>
+        <#if navigatorBaseUrl?? && plugin_settings.show_navigator_link?? && plugin_settings.get("show_navigator_link") == true>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"></h4>
+                        </div>
+                        <div class="panel-body">
+                            <a id="navigator-link" href="${navigatorBaseUrl}?lookup=">
+                                <span class="glyphicon glyphicon-link"></span> ${i18n.dataexplorer_navigator_link_label}
+                            </a>
                         </div>
                     </div>
                 </div>
-            </#if>
+            </div>
+        </#if>
             <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-primary">

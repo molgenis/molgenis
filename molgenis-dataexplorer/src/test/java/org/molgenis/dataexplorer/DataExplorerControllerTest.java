@@ -117,7 +117,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	public void initSetNavigatorMenuPath() throws Exception
 	{
 		String selectedEntityname = "selectedEntityname";
-		String selectedEntityId= "selectedEntityId";
+		String selectedEntityId = "selectedEntityId";
 		String navigatorPath = "path/to-navigator";
 
 		MetaDataService metaDataService = mock(MetaDataService.class);
@@ -137,7 +137,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	public void initSetNavigatorMenuPathNoNavigator() throws Exception
 	{
 		String selectedEntityname = "selectedEntityname";
-		String selectedEntityId= "selectedEntityId";
+		String selectedEntityId = "selectedEntityId";
 		String navigatorPath = "path/to-navigator";
 
 		MetaDataService metaDataService = mock(MetaDataService.class);

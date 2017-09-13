@@ -152,7 +152,7 @@ public class DataExplorerController extends PluginController
 		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
 
 		String navigatorMenuPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
-		if(navigatorMenuPath != null )
+		if (navigatorMenuPath != null)
 		{
 			model.addAttribute("navigatorBaseUrl", navigatorMenuPath);
 		}

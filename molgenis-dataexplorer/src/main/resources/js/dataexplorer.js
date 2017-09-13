@@ -435,13 +435,13 @@ $.when($,
          * @memberOf molgenis.dataexplorer
          *
          * */
-        function setNavigatoHref (entityId) {
-          var navigatorLinkElem = $('#navigator-link');
-          if(navigatorLinkElem.length) { // skip in case navigator-link is set to hidden
-            var currentHref = navigatorLinkElem.attr('href')
-            var newHref = currentHref.substring(0, currentHref.indexOf('?lookup=')) + '?lookup="' + entityId + '"';
-            navigatorLinkElem.attr('href',  newHref);
-          }
+        function setNavigatoHref(entityId) {
+            var navigatorLinkElem = $('#navigator-link');
+            if (navigatorLinkElem.length) { // skip in case navigator-link is set to hidden
+                var currentHref = navigatorLinkElem.attr('href')
+                var newHref = currentHref.substring(0, currentHref.indexOf('?lookup=')) + '?lookup="' + entityId + '"';
+                navigatorLinkElem.attr('href', newHref);
+            }
         }
 
         /**
