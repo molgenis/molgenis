@@ -10,6 +10,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -116,10 +117,12 @@ public class DataExplorerController extends PluginController
 	{
 		StringBuilder message = new StringBuilder("");
 
-		Map<String, EntityType> entitiesMeta = dataService.getMeta()
-														  .getEntityTypes()
-														  .filter(entityType -> !entityType.isAbstract())
-														  .collect(toMap(EntityType::getId, entityType -> entityType));
+		final boolean currentUserIsSu = SecurityUtils.currentUserIsSu();
+
+		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
+				.filter(entityType -> !entityType.isAbstract())
+				.filter(entityType -> currentUserIsSu || !EntityTypeUtils.isSystemEntity(entityType))
+				.collect(toMap(EntityType::getId, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
@@ -144,7 +147,7 @@ public class DataExplorerController extends PluginController
 			model.addAttribute("warningMessage", message.toString());
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
+		model.addAttribute("isAdmin", currentUserIsSu);
 
 		return "view-dataexplorer";
 	}
