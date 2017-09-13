@@ -114,7 +114,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	@Transactional
 	public void createAclClass(EntityType entityType)
 	{
-		// TODO do not create ACL class on demand when calling aclService.createAcl but create when calling this method
+		aclService.createClass(entityType.getId());
 	}
 
 	@Override

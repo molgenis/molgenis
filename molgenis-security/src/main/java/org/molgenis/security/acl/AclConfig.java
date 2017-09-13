@@ -42,7 +42,7 @@ public class AclConfig extends GlobalMethodSecurityConfiguration
 					+ "CONSTRAINT unique_uk_1 UNIQUE(sid,principal)\n" + ");";
 	private static final String SQL_CREATE_TABLE_ACL_CLASS =
 			"CREATE TABLE IF NOT EXISTS acl_class(\n" + "id BIGSERIAL NOT NULL PRIMARY KEY,\n"
-					+ "class VARCHAR(100) NOT NULL,\n" + "\"inheritanceAttribute\" VARCHAR(100) NOT NULL,\n"
+					+ "class VARCHAR(100) NOT NULL,\n"
 					+ "CONSTRAINT unique_uk_2 UNIQUE(class)\n" + ");";
 
 	// acl_object_identity.object_id_identity

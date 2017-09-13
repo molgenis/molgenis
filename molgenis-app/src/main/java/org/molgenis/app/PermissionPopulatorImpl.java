@@ -2,7 +2,6 @@ package org.molgenis.app;
 
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
-import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.security.acl.*;
 import org.molgenis.ui.admin.user.UserAccountController;
 import org.springframework.context.ApplicationContext;
@@ -31,14 +30,6 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 	@Override
 	public void populate(ApplicationContext ctx)
 	{
-		// TODO handle removed system entity types
-		// TODO handle updated system entity types including updates of isEntityLevelSecurity
-		ctx.getBeansOfType(SystemEntityType.class)
-		   .values()
-		   .stream()
-		   .filter(SystemEntityType::isEntityLevelSecurity)
-		   .forEach(entityAclManager::createAclClass);
-
 		SecurityId roleUserSecurityId = SecurityId.createForAuthority(ROLE_USER_ID);
 		EntityAce roleUserReadAce = EntityAce.create(newHashSet(READ), roleUserSecurityId, true);
 
