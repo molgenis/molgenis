@@ -1,8 +1,8 @@
 package org.molgenis.web;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
@@ -63,8 +63,7 @@ public class PluginInterceptor extends HandlerInterceptorAdapter
 			Boolean pluginSettingsCanWrite;
 			if (pluginSettings != null)
 			{
-				String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
-				pluginSettingsCanWrite = permissionService.hasPermissionOnEntityType(pluginSettingsEntityName,
+				pluginSettingsCanWrite = permissionService.hasPermissionOnEntityType(pluginSettings.getEntityType(),
 						Permission.WRITE);
 			}
 			else

@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,14 +21,12 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.questionnaires.QuestionnaireMetaData.ATTR_STATUS;
 import static org.molgenis.questionnaires.QuestionnaireStatus.NOT_STARTED;
 import static org.molgenis.questionnaires.QuestionnaireStatus.OPEN;
 import static org.molgenis.questionnaires.QuestionnaireUtils.findQuestionnairesMetaData;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
-import static org.molgenis.security.owned.OwnedEntityType.OWNER_USERNAME;
 
 @Controller
 @RequestMapping(QuestionnairePluginController.URI)
@@ -136,7 +135,6 @@ public class QuestionnairePluginController extends PluginController
 		if (entity == null)
 		{
 			entity = entityManager.create(entityType, POPULATE);
-			entity.set(OWNER_USERNAME, getCurrentUsername());
 			entity.set(ATTR_STATUS, status.toString());
 			dataService.add(entityType.getId(), entity);
 		}
@@ -152,7 +150,7 @@ public class QuestionnairePluginController extends PluginController
 
 	private Entity findQuestionnaireEntity(String name)
 	{
-		return dataService.findOne(name, EQ(OWNER_USERNAME, getCurrentUsername()));
+		return dataService.findOne(name, new QueryImpl<>()); // FIXME works as intended?
 	}
 
 	private String getThankYouText(String questionnaireName)

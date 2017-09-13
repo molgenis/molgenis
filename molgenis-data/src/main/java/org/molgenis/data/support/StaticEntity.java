@@ -163,4 +163,5 @@ public abstract class StaticEntity implements Entity
 		// TODO modify to 'return entity.toString()' once protected protected StaticEntity() constructor has been removed
 		return entity != null ? entity.toString() : super.toString();
 	}
+
 }

@@ -4,11 +4,9 @@ import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeRepositoryDecorator;
-import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.security.meta.AttributeRepositorySecurityDecorator;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.validation.meta.AttributeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.AttributeValidator;
-import org.molgenis.security.core.PermissionService;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -20,27 +18,23 @@ import static java.util.Objects.requireNonNull;
 public class AttributeRepositoryDecoratorFactory
 		extends AbstractSystemRepositoryDecoratorFactory<Attribute, AttributeMetadata>
 {
-	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final DataService dataService;
-	private final PermissionService permissionService;
 	private final AttributeValidator attributeValidator;
+	private final PermissionService permissionService;
 
-	public AttributeRepositoryDecoratorFactory(AttributeMetadata attributeMetadata,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService,
-			PermissionService permissionService, AttributeValidator attributeValidator)
+	public AttributeRepositoryDecoratorFactory(AttributeMetadata attributeMetadata, DataService dataService,
+			AttributeValidator attributeValidator, PermissionService permissionService)
 	{
 		super(attributeMetadata);
-		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.dataService = requireNonNull(dataService);
-		this.permissionService = requireNonNull(permissionService);
 		this.attributeValidator = requireNonNull(attributeValidator);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
 	public Repository<Attribute> createDecoratedRepository(Repository<Attribute> repository)
 	{
 		repository = new AttributeRepositoryDecorator(repository, dataService);
-		repository = new AttributeRepositoryValidationDecorator(repository, attributeValidator);
-		return new AttributeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService);
+		return new AttributeRepositoryValidationDecorator(repository, attributeValidator);
 	}
 }

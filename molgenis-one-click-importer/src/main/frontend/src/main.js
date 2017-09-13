@@ -3,7 +3,7 @@ import App from './App'
 
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 import store from './store'
-import { INITIAL_STATE } from './store/state'
+import {INITIAL_STATE} from './store/state'
 
 import 'font-awesome/css/font-awesome.min.css' // Font awesome import
 

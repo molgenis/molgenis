@@ -3,7 +3,6 @@ package org.molgenis.data.importer;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.security.owned.OwnedEntityType;
 import org.molgenis.util.ValueLabel;
 
 import javax.annotation.Nullable;
@@ -85,16 +84,6 @@ public class ImportRun extends StaticEntity
 	public void setUsername(String username)
 	{
 		set(USERNAME, username);
-	}
-
-	public String getOwner()
-	{
-		return getString(OwnedEntityType.OWNER_USERNAME);
-	}
-
-	public void setOwner(String username)
-	{
-		set(OwnedEntityType.OWNER_USERNAME, username);
 	}
 
 	public String getStatus()

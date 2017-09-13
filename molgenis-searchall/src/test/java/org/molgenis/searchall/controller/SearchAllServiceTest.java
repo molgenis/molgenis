@@ -2,7 +2,6 @@ package org.molgenis.searchall.controller;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;

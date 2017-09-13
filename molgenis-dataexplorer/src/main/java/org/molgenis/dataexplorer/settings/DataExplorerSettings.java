@@ -3,6 +3,7 @@ package org.molgenis.dataexplorer.settings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -14,6 +15,7 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 
 @Component
@@ -31,6 +33,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	@Component
 	private static class Meta extends DefaultSettingsEntityType
 	{
+		public static final String PLUGIN = "plugin";
+
 		public static final String GENERAL = "general_";
 		public static final String GENERAL_SEARCHBOX = "searchbox";
 		public static final String GENERAL_ITEM_SELECT_PANEL = "item_select_panel";
@@ -90,10 +94,12 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String REPORTS_ENTITIES = "reports_entities";
 
 		private static final boolean DEFAULT_AGGREGATES_DISTINCT_SELECT = true;
+		private final PluginMetadata pluginMetadata;
 
-		public Meta()
+		public Meta(PluginMetadata pluginMetadata)
 		{
 			super(ID);
+			this.pluginMetadata = requireNonNull(pluginMetadata);
 		}
 
 		@Override
@@ -103,8 +109,18 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			setLabel("Data explorer settings");
 			setDescription("Settings for the data explorer plugin.");
 
+			Attribute pluginAttr = addAttribute(PLUGIN).setDataType(XREF)
+													   .setRefEntity(pluginMetadata)
+													   .setVisible(false)
+													   .setReadOnly(true)
+													   .setNillable(false)
+													   .setLabel("Plugin")
+													   .setDefaultValue(DataExplorerController.ID);
+
 			addGeneralSettings();
 			addModulesSettings();
+
+			setEntityLevelSecurityInheritance(pluginAttr);
 		}
 
 		private void addGeneralSettings()
@@ -131,10 +147,12 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												   .setDefaultValue(String.valueOf(DEFAULT_GENERAL_HEADER_ABBREVIATE))
 												   .setLabel("Entity description abbreviation length");
 			addAttribute(GENERAL_SHOW_NAVIGATOR_LINK).setParent(generalAttr)
-												.setDataType(BOOL)
-												.setNillable(false) // Set to true because of lack of migration system.
-												.setDefaultValue(String.valueOf(DEFAULT_GENERAL_SHOW_NAVIGATOR_LINK))
-												.setLabel("Show link to navigator plugin");
+													 .setDataType(BOOL)
+													 .setNillable(
+															 false) // Set to true because of lack of migration system.
+													 .setDefaultValue(
+															 String.valueOf(DEFAULT_GENERAL_SHOW_NAVIGATOR_LINK))
+													 .setLabel("Show link to navigator plugin");
 		}
 
 		private void addModulesSettings()

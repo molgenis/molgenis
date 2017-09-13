@@ -156,12 +156,6 @@ public class AttributeValidator
 			}
 
 			AttributeType fieldType = attr.getDataType();
-			if (fieldType == AttributeType.XREF || fieldType == AttributeType.MREF)
-			{
-				throw new MolgenisDataException("Attribute " + attr.getName()
-						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
-			}
-
 			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
 			{
 				throw new MolgenisDataException(

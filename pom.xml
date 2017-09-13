@@ -905,6 +905,7 @@
         <module>molgenis-scripts</module>
         <module>molgenis-security-core</module>
         <module>molgenis-security</module>
+        <module>molgenis-security-ui</module>
         <module>molgenis-semantic-mapper</module>
         <module>molgenis-semantic-search</module>
         <module>molgenis-settings</module>

@@ -2,7 +2,7 @@ import utils from '@molgenis/molgenis-vue-test-utils'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import actions from 'store/actions'
-import { ADD_FINISHED_JOB, UPDATE_JOB } from 'store/mutations'
+import {ADD_FINISHED_JOB, UPDATE_JOB} from 'store/mutations'
 
 describe('actions', () => {
   describe('Testing action IMPORT_FILE', () => {

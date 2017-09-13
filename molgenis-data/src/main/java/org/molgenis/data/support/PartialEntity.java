@@ -226,4 +226,5 @@ public class PartialEntity implements Entity
 	{
 		decoratedEntity.set(values);
 	}
+
 }

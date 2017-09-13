@@ -64,8 +64,8 @@ public class DataServiceTokenService implements TokenService
 	 * @return token
 	 */
 	@Override
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	public String generateAndStoreToken(String username, String description)
 	{
 		User user = dataService.query(USER, User.class).eq(USERNAME, username).findOne();
@@ -87,8 +87,8 @@ public class DataServiceTokenService implements TokenService
 	}
 
 	@Override
-	@Transactional
 	@RunAsSystem
+	@Transactional
 	public void removeToken(String token)
 	{
 		Token molgenisToken = getMolgenisToken(token);

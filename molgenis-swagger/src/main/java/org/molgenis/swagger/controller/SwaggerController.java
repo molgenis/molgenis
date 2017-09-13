@@ -83,8 +83,7 @@ public class SwaggerController extends PluginController
 		model.addAttribute("entityTypes", metaDataService.getEntityTypes()
 														 .filter(e -> !e.isAbstract())
 														 .map(EntityType::getId)
-														 .sorted()
-														 .collect(toList()));
+														 .sorted().collect(toList()));
 		model.addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
 		model.addAttribute("languageCodes", getLanguageCodes().collect(toList()));
 		return "view-swagger";

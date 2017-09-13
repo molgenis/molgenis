@@ -1,7 +1,7 @@
 package org.molgenis.ui;
 
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;

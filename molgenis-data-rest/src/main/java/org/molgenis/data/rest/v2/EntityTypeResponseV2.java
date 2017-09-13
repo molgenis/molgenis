@@ -10,8 +10,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
 
@@ -37,17 +35,15 @@ class EntityTypeResponseV2
 	private final Boolean writable;
 	private String languageCode;
 
-	public EntityTypeResponseV2(EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+	public EntityTypeResponseV2(EntityType meta, DataService dataService, LanguageService languageService)
 	{
-		this(meta, null, permissionService, dataService, languageService);
+		this(meta, null, dataService, languageService);
 	}
 
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityTypeResponseV2(EntityType meta, Fetch fetch, PermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+	public EntityTypeResponseV2(EntityType meta, Fetch fetch, DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
@@ -82,8 +78,7 @@ class EntityTypeResponseV2
 			{
 				subAttrFetch = null;
 			}
-			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService,
-					languageService);
+			return new AttributeResponseV2(name, meta, attr, subAttrFetch, dataService, languageService);
 		}));
 
 		languageCode = languageService.getCurrentUserLanguageCode();
@@ -100,10 +95,7 @@ class EntityTypeResponseV2
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable =
-				permissionService.hasPermissionOnEntityType(name, Permission.WRITE) && dataService.getCapabilities(name)
-																								  .contains(
-																										  RepositoryCapability.WRITABLE);
+		this.writable = !meta.isReadOnly() && dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

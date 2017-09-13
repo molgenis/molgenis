@@ -1,14 +1,8 @@
 package org.molgenis.file.model;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.security.owned.OwnedEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-
-import static java.util.Collections.singleton;
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -26,20 +20,15 @@ public class FileMetaMetaData extends SystemEntityType
 	public static final String SIZE = "size";
 	public static final String URL = "url";
 
-	private final OwnedEntityType ownedEntityType;
-
-	@Autowired
-	FileMetaMetaData(OwnedEntityType ownedEntityType)
+	FileMetaMetaData()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.ownedEntityType = requireNonNull(ownedEntityType);
 	}
 
 	@Override
 	public void init()
 	{
 		setLabel("File metadata");
-		setExtends(ownedEntityType);
 		addAttribute(ID, ROLE_ID).setVisible(false).setLabel("Id");
 		addAttribute(FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false).setLabel("Filename");
 		addAttribute(CONTENT_TYPE, ROLE_LOOKUP).setDataType(STRING).setLabel("Content-type");
@@ -49,11 +38,5 @@ public class FileMetaMetaData extends SystemEntityType
 						 .setDescription("File download URL")
 						 .setUnique(true)
 						 .setNillable(false);
-	}
-
-	@Override
-	public Set<SystemEntityType> getDependencies()
-	{
-		return singleton(ownedEntityType);
 	}
 }

@@ -1,7 +1,7 @@
 package org.molgenis.web;
 
 import org.molgenis.data.DataService;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.PermissionService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

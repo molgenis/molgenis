@@ -29,13 +29,13 @@ public class RepositoryPopulator
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
 	private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
+	private final PermissionPopulator permissionPopulator;
 
 	@Autowired
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
 			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
-			SettingsPopulator settingsPopulator,
-			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
-			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator)
+			SettingsPopulator settingsPopulator, I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
+			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator, PermissionPopulator permissionPopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
@@ -45,11 +45,13 @@ public class RepositoryPopulator
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
 		this.genomeBrowserAttributesPopulator = requireNonNull(genomeBrowserAttributesPopulator);
+		this.permissionPopulator = requireNonNull(permissionPopulator);
 	}
 
 	public void populate(ContextRefreshedEvent event)
 	{
-		if (!isDatabasePopulated())
+		boolean databasePopulated = isDatabasePopulated();
+		if (!databasePopulated)
 		{
 			LOG.trace("Populating database with users, groups and authorities ...");
 			usersGroupsAuthoritiesPopulator.populate();
@@ -85,6 +87,12 @@ public class RepositoryPopulator
 		scriptTypePopulator.populate();
 		LOG.trace("Populated script type entities");
 
+		if (!databasePopulated)
+		{
+			LOG.trace("Populating database permissions ...");
+			permissionPopulator.populate(event.getApplicationContext());
+			LOG.trace("Populated database with permissions");
+		}
 	}
 
 	private boolean isDatabasePopulated()

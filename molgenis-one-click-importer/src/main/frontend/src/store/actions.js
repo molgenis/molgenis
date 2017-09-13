@@ -1,5 +1,5 @@
 import api from '@molgenis/molgenis-api-client'
-import { ADD_FINISHED_JOB, UPDATE_JOB } from './mutations'
+import {ADD_FINISHED_JOB, UPDATE_JOB} from './mutations'
 
 export const IMPORT_FILE = '__IMPORT_FILE__'
 
@@ -17,7 +17,7 @@ const pollJobUrl = (commit, dispatch, jobUrl) => {
 }
 
 export default {
-  [IMPORT_FILE] ({commit, dispatch}, file) {
+  [IMPORT_FILE]({commit, dispatch}, file) {
     api.postFile('/plugin/one-click-importer/upload', file).then(response => {
       pollJobUrl(commit, dispatch, response)
     })
