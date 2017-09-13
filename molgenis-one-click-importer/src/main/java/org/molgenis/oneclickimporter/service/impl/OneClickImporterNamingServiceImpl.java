@@ -1,4 +1,4 @@
-package org.molgenis.oneclickimporter.service.Impl;
+package org.molgenis.oneclickimporter.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;

@@ -30,7 +30,7 @@ public class StyleController
 		this.styleService = requireNonNull(styleService);
 	}
 
-	@RequestMapping(value = "/css/bootstrap-{bootstrap-version}/{theme}", method = RequestMethod.GET)
+	@GetMapping("/css/bootstrap-{bootstrap-version}/{theme}")
 	public ResponseEntity getThemeCss(@PathVariable("bootstrap-version") String bootstrapVersion,
 			@PathVariable("theme") String theme, HttpServletResponse response) throws MolgenisStyleException
 	{
