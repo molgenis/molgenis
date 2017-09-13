@@ -168,6 +168,29 @@
             </div>
         </div>
     </div>
+    <#if app_settings.show_menu_path>
+        <#if pluginid_with_query_string != "home">
+            <div class="row">
+                <div class="col-md-12">
+                    <#assign menu_items = molgenis_ui.getMenu().items>
+                    <#list menu_items as item>
+
+                        <#if item.type == "MENU">
+                            <#list item.items as sub_item>
+                                <#if sub_item.url == pluginid_with_query_string>
+                                    <@breadcrumb sub_item version item />
+                                </#if>
+                            </#list>
+                        </#if>
+
+                        <#if item.url == pluginid_with_query_string>
+                            <@breadcrumb item version />
+                        </#if>
+                    </#list>
+                </div>
+            </div>
+        </#if>
+    </#if>
     <#if plugin_settings_can_write?? && plugin_settings_can_write>
         <div class="row">
             <div class="col-md-12">
@@ -178,10 +201,31 @@
         </div>
     </#if>
 <div class="row">
-<div class="col-md-12">
-<div id="plugin-container">
+    <div class="col-md-12">
+        <div id="plugin-container">
 </#macro>
 
+<#macro breadcrumb activePlugin version parent = {}>
+    <#if version == 1>
+        <ul class="breadcrumb" style="background-color: #ffffff">
+            <li>Home</li>
+            <#if parent?has_content>
+                <li>${parent.name}</li>
+            </#if>
+            <#if activePlugin.name != "Home">
+                <li>${activePlugin.name}</li>
+            </#if>
+        </ul>
+    <#else>
+        <nav class="breadcrumb" style="background-color: #ffffff;margin-top:10px;font-size:14px">
+            <li class="breadcrumb-item" href="#">Home</li>
+            <#if parent?has_content>
+                <li class="breadcrumb-item" href="#">${parent.name}</li>
+            </#if>
+            <li class="breadcrumb-item" href="#">${activePlugin.name}</li>
+        </nav>
+    </#if>
+</#macro>
 
 <#-- Topmenu -->
 <#--TODO refactor to remove depency on 'Home'-->
