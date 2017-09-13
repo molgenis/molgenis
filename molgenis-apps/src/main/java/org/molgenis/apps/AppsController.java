@@ -12,7 +12,6 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -46,7 +45,6 @@ public class AppsController extends PluginController
 	private final FileStore fileStore;
 	private final PermissionService permissionService;
 
-	@Autowired
 	public AppsController(DataService dataService, FileStore fileStore, PermissionService permissionService)
 	{
 		super(URI);

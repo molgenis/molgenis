@@ -1,7 +1,6 @@
 package org.molgenis.auth;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -27,7 +26,6 @@ public class TokenMetaData extends SystemEntityType
 	private final SecurityPackage securityPackage;
 	private final UserMetaData userMetaData;
 
-	@Autowired
 	TokenMetaData(SecurityPackage securityPackage, UserMetaData userMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);

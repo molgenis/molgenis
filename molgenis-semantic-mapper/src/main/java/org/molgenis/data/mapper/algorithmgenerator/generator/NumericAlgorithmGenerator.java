@@ -4,7 +4,6 @@ import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.converter.ConversionException;
 import javax.measure.converter.UnitConverter;
@@ -20,7 +19,6 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 {
 	private final UnitResolver unitResolver;
 
-	@Autowired
 	public NumericAlgorithmGenerator(UnitResolver unitResolver)
 	{
 		this.unitResolver = requireNonNull(unitResolver);

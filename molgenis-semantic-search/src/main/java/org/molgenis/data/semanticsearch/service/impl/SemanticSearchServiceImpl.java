@@ -32,7 +32,6 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,7 +60,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	// We only explain the top 10 suggested attributes because beyond that the attributes are not high quliaty anymore
 	private static final int MAX_NUMBER_EXPLAINED_ATTRIBUTES = 10;
 
-	@Autowired
 	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
 			MetaDataService metaDataService, SemanticSearchServiceHelper semanticSearchServiceHelper,
 			ElasticSearchExplainService elasticSearchExplainService)

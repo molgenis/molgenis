@@ -2,7 +2,6 @@ package org.molgenis.data.mapper.meta;
 
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -27,7 +26,6 @@ public class MappingProjectMetaData extends SystemEntityType
 	private final UserMetaData userMetaData;
 	private final MappingTargetMetaData mappingTargetMetaData;
 
-	@Autowired
 	public MappingProjectMetaData(MapperPackage mapperPackage, UserMetaData userMetaData,
 			MappingTargetMetaData mappingTargetMetaData)
 	{

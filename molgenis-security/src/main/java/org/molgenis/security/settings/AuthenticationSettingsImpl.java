@@ -3,7 +3,6 @@ package org.molgenis.security.settings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
@@ -35,7 +34,6 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity implements
 		private static final boolean DEFAULT_GOOGLE_SIGN_IN = true;
 		private static final String DEFAULT_GOOGLE_APP_CLIENT_ID = "130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com";
 
-		@Autowired
 		public Meta()
 		{
 			super(ID);

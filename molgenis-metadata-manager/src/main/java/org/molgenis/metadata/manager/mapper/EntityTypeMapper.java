@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.metadata.manager.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -24,7 +23,6 @@ public class EntityTypeMapper
 	private final EntityTypeReferenceMapper entityTypeReferenceMapper;
 	private final EntityTypeParentMapper entityTypeParentMapper;
 
-	@Autowired
 	public EntityTypeMapper(EntityTypeFactory entityTypeFactory, AttributeMapper attributeMapper,
 			AttributeReferenceMapper attributeReferenceMapper, PackageMapper packageMapper, TagMapper tagMapper,
 			EntityTypeReferenceMapper entityTypeReferenceMapper, EntityTypeParentMapper entityTypeParentMapper)

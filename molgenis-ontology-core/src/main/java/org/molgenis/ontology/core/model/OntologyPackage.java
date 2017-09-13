@@ -3,7 +3,6 @@ package org.molgenis.ontology.core.model;
 import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.system.model.RootSystemPackage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -17,7 +16,6 @@ public class OntologyPackage extends SystemPackage
 
 	private final RootSystemPackage rootSystemPackage;
 
-	@Autowired
 	public OntologyPackage(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage)
 	{
 		super(PACKAGE_ONTOLOGY, packageMetadata);

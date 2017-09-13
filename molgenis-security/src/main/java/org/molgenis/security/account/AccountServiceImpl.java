@@ -15,7 +15,6 @@ import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -48,7 +47,6 @@ public class AccountServiceImpl implements AccountService
 	private final GroupMemberFactory groupMemberFactory;
 	private final IdGenerator idGenerator;
 
-	@Autowired
 	public AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService,
 			AppSettings appSettings, AuthenticationSettings authenticationSettings,
 			GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)

@@ -12,7 +12,6 @@ import org.molgenis.data.Query;
 import org.molgenis.file.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,7 +43,6 @@ public class ChartController
 	private final ChartVisualizationServiceFactory chartVisualizationServiceFactory;
 	private final FileStore fileStore;
 
-	@Autowired
 	public ChartController(ChartDataService chartDataService,
 			ChartVisualizationServiceFactory chartVisualizationServiceFactory, FileStore fileStore)
 	{

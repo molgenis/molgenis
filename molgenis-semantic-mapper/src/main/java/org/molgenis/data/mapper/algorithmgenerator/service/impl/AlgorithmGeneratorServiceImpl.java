@@ -17,7 +17,6 @@ import org.molgenis.data.mapper.utils.MagmaUnitConverter;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
@@ -38,7 +37,6 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	private final UnitResolver unitResolver;
 	private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
 
-	@Autowired
 	public AlgorithmGeneratorServiceImpl(DataService dataService, UnitResolver unitResolver,
 			AlgorithmTemplateService algorithmTemplateService)
 	{

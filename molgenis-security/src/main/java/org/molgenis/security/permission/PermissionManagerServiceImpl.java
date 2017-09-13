@@ -10,7 +10,6 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,7 +36,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private final DataService dataService;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
-	@Autowired
 	public PermissionManagerServiceImpl(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		this.dataService = requireNonNull(dataService);

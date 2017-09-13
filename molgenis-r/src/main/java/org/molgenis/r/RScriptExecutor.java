@@ -13,7 +13,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.molgenis.script.ScriptException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -37,7 +36,6 @@ public class RScriptExecutor
 	private final CloseableHttpClient httpClient;
 	private final OpenCpuSettings openCpuSettings;
 
-	@Autowired
 	public RScriptExecutor(CloseableHttpClient httpClient, OpenCpuSettings openCpuSettings)
 	{
 		this.httpClient = requireNonNull(httpClient);

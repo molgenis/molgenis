@@ -6,7 +6,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	private final PubMedTermFrequencyService pubMedTermFrequencyService = new PubMedTermFrequencyService();
 	private final DataService dataService;
 
-	@Autowired
 	public OntologyTermFrequencyServiceImpl(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");

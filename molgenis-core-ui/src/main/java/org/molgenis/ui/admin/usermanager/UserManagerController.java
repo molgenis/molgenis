@@ -1,7 +1,6 @@
 package org.molgenis.ui.admin.usermanager;
 
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +17,6 @@ public class UserManagerController extends PluginController
 	public final static String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
 	private final UserManagerService pluginUserManagerService;
 
-	@Autowired
 	public UserManagerController(UserManagerService pluginUserManagerService)
 	{
 		super(URI);

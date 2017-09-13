@@ -2,7 +2,6 @@ package org.molgenis.security.owned;
 
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -28,7 +27,6 @@ public class OwnedEntityType extends SystemEntityType
 
 	private final SecurityPackage securityPackage;
 
-	@Autowired
 	public OwnedEntityType(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);

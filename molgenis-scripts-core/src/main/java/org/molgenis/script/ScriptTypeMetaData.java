@@ -1,7 +1,6 @@
 package org.molgenis.script;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -19,7 +18,6 @@ public class ScriptTypeMetaData extends SystemEntityType
 
 	private final ScriptPackage scriptPackage;
 
-	@Autowired
 	ScriptTypeMetaData(ScriptPackage scriptPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SCRIPT);
