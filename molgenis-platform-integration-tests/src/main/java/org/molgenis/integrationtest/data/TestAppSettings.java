@@ -176,4 +176,15 @@ public class TestAppSettings implements AppSettings
 		return null;
 	}
 
+	@Override
+	public boolean getShowMenuPath()
+	{
+		return false;
+	}
+
+	@Override
+	public void setShowMenuPath(boolean showMenuPath)
+	{
+	}
+
 }
