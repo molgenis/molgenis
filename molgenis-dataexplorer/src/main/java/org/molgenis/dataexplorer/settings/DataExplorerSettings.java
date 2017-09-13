@@ -40,11 +40,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String GENERAL_ITEM_SELECT_PANEL = "item_select_panel";
 		public static final String GENERAL_LAUNCH_WIZARD = "launch_wizard";
 		public static final String GENERAL_HEADER_ABBREVIATE = "header_abbreviate";
+		public static final String GENERAL_SHOW_NAVIGATOR_LINK = "show_navigator_link";
 
 		private static final boolean DEFAULT_GENERAL_SEARCHBOX = true;
 		private static final boolean DEFAULT_GENERAL_ITEM_SELECT_PANEL = true;
 		private static final boolean DEFAULT_GENERAL_LAUNCH_WIZARD = false;
 		private static final int DEFAULT_GENERAL_HEADER_ABBREVIATE = 180;
+		private static final boolean DEFAULT_GENERAL_SHOW_NAVIGATOR_LINK = false;
 
 		public static final String MOD = "mods";
 		public static final String MOD_AGGREGATES = "mod_aggregates";
@@ -144,6 +146,11 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												   .setNillable(false)
 												   .setDefaultValue(String.valueOf(DEFAULT_GENERAL_HEADER_ABBREVIATE))
 												   .setLabel("Entity description abbreviation length");
+			addAttribute(GENERAL_SHOW_NAVIGATOR_LINK).setParent(generalAttr)
+												.setDataType(BOOL)
+												.setNillable(false) // Set to true because of lack of migration system.
+												.setDefaultValue(String.valueOf(DEFAULT_GENERAL_SHOW_NAVIGATOR_LINK))
+												.setLabel("Show link to navigator plugin");
 		}
 
 		private void addModulesSettings()
@@ -421,6 +428,17 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public void setHeaderAbbreviate(int headerAbbreviate)
 	{
 		set(Meta.GENERAL_HEADER_ABBREVIATE, headerAbbreviate);
+	}
+
+	public boolean getShowNavigatorLink()
+	{
+		Boolean value = getBoolean(Meta.GENERAL_SHOW_NAVIGATOR_LINK);
+		return value != null ? value : false;
+	}
+
+	public void setShowNavigatorLink(boolean showNavigatorLink)
+	{
+		set(Meta.GENERAL_SHOW_NAVIGATOR_LINK, showNavigatorLink);
 	}
 
 	@Nullable

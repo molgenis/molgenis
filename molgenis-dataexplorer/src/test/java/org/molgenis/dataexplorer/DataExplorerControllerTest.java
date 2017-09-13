@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.PermissionService;
@@ -17,6 +18,8 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.Permission;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -33,9 +36,11 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.NAVIGATOR;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_XLSX;
 import static org.testng.Assert.assertEquals;
@@ -81,6 +86,9 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	LanguageService languageService;
 	@Mock
 	PermissionService permissionService = mock(PermissionService.class);
+	@Mock
+	MenuReaderService menuReaderService;
+
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
@@ -103,6 +111,46 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(freemarkerConfigurer.getConfiguration()).thenReturn(configuration);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
+	}
+
+	@Test
+	public void initSetNavigatorMenuPath() throws Exception
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId= "selectedEntityId";
+		String navigatorPath = "path/to-navigator";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(navigatorPath);
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model).addAttribute("navigatorBaseUrl", navigatorPath);
+	}
+
+	@Test
+	public void initSetNavigatorMenuPathNoNavigator() throws Exception
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId= "selectedEntityId";
+		String navigatorPath = "path/to-navigator";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model, never()).addAttribute("navigatorBaseUrl", navigatorPath);
 	}
 
 	@Test
