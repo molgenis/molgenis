@@ -12,7 +12,6 @@ import org.molgenis.security.user.UserService;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
@@ -52,7 +51,6 @@ public class FeedbackController extends AbstractStaticContentController
 	private final CaptchaService captchaService;
 	private final MailSender mailSender;
 
-	@Autowired
 	public FeedbackController(UserService userService, AppSettings appSettings, CaptchaService captchaService,
 			MailSender mailSender)
 	{

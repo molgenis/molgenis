@@ -3,7 +3,6 @@ package org.molgenis.bootstrap.populate;
 import org.molgenis.data.DataService;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesFactory;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -14,7 +13,6 @@ public class GenomeBrowserAttributesPopulator
 	private final DataService dataService;
 	private final GenomeBrowserAttributesFactory gbaFactory;
 
-	@Autowired
 	public GenomeBrowserAttributesPopulator(DataService dataService, GenomeBrowserAttributesFactory gbaFactory)
 	{
 		this.gbaFactory = requireNonNull(gbaFactory);

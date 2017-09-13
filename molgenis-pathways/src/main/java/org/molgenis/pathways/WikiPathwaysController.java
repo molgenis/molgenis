@@ -66,7 +66,6 @@ public class WikiPathwaysController extends PluginController
 	private static final Pattern GENE_SYMBOL_PATTERN = Pattern.compile("^[0-9A-Za-z\\-]*");
 	private static final DocumentBuilderFactory DB_FACTORY = DocumentBuilderFactory.newInstance();
 
-	@Autowired
 	public WikiPathwaysController(WikiPathwaysService wikiPathwaysService)
 	{
 		super(URI);

@@ -10,7 +10,6 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,6 @@ public class DirectoryController extends PluginController
 	private final RestTemplate restTemplate;
 	private final PermissionService permissions;
 
-	@Autowired
 	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate, PermissionService permissions)
 	{
 		super(URI);

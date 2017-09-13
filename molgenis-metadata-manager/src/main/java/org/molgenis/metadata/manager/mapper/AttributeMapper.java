@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.metadata.manager.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -31,7 +30,6 @@ public class AttributeMapper
 	private final AttributeReferenceMapper attributeReferenceMapper;
 	private final SortMapper sortMapper;
 
-	@Autowired
 	AttributeMapper(AttributeFactory attributeFactory, TagMapper tagMapper,
 			EntityTypeReferenceMapper entityTypeReferenceMapper, AttributeReferenceMapper attributeReferenceMapper,
 			SortMapper sortMapper)

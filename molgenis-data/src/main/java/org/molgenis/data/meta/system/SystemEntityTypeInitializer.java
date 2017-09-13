@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.MetaPackage;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.util.GenericDependencyResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -29,7 +28,6 @@ public class SystemEntityTypeInitializer
 	private final MetaPackage metaPackage;
 	private final GenericDependencyResolver genericDependencyResolver;
 
-	@Autowired
 	public SystemEntityTypeInitializer(MetaDataService metaDataService, RootSystemPackage rootSystemPackage,
 			MetaPackage metaPackage, GenericDependencyResolver genericDependencyResolver)
 	{

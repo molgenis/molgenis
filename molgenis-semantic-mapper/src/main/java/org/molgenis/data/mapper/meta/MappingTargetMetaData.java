@@ -1,7 +1,6 @@
 package org.molgenis.data.mapper.meta;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -23,7 +22,6 @@ public class MappingTargetMetaData extends SystemEntityType
 	private final MapperPackage mapperPackage;
 	private final EntityMappingMetaData entityMappingMetaData;
 
-	@Autowired
 	public MappingTargetMetaData(MapperPackage mapperPackage, EntityMappingMetaData entityMappingMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_MAPPER);

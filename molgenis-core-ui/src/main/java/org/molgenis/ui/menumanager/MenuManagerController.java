@@ -9,7 +9,6 @@ import org.molgenis.file.FileStore;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.util.FileUploadUtils;
 import org.molgenis.web.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,7 +44,6 @@ public class MenuManagerController extends PluginController
 
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
 
-	@Autowired
 	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, Ui molgenisUi,
 			AppSettings appSettings)
 	{

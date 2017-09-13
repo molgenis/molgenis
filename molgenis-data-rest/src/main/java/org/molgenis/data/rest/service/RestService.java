@@ -13,7 +13,6 @@ import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -53,7 +52,6 @@ public class RestService
 	private final EntityManager entityManager;
 	private final ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory;
 
-	@Autowired
 	public RestService(DataService dataService, IdGenerator idGenerator, FileStore fileStore,
 			FileMetaFactory fileMetaFactory, EntityManager entityManager,
 			ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory)

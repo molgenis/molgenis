@@ -15,7 +15,6 @@ import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -125,7 +124,6 @@ public class InformationContentService
 
 	private final DataService dataService;
 
-	@Autowired
 	public InformationContentService(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);

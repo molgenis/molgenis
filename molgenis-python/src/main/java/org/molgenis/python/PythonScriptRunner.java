@@ -3,7 +3,6 @@ package org.molgenis.python;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
 import org.molgenis.script.ScriptUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -17,7 +16,6 @@ public class PythonScriptRunner implements ScriptRunner
 
 	private final PythonScriptExecutor pythonScriptExecutor;
 
-	@Autowired
 	public PythonScriptRunner(PythonScriptExecutor pythonScriptExecutor)
 	{
 		this.pythonScriptExecutor = requireNonNull(pythonScriptExecutor);

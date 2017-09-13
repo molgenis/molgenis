@@ -6,7 +6,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.ListEscapeUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -30,7 +29,6 @@ public class DefaultValuePopulator
 {
 	private final EntityReferenceCreator entityReferenceCreator;
 
-	@Autowired
 	public DefaultValuePopulator(EntityReferenceCreator entityReferenceCreator)
 	{
 		this.entityReferenceCreator = requireNonNull(entityReferenceCreator);

@@ -15,7 +15,6 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -37,7 +36,6 @@ public class IndexBootstrapper
 	private final AttributeMetadata attrMetadata;
 	private final EntityTypeFactory entityTypeFactory;
 
-	@Autowired
 	public IndexBootstrapper(MetaDataService metaDataService, IndexService indexService,
 			IndexActionRegisterService indexActionRegisterService, DataService dataService,
 			AttributeMetadata attrMetadata, EntityTypeFactory entityTypeFactory)

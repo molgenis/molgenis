@@ -5,7 +5,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -22,7 +21,6 @@ public class JsMagmaScriptExecutor
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attributeFactory;
 
-	@Autowired
 	public JsMagmaScriptExecutor(JsMagmaScriptEvaluator jsMagmaScriptEvaluator, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attributeFactory)
 	{

@@ -2,7 +2,6 @@ package org.molgenis.data;
 
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryCollectionDecorator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -13,7 +12,6 @@ public class RepositoryCollectionDecoratorFactoryImpl implements RepositoryColle
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 	private final IndexActionRegisterService indexActionRegisterService;
 
-	@Autowired
 	public RepositoryCollectionDecoratorFactoryImpl(RepositoryDecoratorFactory repositoryDecoratorFactory,
 			IndexActionRegisterService indexActionRegisterService)
 	{

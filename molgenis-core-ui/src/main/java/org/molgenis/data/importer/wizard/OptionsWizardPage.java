@@ -15,7 +15,6 @@ import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileExtensionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -39,7 +38,6 @@ public class OptionsWizardPage extends AbstractWizardPage
 	private final transient ImportServiceFactory importServiceFactory;
 	private transient DataService dataService;
 
-	@Autowired
 	public OptionsWizardPage(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
 			ImportServiceFactory importServiceFactory, DataService dataService)
 	{

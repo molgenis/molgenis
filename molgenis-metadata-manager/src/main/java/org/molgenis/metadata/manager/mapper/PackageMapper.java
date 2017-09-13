@@ -5,7 +5,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -16,7 +15,6 @@ public class PackageMapper
 	private final PackageFactory packageFactory;
 	private final DataService dataService;
 
-	@Autowired
 	PackageMapper(PackageFactory packageFactory, DataService dataService)
 	{
 		this.packageFactory = requireNonNull(packageFactory);

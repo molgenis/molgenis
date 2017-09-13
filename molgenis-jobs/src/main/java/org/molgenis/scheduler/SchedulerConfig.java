@@ -1,6 +1,5 @@
 package org.molgenis.scheduler;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +15,6 @@ public class SchedulerConfig
 {
 	private final ApplicationContext applicationContext;
 
-	@Autowired
 	public SchedulerConfig(ApplicationContext applicationContext)
 	{
 		this.applicationContext = applicationContext;

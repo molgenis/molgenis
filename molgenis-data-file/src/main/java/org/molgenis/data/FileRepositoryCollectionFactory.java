@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.util.FileExtensionUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,6 @@ public class FileRepositoryCollectionFactory
 	private final Map<String, Class<? extends FileRepositoryCollection>> fileRepositoryCollection;
 	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
-	@Autowired
 	public FileRepositoryCollectionFactory(AutowireCapableBeanFactory autowireCapableBeanFactory)
 	{
 		this.autowireCapableBeanFactory = requireNonNull(autowireCapableBeanFactory);

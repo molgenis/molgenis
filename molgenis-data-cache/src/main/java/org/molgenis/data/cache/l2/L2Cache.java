@@ -16,7 +16,6 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +50,6 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	private final EntityHydration entityHydration;
 	private final TransactionInformation transactionInformation;
 
-	@Autowired
 	public L2Cache(TransactionManager transactionManager, EntityHydration entityHydration,
 			TransactionInformation transactionInformation)
 	{

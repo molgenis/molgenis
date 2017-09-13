@@ -7,7 +7,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -24,7 +23,6 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 {
 	private final DataService dataService;
 
-	@Autowired
 	public AlgorithmTemplateServiceImpl(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);

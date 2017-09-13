@@ -2,7 +2,6 @@ package org.molgenis.js.magma;
 
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -19,7 +18,6 @@ public class JsMagmaScriptRunner implements ScriptRunner
 
 	private final JsMagmaScriptExecutor jsScriptExecutor;
 
-	@Autowired
 	public JsMagmaScriptRunner(JsMagmaScriptExecutor jsMagmaScriptExecutor)
 	{
 		this.jsScriptExecutor = requireNonNull(jsMagmaScriptExecutor);

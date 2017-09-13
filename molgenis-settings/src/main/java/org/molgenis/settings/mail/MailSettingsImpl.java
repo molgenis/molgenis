@@ -10,7 +10,6 @@ import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.util.mail.MailSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
@@ -86,7 +85,6 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 		public static final String TEST_CONNECTION = "testConnection";
 		private JavaMailPropertyType mailSenderPropertyType;
 
-		@Autowired
 		public Meta(JavaMailPropertyType mailSenderPropertyType)
 		{
 			super(ID);

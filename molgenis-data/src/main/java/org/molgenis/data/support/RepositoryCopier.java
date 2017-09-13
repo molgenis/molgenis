@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,6 @@ public class RepositoryCopier
 	private final MetaDataService metaDataService;
 	private final AttributeFactory attrFactory;
 
-	@Autowired
 	public RepositoryCopier(MetaDataService metaDataService, AttributeFactory attrFactory)
 	{
 		this.metaDataService = requireNonNull(metaDataService);

@@ -1,7 +1,6 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -9,7 +8,6 @@ public class DefaultPackage extends SystemPackage
 {
 	public static final String PACKAGE_DEFAULT = "base";
 
-	@Autowired
 	public DefaultPackage(PackageMetadata packageMetadata)
 	{
 		super(PACKAGE_DEFAULT, packageMetadata);
