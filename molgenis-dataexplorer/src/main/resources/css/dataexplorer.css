@@ -141,6 +141,10 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	margin-top: -1px;
 }
 
+.select2-container {
+	min-width: 16rem;
+}
+
 .molgenis-xrefmrefsearch.select2-drop-active .select2-result-selectable{
 	width: 600px;
 }
