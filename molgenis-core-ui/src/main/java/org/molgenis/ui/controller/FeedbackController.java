@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,11 +103,6 @@ public class FeedbackController extends AbstractStaticContentController
 			form.setSubmitted(true);
 			captchaService.removeCaptcha();
 		}
-		catch (MessagingException e)
-		{
-			LOG.warn("Unable to create mime message for feedback form.", e);
-			form.setErrorMessage(MESSAGING_EXCEPTION_MESSAGE);
-		}
 		catch (MailAuthenticationException e)
 		{
 			LOG.error("Error authenticating with email server.", e);
@@ -125,7 +119,7 @@ public class FeedbackController extends AbstractStaticContentController
 	/**
 	 * Creates a MimeMessage based on a FeedbackForm.
 	 */
-	private SimpleMailMessage createFeedbackMessage(FeedbackForm form) throws MessagingException
+	private SimpleMailMessage createFeedbackMessage(FeedbackForm form)
 	{
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setTo(userService.getSuEmailAddresses().toArray(new String[] {}));

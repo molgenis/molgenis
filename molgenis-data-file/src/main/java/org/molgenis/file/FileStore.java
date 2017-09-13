@@ -20,7 +20,7 @@ public class FileStore
 		this.storageDir = storageDir;
 	}
 
-	public boolean createDirectory(String dirName) throws IOException
+	public boolean createDirectory(String dirName)
 	{
 		return new File(storageDir + separator + dirName).mkdir();
 	}

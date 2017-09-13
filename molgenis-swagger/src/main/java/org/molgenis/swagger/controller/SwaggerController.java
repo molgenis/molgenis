@@ -15,7 +15,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -38,7 +37,7 @@ public class SwaggerController extends PluginController
 	private final TokenService tokenService;
 
 	@Autowired
-	public SwaggerController(MetaDataService metaDataService, TokenService tokenService) throws IOException
+	public SwaggerController(MetaDataService metaDataService, TokenService tokenService)
 	{
 		super(URI);
 		this.metaDataService = requireNonNull(metaDataService);

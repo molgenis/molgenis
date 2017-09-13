@@ -55,7 +55,6 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 
 	@Override
 	public boolean isVerificationCodeValidForUser(String verificationCode)
-			throws InvalidVerificationCodeException, TooManyLoginAttemptsException
 	{
 		boolean isValid = false;
 
@@ -84,7 +83,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean userIsBlocked() throws TooManyLoginAttemptsException
+	public boolean userIsBlocked()
 	{
 		UserSecret userSecret = getSecret();
 		if (userSecret.getFailedLoginAttempts() >= MAX_FAILED_LOGIN_ATTEMPTS)
@@ -103,7 +102,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public void saveSecretForUser(String secret) throws InternalAuthenticationServiceException
+	public void saveSecretForUser(String secret)
 	{
 
 		if (secret == null)
@@ -154,7 +153,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	}
 
 	@Override
-	public boolean isConfiguredForUser() throws InternalAuthenticationServiceException
+	public boolean isConfiguredForUser()
 	{
 		boolean isConfigured = false;
 		try
@@ -203,7 +202,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		runAsSystem(() -> dataService.update(USER_SECRET, userSecret));
 	}
 
-	private UserSecret getSecret() throws InternalAuthenticationServiceException
+	private UserSecret getSecret()
 	{
 		User user = getUser();
 		UserSecret secret = runAsSystem(() -> dataService.query(USER_SECRET, UserSecret.class)

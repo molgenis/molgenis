@@ -33,14 +33,14 @@ public class OntologyManagerController extends PluginController
 	}
 
 	@GetMapping
-	public String init(Model model) throws Exception
+	public String init(Model model)
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return VIEW_ONTOLOGY_MANAGER;
 	}
 
 	@PostMapping
-	public String delete(Model model) throws Exception
+	public String delete(Model model)
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return VIEW_ONTOLOGY_MANAGER;

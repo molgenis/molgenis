@@ -263,7 +263,7 @@ public class WikiPathwaysController extends PluginController
 	 * @return {@link Multimap} mapping gene symbol to graphIDs
 	 * @throws IllegalArgumentException if the gpml is invalid
 	 */
-	Multimap<String, String> analyzeGPML(String gpml) throws ParserConfigurationException, IOException, SAXException
+	Multimap<String, String> analyzeGPML(String gpml)
 	{
 		return streamDataNodes(gpml).filter(node -> !node.getAttribute("GraphId").isEmpty())
 									.collect(toArrayListMultimap(node -> getGeneSymbol(node.getAttribute("TextLabel")),
