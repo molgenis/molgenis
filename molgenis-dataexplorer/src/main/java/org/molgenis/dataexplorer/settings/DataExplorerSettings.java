@@ -132,7 +132,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												   .setLabel("Entity description abbreviation length");
 			addAttribute(GENERAL_SHOW_NAVIGATOR_LINK).setParent(generalAttr)
 												.setDataType(BOOL)
-												.setNillable(true) // Set to true because of lack of migration system.
+												.setNillable(false) // Set to true because of lack of migration system.
 												.setDefaultValue(String.valueOf(DEFAULT_GENERAL_SHOW_NAVIGATOR_LINK))
 												.setLabel("Show link to navigator plugin");
 		}
