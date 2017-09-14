@@ -44,53 +44,53 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 	protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
 			FilterChain filterChain) throws ServletException, IOException
 	{
-		if (isTwoFactorAuthenticationEnabled())
+		if (isTwoFactorAuthenticationEnabled() && SecurityUtils.currentUserIsAuthenticated() && isNotProtected(
+				httpServletRequest.getRequestURI()) && isInsufficientlyAuthenticated()
+				&& isShouldUserTwoFactorAuthenticate())
 		{
-			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
-					&& SecurityUtils.currentUserIsAuthenticated() && !httpServletRequest.getRequestURI()
-																						.equalsIgnoreCase(
-																								CHANGE_PASSWORD_URI))
-			{
-				if (!isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken()
-						&& !isUserRecoveryAuthenticated())
-				{
-					if (isTwoFactorAuthenticationEnforced() || userUsesTwoFactorAuthentication())
-					{
-						if (twoFactorAuthenticationService.isConfiguredForUser())
-						{
-							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-									TwoFactorAuthenticationController.URI
-											+ TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI);
-							return;
-						}
-						else
-						{
-							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-									TwoFactorAuthenticationController.URI
-											+ TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI);
-							return;
-						}
-					}
-				}
-			}
+			redirectToTwoFactorAuthenticationController(httpServletRequest, httpServletResponse);
 		}
+		else
+		{
+			filterChain.doFilter(httpServletRequest, httpServletResponse);
+		}
+	}
 
-		filterChain.doFilter(httpServletRequest, httpServletResponse);
+	private boolean isNotProtected(String requestURI)
+	{
+		return !requestURI.contains(TwoFactorAuthenticationController.URI) && !requestURI.equalsIgnoreCase(
+				CHANGE_PASSWORD_URI);
+	}
+
+	private void redirectToTwoFactorAuthenticationController(HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse) throws IOException
+	{
+		if (twoFactorAuthenticationService.isConfiguredForUser())
+		{
+			redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.URI
+					+ TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI);
+		}
+		else
+		{
+			redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.URI
+					+ TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI);
+		}
+	}
+
+	private boolean isInsufficientlyAuthenticated()
+	{
+		return !isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken() && !isUserRecoveryAuthenticated();
+	}
+
+	private boolean isShouldUserTwoFactorAuthenticate()
+	{
+		return authenticationSettings.getTwoFactorAuthentication() == ENFORCED || userAccountService.getCurrentUser()
+																									.isTwoFactorAuthentication();
 	}
 
 	private boolean isTwoFactorAuthenticationEnabled()
 	{
 		return authenticationSettings.getTwoFactorAuthentication() != DISABLED;
-	}
-
-	private boolean isTwoFactorAuthenticationEnforced()
-	{
-		return authenticationSettings.getTwoFactorAuthentication() == ENFORCED;
-	}
-
-	private boolean userUsesTwoFactorAuthentication()
-	{
-		return userAccountService.getCurrentUser().isTwoFactorAuthentication();
 	}
 
 	private boolean isUserTwoFactorAuthenticated()
