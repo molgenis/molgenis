@@ -4,7 +4,6 @@ import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.framework.MolgenisUpgradeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	private final MolgenisVersionService versionService;
 	private final List<MolgenisUpgrade> upgrades = new ArrayList<>();
 
-	@Autowired
 	public MolgenisUpgradeServiceImpl(MolgenisVersionService versionService)
 	{
 		this.versionService = requireNonNull(versionService);

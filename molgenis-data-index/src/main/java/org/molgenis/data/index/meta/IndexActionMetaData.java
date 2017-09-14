@@ -1,7 +1,6 @@
 package org.molgenis.data.index.meta;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -55,7 +54,6 @@ public class IndexActionMetaData extends SystemEntityType
 	private final IndexPackage indexPackage;
 	private IndexActionGroupMetaData indexActionGroupMetaData;
 
-	@Autowired
 	public IndexActionMetaData(IndexPackage indexPackage, IndexActionGroupMetaData indexActionGroupMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_INDEX);

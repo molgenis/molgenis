@@ -19,7 +19,6 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -54,7 +53,6 @@ public class SnpEffRunner
 	private final Entity snpEffAnnotatorSettings;
 	private final IdGenerator idGenerator;
 
-	@Autowired
 	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator,
 			VcfAttributes vcfAttributes, EffectsMetaData effectsMetaData, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attributeFactory)

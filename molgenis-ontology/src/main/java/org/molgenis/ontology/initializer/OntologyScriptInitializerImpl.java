@@ -8,7 +8,6 @@ import org.molgenis.script.*;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 	private final ScriptFactory scriptFactory;
 	private final ScriptParameterFactory scriptParameterFactory;
 
-	@Autowired
 	public OntologyScriptInitializerImpl(DataService dataService, ScriptFactory scriptFactory,
 			ScriptParameterFactory scriptParameterFactory)
 	{

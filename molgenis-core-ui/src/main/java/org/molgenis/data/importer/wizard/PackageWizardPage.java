@@ -10,7 +10,6 @@ import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
@@ -37,7 +36,6 @@ public class PackageWizardPage extends AbstractWizardPage
 	private ImportServiceFactory importServiceFactory;
 	private MetaDataService metaDataService;
 
-	@Autowired
 	public PackageWizardPage(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
 			ImportServiceFactory importServiceFactory, MetaDataService metaDataService)
 	{

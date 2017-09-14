@@ -2,7 +2,6 @@ package org.molgenis.data.mapper.meta;
 
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,7 +29,6 @@ public class AttributeMappingMetaData extends SystemEntityType
 
 	private final MapperPackage mapperPackage;
 
-	@Autowired
 	public AttributeMappingMetaData(MapperPackage mapperPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_MAPPER);

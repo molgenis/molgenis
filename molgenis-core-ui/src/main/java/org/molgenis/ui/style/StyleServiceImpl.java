@@ -11,7 +11,6 @@ import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -40,7 +39,6 @@ public class StyleServiceImpl implements StyleService
 	private final StyleSheetFactory styleSheetFactory;
 	private final DataService dataService;
 
-	@Autowired
 	public StyleServiceImpl(AppSettings appSettings, IdGenerator idGenerator, FileStore fileStore,
 			FileMetaFactory fileMetaFactory, StyleSheetFactory styleSheetFactory, DataService dataService)
 	{

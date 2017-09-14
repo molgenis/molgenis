@@ -3,7 +3,6 @@ package org.molgenis.data.populate;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -25,7 +24,6 @@ public class AutoValuePopulator
 {
 	private final IdGenerator idGenerator;
 
-	@Autowired
 	public AutoValuePopulator(IdGenerator idGenerator)
 	{
 		this.idGenerator = requireNonNull(idGenerator);

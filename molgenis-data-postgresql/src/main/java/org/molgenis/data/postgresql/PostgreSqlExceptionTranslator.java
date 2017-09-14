@@ -11,7 +11,6 @@ import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.stereotype.Component;
@@ -43,7 +42,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlExceptionTranslator.class);
 	private final EntityTypeRegistry entityTypeRegistry;
 
-	@Autowired
 	PostgreSqlExceptionTranslator(DataSource dataSource, EntityTypeRegistry entityTypeRegistry)
 	{
 		super(requireNonNull(dataSource));

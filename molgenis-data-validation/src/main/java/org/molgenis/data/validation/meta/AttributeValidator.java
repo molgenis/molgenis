@@ -13,7 +13,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -47,7 +46,6 @@ public class AttributeValidator
 	private final EntityManager entityManager;
 	private final EmailValidator emailValidator;
 
-	@Autowired
 	public AttributeValidator(DataService dataService, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);

@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +36,6 @@ class PostgreSqlEntityFactory
 
 	private final EntityManager entityManager;
 
-	@Autowired
 	public PostgreSqlEntityFactory(EntityManager entityManager)
 	{
 		this.entityManager = requireNonNull(entityManager);

@@ -2,7 +2,6 @@ package org.molgenis.python;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,6 @@ public class PythonScriptExecutor
 
 	private final String pythonScriptExecutable;
 
-	@Autowired
 	public PythonScriptExecutor(@Value("${python_script_executable:/usr/bin/python}") String pythonScriptExecutable)
 	{
 		if (pythonScriptExecutable == null)

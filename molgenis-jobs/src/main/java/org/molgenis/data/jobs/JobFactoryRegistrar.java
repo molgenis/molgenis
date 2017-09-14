@@ -1,6 +1,5 @@
 package org.molgenis.data.jobs;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ public class JobFactoryRegistrar
 {
 	private final JobFactoryRegistry jobFactoryRegistry;
 
-	@Autowired
 	public JobFactoryRegistrar(JobFactoryRegistry jobFactoryRegistry)
 	{
 		this.jobFactoryRegistry = requireNonNull(jobFactoryRegistry);

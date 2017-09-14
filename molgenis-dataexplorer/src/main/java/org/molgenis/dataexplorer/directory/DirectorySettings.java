@@ -5,7 +5,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -31,7 +30,6 @@ public class DirectorySettings extends DefaultSettingsEntity
 	{
 		private EntityTypeMetadata entityTypeMetadata;
 
-		@Autowired
 		public Meta(EntityTypeMetadata entityTypeMetadata)
 		{
 			super(ID);

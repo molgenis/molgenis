@@ -4,7 +4,6 @@ import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +19,6 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 	private final RoleHierarchy roleHierarchy;
 	private final DataService dataService;
 
-	@Autowired
 	public PermissionSystemServiceImpl(UserService userService, UserAuthorityFactory userAuthorityFactory,
 			RoleHierarchy roleHierarchy, DataService dataService)
 	{

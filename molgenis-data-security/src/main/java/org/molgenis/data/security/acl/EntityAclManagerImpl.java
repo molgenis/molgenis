@@ -103,10 +103,10 @@ public class EntityAclManagerImpl implements EntityAclManager
 	@Override
 	public String getAclClassParent(EntityType entityType)
 	{
-		if (entityType.equals(EntityTypeMetadata.ENTITY_TYPE_META_DATA)) return EntityTypeMetadata.PACKAGE;
-		if (entityType.equals(PackageMetadata.PACKAGE)) return PackageMetadata.PARENT;
-		if (entityType.equals(AttributeMetadata.ATTRIBUTE_META_DATA)) return AttributeMetadata.ENTITY;
-		if (entityType.equals("sys_set_dataexplorer")) return "plugin";
+		if (entityType.getId().equals(EntityTypeMetadata.ENTITY_TYPE_META_DATA)) return EntityTypeMetadata.PACKAGE;
+		if (entityType.getId().equals(PackageMetadata.PACKAGE)) return PackageMetadata.PARENT;
+		if (entityType.getId().equals(AttributeMetadata.ATTRIBUTE_META_DATA)) return AttributeMetadata.ENTITY;
+		if (entityType.getId().equals("sys_set_dataexplorer")) return "plugin";
 		return null;
 	}
 

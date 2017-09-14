@@ -2,7 +2,6 @@ package org.molgenis.charts;
 
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.highcharts.convert.HighchartService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ public class ChartVisualizationServiceFactory
 {
 	private final List<ChartVisualizationService> chartVisualiationServices;
 
-	@Autowired
 	public ChartVisualizationServiceFactory(HighchartService highchartsService)
 	{
 		chartVisualiationServices = new ArrayList<>();

@@ -7,7 +7,6 @@ import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ public class StaticContentServiceImpl implements StaticContentService
 	private final DataService dataService;
 	private final StaticContentFactory staticContentFactory;
 
-	@Autowired
 	public StaticContentServiceImpl(DataService dataService, StaticContentFactory staticContentFactory)
 	{
 		this.dataService = requireNonNull(dataService);

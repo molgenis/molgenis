@@ -355,4 +355,11 @@ public class EntityTypeUtils
 		}
 		return false;
 	}
+
+	public static boolean isSystemEntity(EntityType entityType)
+	{
+		return entityType.getPackage() != null && (entityType.getPackage().getId().equals("sys") || entityType.getId()
+																											  .startsWith(
+																													  "sys_"));
+	}
 }

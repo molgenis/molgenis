@@ -19,7 +19,6 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 	private final EntityPopulator entityPopulator;
 	private AttributeMetadata attributeMetadata;
 
-	@Autowired
 	public AttributeFactory(EntityPopulator entityPopulator)
 	{
 		this.entityPopulator = requireNonNull(entityPopulator);

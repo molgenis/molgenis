@@ -7,7 +7,6 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +39,6 @@ public class QuestionnairePluginController extends PluginController
 	private final LanguageService languageService;
 	private final EntityManager entityManager;
 
-	@Autowired
 	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
 			LanguageService languageService, EntityManager entityManager)
 	{

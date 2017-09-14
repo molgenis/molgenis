@@ -7,7 +7,6 @@ import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -33,7 +32,6 @@ public class EntityAttributesValidator
 	private final ExpressionValidator expressionValidator;
 	private EmailValidator emailValidator;
 
-	@Autowired
 	public EntityAttributesValidator(ExpressionValidator expressionValidator)
 	{
 		this.expressionValidator = requireNonNull(expressionValidator);

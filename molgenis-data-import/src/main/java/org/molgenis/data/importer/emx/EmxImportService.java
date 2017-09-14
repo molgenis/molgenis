@@ -9,7 +9,6 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -33,7 +32,6 @@ public class EmxImportService implements ImportService
 	private final ImportWriter writer;
 	private final DataService dataService;
 
-	@Autowired
 	public EmxImportService(MetaDataParser parser, ImportWriter writer, DataService dataService)
 	{
 		this.parser = requireNonNull(parser);

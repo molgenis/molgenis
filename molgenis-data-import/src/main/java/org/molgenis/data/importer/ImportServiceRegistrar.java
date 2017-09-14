@@ -1,6 +1,5 @@
 package org.molgenis.data.importer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ public class ImportServiceRegistrar
 {
 	private final ImportServiceFactory importServiceFactory;
 
-	@Autowired
 	public ImportServiceRegistrar(ImportServiceFactory importServiceFactory)
 	{
 		this.importServiceFactory = requireNonNull(importServiceFactory);
