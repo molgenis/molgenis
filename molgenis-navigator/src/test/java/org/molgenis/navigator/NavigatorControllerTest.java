@@ -44,7 +44,7 @@ public class NavigatorControllerTest
 		initMocks(this);
 
 		Menu menu = mock(Menu.class);
-		when(menu.findMenuItemPath(NavigatorController.NAVIGATOR)).thenReturn("/test/path");
+		when(menu.findMenuItemPath(NavigatorController.ID)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(languageService.getCurrentUserLanguageCode()).thenReturn("AABBCC");
 		when(appSettings.getLanguageCode()).thenReturn("DDEEFF");

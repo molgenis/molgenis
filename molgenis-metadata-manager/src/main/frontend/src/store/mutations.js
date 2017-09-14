@@ -1,5 +1,6 @@
 // @flow
 import type { EditorAttribute, Alert, State, EditorPackageIdentifier, EditorEntityType, Update, UpdateOrder } from '../flow.types'
+import { INITIAL_STATE } from './state'
 
 export const SET_PACKAGES: string = '__SET_PACKAGES__'
 export const SET_ENTITY_TYPES: string = '__SET_ENTITY_TYPES__'
@@ -13,6 +14,7 @@ export const SET_SELECTED_ATTRIBUTE_ID: string = '__SET_SELECTED_ATTRIBUTE_ID__'
 export const DELETE_SELECTED_ATTRIBUTE: string = '__DELETE_SELECTED_ATTRIBUTE__'
 
 export const CREATE_ALERT: string = '__CREATE_ALERT__'
+const SYS_PACKAGE_ID = 'sys'
 
 /**
  * Swap the elements in an array at indexes originalIndex and targetIndex.
@@ -28,14 +30,40 @@ const swapArrayElements = (array: Array<EditorAttribute>, originalIndex: number,
   return array
 }
 
+/**
+ * Filter out all system entities unless user is superUser
+ * @param entities
+ * @returns {Array.<Object>}
+ */
+const filterNonVisibleEntities = (entities: Array<Object>) => {
+  return INITIAL_STATE.isSuperUser ? entities : entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
+}
+
+/**
+ * Filter out system package unless user is superUser
+ * @param packages
+ * @returns {Array.<Package>}
+ */
+const filterNonVisiblePackages = (packages: Array<EditorPackageIdentifier>) => {
+  if (INITIAL_STATE.isSuperUser) {
+    return packages
+  }
+
+  return packages
+    .filter(_package => _package.id !== SYS_PACKAGE_ID)
+    .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
+}
+
+const compareByLabel = (a, b) => a.label && b.label ? a.label.localeCompare(b.label) : 0
+
 export default {
   [SET_PACKAGES] (state: State, packages: Array<EditorPackageIdentifier>) {
-    state.packages = packages
+    const visiblePackages = filterNonVisiblePackages(packages)
+    state.packages = visiblePackages.sort(compareByLabel)
   },
   [SET_ENTITY_TYPES] (state: State, entityTypes: Array<Object>) {
-    state.entityTypes = entityTypes.sort((entityType1, entityType2) => {
-      return entityType1.label.localeCompare(entityType2.label)
-    })
+    const visibleEntities = filterNonVisibleEntities(entityTypes)
+    state.entityTypes = visibleEntities.sort(compareByLabel)
   },
   [SET_SELECTED_ENTITY_TYPE_ID] (state: State, entityTypeId: string) {
     state.selectedEntityTypeId = entityTypeId

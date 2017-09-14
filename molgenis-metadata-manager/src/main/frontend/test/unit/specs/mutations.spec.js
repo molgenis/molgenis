@@ -2,15 +2,28 @@ import mutations from 'store/mutations'
 
 describe('mutations', () => {
   describe('Testing mutation SET_PACKAGES', () => {
-    it('Sets package', () => {
+    it('Filters out the "system" packages for non system users, sorts the packages by label stores them in the store', () => {
       const state = {
         packages: []
       }
-      const packages = [{ id: 'sys_idx', label: 'Index' },
-        { id: 'sys_sec', label: 'Security' }, { id: 'sys', label: 'System' },
-        { id: 'sys_md', label: 'Meta' }, { id: 'base', label: 'Default' }]
+      const packages = [
+        { id: 'sys_idx', label: 'Index' },
+        { id: 'sys_sec', label: 'Security' },
+        { id: 'sys', label: 'System' },
+        { id: 'sys_md', label: 'Meta' },
+        { id: 'base', label: 'Default' },
+        { id: 'bbb', label: 'ZZZ' },
+        { id: 'aaa', label: 'AAA' }
+      ]
+
+      const expectedPackages = [
+        { id: 'aaa', label: 'AAA' },
+        { id: 'base', label: 'Default' },
+        { id: 'bbb', label: 'ZZZ' }
+      ]
       mutations.__SET_PACKAGES__(state, packages)
-      expect(state.packages).to.equal(packages)
+
+      expect(state.packages).to.deep.equal(expectedPackages)
     })
   })
 
@@ -46,7 +59,7 @@ describe('mutations', () => {
   })
 
   describe('Testing mutation SET_ENTITY_TYPES', () => {
-    it('Sets entity types', () => {
+    it('Filters out the "system" entities for non system users, sorts the entities by label stores them in the store', () => {
       const state = {
         alert: {
           entityTypes: []
@@ -54,19 +67,20 @@ describe('mutations', () => {
       }
 
       const payload = [
-        { label: 'B entity' },
-        { label: 'A entity' },
-        { label: 'C entity' },
-        { label: 'E entity' },
-        { label: 'D entity' }
+        { id: 'B', label: 'B entity' },
+        { id: 'A', label: 'A entity' },
+        { id: 'C', label: 'C entity' },
+        { id: 'E', label: 'E entity' },
+        { id: 'D', label: 'D entity' },
+        { id: 'sys_sec', label: 'Security' }
       ]
 
       const expected = [
-        { label: 'A entity' },
-        { label: 'B entity' },
-        { label: 'C entity' },
-        { label: 'D entity' },
-        { label: 'E entity' }
+        { id: 'A', label: 'A entity' },
+        { id: 'B', label: 'B entity' },
+        { id: 'C', label: 'C entity' },
+        { id: 'D', label: 'D entity' },
+        { id: 'E', label: 'E entity' }
       ]
 
       mutations.__SET_ENTITY_TYPES__(state, payload)

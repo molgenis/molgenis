@@ -8,9 +8,10 @@ import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
+import org.molgenis.security.user.UserAccountService;
+import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -26,34 +27,28 @@ import static org.springframework.http.HttpStatus.*;
 
 @Controller
 @RequestMapping(URI)
-public class MetadataManagerController extends PluginController
+public class MetadataManagerController extends VuePluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerController.class);
 
 	public static final String METADATA_MANAGER = "metadata-manager";
 	public static final String URI = PLUGIN_URI_PREFIX + METADATA_MANAGER;
 
-	private MenuReaderService menuReaderService;
-	private LanguageService languageService;
-	private AppSettings appSettings;
 	private MetadataManagerService metadataManagerService;
 
 	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings, MetadataManagerService metadataManagerService)
+			AppSettings appSettings, MetadataManagerService metadataManagerService,
+			UserAccountService userAccountService)
 	{
-		super(URI);
-		this.menuReaderService = requireNonNull(menuReaderService);
-		this.languageService = requireNonNull(languageService);
-		this.appSettings = requireNonNull(appSettings);
+		super(URI, menuReaderService, languageService, appSettings, userAccountService);
 		this.metadataManagerService = requireNonNull(metadataManagerService);
+
 	}
 
 	@GetMapping("/**")
 	public String init(Model model)
 	{
-		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
-		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
-		model.addAttribute("baseUrl", getBaseUrl());
+		super.init(model, METADATA_MANAGER);
 		return "view-metadata-manager";
 	}
 
@@ -108,10 +103,5 @@ public class MetadataManagerController extends PluginController
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
-	}
-
-	private String getBaseUrl()
-	{
-		return menuReaderService.getMenu().findMenuItemPath(MetadataManagerController.METADATA_MANAGER);
 	}
 }
