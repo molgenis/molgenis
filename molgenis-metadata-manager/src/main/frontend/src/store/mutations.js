@@ -36,11 +36,7 @@ const swapArrayElements = (array: Array<EditorAttribute>, originalIndex: number,
  * @returns {Array.<Object>}
  */
 const filterNonVisibleEntities = (entities: Array<Object>) => {
-  if (INITIAL_STATE.isSuperUser) {
-    return entities
-  }
-
-  return entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
+  return INITIAL_STATE.isSuperUser ? entities : entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
 /**
