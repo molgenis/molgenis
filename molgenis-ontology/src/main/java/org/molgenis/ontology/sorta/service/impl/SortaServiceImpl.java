@@ -15,7 +15,6 @@ import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.bean.OntologyTermHitEntity;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,7 +50,6 @@ public class SortaServiceImpl implements SortaService
 	private final OntologyTermHitMetaData ontologyTermHitMetaData;
 	private final OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
-	@Autowired
 	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService,
 			OntologyTermHitMetaData ontologyTermHitMetaData, OntologyTermSynonymFactory ontologyTermSynonymFactory)
 	{

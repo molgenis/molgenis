@@ -1,6 +1,5 @@
 package org.molgenis.data.transaction;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,6 @@ public class TransactionExceptionTranslatorRegistrar
 {
 	private final TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry;
 
-	@Autowired
 	public TransactionExceptionTranslatorRegistrar(
 			TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry)
 	{

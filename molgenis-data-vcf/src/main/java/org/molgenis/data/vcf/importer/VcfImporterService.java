@@ -16,7 +16,6 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +39,6 @@ public class VcfImporterService implements ImportService
 	private final MetaDataService metaDataService;
 	private final DefaultPackage defaultPackage;
 
-	@Autowired
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
 			MetaDataService metaDataService, DefaultPackage defaultPackage)
 

@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ public class SystemRepositoryDecoratorFactoryRegistrar
 {
 	private final SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry;
 
-	@Autowired
 	public SystemRepositoryDecoratorFactoryRegistrar(SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry)
 	{
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);

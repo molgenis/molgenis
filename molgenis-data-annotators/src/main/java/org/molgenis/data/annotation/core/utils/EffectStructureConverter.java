@@ -13,7 +13,6 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ public class EffectStructureConverter
 	private EntityTypeFactory entityTypeFactory;
 	private AttributeFactory attributeFactory;
 
-	@Autowired
 	public EffectStructureConverter(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory)
 	{
 		this.entityTypeFactory = entityTypeFactory;

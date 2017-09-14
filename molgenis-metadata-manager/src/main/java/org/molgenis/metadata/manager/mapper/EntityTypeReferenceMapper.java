@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -18,7 +17,6 @@ class EntityTypeReferenceMapper
 	private final EntityTypeMetadata entityTypeMetadata;
 	private final DataService dataService;
 
-	@Autowired
 	EntityTypeReferenceMapper(EntityTypeMetadata entityTypeMetadata, DataService dataService)
 	{
 		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);

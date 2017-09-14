@@ -3,7 +3,6 @@ package org.molgenis.ontology.sorta.meta;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -29,7 +28,6 @@ public class SortaJobExecutionMetaData extends SystemEntityType
 	private final JobPackage jobPackage;
 	private final JobExecutionMetaData jobExecutionMetaData;
 
-	@Autowired
 	SortaJobExecutionMetaData(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_JOB);

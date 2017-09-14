@@ -2,13 +2,11 @@ package org.molgenis.data.i18n.model;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LanguageFactory extends AbstractSystemEntityFactory<Language, LanguageMetadata, String>
 {
-	@Autowired
 	LanguageFactory(LanguageMetadata languageMetadata, EntityPopulator entityPopulator)
 	{
 		super(Language.class, languageMetadata, entityPopulator);

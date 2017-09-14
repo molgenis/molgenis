@@ -13,7 +13,6 @@ import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +27,6 @@ public class OntologyTermRepository
 {
 	private final DataService dataService;
 
-	@Autowired
 	public OntologyTermRepository(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);

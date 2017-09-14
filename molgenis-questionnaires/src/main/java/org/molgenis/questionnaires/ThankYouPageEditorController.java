@@ -4,7 +4,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +29,6 @@ public class ThankYouPageEditorController extends PluginController
 	private final ThankYouTextService thankYouTextService;
 	private final DataService dataService;
 
-	@Autowired
 	public ThankYouPageEditorController(DataService dataService, ThankYouTextService thankYouTextService)
 	{
 		super(URI);

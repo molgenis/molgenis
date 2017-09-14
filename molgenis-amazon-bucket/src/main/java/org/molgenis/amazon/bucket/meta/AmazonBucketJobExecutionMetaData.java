@@ -4,7 +4,6 @@ import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.file.model.FileMetaMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -33,7 +32,6 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType
 
 	public static final String AMAZON_BUCKET_JOB_TYPE = "AmazonBucketJob";
 
-	@Autowired
 	AmazonBucketJobExecutionMetaData(FileMetaMetaData fileMetaMetaData, JobExecutionMetaData jobExecutionMetaData,
 			JobPackage jobPackage)
 	{

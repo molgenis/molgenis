@@ -5,6 +5,7 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,7 +24,6 @@ public class SearchAllPluginController extends VuePluginController
 	public static final String NAVIGATOR = "navigator";
 	public static final String DATAEXPLORER = "dataexplorer";
 
-	@Autowired
 	public SearchAllPluginController(LanguageService languageService, AppSettings appSettings,
 			MenuReaderService menuReaderService, UserAccountService userAccountService)
 	{
