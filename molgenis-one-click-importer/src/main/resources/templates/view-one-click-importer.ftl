@@ -14,6 +14,7 @@
         baseUrl: '${baseUrl}',
         lng: '${lng}',
         fallbackLng: '${fallbackLng}'<#if navigatorBaseUrl??>,
+        isSuperUser: ${isSuperUser?c},
         navigatorBaseUrl: '${navigatorBaseUrl}'</#if><#if dataExplorerBaseUrl??>,
         dataExplorerBaseUrl: '${dataExplorerBaseUrl}'</#if>
     }
