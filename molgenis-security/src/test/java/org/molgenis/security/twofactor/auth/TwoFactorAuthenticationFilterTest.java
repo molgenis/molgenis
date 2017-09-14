@@ -13,14 +13,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.servlet.FilterChain;
@@ -34,6 +36,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = { TwoFactorAuthenticationFilterTest.Config.class })
+@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
 public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringContextTests
 {
 
@@ -44,17 +47,22 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 	@Autowired
 	private TwoFactorAuthenticationFilter filter;
 
+	private MockHttpServletRequest request;
+	private MockHttpServletResponse response;
+	private FilterChain chain;
+
+	@BeforeMethod
+	public void setUpBeforeMethod()
+	{
+		request = new MockHttpServletRequest();
+		response = new MockHttpServletResponse();
+		chain = mock(FilterChain.class);
+	}
+
 	@Test
+	@WithMockUser(username = "user")
 	public void testDoFilterInternalIsConfigured() throws IOException, ServletException
 	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		FilterChain chain = mock(FilterChain.class);
-
-		UsernamePasswordAuthenticationToken token = mock(UsernamePasswordAuthenticationToken.class);
-		SecurityContextHolder.getContext().setAuthentication(token);
-		when(token.isAuthenticated()).thenReturn(true);
-
 		request.setRequestURI("/login");
 		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
@@ -67,16 +75,9 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 	}
 
 	@Test
+	@WithMockUser(username = "user")
 	public void testDoFilterInternalIsConfiguredChangePassword() throws IOException, ServletException
 	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		FilterChain chain = mock(FilterChain.class);
-
-		UsernamePasswordAuthenticationToken token = mock(UsernamePasswordAuthenticationToken.class);
-		SecurityContextHolder.getContext().setAuthentication(token);
-		when(token.isAuthenticated()).thenReturn(true);
-
 		request.setRequestURI("/account/password/change");
 		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
@@ -87,16 +88,9 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 	}
 
 	@Test
+	@WithMockUser(username = "user")
 	public void testDoFilterInternalIsNotConfigured() throws IOException, ServletException
 	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		FilterChain chain = mock(FilterChain.class);
-
-		UsernamePasswordAuthenticationToken token = mock(UsernamePasswordAuthenticationToken.class);
-		when(token.isAuthenticated()).thenReturn(true);
-		SecurityContextHolder.getContext().setAuthentication(token);
-
 		request.setRequestURI("/login");
 		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(false);
@@ -112,10 +106,6 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 	@Test
 	public void testDoFilterInternalNotAuthenticated() throws IOException, ServletException
 	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		FilterChain chain = mock(FilterChain.class);
-
 		request.setRequestURI("/login");
 		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(DISABLED);
 
