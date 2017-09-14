@@ -1,6 +1,5 @@
 package org.molgenis.security.twofactor.auth;
 
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
@@ -19,6 +18,7 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.CHANGE_PASSWORD_URI;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAuthenticated;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 
@@ -44,9 +44,8 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 	protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
 			FilterChain filterChain) throws ServletException, IOException
 	{
-		if (isTwoFactorAuthenticationEnabled() && SecurityUtils.currentUserIsAuthenticated() && isNotProtected(
-				httpServletRequest.getRequestURI()) && isInsufficientlyAuthenticated()
-				&& isShouldUserTwoFactorAuthenticate())
+		if (isUserShouldTwoFactorAuthenticate() && currentUserIsAuthenticated() && isNotProtected(
+				httpServletRequest.getRequestURI()) && isInsufficientlyAuthenticated())
 		{
 			redirectToTwoFactorAuthenticationController(httpServletRequest, httpServletResponse);
 		}
@@ -54,6 +53,13 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		{
 			filterChain.doFilter(httpServletRequest, httpServletResponse);
 		}
+	}
+
+	private boolean isUserShouldTwoFactorAuthenticate()
+	{
+		return authenticationSettings.getTwoFactorAuthentication() != DISABLED && (
+				authenticationSettings.getTwoFactorAuthentication() == ENFORCED || userAccountService.getCurrentUser()
+																									 .isTwoFactorAuthentication());
 	}
 
 	private boolean isNotProtected(String requestURI)
@@ -80,17 +86,6 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 	private boolean isInsufficientlyAuthenticated()
 	{
 		return !isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken() && !isUserRecoveryAuthenticated();
-	}
-
-	private boolean isShouldUserTwoFactorAuthenticate()
-	{
-		return authenticationSettings.getTwoFactorAuthentication() == ENFORCED || userAccountService.getCurrentUser()
-																									.isTwoFactorAuthentication();
-	}
-
-	private boolean isTwoFactorAuthenticationEnabled()
-	{
-		return authenticationSettings.getTwoFactorAuthentication() != DISABLED;
 	}
 
 	private boolean isUserTwoFactorAuthenticated()
