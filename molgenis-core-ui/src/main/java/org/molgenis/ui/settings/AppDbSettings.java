@@ -130,7 +130,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 												   "Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers. Values not ending with the extension 'js' will be ignored");
 
 			addAttribute(SHOW_MENU_PATH).setDataType(BOOL)
-										.setNillable(false)
+										.setNillable(true) // TODO Set to false when we have migration system
 										.setDefaultValue(String.valueOf(DEFAULT_SHOW_MENU_PATH))
 										.setLabel("Show menu path")
 										.setDescription(
