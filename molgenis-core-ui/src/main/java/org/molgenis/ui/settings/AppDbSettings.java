@@ -36,6 +36,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
 		private static final String CSS_HREF = "css_href";
+		private static final String SHOW_MENU_PATH = "show_menu_path";
 
 		private static final String TRACKING = "tracking";
 		private static final String TRACKING_CODE_FOOTER = "tracking_code_footer";
@@ -53,6 +54,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = false;
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS = true;
+		private static final boolean DEFAULT_SHOW_MENU_PATH = false;
 
 		private static final String CUSTOM_JAVASCRIPT = "custom_javascript";
 
@@ -76,32 +78,39 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 							   .setDefaultValue(DEFAULT_TITLE)
 							   .setLabel("Application title")
 							   .setDescription("Displayed in browser toolbar.");
+
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING)
 										  .setNillable(true)
 										  .setLabel("Logo in navigation bar")
 										  .setDefaultValue(DEFAULT_LOGO_NAVBAR_HREF)
 										  .setDescription("HREF to logo image used instead of home plugin label");
+
 			addAttribute(LOGO_TOP_HREF).setDataType(STRING)
 									   .setNillable(true)
 									   .setLabel("Logo above navigation bar")
 									   .setDescription("HREF to logo image");
+
 			addAttribute(FOOTER).setDataType(TEXT).setNillable(true).setLabel("Footer text");
+
 			addAttribute(MENU).setDataType(TEXT)
 							  .setNillable(true)
 							  .setDefaultValue(getDefaultMenuValue())
 							  .setLabel("Menu")
 							  .setDescription("JSON object that describes menu content.");
+
 			addAttribute(LANGUAGE_CODE).setDataType(STRING)
 									   .setNillable(false)
 									   .setDefaultValue(DEFAULT_LANGUAGE_CODE)
 									   .setLabel("Language code")
 									   .setDescription("ISO 639 alpha-2 or alpha-3 language code.");
+
 			addAttribute(BOOTSTRAP_THEME).setDataType(STRING)
 										 .setNillable(false)
 										 .setDefaultValue(DEFAULT_BOOTSTRAP_THEME)
 										 .setLabel("Bootstrap theme")
 										 .setDescription(
 												 "CSS file name of theme (see molgenis-core-ui/src/main/resources/css/themes).");
+
 			addAttribute(CSS_HREF).setDataType(STRING)
 								  .setNillable(true)
 								  .setLabel("CSS href")
@@ -120,6 +129,13 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 										   .setDescription(
 												   "Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers. Values not ending with the extension 'js' will be ignored");
 
+			addAttribute(SHOW_MENU_PATH).setDataType(BOOL)
+										.setNillable(true) // TODO Set to false when we have migration system
+										.setDefaultValue(String.valueOf(DEFAULT_SHOW_MENU_PATH))
+										.setLabel("Show menu path")
+										.setDescription(
+												"Show a non-clickable path from home to your current plugin under the navigaton menu.");
+
 			// tracking settings
 			Attribute trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
 
@@ -131,11 +147,13 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 														   .setLabel("IP anonymization")
 														   .setDescription(
 																   "Disables the cookie wall by using privacy friendly tracking (only works if google analytics accounts are configured correctly, see below)");
+
 			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID).setParent(trackingAttr)
 													  .setDataType(STRING)
 													  .setNillable(true)
 													  .setLabel("Google analytics tracking ID")
 													  .setDescription("Google analytics tracking ID (e.g. UA-XXXX-Y)");
+
 			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS).setParent(trackingAttr)
 																			.setDataType(BOOL)
 																			.setNillable(false)
@@ -145,12 +163,14 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 																					"Google analytics account privacy friendly")
 																			.setDescription(
 																					"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+
 			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS).setParent(trackingAttr)
 															   .setDataType(STRING)
 															   .setNillable(true)
 															   .setLabel("Google analytics tracking ID (MOLGENIS)")
 															   .setDescription(
 																	   "Google analytics tracking ID used by MOLGENIS");
+
 			addAttribute(GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS).setParent(trackingAttr)
 																					 .setDataType(BOOL)
 																					 .setNillable(false)
@@ -161,6 +181,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 																							 "Google analytics account privacy friendly (MOLGENIS)")
 																					 .setDescription(
 																							 "Confirm that the MOLGENIS Google Analytics account is configured as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+
 			addAttribute(TRACKING_CODE_FOOTER).setParent(trackingAttr)
 											  .setDataType(SCRIPT)
 											  .setNillable(true)
@@ -362,5 +383,17 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public String getCustomJavascript()
 	{
 		return getString(Meta.CUSTOM_JAVASCRIPT);
+	}
+
+	@Override
+	public void setShowMenuPath(boolean showMenuPath)
+	{
+		set(Meta.SHOW_MENU_PATH, showMenuPath);
+	}
+
+	@Override
+	public boolean getShowMenuPath()
+	{
+		return getBoolean(Meta.SHOW_MENU_PATH);
 	}
 }

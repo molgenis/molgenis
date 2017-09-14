@@ -178,4 +178,10 @@ public interface AppSettings
 	@Nullable
 	String getCustomJavascript();
 
+	/**
+	 * @return boolean determining if the menu path should be shown or not
+	 */
+	boolean getShowMenuPath();
+
+	void setShowMenuPath(boolean showMenuPath);
 }
