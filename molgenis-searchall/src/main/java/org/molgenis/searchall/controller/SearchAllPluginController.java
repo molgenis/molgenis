@@ -2,48 +2,38 @@ package org.molgenis.searchall.controller;
 
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.user.UserAccountService;
+import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.searchall.controller.SearchAllPluginController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class SearchAllPluginController extends PluginController
+public class SearchAllPluginController extends VuePluginController
 {
-	public static final String SEARCHALL = "searchAll";
-	public static final String URI = PLUGIN_URI_PREFIX + SEARCHALL;
-
-	private final LanguageService languageService;
-	private final AppSettings appSettings;
-	private final MenuReaderService menuReaderService;
+	public static final String ID = "searchAll";
+	public static final String URI = PLUGIN_URI_PREFIX + ID;
 
 	public static final String NAVIGATOR = "navigator";
 	public static final String DATAEXPLORER = "dataexplorer";
 
 	public SearchAllPluginController(LanguageService languageService, AppSettings appSettings,
-			MenuReaderService menuReaderService)
+			MenuReaderService menuReaderService, UserAccountService userAccountService)
 	{
-		super(URI);
-		this.languageService = requireNonNull(languageService);
-		this.appSettings = requireNonNull(appSettings);
-		this.menuReaderService = requireNonNull(menuReaderService);
+		super(URI, menuReaderService, languageService, appSettings, userAccountService);
 	}
 
 	@GetMapping("/**")
 	public String init(Model model)
 	{
-		model.addAttribute("baseUrl", menuReaderService.getMenu().findMenuItemPath(SEARCHALL));
-		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
-		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
+		super.init(model, ID);
 		model.addAttribute("navigatorBaseUrl", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR));
 		model.addAttribute("dataExplorerBaseUrl", menuReaderService.getMenu().findMenuItemPath(DATAEXPLORER));
-
 		return "view-search-all";
 	}
 
