@@ -19,6 +19,7 @@ public class AclService extends JdbcMutableAclService
 	private static final String CLASS_EXISTS_PRIMARY_KEY_SQL = "select exists(select id from acl_class where class=?)";
 	private static final String SELECT_CLASS_PRIMARY_KEY_SQL = "select id from acl_class where class=?";
 	private static final String INSERT_CLASS_SQL = "INSERT INTO acl_class (class) values ('%s') ON CONFLICT DO NOTHING";
+	private static final String DELETE_CLASS_SQL = "DELETE FROM acl_class WHERE class='%s'";
 
 	private static final String DEFAULT_SELECT_ACL_WITH_PARENT_SQL =
 			"select obj.object_id_identity as obj_id, class.class as class "
@@ -33,12 +34,16 @@ public class AclService extends JdbcMutableAclService
 	{
 		super(dataSource, lookupStrategy, aclCache);
 		setClassPrimaryKeyQuery(SELECT_CLASS_PRIMARY_KEY_SQL);
-		setInsertClassSql(INSERT_CLASS_SQL);
 	}
 
 	public void createClass(String type)
 	{
 		jdbcTemplate.execute(String.format(INSERT_CLASS_SQL, type));
+	}
+
+	public void deleteClass(String type)
+	{
+		jdbcTemplate.execute(String.format(DELETE_CLASS_SQL, type));
 	}
 
 	public boolean hasClass(String classId)

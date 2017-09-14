@@ -5,6 +5,7 @@ import org.molgenis.auth.Role;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.PermissionService;
@@ -71,6 +72,30 @@ public class MolgenisPermissionController
 		return dataService.findAll(ROLE, Role.class)
 						  .map(role -> SecurityId.createForAuthority(role.getLabel()))
 						  .collect(toList());
+	}
+
+	@PostMapping("/acl/{entityTypeId}/create")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	public void createAclClass(@PathVariable("entityTypeId") String entityTypeId)
+	{
+		EntityType entityType = dataService.getEntityType(entityTypeId);
+		if (entityType == null)
+		{
+			throw new UnknownEntityException(String.format("Unknown entity type '%s'", entityTypeId));
+		}
+		entityAclManager.createAclClass(entityType);
+	}
+
+	@PostMapping("/acl/{entityTypeId}/delete")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	public void deleteAclClass(@PathVariable("entityTypeId") String entityTypeId)
+	{
+		EntityType entityType = dataService.getEntityType(entityTypeId);
+		if (entityType == null)
+		{
+			throw new UnknownEntityException(String.format("Unknown entity type '%s'", entityTypeId));
+		}
+		entityAclManager.deleteAclClass(entityType);
 	}
 
 	@RequestMapping(value = "/acl", method = PUT)

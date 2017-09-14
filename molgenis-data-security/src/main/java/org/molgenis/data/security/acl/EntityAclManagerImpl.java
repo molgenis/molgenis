@@ -115,6 +115,20 @@ public class EntityAclManagerImpl implements EntityAclManager
 	public void createAclClass(EntityType entityType)
 	{
 		aclService.createClass(entityType.getId());
+		Fetch entityIdFetch = new Fetch().field(entityType.getIdAttribute().getName());
+		dataService.getMeta().getRepository(entityType).forEachBatched(entityIdFetch, this::createAcls, BATCH_SIZE);
+	}
+
+	@Override
+	@Transactional
+	public void createAclClass(Collection<EntityType> entityTypes)
+	{
+		entityTypes.forEach(entityType -> aclService.createClass(entityType.getId()));
+		entityTypes.forEach(entityType ->
+		{
+			Fetch entityIdFetch = new Fetch().field(entityType.getIdAttribute().getName());
+			dataService.getMeta().getRepository(entityType).forEachBatched(entityIdFetch, this::createAcls, BATCH_SIZE);
+		});
 	}
 
 	@Override
@@ -123,6 +137,7 @@ public class EntityAclManagerImpl implements EntityAclManager
 	{
 		Fetch entityIdFetch = new Fetch().field(entityType.getIdAttribute().getName());
 		dataService.getMeta().getRepository(entityType).forEachBatched(entityIdFetch, this::deleteAcls, BATCH_SIZE);
+		aclService.deleteClass(entityType.getId());
 	}
 
 	@Override
