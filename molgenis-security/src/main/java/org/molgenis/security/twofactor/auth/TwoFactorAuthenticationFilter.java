@@ -48,8 +48,8 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 		{
 			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
 					&& SecurityUtils.currentUserIsAuthenticated() && !httpServletRequest.getRequestURI()
-																						.toLowerCase()
-																						.equals(CHANGE_PASSWORD_URI.toLowerCase()))
+																						.equalsIgnoreCase(
+																								CHANGE_PASSWORD_URI))
 			{
 				if (!isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken()
 						&& !isUserRecoveryAuthenticated())
@@ -80,7 +80,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 
 	private boolean isTwoFactorAuthenticationEnabled()
 	{
-		return !(authenticationSettings.getTwoFactorAuthentication() == DISABLED);
+		return authenticationSettings.getTwoFactorAuthentication() != DISABLED;
 	}
 
 	private boolean isTwoFactorAuthenticationEnforced()
