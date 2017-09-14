@@ -60,9 +60,7 @@ public class OpenCpuSettingsImpl extends DefaultSettingsEntity implements OpenCp
 							  .setDescription("Open CPU URI host (e.g. localhost).");
 			addAttribute(PORT).setDataType(INT)
 							  .setDefaultValue(defaultPort)
-							  .setNillable(false)
-							  .setLabel("URI port")
-							  .setDescription("Open CPU URI port (e.g. 8004).");
+							  .setNillable(false).setLabel("URI port").setDescription("Open CPU URI port (e.g. 8004).");
 			addAttribute(ROOT_PATH).setDataType(STRING)
 								   .setDefaultValue(defaultRootPath)
 								   .setNillable(false)

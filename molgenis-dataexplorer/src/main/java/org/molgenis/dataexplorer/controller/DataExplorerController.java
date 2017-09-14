@@ -124,10 +124,12 @@ public class DataExplorerController extends PluginController
 
 		final boolean currentUserIsSu = SecurityUtils.currentUserIsSu();
 
-		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
-				.filter(entityType -> !entityType.isAbstract())
-				.filter(entityType -> currentUserIsSu || !EntityTypeUtils.isSystemEntity(entityType))
-				.collect(toMap(EntityType::getId, entityType -> entityType));
+		Map<String, EntityType> entitiesMeta = dataService.getMeta()
+														  .getEntityTypes()
+														  .filter(entityType -> !entityType.isAbstract())
+														  .filter(entityType -> currentUserIsSu
+																  || !EntityTypeUtils.isSystemEntity(entityType))
+														  .collect(toMap(EntityType::getId, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)

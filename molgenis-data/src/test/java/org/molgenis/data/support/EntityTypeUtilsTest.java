@@ -17,9 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class EntityTypeUtilsTest
 {
@@ -118,7 +116,8 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityIfInSystemPackage() {
+	public void isSystemEntityIfInSystemPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
 		when(entity.getPackage()).thenReturn(entityPackage);
@@ -127,7 +126,8 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityIfInSystemSubPackage() {
+	public void isSystemEntityIfInSystemSubPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
 		when(entity.getPackage()).thenReturn(entityPackage);
@@ -137,7 +137,8 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityNotASystemIfNotInSystemPackage() {
+	public void isSystemEntityNotASystemIfNotInSystemPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
 		when(entity.getPackage()).thenReturn(entityPackage);
@@ -147,7 +148,8 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityNotASystemEntityIfNotInPackage() {
+	public void isSystemEntityNotASystemEntityIfNotInPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		when(entity.getPackage()).thenReturn(null);
 		assertFalse(EntityTypeUtils.isSystemEntity(entity));

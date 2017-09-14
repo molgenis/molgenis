@@ -4,8 +4,6 @@ import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.ui.admin.user.UserAccountController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
