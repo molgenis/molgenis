@@ -2,10 +2,12 @@ package org.molgenis.metadata.manager.controller;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.*;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonConfig;
@@ -51,6 +53,9 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	@Autowired
 	private MetadataManagerService metadataManagerService;
 
+	@Autowired
+	private UserAccountService userAccountService;
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
@@ -65,9 +70,12 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 
 		when(languageService.getCurrentUserLanguageCode()).thenReturn("en");
 		when(appSettings.getLanguageCode()).thenReturn("nl");
+		User user = mock(User.class);
+		when(user.isSuperuser()).thenReturn(false);
+		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		MetadataManagerController metadataEditorController = new MetadataManagerController(menuReaderService,
-				languageService, appSettings, metadataManagerService);
+				languageService, appSettings, metadataManagerService, userAccountService);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(metadataEditorController)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -207,6 +215,12 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		public MetadataManagerService metadataManagerService()
 		{
 			return mock(MetadataManagerService.class);
+		}
+
+		@Bean
+		public UserAccountService userAccountService()
+		{
+			return mock(UserAccountService.class);
 		}
 	}
 }

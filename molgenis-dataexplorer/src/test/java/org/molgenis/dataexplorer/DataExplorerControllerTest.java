@@ -2,6 +2,7 @@ package org.molgenis.dataexplorer;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.mapdb.Fun;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -36,6 +37,9 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
@@ -110,6 +114,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
 		when(freemarkerConfigurer.getConfiguration()).thenReturn(configuration);
 
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
+
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
@@ -144,13 +152,34 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
 
-		Menu menu = mock(Menu.class);
-		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
-
 		controller.init(selectedEntityname, selectedEntityId, model);
 
 		verify(model, never()).addAttribute("navigatorBaseUrl", navigatorPath);
+	}
+
+	@Test
+	public void initSortEntitiesByLabel ()
+	{
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+
+		EntityType entity1 = mock(EntityType.class);
+		when(entity1.getId()).thenReturn("1");
+		when(entity1.getLabel()).thenReturn("zzz");
+
+		EntityType entity2 = mock(EntityType.class);
+		when(entity2.getId()).thenReturn("2");
+		when(entity2.getLabel()).thenReturn("aaa");
+
+		Stream<EntityType> entityStream = Stream.of(entity1, entity2);
+		when(metaDataService.getEntityTypes()).thenReturn(entityStream);
+
+		controller.init(null, null, model);
+
+		LinkedHashMap expected = new LinkedHashMap<>(Stream.of(entity1, entity2).sorted(Comparator.comparing(EntityType::getLabel))
+				.collect(Collectors.toMap(EntityType::getId, Function.identity())));
+
+		verify(model).addAttribute("entitiesMeta", expected);
 	}
 
 	@Test

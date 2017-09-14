@@ -65,7 +65,7 @@ public class OneClickImportJobTest
 		File file = loadFile(OneClickImportJobTest.class, "/" + filename);
 		when(fileStore.getFile(filename)).thenReturn(file);
 
-		List<Sheet> sheets = mock(List.class);
+		List<Sheet> sheets = new ArrayList<>();
 		when(excelService.buildExcelSheetsFromFile(file)).thenReturn(sheets);
 
 		DataCollection dataCollection = mock(DataCollection.class);
