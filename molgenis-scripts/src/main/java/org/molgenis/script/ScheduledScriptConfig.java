@@ -7,7 +7,6 @@ import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
 import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -33,7 +32,6 @@ public class ScheduledScriptConfig
 	private final ScriptJobExecutionMetadata scriptJobExecutionMetadata;
 	private final Gson gson;
 
-	@Autowired
 	public ScheduledScriptConfig(SavedScriptRunner savedScriptRunner, ScheduledJobTypeFactory scheduledJobTypeFactory,
 			ScriptJobExecutionMetadata scriptJobExecutionMetadata, Gson gson)
 	{

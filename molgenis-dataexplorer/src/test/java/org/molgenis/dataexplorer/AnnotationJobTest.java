@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionException;
 import org.molgenis.data.jobs.Progress;
@@ -81,7 +82,7 @@ public class AnnotationJobTest extends AbstractMockitoTest
 		when(exac.getSimpleName()).thenReturn("exac");
 		when(cadd.getSimpleName()).thenReturn("cadd");
 
-		IOException exception = new IOException("error");
+		AnnotationException exception = new AnnotationException(mock(AnnotationException.class));
 		doThrow(exception).when(crudRepositoryAnnotator).annotate(exac, repository);
 		try
 		{

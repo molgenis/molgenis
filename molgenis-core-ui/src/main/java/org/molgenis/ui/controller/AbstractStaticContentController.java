@@ -5,8 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public abstract class AbstractStaticContentController extends PluginController
@@ -27,7 +27,7 @@ public abstract class AbstractStaticContentController extends PluginController
 		this.uniqueReference = uniqueReference;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(final Model model)
 	{
 		try
@@ -44,7 +44,7 @@ public abstract class AbstractStaticContentController extends PluginController
 		return "view-staticcontent";
 	}
 
-	@RequestMapping(value = "/edit", method = RequestMethod.GET)
+	@GetMapping("/edit")
 	public String initEditView(final Model model)
 	{
 		this.staticContentService.checkPermissions(this.uniqueReference);
@@ -61,7 +61,7 @@ public abstract class AbstractStaticContentController extends PluginController
 		return "view-staticcontent-edit";
 	}
 
-	@RequestMapping(value = "/edit", method = RequestMethod.POST)
+	@PostMapping("/edit")
 	public String submitContent(@RequestParam(value = "content") final String content, final Model model)
 	{
 		this.staticContentService.checkPermissions(this.uniqueReference);

@@ -7,7 +7,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.Impl.OneClickImporterServiceImpl;
+import org.molgenis.oneclickimporter.service.impl.OneClickImporterServiceImpl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

@@ -1,7 +1,6 @@
 package org.molgenis.auth;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -18,7 +17,6 @@ public class AuthorityMetaData extends SystemEntityType
 
 	private final SecurityPackage securityPackage;
 
-	@Autowired
 	AuthorityMetaData(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);

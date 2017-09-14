@@ -2,7 +2,6 @@ package org.molgenis.questionnaires;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.security.owned.OwnedEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ public class QuestionnaireMetaData extends SystemEntityType
 
 	private final OwnedEntityType ownedEntityType;
 
-	@Autowired
 	QuestionnaireMetaData(OwnedEntityType ownedEntityType)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);

@@ -16,7 +16,6 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -61,7 +60,6 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 	private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
 
-	@Autowired
 	IndexActionRegisterServiceImpl(DataService dataService, IndexActionFactory indexActionFactory,
 			IndexActionGroupFactory indexActionGroupFactory, IndexingStrategy indexingStrategy)
 	{

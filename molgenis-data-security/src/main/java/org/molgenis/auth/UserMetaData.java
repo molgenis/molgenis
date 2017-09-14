@@ -2,7 +2,6 @@ package org.molgenis.auth;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
@@ -45,7 +44,6 @@ public class UserMetaData extends SystemEntityType
 
 	private final SecurityPackage securityPackage;
 
-	@Autowired
 	public UserMetaData(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);

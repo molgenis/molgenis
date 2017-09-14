@@ -7,7 +7,6 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,16 +30,14 @@ public class RdfConverter extends AbstractHttpMessageConverter<Model>
 	}
 
 	@Override
-	protected Model readInternal(Class<? extends Model> aClass, HttpInputMessage httpInputMessage)
-			throws IOException, HttpMessageNotReadableException
+	protected Model readInternal(Class<? extends Model> aClass, HttpInputMessage httpInputMessage) throws IOException
 	{
 		throw new HttpMessageNotReadableException("RDF support is readonly!");
 	}
 
 	@Override
 	@RunAsSystem
-	protected void writeInternal(Model model, HttpOutputMessage httpOutputMessage)
-			throws IOException, HttpMessageNotWritableException
+	protected void writeInternal(Model model, HttpOutputMessage httpOutputMessage) throws IOException
 	{
 		Rio.write(model, httpOutputMessage.getBody(), TURTLE);
 		httpOutputMessage.getBody().close();

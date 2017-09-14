@@ -24,9 +24,7 @@ import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +33,6 @@ import javax.servlet.http.Part;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -43,8 +40,6 @@ import java.util.*;
 import static org.molgenis.ontology.controller.SortaServiceAnonymousController.URI;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.SCORE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -74,17 +69,17 @@ public class SortaServiceAnonymousController extends PluginController
 		super(URI);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return VIEW_NAME;
 	}
 
-	@RequestMapping(method = POST, value = "/match")
+	@PostMapping("/match")
 	public String match(@RequestParam(value = "selectOntologies") String ontologyIri,
 			@RequestParam(value = "inputTerms") String inputTerms, HttpServletRequest httpServletRequest, Model model)
-			throws UnsupportedEncodingException, IOException
+			throws IOException
 	{
 		String fileName = httpServletRequest.getSession().getId() + "_input.txt";
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), fileName);
@@ -94,10 +89,10 @@ public class SortaServiceAnonymousController extends PluginController
 		return init(model);
 	}
 
-	@RequestMapping(method = POST, value = "/match/upload")
+	@PostMapping("/match/upload")
 	public String upload(@RequestParam(value = "selectOntologies") String ontologyIri,
 			@RequestParam(value = "file") Part file, HttpServletRequest httpServletRequest, Model model)
-			throws UnsupportedEncodingException, IOException
+			throws IOException
 	{
 
 		String fileName = httpServletRequest.getSession().getId() + "_input.csv";
@@ -108,10 +103,9 @@ public class SortaServiceAnonymousController extends PluginController
 		return init(model);
 	}
 
-	@RequestMapping(method = GET, value = "/retrieve")
+	@GetMapping("/retrieve")
 	@ResponseBody
-	public List<Map<String, Object>> matchResult(HttpServletRequest httpServletRequest)
-			throws UnsupportedEncodingException, IOException
+	public List<Map<String, Object>> matchResult(HttpServletRequest httpServletRequest) throws IOException
 	{
 		Object filePath = httpServletRequest.getSession().getAttribute("filePath");
 		Object ontologyIriObject = httpServletRequest.getSession().getAttribute("ontologyIri");
@@ -131,9 +125,8 @@ public class SortaServiceAnonymousController extends PluginController
 		return responseResults;
 	}
 
-	@RequestMapping(method = GET, value = "/download")
-	public void download(HttpServletRequest httpServletRequest, HttpServletResponse response)
-			throws UnsupportedEncodingException, IOException
+	@GetMapping("/download")
+	public void download(HttpServletRequest httpServletRequest, HttpServletResponse response) throws IOException
 	{
 		CsvWriter csvWriter = null;
 		try

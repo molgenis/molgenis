@@ -4,6 +4,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class RecoveryAuthenticationToken extends UsernamePasswordAuthenticationToken
 {
@@ -27,5 +28,21 @@ public class RecoveryAuthenticationToken extends UsernamePasswordAuthenticationT
 	public String getRecoveryCode()
 	{
 		return recoveryCode;
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		RecoveryAuthenticationToken that = (RecoveryAuthenticationToken) o;
+		return Objects.equals(recoveryCode, that.recoveryCode);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(super.hashCode(), recoveryCode);
 	}
 }

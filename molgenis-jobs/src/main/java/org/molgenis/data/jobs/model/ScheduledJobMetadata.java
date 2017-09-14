@@ -2,7 +2,6 @@ package org.molgenis.data.jobs.model;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.util.RegexUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -31,7 +30,6 @@ public class ScheduledJobMetadata extends SystemEntityType
 	private ScheduledJobTypeMetadata scheduledJobTypeMetadata;
 	private final JobPackage jobPackage;
 
-	@Autowired
 	public ScheduledJobMetadata(ScheduledJobTypeMetadata scheduledJobTypeMetadata, JobPackage jobPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_JOB);

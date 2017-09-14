@@ -3,7 +3,6 @@ package org.molgenis.js;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
 import org.molgenis.script.ScriptUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -20,7 +19,6 @@ public class JsScriptRunner implements ScriptRunner
 
 	private final JsScriptExecutor jsScriptExecutor;
 
-	@Autowired
 	public JsScriptRunner(JsScriptExecutor jsScriptExecutor)
 	{
 		this.jsScriptExecutor = requireNonNull(jsScriptExecutor);

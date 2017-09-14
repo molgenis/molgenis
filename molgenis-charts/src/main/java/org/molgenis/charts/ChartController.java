@@ -1,6 +1,5 @@
 package org.molgenis.charts;
 
-import freemarker.template.TemplateException;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.data.DataMatrix;
@@ -13,7 +12,6 @@ import org.molgenis.data.Query;
 import org.molgenis.file.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,7 +43,6 @@ public class ChartController
 	private final ChartVisualizationServiceFactory chartVisualizationServiceFactory;
 	private final FileStore fileStore;
 
-	@Autowired
 	public ChartController(ChartDataService chartDataService,
 			ChartVisualizationServiceFactory chartVisualizationServiceFactory, FileStore fileStore)
 	{
@@ -60,7 +56,7 @@ public class ChartController
 		this.fileStore = fileStore;
 	}
 
-	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/xydatachart", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
 	{
@@ -81,7 +77,7 @@ public class ChartController
 		return (Options) service.renderChart(xYDataChart, model);
 	}
 
-	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/boxplot", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
 	{
@@ -103,7 +99,7 @@ public class ChartController
 	 * <p>
 	 * User can only view his own files he created with the charts module
 	 */
-	@RequestMapping("/get/{name}.{extension}")
+	@GetMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name") String name,
 			@PathVariable("extension") String extension, HttpServletResponse response) throws IOException
 	{
@@ -127,10 +123,10 @@ public class ChartController
 	 * <p>
 	 * The page must have an element with id named 'container'. The svg image will be added to this container element.
 	 */
-	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/heatmap", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model)
-			throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+			throws FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());

@@ -45,8 +45,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -73,7 +71,7 @@ public class UserAccountController extends PluginController
 		this.authenticationSettings = requireNonNull(authenticationSettings);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String showAccount(Model model, @RequestParam(defaultValue = "false") boolean showCodes)
 	{
 		TwoFactorAuthenticationSetting twoFactorAuthenticationApp = authenticationSettings.getTwoFactorAuthentication();
@@ -90,7 +88,7 @@ public class UserAccountController extends PluginController
 		return "view-useraccount";
 	}
 
-	@RequestMapping(value = "/language/update", method = POST, produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/language/update", produces = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateUserLanguage(@RequestParam("languageCode") String languageCode)
 	{
@@ -103,7 +101,7 @@ public class UserAccountController extends PluginController
 		userAccountService.updateCurrentUser(user);
 	}
 
-	@RequestMapping(value = "/update", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@PostMapping(value = "/update", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateAccount(@Valid @NotNull AccountUpdateRequest updateRequest)
 	{
@@ -168,7 +166,7 @@ public class UserAccountController extends PluginController
 		return newPassword;
 	}
 
-	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/enable", method = POST)
+	@PostMapping(TwoFactorAuthenticationController.URI + "/enable")
 	public String enableTwoFactorAuthentication()
 	{
 		twoFactorAuthenticationService.enableForUser();
@@ -176,7 +174,7 @@ public class UserAccountController extends PluginController
 		return "redirect:" + MolgenisLoginController.URI;
 	}
 
-	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/disable", method = POST)
+	@PostMapping(TwoFactorAuthenticationController.URI + "/disable")
 	public String disableTwoFactorAuthentication(Model model)
 	{
 		twoFactorAuthenticationService.disableForUser();
@@ -185,7 +183,7 @@ public class UserAccountController extends PluginController
 		return showAccount(model, false);
 	}
 
-	@RequestMapping(value = TwoFactorAuthenticationController.URI + "/reset", method = POST)
+	@PostMapping(TwoFactorAuthenticationController.URI + "/reset")
 	public String resetTwoFactorAuthentication()
 	{
 		twoFactorAuthenticationService.resetSecretForUser();
@@ -205,7 +203,7 @@ public class UserAccountController extends PluginController
 		SecurityContextHolder.getContext().setAuthentication(token);
 	}
 
-	@RequestMapping(value = "recoveryCodes", method = GET)
+	@GetMapping("recoveryCodes")
 	@ResponseBody
 	public Map<String, List<String>> getRecoveryCodes()
 	{
@@ -213,7 +211,7 @@ public class UserAccountController extends PluginController
 				recoveryService.getRecoveryCodes().map(RecoveryCode::getCode).collect(toList()));
 	}
 
-	@RequestMapping(value = "generateRecoveryCodes", method = GET)
+	@GetMapping("generateRecoveryCodes")
 	@ResponseBody
 	public Map<String, List<String>> generateRecoveryCodes()
 	{

@@ -7,7 +7,6 @@ import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,6 @@ public class UserManagerServiceImpl implements UserManagerService
 	private final DataService dataService;
 	private final GroupMemberFactory groupMemberFactory;
 
-	@Autowired
 	public UserManagerServiceImpl(DataService dataService, GroupMemberFactory groupMemberFactory)
 	{
 		this.dataService = requireNonNull(dataService);

@@ -9,7 +9,6 @@ import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileUploadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -27,7 +26,6 @@ public class UploadWizardPage extends AbstractWizardPage
 	private final ImportServiceFactory importServiceFactory;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
-	@Autowired
 	public UploadWizardPage(ImportServiceFactory importServiceFactory,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory)
 	{

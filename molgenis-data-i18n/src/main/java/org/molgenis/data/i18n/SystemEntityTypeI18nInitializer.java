@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
@@ -52,7 +51,7 @@ public class SystemEntityTypeI18nInitializer
 						.setNillable(true)
 						.setLabel("Description (" + languageCode + ')')
 						.setDataType(TEXT);
-			l10nStringMeta.addAttribute(languageCode).setNillable(true).setDataType(STRING);
+			l10nStringMeta.addAttribute(languageCode).setNillable(true).setDataType(TEXT);
 		});
 	}
 }

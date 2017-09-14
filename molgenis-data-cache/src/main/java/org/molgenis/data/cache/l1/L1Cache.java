@@ -12,7 +12,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -34,7 +33,6 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	private final ThreadLocal<CombinedEntityCache> caches;
 	private final EntityHydration entityHydration;
 
-	@Autowired
 	public L1Cache(TransactionManager transactionManager, EntityHydration entityHydration)
 	{
 		caches = new ThreadLocal<>();

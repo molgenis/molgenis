@@ -6,7 +6,6 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -34,7 +33,6 @@ public class ImportRunService
 	private final UserService userService;
 	private final ImportRunFactory importRunFactory;
 
-	@Autowired
 	public ImportRunService(DataService dataService, MailSender mailSender, UserService userService,
 			ImportRunFactory importRunFactory)
 	{

@@ -5,7 +5,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.GenericDependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -27,7 +26,6 @@ public class EntityTypeDependencyResolver
 	private final GenericDependencyResolver genericDependencyResolver;
 	private static final Logger LOG = LoggerFactory.getLogger(EntityTypeDependencyResolver.class);
 
-	@Autowired
 	public EntityTypeDependencyResolver(GenericDependencyResolver genericDependencyResolver)
 	{
 		this.genericDependencyResolver = requireNonNull(genericDependencyResolver);

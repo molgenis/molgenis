@@ -13,10 +13,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import static java.util.Spliterator.ORDERED;
@@ -37,7 +35,6 @@ public class CrudRepositoryAnnotator
 	private EntityType targetMetaData;
 	private AttributeFactory attributeFactory;
 
-	@Autowired
 	public CrudRepositoryAnnotator(DataService dataService, PermissionSystemService permissionSystemService,
 			AttributeFactory attributeFactory)
 	{
@@ -46,7 +43,7 @@ public class CrudRepositoryAnnotator
 		this.attributeFactory = attributeFactory;
 	}
 
-	public void annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
+	public void annotate(RepositoryAnnotator annotator, Repository<Entity> repository)
 	{
 		annotate(annotator, repository, UPDATE);
 	}

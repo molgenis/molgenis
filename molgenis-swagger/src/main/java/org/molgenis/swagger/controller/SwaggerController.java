@@ -1,28 +1,24 @@
 package org.molgenis.swagger.controller;
 
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.swagger.controller.SwaggerController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 /**
  * Serves Swagger documentation of the REST API.
@@ -39,8 +35,7 @@ public class SwaggerController extends PluginController
 	private final MetaDataService metaDataService;
 	private final TokenService tokenService;
 
-	@Autowired
-	public SwaggerController(MetaDataService metaDataService, TokenService tokenService) throws IOException
+	public SwaggerController(MetaDataService metaDataService, TokenService tokenService)
 	{
 		super(URI);
 		this.metaDataService = requireNonNull(metaDataService);
@@ -52,7 +47,7 @@ public class SwaggerController extends PluginController
 	 * Sets the url parameter to the swagger yaml that describes the REST API.
 	 * Creates an apiKey token for the current user.
 	 */
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("url",
@@ -70,7 +65,7 @@ public class SwaggerController extends PluginController
 	 * As host, fills in the host where the controller lives.
 	 * As options for the entity names, contains only those entity names that the user can actually see.
 	 */
-	@RequestMapping(path = "/swagger.yml", produces = "text/yaml", method = GET)
+	@GetMapping(value = "/swagger.yml", produces = "text/yaml")
 	public String swagger(Model model, HttpServletResponse response)
 	{
 		response.setContentType("text/yaml");

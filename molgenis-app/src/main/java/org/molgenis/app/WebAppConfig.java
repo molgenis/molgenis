@@ -1,6 +1,5 @@
 package org.molgenis.app;
 
-import freemarker.template.TemplateException;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.config.HttpClientConfig;
@@ -17,8 +16,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
-
-import java.io.IOException;
 
 @Configuration
 @EnableTransactionManagement
@@ -37,7 +34,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	 * Configures Freemarker
 	 */
 	@Override
-	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
+	public FreeMarkerConfigurer freeMarkerConfigurer()
 	{
 		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
 		// Look up unknown templates in the FreemarkerTemplate repository

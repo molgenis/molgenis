@@ -10,7 +10,6 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,6 @@ import java.util.Base64;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.dataexplorer.controller.DirectoryController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -38,7 +36,6 @@ public class DirectoryController extends PluginController
 	private final RestTemplate restTemplate;
 	private final PermissionService permissions;
 
-	@Autowired
 	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate, PermissionService permissions)
 	{
 		super(URI);
@@ -58,7 +55,7 @@ public class DirectoryController extends PluginController
 		return collectionEntityType != null && collectionEntityType.getId().equals(selectedEntityName);
 	}
 
-	@RequestMapping(value = "/export", method = POST)
+	@PostMapping("/export")
 	@ResponseBody
 	public String exportToNegotiator(@RequestBody NegotiatorQuery query) throws Exception
 	{

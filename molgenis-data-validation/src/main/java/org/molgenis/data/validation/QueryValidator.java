@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.util.MolgenisDateFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -33,7 +32,6 @@ public class QueryValidator
 {
 	private final EntityManager entityManager;
 
-	@Autowired
 	public QueryValidator(EntityManager entityManager)
 	{
 		this.entityManager = requireNonNull(entityManager);

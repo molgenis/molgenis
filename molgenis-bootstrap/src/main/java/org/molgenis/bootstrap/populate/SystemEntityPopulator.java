@@ -5,7 +5,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -27,7 +26,6 @@ public class SystemEntityPopulator
 	private final DataService dataService;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-	@Autowired
 	public SystemEntityPopulator(DataService dataService, EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);

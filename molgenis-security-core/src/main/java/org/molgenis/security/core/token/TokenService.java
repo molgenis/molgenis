@@ -18,12 +18,12 @@ public interface TokenService
 	 *
 	 * @return the user or null if not found or token is expired
 	 */
-	UserDetails findUserByToken(String token) throws UnknownTokenException;
+	UserDetails findUserByToken(String token);
 
 	/**
 	 * Remove a token from the store
 	 *
 	 * @return true if removed or false when the token is not found
 	 */
-	void removeToken(String token) throws UnknownTokenException;
+	void removeToken(String token);
 }
