@@ -64,7 +64,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 
 	private boolean isNotProtected(String requestURI)
 	{
-		return !requestURI.contains(TwoFactorAuthenticationController.URI) && !requestURI.equalsIgnoreCase(
+		return !requestURI.startsWith(TwoFactorAuthenticationController.URI) && !requestURI.equalsIgnoreCase(
 				CHANGE_PASSWORD_URI);
 	}
 
