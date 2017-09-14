@@ -54,7 +54,8 @@ public class PermissionServiceImpl implements PermissionService
 		// TODO decide whether we want to check for su/system here or in EntityAclService
 		return Arrays.stream(Permission.values())
 					 .filter(permission -> permission != NONE && (SecurityUtils.currentUserIsSuOrSystem()
-							 || entityAclService.isGranted(entityIdentity, permission)))
+							 || !entityAclService.hasAclClass(entity.getEntityType()) || entityAclService.isGranted(
+							 entityIdentity, permission)))
 					 .collect(toCollection(() -> EnumSet.noneOf(Permission.class)));
 	}
 
