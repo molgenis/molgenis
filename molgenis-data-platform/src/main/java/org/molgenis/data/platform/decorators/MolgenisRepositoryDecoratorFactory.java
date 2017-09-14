@@ -49,7 +49,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final EntityAclManager entityAclManager;
 	private final PermissionService permissionService;
 
-	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
 			AppSettings appSettings, DataService dataService, ExpressionValidator expressionValidator,

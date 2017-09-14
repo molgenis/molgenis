@@ -8,7 +8,6 @@ import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -41,7 +40,6 @@ public class SavedScriptRunner
 	private final TokenService tokenService;
 	private final FileMetaFactory fileMetaFactory;
 
-	@Autowired
 	public SavedScriptRunner(ScriptRunnerFactory scriptRunnerFactory, DataService dataService, FileStore fileStore,
 			TokenService tokenService, FileMetaFactory fileMetaFactory)
 	{

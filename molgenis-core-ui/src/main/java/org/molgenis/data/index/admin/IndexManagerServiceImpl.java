@@ -3,7 +3,6 @@ package org.molgenis.data.index.admin;
 import org.molgenis.data.*;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +21,7 @@ public class IndexManagerServiceImpl implements IndexManagerService
 	private final DataService dataService;
 	private final IndexService indexService;
 
-	@Autowired
-	public IndexManagerServiceImpl(DataService dataService,
-			@SuppressWarnings("SpringJavaAutowiringInspection") IndexService indexService)
+	public IndexManagerServiceImpl(DataService dataService, IndexService indexService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.indexService = requireNonNull(indexService);

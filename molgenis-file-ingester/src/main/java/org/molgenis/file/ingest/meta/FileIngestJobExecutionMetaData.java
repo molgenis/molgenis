@@ -4,7 +4,6 @@ import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.file.model.FileMetaMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -33,7 +32,6 @@ public class FileIngestJobExecutionMetaData extends SystemEntityType
 	private final JobExecutionMetaData jobExecutionMetaData;
 	private final JobPackage jobPackage;
 
-	@Autowired
 	FileIngestJobExecutionMetaData(FileMetaMetaData fileMetaMetaData, JobExecutionMetaData jobExecutionMetaData,
 			JobPackage jobPackage)
 	{

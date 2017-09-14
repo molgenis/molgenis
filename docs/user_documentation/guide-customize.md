@@ -211,3 +211,22 @@ from the dropdown.
 4. Provide a translation for each available language.
 
 Missing translations will show up in English in the user interface.
+
+# Adding plugin descriptions
+1. In the top menu, select the Data Explorer.
+2. In the pulldown, select the entity 'Localization'.
+3. Push the plus icon.
+4. Fill in the form according to which plugin you would like to add a description to.
+
+Example for the importwizard plugin, the pluginId is 'importwizard'. 
+The plugin ID can be found in the URL, the sys_Plugin table, or in the menu manager.
+
+```
+	msgid: [pluginId]_description_text
+    	namespace: [pluginId]
+    	description: the i18n entry for the importwizard description text
+    	en: Import wizard. Use the EMX format to create excel files for import
+```
+
+After saving, the importwizard plugin will now have a description at the top when the english language is selected.
+This is an admin only feature and allows the admin to use HTML.

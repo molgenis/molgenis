@@ -129,7 +129,6 @@ public class RestControllerV2
 				"The entity you are trying to update [" + id.toString() + "] does not exist.");
 	}
 
-	@Autowired
 	public RestControllerV2(DataService dataService, RestService restService, LanguageService languageService,
 			PermissionService permissionService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier,

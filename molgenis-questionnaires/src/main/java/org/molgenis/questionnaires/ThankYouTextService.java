@@ -1,7 +1,6 @@
 package org.molgenis.questionnaires;
 
 import org.molgenis.ui.controller.StaticContentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -10,7 +9,6 @@ public class ThankYouTextService
 	private final StaticContentService staticContentService;
 	private static final String DEFAULT_THANK_YOU_TEXT = "<h3>Thank you for submitting the questionnaire.</h3>";
 
-	@Autowired
 	public ThankYouTextService(StaticContentService staticContentService)
 	{
 		this.staticContentService = staticContentService;

@@ -10,7 +10,6 @@ import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,7 +42,6 @@ public class JobsController extends PluginController
 	private final JobScheduler jobScheduler;
 	private final MenuReaderService menuReaderService;
 
-	@Autowired
 	public JobsController(UserAccountService userAccountService, DataService dataService,
 			JobExecutionMetaData jobMetaDataMetaData, JobScheduler jobScheduler, MenuReaderService menuReaderService)
 	{

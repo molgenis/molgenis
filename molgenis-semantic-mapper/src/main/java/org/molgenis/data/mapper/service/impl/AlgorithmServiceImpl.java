@@ -21,7 +21,6 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -56,7 +55,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 	private final EntityManager entityManager;
 
-	@Autowired
 	public AlgorithmServiceImpl(OntologyTagService ontologyTagService, SemanticSearchService semanticSearchService,
 			AlgorithmGeneratorService algorithmGeneratorService, EntityManager entityManager,
 			JsMagmaScriptEvaluator jsMagmaScriptEvaluator)

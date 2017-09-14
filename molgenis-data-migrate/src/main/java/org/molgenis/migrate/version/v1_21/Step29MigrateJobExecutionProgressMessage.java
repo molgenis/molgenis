@@ -3,7 +3,6 @@ package org.molgenis.migrate.version.v1_21;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -21,7 +20,6 @@ public class Step29MigrateJobExecutionProgressMessage extends MolgenisUpgrade
 
 	private final JdbcTemplate jdbcTemplate;
 
-	@Autowired
 	public Step29MigrateJobExecutionProgressMessage(DataSource dataSource)
 	{
 		super(28, 29);

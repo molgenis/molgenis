@@ -7,7 +7,6 @@ import org.molgenis.data.meta.system.SystemEntityTypePersister;
 import org.molgenis.data.security.acl.EntityAclManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,6 @@ public class SystemEntityTypeBootstrapper
 	private final SystemEntityTypePersister systemEntityTypePersister;
 	private final EntityAclManager entityAclManager;
 
-	@Autowired
 	SystemEntityTypeBootstrapper(SystemEntityTypeInitializer systemEntityTypeInitializer,
 			SystemEntityTypeI18nInitializer systemEntityTypeI18nInitializer,
 			SystemEntityTypePersister systemEntityTypePersister, EntityAclManager entityAclManager)

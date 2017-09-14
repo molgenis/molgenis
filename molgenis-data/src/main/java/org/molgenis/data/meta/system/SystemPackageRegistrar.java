@@ -1,7 +1,6 @@
 package org.molgenis.data.meta.system;
 
 import org.molgenis.data.meta.SystemPackage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,6 @@ public class SystemPackageRegistrar
 {
 	private final SystemPackageRegistry systemPackageRegistry;
 
-	@Autowired
 	public SystemPackageRegistrar(SystemPackageRegistry systemPackageRegistry)
 	{
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);

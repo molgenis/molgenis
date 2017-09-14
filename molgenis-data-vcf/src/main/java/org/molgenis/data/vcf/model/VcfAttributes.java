@@ -2,7 +2,6 @@ package org.molgenis.data.vcf.model;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -26,7 +25,6 @@ public class VcfAttributes
 
 	private final AttributeFactory attributeFactory;
 
-	@Autowired
 	public VcfAttributes(AttributeFactory attributeFactory)
 	{
 		this.attributeFactory = requireNonNull(attributeFactory);

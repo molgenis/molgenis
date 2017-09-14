@@ -15,7 +15,6 @@ public class RepositoryCollectionDecoratorFactoryImpl implements RepositoryColle
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final RepositoryCollectionSecurityDecoratorFactory repositoryCollectionSecurityDecoratorFactory;
 
-	@Autowired
 	public RepositoryCollectionDecoratorFactoryImpl(RepositoryDecoratorFactory repositoryDecoratorFactory,
 			IndexActionRegisterService indexActionRegisterService,
 			RepositoryCollectionSecurityDecoratorFactory repositoryCollectionSecurityDecoratorFactory)

@@ -9,7 +9,6 @@ import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -33,7 +32,6 @@ public class JsMagmaScriptEvaluator
 
 	private final NashornScriptEngine jsScriptEngine;
 
-	@Autowired
 	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine)
 	{
 		this.jsScriptEngine = requireNonNull(jsScriptEngine);

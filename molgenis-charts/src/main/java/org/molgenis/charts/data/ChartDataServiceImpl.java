@@ -7,7 +7,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -18,7 +17,6 @@ public class ChartDataServiceImpl implements ChartDataService
 {
 	private final DataService dataService;
 
-	@Autowired
 	public ChartDataServiceImpl(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");

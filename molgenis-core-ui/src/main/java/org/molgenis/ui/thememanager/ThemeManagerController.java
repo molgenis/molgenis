@@ -5,7 +5,6 @@ import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +28,6 @@ public class ThemeManagerController extends PluginController
 
 	private final StyleService styleService;
 
-	@Autowired
 	public ThemeManagerController(StyleService styleService)
 	{
 		super(URI);

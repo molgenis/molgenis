@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
 import org.molgenis.metadata.manager.model.EditorEntityTypeParent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -19,7 +18,6 @@ class EntityTypeParentMapper
 	private final EntityTypeMetadata entityTypeMetadata;
 	private final DataService dataService;
 
-	@Autowired
 	public EntityTypeParentMapper(AttributeReferenceMapper attributeReferenceMapper,
 			EntityTypeMetadata entityTypeMetadata, DataService dataService)
 	{

@@ -2,7 +2,6 @@ package org.molgenis.ui.style;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.util.ErrorMessageResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,6 @@ public class StyleController
 {
 	private final StyleService styleService;
 
-	@Autowired
 	public StyleController(StyleService styleService)
 	{
 		this.styleService = requireNonNull(styleService);

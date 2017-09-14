@@ -5,7 +5,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +22,6 @@ public class UserServiceImpl implements UserService
 {
 	private final DataService dataService;
 
-	@Autowired
 	public UserServiceImpl(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");

@@ -6,7 +6,6 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.repository.OntologyRepository;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,6 @@ public class OntologyServiceImpl implements OntologyService
 	private OntologyRepository ontologyRepository;
 	private OntologyTermRepository ontologyTermRepository;
 
-	@Autowired
 	public OntologyServiceImpl(OntologyRepository ontologyRepository, OntologyTermRepository ontologyTermRepository)
 	{
 		this.ontologyRepository = requireNonNull(ontologyRepository);

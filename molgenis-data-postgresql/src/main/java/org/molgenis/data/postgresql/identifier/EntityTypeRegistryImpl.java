@@ -7,7 +7,6 @@ import org.molgenis.data.postgresql.PostgreSqlNameGenerator;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -31,7 +30,6 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	private final ConcurrentMap<String, EntityTypeDescription> entityTypeDescriptionMap;
 	private final ConcurrentMap<String, Map<String, EntityTypeDescription>> transactionsEntityTypeDescriptionMap;
 
-	@Autowired
 	public EntityTypeRegistryImpl(TransactionManager transactionManager)
 	{
 		entityTypeDescriptionMap = new ConcurrentHashMap<>();

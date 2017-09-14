@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,6 @@ public class EntityFactoryRegistrar
 {
 	private final EntityFactoryRegistry entityFactoryRegistry;
 
-	@Autowired
 	public EntityFactoryRegistrar(EntityFactoryRegistry entityFactoryRegistry)
 	{
 		this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);

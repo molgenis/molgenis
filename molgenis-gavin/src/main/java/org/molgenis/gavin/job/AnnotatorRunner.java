@@ -7,7 +7,6 @@ import org.molgenis.data.annotation.core.utils.EffectStructureConverter;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -23,7 +22,6 @@ public class AnnotatorRunner
 	private final AttributeFactory attributeFactory;
 	private final EffectStructureConverter effectStructureConverter;
 
-	@Autowired
 	public AnnotatorRunner(VcfAttributes vcfAttributes, EntityTypeFactory entityTypeFactory,
 			AttributeFactory attributeFactory, EffectStructureConverter effectStructureConverter)
 	{

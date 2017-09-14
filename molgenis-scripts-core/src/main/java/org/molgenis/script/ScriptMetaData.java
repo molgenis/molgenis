@@ -2,7 +2,6 @@ package org.molgenis.script;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -32,7 +31,6 @@ public class ScriptMetaData extends SystemEntityType
 	private final ScriptParameterMetaData scriptParameterMetaData;
 	private final ScriptTypeMetaData scriptTypeMetaData;
 
-	@Autowired
 	ScriptMetaData(ScriptPackage scriptPackage, ScriptParameterMetaData scriptParameterMetaData,
 			ScriptTypeMetaData scriptTypeMetaData)
 	{

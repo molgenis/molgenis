@@ -1,6 +1,5 @@
 package org.molgenis.script;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ public class ScriptRunnerRegistrar
 {
 	private final ScriptRunnerFactory scriptRunnerFactory;
 
-	@Autowired
 	public ScriptRunnerRegistrar(ScriptRunnerFactory scriptRunnerFactory)
 	{
 		this.scriptRunnerFactory = requireNonNull(scriptRunnerFactory);

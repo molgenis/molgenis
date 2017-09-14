@@ -3,7 +3,6 @@ package org.molgenis.data.index.job;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -31,7 +30,6 @@ public class IndexJobExecutionMeta extends SystemEntityType
 	private final JobPackage jobPackage;
 	private final JobExecutionMetaData jobExecutionMetaData;
 
-	@Autowired
 	public IndexJobExecutionMeta(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_JOB);

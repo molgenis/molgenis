@@ -4,7 +4,6 @@ import com.google.common.cache.LoadingCache;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.wikipathways.client.WikiPathwaysPortType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -32,7 +31,6 @@ public class WikiPathwaysService
 	 *
 	 * @param wikiPathwaysProxy {@link WikiPathwaysPortType} proxy for the REST api that the caches use to load their data from
 	 */
-	@Autowired
 	public WikiPathwaysService(WikiPathwaysPortType wikiPathwaysProxy)
 	{
 		this.wikiPathwaysProxy = wikiPathwaysProxy;

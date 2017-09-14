@@ -7,7 +7,6 @@ import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,7 +31,6 @@ public class I18nPopulator
 	private final List<PropertiesMessageSource> localizationMessageSources;
 	private final LocalizationService localizationService;
 
-	@Autowired
 	public I18nPopulator(DataService dataService, LanguageFactory languageFactory,
 			List<PropertiesMessageSource> localizationMessageSources, LocalizationService localizationService)
 	{
