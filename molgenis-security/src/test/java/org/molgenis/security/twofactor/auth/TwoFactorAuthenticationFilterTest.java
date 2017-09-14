@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -112,6 +114,29 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 		filter.doFilterInternal(request, response, chain);
 		verify(chain).doFilter(request, response);
 
+	}
+
+	@Test
+	@WithMockUser
+	public void testDoFilterInternalRecoveryAuthenticated() throws IOException, ServletException
+	{
+		SecurityContext previous = SecurityContextHolder.getContext();
+		try
+		{
+			SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+			SecurityContextHolder.setContext(testContext);
+			testContext.setAuthentication(new RecoveryAuthenticationToken("recovery"));
+
+			request.setRequestURI("/menu/main/dataexplorer");
+			when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
+
+			filter.doFilterInternal(request, response, chain);
+			verify(chain).doFilter(request, response);
+		}
+		finally
+		{
+			SecurityContextHolder.setContext(previous);
+		}
 	}
 
 	@Configuration
