@@ -1,11 +1,11 @@
 <template>
-  <div v-if="selectedSid">
+  <div v-if="selectedSid && sidType === 'role'">
     <h3 class="pt-3">{{'MEMBERS' | i18n}}</h3>
-    <template v-if="users && groups">
-      <ul class="fa-ul" v-if="users.length + groups.length">
-        <li v-for="group in groups"><i class="fa fa-users fa-li"></i>{{group}}
+    <template v-if="role && role.users !== undefined && role.groups !== undefined">
+      <ul class="fa-ul" v-if="role.users.length + role.groups.length">
+        <li v-for="group in groupsInRole"><i class="fa fa-users fa-li"></i>{{group.name}}
         </li>
-        <li v-for="user in users"><i class="fa fa-user fa-li"></i>{{user}}
+        <li v-for="user in usersInRole"><i class="fa fa-user fa-li"></i>{{user.username}}
         </li>
       </ul>
       <p v-else>{{'NO_MEMBERS_IN_ROLE' | i18n}}</p>
@@ -15,11 +15,18 @@
 </template>
 
 <script>
-  import {mapState} from 'vuex'
+  import {mapState, mapGetters} from 'vuex'
 
   export default {
     computed: {
-      ...mapState(['selectedSid', 'users', 'groups'])
+      ...mapState(['selectedSid', 'sidType', 'users', 'groups']),
+      ...mapGetters(['role']),
+      usersInRole () {
+        return this.users.filter(user => this.role.users && this.role.users.indexOf(user.username) >= 0)
+      },
+      groupsInRole () {
+        return this.groups.filter(group => this.role.groups && this.role.groups.indexOf(group.id) >= 0)
+      }
     }
   }
 </script>

@@ -17,6 +17,7 @@
     "@molgenis/molgenis-api-client": "^1.1.0",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
     "bootstrap": "4.0.0-alpha.6",
+    "bootstrap-vue": "^1.0.0-beta.7",
     "font-awesome": "^4.7.0",
     "vue": "^2.2.6",
     "vue-multiselect": "^2.0.2",

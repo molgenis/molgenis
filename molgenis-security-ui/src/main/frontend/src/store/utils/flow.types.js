@@ -13,7 +13,24 @@ export type Sid = GrantedAuthoritySid | PrincipalSid
 export type Role = {
   id?: string,
   label: string,
-  description ?: string
+  description ?: string,
+  users?: string[],
+  groups?: string[]
+}
+
+export type User = {
+  active: boolean,
+  changePassword: boolean,
+  id: string,
+  superuser: boolean,
+  use2fa: boolean,
+  username: string
+}
+
+export type Group = {
+  active: boolean,
+  id: string,
+  name: string
 }
 
 export type EntityType = {
@@ -52,17 +69,16 @@ export type SidType = 'role' | 'user'
 
 export type State = {
   me: PrincipalSid,
-  roles: Array<Role>,
-  selectedSid: ?string,
-  users: ?Array<string>,
-  groups: ?Array<string>,
-  permissions: Array<string>,
+  roles: Role[],
+  users: User[],
+  groups: Group[],
   sidType: SidType,
+  selectedSid: ?string,
+  permissions: string[],
   selectedEntityTypeId: ?string,
-  entityTypes: Array<EntityType>,
-  rows: Array<Row>,
+  entityTypes: EntityType[],
+  rows: Row[],
   filter: ?string,
-  doCreateRole: ?boolean,
-  doUpdateRole: ?boolean,
+  editRole: boolean,
   acl: ?ACL
 }

@@ -1,5 +1,5 @@
 // @flow
-import type {ACE, EntityType, State} from './utils/flow.types'
+import type {ACE, EntityType, State, Role} from './utils/flow.types'
 
 export default {
   /**
@@ -19,11 +19,14 @@ export default {
         securityId: {authority: selectedSid},
         granting: true
       }
-      const isGrantedAuthority = (sid: string) => (candidate: ACE) => { return state.sidType === 'role' ? (candidate.securityId.authority && candidate.securityId.authority === sid) : (candidate.securityId.username && candidate.securityId.username === sid) }
+      const isGrantedAuthority = (sid: string) => (candidate: ACE) => { return state.type === 'role' ? (candidate.securityId.authority && candidate.securityId.authority === sid) : (candidate.securityId.username && candidate.securityId.username === sid) }
       const aceIndex = entries.findIndex(isGrantedAuthority(selectedSid))
       const ace = entries.find(isGrantedAuthority(selectedSid)) || emptyAce
       const addPermission = (row, permission) => ({...row, [permission]: ace.permissions.includes(permission)})
       return state.permissions.reduce(addPermission, {entityLabel, owner: username, granting: ace.granting, aceIndex})
     })
+  },
+  role (state: State): ?Role {
+    return state.roles && state.roles.find(role => role.id === state.selectedSid)
   }
 }

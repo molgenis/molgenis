@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h3>{{title}}</h3>
-    <form v-on:submit="submit({label, description})">
+    <h3>{{title | i18n}}</h3>
+    <form v-on:submit.prevent="save({label, description})">
       <div class="form-group">
         <label for="labelInput">{{'LABEL' | i18n}}</label>
         <input v-model="label" class="form-control" id="labelInput"
@@ -20,20 +20,32 @@
 </template>
 
 <script>
+  import {mapGetters, mapMutations, mapActions} from 'vuex'
+  import {SAVE_ROLE} from '../store/actions'
+  import {CANCEL_EDIT_ROLE} from '../store/mutations'
+
   export default {
     name: 'role-form',
     data () {
+      const role = this.$store.getters.role
       return {
-        label: this.initialLabel,
-        description: this.initialDescription
+        label: role && role.label,
+        description: role && role.description
       }
     },
-    props: {
-      initialLabel: {type: String},
-      initialDescription: {type: String},
-      title: {type: String},
-      submit: {type: Function},
-      cancel: {type: Function}
+    computed: {
+      ...mapGetters(['role']),
+      title () {
+        return this.role ? 'EDIT_ROLE' : 'CREATE_ROLE'
+      }
+    },
+    methods: {
+      ...mapActions({
+        save: SAVE_ROLE
+      }),
+      ...mapMutations({
+        cancel: CANCEL_EDIT_ROLE
+      })
     }
   }
 </script>
