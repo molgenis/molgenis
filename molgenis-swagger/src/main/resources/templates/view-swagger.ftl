@@ -82,6 +82,49 @@ paths:
       responses:
         200:
           description: Returns the Job ID of the scheduled OneClickImportJob
+  /permission/acls:
+    get:
+      tags:
+        - Security
+      summary: Retrieve ACLs.
+      description: Will retrieve all ACLs for an EntityTypeId
+      parameters:
+        - name: entityTypeId
+          type: string
+          in: query
+          required: true
+          description: ID of the entity type for which the ACLs are retrieved
+        - name: pageSize
+          type: integer
+          in: query
+          required: false
+          description: amount of entities to retrieve ACLs for
+        - name: filter
+          type: string
+          in: query
+          required: false
+          description: string to filter on
+      responses:
+        200:
+          description: MOLGENIS token
+          schema:
+            $ref: '#/definitions/ACLs'
+  /permission/acl:
+    put:
+      tags:
+        - Security
+      summary: Update a single ACL.
+      description: Will update a single ACL if you are admin
+      parameters:
+        - name: acl
+          schema:
+            $ref: '#/definitions/CopyEntityRequest'
+          in: body
+          required: true
+          description: new version of the acl
+      responses:
+        204:
+          description: ACL successfully updated
   /scripts/{name}/start:
     get:
       tags:
@@ -614,6 +657,51 @@ definitions:
     required:
       - id
       - label
+  ACLs:
+    type: array
+    items:
+      type: object
+      properties:
+        entityId:
+          type: string
+        entityLabel:
+          type: string
+        acls:
+          type: array
+          items:
+            $ref: '#/definitions/ACL'
+  ACL:
+    type: object
+    properties:
+      owner:
+        type: object
+        properties:
+          username:
+            type: string
+      aces:
+        type: array
+        items:
+          $ref: '#/definitions/ACE'
+  ACE:
+    type: object
+    properties:
+      granted:
+        type: boolean
+      permissions:
+        type: array
+        items:
+          type: string
+      sid:
+        type: object
+        schema:
+          $ref: '#/definitions/SID'
+  SID:
+    type: object
+    properties:
+      username:
+        type: string
+      autority:
+        type: string
   CopyEntityRequest:
     type: object
     properties:

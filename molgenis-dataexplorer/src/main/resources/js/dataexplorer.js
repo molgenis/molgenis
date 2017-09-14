@@ -167,9 +167,9 @@ $.when($,
         /**
          * @memberOf molgenis.dataexplorer
          */
-        function setGenomeAttributes (start, chromosome) {
-          posAttribute = start
-          chromosomeAttribute = chromosome
+        function setGenomeAttributes(start, chromosome) {
+            posAttribute = start
+            chromosomeAttribute = chromosome
         }
 
         /**
@@ -198,7 +198,7 @@ $.when($,
                                 [{
                                     operator: "NESTED",
                                     nestedRules: [{
-                                      field: chromosomeAttribute,
+                                        field: chromosomeAttribute,
                                         operator: "EQUALS",
                                         value: chromosome
                                     }]
@@ -207,7 +207,7 @@ $.when($,
                                 }, {
                                     operator: "NESTED",
                                     nestedRules: [{
-                                      field: posAttribute,
+                                        field: posAttribute,
                                         operator: "EQUALS",
                                         value: position
                                     }]
@@ -231,7 +231,7 @@ $.when($,
                                     nestedRules: [{
                                         operator: "NESTED",
                                         nestedRules: [{
-                                          field: chromosomeAttribute,
+                                            field: chromosomeAttribute,
                                             operator: "EQUALS",
                                             value: chromosome
                                         }]
@@ -241,13 +241,13 @@ $.when($,
                                 }, {
                                     operator: "NESTED",
                                     nestedRules: [{
-                                      field: posAttribute,
+                                        field: posAttribute,
                                         operator: "GREATER_EQUAL",
                                         value: startPosition
                                     }, {
                                         operator: "AND"
                                     }, {
-                                      field: posAttribute,
+                                        field: posAttribute,
                                         operator: "LESS_EQUAL",
                                         value: stopPosition
                                     }]
@@ -435,13 +435,13 @@ $.when($,
          * @memberOf molgenis.dataexplorer
          *
          * */
-        function setNavigatoHref (entityId) {
-          var navigatorLinkElem = $('#navigator-link');
-          if(navigatorLinkElem.length) { // skip in case navigator-link is set to hidden
-            var currentHref = navigatorLinkElem.attr('href')
-            var newHref = currentHref.substring(0, currentHref.indexOf('?lookup=')) + '?lookup="' + entityId + '"';
-            navigatorLinkElem.attr('href',  newHref);
-          }
+        function setNavigatoHref(entityId) {
+            var navigatorLinkElem = $('#navigator-link');
+            if (navigatorLinkElem.length) { // skip in case navigator-link is set to hidden
+                var currentHref = navigatorLinkElem.attr('href')
+                var newHref = currentHref.substring(0, currentHref.indexOf('?lookup=')) + '?lookup="' + entityId + '"';
+                navigatorLinkElem.attr('href', newHref);
+            }
         }
 
         /**

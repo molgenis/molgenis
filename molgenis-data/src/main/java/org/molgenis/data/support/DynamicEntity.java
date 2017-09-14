@@ -38,6 +38,8 @@ public class DynamicEntity implements Entity
 	 */
 	private final Map<String, Object> values;
 
+	private boolean writable = true;
+
 	/**
 	 * Constructs an entity with the given entity meta data.
 	 *

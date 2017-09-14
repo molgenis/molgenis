@@ -1,6 +1,6 @@
 package org.molgenis.ui;
 
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.ui.XmlMolgenisUiTest.Config;
 import org.molgenis.web.UiMenu;
 import org.springframework.beans.factory.annotation.Autowired;

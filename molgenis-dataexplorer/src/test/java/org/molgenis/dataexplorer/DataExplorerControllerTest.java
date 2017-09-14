@@ -12,11 +12,11 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -117,7 +117,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	public void initSetNavigatorMenuPath() throws Exception
 	{
 		String selectedEntityname = "selectedEntityname";
-		String selectedEntityId= "selectedEntityId";
+		String selectedEntityId = "selectedEntityId";
 		String navigatorPath = "path/to-navigator";
 
 		MetaDataService metaDataService = mock(MetaDataService.class);
@@ -137,7 +137,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	public void initSetNavigatorMenuPathNoNavigator() throws Exception
 	{
 		String selectedEntityname = "selectedEntityname";
-		String selectedEntityId= "selectedEntityId";
+		String selectedEntityId = "selectedEntityId";
 		String navigatorPath = "path/to-navigator";
 
 		MetaDataService metaDataService = mock(MetaDataService.class);

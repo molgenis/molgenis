@@ -14,7 +14,7 @@ import {
   UPDATE_EDITOR_ENTITY_TYPE
 } from 'store/mutations'
 
-import actions, { toAttribute, toEntityType } from 'store/actions'
+import actions, {toAttribute, toEntityType} from 'store/actions'
 
 describe('actions', () => {
   afterEach(() => td.reset())

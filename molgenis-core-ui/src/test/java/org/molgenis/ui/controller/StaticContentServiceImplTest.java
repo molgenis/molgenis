@@ -1,205 +1,152 @@
 package org.molgenis.ui.controller;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.populate.EntityPopulator;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionServiceImpl;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
-import org.molgenis.ui.settings.StaticContentMeta;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-@WebAppConfiguration
-@ContextConfiguration
-public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTests
+public class StaticContentServiceImplTest extends AbstractMockitoTest
 {
-	private final String pluginId = "home";
+	@Mock
+	private DataService dataService;
+	@Mock
+	private StaticContentFactory staticContentFactory;
 
-	@Autowired
-	private StaticContentService staticContentService;
+	private StaticContentServiceImpl staticContentServiceImpl;
 
-	@Test
-	public void getContent()
+	@BeforeMethod
+	public void setUpBeforeMethod()
 	{
-		assertEquals(this.staticContentService.getContent(pluginId), "<p>Welcome to Molgenis!</p>");
+		staticContentServiceImpl = new StaticContentServiceImpl(dataService, staticContentFactory);
+	}
+
+	@Test(expectedExceptions = NullPointerException.class)
+	public void testStaticContentServiceImpl()
+	{
+		new StaticContentServiceImpl(null, null);
 	}
 
 	@Test
-	public void isCurrentUserCanEdit_SuperUser()
+	public void testSubmitContentAdd()
 	{
-		this.setSecurityContextSuperUser();
-		assertTrue(this.staticContentService.isCurrentUserCanEdit(pluginId));
+		String key = "key";
+		String content = "content";
+		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(null);
+		StaticContent staticContent = mock(StaticContent.class);
+		when(staticContentFactory.create(key)).thenReturn(staticContent);
+
+		assertTrue(staticContentServiceImpl.submitContent(key, content));
+		ArgumentCaptor<StaticContent> staticContentArgumentCaptor = ArgumentCaptor.forClass(StaticContent.class);
+		verify(dataService).add(eq(STATIC_CONTENT), staticContentArgumentCaptor.capture());
+		verify(staticContentArgumentCaptor.getValue()).setContent(content);
 	}
 
 	@Test
-	public void isCurrentUserCanEdit_NonSuperUserWithoutPermissions()
+	public void testSubmitContentUpdate()
 	{
-		this.setSecurityContextNonSuperUser(false);
-		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
+		String key = "key";
+		String content = "content";
+		StaticContent staticContent = mock(StaticContent.class);
+		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
+
+		assertTrue(staticContentServiceImpl.submitContent(key, content));
+		ArgumentCaptor<StaticContent> staticContentArgumentCaptor = ArgumentCaptor.forClass(StaticContent.class);
+		verify(dataService).update(eq(STATIC_CONTENT), staticContentArgumentCaptor.capture());
+		verify(staticContentArgumentCaptor.getValue()).setContent(content);
 	}
 
 	@Test
-	public void isCurrentUserCanEdit_NonSuperUserWithPermissions()
+	public void testSubmitContentUpdateNotAllowed()
 	{
-		this.setSecurityContextNonSuperUser(true);
-		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
+		String key = "key";
+		String content = "content";
+		doThrow(new MolgenisDataAccessException()).when(dataService)
+												  .findOneById(STATIC_CONTENT, key, StaticContent.class);
+
+		assertFalse(staticContentServiceImpl.submitContent(key, content));
 	}
 
 	@Test
-	public void isCurrentUserCanEdit_AnonymousUsers()
+	public void testIsCurrentUserCanEditWritePermission()
 	{
-		this.setSecurityContextAnonymousUsers();
-		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permissions on static content page")
-	public void checkPermissions_withoutPermissions()
-	{
-		this.setSecurityContextNonSuperUser(false);
-		this.staticContentService.checkPermissions(pluginId);
+		String key = "key";
+		StaticContent staticContent = mock(StaticContent.class);
+		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
+		assertTrue(staticContentServiceImpl.isCurrentUserCanEdit(key));
+		//		StaticContent staticContent = mock(StaticContent.class).isWritable()).thenReturn(true).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
 	@Test
-	public void submitContent()
+	public void testIsCurrentUserCanEditReadPermission()
 	{
-		assertTrue(this.staticContentService.submitContent(pluginId, "<p>Welcome to Molgenis!</p>"));
+		String key = "key";
+		StaticContent staticContent = mock(StaticContent.class);
+		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
+		assertFalse(staticContentServiceImpl.isCurrentUserCanEdit(key));
+		//		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(false).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
-	private void setSecurityContextSuperUser()
+	@Test
+	public void testIsCurrentUserCanEditNotAllowed()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
-				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
-
-		Authentication authentication = mock(Authentication.class);
-
-		doReturn(authorities).when(authentication).getAuthorities();
-
-		when(authentication.isAuthenticated()).thenReturn(true);
-		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn(SecurityUtils.AUTHORITY_SU)
-																			 .getMock();
-		when(authentication.getPrincipal()).thenReturn(userDetails);
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		String key = "key";
+		doThrow(new MolgenisDataAccessException()).when(dataService)
+												  .findOneById(STATIC_CONTENT, key, StaticContent.class);
+		assertFalse(staticContentServiceImpl.isCurrentUserCanEdit(key));
 	}
 
-	private void setSecurityContextNonSuperUser(Boolean hasPermissions)
+	@Test
+	public void testCheckPermissionWritePermission()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
-				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME"),
-				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "HOME"));
-
-		Authentication authentication = mock(Authentication.class);
-		PermissionService permissions = mock(PermissionService.class);
-
-		doReturn(authorities).when(authentication).getAuthorities();
-
-		when(authentication.isAuthenticated()).thenReturn(true);
-		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn("user").getMock();
-		when(authentication.getPrincipal()).thenReturn(userDetails);
-
-		when(permissions.hasPermissionOnPlugin("home", Permission.WRITE)).thenReturn(hasPermissions);
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		String key = "key";
+		StaticContent staticContent = mock(StaticContent.class);
+		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
+		staticContentServiceImpl.checkPermissions(key); // no exception == test success
+		//		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(true).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
-	private void setSecurityContextAnonymousUsers()
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void testCheckPermissionReadPermission()
 	{
-		Authentication authentication = mock(Authentication.class);
-
-		when(authentication.isAuthenticated()).thenReturn(false);
-		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn(
-				SecurityUtils.ANONYMOUS_USERNAME).getMock();
-		when(authentication.getPrincipal()).thenReturn(userDetails);
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		String key = "key";
+		StaticContent staticContent = mock(StaticContent.class);
+		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
+		staticContentServiceImpl.checkPermissions(key);
+		//		StaticContent staticContent = when(mock(StaticContent.class).isWritable()).thenReturn(false).getMock();
+		throw new UnsupportedOperationException("FIXME");
 	}
 
-	@Configuration
-	@EnableWebSecurity
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
-	public static class Config extends WebSecurityConfigurerAdapter
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void testCheckPermissionNotAllowed()
 	{
-		@Bean
-		public PermissionService permissionService()
-		{
-			return new PermissionServiceImpl();
-		}
+		String key = "key";
+		doThrow(new MolgenisDataAccessException()).when(dataService)
+												  .findOneById(STATIC_CONTENT, key, StaticContent.class);
+		staticContentServiceImpl.checkPermissions(key);
+	}
 
-		@Bean
-		public StaticContentFactory staticContentFactory()
-		{
-			return new StaticContentFactory(mock(StaticContentMeta.class), mock(EntityPopulator.class));
-		}
+	@Test
+	public void testGetContent()
+	{
+		String key = "key";
+		String content = "content";
+		StaticContent staticContent = when(mock(StaticContent.class).getContent()).thenReturn(content).getMock();
+		when(dataService.findOneById(STATIC_CONTENT, key, StaticContent.class)).thenReturn(staticContent);
 
-		@Bean
-		public StaticContentService staticContentService()
-		{
-			return new StaticContentServiceImpl(dataService(), staticContentFactory(), permissionService());
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			DataService dataService = mock(DataService.class);
-			StaticContent staticContent = when(mock(StaticContent.class).getContent()).thenReturn(
-					"<p>Welcome to Molgenis!</p>").getMock();
-			when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
-			return dataService;
-		}
-
-		@Override
-		protected org.springframework.security.core.userdetails.UserDetailsService userDetailsService()
-		{
-			return mock(UserDetailsService.class);
-		}
-
-		@Bean
-		@Override
-		public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean()
-				throws Exception
-		{
-			return userDetailsService();
-		}
-
-		@Bean
-		@Override
-		public AuthenticationManager authenticationManagerBean() throws Exception
-		{
-			return super.authenticationManagerBean();
-		}
-
-		@Autowired
-		@Override
-		public void configure(AuthenticationManagerBuilder auth) throws Exception
-		{
-			auth.inMemoryAuthentication().withUser("user").password("password").authorities("ROLE_USER");
-		}
+		staticContentServiceImpl.getContent(content);
 	}
 }

@@ -14,17 +14,17 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.security.EntitySecurityRepositoryDecorator;
+import org.molgenis.data.security.PermissionService;
+import org.molgenis.data.security.acl.EntityAclManager;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.*;
-import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.util.EntityUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
@@ -45,6 +45,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final L3Cache l3Cache;
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
+	private final EntityAclManager entityAclManager;
+	private final PermissionService permissionService;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
@@ -54,7 +56,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			L3Cache l3Cache,
-			PlatformTransactionManager transactionManager, QueryValidator queryValidator)
+			PlatformTransactionManager transactionManager, QueryValidator queryValidator,
+			EntityAclManager entityAclManager, PermissionService permissionService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -73,6 +76,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.l3Cache = requireNonNull(l3Cache);
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
+		this.entityAclManager = requireNonNull(entityAclManager);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -101,12 +106,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 8. Perform cascading deletes
 		decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
 
-		// 7. Owned decorator
-		if (EntityUtils.doesExtend(decoratedRepository.getEntityType(), OWNED))
-		{
-			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
-		}
-
 		// 6. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
 
@@ -122,7 +121,13 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 				appSettings);
 
 		// 2. security decorator
-		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository);
+		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, permissionService);
+
+		// 1.5
+		if (permissionService.isEntityLevelSecurity(repository.getEntityType()))
+		{
+			decoratedRepository = new EntitySecurityRepositoryDecorator(decoratedRepository, entityAclManager);
+		}
 
 		// 1. transaction decorator
 		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);

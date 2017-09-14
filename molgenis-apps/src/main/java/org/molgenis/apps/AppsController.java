@@ -4,10 +4,8 @@ import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.system.core.FreemarkerTemplate;
-import org.molgenis.file.FileStore;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -42,16 +40,11 @@ public class AppsController extends PluginController
 	private static final String VIEW_NAME = "view-apps";
 
 	private final DataService dataService;
-	private final FileStore fileStore;
-	private final PermissionService permissionService;
 
-	public AppsController(DataService dataService, FileStore fileStore, PermissionService permissionService)
+	public AppsController(DataService dataService)
 	{
 		super(URI);
-
 		this.dataService = requireNonNull(dataService);
-		this.fileStore = requireNonNull(fileStore);
-		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@GetMapping
@@ -64,10 +57,11 @@ public class AppsController extends PluginController
 
 	private Stream<App> getApps()
 	{
-		Query<App> query = dataService.query(APP, App.class);
+		Repository<App> repository = dataService.getRepository(APP, App.class);
+		Query<App> query = repository.query();
 		query.sort().on(AppMetaData.NAME);
 		Stream<App> apps = query.findAll();
-		if (!permissionService.hasPermissionOnEntityType(APP, Permission.WRITE))
+		if (repository.getEntityType().isReadOnly())
 		{
 			apps = apps.filter(App::isActive);
 		}
@@ -124,7 +118,7 @@ public class AppsController extends PluginController
 
 	@PostMapping("/{appId}/deactivate")
 	@ResponseStatus(OK)
-	public void deactivateApp(@PathVariable("appId") String appId, Model model)
+	public void deactivateApp(@PathVariable("appId") String appId)
 	{
 		App app = dataService.findOneById(APP, appId, App.class);
 		if (app == null)

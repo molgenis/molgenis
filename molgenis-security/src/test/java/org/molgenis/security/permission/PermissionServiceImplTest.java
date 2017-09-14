@@ -1,92 +1,70 @@
 package org.molgenis.security.permission;
 
+import org.mockito.Mock;
+import org.molgenis.data.security.acl.EntityAclService;
+import org.molgenis.data.security.acl.EntityIdentity;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.molgenis.test.AbstractMockitoTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
+import static org.molgenis.security.core.Permission.*;
+import static org.testng.Assert.assertEquals;
 
-public class PermissionServiceImplTest
+public class PermissionServiceImplTest extends AbstractMockitoTest
 {
-	private static Authentication AUTHENTICATION;
+	@Mock
+	private EntityAclService entityAclService;
 
-	private static PermissionServiceImpl permissionService;
+	private PermissionServiceImpl molgenisPermissionService;
 
-	@SuppressWarnings("unchecked")
-	@BeforeClass
-	public static void setUpBeforeClass()
+	@BeforeMethod
+	public void setUpBeforeMethod()
 	{
-		AUTHENTICATION = SecurityContextHolder.getContext().getAuthentication();
-
-		Authentication authentication = mock(Authentication.class);
-		GrantedAuthority authority1 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.READ + "_entity1").getMock();
-		GrantedAuthority authority2 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.WRITE + "_entity2").getMock();
-		GrantedAuthority authority3 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.COUNT + "_entity3").getMock();
-		GrantedAuthority authority4 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_plugin1").getMock();
-		GrantedAuthority authority5 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_plugin2").getMock();
-		GrantedAuthority authority6 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.COUNT + "_plugin3").getMock();
-
-		when((Collection<GrantedAuthority>) (authentication.getAuthorities())).thenReturn(
-				Arrays.asList(authority1, authority2, authority3, authority4, authority5, authority6));
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		permissionService = new PermissionServiceImpl();
+		molgenisPermissionService = new PermissionServiceImpl(entityAclService);
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass()
+	@DataProvider(name = "hasPermissionOnEntityProvider")
+	public static Iterator<Object[]> testHasPermissionOnEntityProvider()
 	{
-		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION);
+		List<Object[]> dataList = new ArrayList<>();
+		dataList.add(new Object[] { "myEntityType", READ, true });
+		dataList.add(new Object[] { "myEntityType", WRITE, false });
+		dataList.add(new Object[] { "myOtherEntityType", COUNT, false });
+		return dataList.iterator();
 	}
 
-	@Test
-	public void hasPermissionOnEntity()
+	@Test(dataProvider = "hasPermissionOnEntityProvider")
+	public void testHasPermissionOnEntity(String entityTypeId, Permission permission, boolean expectedIsGranted)
 	{
-		assertTrue(permissionService.hasPermissionOnEntityType("entity1", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.READ));
-		assertTrue(permissionService.hasPermissionOnEntityType("entity2", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.WRITE));
-		assertTrue(permissionService.hasPermissionOnEntityType("entity3", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.COUNT));
+		EntityIdentity entityIdentity = EntityIdentity.create(ENTITY_TYPE_META_DATA, "myEntityType");
+		when(entityAclService.isGranted(entityIdentity, READ)).thenReturn(true);
+		when(entityAclService.isGranted(entityIdentity, WRITE)).thenReturn(false);
+		assertEquals(molgenisPermissionService.hasPermissionOnEntityType(entityTypeId, permission), expectedIsGranted);
 	}
 
-	@Test
-	public void hasPermissionOnPlugin()
+	@DataProvider(name = "hasPermissionOnPluginProvider")
+	public static Iterator<Object[]> testHasPermissionOnPlugin()
 	{
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin1", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin1", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin1", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin2", Permission.READ));
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin2", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin2", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin3", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin3", Permission.WRITE));
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin3", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin-unknown", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin-unknown", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin-unknown", Permission.COUNT));
+		List<Object[]> dataList = new ArrayList<>();
+		dataList.add(new Object[] { "myPlugin", READ, true });
+		dataList.add(new Object[] { "myOtherPlugin", READ, false });
+		return dataList.iterator();
+	}
+
+	@Test(dataProvider = "hasPermissionOnPluginProvider")
+	public void testHasPermissionOnPlugin(String pluginId, Permission permission, boolean expectedIsGranted)
+	{
+		EntityIdentity entityIdentity = EntityIdentity.create(PLUGIN, "myPlugin");
+		when(entityAclService.isGranted(entityIdentity, READ)).thenReturn(true);
+		assertEquals(molgenisPermissionService.hasPermissionOnPlugin(pluginId, permission), expectedIsGranted);
 	}
 }

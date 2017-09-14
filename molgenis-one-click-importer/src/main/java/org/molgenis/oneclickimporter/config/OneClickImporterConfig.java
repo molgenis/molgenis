@@ -55,8 +55,7 @@ public class OneClickImporterConfig
 					String packageId = entityTypes.get(0).getPackage().getId();
 					oneClickImportJobExecution.setPackage(packageId);
 
-					String labels = entityTypes.stream()
-											   .map(EntityType::getLabel)
+					String labels = entityTypes.stream().map(EntityType::getLabel)
 											   .collect(Collectors.joining(","));
 
 					progress.status(format("Created table(s): %s", labels));

@@ -27,6 +27,8 @@ public abstract class SystemEntityType extends EntityType
 	private IdGenerator idGenerator;
 
 	private final String entityTypeId;
+	private boolean entityLevelSecurity;
+	private Attribute attribute;
 
 	/**
 	 * Construct entity meta data for an entity with the given name stored in the system package.
@@ -53,6 +55,7 @@ public abstract class SystemEntityType extends EntityType
 							systemPackageName));
 		}
 		this.entityTypeId = systemPackageName + PACKAGE_SEPARATOR + entityName;
+		this.entityLevelSecurity = true;
 	}
 
 	@Override
@@ -125,5 +128,28 @@ public abstract class SystemEntityType extends EntityType
 	public Set<SystemEntityType> getDependencies()
 	{
 		return Collections.emptySet();
+	}
+
+	@SuppressWarnings("unused")
+	public EntityType setEntityLevelSecurity(boolean entityLevelSecurity)
+	{
+		this.entityLevelSecurity = entityLevelSecurity;
+		return this;
+	}
+
+	public boolean isEntityLevelSecurity()
+	{
+		return entityLevelSecurity;
+	}
+
+	public EntityType setEntityLevelSecurityInheritance(Attribute attribute)
+	{
+		this.attribute = attribute;
+		return this;
+	}
+
+	public Attribute getEntityLevelSecurityInheritance()
+	{
+		return attribute;
 	}
 }

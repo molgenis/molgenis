@@ -86,11 +86,11 @@ public class AttributeMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
-		addAttribute(ENTITY).setDataType(XREF)
-							.setRefEntity(entityTypeMeta)
-							.setLabel("Entity")
-							.setNillable(false)
-							.setReadOnly(true);
+		Attribute entityAttribute = addAttribute(ENTITY).setDataType(XREF)
+														.setRefEntity(entityTypeMeta)
+														.setLabel("Entity")
+														.setNillable(false)
+														.setReadOnly(true);
 		addAttribute(SEQUENCE_NR).setDataType(INT)
 								 .setLabel("Sequence number")
 								 .setDescription("Number that defines order of attributes in a entity")
@@ -163,6 +163,8 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Visible expression");
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Validation expression");
 		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true).setLabel("Default value");
+
+		setEntityLevelSecurityInheritance(entityAttribute);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

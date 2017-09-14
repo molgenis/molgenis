@@ -63,13 +63,13 @@ public class UserDetailsService implements org.springframework.security.core.use
 		List<? extends Authority> authorities = getUserAuthorities(user);
 		List<GrantedAuthority> grantedAuthorities = authorities != null ? Lists.transform(authorities,
 				(Function<Authority, GrantedAuthority>) authority -> new SimpleGrantedAuthority(
-						authority.getRole())) : null;
+						authority.getRole().getId())) : null;
 
 		// // user group authorities
 		List<GroupAuthority> groupAuthorities = getGroupAuthorities(user);
 		List<GrantedAuthority> grantedGroupAuthorities = groupAuthorities != null ? Lists.transform(groupAuthorities,
 				(Function<GroupAuthority, GrantedAuthority>) groupAuthority -> new SimpleGrantedAuthority(
-						groupAuthority.getRole())) : null;
+						groupAuthority.getRole().getId())) : null;
 
 		// union of user and group authorities
 		Set<GrantedAuthority> allGrantedAuthorities = new HashSet<>();
@@ -78,6 +78,10 @@ public class UserDetailsService implements org.springframework.security.core.use
 		if (user.isSuperuser() != null && user.isSuperuser() == true)
 		{
 			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+		}
+		if (user.getUsername().equals(SecurityUtils.ANONYMOUS_USERNAME))
+		{
+			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
 		}
 		return grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities);
 	}

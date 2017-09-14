@@ -83,6 +83,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String EMX_ENTITIES_EXTENDS = "extends";
 	private static final String EMX_ENTITIES_BACKEND = "backend";
 	private static final String EMX_ENTITIES_TAGS = "tags";
+	private static final String EMX_ENTITIES_ROW_SECURITY = "rowSecurity";
 
 	// Column names in the attributes sheet
 	private static final String EMX_ATTRIBUTES_NAME = "name";
@@ -146,7 +147,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final List<String> EMX_ENTITIES_ALLOWED_ATTRS = Arrays.asList(EMX_ENTITIES_NAME.toLowerCase(),
 			EMX_ENTITIES_PACKAGE.toLowerCase(), EMX_ENTITIES_LABEL.toLowerCase(), EMX_ENTITIES_DESCRIPTION,
 			EMX_ENTITIES_ABSTRACT.toLowerCase(), EMX_ENTITIES_EXTENDS.toLowerCase(), EMX_ENTITIES_BACKEND.toLowerCase(),
-			EMX_ENTITIES_TAGS.toLowerCase());
+			EMX_ENTITIES_TAGS.toLowerCase(), EMX_ENTITIES_ROW_SECURITY.toLowerCase());
 
 	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(EMX_ATTRIBUTES_AGGREGATEABLE,
 			EMX_ATTRIBUTES_DATA_TYPE, EMX_ATTRIBUTES_DESCRIPTION, EMX_ATTRIBUTES_ENTITY, EMX_ATTRIBUTES_ENUM_OPTIONS,
@@ -546,6 +547,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				String emxEntityExtends = entity.getString(EMX_ENTITIES_EXTENDS);
 				String emxEntityBackend = entity.getString(EMX_ENTITIES_BACKEND);
 				String emxEntityTags = entity.getString(EMX_ENTITIES_TAGS);
+				String emxEntityRowSecurity = entity.getString(EMX_ENTITIES_ROW_SECURITY);
 
 				// required
 				if (emxEntityName == null)

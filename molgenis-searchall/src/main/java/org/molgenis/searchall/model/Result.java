@@ -15,13 +15,17 @@ public abstract class Result
 	public abstract ImmutableList<PackageResult> getPackages();
 
 	@AutoValue.Builder
-	public abstract static class Builder {
+	public abstract static class Builder
+	{
 		public abstract Builder setEntityTypes(List<EntityTypeResult> entityTypes);
+
 		public abstract Builder setPackages(List<PackageResult> packages);
+
 		public abstract Result build();
 	}
 
-	public static Builder builder() {
+	public static Builder builder()
+	{
 		return new AutoValue_Result.Builder();
 	}
 }

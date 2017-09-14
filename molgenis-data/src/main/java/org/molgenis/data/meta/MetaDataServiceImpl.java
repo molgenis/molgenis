@@ -102,7 +102,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean hasRepository(String entityTypeId)
 	{
-		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
+		SystemEntityType systemEntityType = !isMetaEntityType(
+				entityTypeId) ? null : systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
 		if (systemEntityType != null)
 		{
 			return !systemEntityType.isAbstract();
@@ -380,7 +381,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public EntityType getEntityType(String entityTypeId)
 	{
-		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
+		EntityType systemEntity = !isMetaEntityType(entityTypeId) ? null : systemEntityTypeRegistry.getSystemEntityType(
+				entityTypeId);
 		if (systemEntity != null)
 		{
 			return systemEntity;
@@ -395,7 +397,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public EntityType getEntityTypeById(String entityTypeId)
 	{
-		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
+		EntityType systemEntity = !isMetaEntityType(entityTypeId) ? null : systemEntityTypeRegistry.getSystemEntityType(
+				entityTypeId);
 		if (systemEntity != null)
 		{
 			return systemEntity;
@@ -474,7 +477,6 @@ public class MetaDataServiceImpl implements MetaDataService
 			query.setOffset(page * pageSize);
 			dataService.findAll(ENTITY_TYPE_META_DATA, query, EntityType.class).forEach(entityTypeList::add);
 		}
-
 		return entityTypeList.stream();
 	}
 
@@ -575,6 +577,20 @@ public class MetaDataServiceImpl implements MetaDataService
 	public boolean hasBackend(String backendName)
 	{
 		return repoCollectionRegistry.hasRepositoryCollection(backendName);
+	}
+
+	private boolean isMetaEntityType(String entityTypeId)
+	{
+		switch (entityTypeId)
+		{
+			case ENTITY_TYPE_META_DATA:
+			case ATTRIBUTE_META_DATA:
+			case TAG:
+			case PACKAGE:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	@Override

@@ -1,10 +1,10 @@
 package org.molgenis.dataexplorer.controller;
 
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.dataexplorer.directory.DirectorySettings;
 import org.molgenis.dataexplorer.directory.NegotiatorQuery;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.web.PluginController;

@@ -11,7 +11,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
 
@@ -44,10 +43,10 @@ class AttributeResponseV2
 	private String validationExpression;
 
 	/**
-	 * @param fetch set of lowercase attribute names to include in response
+	 * @param fetch             set of lowercase attribute names to include in response
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -63,8 +62,7 @@ class AttributeResponseV2
 		EntityType refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
-					languageService);
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, dataService, languageService);
 		}
 		else
 		{
@@ -80,32 +78,33 @@ class AttributeResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts, attr1 ->
-			{
-				Fetch subAttrFetch;
-				if (fetch != null)
-				{
-					if (attr1.getDataType() == AttributeType.COMPOUND)
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, attr1 ->
 					{
-						subAttrFetch = fetch;
-					}
-					else
-					{
-						subAttrFetch = fetch.getFetch(attr1);
-					}
-				}
-				else if (EntityTypeUtils.isReferenceType(attr1))
-				{
-					subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
-							languageService.getCurrentUserLanguageCode());
-				}
-				else
-				{
-					subAttrFetch = null;
-				}
-				return new AttributeResponseV2(entityParentName, entityType, attr1, subAttrFetch, permissionService,
-						dataService, languageService);
-			}));
+						Fetch subAttrFetch;
+						if (fetch != null)
+						{
+							if (attr1.getDataType() == AttributeType.COMPOUND)
+							{
+								subAttrFetch = fetch;
+							}
+							else
+							{
+								subAttrFetch = fetch.getFetch(attr1);
+							}
+						}
+						else if (EntityTypeUtils.isReferenceType(attr1))
+						{
+							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
+									languageService.getCurrentUserLanguageCode());
+						}
+						else
+						{
+							subAttrFetch = null;
+						}
+						return new AttributeResponseV2(entityParentName, entityType, attr1, subAttrFetch,
+								 dataService, languageService);
+					}));
 		}
 		else
 		{

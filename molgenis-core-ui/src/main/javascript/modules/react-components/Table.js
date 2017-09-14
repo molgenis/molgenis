@@ -508,20 +508,28 @@ var TableBody = React.createClass({
     _createCols: function (item, entity) {
         var Cols = [];
         if (this.props.enableEdit === true) {
-            var EntityEditBtn = EntityEditBtnFactory({
-                name: entity.name,
-                id: item[entity.idAttribute],
-                onEdit: this.props.onEdit
-            });
-            Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
+            if (item._permissions.indexOf("WRITE") != -1) {
+                var EntityEditBtn = EntityEditBtnFactory({
+                    name: entity.name,
+                    id: item[entity.idAttribute],
+                    onEdit: this.props.onEdit
+                });
+                Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
+            } else {
+                Cols.push(td({className: 'compact', key: 'editDisabled'}));
+            }
         }
         if (this.props.enableDelete === true) {
-            var EntityDeleteBtn = EntityDeleteBtnFactory({
-                name: entity.name,
-                id: item[entity.idAttribute],
-                onDelete: this.props.onDelete
-            });
-            Cols.push(td({className: 'compact', key: 'delete'}, EntityDeleteBtn));
+            if (item._permissions.indexOf("DELETE") != -1) {
+                var EntityDeleteBtn = EntityDeleteBtnFactory({
+                    name: entity.name,
+                    id: item[entity.idAttribute],
+                    onDelete: this.props.onDelete
+                });
+                Cols.push(td({className: 'compact', key: 'delete'}, EntityDeleteBtn));
+            } else {
+                Cols.push(td({className: 'compact', key: 'deleteDisabled'}));
+            }
         }
         if (this.props.enableInspect === true && this.props.onRowInspect !== null) {
             var EntityInspectBtn = EntityInspectBtnFactory({

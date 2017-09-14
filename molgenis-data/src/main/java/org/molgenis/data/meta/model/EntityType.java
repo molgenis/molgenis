@@ -37,6 +37,7 @@ public class EntityType extends StaticEntity
 {
 	private transient Map<String, Attribute> cachedOwnAttrs;
 	private transient Boolean cachedHasAttrWithExpression;
+	private boolean readOnly = false;
 
 	public EntityType(Entity entity)
 	{
@@ -705,6 +706,16 @@ public class EntityType extends StaticEntity
 	public int getIndexingDepth()
 	{
 		return getInt(INDEXING_DEPTH);
+	}
+
+	public void setReadOnly(boolean readOnly)
+	{
+		this.readOnly = readOnly;
+	}
+
+	public boolean isReadOnly()
+	{
+		return this.readOnly;
 	}
 
 	/**

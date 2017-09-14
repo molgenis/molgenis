@@ -2,8 +2,8 @@ package org.molgenis.ui.security;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.molgenis.data.security.PermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;
