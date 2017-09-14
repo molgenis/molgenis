@@ -46,9 +46,9 @@ import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
@@ -127,7 +127,8 @@ public class DataExplorerController extends PluginController
 		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
 				.filter(entityType -> !entityType.isAbstract())
 				.filter(entityType -> currentUserIsSu || !EntityTypeUtils.isSystemEntity(entityType))
-				.collect(toMap(EntityType::getId, entityType -> entityType));
+				.sorted(Comparator.comparing(EntityType::getLabel))
+				.collect(Collectors.toMap(EntityType::getId, Function.identity(), (e1, e2) -> e2, LinkedHashMap::new));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
