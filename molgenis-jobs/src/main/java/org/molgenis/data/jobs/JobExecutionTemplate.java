@@ -88,7 +88,7 @@ class JobExecutionTemplate
 		}
 	}
 
-	private <T> T tryCall(Job<T> job, Progress progress) throws JobExecutionException
+	private <T> T tryCall(Job<T> job, Progress progress)
 	{
 		progress.start();
 		try

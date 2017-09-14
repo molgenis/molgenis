@@ -156,7 +156,7 @@ public class ImportWizardController extends AbstractWizardController
 		return wizard;
 	}
 
-	@RequestMapping(value = "/entityclass/group/{groupId}", method = RequestMethod.GET)
+	@GetMapping("/entityclass/group/{groupId}")
 	@ResponseBody
 	public Permissions getGroupEntityClassPermissions(@PathVariable String groupId, WebRequest webRequest)
 	{
@@ -188,7 +188,7 @@ public class ImportWizardController extends AbstractWizardController
 
 	}
 
-	@RequestMapping(value = "/add/entityclass/group", method = RequestMethod.POST)
+	@PostMapping("/add/entityclass/group")
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
@@ -369,7 +369,7 @@ public class ImportWizardController extends AbstractWizardController
 	 *
 	 * @param url URL from which a file is downloaded
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/importByUrl")
+	@PostMapping("/importByUrl")
 	@ResponseBody
 	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
@@ -408,7 +408,7 @@ public class ImportWizardController extends AbstractWizardController
 	 * @param notify       Should admin be notified when the import fails?
 	 * @return ResponseEntity containing the API URL with the current import status
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/importFile")
+	@PostMapping("/importFile")
 	public ResponseEntity<String> importFile(HttpServletRequest request,
 			@RequestParam(value = "file") MultipartFile file,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,

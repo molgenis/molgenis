@@ -5,7 +5,7 @@ import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.oneclickimporter.service.Impl.OneClickImporterNamingServiceImpl;
+import org.molgenis.oneclickimporter.service.impl.OneClickImporterNamingServiceImpl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

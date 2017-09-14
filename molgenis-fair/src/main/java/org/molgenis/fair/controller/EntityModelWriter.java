@@ -43,7 +43,6 @@ public class EntityModelWriter
 	}
 
 	public EntityModelWriter(TagService<LabeledResource, LabeledResource> tagService, SimpleValueFactory valueFactory)
-			throws DatatypeConfigurationException
 	{
 		this.valueFactory = requireNonNull(valueFactory);
 		this.tagService = requireNonNull(tagService);

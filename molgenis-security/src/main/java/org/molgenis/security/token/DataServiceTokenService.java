@@ -48,7 +48,7 @@ public class DataServiceTokenService implements TokenService
 	@Override
 	@Transactional(readOnly = true)
 	@RunAsSystem
-	public UserDetails findUserByToken(String token) throws UnknownTokenException
+	public UserDetails findUserByToken(String token)
 	{
 		Token molgenisToken = getMolgenisToken(token);
 		return userDetailsService.loadUserByUsername(molgenisToken.getUser().getUsername());
@@ -89,13 +89,13 @@ public class DataServiceTokenService implements TokenService
 	@Override
 	@Transactional
 	@RunAsSystem
-	public void removeToken(String token) throws UnknownTokenException
+	public void removeToken(String token)
 	{
 		Token molgenisToken = getMolgenisToken(token);
 		dataService.delete(TOKEN, molgenisToken);
 	}
 
-	private Token getMolgenisToken(String token) throws UnknownTokenException
+	private Token getMolgenisToken(String token)
 	{
 		Token molgenisToken = dataService.query(TOKEN, Token.class).eq(TOKEN_ATTR, token).findOne();
 		if (molgenisToken == null || molgenisToken.isExpired())

@@ -3,7 +3,6 @@ package org.molgenis.oneclickimporter.job;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -19,17 +18,14 @@ public class OneClickImportJobExecutionMetadata extends SystemEntityType
 	public static final String ENTITY_TYPES = "entityTypes";
 	public static final String PACKAGE = "package";
 
-	private final EntityTypeMetadata entityTypeMetadata;
 	private final JobExecutionMetaData jobExecutionMetaData;
 	private final JobPackage jobPackage;
 
 	public static final String ONE_CLICK_IMPORT_JOB_TYPE = "OneClickImportJob";
 
-	OneClickImportJobExecutionMetadata(EntityTypeMetadata entityTypeMetadata, JobExecutionMetaData jobExecutionMetaData,
-			JobPackage jobPackage)
+	OneClickImportJobExecutionMetadata(JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_JOB);
-		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 		this.jobPackage = requireNonNull(jobPackage);
 	}

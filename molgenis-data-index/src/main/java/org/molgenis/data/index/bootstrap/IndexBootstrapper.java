@@ -11,7 +11,6 @@ import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
 @Component
@@ -34,18 +33,16 @@ public class IndexBootstrapper
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final DataService dataService;
 	private final AttributeMetadata attrMetadata;
-	private final EntityTypeFactory entityTypeFactory;
 
 	public IndexBootstrapper(MetaDataService metaDataService, IndexService indexService,
 			IndexActionRegisterService indexActionRegisterService, DataService dataService,
-			AttributeMetadata attrMetadata, EntityTypeFactory entityTypeFactory)
+			AttributeMetadata attrMetadata)
 	{
 		this.metaDataService = metaDataService;
 		this.indexService = indexService;
 		this.indexActionRegisterService = indexActionRegisterService;
 		this.dataService = dataService;
 		this.attrMetadata = attrMetadata;
-		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
 	public void bootstrap()
@@ -78,15 +75,12 @@ public class IndexBootstrapper
 
 	private void registerIndexAction(IndexAction action)
 	{
-		EntityType entityType = getEntityType(action);
-		Object typedEntityId = getTypedValue(action.getEntityId(), entityType.getIdAttribute());
-		indexActionRegisterService.register(entityType, typedEntityId);
-	}
-
-	private EntityType getEntityType(IndexAction indexAction)
-	{
-		EntityType entityType = entityTypeFactory.create(indexAction.getEntityTypeId());
-		entityType.setId(indexAction.getEntityTypeId());
-		return entityType;
+		String entityTypeId = action.getEntityTypeId();
+		EntityType entityType = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
+		if (entityType != null)
+		{
+			Object typedEntityId = getTypedValue(action.getEntityId(), entityType.getIdAttribute());
+			indexActionRegisterService.register(entityType, typedEntityId);
+		}
 	}
 }

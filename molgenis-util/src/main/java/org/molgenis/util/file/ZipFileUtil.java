@@ -29,7 +29,7 @@ public class ZipFileUtil
 		}
 	}
 
-	public static List<File> unzip(File file) throws FileNotFoundException, IOException
+	public static List<File> unzip(File file) throws IOException
 	{
 
 		List<File> unzippedFiles = new ArrayList<>();

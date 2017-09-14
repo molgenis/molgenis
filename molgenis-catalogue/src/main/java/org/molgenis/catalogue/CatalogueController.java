@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -31,7 +32,7 @@ public class CatalogueController extends PluginController
 		this.dataService = dataService;
 	}
 
-	@RequestMapping
+	@GetMapping
 	public String showView(final @RequestParam(value = "entity", required = false) String selectedEntityName,
 			Model model)
 	{

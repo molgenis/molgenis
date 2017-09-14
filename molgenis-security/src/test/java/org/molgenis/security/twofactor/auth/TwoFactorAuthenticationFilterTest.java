@@ -31,6 +31,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = { TwoFactorAuthenticationFilterTest.Config.class })
 public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringContextTests
@@ -83,8 +84,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 
 		filter.doFilterInternal(request, response, chain);
 
-		assertEquals(null, response.getRedirectedUrl());
-
+		assertNull(response.getRedirectedUrl());
 	}
 
 	@Test

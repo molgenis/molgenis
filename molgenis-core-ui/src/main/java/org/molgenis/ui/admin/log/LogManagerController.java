@@ -13,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,7 +43,7 @@ public class LogManagerController extends PluginController
 		super(URI);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		ILoggerFactory iLoggerFactory = LoggerFactory.getILoggerFactory();
@@ -72,7 +69,7 @@ public class LogManagerController extends PluginController
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@RequestMapping(value = "/logger/{loggerName}/{loggerLevel}", method = RequestMethod.POST)
+	@PostMapping("/logger/{loggerName}/{loggerLevel}")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateLogLevel(@PathVariable(value = "loggerName") String loggerName,
 			@PathVariable(value = "loggerLevel") String loggerLevelStr)
@@ -99,7 +96,7 @@ public class LogManagerController extends PluginController
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@RequestMapping(value = "/loggers/reset", method = RequestMethod.POST)
+	@PostMapping("/loggers/reset")
 	@ResponseStatus(HttpStatus.OK)
 	public void resetLoggers()
 	{

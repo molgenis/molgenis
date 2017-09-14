@@ -17,14 +17,14 @@ public class CaptchaController
 	@Autowired
 	private CaptchaService captchaService;
 
-	@RequestMapping(method = RequestMethod.GET, produces = "image/jpeg")
+	@GetMapping(produces = "image/jpeg")
 	@ResponseBody
 	public BufferedImage getCaptcha()
 	{
 		return captchaService.createCaptcha(CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	@ResponseBody
 	public Boolean validateCaptcha(@Valid @RequestBody CaptchaRequest captchaRequest) throws CaptchaException
 	{
@@ -32,7 +32,7 @@ public class CaptchaController
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
-	@RequestMapping(method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@PostMapping(headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Boolean validateCaptchaFromForm(@Valid @ModelAttribute CaptchaRequest captchaRequest) throws CaptchaException
 	{

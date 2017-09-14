@@ -2,12 +2,9 @@ package org.molgenis.util.mail;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 
@@ -19,14 +16,14 @@ public class MailSenderImpl implements MailSender
 	private final MailSettings mailSettings;
 	private final MailSenderFactory mailSenderFactory;
 
-	public MailSenderImpl(MailSettings mailSettings, MailSenderFactory mailSenderFactory) throws IOException
+	public MailSenderImpl(MailSettings mailSettings, MailSenderFactory mailSenderFactory) 
 	{
 		this.mailSettings = requireNonNull(mailSettings);
 		this.mailSenderFactory = requireNonNull(mailSenderFactory);
 	}
 
 	@Override
-	public void send(SimpleMailMessage simpleMessage) throws MailException
+	public void send(SimpleMailMessage simpleMessage)
 	{
 		LOG.trace("Sending message...");
 		createMailSender().send(simpleMessage);
@@ -34,7 +31,7 @@ public class MailSenderImpl implements MailSender
 	}
 
 	@Override
-	public void send(SimpleMailMessage... simpleMessages) throws MailException
+	public void send(SimpleMailMessage... simpleMessages)
 	{
 		LOG.trace("Sending messages...");
 		createMailSender().send(simpleMessages);

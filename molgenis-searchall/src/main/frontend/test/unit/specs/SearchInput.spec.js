@@ -18,8 +18,8 @@ describe('SearchInput', () => {
       }
 
       SearchInput.methods.submitQuery()
-      SearchInput.methods.$store.commit.should.have.been.calledWith('SET_SUBMITTED', true)
-      SearchInput.methods.$store.dispatch.should.have.been.calledWith('SEARCH_ALL', 'my-query')
+      SearchInput.methods.$store.commit.should.have.been.calledWith('__SET_SUBMITTED__', true)
+      SearchInput.methods.$store.dispatch.should.have.been.calledWith('__SEARCH_ALL__', 'my-query')
     })
   })
   describe('clearQuery', () => {
@@ -33,8 +33,8 @@ describe('SearchInput', () => {
       }
 
       SearchInput.methods.clearQuery()
-      SearchInput.methods.$store.commit.should.have.been.calledWith('SET_SUBMITTED', false)
-      SearchInput.methods.$store.commit.should.have.been.calledWith('SET_SEARCHTERM', undefined)
+      SearchInput.methods.$store.commit.should.have.been.calledWith('__SET_SUBMITTED__', false)
+      SearchInput.methods.$store.commit.should.have.been.calledWith('__SET_SEARCHTERM__', undefined)
     })
   })
 })

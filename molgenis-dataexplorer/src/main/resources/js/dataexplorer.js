@@ -389,6 +389,8 @@ $.when($,
                 });
             });
 
+            setNavigatoHref(state.entity)
+
             $('#observationset-search').focus();
         }
 
@@ -423,6 +425,23 @@ $.when($,
             if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState)
                 + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
+        }
+
+        /**
+         * Sets the href for the link to the Navigator plugin.
+         * The link href to the Navigator is appended with a 'lookup' query that results in the navigator opening in
+         * the correct package.
+         *
+         * @memberOf molgenis.dataexplorer
+         *
+         * */
+        function setNavigatoHref (entityId) {
+          var navigatorLinkElem = $('#navigator-link');
+          if(navigatorLinkElem.length) { // skip in case navigator-link is set to hidden
+            var currentHref = navigatorLinkElem.attr('href')
+            var newHref = currentHref.substring(0, currentHref.indexOf('?lookup=')) + '?lookup="' + entityId + '"';
+            navigatorLinkElem.attr('href',  newHref);
+          }
         }
 
         /**

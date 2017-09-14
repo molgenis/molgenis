@@ -27,8 +27,6 @@ import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
 import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.ui.jobs.JobsController.URI;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -55,14 +53,14 @@ public class JobsController extends PluginController
 		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("username", userAccountService.getCurrentUser().getUsername());
 		return "view-jobs";
 	}
 
-	@RequestMapping(method = GET, value = "/viewJob")
+	@GetMapping("/viewJob")
 	public String viewJob(Model model, @RequestParam(name = "jobHref") String jobHref,
 			@RequestParam(name = "refreshTimeoutMillis", defaultValue = "10000") Integer refreshTimeoutMillis)
 	{
@@ -71,7 +69,7 @@ public class JobsController extends PluginController
 		return "view-job";
 	}
 
-	@RequestMapping(method = GET, value = "/latest", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/latest", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public List<Entity> findLastJobs()
 	{
@@ -102,7 +100,7 @@ public class JobsController extends PluginController
 		return jobs;
 	}
 
-	@RequestMapping(value = "/run/{scheduledJobId}", method = POST)
+	@PostMapping("/run/{scheduledJobId}")
 	@ResponseStatus(NO_CONTENT)
 	public void runNow(@PathVariable("scheduledJobId") String scheduledJobId)
 	{

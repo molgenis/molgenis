@@ -16,6 +16,7 @@
   "dependencies": {
     "@molgenis/molgenis-api-client": "^1.2.5",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
+    "@molgenis/molgenis-vue-test-utils": "^1.0.0",
     "flow": "^0.2.3",
     "flow-babel-webpack-plugin": "^1.0.1",
     "font-awesome": "^4.7.0",

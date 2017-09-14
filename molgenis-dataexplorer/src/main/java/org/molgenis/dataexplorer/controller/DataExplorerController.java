@@ -10,6 +10,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -22,6 +23,7 @@ import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.web.PluginController;
@@ -53,8 +55,6 @@ import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWN
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Controller class for the data explorer.
@@ -74,6 +74,7 @@ public class DataExplorerController extends PluginController
 	public static final String MOD_ANNOTATORS = "annotators";
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
+	public static final String NAVIGATOR = "navigator";
 
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
@@ -102,6 +103,9 @@ public class DataExplorerController extends PluginController
 	@Autowired
 	private GenomeBrowserService genomeBrowserService;
 
+	@Autowired
+	private MenuReaderService menuReaderService;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -112,16 +116,18 @@ public class DataExplorerController extends PluginController
 	 *
 	 * @return the view name
 	 */
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
-			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model) throws Exception
+			@RequestParam(value = "entityId", required = false) String selectedEntityId, Model model)
 	{
 		StringBuilder message = new StringBuilder("");
 
-		Map<String, EntityType> entitiesMeta = dataService.getMeta()
-														  .getEntityTypes()
-														  .filter(entityType -> !entityType.isAbstract())
-														  .collect(toMap(EntityType::getId, entityType -> entityType));
+		final boolean currentUserIsSu = SecurityUtils.currentUserIsSu();
+
+		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
+				.filter(entityType -> !entityType.isAbstract())
+				.filter(entityType -> currentUserIsSu || !EntityTypeUtils.isSystemEntity(entityType))
+				.collect(toMap(EntityType::getId, entityType -> entityType));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
@@ -146,7 +152,13 @@ public class DataExplorerController extends PluginController
 			model.addAttribute("warningMessage", message.toString());
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("isAdmin", SecurityUtils.currentUserIsSu());
+		model.addAttribute("isAdmin", currentUserIsSu);
+
+		String navigatorMenuPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
+		if(navigatorMenuPath != null )
+		{
+			model.addAttribute("navigatorBaseUrl", navigatorMenuPath);
+		}
 
 		return "view-dataexplorer";
 	}
@@ -174,7 +186,7 @@ public class DataExplorerController extends PluginController
 		}
 	}
 
-	@RequestMapping(value = "/module/{moduleId}", method = GET)
+	@GetMapping("/module/{moduleId}")
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityTypeId,
 			Model model)
 	{
@@ -226,7 +238,7 @@ public class DataExplorerController extends PluginController
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
 
-	@RequestMapping(value = "/copy", method = GET)
+	@GetMapping("/copy")
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
@@ -237,7 +249,7 @@ public class DataExplorerController extends PluginController
 	/**
 	 * Returns modules configuration for this entity based on current user permissions.
 	 */
-	@RequestMapping(value = "/modules", method = GET)
+	@GetMapping("/modules")
 	@ResponseBody
 	public ModulesConfigResponse getModules(@RequestParam("entity") String entityTypeId)
 	{
@@ -324,7 +336,7 @@ public class DataExplorerController extends PluginController
 		return allTracks.values().stream().map(track -> track.toTrackJson()).collect(Collectors.toList());
 	}
 
-	@RequestMapping(value = "/download", method = POST)
+	@PostMapping("/download")
 	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
 			throws IOException
 	{
@@ -365,7 +377,7 @@ public class DataExplorerController extends PluginController
 		return String.format("%s_%s.%s", entityTypeId, timestamp, downloadType == DOWNLOAD_TYPE_CSV ? "csv" : "xlsx");
 	}
 
-	@RequestMapping(value = "/galaxy/export", method = POST)
+	@PostMapping("/galaxy/export")
 	@ResponseStatus(HttpStatus.OK)
 	public void exportToGalaxy(@Valid @RequestBody GalaxyDataExportRequest galaxyDataExportRequest, Model model)
 			throws IOException
@@ -403,9 +415,9 @@ public class DataExplorerController extends PluginController
 	 * @return entity report view
 	 * @throws Exception if an entity name or id is not found
 	 */
-	@RequestMapping(value = "/details", method = POST)
+	@PostMapping("/details")
 	public String viewEntityDetails(@RequestParam(value = "entityTypeId") String entityTypeId,
-			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
+			@RequestParam(value = "entityId") String entityId, Model model)
 	{
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		Object id = getTypedValue(entityId, entityType.getIdAttribute());
@@ -429,7 +441,7 @@ public class DataExplorerController extends PluginController
 	 * @throws Exception                   if an entity name or id is not found
 	 * @throws MolgenisDataAccessException if an EntityType does not exist
 	 */
-	@RequestMapping(value = "/details/{entityTypeId}/{entityId}", method = GET)
+	@GetMapping("/details/{entityTypeId}/{entityId}")
 	public String viewEntityDetailsById(@PathVariable(value = "entityTypeId") String entityTypeId,
 			@PathVariable(value = "entityId") String entityId, Model model) throws Exception
 	{

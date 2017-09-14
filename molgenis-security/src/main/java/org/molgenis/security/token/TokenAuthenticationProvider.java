@@ -4,7 +4,6 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
@@ -21,7 +20,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider
 
 	@Override
 	@RunAsSystem
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException
+	public Authentication authenticate(Authentication authentication)
 	{
 		if (!supports(authentication.getClass()))
 			throw new IllegalArgumentException("Only RestAuthenticationToken is supported");

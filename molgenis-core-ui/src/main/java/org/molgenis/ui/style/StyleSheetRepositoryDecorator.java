@@ -24,35 +24,35 @@ public class StyleSheetRepositoryDecorator extends AbstractRepositoryDecorator<S
 	}
 
 	@Override
-	public void delete(StyleSheet sheet) throws MolgenisDataException
+	public void delete(StyleSheet sheet)
 	{
 		checkAndUpdateAppSettings(sheet.getId());
 		super.delete(sheet);
 	}
 
 	@Override
-	public void deleteById(Object id) throws MolgenisDataException
+	public void deleteById(Object id)
 	{
 		checkAndUpdateAppSettings(id);
 		super.deleteById(id);
 	}
 
 	@Override
-	public void deleteAll() throws MolgenisDataException
+	public void deleteAll()
 	{
 		throw new MolgenisDataException(
 				"Cannot delete all boostrap themes, at least one theme is needed for the application");
 	}
 
 	@Override
-	public void delete(Stream<StyleSheet> styleSheetStream) throws MolgenisDataException
+	public void delete(Stream<StyleSheet> styleSheetStream)
 	{
 		styleSheetStream.forEach(sheet -> checkAndUpdateAppSettings(sheet.getId()));
 		super.delete(styleSheetStream);
 	}
 
 	@Override
-	public void deleteAll(Stream<Object> ids) throws MolgenisDataException
+	public void deleteAll(Stream<Object> ids)
 	{
 		ids.forEach(id -> checkAndUpdateAppSettings(id));
 		super.deleteAll(ids);

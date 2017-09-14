@@ -68,13 +68,13 @@ public class AccountController
 		this.userFactory = requireNonNull(userFactory);
 	}
 
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	@GetMapping("/login")
 	public String getLoginForm()
 	{
 		return "login-modal";
 	}
 
-	@RequestMapping(value = "/register", method = RequestMethod.GET)
+	@GetMapping("/register")
 	public ModelAndView getRegisterForm()
 	{
 		ModelAndView model = new ModelAndView("register-modal");
@@ -83,13 +83,13 @@ public class AccountController
 		return model;
 	}
 
-	@RequestMapping(value = "/password/reset", method = RequestMethod.GET)
+	@GetMapping("/password/reset")
 	public String getPasswordResetForm()
 	{
 		return "resetpassword-modal";
 	}
 
-	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.GET)
+	@GetMapping(CHANGE_PASSWORD_RELATIVE_URI)
 	public ModelAndView getChangePasswordForm()
 	{
 		ModelAndView model = new ModelAndView("view-change-password");
@@ -97,7 +97,7 @@ public class AccountController
 		return model;
 	}
 
-	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.POST)
+	@PostMapping(CHANGE_PASSWORD_RELATIVE_URI)
 	public void changePassword(@Valid ChangePasswordForm form, HttpServletRequest request, HttpServletResponse response)
 			throws IOException
 	{
@@ -120,7 +120,7 @@ public class AccountController
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
-	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@PostMapping(value = "/register", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
 			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws Exception
@@ -162,7 +162,7 @@ public class AccountController
 		}
 	}
 
-	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
+	@GetMapping("/activate/{activationCode}")
 	public String activateUser(@Valid @NotNull @PathVariable String activationCode, Model model)
 	{
 		try
@@ -182,7 +182,7 @@ public class AccountController
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
-	@RequestMapping(value = "/password/reset", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@PostMapping(value = "/password/reset", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void resetPassword(@Valid @ModelAttribute PasswordResetRequest passwordResetRequest)
 	{

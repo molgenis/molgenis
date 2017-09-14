@@ -1,6 +1,5 @@
 package org.molgenis.security.twofactor.service;
 
-import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.model.UserSecret;
 
 /**
@@ -18,12 +17,12 @@ public interface OtpService
 	 * @param secretKey        generated secret key
 	 * @return vericifcationCode matches secret key
 	 */
-	boolean tryVerificationCode(String verificationCode, String secretKey) throws InvalidVerificationCodeException;
+	boolean tryVerificationCode(String verificationCode, String secretKey);
 
 	/**
 	 * <p>Generate URI for use in authenticator apps</p>
 	 *
 	 * @return Google Authenticator URI
 	 */
-	String getAuthenticatorURI(String secretKey) throws IllegalStateException;
+	String getAuthenticatorURI(String secretKey);
 }

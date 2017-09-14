@@ -56,7 +56,7 @@ public class OneClickImporterConfig
 					oneClickImportJobExecution.setPackage(packageId);
 
 					String labels = entityTypes.stream()
-											   .map(entityType -> entityType.getLabel())
+											   .map(EntityType::getLabel)
 											   .collect(Collectors.joining(","));
 
 					progress.status(format("Created table(s): %s", labels));
@@ -68,12 +68,10 @@ public class OneClickImporterConfig
 
 	private String createJsonResponse(List<EntityType> entityTypes)
 	{
-		List<String> responsItems = new ArrayList<>();
-		entityTypes.forEach(entityType ->
-		{
-			responsItems.add(format("{\"id\":\"%s\",\"label\":\"%s\"}", entityType.getId(), entityType.getLabel()));
-		});
-		return format("[%s]", StringUtils.join(responsItems, ","));
+		List<String> responseItems = new ArrayList<>();
+		entityTypes.forEach(entityType -> responseItems.add(
+				format("{\"id\":\"%s\",\"label\":\"%s\"}", entityType.getId(), entityType.getLabel())));
+		return format("[%s]", StringUtils.join(responseItems, ","));
 	}
 
 }

@@ -4,7 +4,6 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import org.molgenis.gson.AutoGson;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 @AutoValue

@@ -1,6 +1,5 @@
 package org.molgenis.amazon.bucket.client;
 
-import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -36,8 +35,7 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 
 	@Override
 	public File downloadFile(AmazonS3 s3Client, FileStore fileStore, String jobIdentifier, String bucketName,
-			String keyName, String extension, boolean isExpression, String targetEntityType)
-			throws IOException, AmazonClientException
+			String keyName, String extension, boolean isExpression, String targetEntityType) throws IOException
 	{
 		String key;
 		//The key can be a regular expression instead of the actual key.
