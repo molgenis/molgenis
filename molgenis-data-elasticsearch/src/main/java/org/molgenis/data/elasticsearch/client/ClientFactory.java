@@ -19,10 +19,9 @@ import static java.lang.String.format;
 class ClientFactory
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientFactory.class);
-	private final static int MAX_CONNECTION_TRIES = 100;
+	private final static int MAX_CONNECTION_TRIES = 480; // Almost 24 hours when MAX_INTERVAL_MS is set to 300000
 	private final static long INITIAL_CONNECTION_INTERVAL_MS = 1000;
-	private final static long MAX_INTERVAL_MS = 300000;
-
+	private final static long MAX_INTERVAL_MS = 300000; // 5 minutes
 	private ClientFactory()
 	{
 	}
@@ -46,7 +45,10 @@ class ClientFactory
 		while (transportClient.connectedNodes().isEmpty() && connectionTryCount < MAX_CONNECTION_TRIES)
 		{
 			connectionTryCount++;
-			final long sleepTime = getSleepTime(connectionTryCount);
+			final long sleepTime = new Double(
+					Math.min(
+					INITIAL_CONNECTION_INTERVAL_MS * Math.pow(connectionTryCount, 2),
+						MAX_INTERVAL_MS)).longValue();
 			LOG.info(format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
 					clusterName, Arrays.toString(socketTransportAddresses)));
 			LOG.info(format("Retry %s of %s. Waiting %s ms before next try.", String.valueOf(connectionTryCount),
@@ -73,13 +75,6 @@ class ClientFactory
 							clusterName, Arrays.toString(socketTransportAddresses)));
 		}
 		return transportClient;
-	}
-
-	private static long getSleepTime(int connectionTryCount)
-	{
-		return new Double(
-				Math.min(INITIAL_CONNECTION_INTERVAL_MS * Math.pow(connectionTryCount, 2), MAX_INTERVAL_MS))
-				.longValue();
 	}
 
 	private static InetSocketTransportAddress[] createInetTransportAddresses(List<InetSocketAddress> inetAddresses)
