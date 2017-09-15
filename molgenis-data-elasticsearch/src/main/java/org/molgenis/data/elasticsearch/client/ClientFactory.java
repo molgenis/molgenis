@@ -22,10 +22,17 @@ class ClientFactory
 	private final static int MAX_CONNECTION_TRIES = 480; // Almost 24 hours when MAX_INTERVAL_MS is set to 300000
 	private final static long INITIAL_CONNECTION_INTERVAL_MS = 1000;
 	private final static long MAX_INTERVAL_MS = 300000; // 5 minutes
+
 	private ClientFactory()
 	{
 	}
 
+	/**
+	 * Try's to create by connecting to cluster with given settings.
+	 * In case the connection fail the connection is re-tried {@value #MAX_CONNECTION_TRIES} times.
+	 * <p>
+	 * Delay time = MIN({@value #MAX_INTERVAL_MS} times (n-th retry squared), {@value #MAX_INTERVAL_MS})
+	 */
 	static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses,
 			PreBuiltTransportClientFactory preBuiltTransportClientFactory)
 	{
@@ -46,9 +53,8 @@ class ClientFactory
 		{
 			connectionTryCount++;
 			final long sleepTime = new Double(
-					Math.min(
-					INITIAL_CONNECTION_INTERVAL_MS * Math.pow(connectionTryCount, 2),
-						MAX_INTERVAL_MS)).longValue();
+					Math.min(INITIAL_CONNECTION_INTERVAL_MS * Math.pow(connectionTryCount, 2), MAX_INTERVAL_MS))
+					.longValue();
 			LOG.info(format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
 					clusterName, Arrays.toString(socketTransportAddresses)));
 			LOG.info(format("Retry %s of %s. Waiting %s ms before next try.", String.valueOf(connectionTryCount),
