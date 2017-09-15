@@ -45,7 +45,7 @@ class ClientFactory
 		while (transportClient.connectedNodes().isEmpty() && connectionTryCount < MAX_CONNECTION_TRIES)
 		{
 			connectionTryCount++;
-			long sleepTime = INITIAL_CONNECTION_INTERVAL_MS * connectionTryCount;
+			final long sleepTime = INITIAL_CONNECTION_INTERVAL_MS * new Double(Math.pow(connectionTryCount, 2)).longValue();
 			LOG.info(format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
 					clusterName, Arrays.toString(socketTransportAddresses)));
 			LOG.info(format("Retry '%s' of %s. Waiting %s ms before next try.", String.valueOf(connectionTryCount),
