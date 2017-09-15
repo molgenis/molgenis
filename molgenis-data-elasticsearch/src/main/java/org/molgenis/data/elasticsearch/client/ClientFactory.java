@@ -2,9 +2,9 @@ package org.molgenis.data.elasticsearch.client;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -18,23 +18,52 @@ import static java.lang.String.format;
  */
 class ClientFactory
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ClientFactory.class);
+	private final static int MAX_CONNECTION_TRIES = 100;
+	private final static long INITIAL_CONNECTION_INTERVAL_MS = 1000;
+
 	private ClientFactory()
 	{
 	}
 
-	static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses)
+	static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses,
+			PreBuiltTransportClientFactory preBuiltTransportClientFactory)
 	{
-		return createClient(clusterName, inetAddresses, null);
+		return createClient(clusterName, inetAddresses, null, preBuiltTransportClientFactory);
 	}
 
 	private static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses,
-			@SuppressWarnings("SameParameterValue") Map<String, String> settings)
+			@SuppressWarnings("SameParameterValue") Map<String, String> settings,
+			PreBuiltTransportClientFactory preBuiltTransportClientFactory)
 	{
-		Settings clientSettings = createSettings(clusterName, settings);
 		InetSocketTransportAddress[] socketTransportAddresses = createInetTransportAddresses(inetAddresses);
 
-		TransportClient transportClient = new PreBuiltTransportClient(clientSettings).addTransportAddresses(
-				socketTransportAddresses);
+		TransportClient transportClient = preBuiltTransportClientFactory.build(clusterName, settings)
+				.addTransportAddresses(socketTransportAddresses);
+
+		int connectionTryCount = 0;
+		while (transportClient.connectedNodes().isEmpty() && connectionTryCount < MAX_CONNECTION_TRIES)
+		{
+			connectionTryCount++;
+			long sleepTime = INITIAL_CONNECTION_INTERVAL_MS * connectionTryCount;
+			LOG.info(format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
+					clusterName, Arrays.toString(socketTransportAddresses)));
+			LOG.info(format("Retry '%s' of %s. Waiting %s ms before next try.", String.valueOf(connectionTryCount),
+					String.valueOf(MAX_CONNECTION_TRIES), String.valueOf(sleepTime)));
+			try
+			{
+				Thread.sleep(sleepTime);
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(
+						format("Failed to wait for connection while creating Elasticsearch connection, cluster '%s' on %s.",
+								Arrays.toString(socketTransportAddresses), clusterName), e);
+			}
+
+			transportClient = preBuiltTransportClientFactory.build(clusterName, settings)
+					.addTransportAddresses(socketTransportAddresses).addTransportAddresses(socketTransportAddresses);
+		}
 
 		if (transportClient.connectedNodes().isEmpty())
 		{
@@ -43,22 +72,6 @@ class ClientFactory
 							clusterName, Arrays.toString(socketTransportAddresses)));
 		}
 		return transportClient;
-	}
-
-	private static Settings createSettings(String clusterName, Map<String, String> settings)
-	{
-		if (clusterName == null)
-		{
-			throw new NullPointerException("clusterName cannot be null");
-		}
-
-		Settings.Builder builder = Settings.builder();
-		builder.put("cluster.name", clusterName);
-		if (settings != null)
-		{
-			builder.put(settings);
-		}
-		return builder.build();
 	}
 
 	private static InetSocketTransportAddress[] createInetTransportAddresses(List<InetSocketAddress> inetAddresses)

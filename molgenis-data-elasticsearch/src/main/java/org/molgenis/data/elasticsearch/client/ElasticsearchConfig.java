@@ -44,7 +44,8 @@ public class ElasticsearchConfig
 		}
 
 		List<InetSocketAddress> ipSocketAddresses = toIpSocketAddresses(transportAddresses);
-		Client client = ClientFactory.createClient(clusterName, ipSocketAddresses);
+		Client client = ClientFactory
+				.createClient(clusterName, ipSocketAddresses, new PreBuiltTransportClientFactory());
 		return new ClientFacade(client);
 	}
 
