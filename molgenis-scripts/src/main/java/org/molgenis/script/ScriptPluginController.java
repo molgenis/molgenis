@@ -2,11 +2,10 @@ package org.molgenis.script;
 
 import org.molgenis.data.DataService;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.script.ScriptMetaData.SCRIPT;
@@ -21,14 +20,13 @@ public class ScriptPluginController extends PluginController
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private final DataService dataService;
 
-	@Autowired
 	public ScriptPluginController(DataService dataService)
 	{
 		super(URI);
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String listScripts(Model model)
 	{
 

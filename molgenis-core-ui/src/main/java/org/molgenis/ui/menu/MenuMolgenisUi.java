@@ -2,7 +2,6 @@ package org.molgenis.ui.menu;
 
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static java.util.Objects.requireNonNull;
 
@@ -10,7 +9,6 @@ public class MenuMolgenisUi implements Ui
 {
 	private final MenuReaderService menuReaderService;
 
-	@Autowired
 	public MenuMolgenisUi(MenuReaderService menuReaderService)
 	{
 		this.menuReaderService = requireNonNull(menuReaderService);

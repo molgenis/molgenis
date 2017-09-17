@@ -17,7 +17,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.ic.TermFrequencyService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,7 +44,6 @@ public class SemanticSearchServiceHelper
 	private final static String ESCAPED_CARET_CHARACTER = "\\^";
 	private final static String ILLEGAL_CHARS_REGEX = "[^\\p{L}'a-zA-Z0-9\\.~]+";
 
-	@Autowired
 	public SemanticSearchServiceHelper(DataService dataService, OntologyService ontologyService,
 			TermFrequencyService termFrequencyService)
 	{

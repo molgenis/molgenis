@@ -13,7 +13,6 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -44,8 +43,6 @@ import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.gavin.controller.GavinController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -68,7 +65,6 @@ public class GavinController extends AbstractStaticContentController
 	private final IdGenerator idGenerator;
 	private final MenuReaderService menuReaderService;
 
-	@Autowired
 	public GavinController(@Qualifier("gavinExecutors") ExecutorService executorService,
 			GavinJobFactory gavinJobFactory, GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
 			UserAccountService userAccountService, MenuReaderService menuReaderService, IdGenerator idGenerator)
@@ -90,7 +86,7 @@ public class GavinController extends AbstractStaticContentController
 	 *
 	 * @return the view name
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		super.init(model);
@@ -110,7 +106,7 @@ public class GavinController extends AbstractStaticContentController
 	 * @return the ID of the created {@link GavinJobExecution}
 	 * @throws IOException if interaction with the file store fails
 	 */
-	@RequestMapping(value = "/annotate-file", method = POST)
+	@PostMapping("/annotate-file")
 	public ResponseEntity<String> annotateFile(@RequestParam(value = "file") MultipartFile inputFile,
 			@RequestParam String entityTypeId) throws IOException
 	{
@@ -148,7 +144,7 @@ public class GavinController extends AbstractStaticContentController
 	 * @param jobIdentifier identifier of the annotation job
 	 * @return GavinJobExecution, or null if no GavinJobExecution exists with this ID.
 	 */
-	@RequestMapping(value = "/job/{jobIdentifier}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/job/{jobIdentifier}", produces = APPLICATION_JSON_VALUE)
 	public @ResponseBody
 	GavinJobExecution getGavinJobExecution(@PathVariable(value = "jobIdentifier") String jobIdentifier)
 			throws JobNotFoundException
@@ -162,7 +158,7 @@ public class GavinController extends AbstractStaticContentController
 	 * @param jobIdentifier identifier of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/result/{jobIdentifier}", method = GET)
+	@GetMapping("/result/{jobIdentifier}")
 	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model,
 			HttpServletRequest request) throws JobNotFoundException
 	{
@@ -195,7 +191,7 @@ public class GavinController extends AbstractStaticContentController
 	 * @param jobIdentifier GAVIN_APP of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/download/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
+	@GetMapping(value = "/download/{jobIdentifier}", produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public FileSystemResource download(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier)
@@ -230,7 +226,7 @@ public class GavinController extends AbstractStaticContentController
 	 * @param jobIdentifier GAVIN_APP of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
-	@RequestMapping(value = "/error/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
+	@GetMapping(value = "/error/{jobIdentifier}", produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public Resource downloadErrorReport(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier)

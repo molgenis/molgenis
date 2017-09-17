@@ -6,12 +6,11 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.web.PluginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -41,7 +40,6 @@ public class QuestionnairePluginController extends PluginController
 	private final LanguageService languageService;
 	private final EntityManager entityManager;
 
-	@Autowired
 	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
 			LanguageService languageService, EntityManager entityManager)
 	{
@@ -52,7 +50,7 @@ public class QuestionnairePluginController extends PluginController
 		this.entityManager = requireNonNull(entityManager);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public String showView(Model model)
 	{
 		model.addAttribute("questionnaires", getQuestionnaires());
@@ -86,7 +84,7 @@ public class QuestionnairePluginController extends PluginController
 		return questionnaires;
 	}
 
-	@RequestMapping("/{name}")
+	@GetMapping("/{name}")
 	public String showQuestionnairForm(@PathVariable("name") String name, Model model, HttpServletResponse response)
 			throws IOException
 	{
@@ -114,7 +112,7 @@ public class QuestionnairePluginController extends PluginController
 		return "view-questionnaire";
 	}
 
-	@RequestMapping("/{name}/thanks")
+	@GetMapping("/{name}/thanks")
 	public String showThanks(@PathVariable("name") String name, Model model, HttpServletResponse response)
 			throws IOException
 	{

@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -20,7 +19,6 @@ public class RepositoryCollectionRegistry
 	private Map<String, RepositoryCollection> repoCollectionMap;
 	private RepositoryCollection defaultRepoCollection;
 
-	@Autowired
 	public RepositoryCollectionRegistry(RepositoryCollectionDecoratorFactory repoCollectionDecoratorFactory)
 	{
 		this.repoCollectionDecoratorFactory = requireNonNull(repoCollectionDecoratorFactory);

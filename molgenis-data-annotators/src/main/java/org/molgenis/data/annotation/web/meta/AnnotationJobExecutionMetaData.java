@@ -3,7 +3,6 @@ package org.molgenis.data.annotation.web.meta;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -23,7 +22,6 @@ public class AnnotationJobExecutionMetaData extends SystemEntityType
 	private final JobExecutionMetaData jobExecutionMetaData;
 	private final JobPackage jobPackage;
 
-	@Autowired
 	AnnotationJobExecutionMetaData(JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_JOB);

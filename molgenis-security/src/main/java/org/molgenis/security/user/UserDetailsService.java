@@ -7,7 +7,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -31,7 +30,6 @@ public class UserDetailsService implements org.springframework.security.core.use
 	private final DataService dataService;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
-	@Autowired
 	public UserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		this.dataService = requireNonNull(dataService, "DataService is null");
@@ -40,7 +38,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 
 	@Override
 	@RunAsSystem
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
+	public UserDetails loadUserByUsername(String username)
 	{
 		try
 		{

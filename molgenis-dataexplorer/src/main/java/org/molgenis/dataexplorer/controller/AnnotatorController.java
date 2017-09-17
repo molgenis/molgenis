@@ -16,7 +16,6 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +47,6 @@ public class AnnotatorController
 	private final ExecutorService taskExecutor;
 	private final AnnotationJobExecutionFactory annotationJobExecutionFactory;
 
-	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
 			PermissionService permissionService, UserAccountService userAccountService,
 			AnnotationJobFactory annotationJobFactory, ExecutorService taskExecutor,
@@ -68,7 +66,7 @@ public class AnnotatorController
 	 *
 	 * @return annotatorMap
 	 */
-	@RequestMapping(value = "/get-available-annotators", method = RequestMethod.POST)
+	@PostMapping("/get-available-annotators")
 	@ResponseBody
 	public Map<String, Map<String, Object>> getMapOfAvailableAnnotators(@RequestBody String dataSetName)
 	{
@@ -82,7 +80,7 @@ public class AnnotatorController
 	 *
 	 * @return repositoryName
 	 */
-	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
+	@PostMapping("/annotate-data")
 	@ResponseBody
 	public String annotateData(HttpServletRequest request,
 			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,

@@ -2,6 +2,7 @@ package org.molgenis.dataexplorer;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.mapdb.Fun;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -9,6 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
@@ -17,6 +19,8 @@ import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.ui.menu.Menu;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -33,9 +37,14 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.NAVIGATOR;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_XLSX;
 import static org.testng.Assert.assertEquals;
@@ -81,6 +90,9 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	LanguageService languageService;
 	@Mock
 	PermissionService permissionService = mock(PermissionService.class);
+	@Mock
+	MenuReaderService menuReaderService;
+
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
@@ -102,7 +114,72 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
 		when(freemarkerConfigurer.getConfiguration()).thenReturn(configuration);
 
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
+
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
+	}
+
+	@Test
+	public void initSetNavigatorMenuPath() throws Exception
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId= "selectedEntityId";
+		String navigatorPath = "path/to-navigator";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(navigatorPath);
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model).addAttribute("navigatorBaseUrl", navigatorPath);
+	}
+
+	@Test
+	public void initSetNavigatorMenuPathNoNavigator() throws Exception
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId= "selectedEntityId";
+		String navigatorPath = "path/to-navigator";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model, never()).addAttribute("navigatorBaseUrl", navigatorPath);
+	}
+
+	@Test
+	public void initSortEntitiesByLabel ()
+	{
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+
+		EntityType entity1 = mock(EntityType.class);
+		when(entity1.getId()).thenReturn("1");
+		when(entity1.getLabel()).thenReturn("zzz");
+
+		EntityType entity2 = mock(EntityType.class);
+		when(entity2.getId()).thenReturn("2");
+		when(entity2.getLabel()).thenReturn("aaa");
+
+		Stream<EntityType> entityStream = Stream.of(entity1, entity2);
+		when(metaDataService.getEntityTypes()).thenReturn(entityStream);
+
+		controller.init(null, null, model);
+
+		LinkedHashMap expected = new LinkedHashMap<>(Stream.of(entity1, entity2).sorted(Comparator.comparing(EntityType::getLabel))
+				.collect(Collectors.toMap(EntityType::getId, Function.identity())));
+
+		verify(model).addAttribute("entitiesMeta", expected);
 	}
 
 	@Test

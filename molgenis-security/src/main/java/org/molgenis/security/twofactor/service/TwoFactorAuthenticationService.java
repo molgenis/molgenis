@@ -2,10 +2,6 @@ package org.molgenis.security.twofactor.service;
 
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationFilter;
-import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
-import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
  * <p>Service to use in {@link TwoFactorAuthenticationFilter} and {@link TwoFactorAuthenticationController}</p>
@@ -18,8 +14,7 @@ public interface TwoFactorAuthenticationService
 	 * @param verificationCode code given by user from Google Authenticator
 	 * @return is verificationCode valid
 	 */
-	boolean isVerificationCodeValidForUser(String verificationCode)
-			throws InvalidVerificationCodeException, TooManyLoginAttemptsException;
+	boolean isVerificationCodeValidForUser(String verificationCode);
 
 	/**
 	 * @return user had too many authentication failures
@@ -31,7 +26,7 @@ public interface TwoFactorAuthenticationService
 	 *
 	 * @param secret given secret for user
 	 */
-	void saveSecretForUser(String secret) throws UsernameNotFoundException;
+	void saveSecretForUser(String secret);
 
 	void resetSecretForUser();
 
@@ -49,7 +44,7 @@ public interface TwoFactorAuthenticationService
 	 *
 	 * @return is configured for user
 	 */
-	boolean isConfiguredForUser() throws InternalAuthenticationServiceException;
+	boolean isConfiguredForUser();
 
 	/**
 	 * @return the secretkey for logged in user

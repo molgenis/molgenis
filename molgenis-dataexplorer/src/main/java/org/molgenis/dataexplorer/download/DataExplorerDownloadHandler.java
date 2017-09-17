@@ -13,7 +13,6 @@ import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,7 +29,6 @@ public class DataExplorerDownloadHandler
 	private final DataService dataService;
 	private final AttributeFactory attrMetaFactory;
 
-	@Autowired
 	public DataExplorerDownloadHandler(DataService dataService, AttributeFactory attrMetaFactory)
 	{
 		this.dataService = requireNonNull(dataService);

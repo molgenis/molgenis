@@ -114,7 +114,7 @@ public class RestControllerV2APIIT
 	public void testGetVersion()
 	{
 		//	@Autowired
-		//	@RequestMapping(value = "/version", method = GET)
+		//	@GetMapping("/version")
 		//	@ResponseBody
 		//	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
 		//			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
@@ -279,7 +279,7 @@ public class RestControllerV2APIIT
 	public void testCreateEntities()
 	{
 		//		@Transactional
-		//		@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
+		//		@PostMapping(value = "/{entityName}", produces = APPLICATION_JSON_VALUE)
 		//		@ResponseBody
 		//		public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
 		//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
@@ -343,7 +343,7 @@ public class RestControllerV2APIIT
 	@Test(enabled = false) // FIXME
 	public void testUpdateEntities()
 	{
-		//		@RequestMapping(value = "/{entityName}", method = PUT)
+		//		@PutMapping(value = "/{entityName}")
 		//		public synchronized void updateEntities(@PathVariable("entityName") String entityName,
 		//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 
@@ -369,7 +369,7 @@ public class RestControllerV2APIIT
 	@Test(enabled = false) // TODO
 	public void testUpdateAttribute()
 	{
-		//	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
+		//	@PutMapping(value = "/{entityName}/{attributeName}")
 		//	@ResponseStatus(OK)
 		//	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
 		//			@PathVariable("attributeName") String attributeName,

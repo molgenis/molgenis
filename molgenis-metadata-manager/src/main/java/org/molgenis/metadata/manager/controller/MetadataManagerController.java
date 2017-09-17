@@ -8,9 +8,10 @@ import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
+import org.molgenis.security.user.UserAccountService;
+import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -23,72 +24,64 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.metadata.manager.controller.MetadataManagerController.URI;
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class MetadataManagerController extends PluginController
+public class MetadataManagerController extends VuePluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerController.class);
 
 	public static final String METADATA_MANAGER = "metadata-manager";
 	public static final String URI = PLUGIN_URI_PREFIX + METADATA_MANAGER;
 
-	private MenuReaderService menuReaderService;
-	private LanguageService languageService;
-	private AppSettings appSettings;
 	private MetadataManagerService metadataManagerService;
 
 	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings, MetadataManagerService metadataManagerService)
+			AppSettings appSettings, MetadataManagerService metadataManagerService,
+			UserAccountService userAccountService)
 	{
-		super(URI);
-		this.menuReaderService = requireNonNull(menuReaderService);
-		this.languageService = requireNonNull(languageService);
-		this.appSettings = requireNonNull(appSettings);
+		super(URI, menuReaderService, languageService, appSettings, userAccountService);
 		this.metadataManagerService = requireNonNull(metadataManagerService);
+
 	}
 
-	@RequestMapping(value = "/**", method = GET)
+	@GetMapping("/**")
 	public String init(Model model)
 	{
-		model.addAttribute("lng", languageService.getCurrentUserLanguageCode());
-		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
-		model.addAttribute("baseUrl", getBaseUrl());
+		super.init(model, METADATA_MANAGER);
 		return "view-metadata-manager";
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/editorPackages", method = GET, produces = "application/json")
+	@GetMapping(value = "/editorPackages", produces = "application/json")
 	public List<EditorPackageIdentifier> getEditorPackages()
 	{
 		return metadataManagerService.getEditorPackages();
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/entityType/{id:.*}", method = GET, produces = "application/json")
+	@GetMapping(value = "/entityType/{id:.*}", produces = "application/json")
 	public EditorEntityTypeResponse getEditorEntityType(@PathVariable("id") String id)
 	{
 		return metadataManagerService.getEditorEntityType(id);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/create/entityType", method = GET, produces = "application/json")
+	@GetMapping(value = "/create/entityType", produces = "application/json")
 	public EditorEntityTypeResponse createEditorEntityType()
 	{
 		return metadataManagerService.createEditorEntityType();
 	}
 
 	@ResponseStatus(OK)
-	@RequestMapping(value = "/entityType", method = POST, consumes = "application/json")
+	@PostMapping(value = "/entityType", consumes = "application/json")
 	public void upsertEntityType(@RequestBody EditorEntityType editorEntityType)
 	{
 		metadataManagerService.upsertEntityType(editorEntityType);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/create/attribute", method = GET, produces = "application/json")
+	@GetMapping(value = "/create/attribute", produces = "application/json")
 	public EditorAttributeResponse createEditorAttribute()
 	{
 		return metadataManagerService.createEditorAttribute();
@@ -110,10 +103,5 @@ public class MetadataManagerController extends PluginController
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
-	}
-
-	private String getBaseUrl()
-	{
-		return menuReaderService.getMenu().findMenuItemPath(MetadataManagerController.METADATA_MANAGER);
 	}
 }

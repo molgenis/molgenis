@@ -43,7 +43,6 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -78,8 +77,6 @@ import static org.molgenis.ontology.controller.SortaServiceController.URI;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.*;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -112,7 +109,6 @@ public class SortaServiceController extends PluginController
 
 	private static final Logger LOG = LoggerFactory.getLogger(SortaServiceController.class);
 
-	@Autowired
 	public SortaServiceController(OntologyService ontologyService, SortaService sortaService,
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
 			FileStore fileStore, PermissionService permissionService, DataService dataService,
@@ -143,7 +139,7 @@ public class SortaServiceController extends PluginController
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
-	@RequestMapping(method = GET)
+	@GetMapping
 	public String init(Model model)
 	{
 		model.addAttribute("existingTasks", getJobsForCurrentUser());
@@ -160,21 +156,21 @@ public class SortaServiceController extends PluginController
 		return result;
 	}
 
-	@RequestMapping(method = GET, value = "/jobs")
+	@GetMapping("/jobs")
 	@ResponseBody
 	public List<Entity> getJobs(Model model)
 	{
 		return getJobsForCurrentUser();
 	}
 
-	@RequestMapping(method = GET, value = "/newtask")
+	@GetMapping("/newtask")
 	public String matchTask(Model model)
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return MATCH_VIEW_NAME;
 	}
 
-	@RequestMapping(method = POST, value = "/threshold/{sortaJobExecutionId}")
+	@PostMapping("/threshold/{sortaJobExecutionId}")
 	public String updateThreshold(@RequestParam(value = "threshold") String threshold,
 			@PathVariable String sortaJobExecutionId, Model model)
 	{
@@ -207,7 +203,7 @@ public class SortaServiceController extends PluginController
 		return matchResult(sortaJobExecutionId, model);
 	}
 
-	@RequestMapping(method = GET, value = "/result/{sortaJobExecutionId}")
+	@GetMapping("/result/{sortaJobExecutionId}")
 	public String matchResult(@PathVariable("sortaJobExecutionId") String sortaJobExecutionId, Model model)
 	{
 		SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
@@ -228,7 +224,7 @@ public class SortaServiceController extends PluginController
 		}
 	}
 
-	@RequestMapping(method = GET, value = "/count/{sortaJobExecutionId}")
+	@GetMapping("/count/{sortaJobExecutionId}")
 	@ResponseBody
 	public Map<String, Object> countMatchResult(@PathVariable("sortaJobExecutionId") String sortaJobExecutionId)
 	{
@@ -237,7 +233,7 @@ public class SortaServiceController extends PluginController
 				countMatchedEntities(sortaJobExecution, false));
 	}
 
-	@RequestMapping(method = POST, value = "/delete/{sortaJobExecutionId}")
+	@PostMapping("/delete/{sortaJobExecutionId}")
 	@ResponseStatus(value = HttpStatus.OK)
 	public String deleteResult(@PathVariable("sortaJobExecutionId") String sortaJobExecutionId, Model model)
 	{
@@ -282,7 +278,7 @@ public class SortaServiceController extends PluginController
 		}
 	}
 
-	@RequestMapping(method = POST, value = "/match/retrieve")
+	@PostMapping("/match/retrieve")
 	@ResponseBody
 	public EntityCollectionResponse retrieveSortaJobResults(@RequestBody SortaServiceRequest sortaServiceRequest,
 			HttpServletRequest httpServletRequest)
@@ -345,7 +341,7 @@ public class SortaServiceController extends PluginController
 				permissionService, dataService, languageService);
 	}
 
-	@RequestMapping(method = POST, value = "/match")
+	@PostMapping("/match")
 	public String match(@RequestParam(value = "taskName") String jobName,
 			@RequestParam(value = "selectOntologies") String ontologyIri,
 			@RequestParam(value = "inputTerms") String inputTerms, Model model, HttpServletRequest httpServletRequest)
@@ -356,7 +352,7 @@ public class SortaServiceController extends PluginController
 		return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
 	}
 
-	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
+	@PostMapping(value = "/match/upload", headers = "Content-Type=multipart/form-data")
 	public String upload(@RequestParam(value = "taskName") String jobName,
 			@RequestParam(value = "selectOntologies") String ontologyIri, @RequestParam(value = "file") Part file,
 			Model model, HttpServletRequest httpServletRequest) throws Exception
@@ -366,7 +362,7 @@ public class SortaServiceController extends PluginController
 		return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
 	}
 
-	@RequestMapping(method = POST, value = "/match/entity")
+	@PostMapping("/match/entity")
 	@ResponseBody
 	public SortaServiceResponse findMatchingOntologyTerms(@RequestBody Map<String, Object> request,
 			HttpServletRequest httpServletRequest)
@@ -392,7 +388,7 @@ public class SortaServiceController extends PluginController
 				"Please check that sortaJobExecutionId and identifier keys exist in input and have nonempty value!");
 	}
 
-	@RequestMapping(method = POST, value = "/search")
+	@PostMapping("/search")
 	@ResponseBody
 	public SortaServiceResponse search(@RequestBody Map<String, Object> request, HttpServletRequest httpServletRequest)
 	{
@@ -436,7 +432,7 @@ public class SortaServiceController extends PluginController
 		return row;
 	}
 
-	@RequestMapping(method = GET, value = "/match/download/{sortaJobExecutionId}")
+	@GetMapping("/match/download/{sortaJobExecutionId}")
 	public void download(@PathVariable String sortaJobExecutionId, HttpServletResponse response, Model model)
 			throws IOException
 	{

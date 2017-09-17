@@ -5,7 +5,6 @@ import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -33,7 +32,7 @@ public class TwoFactorAuthenticationProviderImpl implements TwoFactorAuthenticat
 	}
 
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException
+	public Authentication authenticate(Authentication authentication)
 	{
 		if (!supports(authentication.getClass()))
 		{

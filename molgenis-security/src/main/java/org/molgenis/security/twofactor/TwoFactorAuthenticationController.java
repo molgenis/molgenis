@@ -16,8 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import static java.util.Objects.requireNonNull;
@@ -53,13 +54,13 @@ public class TwoFactorAuthenticationController
 		this.otpService = requireNonNull(otpService);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_CONFIGURED_URI)
+	@GetMapping(TWO_FACTOR_CONFIGURED_URI)
 	public String configured(Model model)
 	{
 		return VIEW_2FA_CONFIGURED_MODAL;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_VALIDATION_URI)
+	@PostMapping(TWO_FACTOR_VALIDATION_URI)
 	public String validate(Model model, @RequestParam String verificationCode)
 	{
 		String redirectUri = "redirect:/";
@@ -78,7 +79,7 @@ public class TwoFactorAuthenticationController
 		return redirectUri;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = TWO_FACTOR_ACTIVATION_URI)
+	@GetMapping(TWO_FACTOR_ACTIVATION_URI)
 	public String activation(Model model)
 	{
 		try
@@ -95,7 +96,7 @@ public class TwoFactorAuthenticationController
 		return VIEW_2FA_ACTIVATION_MODAL;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI)
+	@PostMapping(TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI)
 	public String authenticate(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
 	{
 		String redirectUrl = "redirect:/menu/main/useraccount?showCodes=true#security";
@@ -117,7 +118,7 @@ public class TwoFactorAuthenticationController
 		return redirectUrl;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = TWO_FACTOR_RECOVER_URI)
+	@PostMapping(TWO_FACTOR_RECOVER_URI)
 	public String recoverAccount(Model model, @RequestParam String recoveryCode)
 	{
 		String redirectUrl = "redirect:/";

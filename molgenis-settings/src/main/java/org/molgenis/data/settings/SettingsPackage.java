@@ -17,7 +17,6 @@ public class SettingsPackage extends SystemPackage
 
 	private RootSystemPackage rootSystemPackage;
 
-	@Autowired
 	public SettingsPackage(PackageMetadata packageMetadata)
 	{
 		super(PACKAGE_SETTINGS, packageMetadata);

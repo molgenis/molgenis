@@ -1,6 +1,7 @@
 package org.molgenis.swagger.controller;
 
 import org.mockito.Mock;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -21,6 +22,7 @@ import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
@@ -92,6 +94,7 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
 		verify(model).addAttribute("host", "localhost");
 		verify(model).addAttribute("entityTypes", newArrayList("abc_EntityType1ëæ", "abc_EntityType2ëæ"));
 		verify(model).addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
+		verify(model).addAttribute("languageCodes", LanguageService.getLanguageCodes().collect(toList()));
 		verifyNoMoreInteractions(model);
 	}
 

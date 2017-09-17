@@ -13,6 +13,7 @@
     window.searchall = {
         baseUrl: '${baseUrl}',
         lng: '${lng}',
+        isSuperUser: ${isSuperUser?c},
         fallbackLng: '${fallbackLng}'<#if navigatorBaseUrl??>,
         navigatorBaseUrl: '${navigatorBaseUrl}'</#if><#if dataExplorerBaseUrl??>,
         dataExplorerBaseUrl: '${dataExplorerBaseUrl}'</#if>

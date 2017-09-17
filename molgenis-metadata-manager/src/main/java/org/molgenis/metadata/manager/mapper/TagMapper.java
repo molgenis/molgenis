@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.metadata.manager.model.EditorTagIdentifier;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,7 +20,6 @@ class TagMapper
 	private final TagFactory tagFactory;
 	private final DataService dataService;
 
-	@Autowired
 	TagMapper(TagFactory tagFactory, DataService dataService)
 	{
 		this.tagFactory = requireNonNull(tagFactory);

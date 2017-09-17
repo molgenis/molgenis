@@ -28,7 +28,7 @@ public class OpenCpuSettingsImpl extends DefaultSettingsEntity implements OpenCp
 		private String defaultScheme;
 		@Value("${opencpu.uri.host:localhost}")
 		private String defaultHost;
-		@Value("${opencpu.uri.port:80}")
+		@Value("${opencpu.uri.port:8004}")
 		private String defaultPort;
 		@Value("${opencpu.uri.path:/ocpu/}")
 		private String defaultRootPath;
@@ -62,7 +62,7 @@ public class OpenCpuSettingsImpl extends DefaultSettingsEntity implements OpenCp
 							  .setDefaultValue(defaultPort)
 							  .setNillable(false)
 							  .setLabel("URI port")
-							  .setDescription("Open CPU URI port (e.g. 80).");
+							  .setDescription("Open CPU URI port (e.g. 8004).");
 			addAttribute(ROOT_PATH).setDataType(STRING)
 								   .setDefaultValue(defaultRootPath)
 								   .setNillable(false)

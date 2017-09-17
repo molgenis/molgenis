@@ -4,7 +4,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,6 @@ public class LanguageService
 	private final AppSettings appSettings;
 	private final LocalizationService localizationService;
 
-	@Autowired
 	public LanguageService(DataService dataService, AppSettings appSettings, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);

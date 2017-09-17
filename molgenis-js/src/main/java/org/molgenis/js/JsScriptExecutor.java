@@ -1,7 +1,6 @@
 package org.molgenis.js;
 
 import org.molgenis.js.nashorn.NashornScriptEngine;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
@@ -16,7 +15,6 @@ class JsScriptExecutor
 {
 	private final NashornScriptEngine jsScriptEngine;
 
-	@Autowired
 	public JsScriptExecutor(NashornScriptEngine jsScriptEngine)
 	{
 		this.jsScriptEngine = requireNonNull(jsScriptEngine);

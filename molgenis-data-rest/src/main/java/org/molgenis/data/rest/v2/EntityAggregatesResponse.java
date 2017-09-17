@@ -104,7 +104,8 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 					{
 						if (!isReferenceType(attr))
 						{
-							valueMap.put(attr.getName(), entity.getString(attr.getName()));
+							Object attributeValue = entity.get(attr.getName());
+							valueMap.put(attr.getName(), attributeValue != null ? attributeValue.toString() : null);
 						}
 					}
 					value = valueMap;

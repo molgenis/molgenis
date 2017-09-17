@@ -4,7 +4,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -22,7 +21,6 @@ public class PluginInterceptor extends HandlerInterceptorAdapter
 	private final Ui molgenisUi;
 	private final PermissionService permissionService;
 
-	@Autowired
 	public PluginInterceptor(Ui molgenisUi, PermissionService permissionService)
 	{
 		this.molgenisUi = requireNonNull(molgenisUi);

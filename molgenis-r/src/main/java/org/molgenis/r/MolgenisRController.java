@@ -4,8 +4,7 @@ import org.molgenis.security.token.TokenExtractor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,7 +17,7 @@ public class MolgenisRController
 	private static final String URI = "/molgenis.R";
 	private static final String API_URI = "/api/";
 
-	@RequestMapping(method = RequestMethod.GET, value = URI)
+	@GetMapping(URI)
 	public String showMolgenisRApiClient(HttpServletRequest request, Model model)
 	{
 		String apiUrl;

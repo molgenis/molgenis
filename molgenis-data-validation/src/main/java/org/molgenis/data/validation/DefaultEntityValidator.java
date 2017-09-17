@@ -11,7 +11,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
@@ -29,7 +28,6 @@ public class DefaultEntityValidator implements EntityValidator
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final ExpressionValidator expressionValidator;
 
-	@Autowired
 	public DefaultEntityValidator(DataService dataService, EntityAttributesValidator entityAttributesValidator,
 			ExpressionValidator expressionValidator)
 	{
@@ -40,7 +38,6 @@ public class DefaultEntityValidator implements EntityValidator
 
 	@Override
 	public void validate(Iterable<? extends Entity> entities, EntityType meta, DatabaseAction dbAction)
-			throws MolgenisValidationException
 	{
 		Set<ConstraintViolation> violations = checkNotNull(entities, meta);
 		violations.addAll(checkUniques(entities, meta, dbAction));

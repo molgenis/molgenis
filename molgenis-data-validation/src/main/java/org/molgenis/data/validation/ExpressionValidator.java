@@ -5,7 +5,6 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ public class ExpressionValidator
 
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
-	@Autowired
 	public ExpressionValidator(JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
 	{
 		this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);

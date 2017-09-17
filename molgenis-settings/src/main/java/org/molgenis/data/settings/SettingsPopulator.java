@@ -2,7 +2,6 @@ package org.molgenis.data.settings;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ public class SettingsPopulator
 {
 	private final DataService dataService;
 
-	@Autowired
 	public SettingsPopulator(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);

@@ -33,7 +33,6 @@ public class MolgenisWebAppInitializer
 	 *
 	 */
 	protected void onStartup(ServletContext servletContext, Class<?> appConfig, int maxFileSize)
-			throws ServletException
 	{
 		// Create the 'root' Spring application context
 		AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();

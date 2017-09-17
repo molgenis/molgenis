@@ -1,4 +1,4 @@
-package org.molgenis.oneclickimporter.service.Impl;
+package org.molgenis.oneclickimporter.service.impl;
 
 import au.com.bytecode.opencsv.CSVReader;
 import org.apache.commons.io.input.BOMInputStream;
@@ -17,7 +17,7 @@ import static java.text.MessageFormat.format;
 public class CsvServiceImpl implements CsvService
 {
 	@Override
-	public List<String[]> buildLinesFromFile(File file) throws IOException, MolgenisDataException
+	public List<String[]> buildLinesFromFile(File file) throws IOException
 	{
 		CSVReader reader = createCsvReader(file.getName(), removeByteOrderMark(new FileInputStream(file)));
 		List<String[]> content = reader.readAll();
@@ -57,12 +57,18 @@ public class CsvServiceImpl implements CsvService
 	}
 
 	/**
-	 * <p>CSV-file validation.</p>
+	 * Validates CSV file content.
+	 * <p>
+	 * Checks that the content is not empty.
+	 * Checks that at least one data row is present.
+	 * Checks that data row lengths are consistent with the header row length.
 	 *
-	 * @param content content of CSV-file
+	 * @param content  content of CSV-file
+	 * @param fileName the name of the file that is validated
+	 * @throws MolgenisDataException if the validation fails
 	 */
 
-	private void validateCsvFile(List<String[]> content, String fileName) throws MolgenisDataException
+	private void validateCsvFile(List<String[]> content, String fileName)
 	{
 		if (content.isEmpty())
 		{
