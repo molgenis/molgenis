@@ -324,8 +324,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	// Override in subclass if you need more freemarker variables
-	@SuppressWarnings("unused")
-	private void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
+	@SuppressWarnings({ "unused", "WeakerAccess" })
+	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
 
 	}
