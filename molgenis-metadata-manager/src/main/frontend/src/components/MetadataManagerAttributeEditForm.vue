@@ -329,6 +329,10 @@
           return this.selectedAttribute.type
         },
         set (value) {
+          if (value === 'ONETOMANY' || this.type === 'ONETOMANY') {
+            this.refEntityType = null
+            this.mappedByAttribute = null
+          }
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'type', value: value })
         }
       },
@@ -426,7 +430,9 @@
         },
         set (value) {
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'mappedByAttribute', value: value })
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'refEntityType', value: value.entity })
+          if (value !== null) {
+            this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'refEntityType', value: value.entity})
+          }
         }
       },
       orderBy: {
