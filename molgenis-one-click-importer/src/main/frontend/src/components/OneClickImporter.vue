@@ -1,11 +1,5 @@
 <template>
   <div>
-    <div class="row">
-      <div class="col">
-        <h1>{{ 'plugin-title' | i18n }}</h1>
-        <hr>
-      </div>
-    </div>
 
     <div class="row">
       <div class="col-md-12">

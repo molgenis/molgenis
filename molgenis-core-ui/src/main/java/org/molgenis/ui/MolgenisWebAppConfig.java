@@ -31,7 +31,6 @@ import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
-import org.molgenis.util.TemplateResourceUtils;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
 import org.molgenis.web.Ui;
@@ -202,16 +201,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	public TemplateResourceUtils templateResourceUtils()
-	{
-		return new TemplateResourceUtils();
-	}
-
-	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(),
-				templateResourceUtils(), appSettings, authenticationSettings, languageService, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(), appSettings,
+				authenticationSettings, languageService, environment);
 	}
 
 	@Bean

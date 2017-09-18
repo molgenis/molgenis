@@ -1,6 +1,5 @@
 package org.molgenis.security.twofactor.auth;
 
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
@@ -19,6 +18,7 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.CHANGE_PASSWORD_URI;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAuthenticated;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 
@@ -44,54 +44,48 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter
 	protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
 			FilterChain filterChain) throws ServletException, IOException
 	{
-		if (isTwoFactorAuthenticationEnabled())
+		if (isUserShouldTwoFactorAuthenticate() && currentUserIsAuthenticated() && isNotProtected(
+				httpServletRequest.getRequestURI()) && isInsufficientlyAuthenticated())
 		{
-			if (!httpServletRequest.getRequestURI().contains(TwoFactorAuthenticationController.URI)
-					&& SecurityUtils.currentUserIsAuthenticated() && !httpServletRequest.getRequestURI()
-																						.toLowerCase()
-																						.endsWith(
-																								CHANGE_PASSWORD_URI.toLowerCase()))
-			{
-				if (!isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken()
-						&& !isUserRecoveryAuthenticated())
-				{
-					if (isTwoFactorAuthenticationEnforced() || userUsesTwoFactorAuthentication())
-					{
-						if (twoFactorAuthenticationService.isConfiguredForUser())
-						{
-							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-									TwoFactorAuthenticationController.URI
-											+ TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI);
-							return;
-						}
-						else
-						{
-							redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse,
-									TwoFactorAuthenticationController.URI
-											+ TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI);
-							return;
-						}
-					}
-				}
-			}
+			redirectToTwoFactorAuthenticationController(httpServletRequest, httpServletResponse);
 		}
-
-		filterChain.doFilter(httpServletRequest, httpServletResponse);
+		else
+		{
+			filterChain.doFilter(httpServletRequest, httpServletResponse);
+		}
 	}
 
-	private boolean isTwoFactorAuthenticationEnabled()
+	private boolean isUserShouldTwoFactorAuthenticate()
 	{
-		return !(authenticationSettings.getTwoFactorAuthentication() == DISABLED);
+		return authenticationSettings.getTwoFactorAuthentication() != DISABLED && (
+				authenticationSettings.getTwoFactorAuthentication() == ENFORCED || userAccountService.getCurrentUser()
+																									 .isTwoFactorAuthentication());
 	}
 
-	private boolean isTwoFactorAuthenticationEnforced()
+	private boolean isNotProtected(String requestURI)
 	{
-		return authenticationSettings.getTwoFactorAuthentication() == ENFORCED;
+		return !requestURI.startsWith(TwoFactorAuthenticationController.URI) && !requestURI.equalsIgnoreCase(
+				CHANGE_PASSWORD_URI);
 	}
 
-	private boolean userUsesTwoFactorAuthentication()
+	private void redirectToTwoFactorAuthenticationController(HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse) throws IOException
 	{
-		return userAccountService.getCurrentUser().isTwoFactorAuthentication();
+		if (twoFactorAuthenticationService.isConfiguredForUser())
+		{
+			redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.URI
+					+ TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI);
+		}
+		else
+		{
+			redirectStrategy.sendRedirect(httpServletRequest, httpServletResponse, TwoFactorAuthenticationController.URI
+					+ TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI);
+		}
+	}
+
+	private boolean isInsufficientlyAuthenticated()
+	{
+		return !isUserTwoFactorAuthenticated() && !hasAuthenticatedMolgenisToken() && !isUserRecoveryAuthenticated();
 	}
 
 	private boolean isUserTwoFactorAuthenticated()
