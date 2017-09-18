@@ -1,9 +1,9 @@
 <#macro footer version=1>
-</div><#-- close plugin-container -->
-</div><#-- close col-md-12 -->
-</div><#-- close row -->
+            </div><#-- close plugin-container -->
+        </div><#-- close col-md-12 -->
+    </div><#-- close row -->
 </div><#-- close container-fluid -->
-<div id="footer">
+<div id="footer-container">
     <div class="container">
         <#if version == 1>
             <p class="text-muted text-center small footer">

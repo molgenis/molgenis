@@ -1,9 +1,5 @@
 /* Application CSS - start */
 
-#plugin-container {
-	height: 100%;
-}
-
 #spinner img {
 	display: block;
 	margin:0 auto;
@@ -26,9 +22,8 @@
 }
 
 body>.container-fluid {
-	padding-top: 55px;
-!important;
-    margin-bottom: 3rem;
+	padding-top: 55px !important;
+	margin-bottom: 3em;
 }
 
 /* Application CSS - end */
@@ -39,13 +34,16 @@ html {
 	min-height: 100%;
 }
 
-#footer{
+body {
+	/* Margin bottom by footer height */
+	margin-bottom: 60px;
+}
+#footer-container {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-    font-size: 12px;
-    height: 60px;
-    padding-top: 3em;
+	/* Set the fixed height of the footer here */
+	height: 60px;
 }
 
 /* Sticky footer - end */
