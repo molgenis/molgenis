@@ -50,10 +50,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
@@ -73,6 +70,8 @@ import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 @Import({ PlatformConfig.class, RdfConverter.class })
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
+	private static final String MOLGENIS_HOME = "molgenis.home";
+
 	@Autowired
 	private DataService dataService;
 
@@ -156,6 +155,13 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		configurer.setUseRegisteredSuffixPatternMatch(true);
 	}
 
+	@Override
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer)
+	{
+		// Fix for https://github.com/molgenis/molgenis/issues/6575
+		configurer.favorPathExtension(false);
+	}
+
 	@Bean
 	public MappedInterceptor mappedCorsInterceptor()
 	{
@@ -224,7 +230,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 		Resource[] resources = new Resource[] {
-				new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
+				new FileSystemResource(System.getProperty(MOLGENIS_HOME) + "/molgenis-server.properties"),
 				new ClassPathResource("/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
@@ -238,22 +244,20 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public FileStore fileStore()
 	{
 		// get molgenis home directory
-		String molgenisHomeDir = System.getProperty("molgenis.home");
+		String molgenisHomeDir = System.getProperty(MOLGENIS_HOME);
 		if (molgenisHomeDir == null)
 		{
-			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
+			throw new IllegalArgumentException(
+					String.format("missing required java system property '%s'", MOLGENIS_HOME));
 		}
 		if (!molgenisHomeDir.endsWith(File.separator)) molgenisHomeDir = molgenisHomeDir + File.separator;
 
 		// create molgenis store directory in molgenis data directory if not exists
 		String molgenisFileStoreDirStr = molgenisHomeDir + "data" + File.separator + "filestore";
 		File molgenisDataDir = new File(molgenisFileStoreDirStr);
-		if (!molgenisDataDir.exists())
+		if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs())
 		{
-			if (!molgenisDataDir.mkdirs())
-			{
-				throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
-			}
+			throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
 		}
 
 		return new FileStore(molgenisFileStoreDirStr);
@@ -313,6 +317,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	// Override in subclass if you need more freemarker variables
+	@SuppressWarnings({ "unused", "WeakerAccess" })
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
 
@@ -353,7 +358,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void validateMolgenisServerProperties()
 	{
 		// validate properties defined in molgenis-server.properties
-		String path = System.getProperty("molgenis.home") + File.separator + "molgenis-server.properties";
+		String path = System.getProperty(MOLGENIS_HOME) + File.separator + "molgenis-server.properties";
 		if (environment == null)
 		{
 			throw new RuntimeException("Missing required property 'environment' in " + path
