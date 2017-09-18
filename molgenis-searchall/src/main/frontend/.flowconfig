@@ -2,9 +2,7 @@
 .*/node_modules/**/.*
 
 [include]
-./src/.*
 
 [libs]
 
 [options]
-suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
