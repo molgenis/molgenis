@@ -157,7 +157,7 @@ public class AttributeMapper
 		attribute.setName(editorAttribute.getName());
 		attribute.setEntity(entityTypeReferenceMapper.toEntityTypeReference(editorEntityType.getId()));
 		attribute.setSequenceNumber(seqNr);
-		attribute.setDataType(AttributeType.valueOf(editorAttribute.getType()));
+		attribute.setDataType(AttributeType.toEnum(editorAttribute.getType()));
 		attribute.setIdAttribute(isIdAttribute(editorAttribute, editorEntityType));
 		attribute.setLabelAttribute(isLabelAttribute(editorAttribute, editorEntityType));
 		attribute.setLookupAttributeIndex(getLookupAttributeIndex(editorAttribute, editorEntityType));
