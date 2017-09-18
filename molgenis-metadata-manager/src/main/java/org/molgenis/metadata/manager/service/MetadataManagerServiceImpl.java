@@ -1,11 +1,14 @@
 package org.molgenis.metadata.manager.service;
 
 import com.google.common.collect.ImmutableList;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
@@ -13,6 +16,8 @@ import org.molgenis.metadata.manager.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -48,12 +53,17 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 		EntityType entityType = metadataService.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
 				EntityType.class).findOneById(entityTypeId);
 
+
 		if (entityType == null)
 		{
 			throw new UnknownEntityException("Unknown EntityType [" + entityTypeId + "]");
 		}
-
-		return createEntityTypeResponse(entityType);
+		Repository<Attribute> attributeRepository = metadataService.getRepository(AttributeMetadata.ATTRIBUTE_META_DATA,
+				Attribute.class);
+		//TODO: en nu zonder repository
+		Query<Attribute> query = attributeRepository.query().eq(AttributeMetadata.REF_ENTITY_TYPE, entityType).and().eq(AttributeMetadata.TYPE, AttributeType.getValueString(AttributeType.XREF));
+		List<Attribute> referringAttributes = attributeRepository.findAll(query).collect(Collectors.toList());
+		return createEntityTypeResponse(entityType, referringAttributes);
 	}
 
 	@Override
@@ -91,9 +101,9 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 		return createEntityTypeResponse(editorEntityType);
 	}
 
-	private EditorEntityTypeResponse createEntityTypeResponse(EntityType entityType)
+	private EditorEntityTypeResponse createEntityTypeResponse(EntityType entityType, List<Attribute> referringAttributes)
 	{
-		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType);
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 		return createEntityTypeResponse(editorEntityType);
 	}
 

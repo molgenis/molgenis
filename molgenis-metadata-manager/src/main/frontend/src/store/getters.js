@@ -64,6 +64,13 @@ export default {
     return rootAttributes.map(addChildren)
   },
   /**
+   *
+   */
+  getMappedByAttributes: (state, getters) => {
+    return state.initialEditorEntityType.referringAttributes
+  },
+
+  /**
    * Return a list of compound attributes present in the currently selected editorEntityType
    */
   getCompoundAttributes: state => state.editorEntityType && state.editorEntityType.attributes.filter(attribute => attribute.type === 'COMPOUND'),

@@ -82,6 +82,7 @@ public class EntityTypeMapperTest
 		List<EditorEntityTypeIdentifier> entityTypeChildren = of(
 				EditorEntityTypeIdentifier.create("entityTypeChild0", "entity type #0"));
 		List<EditorAttribute> editorAttributes = of(mock(EditorAttribute.class));
+		List<EditorAttributeIdentifier> editorReferringAttributes = of(mock(EditorAttributeIdentifier.class));
 		ImmutableList<EditorTagIdentifier> editorTags = of(EditorTagIdentifier.create("tag0", "tag #0"));
 		EditorAttributeIdentifier idAttribute = EditorAttributeIdentifier.create("idAttr", "id attribute");
 		EditorAttributeIdentifier labelAttribute = EditorAttributeIdentifier.create("labelAttr", "label attribute");
@@ -89,7 +90,7 @@ public class EntityTypeMapperTest
 				EditorAttributeIdentifier.create("attr0", "attribute #0"));
 
 		EditorEntityType editorEntityType = EditorEntityType.create(id, label, i18nLabel, description, i18nDescription,
-				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes, editorTags,
+				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes, editorReferringAttributes, editorTags,
 				idAttribute, labelAttribute, lookupAttributes);
 
 		EntityType entityType = mock(EntityType.class);
@@ -187,6 +188,7 @@ public class EntityTypeMapperTest
 				editorLookupAttributes);
 		@SuppressWarnings("unchecked")
 		ImmutableList<EditorAttribute> editorAttributes = mock(ImmutableList.class);
+		ImmutableList<EditorAttributeIdentifier> editorReferringAttributes = mock(ImmutableList.class);
 		when(attributeMapper.toEditorAttributes(attributes)).thenReturn(editorAttributes);
 		EditorEntityTypeParent editorEntityTypeParent = mock(EditorEntityTypeParent.class);
 		when(entityTypeParentMapper.toEditorEntityTypeParent(extendsEntityType)).thenReturn(editorEntityTypeParent);
@@ -201,7 +203,7 @@ public class EntityTypeMapperTest
 
 		EditorEntityType expectedEditorEntityType = EditorEntityType.create(id, label, i18nLabel, description,
 				i18nDescription, abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
-				editorTags, editorIdAttribute, editorLabelAttribute, editorLookupAttributes);
+				editorReferringAttributes, editorTags, editorIdAttribute, editorLabelAttribute, editorLookupAttributes);
 		assertEquals(editorEntityType, expectedEditorEntityType);
 	}
 
@@ -234,7 +236,7 @@ public class EntityTypeMapperTest
 
 		assertEquals(editorEntityType,
 				EditorEntityType.create(id, null, ImmutableMap.of(), null, ImmutableMap.of(), false, backend, null,
-						null, ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of()));
+						null, ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of()));
 
 	}
 }

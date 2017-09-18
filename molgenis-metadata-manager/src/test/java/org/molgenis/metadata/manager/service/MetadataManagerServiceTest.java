@@ -74,7 +74,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);
 
 		EditorEntityType editorEntityType = getEditorEntityType();
-		when(entityTypeMapper.toEditorEntityType(entityType)).thenReturn(editorEntityType);
+		when(entityTypeMapper.toEditorEntityType(entityType, ImmutableList.of())).thenReturn(editorEntityType);
 
 		EditorEntityTypeResponse actual = metadataManagerService.getEditorEntityType("id_1");
 		EditorEntityTypeResponse expected = getEditorEntityTypeResponse();
@@ -138,7 +138,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 	private EditorEntityType getEditorEntityType()
 	{
 		return EditorEntityType.create("id_1", null, ImmutableMap.of(), null, ImmutableMap.of(), false, "backend", null,
-				null, ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of());
+				null, ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of());
 	}
 
 	private EditorEntityTypeResponse getEditorEntityTypeResponse()

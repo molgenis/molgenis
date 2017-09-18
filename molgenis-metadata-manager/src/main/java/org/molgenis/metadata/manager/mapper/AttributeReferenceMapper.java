@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
+import org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -35,7 +36,7 @@ class AttributeReferenceMapper
 		{
 			return null;
 		}
-		return EditorAttributeIdentifier.create(attribute.getIdentifier(), attribute.getLabel());
+		return EditorAttributeIdentifier.create(attribute.getIdentifier(), attribute.getLabel(), EditorEntityTypeIdentifier.create(attribute.getEntity().getId(), attribute.getEntity().getLabel()));
 	}
 
 	Attribute toAttributeReference(EditorAttributeIdentifier editorAttributeIdentifier)

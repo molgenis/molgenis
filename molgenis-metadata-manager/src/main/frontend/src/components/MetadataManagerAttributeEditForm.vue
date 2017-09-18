@@ -136,7 +136,7 @@
             <div class="form-group row">
               <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-mapped-by-label' | i18n }}</label>
               <div class="col">
-                <multiselect v-model="mappedByEntityType" :options="entityTypes" label="label"
+                <multiselect v-model="mappedByAttribute" :options="mappedByAttributes" :custom-label="customOneToManyLabel"
                              selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-mapped-by-placeholder')"></multiselect>
               </div>
             </div>
@@ -265,6 +265,9 @@
           moveOrder: moveOrder,
           selectedAttributeIndex: this.selectedAttributeIndex
         })
+      },
+      customOneToManyLabel (attr) {
+        return `${attr.entity.label} - ${attr.label}`
       }
     },
     computed: {
@@ -274,7 +277,8 @@
         selectedAttribute: 'getSelectedAttribute',
         editorEntityTypeAttributes: 'getEditorEntityTypeAttributes',
         attributeTree: 'getAttributeTree',
-        compoundAttributes: 'getCompoundAttributes'
+        compoundAttributes: 'getCompoundAttributes',
+        mappedByAttributes: 'getMappedByAttributes'
       }),
       isReferenceType: function () {
         return ['XREF', 'MREF', 'CATEGORICAL', 'CATEGORICAL_MREF'].includes(this.selectedAttribute.type)
@@ -416,12 +420,12 @@
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'enumOptions', value: value.split(',') })
         }
       },
-      mappedByEntityType: {
+      mappedByAttribute: {
         get () {
-          return this.selectedAttribute.mappedByEntityType
+          return this.selectedAttribute.mappedByAttribute
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'mappedByEntityType', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'mappedByAttribute', value: value })
         }
       },
       orderBy: {
