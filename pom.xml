@@ -59,6 +59,9 @@
         <postgres.version>9.4.1211</postgres.version>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <mockito.version>2.7.22</mockito.version>
+        <node.version>v6.11.0</node.version>
+        <!-- Update to 1.x when https://github.com/eirslett/frontend-maven-plugin/issues/647 is fixed -->
+        <yarn.version>v0.27.5</yarn.version>
     </properties>
 
     <distributionManagement>
