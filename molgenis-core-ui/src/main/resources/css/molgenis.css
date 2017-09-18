@@ -39,15 +39,13 @@ html {
 	min-height: 100%;
 }
 
-.footer {
+#footer{
 	position: absolute;
 	bottom: 0;
 	width: 100%;
     font-size: 12px;
-}
-
-.footer p {
-    margin: 0 0 5px;
+    height: 60px;
+    padding-top: 3em;
 }
 
 /* Sticky footer - end */
