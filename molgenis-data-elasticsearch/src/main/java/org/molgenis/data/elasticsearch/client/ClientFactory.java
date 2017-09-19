@@ -52,9 +52,8 @@ class ClientFactory
 		while (transportClient.connectedNodes().isEmpty() && connectionTryCount < MAX_CONNECTION_TRIES)
 		{
 			connectionTryCount++;
-			final long sleepTime = new Double(
-					Math.min(INITIAL_CONNECTION_INTERVAL_MS * Math.pow(connectionTryCount, 2), MAX_INTERVAL_MS))
-					.longValue();
+			final long sleepTime = (long) Math
+					.min(INITIAL_CONNECTION_INTERVAL_MS * Math.pow(connectionTryCount, 2), MAX_INTERVAL_MS);
 			LOG.info(format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
 					clusterName, Arrays.toString(socketTransportAddresses)));
 			LOG.info(format("Retry %s of %s. Waiting %s ms before next try.", String.valueOf(connectionTryCount),
@@ -65,9 +64,10 @@ class ClientFactory
 			}
 			catch (InterruptedException e)
 			{
-				throw new RuntimeException(
+				LOG.error(
 						format("Failed to wait for connection while creating Elasticsearch connection, cluster '%s' on %s.",
-								Arrays.toString(socketTransportAddresses), clusterName), e);
+								Arrays.toString(socketTransportAddresses), clusterName));
+				Thread.currentThread().interrupt();
 			}
 
 			transportClient = preBuiltTransportClientFactory.build(clusterName, settings)

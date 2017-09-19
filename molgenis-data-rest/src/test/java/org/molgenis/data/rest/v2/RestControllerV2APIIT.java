@@ -1,6 +1,8 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import io.restassured.RestAssured;
 import io.restassured.internal.ValidatableResponseImpl;
 import io.restassured.response.ValidatableResponse;
@@ -484,7 +486,7 @@ public class RestControllerV2APIIT
 	}
 
 	@Test
-	public void testOneClickImportExelFile() throws IOException, URISyntaxException
+	public void testOneClickImportExcelFile() throws IOException, URISyntaxException
 	{
 		oneClickImportTest(V2_FILE_ONE_CLICK_IMPORT_EXCEL);
 	}
@@ -549,7 +551,8 @@ public class RestControllerV2APIIT
 														  .then()
 														  .statusCode(OKE);
 
-		String entityId = completedJobResponse.extract().path("entityTypes[0].id");
+		JsonArray entityTypeId = new Gson().fromJson(completedJobResponse.extract().jsonPath().get("entityTypes").toString(), JsonArray.class);
+		String entityId = entityTypeId.get(0).getAsJsonObject().get("id").getAsString();
 		String packageName = completedJobResponse.extract().path("package");
 		String jobId = completedJobResponse.extract().path("identifier");
 
