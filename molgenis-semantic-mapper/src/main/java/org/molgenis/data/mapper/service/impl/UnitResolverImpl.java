@@ -174,7 +174,7 @@ public class UnitResolverImpl implements UnitResolver
 
 	boolean isUnitEmpty(Unit<? extends Quantity> unit)
 	{
-		return unit == null || (unit != null && StringUtils.isBlank(unit.toString()));
+		return unit == null || StringUtils.isBlank(unit.toString());
 	}
 
 	boolean notPureNumberExpression(String str)

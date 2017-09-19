@@ -10,12 +10,17 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static java.util.Objects.requireNonNull;
+
 public class ZipFileUtil
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ZipFileUtil.class);
 
 	private static void copyInputStream(InputStream in, OutputStream out) throws IOException
 	{
+		requireNonNull(in);
+		requireNonNull(out);
+
 		byte[] buffer = new byte[1024];
 		int len;
 		try
@@ -24,8 +29,8 @@ public class ZipFileUtil
 		}
 		finally
 		{
-			if (in != null) in.close();
-			if (out != null) out.close();
+			in.close();
+			out.close();
 		}
 	}
 
@@ -34,10 +39,8 @@ public class ZipFileUtil
 
 		List<File> unzippedFiles = new ArrayList<>();
 		Enumeration<? extends ZipEntry> entries;
-		ZipFile zipFile = null;
-		try
+		try (ZipFile zipFile = new ZipFile(file))
 		{
-			zipFile = new ZipFile(file);
 			entries = zipFile.entries();
 			while (entries.hasMoreElements())
 			{
@@ -62,10 +65,6 @@ public class ZipFileUtil
 
 				unzippedFiles.add(newFile);
 			}
-		}
-		finally
-		{
-			if (zipFile != null) zipFile.close();
 		}
 		return unzippedFiles;
 	}

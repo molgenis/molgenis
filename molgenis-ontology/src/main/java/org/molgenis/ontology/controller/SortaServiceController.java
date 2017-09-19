@@ -1,7 +1,6 @@
 package org.molgenis.ontology.controller;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.data.*;
@@ -436,8 +435,7 @@ public class SortaServiceController extends PluginController
 	public void download(@PathVariable String sortaJobExecutionId, HttpServletResponse response, Model model)
 			throws IOException
 	{
-		CsvWriter csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR);
-		try
+		try (CsvWriter csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR))
 		{
 			SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
 
@@ -458,10 +456,6 @@ public class SortaServiceController extends PluginController
 
 			dataService.findAll(sortaJobExecution.getResultEntityName(), new QueryImpl<>())
 					   .forEach(resultEntity -> csvWriter.add(toDownloadRow(sortaJobExecution, resultEntity)));
-		}
-		finally
-		{
-			if (csvWriter != null) IOUtils.closeQuietly(csvWriter);
 		}
 	}
 
