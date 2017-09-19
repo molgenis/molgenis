@@ -26,10 +26,15 @@ import static org.testng.Assert.assertTrue;
 public class OntologyImportServiceIT extends ImportServiceIT
 {
 	private static final String USERNAME = "ontology_user";
+	private static final String ROLE_READ_ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ENTITY_READ_sys_ont_OntologyTermDynamicAnnotation";
 	private static final String ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ENTITY_WRITE_sys_ont_OntologyTermDynamicAnnotation";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM_SYNONYM = "ENTITY_WRITE_sys_ont_OntologyTermSynonym";
+	private static final String ROLE_READ_ONTOLOGY_TERM_NODE_PATH = "ENTITY_READ_sys_ont_OntologyTermNodePath";
 	private static final String ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH = "ENTITY_WRITE_sys_ont_OntologyTermNodePath";
+	private static final String ROLE_READ_ONTOLOGY_TERM_SYNONYM = "ENTITY_READ_sys_ont_OntologyTermSynonym";
+	private static final String ROLE_WRITE_ONTOLOGY_TERM_SYNONYM = "ENTITY_WRITE_sys_ont_OntologyTermSynonym";
+	private static final String ROLE_READ_ONTOLOGY = "ENTITY_READ_sys_ont_Ontology";
 	private static final String ROLE_WRITE_ONTOLOGY = "ENTITY_WRITE_sys_ont_Ontology";
+	private static final String ROLE_READ_ONTOLOGY_TERM = "ENTITY_READ_sys_ont_OntologyTerm";
 	private static final String ROLE_WRITE_ONTOLOGY_TERM = "ENTITY_WRITE_sys_ont_OntologyTerm";
 
 	@Override
@@ -43,8 +48,10 @@ public class OntologyImportServiceIT extends ImportServiceIT
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
-			ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_WRITE_ONTOLOGY_TERM_SYNONYM,
-			ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_WRITE_ONTOLOGY, ROLE_WRITE_ONTOLOGY_TERM })
+			ROLE_READ_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+			ROLE_READ_ONTOLOGY_TERM_SYNONYM, ROLE_WRITE_ONTOLOGY_TERM_SYNONYM, ROLE_READ_ONTOLOGY_TERM_NODE_PATH,
+			ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_READ_ONTOLOGY, ROLE_WRITE_ONTOLOGY, ROLE_READ_ONTOLOGY_TERM,
+			ROLE_WRITE_ONTOLOGY_TERM })
 	@Test
 	public void testDoImportOboAsNonSuperuser()
 	{
@@ -99,8 +106,9 @@ public class OntologyImportServiceIT extends ImportServiceIT
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE,
-			ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-			ROLE_WRITE_ONTOLOGY_TERM_SYNONYM, ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_WRITE_ONTOLOGY,
+			ROLE_READ_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+			ROLE_READ_ONTOLOGY_TERM_SYNONYM, ROLE_WRITE_ONTOLOGY_TERM_SYNONYM, ROLE_READ_ONTOLOGY_TERM_NODE_PATH,
+			ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_READ_ONTOLOGY, ROLE_WRITE_ONTOLOGY, ROLE_READ_ONTOLOGY_TERM,
 			ROLE_WRITE_ONTOLOGY_TERM })
 	@Test
 	public void testDoImportOwlAsNonSuperuser()
