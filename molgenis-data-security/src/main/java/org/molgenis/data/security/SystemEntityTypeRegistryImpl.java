@@ -22,12 +22,12 @@ import static org.molgenis.data.meta.AttributeType.COMPOUND;
 @Component
 public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 {
-	private final Logger LOG = LoggerFactory.getLogger(SystemEntityTypeRegistryImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SystemEntityTypeRegistryImpl.class);
 
 	private final Map<String, SystemEntityType> systemEntityTypeMap;
 	private final PermissionService permissionService;
 
-	public SystemEntityTypeRegistryImpl(PermissionService permissionService)
+	SystemEntityTypeRegistryImpl(PermissionService permissionService)
 	{
 		this.permissionService = requireNonNull(permissionService);
 		systemEntityTypeMap = Maps.newHashMap();
@@ -37,18 +37,17 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	public SystemEntityType getSystemEntityType(String entityTypeId)
 	{
 		SystemEntityType systemEntityType = systemEntityTypeMap.get(entityTypeId);
-		validateReadPermission(systemEntityType);
+		if (systemEntityType != null)
+		{
+			validateReadPermission(systemEntityType);
+		}
 		return systemEntityType;
 	}
 
 	@Override
 	public Stream<SystemEntityType> getSystemEntityTypes()
 	{
-		return systemEntityTypeMap.values().stream().filter(systemEntityType ->
-		{
-			validateReadPermission(systemEntityType);
-			return true;
-		});
+		return systemEntityTypeMap.values().stream().filter(this::isReadAllowed);
 	}
 
 	@Override
@@ -68,24 +67,37 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	@Override
 	public boolean hasSystemAttribute(String attrIdentifier)
 	{
-		return getSystemAttribute(attrIdentifier) != null;
+		return systemEntityTypeMap.values()
+								  .stream()
+								  .map(systemEntityType -> getSystemAttribute(systemEntityType, attrIdentifier))
+								  .anyMatch(Objects::nonNull);
 	}
 
 	@Override
 	public Attribute getSystemAttribute(String attrIdentifier)
 	{
-		return getSystemEntityTypes().map(systemEntityType -> getSystemAttribute(systemEntityType, attrIdentifier))
-									 .filter(Objects::nonNull)
-									 .findFirst()
-									 .orElse(null);
+		return systemEntityTypeMap.values().stream().map(systemEntityType ->
+		{
+			Attribute attribute = getSystemAttribute(systemEntityType, attrIdentifier);
+			if (attribute != null)
+			{
+				validateReadPermission(systemEntityType);
+			}
+			return attribute;
+		}).filter(Objects::nonNull).findFirst().orElse(null);
+	}
+
+	private boolean isReadAllowed(SystemEntityType systemEntityType)
+	{
+		return permissionService.hasPermissionOnEntityType(systemEntityType.getId(), Permission.READ);
 	}
 
 	private void validateReadPermission(SystemEntityType systemEntityType)
 	{
-		String systemEntityTypeId = systemEntityType.getId();
-		if (!permissionService.hasPermissionOnEntityType(systemEntityTypeId, Permission.READ))
+		if (!isReadAllowed(systemEntityType))
 		{
-			throw new MolgenisDataAccessException(format("No read permission on entity type '%s'", systemEntityTypeId));
+			throw new MolgenisDataAccessException(
+					format("No read permission on entity type '%s'", systemEntityType.getId()));
 		}
 	}
 

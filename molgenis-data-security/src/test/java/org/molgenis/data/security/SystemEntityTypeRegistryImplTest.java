@@ -38,6 +38,12 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 	}
 
 	@Test
+	public void testGetSystemEntityTypeNotExists()
+	{
+		assertNull(systemEntityTypeRegistry.getSystemEntityType("unknownEntityTypeId"));
+	}
+
+	@Test
 	public void testGetSystemEntityTypePermitted()
 	{
 		String entityTypeId = "entityType";
@@ -74,8 +80,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 				singletonList(systemEntityType));
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test
 	public void testGetSystemEntityTypesNotPermitted()
 	{
 		String entityTypeId = "entityType";
@@ -84,7 +89,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.READ)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-		systemEntityTypeRegistry.getSystemEntityTypes().count();
+		assertEquals(systemEntityTypeRegistry.getSystemEntityTypes().count(), 0);
 	}
 
 	@Test
@@ -208,7 +213,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		assertFalse(systemEntityTypeRegistry.hasSystemAttribute("attr"));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test
 	public void testHasSystemAttributeNotPermitted()
 	{
 		String entityTypeId = "entityType";
@@ -219,6 +224,6 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.READ)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-		systemEntityTypeRegistry.hasSystemAttribute("attr");
+		assertTrue(systemEntityTypeRegistry.hasSystemAttribute("attr"));
 	}
 }
