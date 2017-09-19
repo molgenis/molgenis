@@ -329,7 +329,8 @@
           return this.selectedAttribute.type
         },
         set (value) {
-          if (value === 'ONETOMANY' || this.type === 'ONETOMANY') {
+          console.log(value, this.type)
+          if (value === 'ONETOMANY' || this.type === 'ONETOMANY')) {
             this.refEntityType = null
             this.mappedByAttribute = null
           }
