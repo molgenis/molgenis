@@ -22,7 +22,11 @@
       "options": [
         {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/master/",
-          "text": "MOLGENIS version currently under development",
+          "text": "MOLGENIS version currently under development"
+        },
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/5.2/",
+          "text": "MOLGENIS 5.2",
           "selected": true
         },
         {
