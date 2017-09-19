@@ -228,6 +228,22 @@ public class RestControllerIT
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
+	// Regression test for https://github.com/molgenis/molgenis/issues/6575
+	@Test
+	public void testRetrieveResourceWithFileExtensionIdNotFound()
+	{
+		given().log()
+			   .uri()
+			   .log()
+			   .method()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .get(PATH + "sys_FreemarkerTemplate/test.csv")
+			   .then()
+			   .statusCode(NOT_FOUND)
+			   .body("errors.message[0]", equalTo("sys_FreemarkerTemplate test.csv not found"));
+	}
+
 	private ValidatableResponse getWithoutToken(String requestedEntity)
 	{
 		return given().log().uri().when().get(PATH + requestedEntity).then();

@@ -87,7 +87,7 @@
                     </div>
                 </div>
             </div>
-            <#if navigatorBaseUrl?? && plugin_settings.show_navigator_link?? && plugin_settings.get("show_navigator_link") == true>
+            <#if navigatorBaseUrl??>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="panel panel-primary">

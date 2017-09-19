@@ -1,4 +1,5 @@
 // @flow
+// $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
 
 import {

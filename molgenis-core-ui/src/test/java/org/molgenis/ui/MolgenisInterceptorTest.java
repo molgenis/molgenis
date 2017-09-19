@@ -6,7 +6,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ResourceFingerprintRegistry;
-import org.molgenis.util.TemplateResourceUtils;
 import org.molgenis.web.PluginAttributes;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.annotations.BeforeMethod;
@@ -26,7 +25,6 @@ public class MolgenisInterceptorTest
 {
 	private ResourceFingerprintRegistry resourceFingerprintRegistry;
 	private ThemeFingerprintRegistry themeFingerprintRegistry;
-	private TemplateResourceUtils templateResourceUtils;
 	private AppSettings appSettings;
 	private AuthenticationSettings authenticationSettings;
 	private LanguageService languageService;
@@ -36,7 +34,6 @@ public class MolgenisInterceptorTest
 	{
 		resourceFingerprintRegistry = mock(ResourceFingerprintRegistry.class);
 		themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
-		templateResourceUtils = mock(TemplateResourceUtils.class);
 		appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
 		authenticationSettings = mock(AuthenticationSettings.class);
 		languageService = mock(LanguageService.class);
@@ -45,7 +42,7 @@ public class MolgenisInterceptorTest
 	@Test(expectedExceptions = NullPointerException.class)
 	public void MolgenisInterceptor()
 	{
-		new MolgenisInterceptor(null, null, null, null, null, null, null);
+		new MolgenisInterceptor(null, null, null, null, null, null);
 	}
 
 	@Test
@@ -54,8 +51,7 @@ public class MolgenisInterceptorTest
 	{
 		String environment = "development";
 		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry,
-				themeFingerprintRegistry, templateResourceUtils, appSettings, authenticationSettings, languageService,
-				environment);
+				themeFingerprintRegistry, appSettings, authenticationSettings, languageService, environment);
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		Object handler = mock(Object.class);
@@ -66,8 +62,8 @@ public class MolgenisInterceptorTest
 		assertEquals(model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY), resourceFingerprintRegistry);
 
 		Gson gson = new Gson();
-		Map<String, String> environmentAttributes = gson.fromJson(
-				String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
+		Map<String, String> environmentAttributes = gson
+				.fromJson(String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
 
 		assertEquals(model.get(PluginAttributes.KEY_APP_SETTINGS), appSettings);
 		assertEquals(environmentAttributes.get(MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE), environment);
