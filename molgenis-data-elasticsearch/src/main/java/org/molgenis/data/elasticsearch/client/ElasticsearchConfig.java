@@ -32,7 +32,7 @@ public class ElasticsearchConfig
 	private List<String> transportAddresses;
 
 	@Bean(destroyMethod = "close")
-	public ClientFacade elasticsearchClientFacade()
+	public ClientFacade elasticsearchClientFacade() throws InterruptedException
 	{
 		if (clusterName == null)
 		{
