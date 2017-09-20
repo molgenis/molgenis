@@ -4,10 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -48,8 +45,12 @@ public class ZipFileUtil
 				}
 				LOG.info("Extracting directory: " + entry.getName());
 				File newFile = new File(file.getParent(), entry.getName());
-				StreamUtils.copy(zipFile.getInputStream(entry),
-						new BufferedOutputStream(new FileOutputStream(newFile)));
+
+				try (InputStream in = zipFile.getInputStream(entry);
+						OutputStream out = new BufferedOutputStream(new FileOutputStream(newFile)))
+				{
+					StreamUtils.copy(in, out);
+				}
 
 				unzippedFiles.add(newFile);
 			}
