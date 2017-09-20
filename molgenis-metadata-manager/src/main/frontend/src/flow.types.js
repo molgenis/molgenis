@@ -87,7 +87,8 @@ export type EditorSort = {
 
 export type EditorAttributeIdentifier = {
   'id': string,
-  'label': ?string
+  'label': ?string,
+  'entity'?: EditorEntityTypeIdentifier
 }
 
 export type EditorAttribute = {

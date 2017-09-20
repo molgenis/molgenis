@@ -330,10 +330,9 @@
           return this.selectedAttribute.type
         },
         set (value) {
-          console.log(value, this.type)
-          if (value === 'ONETOMANY' || this.type === 'ONETOMANY') {
-            this.refEntityType = null
-            this.mappedByAttribute = null
+          if (value === 'ONETOMANY' || this.selectedAttribute.type === 'ONETOMANY') {
+            this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'refEntityType', value: null })
+            this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'mappedByAttribute', value: null })
           }
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'type', value: value })
         }
