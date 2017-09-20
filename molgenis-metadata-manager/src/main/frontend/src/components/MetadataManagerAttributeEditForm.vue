@@ -255,6 +255,7 @@
         }).catch(this.$swal.noop)
       },
       onAttributeSelect (selectedAttribute) {
+        console.log(selectedAttribute)
         this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, selectedAttribute.id)
       },
       addAttribute () {
@@ -330,7 +331,7 @@
         },
         set (value) {
           console.log(value, this.type)
-          if (value === 'ONETOMANY' || this.type === 'ONETOMANY')) {
+          if (value === 'ONETOMANY' || this.type === 'ONETOMANY') {
             this.refEntityType = null
             this.mappedByAttribute = null
           }
