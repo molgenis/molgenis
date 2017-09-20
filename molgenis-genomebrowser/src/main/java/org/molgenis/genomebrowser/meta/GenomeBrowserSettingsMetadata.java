@@ -38,23 +38,26 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType
 	public static final String CONFIGURED = "CONFIGURED";
 	public static final String NONE = "NONE";
 
+	private final GenomeBrowserPackage genomeBrowserPackage;
 	private EntityTypeMetadata entityTypeMetadata;
 	private AttributeMetadata attributeMetadata;
 	private GenomeBrowserAttributesMetadata genomeBrowserAttributesMetadata;
 
 	public GenomeBrowserSettingsMetadata(AttributeMetadata attributeMetadata, EntityTypeMetadata entityTypeMetadata,
-			GenomeBrowserAttributesMetadata genomeBrowserAttributesMetadata)
+			GenomeBrowserAttributesMetadata genomeBrowserAttributesMetadata, GenomeBrowserPackage genomeBrowserPackage)
 	{
 		super(SIMPLE_NAME, GenomeBrowserPackage.PACKAGE_GENOME_BROWSER);
 		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
 		this.attributeMetadata = requireNonNull(attributeMetadata);
 		this.genomeBrowserAttributesMetadata = requireNonNull(genomeBrowserAttributesMetadata);
+		this.genomeBrowserPackage = genomeBrowserPackage;
 	}
 
 	@Override
 	protected void init()
 	{
 		setLabel("Genome Browser Settings");
+		setPackage(genomeBrowserPackage);
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier").setAuto(true).setNillable(false);
 		addAttribute(LABEL, ROLE_LABEL).setLabel("Label").setNillable(false);
 		addAttribute(ENTITY).setLabel("Entity").setDataType(XREF).setRefEntity(entityTypeMetadata).setNillable(false);
