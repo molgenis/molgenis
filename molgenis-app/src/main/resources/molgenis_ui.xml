@@ -31,7 +31,7 @@
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
         	<plugin id="logmanager" name="Log manager" url="logmanager"/>
         	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
-	        <plugin id="acl" name="Permission Manager" url="acl"/>
+	        <plugin id="permissions" name="Permission Manager" url="permissions"/>
             <plugin id="scheduledjobs" name="Scheduled Jobs" url="scheduledjobs"/>
         	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
         	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
