@@ -16,6 +16,11 @@ public interface EntityAclManager extends EntityAclService
 	void createAclClass(EntityType entityType);
 
 	/**
+	 * Create entity access control list class.
+	 */
+	void createAclClass(Collection<EntityType> entityTypes);
+
+	/**
 	 * Delete entity access control list class including all related access control lists.
 	 */
 	void deleteAclClass(EntityType entityType);

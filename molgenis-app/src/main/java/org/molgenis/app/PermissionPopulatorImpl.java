@@ -2,15 +2,20 @@ package org.molgenis.app;
 
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
+import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.acl.*;
 import org.molgenis.ui.admin.user.UserAccountController;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.bootstrap.populate.UsersGroupsAuthoritiesPopulatorImpl.ROLE_USER_ID;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.security.core.Permission.READ;
@@ -32,6 +37,19 @@ public class PermissionPopulatorImpl implements PermissionPopulator
 	{
 		SecurityId roleUserSecurityId = SecurityId.createForAuthority(ROLE_USER_ID);
 		EntityAce roleUserReadAce = EntityAce.create(newHashSet(READ), roleUserSecurityId, true);
+
+		// TODO handle removed system entity types
+		// TODO handle updated system entity types including updates of isEntityLevelSecurity
+		List<EntityType> systemEntityTypes = ctx.getBeansOfType(SystemEntityType.class)
+												.values()
+												.stream()
+												.filter(systemEntityType -> !systemEntityType.isAbstract())
+												.filter(SystemEntityType::isEntityLevelSecurity)
+												.filter(systemEntityType -> !entityAclManager.hasAclClass(
+														systemEntityType))
+												.map(systemEntityType -> (EntityType) systemEntityType)
+												.collect(toList());
+		entityAclManager.createAclClass(systemEntityTypes);
 
 		// allow user role to see system package
 		// FIXME enable system package ACL population once we solved 'max_locks_per_transaction' issue
