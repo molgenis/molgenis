@@ -8,7 +8,6 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.security.acl.*;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.testng.annotations.BeforeClass;
@@ -16,11 +15,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class MolgenisPermissionControllerTest
 {
