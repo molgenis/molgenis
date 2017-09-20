@@ -3,26 +3,27 @@
 
     <div class="row">
       <div class="col-md-12">
-        <form id="upload-form" v-on:submit.prevent class="form-inline">
+        <form id="upload-form" v-on:submit.prevent class="form">
           <div class="form-group">
+            <label for="file-input">{{ 'import-input-label' | i18n }}</label>
             <input
               id="file-input"
+              class="form-control"
               ref="fileInput"
               type="file"
               accept=".csv, .zip, .xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
               @change="importFile"/>
+            <div class="supported-types">
+              <span class="text-muted"><em>{{ 'file-types' | i18n }}: XLSX, XLS, CSV</em></span>
+            </div>
           </div>
         </form>
-        <div class="supported-types">
-          <span class="text-muted"><em>{{ 'file-types' | i18n }}: XLSX, XLS, CSV</em></span>
-        </div>
-        <br/>
       </div>
     </div>
 
     <div class="row">
       <div class="col">
-        <h5>{{ 'import-list-header' | i18n }}</h5>
+        <strong>{{ 'import-list-header' | i18n }}</strong>
         <ul class="imports-list list-unstyled">
 
           <!-- Running job -->
