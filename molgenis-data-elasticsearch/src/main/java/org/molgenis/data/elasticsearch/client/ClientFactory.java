@@ -1,17 +1,26 @@
 package org.molgenis.data.elasticsearch.client;
 
+import com.evanlennick.retry4j.CallExecutor;
+import com.evanlennick.retry4j.CallResults;
+import com.evanlennick.retry4j.RetryConfig;
+import com.evanlennick.retry4j.RetryConfigBuilder;
+import com.evanlennick.retry4j.exception.Retry4jException;
+import com.evanlennick.retry4j.exception.UnexpectedException;
+import com.evanlennick.retry4j.listener.AfterFailedTryListener;
+import com.evanlennick.retry4j.listener.BeforeNextTryListener;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.molgenis.data.MolgenisDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
-import static java.lang.String.format;
+import static java.lang.Math.min;
+import static java.lang.Math.pow;
 
 /**
  * Creates an Elasticsearch transport client based on given configuration settings.
@@ -19,68 +28,100 @@ import static java.lang.String.format;
 class ClientFactory
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientFactory.class);
-	private final static int MAX_CONNECTION_TRIES = 480; // Almost 24 hours when MAX_INTERVAL_MS is set to 300000
-	private final static long INITIAL_CONNECTION_INTERVAL_MS = 1000;
-	private final static long MAX_INTERVAL_MS = 300000; // 5 minutes
+	private static final int MAX_CONNECTION_TRIES = 480; // Almost 24 hours when MAX_RETRY_WAIT is set to five minutes
+	private static final Duration INITIAL_RETRY_WAIT = Duration.ofSeconds(1);
+	private static final Duration MAX_RETRY_WAIT = Duration.ofMinutes(5);
 
 	private ClientFactory()
 	{
 	}
 
 	/**
-	 * Try's to create by connecting to cluster with given settings.
-	 * In case the connection fail the connection is re-tried {@value #MAX_CONNECTION_TRIES} times.
+	 * Tries to create a Client connecting to cluster on the given adresses.
 	 * <p>
-	 * Delay time = MIN({@value #MAX_INTERVAL_MS} times (n-th retry squared), {@value #MAX_INTERVAL_MS})
+	 * In case the connection fail the connection is retried {@link #MAX_CONNECTION_TRIES} times.
+	 * <p>
+	 * Delay time is an exponential backoff starting with {@link #INITIAL_RETRY_WAIT}, with a maximum of
+	 * {@link #MAX_RETRY_WAIT}.
+	 * @param clusterName name of the cluster
+	 * @param inetAddresses addresses to connect to
+	 * @param preBuiltTransportClientFactory {@link PreBuiltTransportClientFactory} used to create the client
+	 *
+	 * @throws InterruptedException if this thread gets interrupted while trying to connect
+	 * @throws MolgenisDataException if maximum number of retries is exceeded
 	 */
 	static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses,
-			PreBuiltTransportClientFactory preBuiltTransportClientFactory)
+			PreBuiltTransportClientFactory preBuiltTransportClientFactory) throws InterruptedException
 	{
-		return createClient(clusterName, inetAddresses, null, preBuiltTransportClientFactory);
+		LOG.debug("Connecting to Elasticsearch cluster '{}' on {}...", clusterName, inetAddresses);
+		try
+		{
+			CallResults results = createCallExecutor().execute(
+					() -> tryCreateClient(clusterName, preBuiltTransportClientFactory, inetAddresses));
+			LOG.info("Connected to Elasticsearch cluster '{}'.", clusterName);
+			return (Client) results.getResult();
+		}
+		catch (UnexpectedException ex)
+		{
+			LOG.error("Failed to connect to Elasticsearch cluster.", ex);
+			Throwable cause = ex.getCause();
+			if (cause instanceof InterruptedException)
+			{
+				throw (InterruptedException) cause;
+			}
+			if (cause instanceof RuntimeException)
+			{
+				throw (RuntimeException) cause;
+			}
+			throw new MolgenisDataException(cause);
+		}
+		catch (Retry4jException ex)
+		{
+			LOG.error("Failed to connect to Elasticsearch cluster.", ex);
+			throw new MolgenisDataException(ex);
+		}
 	}
 
-	private static Client createClient(String clusterName, List<InetSocketAddress> inetAddresses,
-			@SuppressWarnings("SameParameterValue") Map<String, String> settings,
-			PreBuiltTransportClientFactory preBuiltTransportClientFactory)
+	private static Client tryCreateClient(String clusterName,
+			PreBuiltTransportClientFactory preBuiltTransportClientFactory, List<InetSocketAddress> inetAddresses)
+			throws InterruptedException
 	{
-		InetSocketTransportAddress[] socketTransportAddresses = createInetTransportAddresses(inetAddresses);
-
-		TransportClient transportClient = preBuiltTransportClientFactory.build(clusterName, settings)
-				.addTransportAddresses(socketTransportAddresses);
-
-		int connectionTryCount = 0;
-		while (transportClient.connectedNodes().isEmpty() && connectionTryCount < MAX_CONNECTION_TRIES)
+		if (Thread.interrupted())
 		{
-			connectionTryCount++;
-			final long sleepTime = (long) Math
-					.min(INITIAL_CONNECTION_INTERVAL_MS * Math.pow(connectionTryCount, 2), MAX_INTERVAL_MS);
-			LOG.info(format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
-					clusterName, Arrays.toString(socketTransportAddresses)));
-			LOG.info(format("Retry %s of %s. Waiting %s ms before next try.", String.valueOf(connectionTryCount),
-					String.valueOf(MAX_CONNECTION_TRIES), String.valueOf(sleepTime)));
-			try
-			{
-				Thread.sleep(sleepTime);
-			}
-			catch (InterruptedException e)
-			{
-				LOG.error(
-						format("Failed to wait for connection while creating Elasticsearch connection, cluster '%s' on %s.",
-								Arrays.toString(socketTransportAddresses), clusterName));
-				Thread.currentThread().interrupt();
-			}
-
-			transportClient = preBuiltTransportClientFactory.build(clusterName, settings)
-					.addTransportAddresses(socketTransportAddresses).addTransportAddresses(socketTransportAddresses);
+			throw new InterruptedException();
 		}
-
-		if (transportClient.connectedNodes().isEmpty())
+		TransportClient result = preBuiltTransportClientFactory.build(clusterName, null)
+															   .addTransportAddresses(
+																	   createInetTransportAddresses(inetAddresses));
+		if (result.connectedNodes().isEmpty())
 		{
-			throw new RuntimeException(
-					format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
-							clusterName, Arrays.toString(socketTransportAddresses)));
+			result.close();
+			throw new MolgenisDataException(
+					String.format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
+							clusterName, inetAddresses));
 		}
-		return transportClient;
+		return result;
+	}
+
+	private static CallExecutor createCallExecutor()
+	{
+		RetryConfig config = new RetryConfigBuilder().retryOnSpecificExceptions(MolgenisDataException.class)
+													 .withMaxNumberOfTries(MAX_CONNECTION_TRIES)
+													 .withDelayBetweenTries(INITIAL_RETRY_WAIT)
+													 .withBackoffStrategy(ClientFactory::getSleepTime)
+													 .build();
+		CallExecutor callExecutor = new CallExecutor(config);
+		callExecutor.registerRetryListener(
+				(AfterFailedTryListener) callResults -> LOG.info("{} (Try {}). Sleeping before next try...",
+						callResults.getLastExceptionThatCausedRetry().getMessage(), callResults.getTotalTries()));
+		callExecutor.registerRetryListener((BeforeNextTryListener) callResults -> LOG.info("Retrying to connect..."));
+		return callExecutor;
+	}
+
+	static long getSleepTime(int numberOfTriesFailed, Duration delayBetweenAttempts)
+	{
+		return (long) min(delayBetweenAttempts.toMillis() * pow(2.0, numberOfTriesFailed - 1.0),
+				MAX_RETRY_WAIT.toMillis());
 	}
 
 	private static InetSocketTransportAddress[] createInetTransportAddresses(List<InetSocketAddress> inetAddresses)
