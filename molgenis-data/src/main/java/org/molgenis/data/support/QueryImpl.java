@@ -341,50 +341,31 @@ public class QueryImpl<E extends Entity> implements Query<E>
 	}
 
 	@Override
-	public int hashCode()
+	public boolean equals(Object o)
 	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + offset;
-		result = prime * result + pageSize;
-		result = prime * result + ((rules == null) ? 0 : rules.hashCode());
-		result = prime * result + ((sort == null) ? 0 : sort.hashCode());
-		return result;
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		QueryImpl<?> query = (QueryImpl<?>) o;
+		return offset == query.offset && pageSize == query.pageSize && Objects.equals(rules, query.rules)
+				&& Objects.equals(sort, query.sort);
 	}
 
 	@Override
-	public boolean equals(Object obj)
+	public int hashCode()
 	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		@SuppressWarnings("unchecked")
-		QueryImpl<Entity> other = (QueryImpl<Entity>) obj;
-		if (offset != other.offset) return false;
-		if (pageSize != other.pageSize) return false;
-		if (rules == null)
-		{
-			if (other.rules != null) return false;
-		}
-		else if (!rules.equals(other.rules)) return false;
-		if (sort == null)
-		{
-			if (other.sort != null) return false;
-		}
-		else if (!sort.equals(other.sort)) return false;
-		return true;
+		return Objects.hash(rules, offset, pageSize, sort);
 	}
 
 	@Override
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder();
-		if (rules.size() > 0)
+		if (!rules.isEmpty())
 		{
 			if (rules.size() == 1)
 			{
 				List<QueryRule> rule = rules.get(0);
-				if (rule.size() > 0)
+				if (!rule.isEmpty())
 				{
 					builder.append("rules=").append(rule);
 				}

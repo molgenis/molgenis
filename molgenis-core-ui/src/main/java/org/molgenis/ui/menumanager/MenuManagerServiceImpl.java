@@ -81,7 +81,7 @@ public class MenuManagerServiceImpl implements MenuManagerService
 		}
 
 		Menu defaultMenu = loadDefaultMenu(molgenis);
-		return defaultMenu != null ? new GsonBuilder().create().toJson(defaultMenu) : null;
+		return new GsonBuilder().create().toJson(defaultMenu);
 	}
 
 	private Menu loadDefaultMenu(Molgenis molgenis)

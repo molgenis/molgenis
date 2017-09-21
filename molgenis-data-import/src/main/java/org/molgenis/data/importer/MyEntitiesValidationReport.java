@@ -213,65 +213,21 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	}
 
 	@Override
-	public int hashCode()
+	public boolean equals(Object o)
 	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fieldsAvailable == null) ? 0 : fieldsAvailable.hashCode());
-		result = prime * result + ((fieldsImportable == null) ? 0 : fieldsImportable.hashCode());
-		result = prime * result + ((fieldsRequired == null) ? 0 : fieldsRequired.hashCode());
-		result = prime * result + ((fieldsUnknown == null) ? 0 : fieldsUnknown.hashCode());
-		result = prime * result + ((importOrder == null) ? 0 : importOrder.hashCode());
-		result = prime * result + ((sheetsImportable == null) ? 0 : sheetsImportable.hashCode());
-		result = prime * result + ((packages == null) ? 0 : packages.hashCode());
-		result = prime * result + (valid ? 1231 : 1237);
-		return result;
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		MyEntitiesValidationReport that = (MyEntitiesValidationReport) o;
+		return valid == that.valid && Objects.equals(sheetsImportable, that.sheetsImportable) && Objects.equals(
+				fieldsImportable, that.fieldsImportable) && Objects.equals(fieldsUnknown, that.fieldsUnknown) && Objects
+				.equals(fieldsRequired, that.fieldsRequired) && Objects.equals(fieldsAvailable, that.fieldsAvailable)
+				&& Objects.equals(importOrder, that.importOrder) && Objects.equals(packages, that.packages);
 	}
 
 	@Override
-	public boolean equals(Object obj)
+	public int hashCode()
 	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		MyEntitiesValidationReport other = (MyEntitiesValidationReport) obj;
-		if (fieldsAvailable == null)
-		{
-			if (other.fieldsAvailable != null) return false;
-		}
-		else if (!fieldsAvailable.equals(other.fieldsAvailable)) return false;
-		if (fieldsImportable == null)
-		{
-			if (other.fieldsImportable != null) return false;
-		}
-		else if (!fieldsImportable.equals(other.fieldsImportable)) return false;
-		if (fieldsRequired == null)
-		{
-			if (other.fieldsRequired != null) return false;
-		}
-		else if (!fieldsRequired.equals(other.fieldsRequired)) return false;
-		if (fieldsUnknown == null)
-		{
-			if (other.fieldsUnknown != null) return false;
-		}
-		else if (!fieldsUnknown.equals(other.fieldsUnknown)) return false;
-		if (importOrder == null)
-		{
-			if (other.importOrder != null) return false;
-		}
-		else if (!importOrder.equals(other.importOrder)) return false;
-		if (sheetsImportable == null)
-		{
-			if (other.sheetsImportable != null) return false;
-		}
-		else if (!sheetsImportable.equals(other.sheetsImportable)) return false;
-		if (packages == null)
-		{
-			if (other.packages != null) return false;
-		}
-		else if (!packages.equals(other.packages)) return false;
-		if (valid != other.valid) return false;
-		return true;
+		return Objects.hash(sheetsImportable, fieldsImportable, fieldsUnknown, fieldsRequired, fieldsAvailable,
+				importOrder, packages, valid);
 	}
-
 }
