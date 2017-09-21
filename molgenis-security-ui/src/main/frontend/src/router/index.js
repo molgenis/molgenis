@@ -14,27 +14,6 @@ export default new Router({
       component: PermissionManager
     },
     {
-      path: '/user/:id/'
-    },
-    {
-      path: '/user/:id/:entityType'
-    },
-    {
-      path: '/role/'
-    },
-    {
-      path: '/role/:userId/'
-    },
-    {
-      path: '/role/:sid/edit'
-    },
-    {
-      path: '/role/:roleId/:entityType'
-    },
-    {
-      path: '/resource/:entityType/'
-    },
-    {
       path: '/resource/:entityType/:id',
       component: ResourcePermissionManager
     }
