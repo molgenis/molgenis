@@ -75,6 +75,9 @@
       onGrantingClick (args) {
         this.toggleGranting(args)
         this.save(this.rows[args.rowIndex].acl)
+      },
+      reset () {
+        this.setSelectedEntityType(null)
       }
     },
     computed: {
@@ -89,6 +92,12 @@
           this.getAcls()
         }
       }
+    },
+    created () {
+      this.reset()
+    },
+    watch: {
+      '$route': 'reset'
     },
     components: {
       Multiselect,
