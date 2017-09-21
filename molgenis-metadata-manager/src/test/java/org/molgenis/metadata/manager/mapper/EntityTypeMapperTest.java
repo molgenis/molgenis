@@ -9,7 +9,9 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.metadata.manager.model.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.w3c.dom.Attr;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -148,6 +150,7 @@ public class EntityTypeMapperTest
 		Map<String, String> i18nDescription = singletonMap(i18nDescriptionLangEn, i18nDescriptionValue);
 		boolean abstract_ = true;
 		String backend = "backend";
+		List<Attribute> referringAttributes = new ArrayList<>();
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(id);
@@ -187,8 +190,9 @@ public class EntityTypeMapperTest
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes)).thenReturn(
 				editorLookupAttributes);
 		@SuppressWarnings("unchecked")
-		ImmutableList<EditorAttribute> editorAttributes = mock(ImmutableList.class);
 		ImmutableList<EditorAttributeIdentifier> editorReferringAttributes = mock(ImmutableList.class);
+		when(attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes)).thenReturn(editorReferringAttributes);
+		ImmutableList<EditorAttribute> editorAttributes = mock(ImmutableList.class);
 		when(attributeMapper.toEditorAttributes(attributes)).thenReturn(editorAttributes);
 		EditorEntityTypeParent editorEntityTypeParent = mock(EditorEntityTypeParent.class);
 		when(entityTypeParentMapper.toEditorEntityTypeParent(extendsEntityType)).thenReturn(editorEntityTypeParent);
@@ -199,7 +203,7 @@ public class EntityTypeMapperTest
 		when(tagMapper.toEditorTags(tags)).thenReturn(editorTags);
 
 		when(entityTypeFactory.create()).thenReturn(entityType);
-		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 
 		EditorEntityType expectedEditorEntityType = EditorEntityType.create(id, label, i18nLabel, description,
 				i18nDescription, abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
@@ -221,6 +225,8 @@ public class EntityTypeMapperTest
 		@SuppressWarnings("unchecked")
 		List<Attribute> lookupAttributes = mock(List.class);
 
+		List<Attribute> referringAttributes = mock(List.class);
+
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(id);
 		when(entityType.getBackend()).thenReturn(backend);
@@ -232,7 +238,8 @@ public class EntityTypeMapperTest
 		when(attributeMapper.toEditorAttributes(attributes)).thenReturn(ImmutableList.of());
 		when(tagMapper.toEditorTags(tags)).thenReturn(ImmutableList.of());
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes)).thenReturn(ImmutableList.of());
-		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
+		when(attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes)).thenReturn(ImmutableList.of());
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 
 		assertEquals(editorEntityType,
 				EditorEntityType.create(id, null, ImmutableMap.of(), null, ImmutableMap.of(), false, backend, null,

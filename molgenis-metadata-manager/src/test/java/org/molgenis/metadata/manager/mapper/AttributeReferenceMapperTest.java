@@ -4,9 +4,12 @@ import com.google.common.collect.ImmutableList;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
+import org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,12 +46,19 @@ public class AttributeReferenceMapperTest
 	{
 		String id = "id";
 		String label = "label";
+		String entityTypeId = "id";
+		String entityTypeLabel= "label";
 		Attribute attribute = mock(Attribute.class);
+		EntityType entityType = mock(EntityType.class);
 		when(attribute.getIdentifier()).thenReturn(id);
 		when(attribute.getLabel()).thenReturn(label);
+		when(attribute.getEntity()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(entityTypeId);
+		when(entityType.getLabel()).thenReturn(entityTypeLabel);
 		ImmutableList<EditorAttributeIdentifier> editorAttributeIdentifier = attributeReferenceMapper.toEditorAttributeIdentifiers(
 				of(attribute));
-		assertEquals(editorAttributeIdentifier, of(EditorAttributeIdentifier.create(id, label)));
+		EditorEntityTypeIdentifier editorEntityTypeIdentifier = EditorEntityTypeIdentifier.create(entityTypeId, entityTypeLabel);
+		assertEquals(editorAttributeIdentifier, of(EditorAttributeIdentifier.create(id, label, editorEntityTypeIdentifier)));
 	}
 
 	@Test
@@ -56,12 +66,20 @@ public class AttributeReferenceMapperTest
 	{
 		String id = "id";
 		String label = "label";
+		String entityTypeId = "id";
+		String entityTypeLabel= "label";
 		Attribute attribute = mock(Attribute.class);
+		EntityType entityType = mock(EntityType.class);
 		when(attribute.getIdentifier()).thenReturn(id);
 		when(attribute.getLabel()).thenReturn(label);
+		when(attribute.getEntity()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(entityTypeId);
+		when(entityType.getLabel()).thenReturn(entityTypeLabel);
 		EditorAttributeIdentifier editorAttributeIdentifier = attributeReferenceMapper.toEditorAttributeIdentifier(
 				attribute);
-		assertEquals(editorAttributeIdentifier, EditorAttributeIdentifier.create(id, label));
+
+		EditorEntityTypeIdentifier editorEntityTypeIdentifier = EditorEntityTypeIdentifier.create(entityTypeId, entityTypeLabel);
+		assertEquals(editorAttributeIdentifier, EditorAttributeIdentifier.create(id, label, editorEntityTypeIdentifier));
 	}
 
 	@Test

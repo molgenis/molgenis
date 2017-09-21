@@ -172,7 +172,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 
 	private String getEditorEntityTypeJson()
 	{
-		return "{\"id\":\"id_1\",\"labelI18n\":{},\"descriptionI18n\":{},\"abstract0\":false,\"backend\":\"backend\",\"attributes\":[],\"tags\":[],\"lookupAttributes\":[]}";
+		return "{\"id\":\"id_1\",\"labelI18n\":{},\"descriptionI18n\":{},\"abstract0\":false,\"backend\":\"backend\",\"attributes\":[],\"referringAttributes\":[],\"tags\":[],\"lookupAttributes\":[]}";
 	}
 
 	private EditorAttributeResponse getEditorAttributeResponse()

@@ -2,12 +2,15 @@ package org.molgenis.metadata.manager.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
@@ -18,11 +21,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
+import org.w3c.dom.Attr;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
+import static org.molgenis.data.meta.model.AttributeMetadata.TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
@@ -69,9 +80,17 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 	{
 		EntityType entityType = mock(EntityType.class);
 
-		Repository<EntityType> repository = mock(Repository.class);
+
+		Repository<EntityType> repository = mock(Repository.class, RETURNS_DEEP_STUBS);
 		when(repository.findOneById("id_1")).thenReturn(entityType);
 		when(metaDataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);
+		Repository<Attribute> attributeRepository = mock(Repository.class, RETURNS_DEEP_STUBS);
+		when(metaDataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attributeRepository);
+		Query<Attribute> query = mock(Query.class, RETURNS_DEEP_STUBS);
+		when(attributeRepository.query().eq(REF_ENTITY_TYPE, entityType).and().eq(TYPE, AttributeType
+				.getValueString(XREF))).thenReturn(query);
+		Stream<Attribute> attributesStream = Streams.stream(new ArrayList<>());
+		when(attributeRepository.findAll(query)).thenReturn(attributesStream);
 
 		EditorEntityType editorEntityType = getEditorEntityType();
 		when(entityTypeMapper.toEditorEntityType(entityType, ImmutableList.of())).thenReturn(editorEntityType);
@@ -166,7 +185,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public MetaDataService metaDataService()
 		{
-			return mock(MetaDataService.class);
+			return mock(MetaDataService.class, RETURNS_DEEP_STUBS);
 		}
 
 		@Bean

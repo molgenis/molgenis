@@ -22,6 +22,10 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
+import static org.molgenis.data.meta.model.AttributeMetadata.TYPE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 @Component
 public class MetadataManagerServiceImpl implements MetadataManagerService
@@ -50,7 +54,7 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 	public EditorEntityTypeResponse getEditorEntityType(String entityTypeId)
 	{
 		// metadataService.getEditorEntityType cannot be used due to https://github.com/molgenis/molgenis/issues/5783
-		EntityType entityType = metadataService.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+		EntityType entityType = metadataService.getRepository(ENTITY_TYPE_META_DATA,
 				EntityType.class).findOneById(entityTypeId);
 
 
@@ -58,10 +62,10 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 		{
 			throw new UnknownEntityException("Unknown EntityType [" + entityTypeId + "]");
 		}
-		Repository<Attribute> attributeRepository = metadataService.getRepository(AttributeMetadata.ATTRIBUTE_META_DATA,
+		Repository<Attribute> attributeRepository = metadataService.getRepository(ATTRIBUTE_META_DATA,
 				Attribute.class);
 		//TODO: en nu zonder repository
-		Query<Attribute> query = attributeRepository.query().eq(AttributeMetadata.REF_ENTITY_TYPE, entityType).and().eq(AttributeMetadata.TYPE, AttributeType.getValueString(AttributeType.XREF));
+		Query<Attribute> query = attributeRepository.query().eq(REF_ENTITY_TYPE, entityType).and().eq(TYPE, AttributeType.getValueString(AttributeType.XREF));
 		List<Attribute> referringAttributes = attributeRepository.findAll(query).collect(Collectors.toList());
 		return createEntityTypeResponse(entityType, referringAttributes);
 	}
