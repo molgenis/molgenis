@@ -296,7 +296,7 @@
                 $container.addClass("select2-bootstrap-prepend");
                 $container.prepend($dropdown);
             }
-            else if (attribute.fieldType === 'XREF') {
+            else if (attribute.fieldType === 'FILE' || attribute.fieldType === 'XREF') {
                 $operatorInput.val('OR');
                 $container.append($('<div class="input-group-addon dropdown-toggle-container"><button class="btn btn-default" type="button" disabled>OR</button></div>'));
                 $container.append($operatorInput);
