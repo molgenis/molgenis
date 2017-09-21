@@ -11,14 +11,20 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
 public class SecurityDecoratorUtils
 {
+	public static final String MESSAGE_ENTITY_TYPE_NO_PERMISSION = "No [%s] permission on entity type [%s] with id [%s]";
+
+	private SecurityDecoratorUtils()
+	{
+	}
+
 	public static void validatePermission(EntityType entityType, Permission permission)
 	{
 		String role = format("ROLE_ENTITY_%s_%s", permission.toString(), entityType.getId());
 		if (!currentUserHasRole(AUTHORITY_SU, ROLE_SYSTEM, role))
 		{
 			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
-							entityType.getLabel(), entityType.getId()));
+					format(MESSAGE_ENTITY_TYPE_NO_PERMISSION, permission.toString(), entityType.getLabel(),
+							entityType.getId()));
 		}
 	}
 }
