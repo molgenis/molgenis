@@ -1,5 +1,5 @@
 // @flow
-import type {ACE, EntityType, State, Role} from './utils/flow.types'
+import type { ACE, EntityType, Role, State } from './utils/flow.types'
 
 export default {
   /**
@@ -16,10 +16,12 @@ export default {
       const {entityLabel, acl: {owner: {username}, entries}} = row
       const emptyAce: ACE = {
         permissions: [],
-        securityId: {authority: selectedSid},
+        securityId: state.sidType === 'role' ? {authority: selectedSid} : {username: selectedSid},
         granting: true
       }
-      const isGrantedAuthority = (sid: string) => (candidate: ACE) => { return state.type === 'role' ? (candidate.securityId.authority && candidate.securityId.authority === sid) : (candidate.securityId.username && candidate.securityId.username === sid) }
+      const isAuthority = (sid: string) => (candidate: ACE) => candidate.securityId.authority && candidate.securityId.authority === sid
+      const isUser = (sid: string) => (candidate: ACE) => candidate.securityId.username && candidate.securityId.username === sid
+      const isGrantedAuthority = state.sidType === 'role' ? isAuthority : isUser
       const aceIndex = entries.findIndex(isGrantedAuthority(selectedSid))
       const ace = entries.find(isGrantedAuthority(selectedSid)) || emptyAce
       const addPermission = (row, permission) => ({...row, [permission]: ace.permissions.includes(permission)})
