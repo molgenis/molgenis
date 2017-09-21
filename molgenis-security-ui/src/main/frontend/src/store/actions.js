@@ -50,7 +50,7 @@ export default {
       console.log(error)
     })
   },
-  [GET_USERS] ({commit, dispatch}) {
+  [GET_USERS] ({commit}) {
     return get('/api/v2/sys_sec_User?sort=username', {}).then(response => {
       commit(SET_USERS, response.items)
       return response.items
