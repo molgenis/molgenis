@@ -3,7 +3,7 @@ import type { Package, Entity } from '../flow.types'
 import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from './mutations'
+import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from './mutations'
 
 export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
 export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
@@ -181,7 +181,15 @@ export default {
       // At the moment each entity is stored in either a single package, or no package at all
       if (response.items.length > 0) {
         const entityType = response.items[0]
-        dispatch(GET_STATE_FOR_PACKAGE, entityType['package'].id)
+        const _package = entityType['package']
+        if (_package) {
+          dispatch(GET_STATE_FOR_PACKAGE, _package.id)
+        } else {
+          // In case entity is not in package fallback to searching for entity name.
+          const entityLabel = entityType.label
+          commit(SET_QUERY, entityLabel)
+          dispatch(QUERY_ENTITIES, entityLabel)
+        }
       } else {
         dispatch(RESET_STATE)
       }
