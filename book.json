@@ -30,6 +30,10 @@
           "selected": true
         },
         {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/5.2/",
+          "text": "MOLGENIS 5.2"
+        },
+        {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/5.1/",
           "text": "MOLGENIS 5.1"
         },
