@@ -17,7 +17,7 @@
                   type="button">{{ 'search-button' | i18n }}</button>
         </span>
         <span class="input-group-btn">
-          <button @click="clearQuery()" class="btn btn-secondary" :disabled="!query"
+          <button @click="reset()" class="btn btn-secondary" :disabled="!query"
                   type="button">{{ 'clear-button' | i18n }}</button>
         </span>
       </div>
@@ -108,10 +108,6 @@
         this.$store.dispatch(QUERY_PACKAGES, this.$store.state.query)
         this.$store.dispatch(QUERY_ENTITIES, this.$store.state.query)
       }, 200),
-      clearQuery: function () {
-        this.$store.commit(SET_QUERY, undefined)
-        this.$store.dispatch(QUERY_PACKAGES)
-      },
       selectPackage: function (packageId: string) {
         this.$store.commit(SET_QUERY, undefined)
         this.$store.dispatch(GET_STATE_FOR_PACKAGE, packageId)
