@@ -2,6 +2,7 @@ package org.molgenis.util.file;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -14,30 +15,16 @@ public class ZipFileUtil
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ZipFileUtil.class);
 
-	private static void copyInputStream(InputStream in, OutputStream out) throws IOException
+	private ZipFileUtil()
 	{
-		byte[] buffer = new byte[1024];
-		int len;
-		try
-		{
-			while ((len = in.read(buffer)) >= 0) out.write(buffer, 0, len);
-		}
-		finally
-		{
-			if (in != null) in.close();
-			if (out != null) out.close();
-		}
 	}
 
 	public static List<File> unzip(File file) throws IOException
 	{
-
 		List<File> unzippedFiles = new ArrayList<>();
 		Enumeration<? extends ZipEntry> entries;
-		ZipFile zipFile = null;
-		try
+		try (ZipFile zipFile = new ZipFile(file))
 		{
-			zipFile = new ZipFile(file);
 			entries = zipFile.entries();
 			while (entries.hasMoreElements())
 			{
@@ -58,14 +45,15 @@ public class ZipFileUtil
 				}
 				LOG.info("Extracting directory: " + entry.getName());
 				File newFile = new File(file.getParent(), entry.getName());
-				copyInputStream(zipFile.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(newFile)));
+
+				try (InputStream in = zipFile.getInputStream(entry);
+						OutputStream out = new BufferedOutputStream(new FileOutputStream(newFile)))
+				{
+					StreamUtils.copy(in, out);
+				}
 
 				unzippedFiles.add(newFile);
 			}
-		}
-		finally
-		{
-			if (zipFile != null) zipFile.close();
 		}
 		return unzippedFiles;
 	}

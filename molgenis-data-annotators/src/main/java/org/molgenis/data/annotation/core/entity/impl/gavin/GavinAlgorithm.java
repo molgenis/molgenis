@@ -159,22 +159,29 @@ public class GavinAlgorithm
 			return Judgment.create(Benign, genomewide, gene,
 					"Variant is of 'modifier' impact, and therefore unlikely to be pathogenic.");
 		}
-		if (caddScaled != null && caddScaled > GENOMEWIDE_CADD_THRESHOLD)
+
+		if (caddScaled != null)
 		{
-			return Judgment.create(Pathogenic, genomewide, gene,
-					"Variant MAF of " + exacMAF + " is rare enough to be potentially pathogenic and its CADD score of "
-							+ caddScaled + " is greater than a global threshold of " + GENOMEWIDE_CADD_THRESHOLD + ".");
+			if (caddScaled > GENOMEWIDE_CADD_THRESHOLD)
+			{
+				return Judgment.create(Pathogenic, genomewide, gene, "Variant MAF of " + exacMAF
+						+ " is rare enough to be potentially pathogenic and its CADD score of " + caddScaled
+						+ " is greater than a global threshold of " + GENOMEWIDE_CADD_THRESHOLD + ".");
+			}
+			else
+			{
+				return Judgment.create(Benign, genomewide, gene,
+						"Variant CADD score of " + caddScaled + " is less than a global threshold of "
+								+ GENOMEWIDE_CADD_THRESHOLD + ", although the variant MAF of " + exacMAF
+								+ " is rare enough to be potentially pathogenic.");
+			}
 		}
-		if (caddScaled != null && caddScaled <= GENOMEWIDE_CADD_THRESHOLD)
+		else
 		{
-			return Judgment.create(Benign, genomewide, gene,
-					"Variant CADD score of " + caddScaled + " is less than a global threshold of "
-							+ GENOMEWIDE_CADD_THRESHOLD + ", although the variant MAF of " + exacMAF
-							+ " is rare enough to be potentially pathogenic.");
+			return Judgment.create(VOUS, genomewide, gene,
+					"Unable to classify variant as benign or pathogenic. The combination of " + impact
+							+ " impact, an unknown CADD score and MAF of " + exacMAF + " in " + gene
+							+ " is inconclusive.");
 		}
-		return Judgment.create(VOUS, genomewide, gene,
-				"Unable to classify variant as benign or pathogenic. The combination of " + impact
-						+ " impact, a CADD score of " + caddScaled + " and MAF of " + exacMAF + " in " + gene
-						+ " is inconclusive.");
 	}
 }

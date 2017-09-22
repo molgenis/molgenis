@@ -389,8 +389,7 @@ public class EntityUtils
 		EntityType otherRefEntity = otherAttr.getRefEntity();
 		if (refEntity == null && otherRefEntity != null) return false;
 		if (refEntity != null && otherRefEntity == null) return false;
-		if (refEntity != null && otherRefEntity != null && !refEntity.getId().equals(otherRefEntity.getId()))
-			return false;
+		if (refEntity != null && !refEntity.getId().equals(otherRefEntity.getId())) return false;
 		if (!EntityUtils.equals(attr.getMappedBy(), otherAttr.getMappedBy())) return false;
 		if (!Objects.equals(attr.getOrderBy(), otherAttr.getOrderBy())) return false;
 		if (!Objects.equals(attr.getExpression(), otherAttr.getExpression())) return false;

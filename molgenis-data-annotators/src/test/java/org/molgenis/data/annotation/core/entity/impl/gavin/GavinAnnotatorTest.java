@@ -191,7 +191,7 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		assertEquals(resultEntity.get(CLASSIFICATION), "VOUS");
 		assertEquals(resultEntity.get(CONFIDENCE), "genomewide");
 		assertEquals(resultEntity.get(REASON),
-				"Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score of null and MAF of 1.0E-5 in TFR2 is inconclusive.");
+				"Unable to classify variant as benign or pathogenic. The combination of HIGH impact, an unknown CADD score and MAF of 1.0E-5 in TFR2 is inconclusive.");
 
 	}
 

@@ -103,7 +103,7 @@ public class StandardsRegistryController extends PluginController
 		packageSearchRequest.setNum(3);
 
 		PackageSearchResponse packageSearchResponse = search(packageSearchRequest, model);
-		if (packageSearchRequest != null)
+		if (packageSearchResponse != null)
 		{
 			model.addAttribute("packageSearchResponse", gson.toJson(packageSearchResponse));
 		}
