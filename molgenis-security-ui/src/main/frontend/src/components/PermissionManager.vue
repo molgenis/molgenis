@@ -4,37 +4,17 @@
       <li class="breadcrumb-item"><a href="/">Home</a></li>
       <li class="breadcrumb-item active">{{'PERMISSION_MANAGER' | i18n}}</li>
     </ol>
-    <div class="row pt-3">
+    <div class="row pt-3" v-if="editRole">
+      <div class="col col-md-12">
+        <role-form></role-form>
+      </div>
+    </div>
+    <div class="row pt-3" v-else>
       <div class="col col-md-4">
-        <h3 class="pt-3">{{'SECURITY_ID' | i18n}}</h3>
-        <ul class="nav nav-tabs">
-          <li class="nav-item" v-for="type in ['role', 'user']">
-            <a class="nav-link" :class="{ active: sidType === type }" href="#"
-               @click="sidType = type">{{type | toUpper | i18n}}</a>
-          </li>
-        </ul>
-        <div class="tab-content">
-          <div class="tab-pane active pt-3">
-            <roles :roles="roles" :sidType="sidType"
-                   :selectedRole="selectedRole"
-                   :selectRole="selectRole" :createRole="createRole" :updateRole="updateRole"
-                   :onUpdateRole="onUpdateRole" :onDeleteRole="onDeleteRole"></roles>
-            <role-members v-if="sidType==='role'"></role-members>
-          </div>
-        </div>
+        <roles></roles>
       </div>
       <div class="col col-md-8">
-        <role-form v-if="doCreateRole"
-                   :title="$t('CREATE_ROLE')"
-                   :cancel="cancelCreateRole"
-                   :submit="onSaveRole"></role-form>
-        <role-form v-else-if="doUpdateRole"
-                   :title="$t('UPDATE_ROLE')"
-                   :initialLabel="role.label"
-                   :initialDescription="role.description"
-                   :cancel="cancelUpdateRole"
-                   :submit="onUpdateRole"></role-form>
-        <div v-else-if="selectedRole">
+        <div v-if="selectedSid">
           <h3>{{'TABLE' | i18n}}</h3>
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
                        selectLabel="" deselectLabel="" :placeholder="'SELECT_AN_ENTITY'|i18n"></multiselect>
@@ -60,82 +40,67 @@
 <script>
   import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
   import {
-    CREATE_ROLE,
-    CANCEL_CREATE_ROLE, CANCEL_UPDATE_ROLE, SET_SID_TYPE, SET_SELECTED_ENTITY_TYPE, TOGGLE_PERMISSION, TOGGLE_GRANTING
+    SET_SELECTED_ENTITY_TYPE,
+    TOGGLE_PERMISSION,
+    TOGGLE_GRANTING,
+    SET_ROWS
   } from '../store/mutations'
   import {
-    GET_ROLES,
-    SELECT_ROLE,
     GET_ACLS,
     FILTER_CHANGED,
-    SAVE_ACL,
-    SAVE_CREATE_ROLE,
-    UPDATE_ROLE,
-    DELETE_ROLE
+    SAVE_ACL
   } from '../store/actions'
   import Multiselect from 'vue-multiselect'
   import ACLs from './ACLs'
   import Roles from './Roles'
   import RoleForm from './RoleForm'
   import RoleMembers from './RoleMembers'
-  import {capitalizeFirstLetter, toUpper} from '../filters/text'
 
   export default {
     name: 'permission-manager',
     methods: {
       ...mapMutations({
-        createRole: CREATE_ROLE,
-        cancelCreateRole: CANCEL_CREATE_ROLE,
-        updateRole: UPDATE_ROLE,
-        cancelUpdateRole: CANCEL_UPDATE_ROLE,
-        setSidType: SET_SID_TYPE,
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE,
         togglePermission: TOGGLE_PERMISSION,
-        toggleGranting: TOGGLE_GRANTING
+        toggleGranting: TOGGLE_GRANTING,
+        setRows: SET_ROWS
       }),
       ...mapActions({
-        selectRole: SELECT_ROLE,
+        getAcls: GET_ACLS,
         filterChanged: FILTER_CHANGED,
-        save: SAVE_ACL,
-        onSaveRole: SAVE_CREATE_ROLE,
-        onUpdateRole: UPDATE_ROLE,
-        onDeleteRole: DELETE_ROLE
+        save: SAVE_ACL
       }),
       onPermissionClick (args) {
         this.togglePermission(args)
-        this.save(args.rowIndex)
+        this.save(this.rows[args.rowIndex].acl)
       },
       onGrantingClick (args) {
         this.toggleGranting(args)
-        this.save(args.rowIndex)
+        this.save(this.rows[args.rowIndex].acl)
+      },
+      reset () {
+        this.setSelectedEntityType(null)
+        this.setRows([])
       }
     },
     computed: {
-      ...mapState(['roles', 'selectedRole', 'doCreateRole', 'doUpdateRole', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'acls', 'filter']),
-      ...mapGetters(['tableRows']),
+      ...mapState(['selectedSid', 'entityTypes', 'selectedEntityTypeId', 'permissions', 'rows', 'filter', 'editRole']),
+      ...mapGetters(['tableRows', 'role']),
       selectedEntityType: {
         get () {
           return this.$store.state.selectedEntityType
         },
         set (selectedEntityType) {
           this.setSelectedEntityType(selectedEntityType.id)
-          this.$store.dispatch(GET_ACLS)
-        }
-      },
-      role: {
-        get () {
-          return this.roles.find(role => role.id === this.selectedRole)
-        }
-      },
-      sidType: {
-        get () {
-          return this.$store.state.sidType
-        },
-        set (sidType) {
-          this.setSidType(sidType)
-          this.$store.dispatch(GET_ROLES)
+          this.getAcls()
         }
       }
+    },
+    created () {
+      this.reset()
+    },
+    watch: {
+      '$route': 'reset'
     },
     components: {
       Multiselect,
@@ -143,10 +108,6 @@
       RoleForm,
       RoleMembers,
       acls: ACLs
-    },
-    filters: {
-      capitalizeFirstLetter,
-      toUpper
     }
   }
 </script>

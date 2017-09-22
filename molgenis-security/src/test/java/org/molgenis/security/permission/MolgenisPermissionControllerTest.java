@@ -3,20 +3,21 @@ package org.molgenis.security.permission;
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.security.PermissionService;
 import org.molgenis.data.security.acl.*;
 import org.molgenis.security.core.Permission;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class MolgenisPermissionControllerTest
 {
@@ -95,4 +96,34 @@ public class MolgenisPermissionControllerTest
 		EntityAcl entityAcl = EntityAcl.create(homePluginId, owner, null, singletonList(entityAce));
 		molgenisPermissionController.save(entityAcl);
 	}
+
+	@Test
+	public void testGetEntityAcl()
+	{
+		EntityIdentity homePluginId = EntityIdentity.create("sys_Plugin", "home");
+		EntityAcl entityAcl = mock(EntityAcl.class);
+		when(entityAclService.readAcl(homePluginId)).thenReturn(entityAcl);
+		assertEquals(molgenisPermissionController.getEntityAcl("sys_Plugin", "home"), ResponseEntity.ok(entityAcl));
+	}
+
+	@Test
+	public void testGetEntityAclNotFound()
+	{
+		EntityIdentity homePluginId = EntityIdentity.create("sys_Plugin", "home");
+
+		when(entityAclService.readAcl(homePluginId)).thenReturn(null);
+		assertEquals(molgenisPermissionController.getEntityAcl("sys_Plugin", "home"),
+				ResponseEntity.notFound().build());
+	}
+
+	@Test
+	public void testGetEntityAclForbidden()
+	{
+		EntityIdentity homePluginId = EntityIdentity.create("sys_Plugin", "home");
+
+		when(entityAclService.readAcl(homePluginId)).thenThrow(new MolgenisDataAccessException());
+		assertEquals(molgenisPermissionController.getEntityAcl("sys_Plugin", "home"),
+				ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+	}
+
 }

@@ -110,6 +110,27 @@ paths:
           schema:
             $ref: '#/definitions/ACLs'
   /permission/acl:
+    get:
+      tags:
+        - Security
+      summary: Retrieve ACL.
+      description: Will retrieve single ACL for entity Id and EntityTypeId
+      parameters:
+        - name: entityTypeId
+          type: string
+          in: query
+          required: true
+          description: ID of the entity type for which the ACL is retrieved
+        - name: entityId
+          type: string
+          in: query
+          required: true
+          description: ID of the entity for which the ACL is retrieved
+      responses:
+        200:
+          description: MOLGENIS token
+          schema:
+            $ref: '#/definitions/ACL'
     put:
       tags:
         - Security
