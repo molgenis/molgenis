@@ -73,4 +73,17 @@ describe('Navigator', () => {
       expect(Navigator.methods.isLast(list, item1)).to.equal(false)
     })
   })
+
+  describe('reset', () => {
+    it('should clear the query and dispatch a call to reset the state', () => {
+      Navigator.methods.$store = {
+        dispatch: sinon.spy(),
+        commit: sinon.spy()
+      }
+
+      Navigator.methods.reset('foobar')
+      Navigator.methods.$store.commit.should.have.been.calledWith('__SET_QUERY__', undefined)
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('__RESET_STATE__')
+    })
+  })
 })
