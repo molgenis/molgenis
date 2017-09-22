@@ -24,7 +24,7 @@
 </div>
 <div class="row">
     <div class="col-md-3">
-        <form id="change-entity-form" method="POST" action="${context_url}">
+        <form id="change-entity-form" method="GET" action="${context_url}">
             <select id="select-target" name="selectedTarget" class="form-control">
             <#list entityTypeIds as entityTypeId>
                 <option
