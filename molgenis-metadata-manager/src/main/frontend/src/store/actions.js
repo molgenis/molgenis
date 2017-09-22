@@ -170,6 +170,10 @@ export default {
    * Persist metadata changes to the database
    */
   [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
+    if (!state.editorEntityType.labelAttribute) {
+      commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: state.editorEntityType.idAttribute})
+    }
+
     const options = {
       body: JSON.stringify(state.editorEntityType)
     }
@@ -191,7 +195,6 @@ export default {
         commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
         commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
       } else {
-        response
         commit(SET_EDITOR_ENTITY_TYPE, state.editorEntityType)
       }
     }, error => {
