@@ -1,5 +1,5 @@
 // @flow
-import type {State} from './utils/flow.types'
+import type { State } from './utils/flow.types'
 
 export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 
@@ -14,7 +14,7 @@ const state: State = {
   selectedSid: null,
   editRole: false,
   selectedEntityTypeId: null,
-  permissions: ['WRITEMETA', 'DELETE', 'WRITE', 'READ', 'COUNT'],
+  permissions: ['WRITEMETA', 'DELETE', 'WRITE', 'READ'],
   filter: '',
   rows: [],
   entityTypes: [],

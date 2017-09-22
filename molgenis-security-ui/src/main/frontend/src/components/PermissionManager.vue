@@ -42,7 +42,8 @@
   import {
     SET_SELECTED_ENTITY_TYPE,
     TOGGLE_PERMISSION,
-    TOGGLE_GRANTING
+    TOGGLE_GRANTING,
+    SET_ROWS
   } from '../store/mutations'
   import {
     GET_ACLS,
@@ -61,7 +62,8 @@
       ...mapMutations({
         setSelectedEntityType: SET_SELECTED_ENTITY_TYPE,
         togglePermission: TOGGLE_PERMISSION,
-        toggleGranting: TOGGLE_GRANTING
+        toggleGranting: TOGGLE_GRANTING,
+        setRows: SET_ROWS
       }),
       ...mapActions({
         getAcls: GET_ACLS,
@@ -78,6 +80,7 @@
       },
       reset () {
         this.setSelectedEntityType(null)
+        this.setRows([])
       }
     },
     computed: {

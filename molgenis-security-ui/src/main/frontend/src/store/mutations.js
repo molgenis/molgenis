@@ -1,5 +1,5 @@
 // @flow
-import type {ACE, ACL, EntityType, Group, Permission, Role, Row, Sid, SidType, State, User} from './utils/flow.types'
+import type { ACE, ACL, EntityType, Group, Permission, Role, Row, Sid, SidType, State, User } from './utils/flow.types'
 
 export const SET_SELECTED_SID = '__SET_SELECTED_SID__'
 export const SET_USERS = '__SET_USERS__'
@@ -126,7 +126,6 @@ export default {
     state.groups = groups
   },
   [SET_SID_TYPE] (state: State, sidType: SidType) {
-    state.selectedSid = null
     state.sidType = sidType
   },
   [SET_SELECTED_SID] (state: State, sid: string) {
@@ -153,6 +152,7 @@ export default {
   [SET_SELECTED_ENTITY_TYPE] (state: State, selectedEntityTypeId: string) {
     state.selectedEntityTypeId = selectedEntityTypeId
     state.filter = ''
+    state.rows = []
   },
   [SET_FILTER] (state: State, filter: string) {
     state.filter = filter

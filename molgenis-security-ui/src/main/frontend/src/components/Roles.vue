@@ -4,7 +4,7 @@
     <ul class="nav nav-tabs">
       <li class="nav-item" v-for="type in ['role', 'user']">
         <a class="nav-link" :class="{ active: sidType === type }" href="#"
-           @click="setSidType(type)">{{type | toUpper | i18n}}</a>
+           @click="selectSidType(type)">{{type | toUpper | i18n}}</a>
       </li>
     </ul>
     <div class="tab-content">
@@ -12,8 +12,10 @@
         <div class="row" v-if="sidType === 'role'">
           <div class="col-12">
             <button type="button" class="btn btn-success" @click="createRole()"><i class="fa fa-plus"></i></button>
-            <button v-if="selectedSid" type="button" class="btn btn-default" @click="editRole"><i class="fa fa-pencil"></i></button>
-            <button v-if="selectedSid" type="button" class="btn btn-danger" @click="deleteRole"><i class="fa fa-trash"></i></button>
+            <button v-if="selectedSid" type="button" class="btn btn-default" @click="editRole"><i
+              class="fa fa-pencil"></i></button>
+            <button v-if="selectedSid" type="button" class="btn btn-danger" @click="deleteRole"><i
+              class="fa fa-trash"></i></button>
           </div>
         </div>
         <div class="row">
@@ -39,22 +41,22 @@
 </template>
 
 <script>
-  import {mapState, mapMutations, mapActions} from 'vuex'
+  import { mapState, mapMutations, mapActions } from 'vuex'
   import RoleMembers from './RoleMembers'
 
   import {
     EDIT_ROLE,
-    SET_SID_TYPE,
     SET_SELECTED_SID
   } from '../store/mutations'
 
   import {
     DELETE_ROLE,
     SELECT_USER,
-    SELECT_ROLE
+    SELECT_ROLE,
+    SELECT_SID_TYPE
   } from '../store/actions'
 
-  import {toUpper} from '../filters/text'
+  import { toUpper } from '../filters/text'
 
   export default {
     name: 'roles',
@@ -91,13 +93,13 @@
       },
       ...mapMutations({
         editRole: EDIT_ROLE,
-        setSelectedSid: SET_SELECTED_SID,
-        setSidType: SET_SID_TYPE
+        setSelectedSid: SET_SELECTED_SID
       }),
       ...mapActions({
         deleteRole: DELETE_ROLE,
         selectRole: SELECT_ROLE,
-        selectUser: SELECT_USER
+        selectUser: SELECT_USER,
+        selectSidType: SELECT_SID_TYPE
       })
     },
     components: {
@@ -105,6 +107,9 @@
     },
     filters: {
       toUpper
+    },
+    mounted () {
+      this.selectSidType('role')
     }
   }
 </script>

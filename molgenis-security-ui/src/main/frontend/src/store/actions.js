@@ -1,4 +1,4 @@
-import {delete_, get, post} from '@molgenis/molgenis-api-client'
+import { delete_, get, post } from '@molgenis/molgenis-api-client'
 import {
   CANCEL_EDIT_ROLE,
   SET_ACL,
@@ -9,13 +9,15 @@ import {
   SET_ROLES,
   SET_ROWS,
   SET_SELECTED_SID,
+  SET_SID_TYPE,
   SET_USERS,
   SET_USERS_IN_ROLE
 } from './mutations'
-import {debounce} from 'lodash'
+import { debounce } from 'lodash'
 
 export const SELECT_ROLE = '__SELECT_ROLE__'
 export const SELECT_USER = '__SELECT_USER__'
+export const SELECT_SID_TYPE = '__SELECT_SID_TYPE__'
 export const GET_ENTITY_TYPES = '__GET_ENTITY_TYPES__'
 export const GET_ROLES = '__GET_ROLES__'
 export const GET_USERS = '__GET_USERS__'
@@ -58,6 +60,14 @@ export default {
       console.log(error)
     })
   },
+  [SELECT_SID_TYPE] ({dispatch, commit, state}, sidType) {
+    commit(SET_SID_TYPE, sidType)
+    if (sidType === 'role' && state.roles && state.roles[0]) {
+      dispatch(SELECT_ROLE, state.roles[0].id)
+    } else if (sidType === 'user' && state.users && state.users[0]) {
+      dispatch(SELECT_USER, state.users[0].username)
+    }
+  },
   [SELECT_USER] ({commit}, sid) {
     commit(SET_SELECTED_SID, sid)
   },
@@ -92,9 +102,14 @@ export default {
         'Content-Type': 'application/json'
       },
       method: id ? 'put' : 'post'
-    }).then(() => {
+    }).then((response) => {
       commit(CANCEL_EDIT_ROLE)
-      dispatch(GET_ROLES)
+      let idFromHref = id
+      if (!id) {
+        const href = response.resources[0].href
+        idFromHref = href.substring(href.lastIndexOf('/') + 1)
+      }
+      dispatch(GET_ROLES).then(() => dispatch(SELECT_ROLE, idFromHref))
     }, error => {
       console.log(error)
     })
@@ -102,7 +117,7 @@ export default {
   [DELETE_ROLE] ({state, dispatch, commit}) {
     delete_('/api/v2/sys_sec_Role/' + state.selectedSid).then(() => {
       commit(SET_SELECTED_SID, undefined)
-      dispatch(GET_ROLES)
+      dispatch(GET_ROLES).then(() => dispatch(SELECT_SID_TYPE, 'role'))
     }, error => {
       console.log(error)
     })
