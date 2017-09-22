@@ -4,6 +4,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import org.molgenis.gson.AutoGson;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @AutoValue
@@ -12,6 +13,7 @@ public abstract class EntityTypeResult implements Described
 {
 	public abstract String getId();
 
+	@Nullable
 	public abstract String getPackageId();
 
 	public abstract boolean isLabelMatch();
