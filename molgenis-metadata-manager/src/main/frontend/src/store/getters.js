@@ -64,9 +64,9 @@ export default {
     return rootAttributes.map(addChildren)
   },
   /**
-   *
+   * Return a list of referring attributes for mapped attributes property
    */
-  getMappedByAttributes: (state, getters) => {
+  getMappedByAttributes: state => {
     return state.initialEditorEntityType.referringAttributes
   },
 

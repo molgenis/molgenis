@@ -255,7 +255,6 @@
         }).catch(this.$swal.noop)
       },
       onAttributeSelect (selectedAttribute) {
-        console.log(selectedAttribute)
         this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, selectedAttribute.id)
       },
       addAttribute () {
