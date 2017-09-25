@@ -107,6 +107,18 @@ export default {
     const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
+    const attr = state.editorEntityType.attributes[index]
+    if (key === 'type') {
+      if (attr.type === 'ONETOMANY' || update.value === 'ONETOMANY') {
+        attr.mappedByAttribute = null
+        attr.refEntityType = null
+      }
+      attr[key] = update.value
+    } else if (key === 'mappedByAttribute') {
+      if (update.value !== null) {
+        attr.refEntityType = update.value
+      }
+    }
     state.editorEntityType.attributes[index][key] = update.value
   },
   /**

@@ -229,6 +229,69 @@ describe('mutations', () => {
       mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__(state, { key: 'name', value: 'updated name' })
       expect(state.editorEntityType.attributes).to.deep.equal(expected)
     })
+    it('Updates the selected attribute IN the editorEntityType attribute list when TYPE = ONETOMANY and becomes XREF', () => {
+      const state = {
+        selectedAttributeId: '1',
+        editorEntityType: {
+          attributes: [
+            { id: '1', name: 'attribute 1', type: 'ONETOMANY', mappedByAttribute: 'STRING', refEntityType: 'STRING' },
+            { id: '2', name: 'attribute 2', type: 'INT', mappedByAttribute: null, refEntityType: null },
+            { id: '3', name: 'attribute 3', type: 'STRING', mappedByAttribute: null, refEntityType: null }
+          ]
+        }
+      }
+
+      const expected = [
+        { id: '1', name: 'attribute 1', type: 'XREF', mappedByAttribute: null, refEntityType: null },
+        { id: '2', name: 'attribute 2', type: 'INT', mappedByAttribute: null, refEntityType: null },
+        { id: '3', name: 'attribute 3', type: 'STRING', mappedByAttribute: null, refEntityType: null }
+      ]
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__(state, { key: 'type', value: 'XREF' })
+      expect(state.editorEntityType.attributes).to.deep.equal(expected)
+    })
+    it('Updates the selected attribute IN the editorEntityType attribute list when TYPE = XREF and becomes ONETOMANY', () => {
+      const state = {
+        selectedAttributeId: '1',
+        editorEntityType: {
+          attributes: [
+            { id: '1', name: 'attribute 1', type: 'XREF', mappedByAttribute: null, refEntityType: null },
+            { id: '2', name: 'attribute 2', type: 'INT', mappedByAttribute: null, refEntityType: null },
+            { id: '3', name: 'attribute 3', type: 'STRING', mappedByAttribute: null, refEntityType: null }
+          ]
+        }
+      }
+
+      const expected = [
+        { id: '1', name: 'attribute 1', type: 'ONETOMANY', mappedByAttribute: null, refEntityType: null },
+        { id: '2', name: 'attribute 2', type: 'INT', mappedByAttribute: null, refEntityType: null },
+        { id: '3', name: 'attribute 3', type: 'STRING', mappedByAttribute: null, refEntityType: null }
+      ]
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__(state, { key: 'type', value: 'ONETOMANY' })
+      expect(state.editorEntityType.attributes).to.deep.equal(expected)
+    })
+    it('Updates the selected attribute IN the editorEntityType attribute list when attribute = MAPPEDBYATTRIBUTE and becomes STRING', () => {
+      const state = {
+        selectedAttributeId: '1',
+        editorEntityType: {
+          attributes: [
+            { id: '1', name: 'attribute 1', type: 'ONETOMANY', mappedByAttribute: null, refEntityType: null },
+            { id: '2', name: 'attribute 2', type: 'INT', mappedByAttribute: null, refEntityType: null },
+            { id: '3', name: 'attribute 3', type: 'STRING', mappedByAttribute: null, refEntityType: null }
+          ]
+        }
+      }
+
+      const expected = [
+        { id: '1', name: 'attribute 1', type: 'ONETOMANY', mappedByAttribute: 'STRING', refEntityType: 'STRING' },
+        { id: '2', name: 'attribute 2', type: 'INT', mappedByAttribute: null, refEntityType: null },
+        { id: '3', name: 'attribute 3', type: 'STRING', mappedByAttribute: null, refEntityType: null }
+      ]
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE__(state, { key: 'mappedByAttribute', value: 'STRING' })
+      expect(state.editorEntityType.attributes).to.deep.equal(expected)
+    })
   })
 
   describe('Testing mutation SET_SELECTED_ATTRIBUTE_ID', () => {
