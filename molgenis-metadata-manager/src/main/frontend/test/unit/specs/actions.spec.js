@@ -323,7 +323,7 @@ describe('actions', () => {
 
   describe('SAVE_EDITOR_ENTITY_TYPE', () => {
     it('should persist metadata changes to the database', done => {
-      const editorEntityType = toEntityType({id: '1', label: 'test', attributes: [], labelAttribute: {id: '1'}})
+      const editorEntityType = toEntityType({id: '1', label: 'test', attributes: []})
       const state = {
         editorEntityType: editorEntityType
       }
@@ -344,36 +344,6 @@ describe('actions', () => {
       const options = {
         state: state,
         expectedMutations: [
-          {type: CREATE_ALERT, payload: payload}
-        ]
-      }
-
-      utils.testAction(actions.__SAVE_EDITOR_ENTITY_TYPE__, options, done)
-    })
-
-    it('should persist metadata changes to the database and fill in the label attribute', done => {
-      const editorEntityType = toEntityType({id: '1', label: 'test', attributes: [], idAttribute: {id: '1'}})
-      const state = {
-        editorEntityType: editorEntityType
-      }
-
-      const response = {
-        statusText: 'OK'
-      }
-
-      const post = td.function('api.post')
-      td.when(post('/plugin/metadata-manager/entityType', {body: JSON.stringify(editorEntityType)})).thenResolve(response)
-      td.replace(api, 'post', post)
-
-      const payload = {
-        type: 'success',
-        message: 'OK: Successfully updated metadata for EntityType: test'
-      }
-
-      const options = {
-        state: state,
-        expectedMutations: [
-          {type: UPDATE_EDITOR_ENTITY_TYPE, payload: {key: 'labelAttribute', value: {id: '1'}}},
           {type: CREATE_ALERT, payload: payload}
         ]
       }
@@ -382,7 +352,7 @@ describe('actions', () => {
     })
 
     it('should fail and create an alert in the state via a mutation', done => {
-      const editorEntityType = toEntityType({id: '1', label: 'test', attributes: [], labelAttribute: {id: '1'}})
+      const editorEntityType = toEntityType({id: '1', label: 'test', attributes: []})
       const state = {
         editorEntityType: editorEntityType
       }
