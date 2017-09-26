@@ -256,7 +256,7 @@ $.when($,
                     } else {
                         entityCollectionRequest.q.push({
                             operator: 'SEARCH',
-                            value: searchQuery
+                            value: encodeURIComponent(searchQuery)
                         });
                     }
                 }
