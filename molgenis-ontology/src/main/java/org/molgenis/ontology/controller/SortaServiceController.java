@@ -463,7 +463,8 @@ public class SortaServiceController extends PluginController
 			InputStream inputStream) throws IOException
 	{
 		String sessionId = httpServletRequest.getSession().getId();
-		File uploadFile = fileStore.store(inputStream, sessionId + ".csv");
+		File uploadFile = fileStore.store(inputStream, sessionId
+				+ ".csv"); // TODO determine whether multiple match jobs during the same session results in wrong file usage
 		String inputRepositoryName = idGenerator.generateId();
 		SortaCsvRepository inputRepository = new SortaCsvRepository(inputRepositoryName, jobName + " input", uploadFile,
 				entityTypeFactory, attrMetaFactory);
@@ -541,6 +542,7 @@ public class SortaServiceController extends PluginController
 	{
 		EntityType resultEntityType = EntityType.newInstance(matchingTaskContentMetaData, DEEP_COPY_ATTRS,
 				attrMetaFactory);
+		resultEntityType.setId(resultEntityName);
 		resultEntityType.setPackage(null);
 		resultEntityType.setAbstract(false);
 		resultEntityType.addAttribute(attrMetaFactory.create()
