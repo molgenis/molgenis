@@ -293,7 +293,7 @@
                                 else if (key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
                                 else if (key === 'matchTerm') updatedMappedEntity.matchTerm = row.data('ontologyTerm').ontologyTermIRI;
                                 else if (key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').Score;
-                                else if (key !== 'identifier') updatedMappedEntity[key] = val;
+                                else updatedMappedEntity[key] = val;
                             });
                             restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
                         }
