@@ -8,6 +8,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -409,19 +410,30 @@ public class SortaServiceController extends PluginController
 				"Please check that queryString and ontologyIRI keys exist in input and have nonempty value!");
 	}
 
-	private Entity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity)
+	private Entity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity,
+			EntityType downloadEntityType)
 	{
 		NumberFormat format = NumberFormat.getNumberInstance();
 		format.setMaximumFractionDigits(2);
 		Entity inputEntity = resultEntity.getEntity(MatchingTaskContentMetaData.INPUT_TERM);
 		Entity ontologyTermEntity = sortaService.getOntologyTermEntity(
 				resultEntity.getString(MatchingTaskContentMetaData.MATCHED_TERM), sortaJobExecution.getOntologyIri());
-		Entity row = new DynamicEntity(null); // FIXME pass entity meta data instead of null
-		row.set(inputEntity);
-		row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
-		row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
-				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+
+		Entity row = new DynamicEntity(downloadEntityType);
+		inputEntity.getAttributeNames().forEach(attributeName ->
+		{
+			if (!attributeName.equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER))
+			{
+				row.set(attributeName, inputEntity.get(attributeName));
+			}
+		});
+		if (ontologyTermEntity != null)
+		{
+			row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
+					ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
+			row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
+					ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+		}
 		row.set(MatchingTaskContentMetaData.VALIDATED, resultEntity.getBoolean(MatchingTaskContentMetaData.VALIDATED));
 		Double score = resultEntity.getDouble(MatchingTaskContentMetaData.SCORE);
 		if (score != null)
@@ -441,21 +453,36 @@ public class SortaServiceController extends PluginController
 
 			response.setContentType("text/csv");
 			response.addHeader("Content-Disposition", "attachment; filename=" + generateCsvFileName("match-result"));
+
 			List<String> columnHeaders = new ArrayList<>();
+			EntityType targetMetadata = entityTypeFactory.create("SortaDownload" + sortaJobExecutionId);
 
 			EntityType sourceMetaData = dataService.getEntityType(sortaJobExecution.getSourceEntityName());
 			for (Attribute attribute : sourceMetaData.getAttributes())
 			{
 				if (!attribute.getName().equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER))
+				{
 					columnHeaders.add(attribute.getName());
+					targetMetadata.addAttribute(attrMetaFactory.create().setName(attribute.getName()));
+				}
 			}
 			columnHeaders.addAll(
 					Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI,
 							MatchingTaskContentMetaData.SCORE, MatchingTaskContentMetaData.VALIDATED));
+			targetMetadata.addAttribute(ontologyTermMetaData.getAttribute(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
+			targetMetadata.addAttribute(ontologyTermMetaData.getAttribute(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+			targetMetadata.addAttribute(
+					Attribute.newInstance(matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.SCORE),
+							EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS, attrMetaFactory)
+							 .setDataType(AttributeType.STRING));
+			targetMetadata.addAttribute(
+					matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.VALIDATED));
+
 			csvWriter.writeAttributeNames(columnHeaders);
 
 			dataService.findAll(sortaJobExecution.getResultEntityName(), new QueryImpl<>())
-					   .forEach(resultEntity -> csvWriter.add(toDownloadRow(sortaJobExecution, resultEntity)));
+					   .forEach(resultEntity -> csvWriter.add(
+							   toDownloadRow(sortaJobExecution, resultEntity, targetMetadata)));
 		}
 	}
 
