@@ -16,7 +16,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 @Component
 public class GenomeBrowserSettingsMetadata extends SystemEntityType
 {
-	public static final String SIMPLE_NAME = "GenomeBrowserSettingsMetadata";
+	public static final String SIMPLE_NAME = "GenomeBrowserSettings";
 	public static final String GENOMEBROWSERSETTINGS =
 			GenomeBrowserPackage.PACKAGE_GENOME_BROWSER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 	public static final String IDENTIFIER = "id";
