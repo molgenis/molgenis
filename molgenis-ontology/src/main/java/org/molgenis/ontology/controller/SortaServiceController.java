@@ -158,7 +158,7 @@ public class SortaServiceController extends PluginController
 
 	@GetMapping("/jobs")
 	@ResponseBody
-	public List<Entity> getJobs()
+	public List<SortaJobExecution> getJobs()
 	{
 		return getJobsForCurrentUser();
 	}
@@ -442,8 +442,7 @@ public class SortaServiceController extends PluginController
 	}
 
 	@GetMapping("/match/download/{sortaJobExecutionId}")
-	public void download(@PathVariable String sortaJobExecutionId, HttpServletResponse response)
-			throws IOException
+	public void download(@PathVariable String sortaJobExecutionId, HttpServletResponse response) throws IOException
 	{
 		try (CsvWriter csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR))
 		{
@@ -519,13 +518,14 @@ public class SortaServiceController extends PluginController
 		return "redirect:" + getSortaServiceMenuUrl();
 	}
 
-	private List<Entity> getJobsForCurrentUser()
+	private List<SortaJobExecution> getJobsForCurrentUser()
 	{
-		final List<Entity> jobs = new ArrayList<>();
+		final List<SortaJobExecution> jobs = new ArrayList<>();
 		User currentUser = userAccountService.getCurrentUser();
-		Query<Entity> query = QueryImpl.EQ(JobExecutionMetaData.USER, currentUser.getUsername());
+		Query<SortaJobExecution> query = dataService.query(SORTA_JOB_EXECUTION, SortaJobExecution.class)
+													.eq(JobExecutionMetaData.USER, currentUser.getUsername());
 		query.sort().on(JobExecutionMetaData.START_DATE, DESC);
-		RunAsSystemAspect.runAsSystem(() -> dataService.findAll(SORTA_JOB_EXECUTION, query).forEach(job ->
+		RunAsSystemAspect.runAsSystem(() -> query.findAll().forEach(job ->
 		{
 			// TODO: fetch the user as well
 			job.set(JobExecutionMetaData.USER, currentUser.getUsername());
@@ -609,8 +609,7 @@ public class SortaServiceController extends PluginController
 	{
 		return StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
 							.map(Attribute::getName)
-							.anyMatch(name -> name.equalsIgnoreCase(
-													SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
+							.anyMatch(name -> name.equalsIgnoreCase(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
 	}
 
 	private boolean validateEmptyFileHeader(Repository<Entity> repository)
