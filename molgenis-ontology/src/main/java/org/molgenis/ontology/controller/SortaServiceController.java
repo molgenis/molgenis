@@ -44,8 +44,6 @@ import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -66,6 +64,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -82,7 +81,16 @@ import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 @RequestMapping(URI)
 public class SortaServiceController extends PluginController
 {
-	static final int BATCH_SIZE = 1000;
+	private static final Logger LOG = LoggerFactory.getLogger(SortaServiceController.class);
+
+	public static final String ID = "sortaservice";
+	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+
+	private static final int BATCH_SIZE = 1000;
+	private static final String MODEL_KEY_MESSAGE = "message";
+	private static final String MATCH_VIEW_NAME = "sorta-match-view";
+	private static final double DEFAULT_THRESHOLD = 100.0;
+
 	private final OntologyService ontologyService;
 	private final SortaService sortaService;
 	private final DataService dataService;
@@ -101,13 +109,6 @@ public class SortaServiceController extends PluginController
 	private final SortaJobExecutionFactory sortaJobExecutionFactory;
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attrMetaFactory;
-
-	public static final String MATCH_VIEW_NAME = "sorta-match-view";
-	public static final String ID = "sortaservice";
-	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
-	private static final double DEFAULT_THRESHOLD = 100.0;
-
-	private static final Logger LOG = LoggerFactory.getLogger(SortaServiceController.class);
 
 	public SortaServiceController(OntologyService ontologyService, SortaService sortaService,
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
@@ -150,15 +151,14 @@ public class SortaServiceController extends PluginController
 	{
 		Fetch fetch = new Fetch();
 		sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
-		SortaJobExecution result = RunAsSystemAspect.runAsSystem(
+		return RunAsSystemAspect.runAsSystem(
 				() -> dataService.findOneById(SORTA_JOB_EXECUTION, sortaJobExecutionId, fetch,
 						SortaJobExecution.class));
-		return result;
 	}
 
 	@GetMapping("/jobs")
 	@ResponseBody
-	public List<Entity> getJobs(Model model)
+	public List<Entity> getJobs()
 	{
 		return getJobsForCurrentUser();
 	}
@@ -192,11 +192,11 @@ public class SortaServiceController extends PluginController
 			}
 			catch (NumberFormatException e)
 			{
-				model.addAttribute("message", threshold + " is illegal threshold value!");
+				model.addAttribute(MODEL_KEY_MESSAGE, threshold + " is illegal threshold value!");
 			}
 			catch (Exception other)
 			{
-				model.addAttribute("message", "Error updating threshold: " + other.getMessage());
+				model.addAttribute(MODEL_KEY_MESSAGE, "Error updating threshold: " + other.getMessage());
 			}
 		}
 
@@ -218,8 +218,8 @@ public class SortaServiceController extends PluginController
 		}
 		else
 		{
-			LOG.info("Job execution with id " + sortaJobExecutionId + " not found.");
-			model.addAttribute("message", "Job execution not found.");
+			LOG.info("Job execution with id {} not found.", sortaJobExecutionId);
+			model.addAttribute(MODEL_KEY_MESSAGE, "Job execution not found.");
 			return init(model);
 		}
 	}
@@ -280,8 +280,7 @@ public class SortaServiceController extends PluginController
 
 	@PostMapping("/match/retrieve")
 	@ResponseBody
-	public EntityCollectionResponse retrieveSortaJobResults(@RequestBody SortaServiceRequest sortaServiceRequest,
-			HttpServletRequest httpServletRequest)
+	public EntityCollectionResponse retrieveSortaJobResults(@RequestBody SortaServiceRequest sortaServiceRequest)
 	{
 		List<Map<String, Object>> entityMaps = new ArrayList<>();
 		String sortaJobExecutionId = sortaServiceRequest.getSortaJobExecutionId();
@@ -298,7 +297,7 @@ public class SortaServiceController extends PluginController
 				Arrays.asList(new QueryRule(VALIDATED, EQUALS, isMatched), new QueryRule(isMatched ? OR : AND),
 						new QueryRule(SCORE, isMatched ? GREATER_EQUAL : LESS, threshold)));
 
-		List<QueryRule> queryRuleInputEntitiesInOneMatchingTask = Arrays.asList(queryRuleInputEntities);
+		List<QueryRule> queryRuleInputEntitiesInOneMatchingTask = singletonList(queryRuleInputEntities);
 
 		// Add filter to the query if query string is not empty
 		if (isNotEmpty(filterQuery))
@@ -345,7 +344,7 @@ public class SortaServiceController extends PluginController
 	public String match(@RequestParam(value = "taskName") String jobName,
 			@RequestParam(value = "selectOntologies") String ontologyIri,
 			@RequestParam(value = "inputTerms") String inputTerms, Model model, HttpServletRequest httpServletRequest)
-			throws Exception
+			throws IOException
 	{
 		if (isEmpty(ontologyIri) || isEmpty(inputTerms)) return init(model);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8"));
@@ -355,7 +354,7 @@ public class SortaServiceController extends PluginController
 	@PostMapping(value = "/match/upload", headers = "Content-Type=multipart/form-data")
 	public String upload(@RequestParam(value = "taskName") String jobName,
 			@RequestParam(value = "selectOntologies") String ontologyIri, @RequestParam(value = "file") Part file,
-			Model model, HttpServletRequest httpServletRequest) throws Exception
+			Model model, HttpServletRequest httpServletRequest) throws IOException
 	{
 		if (isEmpty(ontologyIri) || file == null) return init(model);
 		InputStream inputStream = file.getInputStream();
@@ -364,8 +363,7 @@ public class SortaServiceController extends PluginController
 
 	@PostMapping("/match/entity")
 	@ResponseBody
-	public SortaServiceResponse findMatchingOntologyTerms(@RequestBody Map<String, Object> request,
-			HttpServletRequest httpServletRequest)
+	public SortaServiceResponse findMatchingOntologyTerms(@RequestBody Map<String, Object> request)
 	{
 		// TODO: less obfuscated request object, let Spring do the matching
 		if (request.containsKey("sortaJobExecutionId") && !isEmpty(request.get("sortaJobExecutionId").toString())
@@ -390,7 +388,7 @@ public class SortaServiceController extends PluginController
 
 	@PostMapping("/search")
 	@ResponseBody
-	public SortaServiceResponse search(@RequestBody Map<String, Object> request, HttpServletRequest httpServletRequest)
+	public SortaServiceResponse search(@RequestBody Map<String, Object> request)
 	{
 		// TODO: less obfuscated request object, let Spring do the matching
 		if (request.containsKey("queryString") && !StringUtils.isEmpty(request.get("queryString").toString()) && request
@@ -444,7 +442,7 @@ public class SortaServiceController extends PluginController
 	}
 
 	@GetMapping("/match/download/{sortaJobExecutionId}")
-	public void download(@PathVariable String sortaJobExecutionId, HttpServletResponse response, Model model)
+	public void download(@PathVariable String sortaJobExecutionId, HttpServletResponse response)
 			throws IOException
 	{
 		try (CsvWriter csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR))
@@ -452,7 +450,7 @@ public class SortaServiceController extends PluginController
 			SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
 
 			response.setContentType("text/csv");
-			response.addHeader("Content-Disposition", "attachment; filename=" + generateCsvFileName("match-result"));
+			response.addHeader("Content-Disposition", "attachment; filename=" + generateCsvFileName());
 
 			List<String> columnHeaders = new ArrayList<>();
 			EntityType targetMetadata = entityTypeFactory.create("SortaDownload" + sortaJobExecutionId);
@@ -498,24 +496,23 @@ public class SortaServiceController extends PluginController
 
 		if (!validateFileHeader(inputRepository))
 		{
-			model.addAttribute("message", "The Name header is missing!");
+			model.addAttribute(MODEL_KEY_MESSAGE, "The Name header is missing!");
 			return matchTask(model);
 		}
 
 		if (!validateEmptyFileHeader(inputRepository))
 		{
-			model.addAttribute("message", "The empty header is not allowed!");
+			model.addAttribute(MODEL_KEY_MESSAGE, "The empty header is not allowed!");
 			return matchTask(model);
 		}
 
 		if (!validateInputFileContent(inputRepository))
 		{
-			model.addAttribute("message", "The content of input is empty!");
+			model.addAttribute(MODEL_KEY_MESSAGE, "The content of input is empty!");
 			return matchTask(model);
 		}
 
-		SortaJobExecution jobExecution = createJobExecution(inputRepository, jobName, ontologyIri,
-				SecurityContextHolder.getContext());
+		SortaJobExecution jobExecution = createJobExecution(inputRepository, jobName, ontologyIri);
 		SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(jobExecution);
 		taskExecutor.submit(sortaMatchJob);
 
@@ -537,8 +534,7 @@ public class SortaServiceController extends PluginController
 		return jobs;
 	}
 
-	private SortaJobExecution createJobExecution(Repository<Entity> inputData, String jobName, String ontologyIri,
-			SecurityContext securityContext)
+	private SortaJobExecution createJobExecution(Repository<Entity> inputData, String jobName, String ontologyIri)
 	{
 		String resultEntityName = idGenerator.generateId();
 
@@ -603,27 +599,25 @@ public class SortaServiceController extends PluginController
 		return dataService.count(sortaJobExecution.getResultEntityName(), new QueryImpl<>(combinedRule));
 	}
 
-	private String generateCsvFileName(String dataSetName)
+	private String generateCsvFileName()
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
+		return "match-result" + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 
 	private boolean validateFileHeader(Repository<Entity> repository)
 	{
-		boolean containsName = StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
-											.map(Attribute::getName)
-											.anyMatch(name -> name.equalsIgnoreCase(
+		return StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
+							.map(Attribute::getName)
+							.anyMatch(name -> name.equalsIgnoreCase(
 													SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
-		return containsName;
 	}
 
 	private boolean validateEmptyFileHeader(Repository<Entity> repository)
 	{
-		boolean evaluation = StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
-										  .map(Attribute::getName)
-										  .anyMatch(StringUtils::isNotBlank);
-		return evaluation;
+		return StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
+							.map(Attribute::getName)
+							.anyMatch(StringUtils::isNotBlank);
 	}
 
 	private boolean validateInputFileContent(Repository<Entity> repository)
