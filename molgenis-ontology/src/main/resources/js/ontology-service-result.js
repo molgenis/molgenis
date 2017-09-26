@@ -240,7 +240,7 @@
                     var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + mappedEntity.identifier;
                     var updatedMappedEntity = {};
                     $.map(mappedEntity, function (val, key) {
-                        if (key !== 'identifier') updatedMappedEntity[key] = val;
+                        updatedMappedEntity[key] = val;
                         if (key === 'validated') updatedMappedEntity[key] = true;
                         if (key === 'inputTerm') {
                             console.log('inputTerm', val)
