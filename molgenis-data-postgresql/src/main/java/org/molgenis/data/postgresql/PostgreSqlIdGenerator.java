@@ -1,15 +1,14 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.data.meta.AbstractMetadataIdGenerator;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.MetadataIdGenerator;
+import org.molgenis.data.postgresql.identifier.Identifiable;
 
 import java.util.regex.Pattern;
 
 /**
  * Generator for PostgreSQL table, column, key, trigger etc. identifiers.
  */
-public class PostgreSqlIdGenerator extends AbstractMetadataIdGenerator
+public class PostgreSqlIdGenerator implements MetadataIdGenerator<String, Identifiable>
 {
 	private static final Pattern PATTERN_WORD = Pattern.compile("\\w*");
 	private static final Pattern PATTERN_WORD_REPLACE = Pattern.compile("\\W");
@@ -31,15 +30,15 @@ public class PostgreSqlIdGenerator extends AbstractMetadataIdGenerator
 	}
 
 	@Override
-	public String generateId(EntityType entityType)
+	public String generateEntityTypeId(String entityTypeId)
 	{
-		String idHash = generateHashcode(entityType.getId());
-		String truncatedId = truncateName(cleanName(entityType.getId()));
+		String idHash = generateHashcode(entityTypeId);
+		String truncatedId = truncateName(cleanName(entityTypeId));
 		return truncatedId + SEPARATOR + idHash;
 	}
 
 	@Override
-	public String generateId(Attribute attribute)
+	public String generateAttributeId(Identifiable attribute)
 	{
 		String attrName = attribute.getName();
 		if (PATTERN_WORD.matcher(attrName).matches() && attrName.length() <= maxIdentifierByteLength)
@@ -48,7 +47,7 @@ public class PostgreSqlIdGenerator extends AbstractMetadataIdGenerator
 		}
 		else
 		{
-			String idPart = generateHashcode(attribute.getIdentifier());
+			String idPart = generateHashcode(attribute.getId());
 			String namePart = truncateName(cleanName(attribute.getName()));
 			return namePart + SEPARATOR + idPart;
 		}

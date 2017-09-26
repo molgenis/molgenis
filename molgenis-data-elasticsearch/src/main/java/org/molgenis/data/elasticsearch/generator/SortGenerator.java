@@ -58,7 +58,7 @@ class SortGenerator
 	private String getSortField(Attribute attr)
 	{
 		String sortField;
-		String fieldName = documentIdGenerator.generateId(attr);
+		String fieldName = documentIdGenerator.generateAttributeId(attr);
 		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{

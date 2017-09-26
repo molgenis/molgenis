@@ -1,26 +1,33 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
+import com.google.common.hash.Hashing;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Generator for human readable entity type and attribute identifiers.
  */
-public interface MetadataIdGenerator
+public interface MetadataIdGenerator<S, T>
 {
 	/**
 	 * Generates a human readable identifier for the given entity type.
 	 *
-	 * @param entityType entity type
+	 * @param entityIdentity entity type ID
 	 * @return human readable entity type identifier
 	 */
-	String generateId(EntityType entityType);
+	String generateEntityTypeId(S entityIdentity);
 
 	/**
 	 * Generates a human readable identifier for the given attribute.
 	 *
-	 * @param attribute attribute
+	 * @param attributeIdentity attribute I
+	 *
 	 * @return human readable attribute identifier
 	 */
-	String generateId(Attribute attribute);
+	String generateAttributeId(T attributeIdentity);
+
+	default String generateHashcode(Object id)
+	{
+		return Hashing.crc32().hashString(id.toString(), UTF_8).toString();
+	}
 }

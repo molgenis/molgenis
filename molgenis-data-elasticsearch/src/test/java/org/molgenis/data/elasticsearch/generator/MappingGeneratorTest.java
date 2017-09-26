@@ -32,9 +32,9 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(documentIdGenerator.generateId(any(EntityType.class))).thenAnswer(
+		when(documentIdGenerator.generateEntityTypeId(any(EntityType.class))).thenAnswer(
 				invocation -> invocation.<EntityType>getArgument(0).getId());
-		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
+		when(documentIdGenerator.generateAttributeId(any(Attribute.class))).thenAnswer(
 				invocation -> invocation.<Attribute>getArgument(0).getIdentifier());
 		mappingGenerator = new MappingGenerator(documentIdGenerator);
 	}

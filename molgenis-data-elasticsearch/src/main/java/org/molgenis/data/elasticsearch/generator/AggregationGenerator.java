@@ -227,12 +227,12 @@ class AggregationGenerator
 
 	private String getAggregatePathName(Attribute attr)
 	{
-		return documentIdGenerator.generateId(attr);
+		return documentIdGenerator.generateAttributeId(attr);
 	}
 
 	private String getAggregateFieldName(Attribute attr)
 	{
-		String fieldName = documentIdGenerator.generateId(attr);
+		String fieldName = documentIdGenerator.generateAttributeId(attr);
 		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{

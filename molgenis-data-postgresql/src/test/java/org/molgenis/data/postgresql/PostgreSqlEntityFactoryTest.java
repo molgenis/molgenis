@@ -40,6 +40,7 @@ public class PostgreSqlEntityFactoryTest
 		String oneToManyAttrName = "oneToManyAttr";
 		Attribute oneToManyAttr = mock(Attribute.class);
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
+		when(oneToManyAttr.getIdentifier()).thenReturn("abcde");
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
 
@@ -71,13 +72,14 @@ public class PostgreSqlEntityFactoryTest
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 
 		String xrefAttr = "xrefAttr";
-		Attribute oneToManyAttr = mock(Attribute.class);
-		when(oneToManyAttr.getName()).thenReturn(xrefAttr);
-		when(oneToManyAttr.getDataType()).thenReturn(XREF);
-		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityType);
+		Attribute xrefAttribute = mock(Attribute.class);
+		when(xrefAttribute.getName()).thenReturn(xrefAttr);
+		when(xrefAttribute.getIdentifier()).thenReturn("defgh");
+		when(xrefAttribute.getDataType()).thenReturn(XREF);
+		when(xrefAttribute.getRefEntity()).thenReturn(refEntityType);
 
 		EntityType entityType = mock(EntityType.class);
-		when(entityType.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		when(entityType.getAtomicAttributes()).thenReturn(singleton(xrefAttribute));
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString(xrefAttr)).thenReturn("id0");
 		int rowNum = 0;

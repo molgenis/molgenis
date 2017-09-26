@@ -2,6 +2,7 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.postgresql.identifier.Identifiable;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -26,9 +27,7 @@ public class PostgreSqlNameGeneratorTest
 	@Test(dataProvider = "getTableNameEntityTypeProvider")
 	public void testGetTableNameEntityType(String entityTypeId, String expectedTableName)
 	{
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(entityTypeId);
-		assertEquals(PostgreSqlNameGenerator.getTableName(entityType), expectedTableName);
+		assertEquals(PostgreSqlNameGenerator.getTableName(entityTypeId), expectedTableName);
 	}
 
 	@DataProvider(name = "getTableNameEntityTypeBooleanProvider")
@@ -48,7 +47,7 @@ public class PostgreSqlNameGeneratorTest
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId);
-		assertEquals(PostgreSqlNameGenerator.getTableName(entityType, quoteIdentifiers), expectedTableName);
+		assertEquals(PostgreSqlNameGenerator.getTableName(entityType.getId(), quoteIdentifiers), expectedTableName);
 	}
 
 	@DataProvider(name = "getJunctionTableNameProvider")
@@ -71,12 +70,8 @@ public class PostgreSqlNameGeneratorTest
 	public void testGetJunctionTableName(String entityTypeId, String attrName, boolean quotedIdentifiers,
 			String expectedJunctionTableName)
 	{
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(entityTypeId);
-		Attribute attr = mock(Attribute.class);
-		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
-		when(attr.getName()).thenReturn(attrName);
-		assertEquals(PostgreSqlNameGenerator.getJunctionTableName(entityType, attr, quotedIdentifiers),
+		Identifiable attr = Identifiable.create(attrName, "9876543210-9876543210-9876543210");
+		assertEquals(PostgreSqlNameGenerator.getJunctionTableName(entityTypeId, attr, quotedIdentifiers),
 				expectedJunctionTableName);
 	}
 
@@ -106,9 +101,11 @@ public class PostgreSqlNameGeneratorTest
 		Attribute attr = mock(Attribute.class);
 		when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
 		when(attr.getName()).thenReturn(attrName);
+		when(attr.getEntity()).thenReturn(entityType);
 		Attribute idxAttr = mock(Attribute.class);
 		when(idxAttr.getIdentifier()).thenReturn("9876543210-0123456789-9876543210");
 		when(idxAttr.getName()).thenReturn(indexAttrName);
+		when(idxAttr.getEntity()).thenReturn(entityType);
 		assertEquals(PostgreSqlNameGenerator.getJunctionTableIndexName(entityType, attr, idxAttr),
 				expectedJunctionTableName);
 	}
