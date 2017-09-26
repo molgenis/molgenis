@@ -2,8 +2,6 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.util.AttributeCopier;
-import org.molgenis.data.meta.util.EntityTypeCopier;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,12 +27,6 @@ public class PostgreSqlConfiguration
 
 	@Autowired
 	private EntityTypeRegistry entityTypeRegistry;
-
-	@Autowired
-	private EntityTypeCopier entityTypeCopier;
-
-	@Autowired
-	private AttributeCopier attributeCopier;
 
 	@Bean
 	public JdbcTemplate jdbcTemplate()
