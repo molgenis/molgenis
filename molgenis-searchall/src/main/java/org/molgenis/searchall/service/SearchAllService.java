@@ -41,6 +41,7 @@ public class SearchAllService
 		return Result.builder()
 					 .setEntityTypes(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
 												.filter(not(EntityUtils::isSystemEntity))
+							 					.filter(not(EntityType::isAbstract))
 												.map(entityType -> toEntityTypeResult(searchTerm, entityType, lang))
 												.filter(EntityTypeResult::isMatch)
 												.collect(toList()))
