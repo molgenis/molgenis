@@ -21,15 +21,22 @@ public class GenomeBrowserAttributesPopulator
 
 	public void populate()
 	{
-		// Only apply default settings if table is empty
-		if (dataService.count(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES) == 0)
+		// Only apply default settings if table does not contain the genomebrowser setting
+		if(dataService.findOneById(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES, "simple1") == null)
 		{
 			dataService.add(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES,
 					gbaFactory.create("simple1", true, 0, "start", "chr", null, null, null));
+		}
+		if(dataService.findOneById(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES, "VCF") == null) {
 			dataService.add(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES,
 					gbaFactory.create("VCF", true, 1, "POS", "#CHROM", "REF", "ALT", null));
+		}
+		if(dataService.findOneById(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES, "full") == null)
+		{
 			dataService.add(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES,
 					gbaFactory.create("full", true, 2, "start", "chr", "ref", "alt", "stop"));
+		}
+		if(dataService.findOneById(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES, "simple2") == null) {
 			dataService.add(GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES,
 					gbaFactory.create("simple2", true, 3, "POS", "#CHROM", null, null, null));
 		}
