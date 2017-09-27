@@ -50,7 +50,7 @@ class PostgreSqlQueryGenerator
 																   .append(" FOREIGN KEY (")
 																   .append(getColumnName(attr))
 																   .append(") REFERENCES ")
-																   .append(getTableName(attr.getRefEntity()))
+																   .append(getTableName(attr.getRefEntity().getId()))
 																   .append('(')
 																   .append(getColumnName(
 																		   attr.getRefEntity().getIdAttribute()))
@@ -85,27 +85,29 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateForeignKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " ADD " + getSqlForeignKey(entityType, attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " ADD " + getSqlForeignKey(entityType, attr);
 	}
 
 	static String getSqlDropForeignKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " DROP CONSTRAINT " + getForeignKeyName(entityType, attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " DROP CONSTRAINT " + getForeignKeyName(entityType,
+				attr);
 	}
 
 	static String getSqlCreateUniqueKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " ADD " + getSqlUniqueKey(entityType, attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " ADD " + getSqlUniqueKey(entityType, attr);
 	}
 
 	static String getSqlDropUniqueKey(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " DROP CONSTRAINT " + getUniqueKeyName(entityType, attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " DROP CONSTRAINT " + getUniqueKeyName(entityType,
+				attr);
 	}
 
 	static String getSqlCreateCheckConstraint(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " ADD " + getSqlCheckConstraint(entityType, attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " ADD " + getSqlCheckConstraint(entityType, attr);
 	}
 
 	static String getSqlDropCheckConstraint(EntityType entityType, Attribute attr)
@@ -116,24 +118,27 @@ class PostgreSqlQueryGenerator
 					format("Check constraint only allowed for attribute type [%s]", ENUM.toString()));
 		}
 
-		return "ALTER TABLE " + getTableName(entityType) + " DROP CONSTRAINT " + getCheckConstraintName(entityType,
-				attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " DROP CONSTRAINT " + getCheckConstraintName(
+				entityType, attr);
 	}
 
 	static String getSqlSetNotNull(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " ALTER COLUMN " + getColumnName(attr) + " SET NOT NULL";
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " ALTER COLUMN " + getColumnName(attr)
+				+ " SET NOT NULL";
 	}
 
 	static String getSqlDropNotNull(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " ALTER COLUMN " + getColumnName(attr) + " DROP NOT NULL";
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " ALTER COLUMN " + getColumnName(attr)
+				+ " DROP NOT NULL";
 	}
 
 	static String getSqlSetDataType(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " ALTER COLUMN " + getColumnName(attr) + " SET DATA TYPE "
-				+ getPostgreSqlType(attr) + " USING " + getColumnName(attr) + "::" + getPostgreSqlType(attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " ALTER COLUMN " + getColumnName(attr)
+				+ " SET DATA TYPE " + getPostgreSqlType(attr) + " USING " + getColumnName(attr) + "::"
+				+ getPostgreSqlType(attr);
 	}
 
 	/**
@@ -148,7 +153,7 @@ class PostgreSqlQueryGenerator
 		StringBuilder sql = new StringBuilder("ALTER TABLE ");
 
 		String columnSql = getSqlColumn(entityType, attr);
-		sql.append(getTableName(entityType)).append(" ADD ").append(columnSql);
+		sql.append(getTableName(entityType.getId())).append(" ADD ").append(columnSql);
 
 		List<String> sqlTableConstraints = getSqlTableConstraints(entityType, attr);
 		if (!sqlTableConstraints.isEmpty())
@@ -162,7 +167,7 @@ class PostgreSqlQueryGenerator
 	{
 		List<Attribute> persistedTableAttrs = getTableAttributes(entityType).collect(toList());
 
-		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getTableName(entityType)).append('(');
+		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getTableName(entityType.getId())).append('(');
 
 		// add columns
 		for (Iterator<Attribute> it = persistedTableAttrs.iterator(); it.hasNext(); )
@@ -197,7 +202,7 @@ class PostgreSqlQueryGenerator
 														 .append(getFunctionValidateUpdateName(entityType))
 														 .append("() RETURNS TRIGGER AS $$\nBEGIN\n");
 
-		String tableName = getTableName(entityType);
+		String tableName = getTableName(entityType.getId());
 		String idColName = getColumnName(entityType.getIdAttribute());
 		readonlyTableAttrs.forEach(attr ->
 		{
@@ -230,7 +235,7 @@ class PostgreSqlQueryGenerator
 		StringBuilder strBuilder = new StringBuilder(512).append("CREATE TRIGGER ")
 														 .append(getUpdateTriggerName(entityType))
 														 .append(" AFTER UPDATE ON ")
-														 .append(getTableName(entityType))
+														 .append(getTableName(entityType.getId()))
 														 .append(" FOR EACH ROW WHEN (");
 		strBuilder.append(readonlyTableAttrs.stream()
 											.map(attr -> "OLD." + getColumnName(attr) + " IS DISTINCT FROM NEW."
@@ -242,7 +247,7 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlDropUpdateTrigger(EntityType entityType)
 	{
-		return "DROP TRIGGER " + getUpdateTriggerName(entityType) + " ON " + getTableName(entityType);
+		return "DROP TRIGGER " + getUpdateTriggerName(entityType) + " ON " + getTableName(entityType.getId());
 	}
 
 	static String getSqlCreateJunctionTable(EntityType entityType, Attribute attr)
@@ -264,7 +269,7 @@ class PostgreSqlQueryGenerator
 															  .append(", FOREIGN KEY (")
 															  .append(getColumnName(idAttr))
 															  .append(") REFERENCES ")
-															  .append(getTableName(entityType))
+															  .append(getTableName(entityType.getId()))
 															  .append('(')
 															  .append(getColumnName(idAttr))
 															  .append(") ON DELETE CASCADE");
@@ -280,7 +285,7 @@ class PostgreSqlQueryGenerator
 			sql.append(", FOREIGN KEY (")
 			   .append(getColumnName(attr))
 			   .append(") REFERENCES ")
-			   .append(getTableName(attr.getRefEntity()))
+			   .append(getTableName(attr.getRefEntity().getId()))
 			   .append('(')
 			   .append(getColumnName(attr.getRefEntity().getIdAttribute()))
 			   .append(")");
@@ -333,17 +338,17 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlDropTable(EntityType entityType)
 	{
-		return getSqlDropTable(getTableName(entityType));
+		return getSqlDropTable(getTableName(entityType.getId()));
 	}
 
 	static String getSqlDropColumn(EntityType entityType, Attribute attr)
 	{
-		return "ALTER TABLE " + getTableName(entityType) + " DROP COLUMN " + getColumnName(attr);
+		return "ALTER TABLE " + getTableName(entityType.getId()) + " DROP COLUMN " + getColumnName(attr);
 	}
 
 	static String getSqlInsert(EntityType entityType)
 	{
-		StringBuilder sql = new StringBuilder("INSERT INTO ").append(getTableName(entityType)).append(" (");
+		StringBuilder sql = new StringBuilder("INSERT INTO ").append(getTableName(entityType.getId())).append(" (");
 		StringBuilder params = new StringBuilder();
 		getTableAttributes(entityType).forEach(attr ->
 		{
@@ -368,12 +373,12 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlDeleteAll(EntityType entityType)
 	{
-		return "DELETE FROM " + getTableName(entityType);
+		return "DELETE FROM " + getTableName(entityType.getId());
 	}
 
 	static String getSqlDelete(EntityType entityType)
 	{
-		return getSqlDelete(getTableName(entityType), entityType.getIdAttribute());
+		return getSqlDelete(getTableName(entityType.getId()), entityType.getIdAttribute());
 	}
 
 	static String getSqlDelete(String tableName, Attribute attr)
@@ -495,9 +500,10 @@ class PostgreSqlQueryGenerator
 
 							mrefSelect +=
 									' ' + getSqlSort(attr.getRefEntity(), new QueryImpl<>().sort(orderBy)) + ") FROM "
-											+ getTableName(attr.getRefEntity()) + " WHERE this." + getColumnName(
-											idAttribute) + " = " + getTableName(attr.getRefEntity()) + '.'
-											+ getColumnName(attr.getMappedBy()) + ") AS " + getColumnName(attr);
+											+ getTableName(attr.getRefEntity().getId()) + " WHERE this."
+											+ getColumnName(idAttribute) + " = " + getTableName(
+											attr.getRefEntity().getId()) + '.' + getColumnName(attr.getMappedBy())
+											+ ") AS " + getColumnName(attr);
 							select.append(mrefSelect);
 						}
 						else
@@ -561,7 +567,7 @@ class PostgreSqlQueryGenerator
 		Attribute idAttribute = entityType.getIdAttribute();
 
 		// create sql
-		StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(entityType)).append(" SET ");
+		StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(entityType.getId())).append(" SET ");
 		getTableAttributes(entityType).forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
 
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
@@ -587,7 +593,7 @@ class PostgreSqlQueryGenerator
 		List<QueryRule> queryRules = q.getRules();
 		if (queryRules == null || queryRules.isEmpty())
 		{
-			sqlBuilder.append("(*) FROM ").append(getTableName(entityType));
+			sqlBuilder.append("(*) FROM ").append(getTableName(entityType.getId()));
 		}
 		else
 		{
@@ -993,7 +999,7 @@ class PostgreSqlQueryGenerator
 	private static <E extends Entity> String getSqlFrom(EntityType entityType, Query<E> q)
 	{
 		List<Attribute> mrefAttrsInQuery = getJoinQueryAttrs(entityType, q);
-		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityType)).append(" AS this");
+		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityType.getId())).append(" AS this");
 
 		Attribute idAttribute = entityType.getIdAttribute();
 
@@ -1005,8 +1011,7 @@ class PostgreSqlQueryGenerator
 			if (mrefAttr.getDataType() == ONE_TO_MANY && mrefAttr.isMappedBy())
 			{
 				// query table of referenced entity
-				from.append(" LEFT JOIN ")
-					.append(getTableName(mrefAttr.getRefEntity()))
+				from.append(" LEFT JOIN ").append(getTableName(mrefAttr.getRefEntity().getId()))
 					.append(" AS ")
 					.append(getFilterColumnName(mrefAttr, i + 1))
 					.append(" ON (this.")

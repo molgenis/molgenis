@@ -171,6 +171,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(entityType.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(STRING);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
+		when(updatedAttr.getIdentifier()).thenReturn("attrId");
 		when(updatedAttr.getDataType()).thenReturn(INT);
 		postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
 		ArgumentCaptor<String> captor = forClass(String.class);
@@ -285,6 +286,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(attr.getDataType()).thenReturn(STRING);
 		when(attr.isNillable()).thenReturn(false);
 		Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
+		when(updatedAttr.getIdentifier()).thenReturn("attrId");
 		when(updatedAttr.getExpression()).thenReturn(null);
 		when(updatedAttr.hasExpression()).thenReturn(false);
 		when(updatedAttr.getDataType()).thenReturn(STRING);
@@ -437,6 +439,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(refEntityType0.getIdAttribute()).thenReturn(refIdAttr0);
 
 		Attribute refIdAttr1 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr1").getMock();
+		when(refIdAttr1.getIdentifier()).thenReturn("refIdAttr1Id");
 		when(refIdAttr1.getDataType()).thenReturn(STRING);
 		EntityType refEntityType1 = when(mock(EntityType.class).getId()).thenReturn("refEntity1").getMock();
 		when(refEntityType1.getIdAttribute()).thenReturn(refIdAttr1);

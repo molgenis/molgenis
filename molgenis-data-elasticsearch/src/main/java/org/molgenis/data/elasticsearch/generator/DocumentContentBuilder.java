@@ -67,7 +67,7 @@ class DocumentContentBuilder
 	{
 		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
-			generator.writeFieldName(documentIdGenerator.generateId(attr));
+			generator.writeFieldName(documentIdGenerator.generateAttributeId(attr));
 			createRec(entity, attr, generator, depth, maxDepth);
 		}
 	}

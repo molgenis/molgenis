@@ -1,6 +1,6 @@
 package org.molgenis.data.elasticsearch.generator;
 
-import org.molgenis.data.meta.AbstractMetadataIdGenerator;
+import org.molgenis.data.meta.MetadataIdGenerator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * Generator for Elasticsearch document type names and document field names.
  */
 @Component
-public class DocumentIdGenerator extends AbstractMetadataIdGenerator
+public class DocumentIdGenerator implements MetadataIdGenerator<EntityType, Attribute>
 {
 	/**
 	 * Unknown whether Elasticsearch document type names or field names have a length limit. Limit length to be on the
@@ -37,7 +37,7 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 	 * @return human readable document type name (unique within the system)
 	 */
 	@Override
-	public String generateId(EntityType entityType)
+	public String generateEntityTypeId(EntityType entityType)
 	{
 		String idHash = generateHashcode(entityType.getId());
 		String truncatedId = truncateName(cleanName(entityType.getId())).toLowerCase();
@@ -51,7 +51,7 @@ public class DocumentIdGenerator extends AbstractMetadataIdGenerator
 	 * @return human readable field name (unique within the system)
 	 */
 	@Override
-	public String generateId(Attribute attribute)
+	public String generateAttributeId(Attribute attribute)
 	{
 		String idPart = generateHashcode(attribute.getEntity().getId() + attribute.getIdentifier());
 		String namePart = truncateName(cleanName(attribute.getName()));

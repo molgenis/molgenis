@@ -1,7 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.postgresql.identifier.Identifiable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -10,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlIdGeneratorTest
@@ -44,10 +41,7 @@ public class PostgreSqlIdGeneratorTest
 	@Test(dataProvider = "generateIdEntityTypeProvider")
 	public void testGenerateIdEntityType(String entityTypeId, String expectedId)
 	{
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(entityTypeId);
-		String id = postgreSqlIdGenerator.generateId(entityType);
-		assertEquals(id, expectedId);
+		assertEquals(postgreSqlIdGenerator.generateEntityTypeId(entityTypeId), expectedId);
 	}
 
 	@DataProvider(name = "generateIdAttributeTypeProvider")
@@ -66,10 +60,6 @@ public class PostgreSqlIdGeneratorTest
 	@Test(dataProvider = "generateIdAttributeTypeProvider")
 	public void testGenerateIdAttribute(String attrId, String attrName, String expectedId)
 	{
-		Attribute attr = mock(Attribute.class);
-		when(attr.getIdentifier()).thenReturn(attrId);
-		when(attr.getName()).thenReturn(attrName);
-		String id = postgreSqlIdGenerator.generateId(attr);
-		assertEquals(id, expectedId);
+		assertEquals(postgreSqlIdGenerator.generateAttributeId(Identifiable.create(attrName, attrId)), expectedId);
 	}
 }

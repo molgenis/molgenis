@@ -798,7 +798,7 @@ public class QueryGenerator
 
 	private String getQueryFieldName(Attribute attribute)
 	{
-		return documentIdGenerator.generateId(attribute);
+		return documentIdGenerator.generateAttributeId(attribute);
 	}
 
 	private Object getQueryValue(Attribute attribute, Object queryRuleValue)

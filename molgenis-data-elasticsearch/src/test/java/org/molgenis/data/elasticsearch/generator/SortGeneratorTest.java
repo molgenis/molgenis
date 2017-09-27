@@ -25,7 +25,7 @@ public class SortGeneratorTest
 	public void beforeMethod()
 	{
 		DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
-		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
+		when(documentIdGenerator.generateAttributeId(any(Attribute.class))).thenAnswer(
 				invocation -> ((Attribute) invocation.getArguments()[0]).getName());
 
 		sortGenerator = new SortGenerator(documentIdGenerator);

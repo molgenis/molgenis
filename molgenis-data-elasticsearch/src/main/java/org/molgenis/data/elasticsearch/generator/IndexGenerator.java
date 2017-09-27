@@ -21,7 +21,7 @@ class IndexGenerator
 
 	Index createIndex(EntityType entityType)
 	{
-		String indexName = documentIdGenerator.generateId(entityType);
+		String indexName = documentIdGenerator.generateEntityTypeId(entityType);
 		return Index.create(indexName);
 	}
 }

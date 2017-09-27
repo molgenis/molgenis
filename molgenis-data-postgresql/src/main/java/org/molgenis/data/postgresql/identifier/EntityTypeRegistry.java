@@ -1,12 +1,12 @@
 package org.molgenis.data.postgresql.identifier;
 
-import org.molgenis.data.meta.model.EntityType;
+import java.util.List;
 
 public interface EntityTypeRegistry
 {
-	void registerEntityType(EntityType entityType);
+	void registerEntityType(String entityTypeId, List<Identifiable> referenceTypeAttributes);
 
-	void unregisterEntityType(EntityType entityType);
+	void unregisterEntityType(String entityTypeId, List<Identifiable> referenceTypeAttributes);
 
 	EntityTypeDescription getEntityTypeDescription(String tableOrJunctionTableName);
 }

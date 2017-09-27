@@ -31,7 +31,7 @@ class MappingGenerator
 
 	Mapping createMapping(EntityType entityType)
 	{
-		String type = documentIdGenerator.generateId(entityType);
+		String type = documentIdGenerator.generateEntityTypeId(entityType);
 		int maxIndexingDepth = entityType.getIndexingDepth();
 		List<FieldMapping> fieldMappings = createFieldMappings(entityType, 0, maxIndexingDepth);
 		return Mapping.create(type, fieldMappings);
@@ -45,7 +45,7 @@ class MappingGenerator
 
 	private FieldMapping createFieldMapping(Attribute attribute, int depth, int maxDepth)
 	{
-		String fieldName = documentIdGenerator.generateId(attribute);
+		String fieldName = documentIdGenerator.generateAttributeId(attribute);
 		MappingType mappingType = toMappingType(attribute, depth, maxDepth);
 		boolean analyzeNGrams = isAnalyzeNGrams(attribute);
 		List<FieldMapping> nestedFieldMappings =

@@ -86,8 +86,8 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	/**
 	 * Adds an Attribute to an entityType
 	 *
-	 * @param entityType entity meta data
-	 * @param attribute  attribute to add
+	 * @param entityType entity meta data (as it currently exists in the database)
+	 * @param attribute  attribute to add (does not yet exist in database)
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
 	void addAttribute(EntityType entityType, Attribute attribute);

@@ -1,23 +1,19 @@
 package org.molgenis.data.postgresql.identifier;
 
 import com.google.common.collect.ImmutableMap;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.postgresql.PostgreSqlNameGenerator;
-import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getJunctionTableName;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
@@ -38,28 +34,30 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 	}
 
 	@Override
-	public void registerEntityType(EntityType entityType)
+	public void registerEntityType(String entityTypeId, List<Identifiable> referenceTypeAttributes)
 	{
-		String tableName = getTableName(entityType);
-		EntityTypeDescription entityTypeDescription = createEntityTypeDescription(entityType);
+		String tableName = getTableName(entityTypeId);
+		EntityTypeDescription entityTypeDescription = createEntityTypeDescription(entityTypeId,
+				referenceTypeAttributes);
 		getEntityTypeDescriptionMap().put(tableName, entityTypeDescription);
-		putJunctionTableNames(entityType, entityTypeDescription);
+		putJunctionTableNames(entityTypeId, referenceTypeAttributes, entityTypeDescription);
 	}
 
 	@Override
-	public void unregisterEntityType(EntityType entityType)
+	public void unregisterEntityType(String entityTypeId, List<Identifiable> referenceTypeAttributes)
 	{
-		String tableName = getTableName(entityType);
+		String tableName = getTableName(entityTypeId);
 		getEntityTypeDescriptionMap().put(tableName, null);
-		putJunctionTableNames(entityType, null);
+		putJunctionTableNames(entityTypeId, referenceTypeAttributes, null);
 	}
 
-	private void putJunctionTableNames(EntityType entityType, EntityTypeDescription entityTypeDescription)
+	private void putJunctionTableNames(String entityTypeId, List<Identifiable> referenceTypeAttributes,
+			EntityTypeDescription entityTypeDescription)
 	{
-		StreamSupport.stream(entityType.getAllAttributes().spliterator(), false)
-					 .filter(EntityTypeUtils::isReferenceType)
-					 .map(attribute -> getJunctionTableName(entityType, attribute, false))
-					 .forEach(junctionName -> getEntityTypeDescriptionMap().put(junctionName, entityTypeDescription));
+		referenceTypeAttributes.stream()
+							   .map(attribute -> getJunctionTableName(entityTypeId, attribute, false))
+							   .forEach(junctionName -> getEntityTypeDescriptionMap().put(junctionName,
+									   entityTypeDescription));
 	}
 
 	@Override
@@ -106,31 +104,29 @@ public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener i
 		return (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 	}
 
-	private String getTableName(EntityType entityType)
+	private String getTableName(String entityTypeId)
 	{
-		return PostgreSqlNameGenerator.getTableName(entityType, false);
+		return PostgreSqlNameGenerator.getTableName(entityTypeId, false);
 	}
 
-	private String getColumnName(Attribute attr)
+	private String getColumnName(Identifiable attribute)
 	{
-		return PostgreSqlNameGenerator.getColumnName(attr, false);
+		return PostgreSqlNameGenerator.getColumnName(attribute, false);
 	}
 
-	private EntityTypeDescription createEntityTypeDescription(EntityType entityType)
+	private EntityTypeDescription createEntityTypeDescription(String entityTypeId, List<Identifiable> attributes)
 	{
-		String fullyQualifiedName = entityType.getId();
 		ImmutableMap<String, AttributeDescription> attrDescriptionMap = ImmutableMap.copyOf(
-				createAttributeDescriptionMap(entityType));
-		return EntityTypeDescription.create(fullyQualifiedName, attrDescriptionMap);
+				createAttributeDescriptionMap(attributes));
+		return EntityTypeDescription.create(entityTypeId, attrDescriptionMap);
 	}
 
-	private Map<String, AttributeDescription> createAttributeDescriptionMap(EntityType entityType)
+	private Map<String, AttributeDescription> createAttributeDescriptionMap(List<Identifiable> attributes)
 	{
-		return stream(entityType.getAllAttributes().spliterator(), false).collect(
-				toMap(this::getColumnName, this::createAttributeDescription));
+		return attributes.stream().collect(toMap(this::getColumnName, this::createAttributeDescription));
 	}
 
-	private AttributeDescription createAttributeDescription(Attribute attribute)
+	private AttributeDescription createAttributeDescription(Identifiable attribute)
 	{
 		return AttributeDescription.create(attribute.getName());
 	}
