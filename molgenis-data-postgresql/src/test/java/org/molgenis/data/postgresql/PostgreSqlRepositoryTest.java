@@ -86,6 +86,7 @@ public class PostgreSqlRepositoryTest
 	public void testUpdateEntitiesExist()
 	{
 		Attribute idAttr = mock(Attribute.class);
+		when(idAttr.getIdentifier()).thenReturn("attrId");
 		when(idAttr.getName()).thenReturn("attr");
 		when(idAttr.getDataType()).thenReturn(STRING);
 
@@ -115,6 +116,7 @@ public class PostgreSqlRepositoryTest
 	public void testUpdateEntityDoesNotExist()
 	{
 		Attribute idAttr = mock(Attribute.class);
+		when(idAttr.getIdentifier()).thenReturn("attrId");
 		when(idAttr.getName()).thenReturn("attr");
 		when(idAttr.getDataType()).thenReturn(STRING);
 
