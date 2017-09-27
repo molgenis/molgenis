@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.util.SecurityDecoratorUtils.MESSAGE_ENTITY_TYPE_NO_PERMISSION;
 
 @Component
 public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
@@ -97,7 +98,8 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 		if (!isReadAllowed(systemEntityType))
 		{
 			throw new MolgenisDataAccessException(
-					format("No read permission on entity type '%s'", systemEntityType.getId()));
+					format(MESSAGE_ENTITY_TYPE_NO_PERMISSION, Permission.READ.toString(), systemEntityType.getLabel(),
+							systemEntityType.getId()));
 		}
 	}
 
