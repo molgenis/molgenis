@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.metadata.manager.model.*;
@@ -133,6 +134,26 @@ public class EntityTypeMapperTest
 		verifyNoMoreInteractions(entityType);
 	}
 
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID and Label attribute for EntityType \\[test\\] can not be null")
+	public void testToEntityTypeWithoutIdAttribute()
+	{
+		EditorEntityType editorEntityType = mock(EditorEntityType.class);
+		when(editorEntityType.getIdAttribute()).thenReturn(null);
+		when(editorEntityType.getLabelAttribute()).thenReturn(mock(EditorAttributeIdentifier.class));
+		when(editorEntityType.getLabel()).thenReturn("test");
+		entityTypeMapper.toEntityType(editorEntityType);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID and Label attribute for EntityType \\[test\\] can not be null")
+	public void testToEntityTypeWithoutLabelAttribute()
+	{
+		EditorEntityType editorEntityType = mock(EditorEntityType.class);
+		when(editorEntityType.getIdAttribute()).thenReturn(mock(EditorAttributeIdentifier.class));
+		when(editorEntityType.getLabelAttribute()).thenReturn(null);
+		when(editorEntityType.getLabel()).thenReturn("test");
+		entityTypeMapper.toEntityType(editorEntityType);
+	}
+
 	@Test
 	public void testToEditorEntityType()
 	{
@@ -244,7 +265,7 @@ public class EntityTypeMapperTest
 
 		assertEquals(editorEntityType,
 				EditorEntityType.create(id, null, ImmutableMap.of(), null, ImmutableMap.of(), false, backend, null,
-						null, ImmutableList.of(), ImmutableList.of(), editorIdAttribute,
-						editorLabelAttribute, ImmutableList.of()));
+						null, ImmutableList.of(), ImmutableList.of(), editorIdAttribute, editorLabelAttribute,
+						ImmutableList.of()));
 	}
 }
