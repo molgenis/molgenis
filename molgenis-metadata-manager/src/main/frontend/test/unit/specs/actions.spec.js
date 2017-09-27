@@ -104,7 +104,7 @@ describe('actions', () => {
   describe('GET_ATTRIBUTE_TYPES', () => {
     it('should retrieve all attribute types and store them in the state via a mutation', done => {
       const response = {
-        enumOptions: ['string', 'int', 'xref']
+        enumOptions: ['string', 'int', 'xref', 'categoricalmref']
       }
 
       const get = td.function('api.get')
@@ -113,7 +113,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: SET_ATTRIBUTE_TYPES, payload: ['STRING', 'INT', 'XREF']}
+          {type: SET_ATTRIBUTE_TYPES, payload: ['STRING', 'INT', 'XREF', 'CATEGORICAL_MREF']}
         ]
       }
 

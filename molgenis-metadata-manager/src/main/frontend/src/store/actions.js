@@ -103,6 +103,8 @@ export default {
   [GET_ATTRIBUTE_TYPES] ({commit}: { commit: Function }) {
     api.get('/api/v2/sys_md_Attribute/meta/type').then(response => {
       // Workaround for differences between Categorical MREF enum on the server and in the REST api
+      // CATEGORICAL_MREF is needed when posting an edited or created EntityType back to the server
+      // CATEGORICAL_MREF is the correct AttributeType.ENUM value (see org.molgenis.data.meta.AttributeType.java)
       commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map(type => type === 'categoricalmref' ? 'CATEGORICAL_MREF' : type.toUpperCase()))
     }, error => {
       commit(CREATE_ALERT, {type: 'error', message: error})
