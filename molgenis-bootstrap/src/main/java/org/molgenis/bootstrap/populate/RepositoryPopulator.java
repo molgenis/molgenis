@@ -61,10 +61,6 @@ public class RepositoryPopulator
 			LOG.trace("Populating database with application entities ...");
 			systemEntityPopulator.populate(event);
 			LOG.trace("Populated database with application entities");
-
-			LOG.trace("Populating default genome browser attributes ...");
-			genomeBrowserAttributesPopulator.populate();
-			LOG.trace("Populated default genome browser attributes");
 		}
 
 		LOG.trace("Populating plugin entities ...");
@@ -74,6 +70,10 @@ public class RepositoryPopulator
 		LOG.trace("Populating settings entities ...");
 		settingsPopulator.initialize(event);
 		LOG.trace("Populated settings entities");
+
+		LOG.trace("Populating default genome browser attributes ...");
+		genomeBrowserAttributesPopulator.populate();
+		LOG.trace("Populated default genome browser attributes");
 
 		LOG.trace("Populating database with I18N strings ...");
 		i18nPopulator.populateL10nStrings();
