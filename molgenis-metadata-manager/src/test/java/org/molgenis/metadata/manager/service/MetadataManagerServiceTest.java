@@ -138,7 +138,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 	private EditorEntityType getEditorEntityType()
 	{
 		return EditorEntityType.create("id_1", null, ImmutableMap.of(), null, ImmutableMap.of(), false, "backend", null,
-				null, ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of());
+				null, ImmutableList.of(), ImmutableList.of(), EditorAttributeIdentifier.create("id", "label"), EditorAttributeIdentifier.create("id", "label"), ImmutableList.of());
 	}
 
 	private EditorEntityTypeResponse getEditorEntityTypeResponse()

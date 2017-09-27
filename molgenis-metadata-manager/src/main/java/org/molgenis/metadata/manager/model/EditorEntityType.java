@@ -37,10 +37,8 @@ public abstract class EditorEntityType
 
 	public abstract List<EditorTagIdentifier> getTags();
 
-	@Nullable
 	public abstract EditorAttributeIdentifier getIdAttribute();
 
-	@Nullable
 	public abstract EditorAttributeIdentifier getLabelAttribute();
 
 	public abstract List<EditorAttributeIdentifier> getLookupAttributes();
