@@ -31,19 +31,19 @@ public class QueryImpl<E extends Entity> implements Query<E>
 
 	private Repository<E> repository;
 
-	public static Query<Entity> query()
+	public static <T extends Entity> Query<T> query()
 	{
 		return new QueryImpl<>();
 	}
 
-	public static Query<Entity> EQ(String attributeName, Object value)
+	public static <T extends Entity> Query<T> EQ(String attributeName, Object value)
 	{
-		return query().eq(attributeName, value);
+		return QueryImpl.<T>query().eq(attributeName, value);
 	}
 
-	public static Query<Entity> IN(String attributeName, Iterable<?> values)
+	public static <T extends Entity> Query<T> IN(String attributeName, Iterable<?> values)
 	{
-		return query().in(attributeName, values);
+		return QueryImpl.<T>query().in(attributeName, values);
 	}
 
 	public QueryImpl()
