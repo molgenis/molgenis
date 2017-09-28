@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.metadata.manager.model.*;
 import org.testng.annotations.BeforeMethod;
@@ -18,6 +19,7 @@ import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 import static org.testng.Assert.assertEquals;
@@ -62,6 +64,7 @@ public class AttributeMapperTest
 		when(attribute.getIdentifier()).thenReturn(id);
 		when(attribute.getRangeMin()).thenReturn(null);
 		when(attribute.getRangeMax()).thenReturn(null);
+		when(attribute.getDataType()).thenReturn(AttributeType.STRING);
 		@SuppressWarnings("unchecked")
 		Iterable<Tag> tags = mock(Iterable.class);
 		when(attribute.getTags()).thenReturn(tags);
@@ -73,7 +76,7 @@ public class AttributeMapperTest
 
 		EditorAttribute editorAttribute = attributeMapper.createEditorAttribute();
 		assertEquals(editorAttribute,
-				EditorAttribute.create(id, null, null, null, null, null, null, null, false, false, false, null,
+				EditorAttribute.create(id, null, "string", null, null, null, null, null, false, false, false, null,
 						ImmutableMap.of(), null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags,
 						null, null, null, sequenceNumber));
 	}
@@ -83,7 +86,7 @@ public class AttributeMapperTest
 	{
 		String id = "id";
 		String name = "name";
-		String type = "STRING";
+		String type = "string";
 		String parentId = "parentId";
 		EditorAttributeIdentifier editorParentAttributeIdentifier = EditorAttributeIdentifier.create(parentId, "label");
 		String refEntityTypeId = "refId";
@@ -207,7 +210,7 @@ public class AttributeMapperTest
 	{
 		String id = "id";
 		String name = "name";
-		String type = "STRING";
+		String type = "categoricalmref";
 		String expression = "expression";
 		boolean nullable = false;
 		boolean auto = false;
@@ -233,7 +236,7 @@ public class AttributeMapperTest
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getIdentifier()).thenReturn(id);
 		when(attribute.getName()).thenReturn(name);
-		when(attribute.getDataType()).thenReturn(STRING);
+		when(attribute.getDataType()).thenReturn(CATEGORICAL_MREF);
 		Attribute parentAttr = mock(Attribute.class);
 		when(attribute.getParent()).thenReturn(parentAttr);
 		EntityType refEntityType = mock(EntityType.class);

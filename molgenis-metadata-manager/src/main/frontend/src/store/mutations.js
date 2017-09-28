@@ -117,7 +117,7 @@ export default {
 
     const attr = state.editorEntityType.attributes[index]
     if (key === 'type') {
-      if (attr.type === 'ONETOMANY' || update.value === 'ONETOMANY') {
+      if (attr.type === 'onetomany' || update.value === 'onetomany') {
         attr.mappedByAttribute = null
         attr.refEntityType = null
       }

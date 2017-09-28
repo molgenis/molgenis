@@ -88,7 +88,7 @@ public class AttributeMapper
 	{
 		String id = attribute.getIdentifier();
 		String name = attribute.getName();
-		String type = attribute.getDataType() != null ? AttributeType.getValueString(attribute.getDataType()).toUpperCase() : null;
+		String type = attribute.getDataType() != null ? AttributeType.getValueString(attribute.getDataType()) : null;
 		EditorAttributeIdentifier parent = attributeReferenceMapper.toEditorAttributeIdentifier(attribute.getParent());
 		EditorEntityTypeIdentifier refEntityType = entityTypeReferenceMapper.toEditorEntityTypeIdentifier(
 				attribute.getRefEntity());
