@@ -83,8 +83,9 @@
           <div class="form-group row">
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-description-label' | i18n }}</label>
             <div class="col">
-              <input v-model="description" class="form-control" type="text"
-                     :placeholder="$t('attribute-edit-form-description-placeholder')">
+              <textarea v-model="description" class="form-control" rows="2"
+                        :placeholder="$t('attribute-edit-form-description-placeholder')">
+              </textarea>
             </div>
           </div>
 
