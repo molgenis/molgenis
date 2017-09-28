@@ -287,4 +287,23 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return Stream containing all concrete children
 	 */
 	Stream<EntityType> getConcreteChildren(EntityType entityType);
+
+	/**
+	 * Retrieves EntityType, bypassing the {@link org.molgenis.data.meta.system.SystemEntityTypeRegistry}
+	 * This method is a workaround for those cases where {@link #getEntityType(String)} cannot be used
+	 * due to https://github.com/molgenis/molgenis/issues/5783
+	 *
+	 * @param entityTypeId ID of the EntityType
+	 * @return EntityType the retrieved EntityType
+	 * @TODO Remove this method when the issue is fixed
+	 */
+	EntityType getEntityTypeBypassingRegistry(String entityTypeId);
+
+	/**
+	 * Returns all {@link Attribute} that refer to a given {@link EntityType} as a refEntity
+	 *
+	 * @param entityTypeId ID of the {@link EntityType} that the attribute refers to
+	 * @return Stream of referring {@link Attribute}s
+	 */
+	Stream<Attribute> getReferringAttributes(String entityTypeId);
 }
