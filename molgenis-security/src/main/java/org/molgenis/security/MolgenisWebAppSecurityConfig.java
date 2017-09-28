@@ -15,6 +15,7 @@ import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
 import org.molgenis.security.session.ApiSessionExpirationFilter;
+import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
@@ -24,7 +25,6 @@ import org.molgenis.security.twofactor.auth.*;
 import org.molgenis.security.twofactor.service.OtpService;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
-import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
@@ -58,6 +58,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -415,5 +416,11 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public ApiSessionExpirationFilter apiSessionExpirationFilter()
 	{
 		return new ApiSessionExpirationFilter();
+	}
+
+	@Bean
+	public HttpSessionEventPublisher httpSessionEventPublisher()
+	{
+		return new HttpSessionEventPublisher();
 	}
 }

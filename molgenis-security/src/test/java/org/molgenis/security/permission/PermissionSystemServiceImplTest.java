@@ -62,6 +62,9 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 	private DataService dataService;
 
 	@Autowired
+	private PrincipalSecurityContextRegistry principalSecurityContextRegistry;
+
+	@Autowired
 	private PermissionSystemService permissionSystemService;
 
 	@BeforeMethod
@@ -69,13 +72,13 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 	{
 		config.resetMocks();
 		permissionSystemService = new PermissionSystemServiceImpl(userService, userAuthorityFactory, roleHierarchy,
-				dataService);
+				dataService, principalSecurityContextRegistry);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testPermissionSystemService()
 	{
-		new PermissionSystemServiceImpl(null, null, null, null);
+		new PermissionSystemServiceImpl(null, null, null, null, null);
 	}
 
 	@Test
@@ -98,6 +101,9 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 				invocation -> asList(new SimpleGrantedAuthority("newAuthority0"),
 						new SimpleGrantedAuthority("newAuthority1")));
 
+		when(principalSecurityContextRegistry.getSecurityContexts(
+				SecurityContextHolder.getContext().getAuthentication().getPrincipal())).thenReturn(
+				Stream.of(SecurityContextHolder.getContext()));
 		permissionSystemService.giveUserWriteMetaPermissions(asList(entityType0, entityType1));
 
 		String prefix = "ROLE_ENTITY";
@@ -154,6 +160,9 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		@Mock
 		private DataService dataService;
 
+		@Mock
+		private PrincipalSecurityContextRegistry principalSecurityContextRegistry;
+
 		public Config()
 		{
 			MockitoAnnotations.initMocks(this);
@@ -184,15 +193,21 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		}
 
 		@Bean
+		public PrincipalSecurityContextRegistry principalSecurityContextRegistry()
+		{
+			return principalSecurityContextRegistry;
+		}
+
+		@Bean
 		public PermissionSystemService permissionSystemService()
 		{
 			return new PermissionSystemServiceImpl(userService(), userAuthorityFactory(), roleHierarchy(),
-					dataService());
+					dataService(), principalSecurityContextRegistry());
 		}
 
 		void resetMocks()
 		{
-			reset(userService, userAuthorityFactory, roleHierarchy, dataService);
+			reset(userService, userAuthorityFactory, roleHierarchy, dataService, principalSecurityContextRegistry);
 		}
 	}
 }

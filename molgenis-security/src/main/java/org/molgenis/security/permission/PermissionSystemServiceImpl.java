@@ -1,6 +1,5 @@
 package org.molgenis.security.permission;
 
-import com.google.common.collect.Lists;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
@@ -17,6 +16,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,14 +36,17 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final RoleHierarchy roleHierarchy;
 	private final DataService dataService;
+	private final PrincipalSecurityContextRegistry principalSecurityContextRegistry;
 
 	public PermissionSystemServiceImpl(UserService userService, UserAuthorityFactory userAuthorityFactory,
-			RoleHierarchy roleHierarchy, DataService dataService)
+			RoleHierarchy roleHierarchy, DataService dataService,
+			PrincipalSecurityContextRegistry principalSecurityContextRegistry)
 	{
 		this.userService = requireNonNull(userService);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.roleHierarchy = requireNonNull(roleHierarchy);
 		this.dataService = requireNonNull(dataService);
+		this.principalSecurityContextRegistry = requireNonNull(principalSecurityContextRegistry);
 	}
 
 	@Override
@@ -61,15 +64,36 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 			return;
 		}
 
-		SecurityContext securityContext = SecurityContextHolder.getContext();
-		runAsSystem(() -> giveUserEntityPermissionsAsSystem(securityContext, entityTypes));
+		Collection<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(entityTypes);
+		giveUserEntityPermissionsAsSystem(grantedAuthorities);
 	}
 
-	private void giveUserEntityPermissionsAsSystem(SecurityContext securityContext, Collection<EntityType> entityTypes)
+	private void giveUserEntityPermissionsAsSystem(Collection<GrantedAuthority> authorities)
 	{
-		Collection<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(entityTypes);
-		updateUserAuthorities(securityContext, grantedAuthorities);
-		updateSecurityContext(securityContext, grantedAuthorities);
+		String currentUsername = SecurityUtils.getCurrentUsername();
+		runAsSystem(() -> updatePersistedUserAuthorities(currentUsername, authorities));
+
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Stream<SecurityContext> securityContexts = principalSecurityContextRegistry.getSecurityContexts(principal);
+
+		Collection<? extends GrantedAuthority> reachableAuthorities = roleHierarchy.getReachableGrantedAuthorities(
+				authorities);
+		securityContexts.forEach(
+				securityContext -> updateSecurityContextAuthorities(securityContext, reachableAuthorities));
+	}
+
+	private void updateSecurityContextAuthorities(SecurityContext securityContext,
+			Collection<? extends GrantedAuthority> newAuthorities)
+	{
+		Collection<? extends GrantedAuthority> authorities = securityContext.getAuthentication().getAuthorities();
+		List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authorities);
+		updatedAuthorities.addAll(newAuthorities);
+
+		Authentication authentication = securityContext.getAuthentication();
+		UsernamePasswordAuthenticationToken newToken = new UsernamePasswordAuthenticationToken(
+				authentication.getPrincipal(), authentication.getCredentials(), updatedAuthorities);
+
+		securityContext.setAuthentication(newToken);
 	}
 
 	private Collection<GrantedAuthority> getGrantedAuthorities(Collection<EntityType> entityTypeStream)
@@ -84,9 +108,9 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 		return new SimpleGrantedAuthority(role);
 	}
 
-	private void updateUserAuthorities(SecurityContext context, Collection<GrantedAuthority> grantedAuthorities)
+	private void updatePersistedUserAuthorities(String currentUsername, Collection<GrantedAuthority> grantedAuthorities)
 	{
-		User user = userService.getUser(SecurityUtils.getUsername(context.getAuthentication()));
+		User user = userService.getUser(currentUsername);
 		Stream<UserAuthority> userAuthorityStream = grantedAuthorities.stream().map(grantedAuthority ->
 		{
 			UserAuthority userAuthority = userAuthorityFactory.create();
@@ -96,20 +120,4 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 		});
 		dataService.add(USER_AUTHORITY, userAuthorityStream);
 	}
-
-	private void updateSecurityContext(SecurityContext context, Collection<? extends GrantedAuthority> authorities)
-	{
-		Collection<? extends GrantedAuthority> reachableAuthorities = roleHierarchy.getReachableGrantedAuthorities(
-				authorities);
-
-		List<GrantedAuthority> newGrantedAuthorities = Lists.newArrayList(context.getAuthentication().getAuthorities());
-		newGrantedAuthorities.addAll(reachableAuthorities);
-
-		Authentication authentication = context.getAuthentication();
-		Object principal = authentication.getPrincipal();
-		Object credentials = authentication.getCredentials();
-		context.setAuthentication(
-				new UsernamePasswordAuthenticationToken(principal, credentials, newGrantedAuthorities));
-	}
-
 }
