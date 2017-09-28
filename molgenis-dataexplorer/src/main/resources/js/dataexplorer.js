@@ -425,7 +425,7 @@ $.when($,
             // update browser state
             if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState)
                 + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
-            else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
+            else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState).replace(/\+/g, '%20'));
         }
 
         /**
