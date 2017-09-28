@@ -154,37 +154,55 @@
 <script>top.molgenis.ie9 = true;</script>
 <![endif]-->
 <script>
-    <#-- load js dependencies -->
-    $.when(
-            $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
-            $.ajax("<@resource_href "/js/dalliance-all.min.js"/>", {'cache': true}),
-            $.ajax("<@resource_href "/js/dataexplorer-directory.js"/>", {'cache': true}))
-            .done(function () {
-            <#-- do *not* js escape values below -->
-                molgenis.dataexplorer.data.setGenomeBrowserSettings({
-                ${plugin_settings.gb_init_location},
-                        coordSystem
-                : ${plugin_settings.gb_init_coord_system},
-                sources: ${plugin_settings.gb_init_sources},
-                browserLinks: ${plugin_settings.gb_init_browser_links}
-                        }
-                )
-                ;
-                molgenis.dataexplorer.data.setGenomeBrowserTracks([<#list genomeTracks as genomeTrack>${genomeTrack},</#list>]);
-            <#if pos_attr?? && chrom_attr??>
-                molgenis.dataexplorer.setGenomeAttributes('${pos_attr}', '${chrom_attr}')
-                molgenis.dataexplorer.data.setGenomeBrowserAttributes('${pos_attr}', '${chrom_attr}');
-            </#if>
-                if (molgenis.dataexplorer.data.doShowGenomeBrowser() === true) {
-                    molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${plugin_settings.gb_init_highlight_region?c}});
-                }
-                else {
-                    $('#genomebrowser').css('display', 'none');
-                }
+    (function ($, molgenis) {
+        "use strict";
+    <#-- load js dependencies once -->
 
-                molgenis.dataexplorer.data.createDataTable();
-            })
-            .fail(function () {
-                molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
-            });
+        function initializeDataModule() {
+        <#-- do *not* js escape values below -->
+            molgenis.dataexplorer.data.setGenomeBrowserSettings({
+            ${plugin_settings.gb_init_location},
+                    coordSystem
+        : ${plugin_settings.gb_init_coord_system},
+            sources: ${plugin_settings.gb_init_sources},
+            browserLinks: ${plugin_settings.gb_init_browser_links}
+                    }
+        )
+            ;
+            molgenis.dataexplorer.data.setGenomeBrowserTracks([<#list genomeTracks as genomeTrack>${genomeTrack},</#list>]);
+        <#if pos_attr?? && chrom_attr??>
+            molgenis.dataexplorer.setGenomeAttributes('${pos_attr}', '${chrom_attr}')
+            molgenis.dataexplorer.data.setGenomeBrowserAttributes('${pos_attr}', '${chrom_attr}');
+        </#if>
+            if (molgenis.dataexplorer.data.doShowGenomeBrowser() === true) {
+                molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${plugin_settings.gb_init_highlight_region?c}});
+            }
+            else {
+                $('#genomebrowser').css('display', 'none');
+            }
+
+            molgenis.dataexplorer.data.createDataTable();
+        }
+
+        if (molgenis.dataexplorer.data) {
+        <#-- load data and directory resources twice because one or both contain reinit code -->
+            $.when(
+                    $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
+                    $.ajax("<@resource_href "/js/dataexplorer-directory.js"/>", {'cache': true}))
+                    .done(initializeDataModule)
+                    .fail(function () {
+                        molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
+                    });
+        } else {
+        <#-- assert that dalliance is only loaded once to prevent 'babel polyfill loaded twice' issue -->
+            $.when(
+                    $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
+                    $.ajax("<@resource_href "/js/dalliance-all.min.js"/>", {'cache': true}),
+                    $.ajax("<@resource_href "/js/dataexplorer-directory.js"/>", {'cache': true}))
+                    .done(initializeDataModule)
+                    .fail(function () {
+                        molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
+                    });
+        }
+    }($, window.top.molgenis = window.top.molgenis || {}));
 </script>
