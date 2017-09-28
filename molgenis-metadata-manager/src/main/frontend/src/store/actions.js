@@ -192,7 +192,6 @@ export default {
         commit(SET_SELECTED_ENTITY_TYPE_ID, editorEntityType.id)
         commit(SET_ENTITY_TYPES, [...state.entityTypes, editorEntityType])
       } else {
-        response
         commit(SET_EDITOR_ENTITY_TYPE, state.editorEntityType)
       }
     }, error => {

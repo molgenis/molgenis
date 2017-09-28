@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.metadata.manager.model.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.w3c.dom.Attr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +136,26 @@ public class EntityTypeMapperTest
 		verifyNoMoreInteractions(entityType);
 	}
 
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID and Label attribute for EntityType \\[test\\] can not be null")
+	public void testToEntityTypeWithoutIdAttribute()
+	{
+		EditorEntityType editorEntityType = mock(EditorEntityType.class);
+		when(editorEntityType.getIdAttribute()).thenReturn(null);
+		when(editorEntityType.getLabelAttribute()).thenReturn(mock(EditorAttributeIdentifier.class));
+		when(editorEntityType.getLabel()).thenReturn("test");
+		entityTypeMapper.toEntityType(editorEntityType);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID and Label attribute for EntityType \\[test\\] can not be null")
+	public void testToEntityTypeWithoutLabelAttribute()
+	{
+		EditorEntityType editorEntityType = mock(EditorEntityType.class);
+		when(editorEntityType.getIdAttribute()).thenReturn(mock(EditorAttributeIdentifier.class));
+		when(editorEntityType.getLabelAttribute()).thenReturn(null);
+		when(editorEntityType.getLabel()).thenReturn("test");
+		entityTypeMapper.toEntityType(editorEntityType);
+	}
+
 	@Test
 	public void testToEditorEntityType()
 	{
@@ -216,12 +236,15 @@ public class EntityTypeMapperTest
 	{
 		String id = "id";
 		String backend = "backend";
-		@SuppressWarnings("unchecked")
-		List<EntityType> extendedBy = mock(List.class);
+
 		@SuppressWarnings("unchecked")
 		List<Attribute> attributes = mock(List.class);
 		@SuppressWarnings("unchecked")
 		List<Tag> tags = mock(List.class);
+
+		Attribute idAttribute = mock(Attribute.class);
+		Attribute labelAttribute = mock(Attribute.class);
+
 		@SuppressWarnings("unchecked")
 		List<Attribute> lookupAttributes = mock(List.class);
 
@@ -233,9 +256,16 @@ public class EntityTypeMapperTest
 		when(entityType.getOwnAllAttributes()).thenReturn(attributes);
 		when(entityType.getTags()).thenReturn(tags);
 		when(entityType.getLookupAttributes()).thenReturn(lookupAttributes);
+		when(entityType.getIdAttribute()).thenReturn(idAttribute);
+		when(entityType.getLabelAttribute()).thenReturn(labelAttribute);
 		when(entityTypeFactory.create()).thenReturn(entityType);
 
+		EditorAttributeIdentifier editorIdAttribute = mock(EditorAttributeIdentifier.class);
+		EditorAttributeIdentifier editorLabelAttribute = mock(EditorAttributeIdentifier.class);
+
 		when(attributeMapper.toEditorAttributes(attributes)).thenReturn(ImmutableList.of());
+		when(attributeReferenceMapper.toEditorAttributeIdentifier(idAttribute)).thenReturn(editorIdAttribute);
+		when(attributeReferenceMapper.toEditorAttributeIdentifier(labelAttribute)).thenReturn(editorLabelAttribute);
 		when(tagMapper.toEditorTags(tags)).thenReturn(ImmutableList.of());
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes)).thenReturn(ImmutableList.of());
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes)).thenReturn(ImmutableList.of());
@@ -243,7 +273,7 @@ public class EntityTypeMapperTest
 
 		assertEquals(editorEntityType,
 				EditorEntityType.create(id, null, ImmutableMap.of(), null, ImmutableMap.of(), false, backend, null,
-						null, ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of()));
-
+						null, ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), editorIdAttribute,
+						editorLabelAttribute, ImmutableList.of()));
 	}
 }

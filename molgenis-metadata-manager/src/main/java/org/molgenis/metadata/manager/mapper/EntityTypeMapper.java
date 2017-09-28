@@ -2,6 +2,7 @@ package org.molgenis.metadata.manager.mapper;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -76,6 +77,12 @@ public class EntityTypeMapper
 
 	public EntityType toEntityType(EditorEntityType editorEntityType)
 	{
+		if (editorEntityType.getLabelAttribute() == null || editorEntityType.getIdAttribute() == null)
+		{
+			throw new MolgenisDataException(
+					"ID and Label attribute for EntityType [" + editorEntityType.getLabel() + "] can not be null");
+		}
+
 		EntityType entityType = entityTypeFactory.create();
 		entityType.setId(editorEntityType.getId());
 		entityType.setPackage(packageMapper.toPackageReference(editorEntityType.getPackage()));
@@ -99,14 +106,14 @@ public class EntityTypeMapper
 		entityType.setExtends(entityTypeParentMapper.toEntityTypeReference(editorEntityType.getEntityTypeParent()));
 		entityType.setTags(tagMapper.toTagReferences(editorEntityType.getTags()));
 		entityType.setBackend(editorEntityType.getBackend());
+
 		return entityType;
 	}
 
 	private ImmutableMap<String, String> toI18nDescription(EntityType entityType)
 	{
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
-		getLanguageCodes().forEach(languageCode ->
-		{
+		getLanguageCodes().forEach(languageCode -> {
 			// entityType.getDescription cannot be used, since it returns the description in the default language if not available
 			String description = entityType.getString(
 					getI18nAttributeName(EntityTypeMetadata.DESCRIPTION, languageCode));
@@ -121,8 +128,7 @@ public class EntityTypeMapper
 	private ImmutableMap<String, String> toI18nLabel(EntityType entityType)
 	{
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
-		getLanguageCodes().forEach(languageCode ->
-		{
+		getLanguageCodes().forEach(languageCode -> {
 			// entityType.getLabel cannot be used, since it returns the description in the default language if not available
 			String label = entityType.getString(getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode));
 			if (label != null)

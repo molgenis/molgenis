@@ -302,6 +302,7 @@ $.when($,
             // get entity meta data and update header and tree
             var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
                 selectedEntityMetaData = entityMetaData;
+                selectedAttributes = [];
                 self.createHeader(entityMetaData);
 
                 // Loop through all the attributes in the meta data

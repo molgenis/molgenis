@@ -70,9 +70,9 @@ export type EditorEntityType = {
   'attributes': Array<EditorAttribute>,
   'referringAttributes': Array<EditorAttribute>,
   'tags'?: ?Array<Tag>,
-  'idAttribute'?: ?EditorAttributeIdentifier,
-  'labelAttribute'?: ?EditorAttributeIdentifier,
-  'idAttribute'?: ?Array<EditorAttributeIdentifier>,
+  'idAttribute'?: EditorAttributeIdentifier,
+  'labelAttribute'?: EditorAttributeIdentifier,
+  'lookupAttributes'?: ?Array<EditorAttributeIdentifier>,
   'isNew'?: ?boolean
 }
 

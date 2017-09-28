@@ -20,9 +20,9 @@
         </div>
 
         <div class="form-group-row float-right">
-            <save-button :onClick="saveEntityType" :disabled="!isEntityTypeEdited">
-              {{ 'save-changes-button' | i18n }}
-            </save-button>
+          <save-button :onClick="saveEntityType" :disabled="!isEntityTypeEdited">
+            {{ 'save-changes-button' | i18n }}
+          </save-button>
           <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger"
                   :disabled="editorEntityType.isNew">
             {{ 'delete-entity-button' | i18n }}
@@ -106,13 +106,13 @@
   }
 
   .multiselect__tag, .multiselect__tag-icon:hover {
-    background-color: #5bc0de;  /*bootstrap brand-info*/
+    background-color: #5bc0de; /*bootstrap brand-info*/
   }
 </style>
 
 <script>
   import { mapState, mapGetters } from 'vuex'
-  import { UPDATE_EDITOR_ENTITY_TYPE } from '../store/mutations'
+  import { UPDATE_EDITOR_ENTITY_TYPE, CREATE_ALERT } from '../store/mutations'
   import { SAVE_EDITOR_ENTITY_TYPE, DELETE_ENTITY_TYPE } from '../store/actions'
   import { getConfirmBeforeDeletingProperties } from '../store/getters'
 
@@ -123,7 +123,13 @@
     name: 'metadata-manager-entity-edit-form',
     methods: {
       saveEntityType () {
-        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE)
+        if (this.editorEntityType.idAttribute === null || this.editorEntityType.idAttribute === undefined) {
+          this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'ID attribute can not be empty'})
+        } else if (this.editorEntityType.labelAttribute === null || this.editorEntityType.labelAttribute === undefined) {
+          this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'Label attribute can not be empty'})
+        } else {
+          this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE)
+        }
       },
       deleteEntityType (selectedEntityTypeId) {
         this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId)).then(() => {
@@ -143,7 +149,7 @@
           return this.$store.state.editorEntityType.entityTypeParent
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'entityTypeParent', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'entityTypeParent', value: value})
         }
       },
       abstract0: {
@@ -151,7 +157,7 @@
           return this.$store.state.editorEntityType.abstract0
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'abstract0', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'abstract0', value: value})
         }
       },
       label: {
@@ -159,7 +165,7 @@
           return this.$store.state.editorEntityType.label
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'label', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'label', value: value})
         }
       },
       description: {
@@ -167,7 +173,7 @@
           return this.$store.state.editorEntityType.description
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'description', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'description', value: value})
         }
       },
       package0: {
@@ -175,7 +181,7 @@
           return this.$store.state.editorEntityType.package0
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'package0', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'package0', value: value})
         }
       },
       idAttribute: {
@@ -183,7 +189,7 @@
           return this.$store.state.editorEntityType.idAttribute
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'idAttribute', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'idAttribute', value: value})
         }
       },
       labelAttribute: {
@@ -191,7 +197,7 @@
           return this.$store.state.editorEntityType.labelAttribute
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'labelAttribute', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: value})
         }
       },
       lookupAttributes: {
@@ -199,7 +205,7 @@
           return this.$store.state.editorEntityType.lookupAttributes
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, { key: 'lookupAttributes', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'lookupAttributes', value: value})
         }
       }
     },
