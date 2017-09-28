@@ -67,21 +67,24 @@
           <div class="form-group row">
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-name-label' | i18n }}</label>
             <div class="col">
-              <input v-model="name" class="form-control" type="text" :placeholder="$t('attribute-edit-form-name-placeholder')">
+              <input v-model="name" class="form-control" type="text"
+                     :placeholder="$t('attribute-edit-form-name-placeholder')">
             </div>
           </div>
 
           <div class="form-group row">
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-label-label' | i18n }}</label>
             <div class="col">
-              <input v-model="label" class="form-control" type="text" :placeholder="$t('attribute-edit-form-label-placeholder')">
+              <input v-model="label" class="form-control" type="text"
+                     :placeholder="$t('attribute-edit-form-label-placeholder')">
             </div>
           </div>
 
           <div class="form-group row">
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-description-label' | i18n }}</label>
             <div class="col">
-              <input v-model="description" class="form-control" type="text" :placeholder="$t('attribute-edit-form-description-placeholder')">
+              <input v-model="description" class="form-control" type="text"
+                     :placeholder="$t('attribute-edit-form-description-placeholder')">
             </div>
           </div>
 
@@ -89,7 +92,8 @@
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-type-label' | i18n }}</label>
             <div class="col">
               <multiselect v-model="type" :options="attributeTypes"
-                           selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-type-placeholder')"></multiselect>
+                           selectLabel="" deselectLabel=""
+                           :placeholder="$t('attribute-edit-form-type-placeholder')"></multiselect>
             </div>
           </div>
 
@@ -97,30 +101,37 @@
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-parent-label' | i18n }}</label>
             <div class="col">
               <multiselect v-model="parent" :options="compoundAttributes" label="label"
-                           selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-parent-placeholder')"></multiselect>
+                           selectLabel="" deselectLabel=""
+                           :placeholder="$t('attribute-edit-form-parent-placeholder')"></multiselect>
             </div>
           </div>
 
           <div v-if="isReferenceType" class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-reference-entity-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-reference-entity-label' | i18n
+              }}</label>
             <div class="col">
               <multiselect v-model="refEntityType" :options="entityTypes" label="label"
-                           selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-reference-entity-placeholder')"></multiselect>
+                           selectLabel="" deselectLabel=""
+                           :placeholder="$t('attribute-edit-form-reference-entity-placeholder')"></multiselect>
             </div>
           </div>
 
           <div v-else-if="isNumericType">
             <div class="form-group row">
-              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-minimum-range-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-minimum-range-label' | i18n
+                }}</label>
               <div class="col">
-                <input v-model.number="rangeMin" class="form-control" type="number" :placeholder="$t('attribute-edit-form-minimum-range-placeholder')">
+                <input v-model.number="rangeMin" class="form-control" type="number"
+                       :placeholder="$t('attribute-edit-form-minimum-range-placeholder')">
               </div>
             </div>
 
             <div class="form-group row">
-              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-maximum-range-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-maximum-range-label' | i18n
+                }}</label>
               <div class="col">
-                <input v-model.number="rangeMax" class="form-control" type="number" :placeholder="$t('attribute-edit-form-maximum-range-placeholder')">
+                <input v-model.number="rangeMax" class="form-control" type="number"
+                       :placeholder="$t('attribute-edit-form-maximum-range-placeholder')">
               </div>
             </div>
           </div>
@@ -128,7 +139,8 @@
           <div v-else-if="isEnumType" class="form-group row">
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-enum-options-label' | i18n }}</label>
             <div class="col">
-              <input v-model.lazy="enumOptions" class="form-control" type="text" :placeholder="$t('attribute-edit-form-enum-options-placeholder')">
+              <input v-model.lazy="enumOptions" class="form-control" type="text"
+                     :placeholder="$t('attribute-edit-form-enum-options-placeholder')">
             </div>
           </div>
 
@@ -136,15 +148,18 @@
             <div class="form-group row">
               <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-mapped-by-label' | i18n }}</label>
               <div class="col">
-                <multiselect v-model="mappedByAttribute" :options="mappedByAttributes" :custom-label="customOneToManyLabel"
-                             selectLabel="" deselectLabel="" :placeholder="$t('attribute-edit-form-mapped-by-placeholder')"></multiselect>
+                <multiselect v-model="mappedByAttribute" :options="mappedByAttributes"
+                             :custom-label="customOneToManyLabel"
+                             selectLabel="" deselectLabel=""
+                             :placeholder="$t('attribute-edit-form-mapped-by-placeholder')"></multiselect>
               </div>
             </div>
 
             <div class="form-group row">
               <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-order-by-label' | i18n }}</label>
               <div class="col">
-                <input v-model="orderBy" class="form-control" type="text" :placeholder="$t('attribute-edit-form-order-by-placeholder')">
+                <input v-model="orderBy" class="form-control" type="text"
+                       :placeholder="$t('attribute-edit-form-order-by-placeholder')">
               </div>
             </div>
           </div>
@@ -201,19 +216,22 @@
         <div class="col">
           <div class="form-group">
             <label class="text-muted">{{ 'attribute-edit-form-computed-expression-label' | i18n }}</label>
-            <textarea v-model="expression" class="form-control" rows="3" :placeholder="$t('attribute-edit-form-computed-expression-placeholder')"></textarea>
+            <textarea v-model="expression" class="form-control" rows="3"
+                      :placeholder="$t('attribute-edit-form-computed-expression-placeholder')"></textarea>
           </div>
         </div>
         <div class="col">
           <div class="form-group">
             <label class="text-muted">{{ 'attribute-edit-form-visible-expression-label' | i18n }}</label>
-            <textarea v-model="visibleExpression" class="form-control" rows="3" :placeholder="$t('attribute-edit-form-visible-expression-placeholder')"></textarea>
+            <textarea v-model="visibleExpression" class="form-control" rows="3"
+                      :placeholder="$t('attribute-edit-form-visible-expression-placeholder')"></textarea>
           </div>
         </div>
         <div class="col">
           <div class="form-group">
             <label class="text-muted">{{ 'attribute-edit-form-validation-expression-label' | i18n }}</label>
-            <textarea v-model="validationExpression" class="form-control" rows="3" :placeholder="$t('attribute-edit-form-validation-expression-placeholder')"></textarea>
+            <textarea v-model="validationExpression" class="form-control" rows="3"
+                      :placeholder="$t('attribute-edit-form-validation-expression-placeholder')"></textarea>
           </div>
         </div>
       </div>
@@ -281,23 +299,23 @@
         mappedByAttributes: 'getMappedByAttributes'
       }),
       isReferenceType: function () {
-        return ['XREF', 'MREF', 'CATEGORICAL', 'CATEGORICAL_MREF'].includes(this.selectedAttribute.type)
+        return ['xref', 'mref', 'categorical', 'categoricalmref'].includes(this.selectedAttribute.type)
       },
       isNumericType: function () {
-        return ['INT', 'LONG'].includes(this.selectedAttribute.type)
+        return ['int', 'long'].includes(this.selectedAttribute.type)
       },
       isEnumType: function () {
-        return this.selectedAttribute.type === 'ENUM'
+        return this.selectedAttribute.type === 'enum'
       },
       isOneToManyType: function () {
-        return this.selectedAttribute.type === 'ONETOMANY'
+        return this.selectedAttribute.type === 'onetomany'
       },
       name: {
         get () {
           return this.selectedAttribute.name
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'name', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'name', value: value})
         }
       },
       label: {
@@ -305,7 +323,7 @@
           return this.selectedAttribute.label
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'label', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'label', value: value})
         }
       },
       description: {
@@ -313,7 +331,7 @@
           return this.selectedAttribute.description
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'description', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'description', value: value})
         }
       },
       parent: {
@@ -321,7 +339,7 @@
           return this.selectedAttribute.parent
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'parent', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'parent', value: value})
         }
       },
       type: {
@@ -329,7 +347,7 @@
           return this.selectedAttribute.type
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'type', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'type', value: value})
         }
       },
       refEntityType: {
@@ -337,7 +355,7 @@
           return this.selectedAttribute.refEntityType
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'refEntityType', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'refEntityType', value: value})
         }
       },
       nullable: {
@@ -345,7 +363,7 @@
           return this.selectedAttribute.nullable
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'nullable', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'nullable', value: value})
         }
       },
       auto: {
@@ -353,7 +371,7 @@
           return this.selectedAttribute.auto
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'auto', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'auto', value: value})
         }
       },
       visible: {
@@ -361,7 +379,7 @@
           return this.selectedAttribute.visible
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'visible', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'visible', value: value})
         }
       },
       unique: {
@@ -369,7 +387,7 @@
           return this.selectedAttribute.unique
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'unique', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'unique', value: value})
         }
       },
       readonly: {
@@ -377,7 +395,7 @@
           return this.selectedAttribute.readonly
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'readonly', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'readonly', value: value})
         }
       },
       aggregatable: {
@@ -385,7 +403,7 @@
           return this.selectedAttribute.aggregatable
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'aggregatable', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'aggregatable', value: value})
         }
       },
       expression: {
@@ -393,7 +411,7 @@
           return this.selectedAttribute.expression
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'expression', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'expression', value: value})
         }
       },
       visibleExpression: {
@@ -401,7 +419,7 @@
           return this.selectedAttribute.visibleExpression
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'visibleExpression', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'visibleExpression', value: value})
         }
       },
       validationExpression: {
@@ -409,7 +427,7 @@
           return this.selectedAttribute.validationExpression
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'validationExpression', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'validationExpression', value: value})
         }
       },
       enumOptions: {
@@ -417,7 +435,7 @@
           return this.selectedAttribute.enumOptions.join(',')
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'enumOptions', value: value.split(',') })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'enumOptions', value: value.split(',')})
         }
       },
       mappedByAttribute: {
@@ -425,7 +443,7 @@
           return this.selectedAttribute.mappedByAttribute
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'mappedByAttribute', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'mappedByAttribute', value: value})
         }
       },
       orderBy: {
@@ -433,7 +451,7 @@
           return this.selectedAttribute.orderBy
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'orderBy', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'orderBy', value: value})
         }
       },
       rangeMin: {
@@ -441,7 +459,7 @@
           return this.selectedAttribute.rangeMin
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'rangeMin', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'rangeMin', value: value})
         }
       },
       rangeMax: {
@@ -449,7 +467,7 @@
           return this.selectedAttribute.rangeMax
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, { key: 'rangeMax', value: value })
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'rangeMax', value: value})
         }
       }
     },

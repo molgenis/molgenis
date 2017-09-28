@@ -59,7 +59,7 @@ export default {
       const children = allAttributes.filter(attribute => attribute.parent && attribute.parent.id === attr.id)
       const offspring = children.map(addChildren)
       const selected = getters.getSelectedAttribute && attr.id === getters.getSelectedAttribute.id
-      return { ...attr, children: offspring, selected }
+      return {...attr, children: offspring, selected}
     }
     return rootAttributes.map(addChildren)
   },
@@ -73,7 +73,7 @@ export default {
   /**
    * Return a list of compound attributes present in the currently selected editorEntityType
    */
-  getCompoundAttributes: state => state.editorEntityType && state.editorEntityType.attributes.filter(attribute => attribute.type === 'COMPOUND'),
+  getCompoundAttributes: state => state.editorEntityType && state.editorEntityType.attributes.filter(attribute => attribute.type === 'compound'),
   /**
    * Returns true if the editorEntityType has been updated through interaction with the forms
    */

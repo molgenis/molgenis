@@ -113,7 +113,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: SET_ATTRIBUTE_TYPES, payload: ['STRING', 'INT', 'XREF']}
+          {type: SET_ATTRIBUTE_TYPES, payload: ['string', 'int', 'xref']}
         ]
       }
 

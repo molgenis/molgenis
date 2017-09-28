@@ -104,7 +104,7 @@ export default {
    */
   [GET_ATTRIBUTE_TYPES] ({commit}: { commit: Function }) {
     api.get('/api/v2/sys_md_Attribute/meta/type').then(response => {
-      commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map((type) => type.toUpperCase()))
+      commit(SET_ATTRIBUTE_TYPES, response.enumOptions)
     }, error => {
       commit(CREATE_ALERT, {type: 'error', message: error})
     })
