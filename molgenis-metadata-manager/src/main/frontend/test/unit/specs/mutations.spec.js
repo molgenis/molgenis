@@ -248,7 +248,7 @@ describe('mutations', () => {
       }
 
       const expected = [
-        {id: '1', name: 'attribute 1', type: 'xref', mappedByAttribute: null, refEntityType: null},
+        {id: '1', name: 'attribute 1', type: 'xref', mappedByAttribute: null, refEntityType: null, orderBy: null},
         {id: '2', name: 'attribute 2', type: 'int', mappedByAttribute: null, refEntityType: null},
         {id: '3', name: 'attribute 3', type: 'string', mappedByAttribute: null, refEntityType: null}
       ]
@@ -266,6 +266,7 @@ describe('mutations', () => {
               name: 'attribute 1',
               type: 'xref',
               mappedByAttribute: {id: '4', label: 'xrefattr', entity: {id: 'abcde', label: 'label'}},
+              orderBy: {orders: [{attributeName: 'id', order: 'ASC'}]},
               refEntityType: null
             },
             {id: '2', name: 'attribute 2', type: 'int', mappedByAttribute: null, refEntityType: null},
@@ -275,7 +276,7 @@ describe('mutations', () => {
       }
 
       const expected = [
-        {id: '1', name: 'attribute 1', type: 'onetomany', mappedByAttribute: null, refEntityType: null},
+        {id: '1', name: 'attribute 1', type: 'onetomany', mappedByAttribute: null, refEntityType: null, orderBy: null},
         {id: '2', name: 'attribute 2', type: 'int', mappedByAttribute: null, refEntityType: null},
         {id: '3', name: 'attribute 3', type: 'string', mappedByAttribute: null, refEntityType: null}
       ]
@@ -301,6 +302,7 @@ describe('mutations', () => {
           name: 'attribute 1',
           type: 'onetomany',
           mappedByAttribute: {id: 'idAttr1', label: 'testAttr', entity: {id: 'idEntity1', label: 'testEntity'}},
+          orderBy: null,
           refEntityType: {id: 'idEntity1', label: 'testEntity'}
         },
         {id: '2', name: 'attribute 2', type: 'int', mappedByAttribute: null, refEntityType: null},

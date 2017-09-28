@@ -155,11 +155,16 @@
               </div>
             </div>
 
-            <div class="form-group row">
+            <!-- TODO: make this editable -->
+            <div class="form-group row" v-if="orderBy && orderBy.orders">
               <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-order-by-label' | i18n }}</label>
               <div class="col">
-                <input v-model="orderBy" class="form-control" type="text"
-                       :placeholder="$t('attribute-edit-form-order-by-placeholder')">
+                <p class="form-control-static">
+                  <span v-for="o in orderBy.orders"> {{o.attributeName}}
+                  <i class="fa"
+                     :class="{'fa-sort-amount-asc': o.direction === 'ASC', 'fa-sort-amount-desc': o.direction === 'DESC'}"></i>
+                  </span>
+                </p>
               </div>
             </div>
           </div>

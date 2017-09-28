@@ -120,11 +120,13 @@ export default {
       if (attr.type === 'onetomany' || update.value === 'onetomany') {
         attr.mappedByAttribute = null
         attr.refEntityType = null
+        attr.orderBy = null
       }
       attr[key] = update.value
     } else if (key === 'mappedByAttribute') {
       if (update.value !== null && update.value.entity !== null) {
         attr.refEntityType = update.value.entity
+        attr.orderBy = null
       }
     }
     state.editorEntityType.attributes[index][key] = update.value
