@@ -31,6 +31,8 @@ import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.PermissionServiceImpl;
+import org.molgenis.security.permission.PrincipalSecurityContextRegistry;
+import org.molgenis.security.permission.SecurityContextRegistryImpl;
 import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,18 +78,18 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
 		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class,
-		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class,
-		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
+		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class,
+		PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactoryImpl.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
 		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
-		org.molgenis.security.permission.PermissionSystemServiceImpl.class,
-		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
-		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
-		SystemEntityTypeRegistryImpl.class })
+		org.molgenis.security.permission.PermissionSystemServiceImpl.class, PrincipalSecurityContextRegistry.class,
+		SecurityContextRegistryImpl.class, org.molgenis.data.importer.ImportServiceRegistrar.class,
+		EntityTypeRegistryPopulator.class, PermissionServiceImpl.class, MolgenisRoleHierarchy.class,
+		SystemRepositoryDecoratorFactoryRegistrar.class, SemanticSearchConfig.class, OntologyConfig.class,
+		JobExecutionConfig.class, JobFactoryRegistrar.class, SystemEntityTypeRegistryImpl.class, })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
