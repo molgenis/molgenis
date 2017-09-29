@@ -204,8 +204,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(ENTITY_TYPE_META_DATA, false, true, true));
 		authorities.addAll(makeAuthorities(ATTRIBUTE_META_DATA, false, true, true));
 		authorities.addAll(makeAuthorities(PACKAGE, false, true, true));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + LANGUAGE));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + L10N_STRING));
+		authorities.addAll(makeAuthorities(LANGUAGE, false, true, true));
+		authorities.addAll(makeAuthorities(L10N_STRING, false, true, true));
 		authorities.addAll(makeAuthorities(refEntityTypeStatic.getId(), true, true, true));
 		authorities.addAll(makeAuthorities(entityTypeStatic.getId(), true, true, true));
 		authorities.addAll(makeAuthorities(entityTypeDynamic.getId(), true, true, true));
