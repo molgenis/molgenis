@@ -39,6 +39,7 @@
                             <goal>yarn</goal>
                         </goals>
                         <configuration>
+                            <arguments>--frozen-lockfile</arguments>
                             <failOnError>true</failOnError>
                         </configuration>
                     </execution>
