@@ -1,7 +1,7 @@
 import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
-import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, RESET_STATE } from 'src/store/actions'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from 'src/store/mutations'
+import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, RESET_STATE, QUERY_ENTITIES } from 'src/store/actions'
+import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from 'src/store/mutations'
 import utils from '@molgenis/molgenis-vue-test-utils'
 
 describe('actions', () => {
@@ -108,7 +108,8 @@ describe('actions', () => {
           'id': '1',
           'type': 'entity',
           'label': 'test',
-          'description': 'test'
+          'description': 'test',
+          'isRoot': true
         }
       ]
 
@@ -122,7 +123,6 @@ describe('actions', () => {
           {type: SET_ENTITIES, payload: expectedEntities}
         ]
       }
-
       utils.testAction(actions.__QUERY_ENTITIES__, options, done)
     })
 
@@ -150,14 +150,16 @@ describe('actions', () => {
         'id': '1',
         'type': 'entity',
         'label': 'test',
-        'description': 'test'
+        'description': 'test',
+        'isRoot': true
       }
 
       const entity2 = {
         'id': '2',
         'type': 'entity',
         'label': 'test',
-        'description': 'test'
+        'description': 'test',
+        'isRoot': true
       }
 
       const response = {
@@ -200,8 +202,8 @@ describe('actions', () => {
   })
 
   describe('RESET_STATE', () => {
-    it('should fetch all packages and call the SET_PACKAGES, RESET_PATH, and SET_ENTITIES mutations', done => {
-      const response = {
+    it('should fetch all packages and entities and call RESET_PATH', done => {
+      const packageResponse = {
         items: [
           {
             id: '1',
@@ -219,11 +221,28 @@ describe('actions', () => {
         ]
       }
 
+      const entityResponse = {
+        items: [
+          {
+            id: '1',
+            label: 'entity1'
+          },
+          {
+            id: '2',
+            label: 'entity2',
+            package: {
+              id: '123'
+            }
+          }
+        ]
+      }
+
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(packageResponse)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false')).thenResolve(entityResponse)
       td.replace(api, 'get', get)
 
-      const payload = [
+      const packages = [
         {
           id: '1',
           name: 'package1'
@@ -236,9 +255,8 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: SET_PACKAGES, payload: payload},
-          {type: RESET_PATH, payload: null},
-          {type: SET_ENTITIES, payload: []}
+          {type: RESET_PATH},
+          {type: SET_PACKAGES, payload: packages}
         ]
       }
 
@@ -248,13 +266,30 @@ describe('actions', () => {
     it('should fail the get and call the SET_ERROR mutation', done => {
       const error = 'failed to get'
 
+      const entityResponse = {
+        items: [
+          {
+            id: '1',
+            label: 'entity1',
+            package: {
+              id: 123
+            }
+          }
+        ]
+      }
+
+      const entities = []
+
       const get = td.function('api.get')
       td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenReject(error)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false')).thenResolve(entityResponse)
       td.replace(api, 'get', get)
 
       const options = {
         expectedMutations: [
-          {type: SET_ERROR, payload: error}
+          {type: RESET_PATH},
+          {type: SET_ERROR, payload: error},
+          {type: SET_ENTITIES, payload: entities}
         ]
       }
 
@@ -282,10 +317,8 @@ describe('actions', () => {
       td.replace(api, 'get', get)
 
       const options = {
-        expectedMutations: [
-          {type: SET_PACKAGES, payload: response.items},
-          {type: RESET_PATH, payload: null},
-          {type: SET_ENTITIES, payload: []}
+        expectedActions: [
+          {type: RESET_STATE}
         ]
       }
 
@@ -313,10 +346,10 @@ describe('actions', () => {
       const options = {
         payload: '3',
         expectedMutations: [
-          {type: SET_ERROR, payload: 'couldn\'t find package.'},
-          {type: SET_PACKAGES, payload: response.items},
-          {type: RESET_PATH, payload: null},
-          {type: SET_ENTITIES, payload: []}
+          {type: SET_ERROR, payload: 'couldn\'t find package.'}
+        ],
+        expectedActions: [
+          {type: RESET_STATE}
         ]
       }
 
@@ -473,6 +506,35 @@ describe('actions', () => {
         payload: entityId,
         expectedActions: [
           {type: RESET_STATE}
+        ]
+      }
+
+      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
+    })
+
+    it('should fallback to searching if the lookup entity is not in a package', done => {
+      const entityId = 'my-entity-id'
+      const entity = {
+        'id': entityId,
+        'label': 'my entity in a package'
+      }
+
+      const response = {
+        items: [entity]
+      }
+
+      const get = td.function('api.get')
+
+      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenResolve(response)
+      td.replace(api, 'get', get)
+
+      const options = {
+        payload: entityId,
+        expectedMutations: [
+          {type: SET_QUERY, payload: entity.label}
+        ],
+        expectedActions: [
+          {type: QUERY_ENTITIES, payload: entity.label}
         ]
       }
 

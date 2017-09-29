@@ -3,6 +3,7 @@
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
 <#include "theme-macros.ftl">
+<#include "polyfill-macros.ftl">
 <#macro header css=[] js=[] version=1>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
     <#assign googleSignIn = authentication_settings.googleSignIn && authentication_settings.signUp && !authentication_settings.signUpModeration>
@@ -42,6 +43,10 @@
     <#if app_settings.cssHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if>
+    <#if !version?? || version == 1>
+    <#-- Include browser polyfills before any script tags are inserted -->
+    <@polyfill/>
+    </#if>
     <#if app_settings.customJavascript?has_content>
         <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
             <#if js_file_name?ends_with(".js")>
@@ -50,10 +55,6 @@
         </#list>
     </#if>
 <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-    <#if !(version??) || version == 1>
-        <script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
-        <script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-    </#if>
     <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
     <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
     <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
@@ -75,13 +76,6 @@
         <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>"
                 async defer></script>
     </#if>
-
-    <!--[if IE 9]>
-    <#-- used to disable the genomebrowser in IE9 -->
-        <script>top.molgenis.ie9 = true;</script>
-        <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
-        <script src="<@resource_href "/js/typedarray.min.js"/>  </script>
-    <![endif]-->
     <script>
         top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
             <#if context_url??>

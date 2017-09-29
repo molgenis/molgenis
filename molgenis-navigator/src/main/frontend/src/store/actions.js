@@ -3,7 +3,7 @@ import type { Package, Entity } from '../flow.types'
 import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH } from './mutations'
+import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from './mutations'
 
 export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
 export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
@@ -13,22 +13,6 @@ export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
 export const GET_ENTITY_PACKAGES = '__GET_ENTITY_PACKAGES__'
 
 const SYS_PACKAGE_ID = 'sys'
-
-/**
- * Resets the entire state using the given packages as the package state.
- * Only top level packages are set.
- *
- * @param commit, reference to mutation function
- * @param packages, the complete list of packages
- */
-function resetToHome (commit: Function, packages: Array<Package>) {
-  const homePackages = packages.filter(function (packageItem) {
-    return !packageItem.hasOwnProperty('parent')
-  })
-  commit(SET_PACKAGES, homePackages)
-  commit(RESET_PATH)
-  commit(SET_ENTITIES, [])
-}
 
 /**
  * Recursively build the path, going backwards starting at the currentPackage
@@ -61,7 +45,8 @@ function toEntity (item: any) {
     'id': item.id,
     'type': 'entity',
     'label': item.label,
-    'description': item.description
+    'description': item.description,
+    'isRoot': !item['package']
   }
 }
 
@@ -171,17 +156,44 @@ export default {
   },
   [RESET_STATE] ({commit}: { commit: Function }) {
     api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
-      resetToHome(commit, filterNonVisiblePackages(response.items))
+      const visiblePackages = filterNonVisiblePackages(response.items)
+      const homePackages = visiblePackages.filter(function (packageItem) {
+        return !packageItem.hasOwnProperty('parent')
+      })
+      commit(SET_PACKAGES, homePackages)
     }, error => {
       commit(SET_ERROR, error)
     })
+
+    // The Rest API offers no way the filter on missing attributes, as a work around we fetch 'all' entities and
+    // then filter out the non route packages
+    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false').then(response => {
+      const entities = response.items.map(toEntity)
+      const visibleEntities = filterNonVisibleEntities(entities)
+      const rootEntities = visibleEntities.filter(function (entity) {
+        return entity.isRoot
+      })
+      commit(SET_ENTITIES, rootEntities)
+    }, error => {
+      commit(SET_ERROR, error)
+    })
+
+    commit(RESET_PATH)
   },
   [GET_ENTITY_PACKAGES] ({commit, dispatch}: { commit: Function, dispatch: Function }, lookupId: string) {
     api.get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
       // At the moment each entity is stored in either a single package, or no package at all
       if (response.items.length > 0) {
         const entityType = response.items[0]
-        dispatch(GET_STATE_FOR_PACKAGE, entityType['package'].id)
+        const _package = entityType['package']
+        if (_package) {
+          dispatch(GET_STATE_FOR_PACKAGE, _package.id)
+        } else {
+          // In case entity is not in package fallback to searching for entity name.
+          const entityLabel = entityType.label
+          commit(SET_QUERY, entityLabel)
+          dispatch(QUERY_ENTITIES, entityLabel)
+        }
       } else {
         dispatch(RESET_STATE)
       }
@@ -194,7 +206,7 @@ export default {
       const packages = filterNonVisiblePackages(response.items)
 
       if (!selectedPackageId) {
-        resetToHome(commit, packages)
+        dispatch(RESET_STATE)
       } else {
         const selectedPackage = packages.find(function (packageItem) {
           return packageItem.id === selectedPackageId
@@ -202,7 +214,7 @@ export default {
 
         if (!selectedPackage) {
           commit(SET_ERROR, 'couldn\'t find package.')
-          resetToHome(commit, packages)
+          dispatch(RESET_STATE)
         } else {
           // Find child packages.
           const childPackages = packages.filter(function (packageItem) {

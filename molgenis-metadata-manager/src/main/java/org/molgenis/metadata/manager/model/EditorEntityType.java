@@ -47,9 +47,10 @@ public abstract class EditorEntityType
 
 	public static EditorEntityType create(String id, @Nullable String label, Map<String, String> i18nLabel,
 			@Nullable String description, Map<String, String> i18nDescription, boolean abstract_, String backend,
-			EditorPackageIdentifier package_, @Nullable EditorEntityTypeParent entityTypeParent,
-			List<EditorAttribute> attributes, List<EditorTagIdentifier> tags, EditorAttributeIdentifier idAttribute,
-			EditorAttributeIdentifier labelAttribute, List<EditorAttributeIdentifier> lookupAttributes)
+			@Nullable EditorPackageIdentifier package_, @Nullable EditorEntityTypeParent entityTypeParent,
+			List<EditorAttribute> attributes, List<EditorTagIdentifier> tags,
+			@Nullable EditorAttributeIdentifier idAttribute, @Nullable EditorAttributeIdentifier labelAttribute,
+			List<EditorAttributeIdentifier> lookupAttributes)
 	{
 		return new AutoValue_EditorEntityType(id, label, i18nLabel, description, i18nDescription, abstract_, backend,
 				package_, entityTypeParent, attributes, tags, idAttribute, labelAttribute, lookupAttributes);

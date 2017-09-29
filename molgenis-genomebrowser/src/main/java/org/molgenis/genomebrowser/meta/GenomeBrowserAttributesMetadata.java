@@ -10,7 +10,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 @Component
 public class GenomeBrowserAttributesMetadata extends SystemEntityType
 {
-	public static final String SIMPLE_NAME = "GenomeBrowserAttributesMetadata";
+	public static final String SIMPLE_NAME = "GenomeBrowserAttributes";
 
 	public static final String GENOMEBROWSERATTRIBUTES =
 			GenomeBrowserPackage.PACKAGE_GENOME_BROWSER + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -24,15 +24,19 @@ public class GenomeBrowserAttributesMetadata extends SystemEntityType
 	public static final String ALT = "alt";
 	public static final String STOP = "stop";
 
-	public GenomeBrowserAttributesMetadata()
+	private final GenomeBrowserPackage genomeBrowserPackage;
+
+	public GenomeBrowserAttributesMetadata(GenomeBrowserPackage genomeBrowserPackage)
 	{
 		super(SIMPLE_NAME, GenomeBrowserPackage.PACKAGE_GENOME_BROWSER);
+		this.genomeBrowserPackage = genomeBrowserPackage;
 	}
 
 	@Override
 	protected void init()
 	{
 		setLabel("Genome Browser Attributes");
+		setPackage(genomeBrowserPackage);
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier").setAuto(false).setNillable(false);
 		addAttribute(DEFAULT).setDataType(AttributeType.BOOL).setNillable(false).setLabel("Default configuration");
 		addAttribute(ORDER).setDataType(AttributeType.INT)

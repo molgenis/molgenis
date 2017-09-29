@@ -26,17 +26,23 @@ $.when($,
         var uri = '/api/v2/' + entityTypeId + '?num=10000&q='
         var rsql = molgenis.dataexplorer.getRSQL()
         var humanReadable = ''
+        alert(googleSearch)
         if (rsql && googleSearch) {
-            uri = uri + rsql + '&*=q=' + googleSearch
-            humanReadable = 'Free text search contains ' + googleSearch + ' and ' + molgenis.rsql.getHumanReadable(rsql)
+            alert("both")
+            uri = uri + rsql + ';*=q=' + encodeURIComponent(googleSearch)
+            alert(uri)
+            humanReadable = 'Free text search contains ' + decodeURIComponent(googleSearch) + ' and ' +
+              molgenis.rsql.getHumanReadable(rsql)
         }
         else if (rsql) {
+            alert("rsql")
             uri = uri + rsql
             humanReadable = molgenis.rsql.getHumanReadable(rsql)
         }
         else if (googleSearch) {
-            uri = uri + '*=q=' + googleSearch
-            humanReadable = 'Free text search contains ' + googleSearch
+            alert("googleSearch")
+            uri = uri + '*=q=' + encodeURIComponent(googleSearch)
+            humanReadable = 'Free text search contains ' + decodeURIComponent(googleSearch)
         }
         var collections = []
         restApi.getAsync(uri).then(function (response) {
@@ -58,7 +64,7 @@ $.when($,
                 molgenis.createAlert([{message: 'Please make sure your filters result in at least 1 row'}], 'warning')
             } else {
                 // when a query is edited more than once
-                console.log(url)
+                alert(url)
                 var request = {
                     URL: url,
                     collections: collections,
@@ -84,6 +90,8 @@ $.when($,
         $('#directory-export-button').on('click', function () {
             var url = window.location.href.replace(/&nToken=\w{32}/, '')
             var googleSearch = url.replace(/&filter=t.+/, '').split('value%5D=')[1]
+            alert(molgenis.dataexplorer.getRSQL())
+            alert(googleSearch)
             if (!molgenis.dataexplorer.getRSQL() && !googleSearch) {
                 // no filters selected yet
                 bootbox.alert(i18n.dataexplorer_directory_export_no_filters)
