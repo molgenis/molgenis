@@ -15,6 +15,7 @@ $.when($,
         self.setGenomeAttributes = setGenomeAttributes;
         self.getSelectedModule = getSelectedModule;
         self.getRSQL = getRSQL;
+        self.getSearchQuery = getSearchQuery
         self.getnToken = getnToken;
 
         var restApi = new molgenis.RestClient();
@@ -98,6 +99,10 @@ $.when($,
             // (CHROM = 1 AND POS = 1005001)
             // So here we should return the *translated* query.
             return createEntityQuery();
+        }
+
+        function getSearchQuery () {
+            return searchQuery
         }
 
         /**
