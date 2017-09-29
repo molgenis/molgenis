@@ -10,8 +10,7 @@ import javax.servlet.http.HttpSession;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
 
@@ -63,6 +62,17 @@ public class SecurityContextRegistryImplTest
 		HttpSession corruptHttpSession = when(mock(HttpSession.class).getId()).thenReturn(corruptHttpSessionId)
 																			  .getMock();
 		when(corruptHttpSession.getAttribute("SPRING_SECURITY_CONTEXT")).thenReturn("corruptSecurityContext");
+		securityContextRegistry.handleHttpSessionCreatedEvent(new HttpSessionCreatedEvent(corruptHttpSession));
+		assertNull(securityContextRegistry.getSecurityContext(corruptHttpSessionId));
+	}
+
+	@Test
+	public void testGetSecurityContextInvalidatedSession()
+	{
+		String corruptHttpSessionId = "invalidSessionId";
+		HttpSession corruptHttpSession = when(mock(HttpSession.class).getId()).thenReturn(corruptHttpSessionId)
+																			  .getMock();
+		doThrow(IllegalStateException.class).when(corruptHttpSession).getAttribute("SPRING_SECURITY_CONTEXT");
 		securityContextRegistry.handleHttpSessionCreatedEvent(new HttpSessionCreatedEvent(corruptHttpSession));
 		assertNull(securityContextRegistry.getSecurityContext(corruptHttpSessionId));
 	}

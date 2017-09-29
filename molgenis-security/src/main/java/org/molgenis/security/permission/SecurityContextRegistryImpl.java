@@ -43,7 +43,16 @@ public class SecurityContextRegistryImpl implements SecurityContextRegistry
 
 	private SecurityContext getSecurityContext(HttpSession httpSession)
 	{
-		Object securityContext = httpSession.getAttribute(SPRING_SECURITY_CONTEXT_KEY);
+		Object securityContext;
+		try
+		{
+			securityContext = httpSession.getAttribute(SPRING_SECURITY_CONTEXT_KEY);
+		}
+		catch (IllegalStateException e)
+		{
+			// session was invalidated
+			return null;
+		}
 		if (securityContext == null)
 		{
 			return null;
