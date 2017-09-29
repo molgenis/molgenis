@@ -29,7 +29,7 @@ $.when($,
         alert(googleSearch)
         if (rsql && googleSearch) {
             alert("both")
-            uri = uri + rsql + '*=q=' + encodeURIComponent(googleSearch)
+            uri = uri + rsql + ';*=q=' + encodeURIComponent(googleSearch)
             alert(uri)
             humanReadable = 'Free text search contains ' + decodeURIComponent(googleSearch) + ' and ' +
               molgenis.rsql.getHumanReadable(rsql)
