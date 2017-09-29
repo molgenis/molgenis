@@ -29,7 +29,7 @@
                         <phase>initialize</phase>
                         <configuration>
                             <nodeVersion>${node.version}</nodeVersion>
-                            <yarnVersion>${yarn.version}</yarnVersion>
+                            <yarnVersion>v0.24.5</yarnVersion>
                         </configuration>
                     </execution>
                     <execution>
