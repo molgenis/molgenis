@@ -18,10 +18,11 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="test",description=q="test",label=q="test"')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
+        payload: 'test',
         expectedMutations: [
           {type: SET_PACKAGES, payload: [package1, package2]}
         ]
@@ -54,11 +55,6 @@ describe('actions', () => {
 
     it('should fail creating the URI and call the SET_ERROR mutation', done => {
       const error = 'Double quotes not are allowed in queries, please use single quotes.'
-
-      const get = td.function('api.get')
-      td.when(get('/undefined')).thenResolve('ignore')
-      td.replace(api, 'get', get)
-
       const options = {
         payload: '"wrong query"',
         expectedMutations: [
@@ -71,12 +67,14 @@ describe('actions', () => {
 
     it('should fail the get and call the SET_ERROR mutation', done => {
       const error = 'failed to get'
+      const query = 'foobar'
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenReject(error)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
+        payload: query,
         expectedMutations: [
           {type: SET_ERROR, payload: error}
         ]

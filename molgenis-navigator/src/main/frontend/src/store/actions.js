@@ -120,16 +120,15 @@ export default {
       try {
         validateQuery(query)
         uri = getPackageQuery(query)
+        api.get(uri).then(response => {
+          commit(SET_PACKAGES, filterNonVisiblePackages(response.items))
+        }, error => {
+          commit(SET_ERROR, error)
+        })
       } catch (error) {
         commit(SET_ERROR, error.message)
       }
     }
-
-    api.get(uri).then(response => {
-      commit(SET_PACKAGES, filterNonVisiblePackages(response.items))
-    }, error => {
-      commit(SET_ERROR, error)
-    })
   },
   [QUERY_ENTITIES] ({commit}: { commit: Function }, query: string) {
     if (query) {
