@@ -27,7 +27,7 @@ $.when($,
         var rsql = molgenis.dataexplorer.getRSQL()
         var humanReadable = ''
         if (rsql && googleSearch) {
-            uri = uri + rsql + '&*=q=' + googleSearch
+            uri = uri + rsql + ';*=q=' + googleSearch
             humanReadable = 'Free text search contains ' + googleSearch + ' and ' + molgenis.rsql.getHumanReadable(rsql)
         }
         else if (rsql) {
