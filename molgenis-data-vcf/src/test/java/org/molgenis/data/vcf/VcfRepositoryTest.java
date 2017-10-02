@@ -3,12 +3,14 @@ package org.molgenis.data.vcf;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.vcf.VcfReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
 
@@ -51,6 +54,24 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 		InputStream in_no_data = VcfRepositoryTest.class.getResourceAsStream("/testnodata.vcf");
 		testNoData = new File(FileUtils.getTempDirectory(), "testnodata.vcf");
 		FileCopyUtils.copy(in_no_data, new FileOutputStream(testNoData));
+	}
+
+	// Regression test for https://github.com/molgenis/molgenis/issues/6528
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file; nested exception is java.io.IOException: error processing source")
+	public void testGetEntityType() throws IOException
+	{
+		VcfReaderFactory vcfReaderFactory = mock(VcfReaderFactory.class);
+		VcfReader vcfReader = mock(VcfReader.class);
+		doThrow(new IOException("error processing source")).when(vcfReader).getVcfMeta();
+		when(vcfReaderFactory.get()).thenReturn(vcfReader);
+
+		String entityTypeId = "entityTypeId";
+		VcfAttributes vcfAttributes = mock(VcfAttributes.class);
+		EntityTypeFactory entityTypeFactory = mock(EntityTypeFactory.class);
+		AttributeFactory attrMetaFactory = mock(AttributeFactory.class);
+		VcfRepository vcfRepository = new VcfRepository(vcfReaderFactory, entityTypeId, vcfAttributes,
+				entityTypeFactory, attrMetaFactory);
+		vcfRepository.getEntityType();
 	}
 
 	@Test
