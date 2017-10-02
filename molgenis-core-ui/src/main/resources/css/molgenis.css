@@ -22,7 +22,7 @@
 }
 
 body>.container-fluid {
-	padding-top: 55px;
+	padding-top: 55px !important;
 	margin-bottom: 3em;
 }
 
