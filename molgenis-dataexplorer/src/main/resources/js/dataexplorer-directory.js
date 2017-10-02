@@ -18,47 +18,39 @@ $.when($,
      * Retrieves the collectionID and biobankID of all entities remaining after filtering
      * Sends request to server, which posts to the negotiator
      */
-    function sendNegotiatorRequest() {
+    function sendNegotiatorRequest () {
         var entityTypeId = molgenis.dataexplorer.getSelectedEntityMeta().name
-        // Remove the nToken from the URL to prevent duplication on the negotiator side
-        var url = window.location.href.replace(/&nToken=\w{32}/, '')
-        var googleSearch = url.replace(/&filter=.+/, '').split('value%5D=')[1]
-        var uri = '/api/v2/' + entityTypeId + '?num=10000&q='
-        var rsql = molgenis.dataexplorer.getRSQL()
-        var humanReadable = ''
-        if (rsql && googleSearch) {
-            uri = uri + rsql + '&*=q=' + googleSearch
-            humanReadable = 'Free text search contains ' + googleSearch + ' and ' + molgenis.rsql.getHumanReadable(rsql)
+        var searchQuery = molgenis.dataexplorer.getSearchQuery()
+        var filter = molgenis.dataexplorer.getRSQL()
+
+        var rsqlParts = []
+        var humanReadableParts = []
+        if (searchQuery) {
+            rsqlParts.push('*=q=' + molgenis.rsql.toRsqlValue(searchQuery))
+            humanReadableParts.push('Free text search contains ' + searchQuery)
         }
-        else if (rsql) {
-            uri = uri + rsql
-            humanReadable = molgenis.rsql.getHumanReadable(rsql)
+        if (filter) {
+            rsqlParts.push(filter)
+            humanReadableParts.push(molgenis.rsql.getHumanReadable(filter))
         }
-        else if (googleSearch) {
-            uri = uri + '*=q=' + googleSearch
-            humanReadable = 'Free text search contains ' + googleSearch
-        }
-        var collections = []
+        var rsql = molgenis.rsql.encodeRsqlValue(rsqlParts.join(';'))
+        var humanReadable = humanReadableParts.join(' and ')
+        var uri = '/api/v2/' + entityTypeId + '?num=10000&attrs=id,biobank&q=' + rsql
+
         restApi.getAsync(uri).then(function (response) {
-            var collectionId, biobank, biobankId
-            $.each(response.items, function () {
-                var item = this
-
-                collectionId = item.id
-                biobank = item.biobank
-                biobankId = biobank ? biobank.id : null
-
-                collections.push({
-                    collectionId: collectionId,
-                    biobankId: biobankId
-                })
+            var collections = response.items.map(function (item) {
+                return {
+                    collectionId: item.id,
+                    biobankId: item.biobank ? item.biobank.id : null
+                }
             })
-
             if (collections.length === 0) {
                 molgenis.createAlert([{message: 'Please make sure your filters result in at least 1 row'}], 'warning')
             } else {
+                // Remove the nToken from the URL to prevent duplication on the negotiator side
                 // when a query is edited more than once
-                console.log(url)
+                var url = window.location.href.replace(/&nToken=\w{32}/, '')
+
                 var request = {
                     URL: url,
                     collections: collections,
@@ -82,9 +74,7 @@ $.when($,
 
     $(function () {
         $('#directory-export-button').on('click', function () {
-            var url = window.location.href.replace(/&nToken=\w{32}/, '')
-            var googleSearch = url.replace(/&filter=t.+/, '').split('value%5D=')[1]
-            if (!molgenis.dataexplorer.getRSQL() && !googleSearch) {
+            if (!molgenis.dataexplorer.getRSQL() && !molgenis.dataexplorer.getSearchQuery()) {
                 // no filters selected yet
                 bootbox.alert(i18n.dataexplorer_directory_export_no_filters)
                 return
