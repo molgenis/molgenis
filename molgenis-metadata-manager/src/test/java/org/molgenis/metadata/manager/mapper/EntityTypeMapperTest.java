@@ -11,6 +11,7 @@ import org.molgenis.metadata.manager.model.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +84,7 @@ public class EntityTypeMapperTest
 		List<EditorEntityTypeIdentifier> entityTypeChildren = of(
 				EditorEntityTypeIdentifier.create("entityTypeChild0", "entity type #0"));
 		List<EditorAttribute> editorAttributes = of(mock(EditorAttribute.class));
+		List<EditorAttributeIdentifier> editorReferringAttributes = of(mock(EditorAttributeIdentifier.class));
 		ImmutableList<EditorTagIdentifier> editorTags = of(EditorTagIdentifier.create("tag0", "tag #0"));
 		EditorAttributeIdentifier idAttribute = EditorAttributeIdentifier.create("idAttr", "id attribute");
 		EditorAttributeIdentifier labelAttribute = EditorAttributeIdentifier.create("labelAttr", "label attribute");
@@ -90,7 +92,7 @@ public class EntityTypeMapperTest
 				EditorAttributeIdentifier.create("attr0", "attribute #0"));
 
 		EditorEntityType editorEntityType = EditorEntityType.create(id, label, i18nLabel, description, i18nDescription,
-				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes, editorTags,
+				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes, editorReferringAttributes, editorTags,
 				idAttribute, labelAttribute, lookupAttributes);
 
 		EntityType entityType = mock(EntityType.class);
@@ -168,6 +170,7 @@ public class EntityTypeMapperTest
 		Map<String, String> i18nDescription = singletonMap(i18nDescriptionLangEn, i18nDescriptionValue);
 		boolean abstract_ = true;
 		String backend = "backend";
+		List<Attribute> referringAttributes = new ArrayList<>();
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(id);
@@ -207,6 +210,8 @@ public class EntityTypeMapperTest
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes)).thenReturn(
 				editorLookupAttributes);
 		@SuppressWarnings("unchecked")
+		ImmutableList<EditorAttributeIdentifier> editorReferringAttributes = mock(ImmutableList.class);
+		when(attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes)).thenReturn(editorReferringAttributes);
 		ImmutableList<EditorAttribute> editorAttributes = mock(ImmutableList.class);
 		when(attributeMapper.toEditorAttributes(attributes)).thenReturn(editorAttributes);
 		EditorEntityTypeParent editorEntityTypeParent = mock(EditorEntityTypeParent.class);
@@ -218,11 +223,11 @@ public class EntityTypeMapperTest
 		when(tagMapper.toEditorTags(tags)).thenReturn(editorTags);
 
 		when(entityTypeFactory.create()).thenReturn(entityType);
-		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 
 		EditorEntityType expectedEditorEntityType = EditorEntityType.create(id, label, i18nLabel, description,
 				i18nDescription, abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
-				editorTags, editorIdAttribute, editorLabelAttribute, editorLookupAttributes);
+				editorReferringAttributes, editorTags, editorIdAttribute, editorLabelAttribute, editorLookupAttributes);
 		assertEquals(editorEntityType, expectedEditorEntityType);
 	}
 
@@ -243,6 +248,8 @@ public class EntityTypeMapperTest
 		@SuppressWarnings("unchecked")
 		List<Attribute> lookupAttributes = mock(List.class);
 
+		List<Attribute> referringAttributes = mock(List.class);
+
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(id);
 		when(entityType.getBackend()).thenReturn(backend);
@@ -261,11 +268,12 @@ public class EntityTypeMapperTest
 		when(attributeReferenceMapper.toEditorAttributeIdentifier(labelAttribute)).thenReturn(editorLabelAttribute);
 		when(tagMapper.toEditorTags(tags)).thenReturn(ImmutableList.of());
 		when(attributeReferenceMapper.toEditorAttributeIdentifiers(lookupAttributes)).thenReturn(ImmutableList.of());
-		EditorEntityType editorEntityType = entityTypeMapper.createEditorEntityType();
+		when(attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes)).thenReturn(ImmutableList.of());
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 
 		assertEquals(editorEntityType,
 				EditorEntityType.create(id, null, ImmutableMap.of(), null, ImmutableMap.of(), false, backend, null,
-						null, ImmutableList.of(), ImmutableList.of(), editorIdAttribute, editorLabelAttribute,
-						ImmutableList.of()));
+						null, ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), editorIdAttribute,
+						editorLabelAttribute, ImmutableList.of()));
 	}
 }

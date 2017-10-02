@@ -168,13 +168,14 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	private EditorEntityType getEditorEntityType()
 	{
 		return EditorEntityType.create("id_1", null, ImmutableMap.of(), null, ImmutableMap.of(), false, "backend", null,
-				null, ImmutableList.of(), ImmutableList.of(), EditorAttributeIdentifier.create("id", "label"), EditorAttributeIdentifier.create("id", "label"),
+				null, ImmutableList.of(), ImmutableList.of(), ImmutableList.of(),
+				EditorAttributeIdentifier.create("id", "label"), EditorAttributeIdentifier.create("id", "label"),
 				ImmutableList.of());
 	}
 
 	private String getEditorEntityTypeJson()
 	{
-		return "{\"id\":\"id_1\",\"labelI18n\":{},\"descriptionI18n\":{},\"abstract0\":false,\"backend\":\"backend\",\"attributes\":[],\"tags\":[],\"idAttribute\":{\"id\":\"id\",\"label\":\"label\"},\"labelAttribute\":{\"id\":\"id\",\"label\":\"label\"},\"lookupAttributes\":[]}";
+		return "{\"id\":\"id_1\",\"labelI18n\":{},\"descriptionI18n\":{},\"abstract0\":false,\"backend\":\"backend\",\"attributes\":[],\"referringAttributes\":[],\"tags\":[],\"idAttribute\":{\"id\":\"id\",\"label\":\"label\"},\"labelAttribute\":{\"id\":\"id\",\"label\":\"label\"},\"lookupAttributes\":[]}";
 	}
 
 	private EditorAttributeResponse getEditorAttributeResponse()

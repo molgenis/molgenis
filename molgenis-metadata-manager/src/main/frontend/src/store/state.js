@@ -14,12 +14,14 @@ const state: State = {
     'id': '',
     'label': '',
     'attributes': [],
+    'referringAttributes': [],
     'lookupAttributes': []
   },
   initialEditorEntityType: {
     'id': '',
     'label': '',
     'attributes': [],
+    'referringAttributes': [],
     'lookupAttributes': []
   }
 }

@@ -1,5 +1,13 @@
 // @flow
-import type { EditorAttribute, Alert, State, EditorPackageIdentifier, EditorEntityType, Update, UpdateOrder } from '../flow.types'
+import type {
+  Alert,
+  EditorAttribute,
+  EditorEntityType,
+  EditorPackageIdentifier,
+  State,
+  Update,
+  UpdateOrder
+} from '../flow.types'
 import { INITIAL_STATE } from './state'
 
 export const SET_PACKAGES: string = '__SET_PACKAGES__'
@@ -107,6 +115,20 @@ export default {
     const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
+    const attr = state.editorEntityType.attributes[index]
+    if (key === 'type') {
+      if (attr.type === 'onetomany' || update.value === 'onetomany') {
+        attr.mappedByAttribute = null
+        attr.refEntityType = null
+        attr.orderBy = null
+      }
+      attr[key] = update.value
+    } else if (key === 'mappedByAttribute') {
+      if (update.value !== null && update.value.entity !== null) {
+        attr.refEntityType = update.value.entity
+        attr.orderBy = null
+      }
+    }
     state.editorEntityType.attributes[index][key] = update.value
   },
   /**

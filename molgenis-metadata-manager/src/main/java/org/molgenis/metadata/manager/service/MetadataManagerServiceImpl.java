@@ -3,9 +3,10 @@ package org.molgenis.metadata.manager.service;
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 
 @Component
@@ -44,16 +46,14 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 	@Override
 	public EditorEntityTypeResponse getEditorEntityType(String entityTypeId)
 	{
-		// metadataService.getEditorEntityType cannot be used due to https://github.com/molgenis/molgenis/issues/5783
-		EntityType entityType = metadataService.getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-				EntityType.class).findOneById(entityTypeId);
-
+		EntityType entityType = metadataService.getEntityTypeBypassingRegistry(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException("Unknown EntityType [" + entityTypeId + "]");
+			throw new UnknownEntityException(String.format("Unknown EntityType [%s]", entityTypeId));
 		}
-
-		return createEntityTypeResponse(entityType);
+		return createEntityTypeResponse(entityType, metadataService.getReferringAttributes(entityTypeId)
+																   .filter(EntityTypeUtils::isSingleReferenceType)
+																   .collect(toList()));
 	}
 
 	@Override
@@ -91,9 +91,9 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 		return createEntityTypeResponse(editorEntityType);
 	}
 
-	private EditorEntityTypeResponse createEntityTypeResponse(EntityType entityType)
+	private EditorEntityTypeResponse createEntityTypeResponse(EntityType entityType, List<Attribute> referringAttributes)
 	{
-		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType);
+		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 		return createEntityTypeResponse(editorEntityType);
 	}
 

@@ -27,8 +27,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
+import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
@@ -387,8 +386,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			return entityTypeId != null ? dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId,
-					getEntityTypeFetch(), EntityType.class) : null;
+			return getEntityTypeBypassingRegistry(entityTypeId);
 		}
 	}
 
@@ -402,8 +400,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			return entityTypeId != null ? dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId,
-					getEntityTypeFetch(), EntityType.class) : null;
+			return getEntityTypeBypassingRegistry(entityTypeId);
 		}
 	}
 
@@ -588,6 +585,19 @@ public class MetaDataServiceImpl implements MetaDataService
 						  .eq(EXTENDS, entityType)
 						  .findAll()
 						  .flatMap(this::getConcreteChildren);
+	}
+
+	@Override
+	public EntityType getEntityTypeBypassingRegistry(String entityTypeId)
+	{
+		return entityTypeId != null ? dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(),
+				EntityType.class) : null;
+	}
+
+	@Override
+	public Stream<Attribute> getReferringAttributes(String entityTypeId)
+	{
+		return dataService.findAll(ATTRIBUTE_META_DATA, QueryImpl.EQ(REF_ENTITY_TYPE, entityTypeId), Attribute.class);
 	}
 
 	/**

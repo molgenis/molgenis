@@ -36,6 +36,7 @@ export const toEntityType = (editorEntityType: Object): EditorEntityType => {
     'package0': editorEntityType.package0,
     'entityTypeParent': editorEntityType.entityTypeParent,
     'attributes': editorEntityType.attributes.map(attribute => toAttribute(attribute)),
+    'referringAttributes': editorEntityType.referringAttributes,
     'tags': editorEntityType.tags,
     'idAttribute': editorEntityType.idAttribute,
     'labelAttribute': editorEntityType.labelAttribute,
@@ -51,7 +52,7 @@ export const toAttribute = (attribute: Object): EditorAttribute => {
     'type': attribute.type,
     'parent': attribute.parent,
     'refEntityType': attribute.refEntityType,
-    'mappedByEntityType': attribute.mappedByEntityType,
+    'mappedByAttribute': attribute.mappedByAttribute,
     'orderBy': attribute.orderBy,
     'expression': attribute.expression,
     'nullable': attribute.nullable,
@@ -103,7 +104,7 @@ export default {
    */
   [GET_ATTRIBUTE_TYPES] ({commit}: { commit: Function }) {
     api.get('/api/v2/sys_md_Attribute/meta/type').then(response => {
-      commit(SET_ATTRIBUTE_TYPES, response.enumOptions.map((type) => type.toUpperCase()))
+      commit(SET_ATTRIBUTE_TYPES, response.enumOptions)
     }, error => {
       commit(CREATE_ALERT, {type: 'error', message: error})
     })

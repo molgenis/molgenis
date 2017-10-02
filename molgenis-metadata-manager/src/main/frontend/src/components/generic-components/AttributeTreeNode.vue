@@ -39,7 +39,7 @@
     },
     computed: {
       isFolder: function () {
-        return this.attribute.type === 'COMPOUND'
+        return this.attribute.type === 'compound'
       }
     }
   }
