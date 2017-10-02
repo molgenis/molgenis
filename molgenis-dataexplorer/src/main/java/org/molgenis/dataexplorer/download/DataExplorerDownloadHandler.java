@@ -29,6 +29,7 @@ import static java.util.Objects.requireNonNull;
 
 public class DataExplorerDownloadHandler
 {
+	// Magic value: https://github.com/molgenis/molgenis/issues/6687
 	private static final long MAX_EXCEL_CELLS = 500000L;
 	private final DataService dataService;
 	private final AttributeFactory attrMetaFactory;
