@@ -1,7 +1,10 @@
 package org.molgenis.dataexplorer.download;
 
+import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
@@ -26,6 +29,7 @@ import static java.util.Objects.requireNonNull;
 
 public class DataExplorerDownloadHandler
 {
+	private static final long MAX_EXCEL_CELLS = 500000L;
 	private final DataService dataService;
 	private final AttributeFactory attrMetaFactory;
 
@@ -40,6 +44,13 @@ public class DataExplorerDownloadHandler
 		String entityTypeId = dataRequest.getEntityName();
 
 		QueryImpl<Entity> query = dataRequest.getQuery();
+
+		if (getNumberOfCellsForEntityType(dataRequest.getEntityName(), dataRequest.getQuery()) >= MAX_EXCEL_CELLS)
+		{
+			throw new MolgenisDataException(String.format(
+					"Total number of cells for this download exceeds the maximum of %s for .xlsx downloads, please use .csv instead",
+					MAX_EXCEL_CELLS));
+		}
 		ExcelSheetWriter excelSheetWriter = null;
 		try (ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX))
 		{
@@ -74,6 +85,13 @@ public class DataExplorerDownloadHandler
 			excelSheetWriter.add(dataService.findAll(entityTypeId, query));
 			excelSheetWriter.close();
 		}
+	}
+
+	private long getNumberOfCellsForEntityType(String entityId, Query query)
+	{
+		long rows = dataService.count(entityId, query);
+		long columns = Iterables.size(dataService.getMeta().getEntityTypeById(entityId).getAllAttributes());
+		return rows * columns;
 	}
 
 	public void writeToCsv(DataRequest request, OutputStream outputStream, char separator) throws IOException
