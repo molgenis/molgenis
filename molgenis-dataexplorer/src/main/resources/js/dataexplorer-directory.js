@@ -27,7 +27,7 @@ $.when($,
         var rsql = molgenis.dataexplorer.getRSQL()
         var humanReadable = ''
         if (rsql && googleSearch) {
-            uri = uri + rsql + '&*=q=' + googleSearch
+            uri = uri + rsql + ';*=q=' + encodeURIComponent(googleSearch)
             humanReadable = 'Free text search contains ' + googleSearch + ' and ' + molgenis.rsql.getHumanReadable(rsql)
         }
         else if (rsql) {
@@ -35,7 +35,7 @@ $.when($,
             humanReadable = molgenis.rsql.getHumanReadable(rsql)
         }
         else if (googleSearch) {
-            uri = uri + '*=q=' + googleSearch
+            uri = uri + '*=q=' + encodeURIComponent(googleSearch)
             humanReadable = 'Free text search contains ' + googleSearch
         }
         var collections = []
