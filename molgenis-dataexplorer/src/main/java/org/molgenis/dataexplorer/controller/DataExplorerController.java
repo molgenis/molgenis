@@ -372,14 +372,15 @@ public class DataExplorerController extends PluginController
 					response.sendError(500, String.format(
 							"Total number of cells for this download exceeds the maximum of %s for .xlsx downloads, please use .csv instead",
 							MAX_EXCEL_CELLS));
-					break;
 				}
+				else
+				{
+					response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
-				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-
-				outputStream = response.getOutputStream();
-				download.writeToExcel(dataRequest, outputStream);
+					outputStream = response.getOutputStream();
+					download.writeToExcel(dataRequest, outputStream);
+				}
 				break;
 		}
 	}
