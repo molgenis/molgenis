@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.controller;
 
+import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.apache.commons.lang3.StringUtils;
@@ -75,6 +76,7 @@ public class DataExplorerController extends PluginController
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
 	public static final String NAVIGATOR = "navigator";
+	private static final Long MAX_EXCEL_CELLS = 500000L;
 
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
@@ -363,13 +365,31 @@ public class DataExplorerController extends PluginController
 				download.writeToCsv(dataRequest, outputStream, ',');
 				break;
 			case DOWNLOAD_TYPE_XLSX:
-				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
-				outputStream = response.getOutputStream();
-				download.writeToExcel(dataRequest, outputStream);
+				if (getNumberOfCellsForEntityType(dataRequest.getEntityName(), dataRequest.getQuery())
+						>= MAX_EXCEL_CELLS)
+				{
+					response.sendError(500, String.format(
+							"Total number of cells for this download exceeds the maximum of %s for .xlsx downloads, please use .csv instead",
+							MAX_EXCEL_CELLS));
+				}
+				else
+				{
+					response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+					outputStream = response.getOutputStream();
+					download.writeToExcel(dataRequest, outputStream);
+				}
 				break;
 		}
+	}
+
+	private Long getNumberOfCellsForEntityType(String entityId, Query query)
+	{
+		long rows = dataService.count(entityId, query);
+		long columns = Iterables.size(dataService.getMeta().getEntityTypeById(entityId).getAllAttributes());
+		return rows * columns;
 	}
 
 	public String getDownloadFilename(String entityTypeId, LocalDateTime localDateTime, DownloadType downloadType)
