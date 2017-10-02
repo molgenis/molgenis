@@ -89,6 +89,7 @@ public class Attribute extends StaticEntity
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
+		attrMetaCopy.setVisible(attrMeta.isVisible());
 		attrMetaCopy.setLabel(attrMeta.getLabel());
 		attrMetaCopy.setDescription(attrMeta.getDescription());
 		attrMetaCopy.setAggregatable(attrMeta.isAggregatable());

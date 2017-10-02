@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.testng.Assert.*;
 
 public class AttributeTest
@@ -110,5 +111,18 @@ public class AttributeTest
 						+ "$('type').eq('email')" + ".or($('type').eq('hyperlink'))" + ".or($('type').eq('int'))"
 						+ ".or($('type').eq('long'))" + ".or($('type').eq('string'))" + ".or($('type').isNull())" + ")"
 						+ ".and($('isNullable').eq(false))).value()");
+	}
+
+	// Regression test for https://github.com/molgenis/molgenis/issues/6566
+	@Test
+	public void testNewInstance()
+	{
+		AttributeFactory attributeFactory = mock(AttributeFactory.class);
+		when(attributeFactory.create()).thenReturn(mock(Attribute.class));
+
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.isVisible()).thenReturn(true);
+		Attribute attributeCopy = Attribute.newInstance(attribute, SHALLOW_COPY_ATTRS, attributeFactory);
+		verify(attributeCopy).setVisible(true);
 	}
 }
