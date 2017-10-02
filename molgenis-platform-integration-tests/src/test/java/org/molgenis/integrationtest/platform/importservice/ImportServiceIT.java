@@ -60,8 +60,11 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 
 	static final String ROLE_SU = "SU";
 	static final String ROLE_READ_PACKAGE = "ENTITY_READ_sys_md_Package";
+	static final String ROLE_COUNT_PACKAGE = "ENTITY_COUNT_sys_md_Package";
 	static final String ROLE_READ_ENTITY_TYPE = "ENTITY_READ_sys_md_EntityType";
+	static final String ROLE_COUNT_ENTITY_TYPE = "ENTITY_COUNT_sys_md_EntityType";
 	static final String ROLE_READ_ATTRIBUTE = "ENTITY_READ_sys_md_Attribute";
+	static final String ROLE_COUNT_ATTRIBUTE = "ENTITY_COUNT_sys_md_Attribute";
 	static final String ROLE_READ_TAG = "ENTITY_READ_sys_md_Tag";
 	static final String ROLE_COUNT_TAG = "ENTITY_COUNT_sys_md_Tag";
 	static final String ROLE_READ_OWNED = "ENTITY_READ_sys_sec_Owned";

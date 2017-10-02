@@ -13,6 +13,7 @@ import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.COUNT;
 
 public class RestControllerIT
 {
@@ -72,22 +73,22 @@ public class RestControllerIT
 		response = getWithoutToken("sys_FreemarkerTemplate");
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
-						equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
+						equalTo("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		response = getWithoutToken("sys_scr_ScriptType");
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
-						equalTo("No [COUNT] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
+						equalTo("No read permission on entity type 'Script type' with id 'sys_scr_ScriptType'"));
 
 		response = getWithoutToken("sys_sec_UserAuthority");
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
-						equalTo("No [COUNT] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
+						equalTo("No read permission on entity type 'User authority' with id 'sys_sec_UserAuthority'"));
 
 		response = getWithoutToken("sys_sec_GroupAuthority");
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
-						equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+						equalTo("No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -112,7 +113,7 @@ public class RestControllerIT
 		ValidatableResponse response = getWithToken("sys_sec_GroupAuthority", this.testUserToken);
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
-						equalTo("No [COUNT] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+						equalTo("No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -167,7 +168,7 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.message[0]",
-					   equalTo("No [WRITE] permission on entity type [Group authority] with id [sys_sec_GroupAuthority]"));
+					   equalTo("No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -211,7 +212,7 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.message[0]",
-					   equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
+					   equalTo("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		given().log()
 			   .uri()
@@ -222,7 +223,7 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.message[0]",
-					   equalTo("No [COUNT] permission on entity type [Freemarker template] with id [sys_FreemarkerTemplate]"));
+					   equalTo("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		// clean up after test
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
@@ -242,6 +243,36 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(NOT_FOUND)
 			   .body("errors.message[0]", equalTo("sys_FreemarkerTemplate test.csv not found"));
+	}
+
+	// Regression test for https://github.com/molgenis/molgenis/issues/6731
+	@Test
+	public void testRetrieveSystemEntityTypeNotAllowed()
+	{
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .get(PATH + "sys_sec_User/meta")
+			   .then()
+			   .statusCode(UNAUTHORIZED)
+			   .body("errors.message[0]", equalTo("No read permission on entity type 'User' with id 'sys_sec_User'"));
+	}
+
+	// Regression test for https://github.com/molgenis/molgenis/issues/6731
+	@Test(dependsOnMethods = { "testRetrieveSystemEntityTypeNotAllowed" })
+	public void testRetrieveSystemEntityType()
+	{
+		grantSystemRights(adminToken, testUserId, "sys_sec_User", COUNT);
+
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .get(PATH + "sys_sec_User/meta")
+			   .then()
+			   .statusCode(OKE)
+			   .body("name", equalTo("sys_sec_User"));
 	}
 
 	private ValidatableResponse getWithoutToken(String requestedEntity)
