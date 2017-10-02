@@ -48,7 +48,7 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 		this.roleHierarchy = requireNonNull(roleHierarchy);
 		this.dataService = requireNonNull(dataService);
 		this.principalSecurityContextRegistry = requireNonNull(principalSecurityContextRegistry);
-		this.authenticationAuthoritiesUpdater = authenticationAuthoritiesUpdater;
+		this.authenticationAuthoritiesUpdater = requireNonNull(authenticationAuthoritiesUpdater);
 	}
 
 	@Override
