@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserService;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,16 +36,19 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 	private final RoleHierarchy roleHierarchy;
 	private final DataService dataService;
 	private final PrincipalSecurityContextRegistry principalSecurityContextRegistry;
+	private final AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater;
 
 	public PermissionSystemServiceImpl(UserService userService, UserAuthorityFactory userAuthorityFactory,
 			RoleHierarchy roleHierarchy, DataService dataService,
-			PrincipalSecurityContextRegistry principalSecurityContextRegistry)
+			PrincipalSecurityContextRegistry principalSecurityContextRegistry,
+			AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater)
 	{
 		this.userService = requireNonNull(userService);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.roleHierarchy = requireNonNull(roleHierarchy);
 		this.dataService = requireNonNull(dataService);
 		this.principalSecurityContextRegistry = requireNonNull(principalSecurityContextRegistry);
+		this.authenticationAuthoritiesUpdater = authenticationAuthoritiesUpdater;
 	}
 
 	@Override
@@ -89,11 +91,9 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 		List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authorities);
 		updatedAuthorities.addAll(newAuthorities);
 
-		Authentication authentication = securityContext.getAuthentication();
-		UsernamePasswordAuthenticationToken newToken = new UsernamePasswordAuthenticationToken(
-				authentication.getPrincipal(), authentication.getCredentials(), updatedAuthorities);
-
-		securityContext.setAuthentication(newToken);
+		Authentication updatedAuthentication = authenticationAuthoritiesUpdater.updateAuthentication(
+				securityContext.getAuthentication(), updatedAuthorities);
+		securityContext.setAuthentication(updatedAuthentication);
 	}
 
 	private Collection<GrantedAuthority> getGrantedAuthorities(Collection<EntityType> entityTypeStream)

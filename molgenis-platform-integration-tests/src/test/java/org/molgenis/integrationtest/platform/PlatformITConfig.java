@@ -30,6 +30,7 @@ import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PermissionServiceImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
 import org.molgenis.security.permission.SecurityContextRegistryImpl;
@@ -86,10 +87,11 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class, PrincipalSecurityContextRegistryImpl.class,
-		SecurityContextRegistryImpl.class, org.molgenis.data.importer.ImportServiceRegistrar.class,
-		EntityTypeRegistryPopulator.class, PermissionServiceImpl.class, MolgenisRoleHierarchy.class,
-		SystemRepositoryDecoratorFactoryRegistrar.class, SemanticSearchConfig.class, OntologyConfig.class,
-		JobExecutionConfig.class, JobFactoryRegistrar.class, SystemEntityTypeRegistryImpl.class, })
+		AuthenticationAuthoritiesUpdaterImpl.class, SecurityContextRegistryImpl.class,
+		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
+		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
+		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
+		SystemEntityTypeRegistryImpl.class, })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
