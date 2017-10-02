@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.download;
 
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaDataService;
@@ -8,6 +9,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -18,18 +20,18 @@ import java.util.Collections;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DataExplorerDownloadHandlerTest
+public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest
 {
-	DataService dataService;
-	AttributeFactory attributeFactory;
+	@Mock
+	private DataService dataService;
+	@Mock
+	private AttributeFactory attributeFactory;
 
 	private DataExplorerDownloadHandler dataExplorerDownloadHandler;
 
 	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
-		dataService = mock(DataService.class);
-		attributeFactory = mock(AttributeFactory.class);
 		dataExplorerDownloadHandler = new DataExplorerDownloadHandler(dataService, attributeFactory);
 	}
 
