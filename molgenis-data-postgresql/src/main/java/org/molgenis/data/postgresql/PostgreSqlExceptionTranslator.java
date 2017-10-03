@@ -365,23 +365,40 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
 		String detailMessage = serverErrorMessage.getDetail();
-		Matcher matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
+		Matcher matcher = Pattern.compile("Key \\(\"?(.*?)\"?\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
 		boolean matches = matcher.matches();
 		if (matches)
 		{
-			// exception message when adding data that does not match constraint
-			String columnName = matcher.group(1);
-			String value = matcher.group(2);
+			ConstraintViolation constraintViolation;
 
-			ConstraintViolation constraintViolation = new ConstraintViolation(
-					format("Duplicate value '%s' for unique attribute '%s' from entity '%s'.", value,
-							getAttributeName(tableName, columnName), getEntityTypeName(tableName)), null);
+			// exception message when adding data that does not match constraint
+			String[] columnNames = matcher.group(1).split(", ");
+			if (columnNames.length == 1)
+			{
+				String columnName = columnNames[0];
+				String value = matcher.group(2);
+
+				constraintViolation = new ConstraintViolation(
+						format("Duplicate value '%s' for unique attribute '%s' from entity '%s'.", value,
+								getAttributeName(tableName, columnName), getEntityTypeName(tableName)), null);
+			}
+			else
+			{
+				String columnName = columnNames[columnNames.length - 1];
+				String[] values = matcher.group(2).split(", ");
+				String idValue = values[0];
+				String value = values[1];
+
+				constraintViolation = new ConstraintViolation(
+						format("Duplicate list value '%s' for attribute '%s' from entity '%s' with id '%s'.", value,
+								getAttributeName(tableName, columnName), getEntityTypeName(tableName), idValue), null);
+			}
 			return new MolgenisValidationException(singleton(constraintViolation));
 		}
 		else
 		{
 			// exception message when applying constraint on existing data
-			matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) is duplicated.").matcher(detailMessage);
+			matcher = Pattern.compile("Key \\(\"?(.*?)\"?\\)=\\((.*?)\\) is duplicated.").matcher(detailMessage);
 			matches = matcher.matches();
 			if (matches)
 			{
