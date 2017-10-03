@@ -5,6 +5,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -72,10 +73,9 @@ public class VcfRepository extends AbstractRepository
 			VcfMeta vcfMeta = reader.getVcfMeta();
 			return new VcfToEntity(entityTypeId, vcfMeta, vcfAttributes, entityTypeFactory, attrMetaFactory);
 		}
-		catch (Exception e)
+		catch (IOException | RuntimeException e)
 		{
-			LOG.error("Failed to read VCF Metadata from file", e);
-			return null;
+			throw new MolgenisDataException("Failed to read VCF Metadata from file", e);
 		}
 		finally
 		{
