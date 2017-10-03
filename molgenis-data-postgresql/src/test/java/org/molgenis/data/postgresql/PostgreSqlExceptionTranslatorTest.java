@@ -232,6 +232,21 @@ public class PostgreSqlExceptionTranslatorTest
 		assertEquals(e.getMessage(), "Duplicate value 'myValue' for unique attribute 'myAttr' from entity 'myEntity'.");
 	}
 
+	@Test
+	public void translateUniqueKeyViolationCompositeKey()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("23505");
+		when(serverErrorMessage.getTable()).thenReturn("myTable");
+		when(serverErrorMessage.getDetail()).thenReturn(
+				"Key (myIdColumn, myColumn)=(myIdValue, myValue) already exists.");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = postgreSqlExceptionTranslator.translateUniqueKeyViolation(
+				new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(),
+				"Duplicate list value 'myValue' for attribute 'myAttr' from entity 'myEntity' with id 'myIdValue'.");
+	}
+
 	@Test(expectedExceptions = RuntimeException.class)
 	public void translateUniqueKeyViolationBadMessage()
 	{
