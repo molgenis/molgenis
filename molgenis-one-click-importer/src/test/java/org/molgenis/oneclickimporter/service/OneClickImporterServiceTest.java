@@ -26,15 +26,13 @@ import static org.testng.Assert.*;
 
 public class OneClickImporterServiceTest
 {
-	@Mock
-	private CsvService csvService;
 	private OneClickImporterService oneClickImporterService;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		initMocks(this);
-		oneClickImporterService = new OneClickImporterServiceImpl(csvService);
+		oneClickImporterService = new OneClickImporterServiceImpl();
 	}
 
 	@Test
@@ -131,7 +129,7 @@ public class OneClickImporterServiceTest
 	public void testBuildDataCollectionWithSimpleValidCsvFile() throws IOException, URISyntaxException
 	{
 
-		oneClickImporterService = new OneClickImporterServiceImpl(csvService);
+		oneClickImporterService = new OneClickImporterServiceImpl();
 
 		List<String[]> lines = loadLinesFromFile(OneClickImporterServiceTest.class, "/simple-valid.csv");
 		DataCollection actual = oneClickImporterService.buildDataCollectionFromCsv("simple-valid", lines);
@@ -147,7 +145,7 @@ public class OneClickImporterServiceTest
 	@Test
 	public void testBuildDataCollectionWithComplexValidCsvFile() throws IOException, URISyntaxException
 	{
-		oneClickImporterService = new OneClickImporterServiceImpl(csvService);
+		oneClickImporterService = new OneClickImporterServiceImpl();
 
 		List<String[]> lines = loadLinesFromFile(OneClickImporterServiceTest.class, "/complex-valid.csv");
 		DataCollection actual = oneClickImporterService.buildDataCollectionFromCsv("complex-valid", lines);
@@ -162,7 +160,7 @@ public class OneClickImporterServiceTest
 						"Mariska Slofstra", "Tommy de Boer", "Connor Stroomberg", "Piet Klaassen", null));
 		Column c4 = Column.create("UMCG employee", 3,
 				newArrayList(true, true, true, true, true, true, true, true, false, false));
-		Column c5 = Column.create("Age", 4, newArrayList(26, null, null, null, null, 22, 27, null, 53, 32));
+		Column c5 = Column.create("Age", 4, newArrayList(26.4f, null, null, null, null, 22, 27, null, 53, 0.123f));
 
 		DataCollection expected = DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5));
 		assertEquals(actual, expected);
