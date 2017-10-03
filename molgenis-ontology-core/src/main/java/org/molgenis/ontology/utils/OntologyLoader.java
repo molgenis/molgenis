@@ -92,8 +92,8 @@ public class OntologyLoader
 		Set<OWLClass> listOfTopClasses = new HashSet<>();
 		for (OWLClass cls : ontology.getClassesInSignature())
 		{
-			if (ontology.getSubClassAxiomsForSubClass(cls).size() == 0
-					&& ontology.getEquivalentClassesAxioms(cls).size() == 0) listOfTopClasses.add(cls);
+			if (ontology.getSubClassAxiomsForSubClass(cls).isEmpty() && ontology.getEquivalentClassesAxioms(cls)
+																				.isEmpty()) listOfTopClasses.add(cls);
 		}
 		return listOfTopClasses;
 	}
@@ -147,9 +147,10 @@ public class OntologyLoader
 		{
 			if (ifExistsAnnotation(owlObjectProperty.toString(), "id"))
 			{
-				for (String annotation : getAnnotation(entity, owlObjectProperty.getIRI().toString()))
+				Set<String> annotation = getAnnotation(entity, owlObjectProperty.getIRI().toString());
+				if (!annotation.isEmpty())
 				{
-					return annotation;
+					return annotation.iterator().next();
 				}
 			}
 		}
@@ -187,9 +188,10 @@ public class OntologyLoader
 	{
 		for (String definitionProperty : ontologyTermDefinitions)
 		{
-			for (String definition : getAnnotation(cls, definitionProperty))
+			Set<String> annotation = getAnnotation(cls, definitionProperty);
+			if (!annotation.isEmpty())
 			{
-				return definition;
+				return annotation.iterator().next();
 			}
 		}
 		return StringUtils.EMPTY;
@@ -197,11 +199,15 @@ public class OntologyLoader
 
 	public String getLabel(OWLEntity entity)
 	{
-		for (String annotation : getAnnotation(entity, OWLRDFVocabulary.RDFS_LABEL.toString()))
+		Set<String> annotation = getAnnotation(entity, OWLRDFVocabulary.RDFS_LABEL.toString());
+		if (!annotation.isEmpty())
 		{
-			return annotation;
+			return annotation.iterator().next();
 		}
-		return extractOWLClassId(entity);
+		else
+		{
+			return extractOWLClassId(entity);
+		}
 	}
 
 	private Set<String> getAnnotation(OWLEntity entity, String property)
