@@ -233,6 +233,19 @@ public class PostgreSqlExceptionTranslatorTest
 	}
 
 	@Test
+	public void translateUniqueKeyViolationDoubleQuotes()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("23505");
+		when(serverErrorMessage.getTable()).thenReturn("myTable");
+		when(serverErrorMessage.getDetail()).thenReturn("Key (\"myColumn\")=(myValue) already exists.");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = postgreSqlExceptionTranslator.translateUniqueKeyViolation(
+				new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Duplicate value 'myValue' for unique attribute 'myAttr' from entity 'myEntity'.");
+	}
+
+	@Test
 	public void translateUniqueKeyViolationCompositeKey()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
@@ -245,6 +258,32 @@ public class PostgreSqlExceptionTranslatorTest
 				new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(),
 				"Duplicate list value 'myValue' for attribute 'myAttr' from entity 'myEntity' with id 'myIdValue'.");
+	}
+
+	@Test
+	public void translateUniqueKeyViolationKeyIsDuplicated()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("23505");
+		when(serverErrorMessage.getTable()).thenReturn("myTable");
+		when(serverErrorMessage.getDetail()).thenReturn("Key (myColumn)=(myValue) is duplicated.");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = postgreSqlExceptionTranslator.translateUniqueKeyViolation(
+				new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "The attribute 'myAttr' of entity 'myEntity' contains duplicate value 'myValue'.");
+	}
+
+	@Test
+	public void translateUniqueKeyViolationKeyIsDuplicatedDoubleQuotes()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("23505");
+		when(serverErrorMessage.getTable()).thenReturn("myTable");
+		when(serverErrorMessage.getDetail()).thenReturn("Key (\"myColumn\")=(myValue) is duplicated.");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = postgreSqlExceptionTranslator.translateUniqueKeyViolation(
+				new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "The attribute 'myAttr' of entity 'myEntity' contains duplicate value 'myValue'.");
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)

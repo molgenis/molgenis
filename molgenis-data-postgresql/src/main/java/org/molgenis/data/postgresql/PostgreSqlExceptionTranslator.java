@@ -365,7 +365,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
 		String detailMessage = serverErrorMessage.getDetail();
-		Matcher matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
+		Matcher matcher = Pattern.compile("Key \\(\"?(.*?)\"?\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
 		boolean matches = matcher.matches();
 		if (matches)
 		{
@@ -398,7 +398,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		else
 		{
 			// exception message when applying constraint on existing data
-			matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) is duplicated.").matcher(detailMessage);
+			matcher = Pattern.compile("Key \\(\"?(.*?)\"?\\)=\\((.*?)\\) is duplicated.").matcher(detailMessage);
 			matches = matcher.matches();
 			if (matches)
 			{
