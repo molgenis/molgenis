@@ -1,5 +1,6 @@
 package org.molgenis.data.semanticsearch.string;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +37,7 @@ public class NGramDistanceAlgorithm
 
 	static
 	{
-		STOPWORDSLIST = Sets.newHashSet("a", "you", "about", "above", "after", "again", "against", "all", "am", "an",
+		STOPWORDSLIST = ImmutableSet.of("a", "you", "about", "above", "after", "again", "against", "all", "am", "an",
 				"and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below",
 				"between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does",
 				"doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't",
