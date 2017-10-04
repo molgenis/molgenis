@@ -395,4 +395,28 @@ describe('mutations', () => {
       expect(state.editorEntityType.attributes).to.deep.equal(expected)
     })
   })
+
+  describe('Testing mutation SET_LOADING', () => {
+    it('should set loading to true', () => {
+      const state = {
+        loading: 0
+      }
+
+      const expected = 1
+
+      mutations.__SET_LOADING__(state, true)
+      expect(state.loading).to.equal(expected)
+    })
+
+    it('should set loading to false', () => {
+      const state = {
+        loading: 1
+      }
+
+      const expected = 0
+
+      mutations.__SET_LOADING__(state, false)
+      expect(state.loading).to.equal(expected)
+    })
+  })
 })

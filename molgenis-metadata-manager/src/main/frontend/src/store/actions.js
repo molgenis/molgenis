@@ -81,7 +81,6 @@ export const toAttribute = (attribute: Object): EditorAttribute => {
 const withSpinner = (commit, promise) => {
   commit(SET_LOADING, true)
   promise.catch(error => {
-    console.log(error)
     commit(CREATE_ALERT, {type: 'error', message: error})
   }).then(() => commit(SET_LOADING, false), 1000)
 }
