@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
 import static org.testng.Assert.assertEquals;
 
@@ -23,13 +24,13 @@ public class GenomeBrowserTrackTest
 		GenomeBrowserTrack reference = GenomeBrowserTrack.create("ref_id", "label", "ref_label", entity, VARIANT, null,
 				GenomeBrowserSettings.MolgenisReferenceMode.NONE, genomeBrowserAttributes, null, null, null, null);
 
-		EntityType molgenisEntity = mock(EntityType.class);
-		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "label", "entityLabel", molgenisEntity, VARIANT,
+		EntityType molgenisEntityType = when(mock(EntityType.class).getId()).thenReturn("molgenisEntityType").getMock();
+		GenomeBrowserTrack track = GenomeBrowserTrack.create("id", "label", "entityLabel", molgenisEntityType, VARIANT,
 				Collections.singletonList(reference), GenomeBrowserSettings.MolgenisReferenceMode.NONE,
 				genomeBrowserAttributes, "alert(\"test\")",
 				"attr 1:attr1,reference attribute:REF,position on genome:POS", null, null);
 
-		String expected = "{\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"postion\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"name\":\"label\",\"label_attr\":\"entityLabel\",\"tier_type\":\"molgenis\",\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"]}";
+		String expected = "{\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"postion\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"name\":\"label\",\"label_attr\":\"entityLabel\",\"tier_type\":\"molgenis\",\"uri\":\"/api/v2/molgenisEntityType\",\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"entity\":\"molgenisEntityType\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"]}";
 
 		assertEquals(track.toTrackJson().toString(), expected);
 	}
