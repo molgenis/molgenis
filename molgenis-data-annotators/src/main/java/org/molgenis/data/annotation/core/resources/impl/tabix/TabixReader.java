@@ -41,8 +41,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class TabixReader
 {
-	public String filename;
-	public BlockCompressedInputStream blockCompressedInputStream;
+	private String filename;
+	private BlockCompressedInputStream blockCompressedInputStream;
 
 	private int mPreset;
 	private int mSc;
@@ -53,7 +53,7 @@ public class TabixReader
 	private String[] mSeq;
 	private TIndex[] mIndex;
 
-	public HashMap<String, Integer> mChr2tid;
+	private HashMap<String, Integer> mChr2tid;
 
 	private static int MAX_BIN = 37450;
 	private static int TAD_MIN_CHUNK_GAP = 32768;
