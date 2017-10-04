@@ -25,19 +25,6 @@ describe('Navigator', () => {
     })
   })
 
-  describe('clearQuery', () => {
-    it('should clear the query and dispatch a call to fetch all packages', () => {
-      Navigator.methods.$store = {
-        dispatch: sinon.spy(),
-        commit: sinon.spy()
-      }
-
-      Navigator.methods.clearQuery('foobar')
-      Navigator.methods.$store.commit.should.have.been.calledWith('__SET_QUERY__', undefined)
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_PACKAGES__')
-    })
-  })
-
   describe('selectPackage', () => {
     Navigator.methods.$store = {
       state: {},
@@ -71,6 +58,19 @@ describe('Navigator', () => {
     it('should should return false if the item is not last item in the list', () => {
       expect(Navigator.methods.isLast(list, item2)).to.equal(false)
       expect(Navigator.methods.isLast(list, item1)).to.equal(false)
+    })
+  })
+
+  describe('reset', () => {
+    it('should clear the query and dispatch a call to reset the state', () => {
+      Navigator.methods.$store = {
+        dispatch: sinon.spy(),
+        commit: sinon.spy()
+      }
+
+      Navigator.methods.reset('foobar')
+      Navigator.methods.$store.commit.should.have.been.calledWith('__SET_QUERY__', undefined)
+      Navigator.methods.$store.dispatch.should.have.been.calledWith('__RESET_STATE__')
     })
   })
 })

@@ -1,5 +1,6 @@
 package org.molgenis.oneclickimporter.service.impl;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -9,7 +10,6 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.CsvService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Boolean.parseBoolean;
-import static java.lang.Integer.parseInt;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
@@ -33,13 +32,6 @@ import static org.apache.poi.util.LocaleUtil.setUserTimeZone;
 @Component
 public class OneClickImporterServiceImpl implements OneClickImporterService
 {
-	private final CsvService csvService;
-
-	public OneClickImporterServiceImpl(CsvService csvService)
-	{
-		this.csvService = Objects.requireNonNull(csvService);
-	}
-
 	@Override
 	public List<DataCollection> buildDataCollectionsFromExcel(List<Sheet> sheets)
 	{
@@ -183,7 +175,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 
 		if (isNumber(part))
 		{
-			return parseInt(part);
+			return NumberUtils.createNumber(part);
 		}
 
 		return part;

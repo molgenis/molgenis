@@ -87,9 +87,12 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 		}).filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
+	/**
+	 * See {@link Permission#COUNT} for an explanation why we are not using {@link Permission#READ} here
+	 */
 	private boolean isReadAllowed(SystemEntityType systemEntityType)
 	{
-		return permissionService.hasPermissionOnEntityType(systemEntityType.getId(), Permission.READ);
+		return permissionService.hasPermissionOnEntityType(systemEntityType.getId(), Permission.COUNT);
 	}
 
 	private void validateReadPermission(SystemEntityType systemEntityType)
@@ -97,7 +100,8 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 		if (!isReadAllowed(systemEntityType))
 		{
 			throw new MolgenisDataAccessException(
-					format("No read permission on entity type '%s'", systemEntityType.getId()));
+					format("No read permission on entity type '%s' with id '%s'", systemEntityType.getLabel(),
+							systemEntityType.getId()));
 		}
 	}
 

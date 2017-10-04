@@ -11,7 +11,8 @@ import {
   SET_PACKAGES,
   SET_SELECTED_ATTRIBUTE_ID,
   SET_SELECTED_ENTITY_TYPE_ID,
-  UPDATE_EDITOR_ENTITY_TYPE
+  UPDATE_EDITOR_ENTITY_TYPE,
+  SET_LOADING
 } from 'store/mutations'
 
 import actions, { toAttribute, toEntityType } from 'store/actions'
@@ -40,6 +41,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: SET_PACKAGES, payload: response}
         ]
       }
@@ -54,6 +56,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }
@@ -79,6 +82,7 @@ describe('actions', () => {
       const options = {
         state: {route: {params: {}}},
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: SET_ENTITY_TYPES, payload: response.items}
         ]
       }
@@ -93,6 +97,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }
@@ -113,7 +118,8 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: SET_ATTRIBUTE_TYPES, payload: ['STRING', 'INT', 'XREF']}
+          {type: SET_LOADING, payload: true},
+          {type: SET_ATTRIBUTE_TYPES, payload: ['string', 'int', 'xref']}
         ]
       }
 
@@ -127,6 +133,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }
@@ -155,6 +162,7 @@ describe('actions', () => {
       const options = {
         payload: entityTypeId,
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: SET_EDITOR_ENTITY_TYPE, payload: payload}
         ]
       }
@@ -170,6 +178,7 @@ describe('actions', () => {
       const options = {
         payload: entityTypeId,
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }
@@ -196,6 +205,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: SET_EDITOR_ENTITY_TYPE, payload: payload}
         ]
       }
@@ -210,6 +220,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }
@@ -241,6 +252,7 @@ describe('actions', () => {
         payload: '1',
         state: state,
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: SET_ENTITY_TYPES, payload: [{id: '2'}]},
           {type: SET_SELECTED_ENTITY_TYPE_ID, payload: null},
           {type: SET_SELECTED_ATTRIBUTE_ID, payload: null},
@@ -261,6 +273,7 @@ describe('actions', () => {
         payload: '1',
         state: state,
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }
@@ -295,6 +308,7 @@ describe('actions', () => {
       const options = {
         state: state,
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {
             type: UPDATE_EDITOR_ENTITY_TYPE,
             payload: {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]}
@@ -313,6 +327,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }
@@ -344,6 +359,7 @@ describe('actions', () => {
       const options = {
         state: state,
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: payload}
         ]
       }
@@ -364,6 +380,7 @@ describe('actions', () => {
       const options = {
         state: state,
         expectedMutations: [
+          {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}
         ]
       }

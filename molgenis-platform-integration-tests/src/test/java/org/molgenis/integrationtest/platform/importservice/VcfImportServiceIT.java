@@ -34,7 +34,8 @@ public class VcfImportServiceIT extends ImportServiceIT
 		return user;
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
+	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
+			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
 	@Test
 	public void testDoImportVcfWithoutSamplesAsNonSuperuser()
 	{
@@ -104,7 +105,8 @@ public class VcfImportServiceIT extends ImportServiceIT
 		assertEquals(lastRow.getString("SAS_AF"), "0.0");
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
+	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
+			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
 	@Test
 	public void testDoImportVcfWithSamplesAsNonSuperuser()
 	{
@@ -189,7 +191,8 @@ public class VcfImportServiceIT extends ImportServiceIT
 		assertEquals(lastRowSample.getString(VcfAttributes.FORMAT_GT), "1|1");
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_READ_ENTITY_TYPE, ROLE_READ_ATTRIBUTE })
+	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
+			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
 	@Test
 	public void testDoImportVcfGzWithSamplesAsNonSuperuser()
 	{

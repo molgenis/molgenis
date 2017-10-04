@@ -130,11 +130,5 @@
             </exclusions>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-one-click-importer</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

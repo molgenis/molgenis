@@ -15,6 +15,7 @@ $.when($,
         self.setGenomeAttributes = setGenomeAttributes;
         self.getSelectedModule = getSelectedModule;
         self.getRSQL = getRSQL;
+        self.getSearchQuery = getSearchQuery
         self.getnToken = getnToken;
 
         var restApi = new molgenis.RestClient();
@@ -98,6 +99,10 @@ $.when($,
             // (CHROM = 1 AND POS = 1005001)
             // So here we should return the *translated* query.
             return createEntityQuery();
+        }
+
+        function getSearchQuery () {
+            return searchQuery
         }
 
         /**
@@ -302,6 +307,7 @@ $.when($,
             // get entity meta data and update header and tree
             var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
                 selectedEntityMetaData = entityMetaData;
+                selectedAttributes = [];
                 self.createHeader(entityMetaData);
 
                 // Loop through all the attributes in the meta data
@@ -545,6 +551,9 @@ $.when($,
                     var queryRuleRSQL = molgenis.createRsqlQuery(rules)
                     state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
                     pushState()
+                } else if (rules.length === 0) { // Filter wizard triggers updateAttributeFilters with an empty rule list, cleanup state when this happens
+                  delete state.filter
+                  pushState()
                 }
 
                 self.filter.createFilterQueryUserReadableList(attributeFilters);

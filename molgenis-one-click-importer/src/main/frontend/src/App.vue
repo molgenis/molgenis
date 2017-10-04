@@ -1,5 +1,5 @@
 <template>
-      <div id="molgenis-one-click-importer">
+      <div id="molgenis-one-click-importer" class="pt-3">
         <one-click-importer></one-click-importer>
       </div>
 </template>

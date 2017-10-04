@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.ImmutableList;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.molgenis.data.*;
@@ -8,6 +9,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -22,7 +24,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
@@ -37,6 +41,7 @@ public class MetaDataServiceImplTest
 	private RepositoryCollectionRegistry repoCollectionRegistry;
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private PackagePersister packagePersister;
+	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -44,7 +49,7 @@ public class MetaDataServiceImplTest
 		dataService = mock(DataService.class);
 		repoCollectionRegistry = mock(RepositoryCollectionRegistry.class);
 
-		SystemEntityTypeRegistry systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
+		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
 		entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		packagePersister = mock(PackagePersister.class);
 		metaDataServiceImpl = new MetaDataServiceImpl(dataService, repoCollectionRegistry, systemEntityTypeRegistry,
@@ -420,15 +425,62 @@ public class MetaDataServiceImplTest
 				eq(EntityType.class))).thenReturn(entityType);
 
 		assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), entityType);
+		verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
+	}
+
+	@Test
+	public void getEntityTypeNull()
+	{
+		assertNull(metaDataServiceImpl.getEntityType(null));
 	}
 
 	@Test
 	public void getEntityTypeUnknownEntity()
 	{
 		String entityTypeId = "entity";
-		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class),
-				eq(EntityType.class))).thenReturn(null);
+
 		assertNull(metaDataServiceImpl.getEntityType(entityTypeId));
+
+		verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
+		verify(dataService).findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(), EntityType.class);
+	}
+
+	@Test
+	public void getSystemEntityTypeFromRegistry()
+	{
+		String systemEntityTypeId = "sys_blah_MySystemEntityType";
+		SystemEntityType systemEntityType = mock(SystemEntityType.class);
+
+		when(systemEntityTypeRegistry.getSystemEntityType(systemEntityTypeId)).thenReturn(systemEntityType);
+		assertEquals(metaDataServiceImpl.getEntityType(systemEntityTypeId), systemEntityType);
+
+		verifyZeroInteractions(dataService);
+	}
+
+	@Test
+	public void getSystemEntityTypeBypassingRegistry()
+	{
+		String systemEntityTypeId = "sys_blah_MySystemEntityType";
+		SystemEntityType systemEntityType = mock(SystemEntityType.class);
+		when(dataService.findOneById(ENTITY_TYPE_META_DATA, systemEntityTypeId, getEntityTypeFetch(), EntityType.class))
+				.thenReturn(systemEntityType);
+
+		assertEquals(metaDataServiceImpl.getEntityTypeBypassingRegistry(systemEntityTypeId), systemEntityType);
+		verifyZeroInteractions(systemEntityTypeRegistry);
+	}
+
+	@Test
+	public void testGetReferringAttributes()
+	{
+		String entityTypeId = "entityTypeId";
+		Attribute attr1 = mock(Attribute.class);
+		Attribute attr2 = mock(Attribute.class);
+
+		Query<Attribute> query = new QueryImpl<Attribute>().eq(REF_ENTITY_TYPE, entityTypeId);
+		when(dataService.findAll(ATTRIBUTE_META_DATA, query, Attribute.class)).thenReturn(Stream.of(attr1, attr2));
+
+		assertEquals(metaDataServiceImpl.getReferringAttributes(entityTypeId).collect(toList()),
+				ImmutableList.of(attr1, attr2));
 	}
 
 	@Test

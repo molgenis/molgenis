@@ -6,20 +6,28 @@
         <hr>
       </div>
     </div>
-
-    <div class="row">
+    <div v-if="loading" class="row">
       <div class="col">
-        <div v-if="editorEntityType && editorEntityType.id !== ''">
-          <metadata-manager-entity-edit-form ></metadata-manager-entity-edit-form>
-          <hr>
+        <div class="row">
+          <spinner></spinner>
         </div>
-        <h4 v-else class="text-muted text-center">{{ 'no-entity-type-selected-text' | i18n }}</h4>
       </div>
     </div>
-
-    <div class="row">
-      <div class="col">
-        <metadata-manager-attribute-edit-form v-if="editorEntityType && editorEntityType.id !== ''"></metadata-manager-attribute-edit-form>
+    <div v-else>
+      <div class="row">
+        <div class="col">
+          <div v-if="editorEntityType && editorEntityType.id !== ''">
+            <metadata-manager-entity-edit-form></metadata-manager-entity-edit-form>
+            <hr>
+          </div>
+          <h4 v-else class="text-muted text-center">{{ 'no-entity-type-selected-text' | i18n }}</h4>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <metadata-manager-attribute-edit-form
+            v-if="editorEntityType && editorEntityType.id !== ''"></metadata-manager-attribute-edit-form>
+        </div>
       </div>
     </div>
   </div>
@@ -29,6 +37,7 @@
   import MetadataManagerHeader from './MetadataManagerHeader'
   import MetadataManagerEntityEditForm from './MetadataManagerEntityEditForm'
   import MetadataManagerAttributeEditForm from './MetadataManagerAttributeEditForm'
+  import Spinner from './generic-components/Spinner'
 
   import { SET_SELECTED_ENTITY_TYPE_ID, SET_SELECTED_ATTRIBUTE_ID } from '../store/mutations'
   import { GET_ENTITY_TYPES, GET_PACKAGES, GET_ATTRIBUTE_TYPES, GET_EDITOR_ENTITY_TYPE } from '../store/actions'
@@ -37,7 +46,7 @@
   export default {
     name: 'metadata-manager',
     computed: {
-      ...mapState(['alert', 'editorEntityType']),
+      ...mapState(['alert', 'editorEntityType', 'loading']),
       ...mapGetters({
         selectedEntityType: 'getSelectedEntityType',
         selectedAttribute: 'getSelectedAttribute'
@@ -89,7 +98,8 @@
     components: {
       MetadataManagerHeader,
       MetadataManagerEntityEditForm,
-      MetadataManagerAttributeEditForm
+      MetadataManagerAttributeEditForm,
+      Spinner
     }
   }
 </script>
