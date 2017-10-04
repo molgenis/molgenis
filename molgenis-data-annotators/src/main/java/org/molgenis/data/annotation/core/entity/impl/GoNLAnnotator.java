@@ -110,7 +110,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 				return createGoNlOutputAttributes();
 			}
 
-			public String postFixResource = "";
+			private String postFixResource = "";
 
 			@Override
 			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
