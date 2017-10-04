@@ -23,7 +23,8 @@ const state: State = {
     'attributes': [],
     'referringAttributes': [],
     'lookupAttributes': []
-  }
+  },
+  loading: 0
 }
 
 export default state

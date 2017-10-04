@@ -17,7 +17,8 @@ export type State = {
   selectedEntityTypeId: ?string,
   selectedAttributeId: ?string,
   editorEntityType: EditorEntityType,
-  initialEditorEntityType: ?EditorEntityType
+  initialEditorEntityType: ?EditorEntityType,
+  loading: number
 }
 
 export type Alert = {

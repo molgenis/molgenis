@@ -22,6 +22,8 @@ export const SET_SELECTED_ATTRIBUTE_ID: string = '__SET_SELECTED_ATTRIBUTE_ID__'
 export const DELETE_SELECTED_ATTRIBUTE: string = '__DELETE_SELECTED_ATTRIBUTE__'
 
 export const CREATE_ALERT: string = '__CREATE_ALERT__'
+export const SET_LOADING = '__SET_LOADING__'
+
 const SYS_PACKAGE_ID = 'sys'
 
 /**
@@ -161,5 +163,8 @@ export default {
    */
   [CREATE_ALERT] (state: State, alert: Alert) {
     state.alert = alert
+  },
+  [SET_LOADING] (state: State, loading: boolean) {
+    state.loading = loading ? state.loading + 1 : state.loading - 1
   }
 }
