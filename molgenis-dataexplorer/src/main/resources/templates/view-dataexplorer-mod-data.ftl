@@ -149,6 +149,10 @@
 </#if>
 </div>
 </div>
+<!--[if IE 9]>
+<#-- used to disable the genomebrowser in IE9 -->
+<script>top.molgenis.ie9 = true;</script>
+<![endif]-->
 <script>
     <#-- load js dependencies -->
     $.when(

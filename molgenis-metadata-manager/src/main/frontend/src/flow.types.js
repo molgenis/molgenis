@@ -17,7 +17,8 @@ export type State = {
   selectedEntityTypeId: ?string,
   selectedAttributeId: ?string,
   editorEntityType: EditorEntityType,
-  initialEditorEntityType: ?EditorEntityType
+  initialEditorEntityType: ?EditorEntityType,
+  loading: number
 }
 
 export type Alert = {
@@ -68,10 +69,11 @@ export type EditorEntityType = {
   'package0'?: ?EditorPackageIdentifier,
   'entityTypeParent'?: ?EditorEntityTypeParent,
   'attributes': Array<EditorAttribute>,
+  'referringAttributes': Array<EditorAttribute>,
   'tags'?: ?Array<Tag>,
-  'idAttribute'?: ?EditorAttributeIdentifier,
-  'labelAttribute'?: ?EditorAttributeIdentifier,
-  'idAttribute'?: ?Array<EditorAttributeIdentifier>,
+  'idAttribute'?: EditorAttributeIdentifier,
+  'labelAttribute'?: EditorAttributeIdentifier,
+  'lookupAttributes'?: ?Array<EditorAttributeIdentifier>,
   'isNew'?: ?boolean
 }
 
@@ -86,7 +88,8 @@ export type EditorSort = {
 
 export type EditorAttributeIdentifier = {
   'id': string,
-  'label': ?string
+  'label': ?string,
+  'entity'?: EditorEntityTypeIdentifier
 }
 
 export type EditorAttribute = {
@@ -95,7 +98,7 @@ export type EditorAttribute = {
   'type': ?string,
   'parent': ?EditorAttributeIdentifier,
   'refEntityType': ?EditorEntityTypeIdentifier,
-  'mappedByEntityType': ?EditorAttributeIdentifier,
+  'mappedByAttribute': ?EditorAttributeIdentifier,
   'orderBy': ?EditorSort,
   'expression': ?string,
   'nullable': ?boolean,

@@ -4,6 +4,7 @@ import org.molgenis.security.CorsFilter;
 import org.molgenis.ui.browserdetection.BrowserDetectionFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -72,5 +73,7 @@ public class MolgenisWebAppInitializer
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
+
+		servletContext.addListener(HttpSessionEventPublisher.class);
 	}
 }

@@ -71,13 +71,15 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
 
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + AttributeMetadata.ATTRIBUTE_META_DATA));
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + AttributeMetadata.ATTRIBUTE_META_DATA));
-
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + AttributeMetadata.ATTRIBUTE_META_DATA));
 
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + PackageMetadata.PACKAGE));
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PackageMetadata.PACKAGE));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + PackageMetadata.PACKAGE));
 
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + UserAuthorityMetaData.USER_AUTHORITY));
 

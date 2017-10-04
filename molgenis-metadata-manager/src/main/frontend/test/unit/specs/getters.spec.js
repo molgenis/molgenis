@@ -39,18 +39,18 @@ describe('getters', () => {
       const state = {
         editorEntityType: {
           attributes: [
-            { id: '1', label: 'attribute1' },
-            { id: '2', label: 'attribute2' },
-            { id: '3', label: 'attribute3' }
+            {id: '1', label: 'attribute1'},
+            {id: '2', label: 'attribute2'},
+            {id: '3', label: 'attribute3'}
           ]
         }
       }
 
       const actual = getters.getEditorEntityTypeAttributes(state)
       const expected = [
-        { id: '1', label: 'attribute1' },
-        { id: '2', label: 'attribute2' },
-        { id: '3', label: 'attribute3' }
+        {id: '1', label: 'attribute1'},
+        {id: '2', label: 'attribute2'},
+        {id: '3', label: 'attribute3'}
       ]
 
       expect(actual).to.deep.equal(expected)
@@ -61,16 +61,16 @@ describe('getters', () => {
     it('Should filter a list of entityTypes and only return those that are abstract', () => {
       const state = {
         entityTypes: [
-          { id: '1', isAbstract: true },
-          { id: '2', isAbstract: false },
-          { id: '3', isAbstract: true },
-          { id: '4', isAbstract: false },
-          { id: '5', isAbstract: false }
+          {id: '1', isAbstract: true},
+          {id: '2', isAbstract: false},
+          {id: '3', isAbstract: true},
+          {id: '4', isAbstract: false},
+          {id: '5', isAbstract: false}
         ]
       }
 
       const actual = getters.getAbstractEntities(state)
-      const expected = [{ id: '1', isAbstract: true }, { id: '3', isAbstract: true }]
+      const expected = [{id: '1', isAbstract: true}, {id: '3', isAbstract: true}]
 
       expect(actual).to.deep.equal(expected)
     })
@@ -81,24 +81,24 @@ describe('getters', () => {
       const state = {
         editorEntityType: {
           attributes: [
-            { id: '1' },
-            { id: '2' },
-            { id: '3' },
-            { id: '4', parent: { id: '3' } },
-            { id: '5', parent: { id: '3' } }
+            {id: '1'},
+            {id: '2'},
+            {id: '3'},
+            {id: '4', parent: {id: '3'}},
+            {id: '5', parent: {id: '3'}}
           ]
         }
       }
 
       const actual = getters.getAttributeTree(state, getters)
       const expected = [
-        { id: '1', children: [], selected: false },
-        { id: '2', children: [], selected: false },
+        {id: '1', children: [], selected: false},
+        {id: '2', children: [], selected: false},
         {
           id: '3',
           children: [
-            { id: '4', parent: { id: '3' }, children: [], selected: false },
-            { id: '5', parent: { id: '3' }, children: [], selected: false }
+            {id: '4', parent: {id: '3'}, children: [], selected: false},
+            {id: '5', parent: {id: '3'}, children: [], selected: false}
           ],
           selected: false
         }
@@ -115,11 +115,11 @@ describe('getters', () => {
         selectedAttributeId: '3',
         editorEntityType: {
           attributes: [
-            { id: '1' },
-            { id: '2' },
-            { id: '3' },
-            { id: '4' },
-            { id: '5' }
+            {id: '1'},
+            {id: '2'},
+            {id: '3'},
+            {id: '4'},
+            {id: '5'}
           ]
         }
       }
@@ -135,26 +135,26 @@ describe('getters', () => {
     let state = {
       editorEntityType: {
         attributes: [
-          { id: '1', name: 'attribute1' },
-          { id: '2', name: 'attribute2' },
-          { id: '3', name: 'attribute3' },
-          { id: '4', name: 'attribute4' },
-          { id: '5', name: 'attribute5' }
+          {id: '1', name: 'attribute1'},
+          {id: '2', name: 'attribute2'},
+          {id: '3', name: 'attribute3'},
+          {id: '4', name: 'attribute4'},
+          {id: '5', name: 'attribute5'}
         ]
       }
     }
 
     it('Should retrieve an attribute object from a list of attributes based on the selectedAttributeID from the state', () => {
-      state = { ...state, selectedAttributeId: '4' }
+      state = {...state, selectedAttributeId: '4'}
 
       const actual = getters.getSelectedAttribute(state)
-      const expected = { id: '4', name: 'attribute4' }
+      const expected = {id: '4', name: 'attribute4'}
 
       expect(actual).to.deep.equal(expected)
     })
 
     it('Should retrieve nothing because the selectedAttributeID in the state is null', () => {
-      state = { ...state, selectedAttributeId: null }
+      state = {...state, selectedAttributeId: null}
 
       const actual = getters.getSelectedAttribute(state)
       const expected = undefined
@@ -164,21 +164,21 @@ describe('getters', () => {
   })
 
   describe('getCompoundAttributes', () => {
-    it('should retrieve all COMPOUND attributes', () => {
+    it('should retrieve all compound attributes', () => {
       const state = {
         editorEntityType: {
           attributes: [
-            { id: '1', type: 'STRING' },
-            { id: '2', type: 'CATEGORICAL' },
-            { id: '3', type: 'XREF' },
-            { id: '4', type: 'COMPOUND' },
-            { id: '5', type: 'INT' }
+            {id: '1', type: 'string'},
+            {id: '2', type: 'categorical'},
+            {id: '3', type: 'xref'},
+            {id: '4', type: 'compound'},
+            {id: '5', type: 'int'}
           ]
         }
       }
 
       const actual = getters.getCompoundAttributes(state)
-      const expected = [{ id: '4', type: 'COMPOUND' }]
+      const expected = [{id: '4', type: 'compound'}]
 
       expect(actual).to.deep.equal(expected)
     })
@@ -189,17 +189,17 @@ describe('getters', () => {
       // state => state.entityTypes.find(entityType => entityType.id === state.selectedEntityTypeId),
       const state = {
         entityTypes: [
-          { id: '1', selected: false },
-          { id: '2', selected: false },
-          { id: '3', selected: true },
-          { id: '4', selected: false },
-          { id: '5', selected: false }
+          {id: '1', selected: false},
+          {id: '2', selected: false},
+          {id: '3', selected: true},
+          {id: '4', selected: false},
+          {id: '5', selected: false}
         ],
         selectedEntityTypeId: '3'
       }
 
       const actual = getters.getSelectedEntityType(state)
-      const expected = { id: '3', selected: true }
+      const expected = {id: '3', selected: true}
 
       expect(actual).to.deep.equal(expected)
     })

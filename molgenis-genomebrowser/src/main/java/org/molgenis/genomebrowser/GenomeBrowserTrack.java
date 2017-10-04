@@ -4,8 +4,10 @@ import com.google.auto.value.AutoValue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.v2.RestControllerV2;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Nullable;
 import java.util.stream.Collectors;
@@ -66,6 +68,9 @@ public abstract class GenomeBrowserTrack
 		json.put("name", getLabel());
 		json.put("entity", getEntity().getId());
 		json.put("tier_type", "molgenis");
+		json.put("uri", UriComponentsBuilder.fromPath(RestControllerV2.BASE_URI)
+											.pathSegment(getEntity().getId())
+											.toUriString());
 		json.put("genome_attrs", getGenomeBrowserAttrsJSON(getGenomeBrowserAttrs()));
 		if (getLabelAttr() != null) json.put("label_attr", getLabelAttr());
 		if (getAttrs() != null) json.put("attrs", getAttrsJSON(getAttrs()));

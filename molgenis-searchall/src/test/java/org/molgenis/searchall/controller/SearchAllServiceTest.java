@@ -27,12 +27,13 @@ import static org.testng.Assert.assertEquals;
 
 public class SearchAllServiceTest
 {
-	DataService dataService;
-	SearchAllService searchAllService;
+	private DataService dataService;
+	private SearchAllService searchAllService;
 	private EntityType entity1;
 	private EntityType entity2;
 	private EntityType entity3;
 	private EntityType entity4;
+	private EntityType abstractEntity;
 
 	private Package pack1;
 	private Package pack2;
@@ -137,7 +138,15 @@ public class SearchAllServiceTest
 		when(entity4.getId()).thenReturn("entity id 4");
 		when(entity4.getDescription("en")).thenReturn("entity test description 4");
 		when(entity4.getAllAttributes()).thenReturn(singletonList(attr4));
-		when(entity4.getPackage()).thenReturn(pack3);
+		when(entity4.getPackage()).thenReturn(null);
+
+		abstractEntity = mock(EntityType.class);
+		when(abstractEntity.getLabel("en")).thenReturn("abstract");
+		when(abstractEntity.getId()).thenReturn("abstract");
+		when(abstractEntity.getDescription("en")).thenReturn("abstract");
+		when(abstractEntity.getAllAttributes()).thenReturn(singletonList(attr1));
+		when(abstractEntity.isAbstract()).thenReturn(true);
+		when(abstractEntity.getPackage()).thenReturn(pack1);
 	}
 
 	@Test
@@ -146,7 +155,7 @@ public class SearchAllServiceTest
 		when(dataService.findAll(PackageMetadata.PACKAGE, Package.class)).thenReturn(
 				Stream.of(pack1, pack2, pack3, pack_sys));
 		when(dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(
-				Stream.of(entity1, entity2, entity3, entity4));
+				Stream.of(entity1, entity2, entity3, entity4, abstractEntity));
 		when(dataService.count("entity id 1", new QueryImpl<>().search("test"))).thenReturn(2L);
 		when(dataService.count("entity id 3", new QueryImpl<>().search("test"))).thenReturn(6L);
 		when(dataService.count("entity id 4", new QueryImpl<>().search("test"))).thenReturn(11L);
@@ -179,7 +188,7 @@ public class SearchAllServiceTest
 															 .setId("entity id 4")
 															 .setLabel("entity nr 4")
 															 .setDescription("entity test description 4")
-															 .setPackageId("package id 3")
+															 .setPackageId(null)
 															 .setLabelMatch(false)
 															 .setDescriptionMatch(true)
 															 .setAttributes(Collections.emptyList())

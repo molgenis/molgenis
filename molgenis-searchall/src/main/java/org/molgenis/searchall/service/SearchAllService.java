@@ -35,37 +35,41 @@ public class SearchAllService
 		this.languageService = requireNonNull(languageService);
 	}
 
-	public Result searchAll(String searchterm)
+	public Result searchAll(final String searchTerm)
 	{
 		final String lang = languageService.getCurrentUserLanguageCode();
 		return Result.builder()
 					 .setEntityTypes(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
 												.filter(not(EntityUtils::isSystemEntity))
-												.map(entityType -> toEntityTypeResult(searchterm, entityType, lang))
+							 					.filter(not(EntityType::isAbstract))
+												.map(entityType -> toEntityTypeResult(searchTerm, entityType, lang))
 												.filter(EntityTypeResult::isMatch)
 												.collect(toList()))
 					 .setPackages(dataService.findAll(PACKAGE, Package.class)
 											 .filter(not(EntityUtils::isSystemPackage))
 											 .map(PackageResult::create)
 											 .filter(packageResult -> packageResult.isLabelOrDescriptionMatch(
-													 searchterm))
+													 searchTerm))
 											 .collect(toList()))
 					 .build();
 	}
 
-	private EntityTypeResult toEntityTypeResult(String searchterm, EntityType entityType, String lang)
+	private EntityTypeResult toEntityTypeResult(final String searchTerm, final EntityType entityType, final String lang)
 	{
-		return EntityTypeResult.builder()
-							   .setId(entityType.getId())
-							   .setLabel(entityType.getLabel(lang))
-							   .setDescription(entityType.getDescription(lang))
-							   .setPackageId(entityType.getPackage().getId())
-							   .setLabelMatch(containsIgnoreCase(entityType.getLabel(lang), searchterm))
-							   .setDescriptionMatch(containsIgnoreCase(entityType.getDescription(lang), searchterm))
-							   .setAttributes(matchingAttributes(searchterm, entityType.getAllAttributes(), lang))
-							   .setNrOfMatchingEntities(
-									   dataService.count(entityType.getId(), new QueryImpl<>().search(searchterm)))
-							   .build();
+		EntityTypeResult.Builder builder = EntityTypeResult.builder().setId(entityType.getId())
+				.setLabel(entityType.getLabel(lang)).setDescription(entityType.getDescription(lang));
+
+		if (entityType.getPackage() != null)
+		{
+			builder.setPackageId(entityType.getPackage().getId());
+		}
+
+		builder.setLabelMatch(containsIgnoreCase(entityType.getLabel(lang), searchTerm))
+				.setDescriptionMatch(containsIgnoreCase(entityType.getDescription(lang), searchTerm))
+				.setAttributes(matchingAttributes(searchTerm, entityType.getAllAttributes(), lang))
+				.setNrOfMatchingEntities(dataService.count(entityType.getId(), new QueryImpl<>().search(searchTerm)));
+
+		return builder.build();
 	}
 
 	private List<AttributeResult> matchingAttributes(String searchterm, Iterable<Attribute> allAttributes, String lang)

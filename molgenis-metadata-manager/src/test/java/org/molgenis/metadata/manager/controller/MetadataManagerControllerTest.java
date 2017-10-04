@@ -116,7 +116,8 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testCreateEditorEntityType() throws Exception
 	{
-		when(metadataManagerService.createEditorEntityType()).thenReturn(getEditorEntityTypeResponse());
+		EditorEntityTypeResponse editorEntityTypeResponse = getEditorEntityTypeResponse();
+		when(metadataManagerService.createEditorEntityType()).thenReturn(editorEntityTypeResponse);
 		mockMvc.perform(get("/plugin/metadata-manager/create/entityType"))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
@@ -167,12 +168,14 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	private EditorEntityType getEditorEntityType()
 	{
 		return EditorEntityType.create("id_1", null, ImmutableMap.of(), null, ImmutableMap.of(), false, "backend", null,
-				null, ImmutableList.of(), ImmutableList.of(), null, null, ImmutableList.of());
+				null, ImmutableList.of(), ImmutableList.of(), ImmutableList.of(),
+				EditorAttributeIdentifier.create("id", "label"), EditorAttributeIdentifier.create("id", "label"),
+				ImmutableList.of());
 	}
 
 	private String getEditorEntityTypeJson()
 	{
-		return "{\"id\":\"id_1\",\"labelI18n\":{},\"descriptionI18n\":{},\"abstract0\":false,\"backend\":\"backend\",\"attributes\":[],\"tags\":[],\"lookupAttributes\":[]}";
+		return "{\"id\":\"id_1\",\"labelI18n\":{},\"descriptionI18n\":{},\"abstract0\":false,\"backend\":\"backend\",\"attributes\":[],\"referringAttributes\":[],\"tags\":[],\"idAttribute\":{\"id\":\"id\",\"label\":\"label\"},\"labelAttribute\":{\"id\":\"id\",\"label\":\"label\"},\"lookupAttributes\":[]}";
 	}
 
 	private EditorAttributeResponse getEditorAttributeResponse()

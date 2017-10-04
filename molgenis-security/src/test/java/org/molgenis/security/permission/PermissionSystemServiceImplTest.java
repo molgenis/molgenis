@@ -1,6 +1,5 @@
 package org.molgenis.security.permission;
 
-import com.google.common.collect.Sets;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,15 +26,14 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static org.mockito.Mockito.*;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.testng.Assert.assertEquals;
@@ -62,26 +61,39 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 	private DataService dataService;
 
 	@Autowired
+	private PrincipalSecurityContextRegistry principalSecurityContextRegistry;
+
+	@Autowired
 	private PermissionSystemService permissionSystemService;
+
+	@Autowired
+	private AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		config.resetMocks();
 		permissionSystemService = new PermissionSystemServiceImpl(userService, userAuthorityFactory, roleHierarchy,
-				dataService);
+				dataService, principalSecurityContextRegistry, authenticationAuthoritiesUpdater);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testPermissionSystemService()
 	{
-		new PermissionSystemServiceImpl(null, null, null, null);
+		new PermissionSystemServiceImpl(null, null, null, null, null, null);
 	}
 
 	@Test
 	@WithMockUser(username = "user", authorities = { "existingAuthority" })
 	public void giveUserEntityPermissions()
 	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Authentication updatedAuthication = mock(Authentication.class);
+		List<GrantedAuthority> updatedAuthorities = Arrays.asList(new SimpleGrantedAuthority("existingAuthority"),
+				new SimpleGrantedAuthority("newAuthority0"), new SimpleGrantedAuthority("newAuthority1"));
+		when(authenticationAuthoritiesUpdater.updateAuthentication(authentication, updatedAuthorities)).thenReturn(
+				updatedAuthication);
+
 		String id0 = "entityTypeId0";
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(id0).getMock();
 		String id1 = "entityTypeId1";
@@ -98,6 +110,8 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 				invocation -> asList(new SimpleGrantedAuthority("newAuthority0"),
 						new SimpleGrantedAuthority("newAuthority1")));
 
+		when(principalSecurityContextRegistry.getSecurityContexts(authentication.getPrincipal())).thenReturn(
+				Stream.of(SecurityContextHolder.getContext()));
 		permissionSystemService.giveUserWriteMetaPermissions(asList(entityType0, entityType1));
 
 		String prefix = "ROLE_ENTITY";
@@ -109,13 +123,7 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		verify(userAuthorities.get(1)).setUser(user);
 		verify(userAuthorities.get(1)).setRole(prefix + "_WRITEMETA_" + id1);
 
-		Set<String> newAuthorities = SecurityContextHolder.getContext()
-														  .getAuthentication()
-														  .getAuthorities()
-														  .stream()
-														  .map(GrantedAuthority::getAuthority)
-														  .collect(toSet());
-		assertEquals(newAuthorities, Sets.newHashSet("existingAuthority", "newAuthority0", "newAuthority1"));
+		assertEquals(SecurityContextHolder.getContext().getAuthentication(), updatedAuthication);
 	}
 
 	@Test
@@ -154,6 +162,12 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		@Mock
 		private DataService dataService;
 
+		@Mock
+		private PrincipalSecurityContextRegistry principalSecurityContextRegistry;
+
+		@Mock
+		private AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater;
+
 		public Config()
 		{
 			MockitoAnnotations.initMocks(this);
@@ -184,15 +198,28 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 		}
 
 		@Bean
+		public PrincipalSecurityContextRegistry principalSecurityContextRegistry()
+		{
+			return principalSecurityContextRegistry;
+		}
+
+		@Bean
+		public AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater()
+		{
+			return authenticationAuthoritiesUpdater;
+		}
+
+		@Bean
 		public PermissionSystemService permissionSystemService()
 		{
 			return new PermissionSystemServiceImpl(userService(), userAuthorityFactory(), roleHierarchy(),
-					dataService());
+					dataService(), principalSecurityContextRegistry(), authenticationAuthoritiesUpdater());
 		}
 
 		void resetMocks()
 		{
-			reset(userService, userAuthorityFactory, roleHierarchy, dataService);
+			reset(userService, userAuthorityFactory, roleHierarchy, dataService, principalSecurityContextRegistry,
+					authenticationAuthoritiesUpdater);
 		}
 	}
 }

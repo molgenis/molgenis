@@ -14,8 +14,16 @@ public abstract class EditorAttributeIdentifier
 	@Nullable
 	public abstract String getLabel();
 
+	@Nullable
+	public abstract EditorEntityTypeIdentifier getEntity();
+
 	public static EditorAttributeIdentifier create(String id, @Nullable String label)
 	{
-		return new AutoValue_EditorAttributeIdentifier(id, label);
+		return new AutoValue_EditorAttributeIdentifier(id, label, null);
+	}
+
+	public static EditorAttributeIdentifier create(String id, @Nullable String label, @Nullable EditorEntityTypeIdentifier entity)
+	{
+		return new AutoValue_EditorAttributeIdentifier(id, label, entity);
 	}
 }

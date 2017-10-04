@@ -1,5 +1,13 @@
 // @flow
-import type { EditorAttribute, Alert, State, EditorPackageIdentifier, EditorEntityType, Update, UpdateOrder } from '../flow.types'
+import type {
+  Alert,
+  EditorAttribute,
+  EditorEntityType,
+  EditorPackageIdentifier,
+  State,
+  Update,
+  UpdateOrder
+} from '../flow.types'
 import { INITIAL_STATE } from './state'
 
 export const SET_PACKAGES: string = '__SET_PACKAGES__'
@@ -14,6 +22,8 @@ export const SET_SELECTED_ATTRIBUTE_ID: string = '__SET_SELECTED_ATTRIBUTE_ID__'
 export const DELETE_SELECTED_ATTRIBUTE: string = '__DELETE_SELECTED_ATTRIBUTE__'
 
 export const CREATE_ALERT: string = '__CREATE_ALERT__'
+export const SET_LOADING = '__SET_LOADING__'
+
 const SYS_PACKAGE_ID = 'sys'
 
 /**
@@ -107,6 +117,20 @@ export default {
     const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
+    const attr = state.editorEntityType.attributes[index]
+    if (key === 'type') {
+      if (attr.type === 'onetomany' || update.value === 'onetomany') {
+        attr.mappedByAttribute = null
+        attr.refEntityType = null
+        attr.orderBy = null
+      }
+      attr[key] = update.value
+    } else if (key === 'mappedByAttribute') {
+      if (update.value !== null && update.value.entity !== null) {
+        attr.refEntityType = update.value.entity
+        attr.orderBy = null
+      }
+    }
     state.editorEntityType.attributes[index][key] = update.value
   },
   /**
@@ -139,5 +163,8 @@ export default {
    */
   [CREATE_ALERT] (state: State, alert: Alert) {
     state.alert = alert
+  },
+  [SET_LOADING] (state: State, loading: boolean) {
+    state.loading = loading ? state.loading + 1 : state.loading - 1
   }
 }

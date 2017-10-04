@@ -17,7 +17,7 @@
                   type="button">{{ 'search-button' | i18n }}</button>
         </span>
         <span class="input-group-btn">
-          <button @click="clearQuery()" class="btn btn-secondary" :disabled="!query"
+          <button @click="reset()" class="btn btn-secondary" :disabled="!query"
                   type="button">{{ 'clear-button' | i18n }}</button>
         </span>
       </div>
@@ -28,9 +28,9 @@
       <div class="col input-group">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <router-link to="/">
+            <a :href="homeUrl" v-on:click="reset">
               <i class="fa fa-home" aria-hidden="true"></i>
-            </router-link>
+            </a>
           </li>
           <li class="breadcrumb-item" v-for="package in path">
             <a v-if="isLast(path, package)">{{package.label}}</a>
@@ -79,7 +79,7 @@
   import _ from 'lodash'
   import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE, GET_ENTITY_PACKAGES } from '../store/actions'
   import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
-  import { Package } from '../store/state'
+  import { Package, INITIAL_STATE } from '../store/state'
   import { mapState } from 'vuex'
 
   export default {
@@ -98,7 +98,8 @@
             'class': 'hidden-sm-down'
           }
         },
-        filter: null
+        filter: null,
+        homeUrl: INITIAL_STATE.baseUrl
       }
     },
     methods: {
@@ -108,10 +109,6 @@
         this.$store.dispatch(QUERY_PACKAGES, this.$store.state.query)
         this.$store.dispatch(QUERY_ENTITIES, this.$store.state.query)
       }, 200),
-      clearQuery: function () {
-        this.$store.commit(SET_QUERY, undefined)
-        this.$store.dispatch(QUERY_PACKAGES)
-      },
       selectPackage: function (packageId: string) {
         this.$store.commit(SET_QUERY, undefined)
         this.$store.dispatch(GET_STATE_FOR_PACKAGE, packageId)
@@ -119,6 +116,10 @@
       isLast: function (list: Array<Package>, item: Package) {
         const tail = list[list.length - 1]
         return !!tail && !!item && tail.id === item.id
+      },
+      reset: function () {
+        this.$store.commit(SET_QUERY, undefined)
+        this.$store.dispatch(RESET_STATE)
       }
     },
     computed: {

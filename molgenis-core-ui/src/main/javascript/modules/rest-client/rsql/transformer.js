@@ -130,12 +130,18 @@ function toText(constraint) {
 }
 
 function toSimpleRef(labels, constraint) {
+    const addLabel = value => ({'label': labels[value], value})
+
+    let values
+    if( constraint.comparison === '=in=' ) {
+        values = constraint.arguments
+    } else {
+      values = (constraint.operands || [constraint]).map(o => o.arguments)
+    }
+
     return {
-        'type': 'SIMPLE_REF',
-        'values': (constraint.operands || [constraint]).map(o => {
-            const value = o.arguments
-            return {'label': labels[value], value}
-        })
+      'type': 'SIMPLE_REF',
+      values : values.map(addLabel)
     }
 }
 

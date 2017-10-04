@@ -16,8 +16,7 @@ import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.READ;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.WRITE;
+import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
 
 public class RestControllerV2IT
 {
@@ -250,6 +249,35 @@ public class RestControllerV2IT
 			   .statusCode(NO_CONTENT)
 			   .log()
 			   .all();
+	}
+
+	// Regression test for https://github.com/molgenis/molgenis/issues/6731
+	@Test
+	public void testRetrieveSystemEntityCollectionAggregatesNotAllowed()
+	{
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
+			   .then()
+			   .statusCode(UNAUTHORIZED);
+	}
+
+	// Regression test for https://github.com/molgenis/molgenis/issues/6731
+	@Test(dependsOnMethods = { "testRetrieveSystemEntityCollectionAggregatesNotAllowed" })
+	public void testRetrieveSystemEntityCollectionAggregates()
+	{
+		grantSystemRights(adminToken, testUserId, "sys_sec_User", COUNT);
+
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .when()
+			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
+			   .then()
+			   .statusCode(OKE)
+			   .body("aggs.matrix[0][0]", equalTo(1));
 	}
 
 	@AfterClass

@@ -59,6 +59,7 @@
   import SearchInput from './SearchInput'
   import PackagesResult from './PackagesResult'
   import EntityResult from './EntityResult'
+
   export default {
     name: 'SearchAll',
     components: {SearchInput, PackagesResult, EntityResult},
@@ -71,10 +72,12 @@
     },
     methods: {
       highlight: function (text) {
-        var iQuery = new RegExp(this.$store.state.query, 'ig')
-        return text.toString().replace(iQuery, function (matchedTxt, a, b) {
-          return ('<b class=\'search-result\'>' + matchedTxt + '</b>')
-        })
+        if (text !== null) {
+          var iQuery = new RegExp(this.$store.state.query, 'ig')
+          return text.toString().replace(iQuery, function (matchedTxt, a, b) {
+            return ('<b class=\'search-result\'>' + matchedTxt + '</b>')
+          })
+        }
       }
     }
   }

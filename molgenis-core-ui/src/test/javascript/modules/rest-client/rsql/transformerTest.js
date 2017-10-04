@@ -238,6 +238,17 @@ test("Test transformModelPart XREF two values", assert => {
     assert.end();
 })
 
+test("Test transformModelPart XREF two values with IN comparison", assert => {
+  const actual = transformModelPart("XREF", {"ref1": "label1", "ref2": "label2"},
+    parser.parse("xxref=in=(ref1,ref2)"))
+  const expected = {
+    'type': 'SIMPLE_REF',
+    'values': [{'label': 'label1', 'value': 'ref1'}, {'label': 'label2', 'value': 'ref2'}]
+  }
+  assert.deepEqual(actual, expected);
+  assert.end();
+})
+
 test("Test toComplexLine one value selected", assert => {
     const actual = toComplexLine({"ref1": "label1"}, parser.parse("xmref==ref1"))
     const expected = {'operator': undefined, 'values': [{'label': 'label1', 'value': 'ref1'}]}
