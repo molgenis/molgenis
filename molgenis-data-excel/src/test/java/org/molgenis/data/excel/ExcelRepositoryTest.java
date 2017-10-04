@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
@@ -169,6 +170,17 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 		assertEquals(row4.get("col1"), "1.2");
 		assertEquals(row4.get("col2"), "2.4");
 		assertFalse(it.hasNext());
+	}
+
+	@Test(expectedExceptions = NoSuchElementException.class)
+	public void iteratorNextWhenNoNext()
+	{
+		Iterator<Entity> it = excelSheetReader.iterator();
+		it.next(); // 1
+		it.next(); // 2
+		it.next(); // 3
+		it.next(); // 4
+		it.next(); // does not exist
 	}
 
 	@Test
