@@ -551,6 +551,9 @@ $.when($,
                     var queryRuleRSQL = molgenis.createRsqlQuery(rules)
                     state.filter = molgenis.dataexplorer.rsql.translateFilterRulesToRSQL(queryRuleRSQL, state.filter)
                     pushState()
+                } else if (rules.length === 0) { // Filter wizard triggers updateAttributeFilters with an empty rule list, cleanup state when this happens
+                  delete state.filter
+                  pushState()
                 }
 
                 self.filter.createFilterQueryUserReadableList(attributeFilters);
