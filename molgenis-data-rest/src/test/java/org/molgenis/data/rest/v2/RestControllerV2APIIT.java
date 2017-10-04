@@ -1,27 +1,25 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import io.restassured.RestAssured;
-import io.restassured.internal.ValidatableResponseImpl;
 import io.restassured.response.ValidatableResponse;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.molgenis.oneclickimporter.controller.OneClickImporterController;
 import org.slf4j.Logger;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static java.lang.Thread.sleep;
@@ -30,7 +28,6 @@ import static org.molgenis.data.rest.convert.RestTestUtils.*;
 import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.collections.Maps.newHashMap;
 
 /**
@@ -45,8 +42,6 @@ public class RestControllerV2APIIT
 	private static final String V2_TEST_FILE = "/RestControllerV2_API_TestEMX.xlsx";
 	private static final String V2_DELETE_TEST_FILE = "/RestControllerV2_DeleteEMX.xlsx";
 	private static final String V2_COPY_TEST_FILE = "/RestControllerV2_CopyEMX.xlsx";
-	private static final String V2_FILE_ONE_CLICK_IMPORT_EXCEL = "/OneClickImport_complex-valid.xlsx";
-	private static final String V2_FILE_ONE_CLICK_IMPORT_CSV = "/OneClickImport_complex-valid.csv";
 	private static final String API_V2 = "api/v2/";
 
 	private String testUserToken;
@@ -485,106 +480,6 @@ public class RestControllerV2APIIT
 			   .body("total", equalTo(0));
 	}
 
-	@Test
-	public void testOneClickImportExcelFile() throws IOException, URISyntaxException
-	{
-		oneClickImportTest(V2_FILE_ONE_CLICK_IMPORT_EXCEL);
-	}
-
-	@Test
-	public void testOneClickImportCsvFile() throws IOException, URISyntaxException
-	{
-		oneClickImportTest(V2_FILE_ONE_CLICK_IMPORT_CSV);
-	}
-
-	private void oneClickImportTest(String fileToImport) throws URISyntaxException
-	{
-		URL resourceUrl = getResource(RestControllerV2APIIT.class, fileToImport);
-		File file = new File(new URI(resourceUrl.toString()).getPath());
-
-		// Post the file to be imported
-		ValidatableResponse response = given().log()
-											  .all()
-											  .header(X_MOLGENIS_TOKEN, testUserToken)
-											  .multiPart(file)
-											  .post(OneClickImporterController.URI + "/upload")
-											  .then()
-											  .log()
-											  .all()
-											  .statusCode(OKE);
-
-		// Verify the post returns a job url
-		String jobUrl = ((ValidatableResponseImpl) response).originalResponse().asString();
-		assertTrue(jobUrl.startsWith("/api/v2/sys_job_OneClickImportJobExecution/"));
-
-		String jobStatus = given().log()
-								  .all()
-								  .header(X_MOLGENIS_TOKEN, testUserToken)
-								  .get(jobUrl)
-								  .then()
-								  .statusCode(OKE)
-								  .extract()
-								  .path("status");
-
-		List<String> validJobStats = Arrays.asList("PENDING", "RUNNING", "SUCCESS");
-		assertTrue(validJobStats.contains(jobStatus));
-
-		// Poll job until it finishes
-		int pollIndex = 0;
-		int maxPolls = 10;
-		long pollInterval = 500L;
-		while ((!jobStatus.equals("SUCCESS")) && pollIndex < maxPolls)
-		{
-			LOG.info("Import job status : " + jobStatus);
-			jobStatus = pollJobForStatus(jobUrl);
-			waitForNMillis(pollInterval);
-			pollIndex++;
-		}
-		LOG.info("Import job status : " + jobStatus);
-		assertEquals(jobStatus, "SUCCESS");
-
-		// Extract the id of the entity created by the import
-		ValidatableResponse completedJobResponse = given().log()
-														  .all()
-														  .header(X_MOLGENIS_TOKEN, testUserToken)
-														  .get(jobUrl)
-														  .then()
-														  .statusCode(OKE);
-
-		JsonArray entityTypeId = new Gson().fromJson(completedJobResponse.extract().jsonPath().get("entityTypes").toString(), JsonArray.class);
-		String entityId = entityTypeId.get(0).getAsJsonObject().get("id").getAsString();
-		String packageName = completedJobResponse.extract().path("package");
-		String jobId = completedJobResponse.extract().path("identifier");
-
-		// Store to use during cleanup
-		importedEntities.add(entityId);
-		importPackages.add(packageName);
-		importJobIds.add(jobId);
-
-		// Get the entity value to check the import
-		ValidatableResponse entityResponse = given().log()
-													.all()
-													.header(X_MOLGENIS_TOKEN, testUserToken)
-													.get(API_V2 + entityId
-															+ "?attrs=~id,first_name,last_name,full_name,UMCG_employee,Age")
-													.then()
-													.log()
-													.all();
-		entityResponse.statusCode(OKE);
-
-		// Check first row for expected values
-		entityResponse.body("items[0].first_name", equalTo("Mark"));
-		entityResponse.body("items[0].last_name", equalTo("de Haan"));
-		entityResponse.body("items[0].full_name", equalTo("Mark de Haan"));
-		entityResponse.body("items[0].UMCG_employee", equalTo(true));
-		entityResponse.body("items[0].Age", equalTo(26));
-
-		// Check last row for expected values
-		entityResponse.body("items[9].first_name", equalTo("Jan"));
-		entityResponse.body("items[9].UMCG_employee", equalTo(false));
-		entityResponse.body("items[9].Age", equalTo(32));
-	}
-
 	private String pollJobForStatus(String jobUrl)
 	{
 		return given().header(X_MOLGENIS_TOKEN, testUserToken).get(jobUrl).then().extract().path("status");
@@ -778,5 +673,3 @@ public class RestControllerV2APIIT
 	}
 
 }
-
-
