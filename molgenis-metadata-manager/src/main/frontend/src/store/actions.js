@@ -7,6 +7,7 @@ import {
   SET_ATTRIBUTE_TYPES,
   SET_EDITOR_ENTITY_TYPE,
   SET_ENTITY_TYPES,
+  SET_LOADING,
   SET_PACKAGES,
   SET_SELECTED_ATTRIBUTE_ID,
   SET_SELECTED_ENTITY_TYPE_ID,
@@ -77,37 +78,38 @@ export const toAttribute = (attribute: Object): EditorAttribute => {
   }
 }
 
+const withSpinner = (commit, promise) => {
+  commit(SET_LOADING, true)
+  promise.catch(error => {
+    console.log(error)
+    commit(CREATE_ALERT, {type: 'error', message: error})
+  }).then(() => commit(SET_LOADING, false), 1000)
+}
+
 export default {
   /**
    * Retrieve all Packages and filter on non-system Packages
    */
   [GET_PACKAGES] ({commit}: { commit: Function }) {
-    api.get('/plugin/metadata-manager/editorPackages').then(response => {
+    withSpinner(commit, api.get('/plugin/metadata-manager/editorPackages').then(response => {
       commit(SET_PACKAGES, response)
-    }, error => {
-      console.log(error)
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   },
   /**
    * Retrieve all EntityTypes and filter on non-system EntityTypes
    */
   [GET_ENTITY_TYPES] ({commit}: { commit: Function }) {
-    api.get('/api/v2/sys_md_EntityType?num=10000').then(response => {
+    withSpinner(commit, api.get('/api/v2/sys_md_EntityType?num=10000').then(response => {
       commit(SET_ENTITY_TYPES, response.items)
-    }, error => {
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   },
   /**
    * Retrieve all Attribute types
    */
   [GET_ATTRIBUTE_TYPES] ({commit}: { commit: Function }) {
-    api.get('/api/v2/sys_md_Attribute/meta/type').then(response => {
+    withSpinner(commit, api.get('/api/v2/sys_md_Attribute/meta/type').then(response => {
       commit(SET_ATTRIBUTE_TYPES, response.enumOptions)
-    }, error => {
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   },
   /**
    * Retrieve EditorEntityType based on EntityType ID
@@ -115,11 +117,9 @@ export default {
    * @param entityTypeId The selected EntityType identifier
    */
   [GET_EDITOR_ENTITY_TYPE] ({commit}: { commit: Function }, entityTypeId: string) {
-    api.get('/plugin/metadata-manager/entityType/' + entityTypeId).then(response => {
+    withSpinner(commit, api.get('/plugin/metadata-manager/entityType/' + entityTypeId).then(response => {
       commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
-    }, error => {
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   },
   /**
    * Create a new EntityType
@@ -127,14 +127,12 @@ export default {
    * EditorEntityType is added to the list of entityTypes in the state
    */
   [CREATE_ENTITY_TYPE] ({commit}: { commit: Function }) {
-    api.get('/plugin/metadata-manager/create/entityType').then(response => {
+    withSpinner(commit, api.get('/plugin/metadata-manager/create/entityType').then(response => {
       const newEditorEntityType = toEntityType(response.entityType)
       newEditorEntityType.isNew = true
       commit(SET_EDITOR_ENTITY_TYPE, newEditorEntityType)
       commit(SET_SELECTED_ENTITY_TYPE_ID, newEditorEntityType.id)
-    }, error => {
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   },
   /**
    * Deletes an EntityType and reloads the EntityTypes present in the state
@@ -142,15 +140,13 @@ export default {
    * @param selectedEntityTypeId the ID of the EntityType to be deleted
    */
   [DELETE_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }, selectedEntityTypeId: string) {
-    api.delete_('/api/v1/' + selectedEntityTypeId + '/meta').then(response => {
+    withSpinner(commit, api.delete_('/api/v1/' + selectedEntityTypeId + '/meta').then(response => {
       commit(SET_ENTITY_TYPES, state.entityTypes.filter(entityType => entityType.id !== selectedEntityTypeId))
       commit(SET_SELECTED_ENTITY_TYPE_ID, null)
       commit(SET_SELECTED_ATTRIBUTE_ID, null)
       commit(SET_EDITOR_ENTITY_TYPE, null)
       commit(CREATE_ALERT, {type: 'info', message: 'Delete was successful: ' + response.statusText})
-    }, error => {
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   },
   /**
    * Create a new Attribute
@@ -158,14 +154,12 @@ export default {
    * Attribute is added to the list of attributes in the existing editorEntityType
    */
   [CREATE_ATTRIBUTE] ({commit, state}: { commit: Function, state: State }) {
-    api.get('/plugin/metadata-manager/create/attribute').then(response => {
+    withSpinner(commit, api.get('/plugin/metadata-manager/create/attribute').then(response => {
       const attribute = toAttribute(response.attribute)
       attribute.isNew = true
       commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'attributes', value: [...state.editorEntityType.attributes, attribute]})
       commit(SET_SELECTED_ATTRIBUTE_ID, attribute.id)
-    }, error => {
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   },
   /**
    * Persist metadata changes to the database
@@ -174,8 +168,7 @@ export default {
     const options = {
       body: JSON.stringify(state.editorEntityType)
     }
-
-    api.post('/plugin/metadata-manager/entityType', options).then(response => {
+    withSpinner(commit, api.post('/plugin/metadata-manager/entityType', options).then(response => {
       commit(CREATE_ALERT, {
         type: 'success',
         message: response.statusText + ': Successfully updated metadata for EntityType: ' + state.editorEntityType.label
@@ -194,8 +187,6 @@ export default {
       } else {
         commit(SET_EDITOR_ENTITY_TYPE, state.editorEntityType)
       }
-    }, error => {
-      commit(CREATE_ALERT, {type: 'error', message: error})
-    })
+    }))
   }
 }
