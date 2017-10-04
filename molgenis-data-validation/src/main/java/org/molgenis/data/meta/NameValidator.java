@@ -1,6 +1,6 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.MolgenisDataException;
 
 import java.util.Set;
@@ -11,7 +11,7 @@ import java.util.Set;
 public class NameValidator
 {
 	// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
-	public static final Set<String> KEYWORDS = Sets.newHashSet("login", "logout", "csv", "base", "exist", "meta");
+	public static final Set<String> KEYWORDS = ImmutableSet.of("login", "logout", "csv", "base", "exist", "meta");
 
 	/**
 	 * Checks if a name is a reserved keyword.
