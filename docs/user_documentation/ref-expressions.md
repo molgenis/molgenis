@@ -11,7 +11,7 @@ alphanumberic characters:
 ```js
 $('myStringAttributeName').matches(/^[a-z0-9]+$/i).value()
 ```
-Is this example:
+In this example:
 - '$(...)' is the selector
 - 'myStringAttributeName' is an attribute name
 - 'matches' is a chaining operation
