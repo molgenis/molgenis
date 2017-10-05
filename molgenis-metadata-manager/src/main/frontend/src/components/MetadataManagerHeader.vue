@@ -33,7 +33,7 @@
     methods: {
       createNewEntityType () {
         if (this.isEntityTypeEdited) {
-          this.$swal(getConfirmBeforeLeavingProperties()).then(() => {
+          this.$swal(getConfirmBeforeLeavingProperties(this.$t)).then(() => {
             this.$store.dispatch(CREATE_ENTITY_TYPE)
           }).catch(this.$swal.noop)
         } else {
@@ -53,7 +53,7 @@
         set (selectedEntityType) {
           if (!this.isEntityTypeEdited) this.$store.commit(SET_SELECTED_ENTITY_TYPE_ID, selectedEntityType.id)
           else {
-            this.$swal(getConfirmBeforeLeavingProperties()).then(() => {
+            this.$swal(getConfirmBeforeLeavingProperties(this.$t)).then(() => {
               this.$store.commit(SET_SELECTED_ENTITY_TYPE_ID, selectedEntityType.id)
             }).catch(this.$swal.noop)
           }

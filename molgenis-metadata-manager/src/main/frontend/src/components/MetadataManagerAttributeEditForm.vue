@@ -41,7 +41,7 @@
                       :onAttributeSelect="onAttributeSelect"></attribute-tree>
 
       <p v-if="editorEntityType.entityTypeParent !== undefined">
-        {{ 'compound-attribute-text' | i18n }} from <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
+        {{ 'compound-attribute-text' | i18n }} <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
         <span v-for="attribute in editorEntityType.entityTypeParent.attributes">- {{attribute.label}} <br></span>
       </p>
     </div>

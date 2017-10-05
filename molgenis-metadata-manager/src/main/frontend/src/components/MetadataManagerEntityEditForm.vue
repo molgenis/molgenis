@@ -128,11 +128,11 @@
         } else if (this.editorEntityType.labelAttribute === null || this.editorEntityType.labelAttribute === undefined) {
           this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'Label attribute can not be empty'})
         } else {
-          this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE)
+          this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
         }
       },
       deleteEntityType (selectedEntityTypeId) {
-        this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId)).then(() => {
+        this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId, this.$t)).then(() => {
           this.$store.dispatch(DELETE_ENTITY_TYPE, selectedEntityTypeId)
         }).catch(this.$swal.noop)
       }

@@ -1,10 +1,25 @@
 import { expect } from 'chai'
 import getters, { getConfirmBeforeDeletingProperties, getConfirmBeforeLeavingProperties } from 'src/store/getters'
 
+const i18n = {
+  'confirm-before-delete-title': 'You are about to delete',
+  'confirm-before-delete-text': 'Are you sure you want to continue?',
+  'confirm-before-delete-confirm': 'Yes, delete',
+  'confirm-before-delete-cancel': 'Cancel',
+  'confirm-before-leaving-title': 'There are unsaved changes',
+  'confirm-before-leaving-text': 'All unsaved changes will be lost, are you sure you want to continue?',
+  'confirm-before-leaving-confirm': 'Yes',
+  'confirm-before-leaving-cancel': 'No, stay'
+}
+
+const t = (key) => {
+  return i18n[key]
+}
+
 describe('getters', () => {
   describe('getConfirmBeforeDeletingProperties', () => {
     it('should return a property object usable by sweetalert2 that asks before delete', () => {
-      const actual = getConfirmBeforeDeletingProperties('1')
+      const actual = getConfirmBeforeDeletingProperties('1', t)
       const expected = {
         title: 'You are about to delete 1',
         text: 'Are you sure you want to continue?',
@@ -20,7 +35,7 @@ describe('getters', () => {
 
   describe('getConfirmBeforeLeavingProperties', () => {
     it('should return a property object usable by sweetalert2 that asks before leaving screen', () => {
-      const actual = getConfirmBeforeLeavingProperties()
+      const actual = getConfirmBeforeLeavingProperties(t)
       const expected = {
         title: 'There are unsaved changes',
         text: 'All unsaved changes will be lost, are you sure you want to continue?',
