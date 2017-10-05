@@ -230,3 +230,11 @@ The plugin ID can be found in the URL, the sys_Plugin table, or in the menu mana
 
 After saving, the importwizard plugin will now have a description at the top when the english language is selected.
 This is an admin only feature and allows the admin to use HTML.
+
+# Adding a banner
+If you want to brand your MOLGENIS instance, you could add a banner.
+The width of the banner does not really matter, a higher resolution is better. It will be automatically resize to fit the browser window.
+The maximum height of a banner is **200px**!! Any larger will cause rescaling of your image and it will not look nice.
+
+An example of a banner:
+![Website banner](../images/customize/website_banner.png?raw=true, "website banner")

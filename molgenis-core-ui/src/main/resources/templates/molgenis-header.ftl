@@ -186,13 +186,12 @@
 <#macro topmenu menu plugin_id pluginid_with_query_string>
     <nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
         <div class="container-fluid">
+            <#if app_settings.logoTopHref?has_content>
+            <header id="top-logo-banner">
+                <a href="/"></a><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0">
+            </header>
+            </#if>
             <div class="navbar-header">
-            <#-- Logo start -->
-                <#if app_settings.logoTopHref?has_content>
-                    <div id="Intro">
-                        <a href="/"><img src="${app_settings.logoTopHref?html}" alt="" border="0" height="150"></a>
-                    </div>
-                </#if>
 
                 <#list menu.items as item>
                     <#if item.type != "MENU" && item.name == "Home" && app_settings.logoNavBarHref?has_content>
