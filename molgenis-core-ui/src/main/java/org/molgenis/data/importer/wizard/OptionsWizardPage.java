@@ -92,7 +92,10 @@ public class OptionsWizardPage extends AbstractWizardPage
 					fileRepositoryCollectionFactory.createFileRepositoryCollection(tmpFile).getFileNameExtensions());
 
 			File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
-			tmpFile.renameTo(file);
+			if (!tmpFile.renameTo(file))
+			{
+				LOG.error("Failed to rename '{}' to '{}'", tmpFile.getName(), file.getName());
+			}
 			importWizard.setFile(file);
 		}
 

@@ -124,11 +124,15 @@ public class DataExplorerController extends PluginController
 
 		final boolean currentUserIsSu = SecurityUtils.currentUserIsSu();
 
-		Map<String, EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
-				.filter(entityType -> !entityType.isAbstract())
-				.filter(entityType -> currentUserIsSu || !EntityTypeUtils.isSystemEntity(entityType))
-				.sorted(Comparator.comparing(EntityType::getLabel))
-				.collect(Collectors.toMap(EntityType::getId, Function.identity(), (e1, e2) -> e2, LinkedHashMap::new));
+		Map<String, EntityType> entitiesMeta = dataService.getMeta()
+														  .getEntityTypes()
+														  .filter(entityType -> !entityType.isAbstract())
+														  .filter(entityType -> currentUserIsSu
+																  || !EntityTypeUtils.isSystemEntity(entityType))
+														  .sorted(Comparator.comparing(EntityType::getLabel))
+														  .collect(Collectors.toMap(EntityType::getId,
+																  Function.identity(), (e1, e2) -> e2,
+																  LinkedHashMap::new));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
@@ -156,7 +160,7 @@ public class DataExplorerController extends PluginController
 		model.addAttribute("isAdmin", currentUserIsSu);
 
 		String navigatorMenuPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
-		if(navigatorMenuPath != null )
+		if (navigatorMenuPath != null)
 		{
 			model.addAttribute("navigatorBaseUrl", navigatorMenuPath);
 		}
@@ -402,7 +406,10 @@ public class DataExplorerController extends PluginController
 		}
 		finally
 		{
-			csvFile.delete();
+			if (!csvFile.delete())
+			{
+				LOG.warn("Failed to delete temporary file '{}'", csvFile.getName());
+			}
 		}
 
 		// store url and api key in session for subsequent galaxy export requests
