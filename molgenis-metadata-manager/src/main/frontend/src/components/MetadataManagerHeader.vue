@@ -7,7 +7,7 @@
       <div class="col-md-4 col-sm-12 col-xs-12">
         <div class="input-group">
           <multiselect v-model="selectedEntityType" :options="entityTypes" label="label"
-                       selectLabel="" deselectLabel="" placeholder="Select an Entity..."></multiselect>
+                       selectLabel="" deselectLabel="" :placeholder="$t('header-entity-select-placeholder')"></multiselect>
 
           <span class="input-group-btn">
             <button @click="createNewEntityType" class="btn btn-primary"><i class="fa fa-plus"></i></button>
