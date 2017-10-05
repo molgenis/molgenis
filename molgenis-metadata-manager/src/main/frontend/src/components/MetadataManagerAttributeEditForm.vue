@@ -13,7 +13,7 @@
 
       <div class="row">
         <div class="col">
-          <div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
+          <div class="btn-toolbar float-right" role="toolbar" :aria-label="$t('button-group-aria-label')">
             <div class="btn-group mr-2" role="group">
               <button @click="moveAttribute('up')" class="btn btn-secondary btn-sm"
                       :disabled="!selectedAttribute || selectedAttributeIndex === 0">

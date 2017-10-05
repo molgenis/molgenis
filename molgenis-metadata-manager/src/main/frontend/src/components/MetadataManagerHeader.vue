@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col-md-4 col-sm-12 col-xs-12">
-        <h2>Metadata manager</h2>
+        <h2>{{ 'application-title' | i18n }}</h2>
       </div>
       <div class="col-md-4 col-sm-12 col-xs-12">
         <div class="input-group">
