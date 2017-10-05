@@ -25,6 +25,10 @@
             <div class="row">
                 <div class="col-md-7">
                     <h3 id="entity-class-name"></h3>
+                <#if showPackageHref??>
+                    <a id="entity-package-path" <#if !plugin_settings.get("show_package_href")?? || plugin_settings.get("show_package_href") == false>
+                       style="display:none"</#if>></a>
+                </#if>
                     <span id="entity-class-description"></span>
                 </div>
                 <div class="col-md-4">
@@ -87,22 +91,6 @@
                     </div>
                 </div>
             </div>
-            <#if navigatorBaseUrl??>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h4 class="panel-title"></h4>
-                            </div>
-                            <div class="panel-body">
-                                <a id="navigator-link" href="${navigatorBaseUrl}?lookup=">
-                                    <span class="glyphicon glyphicon-link"></span> ${i18n.dataexplorer_navigator_link_label}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </#if>
             <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-primary">
