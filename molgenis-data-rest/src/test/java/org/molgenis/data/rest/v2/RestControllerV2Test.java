@@ -69,7 +69,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
-import org.molgenis.controller.api.tests.utils.ResponseErrors;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerV2Config.class, GsonConfig.class })
