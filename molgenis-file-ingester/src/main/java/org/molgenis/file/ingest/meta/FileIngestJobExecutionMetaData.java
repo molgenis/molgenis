@@ -1,12 +1,12 @@
 package org.molgenis.file.ingest.meta;
 
+import com.google.common.collect.ImmutableList;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -22,7 +22,7 @@ public class FileIngestJobExecutionMetaData extends SystemEntityType
 
 	public static final String URL = "url";
 	public static final String LOADER = "loader";
-	public static final List<String> LOADERS = Collections.singletonList("CSV");
+	public static final List<String> LOADERS = ImmutableList.of("CSV");
 
 	public static final String FILE = "file";
 	public static final String TARGET_ENTITY_ID = "targetEntityId";

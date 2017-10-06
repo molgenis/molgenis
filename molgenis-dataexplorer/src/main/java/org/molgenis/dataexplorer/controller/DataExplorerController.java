@@ -429,7 +429,10 @@ public class DataExplorerController extends PluginController
 		}
 		finally
 		{
-			csvFile.delete();
+			if (!csvFile.delete())
+			{
+				LOG.warn("Failed to delete temporary file '{}'", csvFile.getName());
+			}
 		}
 
 		// store url and api key in session for subsequent galaxy export requests

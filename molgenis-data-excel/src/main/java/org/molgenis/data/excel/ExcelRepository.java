@@ -95,6 +95,30 @@ public class ExcelRepository extends AbstractRepository
 			@Override
 			public boolean hasNext()
 			{
+				getAndUpdateNext();
+				return next != null;
+			}
+
+			@Override
+			public ExcelEntity next()
+			{
+				boolean hasNext = hasNext();
+				if (!hasNext)
+				{
+					throw new NoSuchElementException();
+				}
+				ExcelEntity result = next;
+				next = null;
+				return result;
+			}
+
+			@Override
+			public void remove()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			private void getAndUpdateNext() {
 				// iterator skips empty lines.
 				if (it.hasNext() && next == null)
 				{
@@ -112,25 +136,9 @@ public class ExcelRepository extends AbstractRepository
 					// next line not empty?
 					if (next == null)
 					{
-						hasNext();
+						getAndUpdateNext();
 					}
 				}
-				return next != null;
-			}
-
-			@Override
-			public ExcelEntity next()
-			{
-				hasNext();
-				ExcelEntity result = next;
-				next = null;
-				return result;
-			}
-
-			@Override
-			public void remove()
-			{
-				throw new UnsupportedOperationException();
 			}
 		};
 	}
