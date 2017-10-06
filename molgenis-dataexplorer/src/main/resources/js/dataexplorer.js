@@ -157,7 +157,6 @@ $.when($,
          * @memberOf molgenis.dataexplorer
          */
         function createHeader(entityMetaData) {
-            console.log(entityMetaData);
             $('#entity-class-name').html(entityMetaData.label);
 
             if (entityMetaData.description) {
@@ -316,7 +315,7 @@ $.when($,
             });
 
             // get entity meta data and update header and tree
-            var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes', 'package']}, function (entityMetaData) {
+            var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
                 selectedEntityMetaData = entityMetaData;
                 selectedAttributes = [];
                 self.createHeader(entityMetaData);
