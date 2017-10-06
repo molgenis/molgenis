@@ -163,14 +163,14 @@ export default {
   /**
    * Persist metadata changes to the database
    */
-  [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
+  [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }, t: Function) {
     const options = {
       body: JSON.stringify(state.editorEntityType)
     }
     withSpinner(commit, api.post('/plugin/metadata-manager/entityType', options).then(response => {
       commit(CREATE_ALERT, {
         type: 'success',
-        message: response.statusText + ': Successfully updated metadata for EntityType: ' + state.editorEntityType.label
+        message: response.statusText + ': ' + t('save-succes-message') + ': ' + state.editorEntityType.label
       })
 
       if (state.editorEntityType.isNew) {

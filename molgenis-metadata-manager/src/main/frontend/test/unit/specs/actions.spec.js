@@ -8,14 +8,22 @@ import {
   SET_ATTRIBUTE_TYPES,
   SET_EDITOR_ENTITY_TYPE,
   SET_ENTITY_TYPES,
+  SET_LOADING,
   SET_PACKAGES,
   SET_SELECTED_ATTRIBUTE_ID,
   SET_SELECTED_ENTITY_TYPE_ID,
-  UPDATE_EDITOR_ENTITY_TYPE,
-  SET_LOADING
+  UPDATE_EDITOR_ENTITY_TYPE
 } from 'store/mutations'
 
 import actions, { toAttribute, toEntityType } from 'store/actions'
+
+const i18n = {
+  'save-succes-message': 'Successfully updated metadata for EntityType'
+}
+
+const t = (key) => {
+  return i18n[key]
+}
 
 describe('actions', () => {
   afterEach(() => td.reset())
@@ -358,6 +366,7 @@ describe('actions', () => {
 
       const options = {
         state: state,
+        payload: t,
         expectedMutations: [
           {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: payload}
@@ -379,6 +388,7 @@ describe('actions', () => {
 
       const options = {
         state: state,
+        payload: t,
         expectedMutations: [
           {type: SET_LOADING, payload: true},
           {type: CREATE_ALERT, payload: alertPayload}

@@ -4,7 +4,7 @@
     <div class="col-md-3 attribute-tree">
       <div class="row">
         <div class="col">
-          <strong>Attributes</strong>
+          <strong>{{ 'attribute-tree-title' | i18n }}</strong>
           <button @click="addAttribute" class="btn btn-primary btn-sm float-right"><i class="fa fa-plus"></i></button>
         </div>
       </div>
@@ -13,7 +13,7 @@
 
       <div class="row">
         <div class="col">
-          <div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
+          <div class="btn-toolbar float-right" role="toolbar" :aria-label="$t('button-group-aria-label')">
             <div class="btn-group mr-2" role="group">
               <button @click="moveAttribute('up')" class="btn btn-secondary btn-sm"
                       :disabled="!selectedAttribute || selectedAttributeIndex === 0">
@@ -41,7 +41,7 @@
                       :onAttributeSelect="onAttributeSelect"></attribute-tree>
 
       <p v-if="editorEntityType.entityTypeParent !== undefined">
-        Parent attributes from <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
+        {{ 'compound-attribute-text' | i18n }} <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
         <span v-for="attribute in editorEntityType.entityTypeParent.attributes">- {{attribute.label}} <br></span>
       </p>
     </div>
@@ -57,7 +57,7 @@
     <div v-else class="col-md-9">
       <div class="row">
         <div class="col attribute-form-header">
-          <strong>Attribute:</strong> {{selectedAttribute.label}}
+          <strong>{{ 'selected-attribute-label' | i18n }}:</strong> {{selectedAttribute.label}}
           <hr>
         </div>
       </div>

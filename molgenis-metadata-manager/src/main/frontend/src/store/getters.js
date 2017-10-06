@@ -1,28 +1,28 @@
 /**
  * Returns a property object used for creating a sweetalert2 modal when trying to delete an EntityType
  */
-export const getConfirmBeforeDeletingProperties = (identifier) => {
+export const getConfirmBeforeDeletingProperties = (identifier, t) => {
   return {
-    title: 'You are about to delete ' + identifier,
-    text: 'Are you sure you want to continue?',
+    title: t('confirm-before-delete-title') + ' ' + identifier,
+    text: t('confirm-before-delete-text'),
     type: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete',
-    cancelButtonText: 'Cancel'
+    confirmButtonText: t('confirm-before-delete-confirm'),
+    cancelButtonText: t('confirm-before-delete-cancel')
   }
 }
 
 /**
  * Returns a property object used for creating a sweetalert2 modal when leaving a view with unsaved changes
  */
-export const getConfirmBeforeLeavingProperties = () => {
+export const getConfirmBeforeLeavingProperties = (t) => {
   return {
-    title: 'There are unsaved changes',
-    text: 'All unsaved changes will be lost, are you sure you want to continue?',
+    title: t('confirm-before-leaving-title'),
+    text: t('confirm-before-leaving-text'),
     type: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes',
-    cancelButtonText: 'No, stay'
+    confirmButtonText: t('confirm-before-leaving-confirm'),
+    cancelButtonText: t('confirm-before-leaving-cancel')
   }
 }
 
