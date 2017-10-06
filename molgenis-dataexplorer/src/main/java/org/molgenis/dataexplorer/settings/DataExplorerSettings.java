@@ -131,8 +131,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												   .setNillable(false)
 												   .setDefaultValue(String.valueOf(DEFAULT_GENERAL_HEADER_ABBREVIATE))
 												   .setLabel("Entity description abbreviation length");
-			addAttribute(GENERAL_PACKAGE_HREF).setParent(generalAttr)
-											  .setDataType(BOOL)
+			addAttribute(GENERAL_PACKAGE_HREF).setDataType(BOOL)
 											  .setNillable(true)
 											  .setDefaultValue(String.valueOf(DEFAULT_SHOW_PACKAGE_HREF))
 											  .setLabel(
