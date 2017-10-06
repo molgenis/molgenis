@@ -233,8 +233,8 @@ This is an admin only feature and allows the admin to use HTML.
 
 # Adding a banner
 If you want to brand your MOLGENIS instance, you could add a banner.
-The width of the banner does not really matter, a higher resolution is better. It will be automatically resize to fit the browser window.
-The maximum height of a banner is **200px**!! Any larger will cause rescaling of your image and it will not look nice.
+The width and height of the banner does not really matter, a higher resolution is better. It will be automatically resize to fit the browser window.
+Do realize that taking a banner with a very big height might make your application unusable.
 
 An example of a banner:
 ![Website banner](../images/customize/website_banner.png?raw=true, "website banner")
