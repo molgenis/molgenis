@@ -178,14 +178,24 @@
                 <script>
                     // Calculate the amount of pixels that the content needs to
                     // be pushed down based on the height of the uploaded banner
-                    var img = document.getElementById('logo-top');
-                    img.style['height'] = 'auto'
+                    var maxHeight = 0
 
-                    var height = img.height;
-                    var maxHeight = height + 60
+                    function setContainerHeight() {
+                        var img = document.getElementById('logo-top');
+                        img.style['height'] = 'auto'
 
-                    var container = document.querySelector('body>.container-fluid')
-                    container.setAttribute("style", "padding-top: " + maxHeight + "px;")
+                        var height = img.height
+                        maxHeight = height + 60
+
+                        var container = document.querySelector('body>.container-fluid')
+                        container.setAttribute("style", "padding-top: " + maxHeight + "px;")
+                    }
+
+                    $(window).resize(function() {
+                        setContainerHeight()
+                    })
+
+                    setContainerHeight()
                 </script>
             </#if>
 
