@@ -1,11 +1,5 @@
 #logo-top {
     max-width: 100vw;
-    max-height: 200px;
-    height: auto;
-}
-
-body>.container-fluid {
-    padding-top: 260px;
 }
 
 #top-logo-banner {

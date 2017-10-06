@@ -172,12 +172,27 @@
         </div>
     </#if>
 <div class="row">
-<div class="col-md-12">
-<div id="plugin-container">
-    <#assign plugin_description_key = plugin_id + '_description_text'>
-    <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
-        ${i18n[plugin_description_key]}
-    </#if>
+    <div class="col-md-12">
+        <div id="plugin-container">
+            <#if app_settings.logoTopHref?has_content>
+                <script>
+                    // Calculate the amount of pixels that the content needs to
+                    // be pushed down based on the height of the uploaded banner
+                    var img = document.getElementById('logo-top');
+                    img.style['height'] = 'auto'
+
+                    var height = img.height;
+                    var maxHeight = height + 60
+
+                    var container = document.querySelector('body>.container-fluid')
+                    container.setAttribute("style", "padding-top: " + maxHeight + "px;")
+                </script>
+            </#if>
+
+            <#assign plugin_description_key = plugin_id + '_description_text'>
+            <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
+                ${i18n[plugin_description_key]}
+            </#if>
 </#macro>
 
 
@@ -192,7 +207,6 @@
             </header>
             </#if>
             <div class="navbar-header">
-
                 <#list menu.items as item>
                     <#if item.type != "MENU" && item.name == "Home" && app_settings.logoNavBarHref?has_content>
                         <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
