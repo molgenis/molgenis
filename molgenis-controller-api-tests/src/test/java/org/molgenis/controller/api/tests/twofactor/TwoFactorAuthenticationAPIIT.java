@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.twofactor;
+package org.molgenis.controller.api.tests.twofactor;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -16,11 +16,11 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
-import static org.molgenis.data.rest.convert.RestTestUtils.*;
+import static org.molgenis.controller.api.tests.utils.RestTestUtils.*;
 
-public class TwoFactorAuthenticationIT
+public class TwoFactorAuthenticationAPIIT
 {
-	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationIT.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationAPIIT.class);
 
 	// Request parameters
 	private static final String PATH = "api/v1/";
@@ -43,18 +43,15 @@ public class TwoFactorAuthenticationIT
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
-		envHost = "http://localhost:8080";
 		baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
 		LOG.info("baseURI: " + baseURI);
 
 		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
 		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
-		adminUserName = DEFAULT_ADMIN_NAME;
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
 		String adminPassword = Strings.isNullOrEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
-		adminPassword = DEFAULT_ADMIN_PW;
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);

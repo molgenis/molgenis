@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.convert;
+package org.molgenis.controller.api.tests.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
