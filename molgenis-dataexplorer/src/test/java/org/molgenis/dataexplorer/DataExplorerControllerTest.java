@@ -137,26 +137,6 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	}
 
 	@Test
-	public void initSetNavigatorMenuPath() throws Exception
-	{
-		String selectedEntityname = "selectedEntityname";
-		String selectedEntityId= "selectedEntityId";
-		String navigatorPath = "path/to-navigator";
-
-		MetaDataService metaDataService = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(metaDataService);
-		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
-
-		Menu menu = mock(Menu.class);
-		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(navigatorPath);
-
-		controller.init(selectedEntityname, selectedEntityId, model);
-
-		verify(model).addAttribute("navigatorBaseUrl", navigatorPath);
-	}
-
-	@Test
 	public void initSetNavigatorMenuPathNoNavigator() throws Exception
 	{
 		String selectedEntityname = "selectedEntityname";
