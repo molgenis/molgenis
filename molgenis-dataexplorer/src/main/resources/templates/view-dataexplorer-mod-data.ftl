@@ -154,6 +154,10 @@
 <script>top.molgenis.ie9 = true;</script>
 <![endif]-->
 <script>
+    <#-- used to disable the genomebrowser in IE10 (which no longer supports conditional comments) -->
+    if (Function('/*@cc_on return document.documentMode===10@*/')()) {
+        top.molgenis.ie10 = true;
+    }
     <#-- load js dependencies -->
     $.when(
             $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),

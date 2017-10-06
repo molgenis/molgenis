@@ -137,7 +137,7 @@
      */
     function doShowGenomeBrowser() {
         // dalliance is not compatible with IE9
-        return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined && molgenis.dataexplorer.settings["data_genome_browser"] !== false;
+        return molgenis.ie9 !== true && molgenis.ie10 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined && molgenis.dataexplorer.settings["data_genome_browser"] !== false;
     }
 
     //used to determine if the rowclick should be available
