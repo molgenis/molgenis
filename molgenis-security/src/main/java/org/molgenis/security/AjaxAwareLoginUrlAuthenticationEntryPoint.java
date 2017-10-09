@@ -1,10 +1,8 @@
 package org.molgenis.security;
 
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.ELRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.servlet.ServletException;
@@ -17,11 +15,10 @@ import java.io.IOException;
  */
 public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint
 {
+	private static final RequestMatcher REQUEST_MATCHER_XML_HTTP_REQUEST = new RequestHeaderRequestMatcher(
+			"X-Requested-With", "XMLHttpRequest");
 
-	private static final RequestMatcher requestMatcher = new ELRequestMatcher(
-			"hasHeader('X-Requested-With','XMLHttpRequest')");
-
-	public AjaxAwareLoginUrlAuthenticationEntryPoint(String loginFormUrl)
+	AjaxAwareLoginUrlAuthenticationEntryPoint(String loginFormUrl)
 	{
 		super(loginFormUrl);
 	}
@@ -36,22 +33,10 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 		}
 		else if (isRestRequest(request))
 		{
-			if (SecurityUtils.isSessionExpired(request))
-			{
-				// Signal that 'session expired' message must be shown to the user
-				request.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTRIBUTE, true);
-			}
-
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		}
 		else
 		{
-			if (SecurityUtils.isSessionExpired(request))
-			{
-				// Signal that 'session expired' message must be shown to the user
-				request.getSession().setAttribute("sessionExpired", true);
-			}
-
 			super.commence(request, response, authException);
 		}
 	}
@@ -67,8 +52,8 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 	/**
 	 * Checks if it is a rest request
 	 */
-	protected boolean isRestRequest(HttpServletRequest request)
+	private boolean isRestRequest(HttpServletRequest request)
 	{
-		return requestMatcher.matches(request);
+		return REQUEST_MATCHER_XML_HTTP_REQUEST.matches(request);
 	}
 }

@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import static org.molgenis.security.login.MolgenisLoginController.URI;
 
@@ -20,8 +18,9 @@ import static org.molgenis.security.login.MolgenisLoginController.URI;
 @RequestMapping(URI)
 public class MolgenisLoginController
 {
+	public static final String PARAM_SESSION_EXPIRED = "expired";
+
 	public static final String URI = "/login";
-	public static final String SESSION_EXPIRED_SESSION_ATTRIBUTE = "sessionExpired";
 	public static final String ERROR_MESSAGE_ATTRIBUTE = "errorMessage";
 
 	private static final String ERROR_MESSAGE_BAD_CREDENTIALS = "The username or password you entered is incorrect.";
@@ -29,21 +28,23 @@ public class MolgenisLoginController
 	private static final String ERROR_MESSAGE_SESSION_AUTHENTICATION = "Your login session has expired.";
 	private static final String ERROR_MESSAGE_UNKNOWN = "Sign in failed.";
 
-	public static final String VIEW_LOGIN = "view-login";
+	private static final String VIEW_LOGIN = "view-login";
 
 	@GetMapping
-	public String getLoginPage(Model model, HttpSession session)
+	public String getLoginPage()
 	{
-		if (session.getAttribute(SESSION_EXPIRED_SESSION_ATTRIBUTE) != null)
-		{
-			model.addAttribute(ERROR_MESSAGE_ATTRIBUTE, ERROR_MESSAGE_SESSION_AUTHENTICATION);
-			session.removeAttribute(SESSION_EXPIRED_SESSION_ATTRIBUTE);
-		}
+		return VIEW_LOGIN;
+	}
+
+	@GetMapping(params = PARAM_SESSION_EXPIRED)
+	public String getLoginErrorPage(Model model)
+	{
+		model.addAttribute(ERROR_MESSAGE_ATTRIBUTE, ERROR_MESSAGE_SESSION_AUTHENTICATION);
 		return VIEW_LOGIN;
 	}
 
 	@GetMapping(params = "error")
-	public String getLoginErrorPage(Model model, HttpServletRequest request, HttpServletResponse response)
+	public String getLoginErrorPage(Model model, HttpServletRequest request)
 	{
 		String errorMessage;
 		Object attribute = request.getSession().getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
