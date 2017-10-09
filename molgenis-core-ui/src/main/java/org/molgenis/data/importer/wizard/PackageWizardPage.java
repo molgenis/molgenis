@@ -15,12 +15,11 @@ import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class PackageWizardPage extends AbstractWizardPage
@@ -75,12 +74,14 @@ public class PackageWizardPage extends AbstractWizardPage
 				if (!importWizard.getEntitiesImportable().containsValue(false))
 				{
 					// The package name that is selected in the "package selection" page
-					String selectedPackage = request.getParameter("defaultEntity");
+					String selectedPackage = request.getParameter("selectedPackage");
 
 					// The entities that can be imported
 					LinkedHashMap<String, Boolean> entitiesImportable = importService.determineImportableEntities(
 							metaDataService, repositoryCollection, selectedPackage);
 
+					// The results of the attribute checks are stored in maps with the entityname as key, those need to be updated with the packagename
+					updateFieldReports(importWizard, selectedPackage);
 					// Set the entities that can be imported
 					importWizard.setEntitiesImportable(entitiesImportable);
 
@@ -103,5 +104,20 @@ public class PackageWizardPage extends AbstractWizardPage
 			}
 		}
 		return null;
+	}
+
+	private void updateFieldReports(ImportWizard importWizard, String pack)
+	{
+		importWizard.setFieldsAvailable(renameKeys(importWizard.getFieldsAvailable(), pack));
+		importWizard.setFieldsDetected(renameKeys(importWizard.getFieldsDetected(), pack));
+		importWizard.setFieldsRequired(renameKeys(importWizard.getFieldsRequired(), pack));
+		importWizard.setFieldsUnknown(renameKeys(importWizard.getFieldsUnknown(), pack));
+	}
+
+	private Map<String, Collection<String>> renameKeys(Map<String, Collection<String>> map, String pack)
+	{
+		Map<String, Collection<String>> result = new HashMap<>();
+		map.keySet().forEach(key -> result.put(pack + PACKAGE_SEPARATOR + key, map.get(key)));
+		return result;
 	}
 }

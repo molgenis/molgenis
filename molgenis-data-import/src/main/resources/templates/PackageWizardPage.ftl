@@ -26,7 +26,7 @@
                 <#list wizard.packages as packageName>
                     <div class="radio">
                         <label>
-                            <input type="radio" name="defaultEntity"
+                            <input type="radio" name="selectedPackage"
                                    <#if packageName == wizard.packages?first>checked</#if>
                                    value="${packageName?html}">${packageName?html}
                         </label>
