@@ -44,7 +44,7 @@ public class AjaxAwareLoginUrlAuthenticationEntryPointTest
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		AuthenticationException authException = mock(AuthenticationException.class);
 		ajaxAwareLoginUrlAuthenticationEntryPoint.commence(request, response, authException);
-		verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+		verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 
 	@Test

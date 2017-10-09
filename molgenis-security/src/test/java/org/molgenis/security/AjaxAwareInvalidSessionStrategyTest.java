@@ -44,6 +44,6 @@ public class AjaxAwareInvalidSessionStrategyTest
 		when(request.getHeaders("X-Requested-With")).thenReturn(headerValueEnumeration);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		ajaxAwareInvalidSessionStrategy.onInvalidSessionDetected(request, response);
-		verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Session expired");
+		verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 }
