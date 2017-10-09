@@ -10,6 +10,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
@@ -158,12 +159,7 @@ public class DataExplorerController extends PluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", currentUserIsSu);
-
-		String navigatorMenuPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
-		if (navigatorMenuPath != null)
-		{
-			model.addAttribute("navigatorBaseUrl", navigatorMenuPath);
-		}
+		model.addAttribute("showPackageHref", dataExplorerSettings.isShowPackageHref());
 
 		return "view-dataexplorer";
 	}
@@ -325,6 +321,33 @@ public class DataExplorerController extends PluginController
 			}
 		}
 		return modulesConfig;
+	}
+
+	@GetMapping("/packageHref")
+	@ResponseBody
+	public Map<String, String> getPackageLink(@RequestParam("entity") String entityTypeId)
+	{
+		Map<String, String> result = new HashMap<>();
+		EntityType entityType = dataService.getEntityType(entityTypeId);
+
+		if (entityType != null)
+		{
+			Package package_ = entityType.getPackage();
+			if (package_ != null)
+			{
+				result.put("href", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + package_.getId());
+				LinkedList<String> packages = new LinkedList<>();
+				packages.add(package_.getLabel());
+				while (package_.getParent() != null)
+				{
+					package_ = package_.getParent();
+					if (package_ != null) packages.add(package_.getLabel());
+				}
+				Collections.reverse(packages);
+				result.put("fullLabel", String.join(" / ", packages));
+			}
+		}
+		return result;
 	}
 
 	/**

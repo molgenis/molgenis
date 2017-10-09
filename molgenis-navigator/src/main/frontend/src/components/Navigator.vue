@@ -146,14 +146,8 @@
       }
     },
     mounted: function () {
-      const route = this.$route
-      if (route.query.lookup && route.query.lookup !== '') {
-        const lookupEntityId = route.query.lookup
-        this.$store.dispatch(GET_ENTITY_PACKAGES, lookupEntityId)
-      } else {
-        route.params.package ? this.selectPackage(route.params.package) : this.$store.dispatch(RESET_STATE)
-      }
-    },
+         this.$route.params.package ? this.selectPackage(this.$route.params.package) : this.$store.dispatch(RESET_STATE)
+     },
     watch: {
       '$route' (to, from) {
         this.selectPackage(this.$route.params.package)

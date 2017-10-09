@@ -2,7 +2,6 @@ package org.molgenis.dataexplorer;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.mapdb.Fun;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -13,6 +12,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
@@ -37,7 +37,10 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -93,6 +96,13 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Mock
 	MenuReaderService menuReaderService;
 
+	@Mock
+	Menu menu;
+	@Mock
+	Package package_;
+	@Mock
+	Package parentPackage;
+
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
@@ -105,6 +115,11 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(package_.getLabel()).thenReturn("pack");
+		when(package_.getId()).thenReturn("packId");
+		when(parentPackage.getLabel()).thenReturn("parent");
+		when(package_.getParent()).thenReturn(parentPackage);
+		when(entityType.getPackage()).thenReturn(package_);
 		when(repository.findOneById(entityId)).thenReturn(entity);
 		when(dataService.getEntityType(entityTypeId)).thenReturn(entityType);
 		when(dataService.getRepository(entityTypeId)).thenReturn(repository);
@@ -119,26 +134,6 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
-	}
-
-	@Test
-	public void initSetNavigatorMenuPath() throws Exception
-	{
-		String selectedEntityname = "selectedEntityname";
-		String selectedEntityId= "selectedEntityId";
-		String navigatorPath = "path/to-navigator";
-
-		MetaDataService metaDataService = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(metaDataService);
-		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
-
-		Menu menu = mock(Menu.class);
-		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(navigatorPath);
-
-		controller.init(selectedEntityname, selectedEntityId, model);
-
-		verify(model).addAttribute("navigatorBaseUrl", navigatorPath);
 	}
 
 	@Test
@@ -250,5 +245,16 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		assertEquals(
 				controller.getDownloadFilename("it_emx_datatypes_TypeTest", LocalDateTime.parse("2017-07-04T14:14:33"),
 						DOWNLOAD_TYPE_XLSX), "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.xlsx");
+	}
+
+	@Test
+	public void testPackageLink()
+	{
+		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn("menu/main/navigation/navigator");
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		Map<String, String> expected = new HashMap<>();
+		expected.put("href", "menu/main/navigation/navigator/packId");
+		expected.put("fullLabel", "parent / pack");
+		assertEquals(controller.getPackageLink(entityTypeId), expected);
 	}
 }

@@ -118,7 +118,8 @@ public class ExcelRepository extends AbstractRepository
 				throw new UnsupportedOperationException();
 			}
 
-			private void getAndUpdateNext() {
+			private void getAndUpdateNext()
+			{
 				// iterator skips empty lines.
 				if (it.hasNext() && next == null)
 				{

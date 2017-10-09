@@ -304,6 +304,16 @@ $.when($,
                 }
             });
 
+            $.get(molgenis.getContextUrl() + '/packageHref?entity=' + state.entity).done(function (data) {
+                if (data.href !== undefined) {
+                    $("#entity-package-path").removeClass('hidden');
+                    $("#entity-package-path").prop("href", data.href);
+                    $("#entity-package-path").html('(<span class="glyphicon glyphicon-home" aria-hidden="true"></span> / ' + data.fullLabel + ')');
+                } else {
+                    $("#entity-package-path").addClass('hidden');
+                }
+            });
+
             // get entity meta data and update header and tree
             var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
                 selectedEntityMetaData = entityMetaData;
@@ -395,8 +405,6 @@ $.when($,
                 });
             });
 
-            setNavigatoHref(state.entity)
-
             $('#observationset-search').focus();
         }
 
@@ -431,23 +439,6 @@ $.when($,
             if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState)
                 + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
-        }
-
-        /**
-         * Sets the href for the link to the Navigator plugin.
-         * The link href to the Navigator is appended with a 'lookup' query that results in the navigator opening in
-         * the correct package.
-         *
-         * @memberOf molgenis.dataexplorer
-         *
-         * */
-        function setNavigatoHref (entityId) {
-          var navigatorLinkElem = $('#navigator-link');
-          if(navigatorLinkElem.length) { // skip in case navigator-link is set to hidden
-            var currentHref = navigatorLinkElem.attr('href')
-            var newHref = currentHref.substring(0, currentHref.indexOf('?lookup=')) + '?lookup="' + entityId + '"';
-            navigatorLinkElem.attr('href',  newHref);
-          }
         }
 
         /**
