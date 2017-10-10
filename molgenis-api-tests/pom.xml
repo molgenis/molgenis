@@ -10,7 +10,7 @@
     </parent>
     <artifactId>molgenis-controller-api-tests</artifactId>
 
-    <name>controller-api-tests</name>
+    <name>api-tests</name>
 
     <dependencies>
         <dependency>
