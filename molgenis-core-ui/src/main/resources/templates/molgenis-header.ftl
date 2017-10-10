@@ -183,6 +183,9 @@
                     function setContainerHeight() {
                         var img = document.getElementById('logo-top');
                         img.style['height'] = 'auto'
+                        <#if (app_settings.fixedHeightLogo?? && app_settings.fixedHeightLogo == true)>
+                        img.style['max-height'] = '150px'
+                        </#if>
 
                         var height = img.height
                         maxHeight = height + 60
@@ -213,7 +216,7 @@
         <div class="container-fluid">
             <#if app_settings.logoTopHref?has_content>
             <header id="top-logo-banner">
-                <a href="/"></a><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0">
+                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"></a>
             </header>
             </#if>
             <div class="navbar-header">

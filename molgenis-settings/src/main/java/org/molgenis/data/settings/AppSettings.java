@@ -29,6 +29,16 @@ public interface AppSettings
 	void setLogoTopHref(String logoHref);
 
 	/**
+	 * @return boolean if top logo should have a fixed height
+	 */
+	public boolean getFixedHeightLogo();
+
+	/**
+	 * @param fixedHeight boolean for fixed height
+	 */
+	public void setFixedHeightLogo(boolean fixedHeight);
+
+	/**
 	 * @return href of logo displayed in menu
 	 */
 	@Nullable

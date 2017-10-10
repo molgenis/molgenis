@@ -31,6 +31,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String TITLE = "title";
 		private static final String LOGO_NAVBAR_HREF = "logo_href_navbar";
 		private static final String LOGO_TOP_HREF = "logo_href_top";
+		private static final String FIXED_LOGO_HEIGHT = "fixed_logo_height";
 		private static final String FOOTER = "footer";
 		public static final String MENU = "molgenis_menu";
 		private static final String LANGUAGE_CODE = "language_code";
@@ -48,6 +49,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String DEFAULT_TITLE = "MOLGENIS";
 		private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
+		private static final boolean DEFAULT_FIXED_LOGO_HEIGHT = true;
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -85,6 +87,11 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 									   .setNillable(true)
 									   .setLabel("Logo above navigation bar")
 									   .setDescription("HREF to logo image");
+			addAttribute(FIXED_LOGO_HEIGHT).setDataType(BOOL)
+										   .setNillable(true)
+										   .setLabel("Fixed height top logo")
+										   .setDefaultValue(String.valueOf(DEFAULT_FIXED_LOGO_HEIGHT))
+										   .setDescription("Use fixed height for logo above navigation bar");
 			addAttribute(FOOTER).setDataType(TEXT).setNillable(true).setLabel("Footer text");
 			addAttribute(MENU).setDataType(TEXT)
 							  .setNillable(true)
@@ -197,6 +204,18 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public void setLogoTopHref(String logoHref)
 	{
 		set(Meta.LOGO_TOP_HREF, logoHref);
+	}
+
+	@Override
+	public boolean getFixedHeightLogo()
+	{
+		return getBoolean(Meta.FIXED_LOGO_HEIGHT);
+	}
+
+	@Override
+	public void setFixedHeightLogo(boolean fixedHeight)
+	{
+		set(Meta.FIXED_LOGO_HEIGHT, fixedHeight);
 	}
 
 	@Override
