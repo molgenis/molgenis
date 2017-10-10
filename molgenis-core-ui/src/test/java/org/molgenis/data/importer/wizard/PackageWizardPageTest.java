@@ -2,11 +2,11 @@ package org.molgenis.data.importer.wizard;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.validation.BindingResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.testng.Assert.assertTrue;
 
-public class PackageWizardPageTest
+public class PackageWizardPageTest extends AbstractMockitoTest
 {
 	@Mock
 	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
@@ -39,7 +39,6 @@ public class PackageWizardPageTest
 	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
-		MockitoAnnotations.initMocks(this);
 		when(importServiceFactory.getImportService(any(), any())).thenReturn(importService);
 		LinkedHashMap importableEntities = new LinkedHashMap<>();
 		importableEntities.put("pack1_test", true);
