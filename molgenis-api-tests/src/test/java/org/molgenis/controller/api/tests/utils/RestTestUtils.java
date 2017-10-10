@@ -5,7 +5,6 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -50,7 +49,7 @@ public class RestTestUtils
 
 	public enum Permission
 	{
-		READ, WRITE, COUNT, NONE, WRITEMETA
+		READ, WRITE, COUNT, WRITEMETA
 	}
 
 	/**
@@ -295,17 +294,6 @@ public class RestTestUtils
 			   .post("api/v1/" + "sys_sec_UserAuthority");
 	}
 
-	/**
-	 * @param adminToken   the token to use to authenticate
-	 * @param permissionId the id of the permission to use
-	 */
-	public static void removeRight(String adminToken, String permissionId)
-	{
-		given().header("x-molgenis-token", adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .delete("api/v1/sys_sec_UserAuthority/" + permissionId);
-	}
-
 	public static void removePackage(String adminToken, String packageName)
 	{
 		given().header("x-molgenis-token", adminToken)
@@ -359,21 +347,4 @@ public class RestTestUtils
 			   .body(requestBody)
 			   .delete("api/v2/sys_sec_UserAuthority");
 	}
-
-	/**
-	 * Enable or disable 2 factor authentication
-	 *
-	 * @param adminToken admin token for login in RESTAPI
-	 * @param state      state of 2 factor authentication (can be Enforced, Enabled, Disabled)
-	 */
-	public static void toggle2fa(String adminToken, TwoFactorAuthenticationSetting state)
-	{
-
-		given().header(X_MOLGENIS_TOKEN, adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .body(state.getLabel())
-			   .when()
-			   .put("api/v1/sys_set_auth/auth/sign_in_2fa");
-	}
-
 }

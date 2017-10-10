@@ -2,7 +2,6 @@ package org.molgenis.controller.api.tests.twofactor;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
@@ -28,8 +27,6 @@ public class TwoFactorAuthenticationAPIIT
 	// User credentials
 	private static final String REST_TEST_USER = "rest_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
-	private String testUserId;
-	private String testUserToken;
 	private String adminToken;
 
 	/**
@@ -55,11 +52,7 @@ public class TwoFactorAuthenticationAPIIT
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
-
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-
-		testUserId = getUserId(adminToken, REST_TEST_USER);
-		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -67,30 +60,19 @@ public class TwoFactorAuthenticationAPIIT
 	{
 		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
 
-		ValidatableResponse response;
-
-		response = given().log()
-						  .all()
-						  .header(X_MOLGENIS_TOKEN, testUserToken)
-						  .contentType(APPLICATION_JSON)
-						  .when()
-						  .get(PATH + "logout")
-						  .then();
-		response.statusCode(OKE);
-
 		Gson gson = new Gson();
 		Map<String, String> loginBody = new HashMap<>();
 		loginBody.put("username", REST_TEST_USER);
 		loginBody.put("password", REST_TEST_USER_PASSWORD);
 
-		response = given().contentType(APPLICATION_JSON)
-						  .body(gson.toJson(loginBody))
-						  .when()
-						  .post(PATH + "login")
-						  .then();
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
-						"Login using /api/v1/login is disabled, two factor authentication is enabled"));
+		given().contentType(APPLICATION_JSON)
+			   .body(gson.toJson(loginBody))
+			   .when()
+			   .post(PATH + "login")
+			   .then()
+			   .statusCode(UNAUTHORIZED)
+			   .body("errors.message[0]",
+					   Matchers.equalTo("Login using /api/v1/login is disabled, two factor authentication is enabled"));
 	}
 
 	@Test
@@ -98,38 +80,42 @@ public class TwoFactorAuthenticationAPIIT
 	{
 		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
 
-		ValidatableResponse response;
-
-		response = given().log()
-						  .all()
-						  .header(X_MOLGENIS_TOKEN, testUserToken)
-						  .contentType(APPLICATION_JSON)
-						  .when()
-						  .get(PATH + "logout")
-						  .then();
-		response.statusCode(OKE);
-
 		Gson gson = new Gson();
 		Map<String, String> loginBody = new HashMap<>();
 		loginBody.put("username", REST_TEST_USER);
 		loginBody.put("password", REST_TEST_USER_PASSWORD);
 
-		response = given().contentType(APPLICATION_JSON)
-						  .body(gson.toJson(loginBody))
-						  .when()
-						  .post(PATH + "login")
-						  .then();
-		response.statusCode(OKE);
-
+		given().contentType(APPLICATION_JSON)
+			   .body(gson.toJson(loginBody))
+			   .when()
+			   .post(PATH + "login")
+			   .then()
+			   .statusCode(OKE);
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
+		given().header(X_MOLGENIS_TOKEN, this.adminToken)
+			   .when()
+			   .delete("api/v1/sys_sec_User/" + getUserId(adminToken, REST_TEST_USER));
 
 		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
 	}
 
+	/**
+	 * Enable or disable 2 factor authentication
+	 *
+	 * @param adminToken admin token for login in RESTAPI
+	 * @param state      state of 2 factor authentication (can be Enforced, Enabled, Disabled)
+	 */
+	private void toggle2fa(String adminToken, TwoFactorAuthenticationSetting state)
+	{
+		given().header(X_MOLGENIS_TOKEN, adminToken)
+			   .contentType(APPLICATION_JSON)
+			   .body(state.getLabel())
+			   .when()
+			   .put("api/v1/sys_set_auth/auth/sign_in_2fa");
+	}
 }
