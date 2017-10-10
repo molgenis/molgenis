@@ -42,7 +42,7 @@ public class PackageWizardPageTest
 		MockitoAnnotations.initMocks(this);
 		when(importServiceFactory.getImportService(any(), any())).thenReturn(importService);
 		LinkedHashMap importableEntities = new LinkedHashMap<>();
-		importableEntities.put("test", true);
+		importableEntities.put("pack1_test", true);
 		when(importService.determineImportableEntities(any(), any(), any())).thenReturn(importableEntities);
 		packageWizardPage = new PackageWizardPage(fileRepositoryCollectionFactory, importServiceFactory,
 				metaDataService);

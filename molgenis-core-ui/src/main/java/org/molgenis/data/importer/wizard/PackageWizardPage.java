@@ -81,7 +81,7 @@ public class PackageWizardPage extends AbstractWizardPage
 							metaDataService, repositoryCollection, selectedPackage);
 
 					// The results of the attribute checks are stored in maps with the entityname as key, those need to be updated with the packagename
-					updateFieldReports(importWizard, selectedPackage);
+					updateFieldReports(importWizard, selectedPackage, entitiesImportable);
 					// Set the entities that can be imported
 					importWizard.setEntitiesImportable(entitiesImportable);
 
@@ -106,18 +106,32 @@ public class PackageWizardPage extends AbstractWizardPage
 		return null;
 	}
 
-	private void updateFieldReports(ImportWizard importWizard, String pack)
+	private void updateFieldReports(ImportWizard importWizard, String pack,
+			LinkedHashMap<String, Boolean> entitiesImportable)
 	{
-		importWizard.setFieldsAvailable(renameKeys(importWizard.getFieldsAvailable(), pack));
-		importWizard.setFieldsDetected(renameKeys(importWizard.getFieldsDetected(), pack));
-		importWizard.setFieldsRequired(renameKeys(importWizard.getFieldsRequired(), pack));
-		importWizard.setFieldsUnknown(renameKeys(importWizard.getFieldsUnknown(), pack));
+		importWizard.setFieldsAvailable(renameKeys(importWizard.getFieldsAvailable(), pack, entitiesImportable));
+		importWizard.setFieldsDetected(renameKeys(importWizard.getFieldsDetected(), pack, entitiesImportable));
+		importWizard.setFieldsRequired(renameKeys(importWizard.getFieldsRequired(), pack, entitiesImportable));
+		importWizard.setFieldsUnknown(renameKeys(importWizard.getFieldsUnknown(), pack, entitiesImportable));
 	}
 
-	private Map<String, Collection<String>> renameKeys(Map<String, Collection<String>> map, String pack)
+	private Map<String, Collection<String>> renameKeys(Map<String, Collection<String>> map, String pack,
+			LinkedHashMap<String, Boolean> entitiesImportable)
 	{
 		Map<String, Collection<String>> result = new HashMap<>();
-		map.keySet().forEach(key -> result.put(pack + PACKAGE_SEPARATOR + key, map.get(key)));
+		//if the key is not in the importable entities, this must be caused by the entity being moved into a package
+		map.keySet().forEach(key ->
+		{
+			if (!entitiesImportable.keySet().contains(key))
+			{
+				result.put(pack + PACKAGE_SEPARATOR + key, map.get(key));
+			}
+			else
+			{
+				result.put(key, map.get(key));
+			}
+
+		});
 		return result;
 	}
 }
