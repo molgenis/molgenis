@@ -858,12 +858,12 @@
 
     <modules>
         <module>molgenis-amazon-bucket</module>
+        <module>molgenis-api-tests</module>
         <module>molgenis-app</module>
         <module>molgenis-apps</module>
         <module>molgenis-bootstrap</module>
         <module>molgenis-catalogue</module>
         <module>molgenis-charts</module>
-        <module>molgenis-controller-api-tests</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
         <module>molgenis-data-annotators</module>
