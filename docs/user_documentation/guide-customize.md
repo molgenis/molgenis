@@ -233,8 +233,10 @@ This is an admin only feature and allows the admin to use HTML.
 
 # Adding a banner
 If you want to brand your MOLGENIS instance, you could add a banner.
-The width and height of the banner does not really matter, a higher resolution is better. It will be automatically resize to fit the browser window.
+We recommend high resolution image. It will be automatically resize to fit the browser window.
 Do realize that taking a banner with a very big height might make your application unusable.
+
+There is an application setting that forces your image to 150px which you can use to set a larger image to have a fixed height.
 
 An example of a banner:
 ![Website banner](../images/customize/website_banner.png?raw=true, "website banner")
