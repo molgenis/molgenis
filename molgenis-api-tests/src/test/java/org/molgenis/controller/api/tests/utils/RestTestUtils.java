@@ -294,6 +294,11 @@ public class RestTestUtils
 			   .post("api/v1/" + "sys_sec_UserAuthority");
 	}
 
+	public static void removePackages(String adminToken, List<String> packageNames)
+	{
+		packageNames.forEach(packageName -> removePackage(adminToken, packageName));
+	}
+
 	public static void removePackage(String adminToken, String packageName)
 	{
 		given().header("x-molgenis-token", adminToken)
@@ -301,11 +306,21 @@ public class RestTestUtils
 			   .delete("api/v1/sys_md_Package/" + packageName);
 	}
 
+	public static void removeEntities(String adminToken, List<String> entities)
+	{
+		entities.forEach(entity -> removeEntity(adminToken, entity));
+	}
+
 	public static void removeEntity(String adminToken, String entityId)
 	{
 		given().header("x-molgenis-token", adminToken)
 			   .contentType(APPLICATION_JSON)
 			   .delete("api/v1/" + entityId + "/meta");
+	}
+
+	public static void removeImportJobs(String adminToken, List<String> jobIds)
+	{
+		jobIds.forEach(jobId -> removeImportJob(adminToken, jobId));
 	}
 
 	public static void removeImportJob(String adminToken, String jobId)

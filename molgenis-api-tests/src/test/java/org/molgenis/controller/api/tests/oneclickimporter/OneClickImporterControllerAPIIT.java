@@ -8,6 +8,7 @@ import io.restassured.response.ValidatableResponse;
 import org.molgenis.controller.api.tests.rest.v2.RestControllerV2APIIT;
 import org.molgenis.oneclickimporter.controller.OneClickImporterController;
 import org.slf4j.Logger;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -26,7 +27,8 @@ import static io.restassured.RestAssured.given;
 import static java.lang.Thread.sleep;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.controller.api.tests.utils.RestTestUtils.*;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.Permission.*;
+import static org.molgenis.controller.api.tests.utils.RestTestUtils.Permission.READ;
+import static org.molgenis.controller.api.tests.utils.RestTestUtils.Permission.WRITE;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -37,9 +39,6 @@ public class OneClickImporterControllerAPIIT
 
 	private static final String REST_TEST_USER = "api_v2_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
-	private static final String V2_TEST_FILE = "/RestControllerV2_API_TestEMX.xlsx";
-	private static final String V2_DELETE_TEST_FILE = "/RestControllerV2_DeleteEMX.xlsx";
-	private static final String V2_COPY_TEST_FILE = "/RestControllerV2_CopyEMX.xlsx";
 	private static final String API_V2 = "api/v2/";
 
 	private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "/OneClickImport_complex-valid.xlsx";
@@ -71,17 +70,8 @@ public class OneClickImporterControllerAPIIT
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
-
-		LOG.info("Importing Test data");
-		uploadEMX(adminToken, V2_TEST_FILE);
-		uploadEMX(adminToken, V2_DELETE_TEST_FILE);
-		uploadEMX(adminToken, V2_COPY_TEST_FILE);
-		LOG.info("Importing Done");
-
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-
 		testUserId = getUserId(adminToken, REST_TEST_USER);
-		LOG.info("testUserId: " + testUserId);
 
 		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
@@ -90,16 +80,6 @@ public class OneClickImporterControllerAPIIT
 		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
 		grantSystemRights(adminToken, testUserId, "sys_L10nString", WRITE);
-
-		grantRights(adminToken, testUserId, "V2_API_TypeTestAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_TypeTestRefAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_LocationAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_PersonAPIV2", WRITE);
-
-		grantRights(adminToken, testUserId, "base_v2APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_v2APITest2", WRITEMETA);
-
-		grantRights(adminToken, testUserId, "base_APICopyTest", WRITEMETA);
 
 		grantPluginRights(adminToken, testUserId, "one-click-importer");
 		grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", READ);
@@ -207,6 +187,28 @@ public class OneClickImporterControllerAPIIT
 		entityResponse.body("items[9].first_name", equalTo("Jan"));
 		entityResponse.body("items[9].UMCG_employee", equalTo(false));
 		entityResponse.body("items[9].Age", equalTo(32));
+	}
+
+	@AfterClass
+	public void afterClass()
+	{
+		// Clean up created entities
+		removeEntities(adminToken, importedEntities);
+
+		// Clean up created packages
+		removePackages(adminToken, importPackages);
+
+		// Clean up jobs
+		removeImportJobs(adminToken, importJobIds);
+
+		// Clean up permissions
+		removeRightsForUser(adminToken, testUserId);
+
+		// Clean up Token for user
+		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post("api/v1/logout");
+
+		// Clean up user
+		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
 	}
 
 	private String pollJobForStatus(String jobUrl)
