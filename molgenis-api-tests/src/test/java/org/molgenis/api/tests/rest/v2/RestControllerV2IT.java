@@ -272,7 +272,7 @@ public class RestControllerV2IT
 			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
 			   .then()
 			   .statusCode(OKE)
-			   .body("aggs.matrix[0][0]", Matchers.equalTo(2));
+			   .body("aggs.matrix[0][0]", Matchers.equalTo(1));
 	}
 
 	@AfterClass
