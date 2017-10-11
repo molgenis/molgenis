@@ -1,12 +1,12 @@
-package org.molgenis.controller.api.tests.rest.v2;
+package org.molgenis.api.tests.rest.v2;
 
 import com.google.common.base.Strings;
 import io.restassured.RestAssured;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
-import org.molgenis.controller.api.tests.rest.v1.RestControllerIT;
-import org.molgenis.controller.api.tests.utils.RestTestUtils;
+import org.molgenis.api.tests.rest.v1.RestControllerIT;
+import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -17,8 +17,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.restassured.RestAssured.given;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.*;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.Permission.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;

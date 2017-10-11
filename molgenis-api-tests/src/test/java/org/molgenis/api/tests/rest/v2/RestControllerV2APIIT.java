@@ -1,4 +1,4 @@
-package org.molgenis.controller.api.tests.rest.v2;
+package org.molgenis.api.tests.rest.v2;
 
 import com.google.common.base.Strings;
 import io.restassured.RestAssured;
@@ -6,7 +6,7 @@ import io.restassured.response.ValidatableResponse;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
-import org.molgenis.controller.api.tests.utils.RestTestUtils;
+import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.Thread.sleep;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.Permission;
+import static io.restassured.RestAssured.given;
+import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertEquals;
 import static org.testng.collections.Maps.newHashMap;
@@ -67,42 +68,41 @@ public class RestControllerV2APIIT
 		String adminPassword = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
-		adminToken = RestTestUtils.login(adminUserName, adminPassword);
+		adminToken = login(adminUserName, adminPassword);
 
 		LOG.info("Importing Test data");
-		RestTestUtils.uploadEMX(adminToken, V2_TEST_FILE);
-		RestTestUtils.uploadEMX(adminToken, V2_DELETE_TEST_FILE);
-		RestTestUtils.uploadEMX(adminToken, V2_COPY_TEST_FILE);
+		uploadEMX(adminToken, V2_TEST_FILE);
+		uploadEMX(adminToken, V2_DELETE_TEST_FILE);
+		uploadEMX(adminToken, V2_COPY_TEST_FILE);
 		LOG.info("Importing Done");
 
-		RestTestUtils.createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 
-		testUserId = RestTestUtils.getUserId(adminToken, REST_TEST_USER);
-		LOG.info("testUserId: " + testUserId);
+		testUserId = getUserId(adminToken, REST_TEST_USER);
 
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_md_Package", Permission.WRITE);
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_md_EntityType", Permission.WRITE);
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_md_Attribute", Permission.WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
 
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_FileMeta", Permission.WRITE);
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_sec_Owned", Permission.READ);
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_L10nString", Permission.WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
+		grantSystemRights(adminToken, testUserId, "sys_L10nString", WRITE);
 
-		RestTestUtils.grantRights(adminToken, testUserId, "V2_API_TypeTestAPIV2", Permission.WRITE);
-		RestTestUtils.grantRights(adminToken, testUserId, "V2_API_TypeTestRefAPIV2", Permission.WRITE);
-		RestTestUtils.grantRights(adminToken, testUserId, "V2_API_LocationAPIV2", Permission.WRITE);
-		RestTestUtils.grantRights(adminToken, testUserId, "V2_API_PersonAPIV2", Permission.WRITE);
+		grantRights(adminToken, testUserId, "V2_API_TypeTestAPIV2", WRITE);
+		grantRights(adminToken, testUserId, "V2_API_TypeTestRefAPIV2", WRITE);
+		grantRights(adminToken, testUserId, "V2_API_LocationAPIV2", WRITE);
+		grantRights(adminToken, testUserId, "V2_API_PersonAPIV2", WRITE);
 
-		RestTestUtils.grantRights(adminToken, testUserId, "base_v2APITest1", Permission.WRITEMETA);
-		RestTestUtils.grantRights(adminToken, testUserId, "base_v2APITest2", Permission.WRITEMETA);
+		grantRights(adminToken, testUserId, "base_v2APITest1", WRITEMETA);
+		grantRights(adminToken, testUserId, "base_v2APITest2", WRITEMETA);
 
-		RestTestUtils.grantRights(adminToken, testUserId, "base_APICopyTest", Permission.WRITEMETA);
+		grantRights(adminToken, testUserId, "base_APICopyTest", WRITEMETA);
 
-		RestTestUtils.grantPluginRights(adminToken, testUserId, "one-click-importer");
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", Permission.READ);
-		RestTestUtils.grantSystemRights(adminToken, testUserId, "sys_job_OneClickImportJobExecution", Permission.READ);
+		grantPluginRights(adminToken, testUserId, "one-click-importer");
+		grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", READ);
+		grantSystemRights(adminToken, testUserId, "sys_job_OneClickImportJobExecution", READ);
 
-		testUserToken = RestTestUtils.login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test(enabled = false) // TODO
@@ -118,79 +118,79 @@ public class RestControllerV2APIIT
 	@Test
 	public void testRetrieveEntity()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityWithoutAttributeFilter(response);
 	}
 
 	@Test
 	public void testRetrieveEntityPost()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityWithoutAttributeFilter(response);
 	}
 
 	@Test
 	public void testRetrieveEntityWithAttributeFilter()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .param("attrs", newArrayList("label"))
-												  .get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .param("attrs", newArrayList("label"))
+											  .get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityWithAttributeFilter(response);
 	}
 
 	@Test
 	public void testRetrieveEntityWithAttributeFilterPost()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .param("attrs", newArrayList("label"))
-												  .post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .param("attrs", newArrayList("label"))
+											  .post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityWithAttributeFilter(response);
 	}
 
 	@Test
 	public void testDeleteEntity()
 	{
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .delete(API_V2 + "base_v2APITest1/ref1")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(RestTestUtils.NO_CONTENT);
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .delete(API_V2 + "base_v2APITest1/ref1")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(RestTestUtils.NO_CONTENT);
 
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .get(API_V2 + "base_v2APITest1")
-				   .then()
-				   .log()
-				   .all()
-				   .body("total", Matchers.equalTo(4), "items[0].value", Matchers.equalTo("ref2"), "items[1].value", Matchers
-								   .equalTo("ref3"),
-					   "items[2].value", Matchers.equalTo("ref4"), "items[3].value", Matchers.equalTo("ref5"));
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .get(API_V2 + "base_v2APITest1")
+			   .then()
+			   .log()
+			   .all()
+			   .body("total", Matchers.equalTo(4), "items[0].value", Matchers.equalTo("ref2"), "items[1].value",
+					   Matchers.equalTo("ref3"), "items[2].value", Matchers.equalTo("ref4"), "items[3].value",
+					   Matchers.equalTo("ref5"));
 	}
 
 	@Test
@@ -198,76 +198,76 @@ public class RestControllerV2APIIT
 	{
 		Map<String, List<String>> requestBody = newHashMap();
 		requestBody.put("entityIds", newArrayList("ref1", "ref2", "ref3", "ref4"));
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .contentType(RestTestUtils.APPLICATION_JSON)
-				   .body(requestBody)
-				   .delete(API_V2 + "base_v2APITest2")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(RestTestUtils.NO_CONTENT);
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .contentType(APPLICATION_JSON)
+			   .body(requestBody)
+			   .delete(API_V2 + "base_v2APITest2")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(RestTestUtils.NO_CONTENT);
 
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .get(API_V2 + "base_v2APITest2")
-				   .then()
-				   .log()
-				   .all()
-				   .body("total", Matchers.equalTo(1), "items[0].value", Matchers.equalTo("ref5"));
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .get(API_V2 + "base_v2APITest2")
+			   .then()
+			   .log()
+			   .all()
+			   .body("total", Matchers.equalTo(1), "items[0].value", Matchers.equalTo("ref5"));
 	}
 
 	@Test
 	public void testRetrieveEntityCollection()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .get(API_V2 + "V2_API_TypeTestRefAPIV2")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .get(API_V2 + "V2_API_TypeTestRefAPIV2")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityCollection(response);
 	}
 
 	@Test
 	public void testRetrieveEntityCollectionPost()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .post(API_V2 + "V2_API_TypeTestRefAPIV2?_method=GET")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .post(API_V2 + "V2_API_TypeTestRefAPIV2?_method=GET")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityCollection(response);
 	}
 
 	@Test
 	public void testRetrieveEntityAttributeMeta()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .get(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .get(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityAttributeMeta(response);
 	}
 
 	@Test
 	public void testRetrieveEntityAttributeMetaPost()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .post(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value?_method=GET")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .post(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value?_method=GET")
+											  .then()
+											  .log()
+											  .all();
 		validateRetrieveEntityAttributeMeta(response);
 	}
 
@@ -295,18 +295,18 @@ public class RestControllerV2APIIT
 
 		jsonObject.put("entities", entities);
 
-		RestAssured.given().log()
-				   .all()
-				   .body(jsonObject.toJSONString())
-				   .contentType(RestTestUtils.APPLICATION_JSON)
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .post(API_V2 + "V2_API_TypeTestAPIV2")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(RestTestUtils.CREATED)
-				   .body("location", Matchers.equalTo("/api/v2/V2_API_TypeTestv2?q=id=in=(\"55\",\"57\")"), "resources[0].href",
-					   Matchers.equalTo("/api/v2/V2_API_TypeTestAPIV2/55"), "resources[1].href",
+		given().log()
+			   .all()
+			   .body(jsonObject.toJSONString())
+			   .contentType(APPLICATION_JSON)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .post(API_V2 + "V2_API_TypeTestAPIV2")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(CREATED)
+			   .body("location", Matchers.equalTo("/api/v2/V2_API_TypeTestv2?q=id=in=(\"55\",\"57\")"),
+					   "resources[0].href", Matchers.equalTo("/api/v2/V2_API_TypeTestAPIV2/55"), "resources[1].href",
 					   Matchers.equalTo("/api/v2/V2_API_TypeTestAPIV2/57"));
 	}
 
@@ -316,24 +316,25 @@ public class RestControllerV2APIIT
 		Map<String, String> request = newHashMap();
 		request.put("newEntityName", "base_CopiedEntity");
 
-		RestAssured.given().log()
-				   .all()
-				   .contentType(RestTestUtils.APPLICATION_JSON)
-				   .body(request)
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .post(API_V2 + "copy/base_APICopyTest")
-				   .then()
-				   .log()
-				   .all();
+		given().log()
+			   .all()
+			   .contentType(APPLICATION_JSON)
+			   .body(request)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .post(API_V2 + "copy/base_APICopyTest")
+			   .then()
+			   .log()
+			   .all();
 
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .get(API_V2 + "base_CopiedEntity")
-				   .then()
-				   .log()
-				   .all()
-				   .body("href", Matchers.equalTo("/api/v2/base_CopiedEntity"), "items[0].label", Matchers.equalTo("Copied!"));
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .get(API_V2 + "base_CopiedEntity")
+			   .then()
+			   .log()
+			   .all()
+			   .body("href", Matchers.equalTo("/api/v2/base_CopiedEntity"), "items[0].label",
+					   Matchers.equalTo("Copied!"));
 	}
 
 	@Test(enabled = false) // FIXME
@@ -350,16 +351,16 @@ public class RestControllerV2APIIT
 
 		request.put("entities", newArrayList(entity));
 
-		RestAssured.given().log()
-				   .all()
-				   .contentType(RestTestUtils.APPLICATION_JSON)
-				   .body(request)
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .put(API_V2 + "V2_API_TypeTestRefAPIV2")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(RestTestUtils.OKE);
+		given().log()
+			   .all()
+			   .contentType(APPLICATION_JSON)
+			   .body(request)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .put(API_V2 + "V2_API_TypeTestRefAPIV2")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(OKE);
 	}
 
 	@Test(enabled = false) // TODO
@@ -371,57 +372,57 @@ public class RestControllerV2APIIT
 		//			@PathVariable("attributeName") String attributeName,
 		//			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 
-		RestAssured.given().log().all().header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken).
-				put(API_V2 + "base_v2APITest1/label").then().log().all().statusCode(RestTestUtils.OKE);
+		given().log().all().header(X_MOLGENIS_TOKEN, testUserToken).
+				put(API_V2 + "base_v2APITest1/label").then().log().all().statusCode(OKE);
 	}
 
 	@Test
 	public void testGetI18nStrings()
 	{
-		ValidatableResponse response = RestAssured.given().log()
-												  .all()
-												  .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-												  .get(API_V2 + "i18n")
-												  .then()
-												  .log()
-												  .all();
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .get(API_V2 + "i18n")
+											  .then()
+											  .log()
+											  .all();
 		validateGetI18nStrings(response);
 	}
 
 	@Test
 	public void testGetL10nStrings()
 	{
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .get(API_V2 + "i18n/form/en")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(RestTestUtils.OKE)
-				   .body("form_number_control_placeholder", Matchers.equalTo("Number"), "form_bool_true", Matchers.equalTo("Yes"),
-					   "form_xref_control_placeholder", Matchers.equalTo("Search for a Value"), "form_date_control_placeholder",
-					   Matchers.equalTo("Date"), "form_url_control_placeholder", Matchers.equalTo("URL"),
-					   "form_computed_control_placeholder", Matchers.equalTo("This value is computed automatically"),
-					   "form_email_control_placeholder", Matchers.equalTo("Email"), "form_bool_false", Matchers.equalTo("No"),
-					   "form_bool_missing", Matchers.equalTo("N/A"), "form_mref_control_placeholder",
-					   Matchers.equalTo("Search for Values"));
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .get(API_V2 + "i18n/form/en")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(OKE)
+			   .body("form_number_control_placeholder", Matchers.equalTo("Number"), "form_bool_true",
+					   Matchers.equalTo("Yes"), "form_xref_control_placeholder", Matchers.equalTo("Search for a Value"),
+					   "form_date_control_placeholder", Matchers.equalTo("Date"), "form_url_control_placeholder",
+					   Matchers.equalTo("URL"), "form_computed_control_placeholder",
+					   Matchers.equalTo("This value is computed automatically"), "form_email_control_placeholder",
+					   Matchers.equalTo("Email"), "form_bool_false", Matchers.equalTo("No"), "form_bool_missing",
+					   Matchers.equalTo("N/A"), "form_mref_control_placeholder", Matchers.equalTo("Search for Values"));
 	}
 
 	@Test
 	public void testGetL10nProperties() throws IOException
 	{
-		String response = RestAssured.given().log()
-									 .all()
-									 .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-									 .get(API_V2 + "i18n/form_en.properties")
-									 .then()
-									 .log()
-									 .all()
-									 .contentType("text/plain;charset=UTF-8")
-									 .statusCode(RestTestUtils.OKE)
-									 .extract()
-									 .asString();
+		String response = given().log()
+								 .all()
+								 .header(X_MOLGENIS_TOKEN, testUserToken)
+								 .get(API_V2 + "i18n/form_en.properties")
+								 .then()
+								 .log()
+								 .all()
+								 .contentType("text/plain;charset=UTF-8")
+								 .statusCode(OKE)
+								 .extract()
+								 .asString();
 
 		Properties responseProperties = new Properties();
 		responseProperties.load(new StringReader(response));
@@ -436,205 +437,206 @@ public class RestControllerV2APIIT
 	@Test
 	public void testRegisterMissingResourceStrings()
 	{
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .contentType("application/x-www-form-urlencoded;charset=UTF-8")
-				   .formParam("my_test_key", "test")
-				   .post(API_V2 + "i18n/apiv2test")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(RestTestUtils.CREATED);
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .contentType("application/x-www-form-urlencoded;charset=UTF-8")
+			   .formParam("my_test_key", "test")
+			   .post(API_V2 + "i18n/apiv2test")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(CREATED);
 
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .get(API_V2 + "sys_L10nString?q=namespace==apiv2test")
-				   .then()
-				   .log()
-				   .all()
-				   .body("items[0].msgid", Matchers.equalTo("my_test_key"), "items[0].namespace", Matchers.equalTo("apiv2test"));
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .get(API_V2 + "sys_L10nString?q=namespace==apiv2test")
+			   .then()
+			   .log()
+			   .all()
+			   .body("items[0].msgid", Matchers.equalTo("my_test_key"), "items[0].namespace",
+					   Matchers.equalTo("apiv2test"));
 	}
 
 	@Test(dependsOnMethods = "testRegisterMissingResourceStrings")
 	public void testDeleteNamespace()
 	{
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .delete(API_V2 + "i18n/apiv2test")
-				   .then()
-				   .log()
-				   .all()
-				   .statusCode(RestTestUtils.NO_CONTENT);
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .delete(API_V2 + "i18n/apiv2test")
+			   .then()
+			   .log()
+			   .all()
+			   .statusCode(RestTestUtils.NO_CONTENT);
 
-		RestAssured.given().log()
-				   .all()
-				   .header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken)
-				   .get(API_V2 + "sys_L10nString?q=namespace==apiv2test")
-				   .then()
-				   .log()
-				   .all()
-				   .body("total", Matchers.equalTo(0));
-	}
-
-	private String pollJobForStatus(String jobUrl)
-	{
-		return RestAssured.given().header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken).get(jobUrl).then().extract().path("status");
-	}
-
-	private void waitForNMillis(Long numberOfMillis)
-	{
-		try
-		{
-			sleep(numberOfMillis);
-		}
-		catch (InterruptedException e)
-		{
-			LOG.error(e.getMessage());
-		}
+		given().log()
+			   .all()
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
+			   .get(API_V2 + "sys_L10nString?q=namespace==apiv2test")
+			   .then()
+			   .log()
+			   .all()
+			   .body("total", Matchers.equalTo(0));
 	}
 
 	private void validateRetrieveEntityWithoutAttributeFilter(ValidatableResponse response)
 	{
-		response.statusCode(RestTestUtils.OKE);
+		response.statusCode(OKE);
 		response.body("_meta.href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.hrefCollection",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name", Matchers.equalTo("V2_API_TypeTestRefAPIV2"),
-				"_meta.label", Matchers.equalTo("TypeTestRefAPIV2"), "_meta.description",
-				Matchers.equalTo("MOLGENIS Data types test ref entity"), "_meta.attributes[0].href",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "_meta.attributes[0].fieldType",
-				Matchers.equalTo("STRING"), "_meta.attributes[0].name", Matchers.equalTo("value"), "_meta.attributes[0].label",
-				Matchers.equalTo("value label"), "_meta.attributes[0].description", Matchers.equalTo("TypeTestRef value attribute"),
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name",
+				Matchers.equalTo("V2_API_TypeTestRefAPIV2"), "_meta.label", Matchers.equalTo("TypeTestRefAPIV2"),
+				"_meta.description", Matchers.equalTo("MOLGENIS Data types test ref entity"),
+				"_meta.attributes[0].href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"),
+				"_meta.attributes[0].fieldType", Matchers.equalTo("STRING"), "_meta.attributes[0].name",
+				Matchers.equalTo("value"), "_meta.attributes[0].label", Matchers.equalTo("value label"),
+				"_meta.attributes[0].description", Matchers.equalTo("TypeTestRef value attribute"),
 				"_meta.attributes[0].attributes", Matchers.equalTo(newArrayList()), "_meta.attributes[0].maxLength",
-				Matchers.equalTo(255), "_meta.attributes[0].auto", Matchers.equalTo(false), "_meta.attributes[0].nillable",
-				Matchers.equalTo(false), "_meta.attributes[0].readOnly", Matchers.equalTo(true), "_meta.attributes[0].labelAttribute",
-				Matchers.equalTo(false), "_meta.attributes[0].unique", Matchers.equalTo(true), "_meta.attributes[0].visible",
+				Matchers.equalTo(255), "_meta.attributes[0].auto", Matchers.equalTo(false),
+				"_meta.attributes[0].nillable", Matchers.equalTo(false), "_meta.attributes[0].readOnly",
+				Matchers.equalTo(true), "_meta.attributes[0].labelAttribute", Matchers.equalTo(false),
+				"_meta.attributes[0].unique", Matchers.equalTo(true), "_meta.attributes[0].visible",
 				Matchers.equalTo(true), "_meta.attributes[0].lookupAttribute", Matchers.equalTo(true),
 				"_meta.attributes[0].isAggregatable", Matchers.equalTo(false), "_meta.attributes[1].href",
 				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"), "_meta.attributes[1].fieldType",
-				Matchers.equalTo("STRING"), "_meta.attributes[1].name", Matchers.equalTo("label"), "_meta.attributes[1].label",
-				Matchers.equalTo("label label"), "_meta.attributes[1].description", Matchers.equalTo("TypeTestRef label attribute"),
-				"_meta.attributes[1].attributes", Matchers.equalTo(newArrayList()), "_meta.attributes[1].maxLength",
-				Matchers.equalTo(255), "_meta.attributes[1].auto", Matchers.equalTo(false), "_meta.attributes[1].nillable",
-				Matchers.equalTo(false), "_meta.attributes[1].readOnly", Matchers.equalTo(false), "_meta.attributes[1].labelAttribute",
-				Matchers.equalTo(true), "_meta.attributes[1].unique", Matchers.equalTo(false), "_meta.attributes[1].visible",
-				Matchers.equalTo(true), "_meta.attributes[1].lookupAttribute", Matchers.equalTo(true),
-				"_meta.attributes[1].isAggregatable", Matchers.equalTo(false), "_meta.labelAttribute", Matchers.equalTo("label"),
-				"_meta.idAttribute", Matchers.equalTo("value"), "_meta.lookupAttributes",
-				Matchers.equalTo(newArrayList("value", "label")), "_meta.isAbstract", Matchers.equalTo(false), "_meta.writable",
-				Matchers.equalTo(true), "_meta.languageCode", Matchers.equalTo("en"), "_href",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"), "value", Matchers.equalTo("ref1"), "label", Matchers
-						.equalTo("label1"));
+				Matchers.equalTo("STRING"), "_meta.attributes[1].name", Matchers.equalTo("label"),
+				"_meta.attributes[1].label", Matchers.equalTo("label label"), "_meta.attributes[1].description",
+				Matchers.equalTo("TypeTestRef label attribute"), "_meta.attributes[1].attributes",
+				Matchers.equalTo(newArrayList()), "_meta.attributes[1].maxLength", Matchers.equalTo(255),
+				"_meta.attributes[1].auto", Matchers.equalTo(false), "_meta.attributes[1].nillable",
+				Matchers.equalTo(false), "_meta.attributes[1].readOnly", Matchers.equalTo(false),
+				"_meta.attributes[1].labelAttribute", Matchers.equalTo(true), "_meta.attributes[1].unique",
+				Matchers.equalTo(false), "_meta.attributes[1].visible", Matchers.equalTo(true),
+				"_meta.attributes[1].lookupAttribute", Matchers.equalTo(true), "_meta.attributes[1].isAggregatable",
+				Matchers.equalTo(false), "_meta.labelAttribute", Matchers.equalTo("label"), "_meta.idAttribute",
+				Matchers.equalTo("value"), "_meta.lookupAttributes", Matchers.equalTo(newArrayList("value", "label")),
+				"_meta.isAbstract", Matchers.equalTo(false), "_meta.writable", Matchers.equalTo(true),
+				"_meta.languageCode", Matchers.equalTo("en"), "_href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"), "value", Matchers.equalTo("ref1"), "label",
+				Matchers.equalTo("label1"));
 	}
 
 	private void validateRetrieveEntityWithAttributeFilter(ValidatableResponse response)
 	{
-		response.statusCode(RestTestUtils.OKE);
+		response.statusCode(OKE);
 		response.body("_meta.href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.hrefCollection",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name", Matchers.equalTo("V2_API_TypeTestRefAPIV2"),
-				"_meta.label", Matchers.equalTo("TypeTestRefAPIV2"), "_meta.description",
-				Matchers.equalTo("MOLGENIS Data types test ref entity"), "_meta.attributes[0].href",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"), "_meta.attributes[0].fieldType",
-				Matchers.equalTo("STRING"), "_meta.attributes[0].name", Matchers.equalTo("label"), "_meta.attributes[0].label",
-				Matchers.equalTo("label label"), "_meta.attributes[0].description", Matchers.equalTo("TypeTestRef label attribute"),
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "_meta.name",
+				Matchers.equalTo("V2_API_TypeTestRefAPIV2"), "_meta.label", Matchers.equalTo("TypeTestRefAPIV2"),
+				"_meta.description", Matchers.equalTo("MOLGENIS Data types test ref entity"),
+				"_meta.attributes[0].href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"),
+				"_meta.attributes[0].fieldType", Matchers.equalTo("STRING"), "_meta.attributes[0].name",
+				Matchers.equalTo("label"), "_meta.attributes[0].label", Matchers.equalTo("label label"),
+				"_meta.attributes[0].description", Matchers.equalTo("TypeTestRef label attribute"),
 				"_meta.attributes[0].attributes", Matchers.equalTo(newArrayList()), "_meta.attributes[0].maxLength",
-				Matchers.equalTo(255), "_meta.attributes[0].auto", Matchers.equalTo(false), "_meta.attributes[0].nillable",
-				Matchers.equalTo(false), "_meta.attributes[0].readOnly", Matchers.equalTo(false), "_meta.attributes[0].labelAttribute",
-				Matchers.equalTo(true), "_meta.attributes[0].unique", Matchers.equalTo(false), "_meta.attributes[0].visible",
+				Matchers.equalTo(255), "_meta.attributes[0].auto", Matchers.equalTo(false),
+				"_meta.attributes[0].nillable", Matchers.equalTo(false), "_meta.attributes[0].readOnly",
+				Matchers.equalTo(false), "_meta.attributes[0].labelAttribute", Matchers.equalTo(true),
+				"_meta.attributes[0].unique", Matchers.equalTo(false), "_meta.attributes[0].visible",
 				Matchers.equalTo(true), "_meta.attributes[0].lookupAttribute", Matchers.equalTo(true),
-				"_meta.attributes[0].isAggregatable", Matchers.equalTo(false), "_meta.labelAttribute", Matchers.equalTo("label"),
-				"_meta.idAttribute", Matchers.equalTo("value"), "_meta.lookupAttributes",
-				Matchers.equalTo(newArrayList("value", "label")), "_meta.isAbstract", Matchers.equalTo(false), "_meta.writable",
-				Matchers.equalTo(true), "_meta.languageCode", Matchers.equalTo("en"), "_href",
+				"_meta.attributes[0].isAggregatable", Matchers.equalTo(false), "_meta.labelAttribute",
+				Matchers.equalTo("label"), "_meta.idAttribute", Matchers.equalTo("value"), "_meta.lookupAttributes",
+				Matchers.equalTo(newArrayList("value", "label")), "_meta.isAbstract", Matchers.equalTo(false),
+				"_meta.writable", Matchers.equalTo(true), "_meta.languageCode", Matchers.equalTo("en"), "_href",
 				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"), "label", Matchers.equalTo("label1"));
 	}
 
 	private void validateRetrieveEntityCollection(ValidatableResponse response)
 	{
-		response.statusCode(RestTestUtils.OKE);
+		response.statusCode(OKE);
 		response.body("href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.href",
 				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.hrefCollection",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.name", Matchers.equalTo("V2_API_TypeTestRefAPIV2"),
-				"meta.label", Matchers.equalTo("TypeTestRefAPIV2"), "meta.description",
-				Matchers.equalTo("MOLGENIS Data types test ref entity"), "meta.attributes[0].href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2"), "meta.name",
+				Matchers.equalTo("V2_API_TypeTestRefAPIV2"), "meta.label", Matchers.equalTo("TypeTestRefAPIV2"),
+				"meta.description", Matchers.equalTo("MOLGENIS Data types test ref entity"), "meta.attributes[0].href",
 				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "meta.attributes[0].fieldType",
-				Matchers.equalTo("STRING"), "meta.attributes[0].name", Matchers.equalTo("value"), "meta.attributes[0].label",
-				Matchers.equalTo("value label"), "meta.attributes[0].description", Matchers.equalTo("TypeTestRef value attribute"),
-				"meta.attributes[0].attributes", Matchers.equalTo(newArrayList()), "meta.attributes[0].maxLength", Matchers
-						.equalTo(255),
-				"meta.attributes[0].auto", Matchers.equalTo(false), "meta.attributes[0].nillable", Matchers.equalTo(false),
-				"meta.attributes[0].readOnly", Matchers.equalTo(true), "meta.attributes[0].labelAttribute", Matchers.equalTo(false),
-				"meta.attributes[0].unique", Matchers.equalTo(true), "meta.attributes[0].visible", Matchers.equalTo(true),
+				Matchers.equalTo("STRING"), "meta.attributes[0].name", Matchers.equalTo("value"),
+				"meta.attributes[0].label", Matchers.equalTo("value label"), "meta.attributes[0].description",
+				Matchers.equalTo("TypeTestRef value attribute"), "meta.attributes[0].attributes",
+				Matchers.equalTo(newArrayList()), "meta.attributes[0].maxLength", Matchers.equalTo(255),
+				"meta.attributes[0].auto", Matchers.equalTo(false), "meta.attributes[0].nillable",
+				Matchers.equalTo(false), "meta.attributes[0].readOnly", Matchers.equalTo(true),
+				"meta.attributes[0].labelAttribute", Matchers.equalTo(false), "meta.attributes[0].unique",
+				Matchers.equalTo(true), "meta.attributes[0].visible", Matchers.equalTo(true),
 				"meta.attributes[0].lookupAttribute", Matchers.equalTo(true), "meta.attributes[0].isAggregatable",
-				Matchers.equalTo(false), "meta.attributes[1].href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"),
-				"meta.attributes[1].fieldType", Matchers.equalTo("STRING"), "meta.attributes[1].name", Matchers.equalTo("label"),
+				Matchers.equalTo(false), "meta.attributes[1].href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/label"), "meta.attributes[1].fieldType",
+				Matchers.equalTo("STRING"), "meta.attributes[1].name", Matchers.equalTo("label"),
 				"meta.attributes[1].label", Matchers.equalTo("label label"), "meta.attributes[1].description",
-				Matchers.equalTo("TypeTestRef label attribute"), "meta.attributes[1].attributes", Matchers.equalTo(newArrayList()),
-				"meta.attributes[1].maxLength", Matchers.equalTo(255), "meta.attributes[1].auto", Matchers.equalTo(false),
-				"meta.attributes[1].nillable", Matchers.equalTo(false), "meta.attributes[1].readOnly", Matchers.equalTo(false),
-				"meta.attributes[1].labelAttribute", Matchers.equalTo(true), "meta.attributes[1].unique", Matchers.equalTo(false),
-				"meta.attributes[1].visible", Matchers.equalTo(true), "meta.attributes[1].lookupAttribute", Matchers.equalTo(true),
-				"meta.labelAttribute", Matchers.equalTo("label"), "meta.idAttribute", Matchers.equalTo("value"), "meta.lookupAttributes",
-				Matchers.equalTo(newArrayList("value", "label")), "meta.isAbstract", Matchers.equalTo(false), "meta.writable",
-				Matchers.equalTo(true), "meta.languageCode", Matchers.equalTo("en"), "start", Matchers.equalTo(0), "num", Matchers
-						.equalTo(100), "total",
-				Matchers.equalTo(5), "items[0]._href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"), "items[0].value",
-				Matchers.equalTo("ref1"), "items[0].label", Matchers.equalTo("label1"), "items[1]._href",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref2"), "items[1].value", Matchers.equalTo("ref2"), "items[1].label",
-				Matchers.equalTo("label2"), "items[2]._href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref3"), "items[2].value",
-				Matchers.equalTo("ref3"), "items[2].label", Matchers.equalTo("label3"), "items[3]._href",
-				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref4"), "items[3].value", Matchers.equalTo("ref4"), "items[3].label",
-				Matchers.equalTo("label4"), "items[4]._href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref5"), "items[4].value",
-				Matchers.equalTo("ref5"), "items[4].label", Matchers.equalTo("label5"));
+				Matchers.equalTo("TypeTestRef label attribute"), "meta.attributes[1].attributes",
+				Matchers.equalTo(newArrayList()), "meta.attributes[1].maxLength", Matchers.equalTo(255),
+				"meta.attributes[1].auto", Matchers.equalTo(false), "meta.attributes[1].nillable",
+				Matchers.equalTo(false), "meta.attributes[1].readOnly", Matchers.equalTo(false),
+				"meta.attributes[1].labelAttribute", Matchers.equalTo(true), "meta.attributes[1].unique",
+				Matchers.equalTo(false), "meta.attributes[1].visible", Matchers.equalTo(true),
+				"meta.attributes[1].lookupAttribute", Matchers.equalTo(true), "meta.labelAttribute",
+				Matchers.equalTo("label"), "meta.idAttribute", Matchers.equalTo("value"), "meta.lookupAttributes",
+				Matchers.equalTo(newArrayList("value", "label")), "meta.isAbstract", Matchers.equalTo(false),
+				"meta.writable", Matchers.equalTo(true), "meta.languageCode", Matchers.equalTo("en"), "start",
+				Matchers.equalTo(0), "num", Matchers.equalTo(100), "total", Matchers.equalTo(5), "items[0]._href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref1"), "items[0].value", Matchers.equalTo("ref1"),
+				"items[0].label", Matchers.equalTo("label1"), "items[1]._href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref2"), "items[1].value", Matchers.equalTo("ref2"),
+				"items[1].label", Matchers.equalTo("label2"), "items[2]._href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref3"), "items[2].value", Matchers.equalTo("ref3"),
+				"items[2].label", Matchers.equalTo("label3"), "items[3]._href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref4"), "items[3].value", Matchers.equalTo("ref4"),
+				"items[3].label", Matchers.equalTo("label4"), "items[4]._href",
+				Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/ref5"), "items[4].value", Matchers.equalTo("ref5"),
+				"items[4].label", Matchers.equalTo("label5"));
 	}
 
 	private void validateRetrieveEntityAttributeMeta(ValidatableResponse response)
 	{
-		response.statusCode(RestTestUtils.OKE);
-		response.body("href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "fieldType", Matchers.equalTo("STRING"),
-				"name", Matchers.equalTo("value"), "label", Matchers.equalTo("value label"), "description",
-				Matchers.equalTo("TypeTestRef value attribute"), "attributes", Matchers.equalTo(newArrayList()), "maxLength",
-				Matchers.equalTo(255), "auto", Matchers.equalTo(false), "nillable", Matchers.equalTo(false), "readOnly", Matchers
-						.equalTo(true),
-				"labelAttribute", Matchers.equalTo(false), "unique", Matchers.equalTo(true), "visible", Matchers.equalTo(true), "lookupAttribute",
-				Matchers.equalTo(true), "isAggregatable", Matchers.equalTo(false));
+		response.statusCode(OKE);
+		response.body("href", Matchers.equalTo("/api/v2/V2_API_TypeTestRefAPIV2/meta/value"), "fieldType",
+				Matchers.equalTo("STRING"), "name", Matchers.equalTo("value"), "label", Matchers.equalTo("value label"),
+				"description", Matchers.equalTo("TypeTestRef value attribute"), "attributes",
+				Matchers.equalTo(newArrayList()), "maxLength", Matchers.equalTo(255), "auto", Matchers.equalTo(false),
+				"nillable", Matchers.equalTo(false), "readOnly", Matchers.equalTo(true), "labelAttribute",
+				Matchers.equalTo(false), "unique", Matchers.equalTo(true), "visible", Matchers.equalTo(true),
+				"lookupAttribute", Matchers.equalTo(true), "isAggregatable", Matchers.equalTo(false));
 	}
 
 	private void validateGetI18nStrings(ValidatableResponse response)
 	{
-		response.statusCode(RestTestUtils.OKE);
-		response.body("dataexplorer_wizard_cancel", Matchers.equalTo("Cancel"), "questionnaires_table_view_questionnaire_button",
-				Matchers.equalTo("View questionnaire"), "dataexplorer_aggregates_title", Matchers.equalTo("Aggregates"),
+		response.statusCode(OKE);
+		response.body("dataexplorer_wizard_cancel", Matchers.equalTo("Cancel"),
+				"questionnaires_table_view_questionnaire_button", Matchers.equalTo("View questionnaire"),
+				"dataexplorer_aggregates_title", Matchers.equalTo("Aggregates"),
 				"dataexplorer_directory_export_no_filters",
 				Matchers.equalTo("Please filter the collections before sending a request to the negotiator."),
-				"questionnaire_submit", Matchers.equalTo("Submit"), "questionnaires_title", Matchers.equalTo("My questionnaires"),
-				"form_bool_false", Matchers.equalTo("No"), "form_bool_missing", Matchers.equalTo("N/A"), "form_mref_control_placeholder",
-				Matchers.equalTo("Search for Values"), "dataexplorer_directory_export_dialog_message",
-				Matchers.equalTo("Your current selection of biobanks along with your filtering criteria will be sent to the BBMRI Negotiator. Are you sure?"),
-				"questionnaires_table_status_header", Matchers.equalTo("Status"), "dataexplorer_directory_export_dialog_yes",
-				Matchers.equalTo("Yes, Send to Negotiator"), "dataexplorer_wizard_button", Matchers.equalTo("Wizard"),
-				"dataexplorer_wizard_apply", Matchers.equalTo("Apply"), "questionnaires_table_status_open", Matchers.equalTo("Open"),
-				"questionnaire_thank_you_page_back_button", Matchers.equalTo("Back to My questionnaires"), "form_bool_true",
-				Matchers.equalTo("Yes"), "form_xref_control_placeholder", Matchers.equalTo("Search for a Value"),
-				"form_url_control_placeholder", Matchers.equalTo("URL"), "questionnaires_table_continue_questionnaire_button",
-				Matchers.equalTo("Continue questionnaire"), "questionnaires_table_questionnaire_header",
-				Matchers.equalTo("Questionnaire"), "dataexplorer_aggregates_missing", Matchers.equalTo("N/A"),
-				"questionnaires_description", Matchers.equalTo("Submitted and open questionnaires"),
-				"questionnaires_table_status_submitted", Matchers.equalTo("Submitted"), "questionnaire_save_and_continue",
+				"questionnaire_submit", Matchers.equalTo("Submit"), "questionnaires_title",
+				Matchers.equalTo("My questionnaires"), "form_bool_false", Matchers.equalTo("No"), "form_bool_missing",
+				Matchers.equalTo("N/A"), "form_mref_control_placeholder", Matchers.equalTo("Search for Values"),
+				"dataexplorer_directory_export_dialog_message", Matchers.equalTo(
+						"Your current selection of biobanks along with your filtering criteria will be sent to the BBMRI Negotiator. Are you sure?"),
+				"questionnaires_table_status_header", Matchers.equalTo("Status"),
+				"dataexplorer_directory_export_dialog_yes", Matchers.equalTo("Yes, Send to Negotiator"),
+				"dataexplorer_wizard_button", Matchers.equalTo("Wizard"), "dataexplorer_wizard_apply",
+				Matchers.equalTo("Apply"), "questionnaires_table_status_open", Matchers.equalTo("Open"),
+				"questionnaire_thank_you_page_back_button", Matchers.equalTo("Back to My questionnaires"),
+				"form_bool_true", Matchers.equalTo("Yes"), "form_xref_control_placeholder",
+				Matchers.equalTo("Search for a Value"), "form_url_control_placeholder", Matchers.equalTo("URL"),
+				"questionnaires_table_continue_questionnaire_button", Matchers.equalTo("Continue questionnaire"),
+				"questionnaires_table_questionnaire_header", Matchers.equalTo("Questionnaire"),
+				"dataexplorer_aggregates_missing", Matchers.equalTo("N/A"), "questionnaires_description",
+				Matchers.equalTo("Submitted and open questionnaires"), "questionnaires_table_status_submitted",
+				Matchers.equalTo("Submitted"), "questionnaire_save_and_continue",
 				Matchers.equalTo("Save and continue later"), "dataexplorer_directory_export_button",
 				Matchers.equalTo("Go to sample / data negotiation"), "dataexplorer_data_data_item_filters",
 				Matchers.equalTo("Data item filters"), "dataexplorer_aggregates_total", Matchers.equalTo("Total"),
 				"dataexplorer_directory_export_dialog_title", Matchers.equalTo("Send request to the BBMRI Negotiator?"),
-				"questionnaires_table_status_not_started", Matchers.equalTo("Not started yet"), "form_email_control_placeholder",
-				Matchers.equalTo("Email"), "form_computed_control_placeholder", Matchers.equalTo("This value is computed automatically"),
-				"dataexplorer_aggregates_no_result_message", Matchers.equalTo("No results found"),
-				"questionnaires_table_start_questionnaire_button", Matchers.equalTo("Start questionnaire"),
-				"dataexplorer_wizard_title", Matchers.equalTo("Filter Wizard"), "dataexplorer_aggregates_distinct",
-				Matchers.equalTo("Distinct"), "form_number_control_placeholder", Matchers.equalTo("Number"),
-				"dataexplorer_aggregates_group_by", Matchers.equalTo("Group by"), "dataexplorer_directory_export_dialog_no",
-				Matchers.equalTo("No, I want to keep filtering"), "questionnaire_back_button",
-				Matchers.equalTo("Back to my questionnaires"), "form_date_control_placeholder", Matchers.equalTo("Date"),
+				"questionnaires_table_status_not_started", Matchers.equalTo("Not started yet"),
+				"form_email_control_placeholder", Matchers.equalTo("Email"), "form_computed_control_placeholder",
+				Matchers.equalTo("This value is computed automatically"), "dataexplorer_aggregates_no_result_message",
+				Matchers.equalTo("No results found"), "questionnaires_table_start_questionnaire_button",
+				Matchers.equalTo("Start questionnaire"), "dataexplorer_wizard_title", Matchers.equalTo("Filter Wizard"),
+				"dataexplorer_aggregates_distinct", Matchers.equalTo("Distinct"), "form_number_control_placeholder",
+				Matchers.equalTo("Number"), "dataexplorer_aggregates_group_by", Matchers.equalTo("Group by"),
+				"dataexplorer_directory_export_dialog_no", Matchers.equalTo("No, I want to keep filtering"),
+				"questionnaire_back_button", Matchers.equalTo("Back to my questionnaires"),
+				"form_date_control_placeholder", Matchers.equalTo("Date"),
 				"questionnaires_no_questionnaires_found_message", Matchers.equalTo("No questionnaires found"));
 	}
 
@@ -645,34 +647,34 @@ public class RestControllerV2APIIT
 		// TODO at the moment the Rest API has no way to remove/delete a file.
 
 		// Delete import jobs
-		importJobIds.forEach(j -> RestTestUtils.removeImportJob(adminToken, j));
+		removeImportJobs(adminToken, importJobIds);
 
 		// Delete imported entity
-		importedEntities.forEach(ie -> RestTestUtils.removeEntity(adminToken, ie));
+		removeEntities(adminToken, importedEntities);
 
 		// Delete created packages
-		importPackages.forEach(p -> RestTestUtils.removePackage(adminToken, p));
+		removePackages(adminToken, importPackages);
 
 		// Clean up TestEMX
-		RestTestUtils.removeEntity(adminToken, "V2_API_TypeTestAPIV2");
-		RestTestUtils.removeEntity(adminToken, "V2_API_TypeTestRefAPIV2");
-		RestTestUtils.removeEntity(adminToken, "V2_API_LocationAPIV2");
-		RestTestUtils.removeEntity(adminToken, "V2_API_PersonAPIV2");
+		removeEntity(adminToken, "V2_API_TypeTestAPIV2");
+		removeEntity(adminToken, "V2_API_TypeTestRefAPIV2");
+		removeEntity(adminToken, "V2_API_LocationAPIV2");
+		removeEntity(adminToken, "V2_API_PersonAPIV2");
 
-		RestTestUtils.removeEntity(adminToken, "base_v2APITest1");
-		RestTestUtils.removeEntity(adminToken, "base_v2APITest2");
+		removeEntity(adminToken, "base_v2APITest1");
+		removeEntity(adminToken, "base_v2APITest2");
 
-		RestTestUtils.removeEntity(adminToken, "base_APICopyTest");
-		RestTestUtils.removeEntity(adminToken, "base_CopiedEntity");
+		removeEntity(adminToken, "base_APICopyTest");
+		removeEntity(adminToken, "base_CopiedEntity");
 
 		// Clean up permissions
-		RestTestUtils.removeRightsForUser(adminToken, testUserId);
+		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		RestAssured.given().header(RestTestUtils.X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
+		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
 
 		// Clean up user
-		RestAssured.given().header(RestTestUtils.X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
+		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
 	}
 
 }

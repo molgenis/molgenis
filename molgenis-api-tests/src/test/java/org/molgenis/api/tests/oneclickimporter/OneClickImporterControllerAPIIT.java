@@ -1,11 +1,11 @@
-package org.molgenis.controller.api.tests.oneclickimporter;
+package org.molgenis.api.tests.oneclickimporter;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import io.restassured.internal.ValidatableResponseImpl;
 import io.restassured.response.ValidatableResponse;
-import org.molgenis.controller.api.tests.rest.v2.RestControllerV2APIIT;
+import org.molgenis.api.tests.rest.v2.RestControllerV2APIIT;
 import org.molgenis.oneclickimporter.controller.OneClickImporterController;
 import org.slf4j.Logger;
 import org.testng.annotations.AfterClass;
@@ -26,9 +26,9 @@ import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static java.lang.Thread.sleep;
 import static org.hamcrest.Matchers.equalTo;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.*;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.Permission.READ;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.Permission.WRITE;
+import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -37,8 +37,8 @@ public class OneClickImporterControllerAPIIT
 {
 	private static final Logger LOG = getLogger(OneClickImporterControllerAPIIT.class);
 
-	private static final String REST_TEST_USER = "api_v2_test_user";
-	private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
+	private static final String ONE_CLICK_IMPORTER_TEST_USER = "one_click_importer_test_user";
+	private static final String ONE_CLICK_IMPORTER_TEST_USER_PASSWORD = "one_click_importer_test_user_password";
 	private static final String API_V2 = "api/v2/";
 
 	private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "/OneClickImport_complex-valid.xlsx";
@@ -70,8 +70,8 @@ public class OneClickImporterControllerAPIIT
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, REST_TEST_USER);
+		createUser(adminToken, ONE_CLICK_IMPORTER_TEST_USER, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, ONE_CLICK_IMPORTER_TEST_USER);
 
 		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
 		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
@@ -85,7 +85,7 @@ public class OneClickImporterControllerAPIIT
 		grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", READ);
 		grantSystemRights(adminToken, testUserId, "sys_job_OneClickImportJobExecution", READ);
 
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(ONE_CLICK_IMPORTER_TEST_USER, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
 	}
 
 	@Test
