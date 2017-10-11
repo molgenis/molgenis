@@ -1,13 +1,15 @@
-package org.molgenis.controller.api.tests.twofactor;
+package org.molgenis.api.tests.twofactor;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -15,7 +17,7 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
-import static org.molgenis.controller.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.*;
 
 public class TwoFactorAuthenticationAPIIT
 {
@@ -25,9 +27,12 @@ public class TwoFactorAuthenticationAPIIT
 	private static final String PATH = "api/v1/";
 
 	// User credentials
-	private static final String REST_TEST_USER = "rest_test_user";
-	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
+	private static final String TWO_FA_AUTH_TEST_USER = "two_fa_auth_test_user";
+	private static final String TWO_FA_AUTH_TEST_USER_PASSWORD = "two_fa_auth_test_user_password";
+
 	private String adminToken;
+	private String testUserToken;
+	private String testUserId;
 
 	/**
 	 * Pass down system properties via the mvn commandline argument
@@ -35,8 +40,8 @@ public class TwoFactorAuthenticationAPIIT
 	 * example:
 	 * mvn test -Dtest="RestTwoFactorAuthenticationIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
 	 */
-	@BeforeMethod
-	public void beforeMethod()
+	@BeforeClass
+	public void beforeClass()
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
@@ -52,7 +57,8 @@ public class TwoFactorAuthenticationAPIIT
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		createUser(adminToken, TWO_FA_AUTH_TEST_USER, TWO_FA_AUTH_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, TWO_FA_AUTH_TEST_USER);
 	}
 
 	@Test
@@ -62,8 +68,8 @@ public class TwoFactorAuthenticationAPIIT
 
 		Gson gson = new Gson();
 		Map<String, String> loginBody = new HashMap<>();
-		loginBody.put("username", REST_TEST_USER);
-		loginBody.put("password", REST_TEST_USER_PASSWORD);
+		loginBody.put("username", TWO_FA_AUTH_TEST_USER);
+		loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
 		given().contentType(APPLICATION_JSON)
 			   .body(gson.toJson(loginBody))
@@ -82,25 +88,36 @@ public class TwoFactorAuthenticationAPIIT
 
 		Gson gson = new Gson();
 		Map<String, String> loginBody = new HashMap<>();
-		loginBody.put("username", REST_TEST_USER);
-		loginBody.put("password", REST_TEST_USER_PASSWORD);
+		loginBody.put("username", TWO_FA_AUTH_TEST_USER);
+		loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
-		given().contentType(APPLICATION_JSON)
-			   .body(gson.toJson(loginBody))
-			   .when()
-			   .post(PATH + "login")
-			   .then()
-			   .statusCode(OKE);
+		ValidatableResponse response = given().contentType(APPLICATION_JSON)
+											  .body(gson.toJson(loginBody))
+											  .when()
+											  .post(PATH + "login")
+											  .then()
+											  .statusCode(OKE);
+
+		testUserToken = response.extract().path("token");
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
-		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, this.adminToken)
-			   .when()
-			   .delete("api/v1/sys_sec_User/" + getUserId(adminToken, REST_TEST_USER));
+		// Clean up Token for user
+		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
+	}
 
+	@AfterClass
+	public void afterClass()
+	{
+		// Clean up permissions
+		removeRightsForUser(adminToken, testUserId);
+
+		// Clean up user
+		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
+
+		// Disable two factor authentication
 		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
 	}
 
