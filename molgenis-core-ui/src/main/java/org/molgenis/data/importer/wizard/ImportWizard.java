@@ -34,7 +34,7 @@ public class ImportWizard extends Wizard
 	private boolean allowPermissions;
 	private List<String> packages;
 	private List<String> entitiesInDefaultPackage;
-	private String defaultEntity;
+	private String selectedPackage;
 
 	public File getFile()
 	{
@@ -71,9 +71,10 @@ public class ImportWizard extends Wizard
 		return fieldsDetected;
 	}
 
-	public void setFieldsDetected(Map<String, Collection<String>> fieldsDetected)
+	public ImportWizard setFieldsDetected(Map<String, Collection<String>> fieldsDetected)
 	{
 		this.fieldsDetected = fieldsDetected;
+		return this;
 	}
 
 	public Map<String, Collection<String>> getFieldsUnknown()
@@ -81,9 +82,10 @@ public class ImportWizard extends Wizard
 		return fieldsUnknown;
 	}
 
-	public void setFieldsUnknown(Map<String, Collection<String>> fieldsUnknown)
+	public ImportWizard setFieldsUnknown(Map<String, Collection<String>> fieldsUnknown)
 	{
 		this.fieldsUnknown = fieldsUnknown;
+		return this;
 	}
 
 	public Map<String, Collection<String>> getFieldsRequired()
@@ -91,9 +93,10 @@ public class ImportWizard extends Wizard
 		return fieldsRequired;
 	}
 
-	public void setFieldsRequired(Map<String, Collection<String>> fieldsRequired)
+	public ImportWizard setFieldsRequired(Map<String, Collection<String>> fieldsRequired)
 	{
 		this.fieldsRequired = fieldsRequired;
+		return this;
 	}
 
 	public Map<String, Collection<String>> getFieldsAvailable()
@@ -101,9 +104,10 @@ public class ImportWizard extends Wizard
 		return fieldsAvailable;
 	}
 
-	public void setFieldsAvailable(Map<String, Collection<String>> fieldsAvailable)
+	public ImportWizard setFieldsAvailable(Map<String, Collection<String>> fieldsAvailable)
 	{
 		this.fieldsAvailable = fieldsAvailable;
+		return this;
 	}
 
 	public String getEntityImportOption()
@@ -196,14 +200,14 @@ public class ImportWizard extends Wizard
 		this.entitiesInDefaultPackage = entitiesInDefaultPackage;
 	}
 
-	public String getDefaultEntity()
+	public String getSelectedPackage()
 	{
-		return defaultEntity;
+		return selectedPackage;
 	}
 
-	public void setDefaultEntity(String defaultEntity)
+	public void setSelectedPackage(String selectedPackage)
 	{
-		this.defaultEntity = defaultEntity;
+		this.selectedPackage = selectedPackage;
 	}
 
 	public boolean getAllowPermissions()

@@ -8,6 +8,7 @@ import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -125,6 +126,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
 		when(source.getRepository(entityTypeId0)).thenReturn(repo0);
 		String defaultPackage = "package";
+		Package pack = mock(Package.class);
+		when(metaDataService.getPackage(defaultPackage)).thenReturn(pack);
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD, defaultPackage);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
 		expectedEntityImportReport.addEntityCount(entityTypeId0, entities.size());
@@ -222,6 +225,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
 		when(source.getRepository(entityTypeId0)).thenReturn(repo0);
 		String defaultPackage = "package";
+		Package pack = mock(Package.class);
+		when(metaDataService.getPackage(defaultPackage)).thenReturn(pack);
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD, defaultPackage);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
 		expectedEntityImportReport.addNewEntity(sampleEntityName0);
