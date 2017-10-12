@@ -269,7 +269,7 @@ public class RestControllerV2IT
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .when()
-			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
+			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser;distinct==active")
 			   .then()
 			   .statusCode(OKE)
 			   .body("aggs.matrix[0][0]", Matchers.equalTo(1));
