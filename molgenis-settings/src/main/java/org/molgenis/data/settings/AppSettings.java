@@ -31,7 +31,8 @@ public interface AppSettings
 	/**
 	 * @return integer top logo uses int value as a max-height in px
 	 */
-	int getFixedHeightLogo();
+	@Nullable
+	Integer getFixedHeightLogo();
 
 	/**
 	 * @param fixedHeight value for top logo max-height in px

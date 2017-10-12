@@ -184,7 +184,7 @@
                         var img = document.getElementById('logo-top');
                         img.style['height'] = 'auto'
 
-                        <#if app_settings.fixedHeightLogo?? || app_settings.fixedHeightLogo != 0>
+                        <#if app_settings.fixedHeightLogo??>
                         img.style['max-height'] = '${app_settings.fixedHeightLogo?string}px'
                         </#if>
 

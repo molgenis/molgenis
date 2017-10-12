@@ -27,9 +27,9 @@ public class TestAppSettings implements AppSettings
 	}
 
 	@Override
-	public int getFixedHeightLogo()
+	public Integer getFixedHeightLogo()
 	{
-		return 0;
+		return null;
 	}
 
 	@Override

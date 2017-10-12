@@ -49,7 +49,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String DEFAULT_TITLE = "MOLGENIS";
 		private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
-		private static final int DEFAULT_FIXED_LOGO_HEIGHT = 150;
+		private static final Integer DEFAULT_FIXED_LOGO_HEIGHT = 150;
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -207,7 +207,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	}
 
 	@Override
-	public int getFixedHeightLogo()
+	public Integer getFixedHeightLogo()
 	{
 		return getInt(Meta.FIXED_LOGO_HEIGHT);
 	}
