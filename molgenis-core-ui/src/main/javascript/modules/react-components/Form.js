@@ -14,6 +14,7 @@ import AlertMessage from "./AlertMessage";
 import Promise from "promise";
 import FormControlGroup from "./FormControlGroup";
 import FormControl from "./FormControl";
+import moment from "moment";
 
 var div = React.DOM.div, span = React.DOM.span, ol = React.DOM.ol, li = React.DOM.li, a = React.DOM.a;
 var api = new RestClient();
@@ -679,6 +680,12 @@ var Form = React.createClass({
 
             if (value !== null && value !== undefined) {
                 switch (attr.fieldType) {
+                    case 'DATE':
+                        form[attr.name] = moment(value, 'YYYY-MM-DD', true);
+                        break;
+                    case 'DATE_TIME':
+                        form[attr.name] = moment(value, moment.ISO_8601, true);
+                        break;
                     case 'CATEGORICAL':
                     case 'XREF':
                         form[attr.name] = value[attr.refEntity.idAttribute];
