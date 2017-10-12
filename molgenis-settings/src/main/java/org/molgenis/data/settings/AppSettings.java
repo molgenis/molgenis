@@ -29,14 +29,14 @@ public interface AppSettings
 	void setLogoTopHref(String logoHref);
 
 	/**
-	 * @return boolean if top logo should have a fixed height
+	 * @return integer top logo uses int value as a max-height in px
 	 */
-	public boolean getFixedHeightLogo();
+	int getFixedHeightLogo();
 
 	/**
-	 * @param fixedHeight boolean for fixed height
+	 * @param fixedHeight value for top logo max-height in px
 	 */
-	public void setFixedHeightLogo(boolean fixedHeight);
+	void setFixedHeightLogo(int fixedHeight);
 
 	/**
 	 * @return href of logo displayed in menu

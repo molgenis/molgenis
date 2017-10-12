@@ -27,13 +27,13 @@ public class TestAppSettings implements AppSettings
 	}
 
 	@Override
-	public boolean getFixedHeightLogo()
+	public int getFixedHeightLogo()
 	{
-		return false;
+		return 0;
 	}
 
 	@Override
-	public void setFixedHeightLogo(boolean fixedHeight)
+	public void setFixedHeightLogo(int fixedHeight)
 	{
 	}
 

@@ -183,8 +183,9 @@
                     function setContainerHeight() {
                         var img = document.getElementById('logo-top');
                         img.style['height'] = 'auto'
-                        <#if (app_settings.fixedHeightLogo?? && app_settings.fixedHeightLogo == true)>
-                        img.style['max-height'] = '150px'
+
+                        <#if app_settings.fixedHeightLogo?? || app_settings.fixedHeightLogo != 0>
+                        img.style['max-height'] = '${app_settings.fixedHeightLogo?string}px'
                         </#if>
 
                         var height = img.height

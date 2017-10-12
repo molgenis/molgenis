@@ -49,7 +49,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String DEFAULT_TITLE = "MOLGENIS";
 		private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
-		private static final boolean DEFAULT_FIXED_LOGO_HEIGHT = true;
+		private static final int DEFAULT_FIXED_LOGO_HEIGHT = 150;
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -87,11 +87,11 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 									   .setNillable(true)
 									   .setLabel("Logo above navigation bar")
 									   .setDescription("HREF to logo image");
-			addAttribute(FIXED_LOGO_HEIGHT).setDataType(BOOL)
+			addAttribute(FIXED_LOGO_HEIGHT).setDataType(INT)
 										   .setNillable(true)
 										   .setLabel("Fixed height top logo")
 										   .setDefaultValue(String.valueOf(DEFAULT_FIXED_LOGO_HEIGHT))
-										   .setDescription("Use fixed height for logo above navigation bar");
+										   .setDescription("Set fixed height for top logo in px");
 			addAttribute(FOOTER).setDataType(TEXT).setNillable(true).setLabel("Footer text");
 			addAttribute(MENU).setDataType(TEXT)
 							  .setNillable(true)
@@ -207,13 +207,13 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	}
 
 	@Override
-	public boolean getFixedHeightLogo()
+	public int getFixedHeightLogo()
 	{
-		return getBoolean(Meta.FIXED_LOGO_HEIGHT);
+		return getInt(Meta.FIXED_LOGO_HEIGHT);
 	}
 
 	@Override
-	public void setFixedHeightLogo(boolean fixedHeight)
+	public void setFixedHeightLogo(int fixedHeight)
 	{
 		set(Meta.FIXED_LOGO_HEIGHT, fixedHeight);
 	}

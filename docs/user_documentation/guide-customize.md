@@ -236,7 +236,8 @@ If you want to brand your MOLGENIS instance, you could add a banner.
 We recommend high resolution image. It will be automatically resize to fit the browser window.
 Do realize that taking a banner with a very big height might make your application unusable.
 
-There is an application setting that forces your image to 150px which you can use to set a larger image to have a fixed height.
+There is an application setting that allows you to set the max height of your image.
+This will force an image to have a height according to the set amount of pixel.
 
 An example of a banner:
 ![Website banner](../images/customize/website_banner.png?raw=true, "website banner")
