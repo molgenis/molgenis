@@ -1,17 +1,7 @@
-.navbar-fixed-top {
-    top: 150px;
+#logo-top {
+    max-width: 100vw;
 }
 
- body>.container-fluid {
-     padding-top: 210px;
- !important;
- }
-
-#Intro {
-    top: 0;
-    position: fixed;
-    background-color: #FFFFFF;
-    height: 150px;
-    width: 100%;
-    z-index: 1039;
+#top-logo-banner {
+    margin-left: -15px !important;
 }

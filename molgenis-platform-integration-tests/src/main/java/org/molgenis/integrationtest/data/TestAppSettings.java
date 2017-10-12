@@ -27,6 +27,17 @@ public class TestAppSettings implements AppSettings
 	}
 
 	@Override
+	public Integer getFixedHeightLogo()
+	{
+		return null;
+	}
+
+	@Override
+	public void setFixedHeightLogo(int fixedHeight)
+	{
+	}
+
+	@Override
 	public String getLogoNavBarHref()
 	{
 		return null;

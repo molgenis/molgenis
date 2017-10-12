@@ -29,6 +29,17 @@ public interface AppSettings
 	void setLogoTopHref(String logoHref);
 
 	/**
+	 * @return integer top logo uses int value as a max-height in px
+	 */
+	@Nullable
+	Integer getFixedHeightLogo();
+
+	/**
+	 * @param fixedHeight value for top logo max-height in px
+	 */
+	void setFixedHeightLogo(int fixedHeight);
+
+	/**
 	 * @return href of logo displayed in menu
 	 */
 	@Nullable

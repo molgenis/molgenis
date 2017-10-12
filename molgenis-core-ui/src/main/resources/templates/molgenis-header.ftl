@@ -172,12 +172,41 @@
         </div>
     </#if>
 <div class="row">
-<div class="col-md-12">
-<div id="plugin-container">
-    <#assign plugin_description_key = plugin_id + '_description_text'>
-    <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
-        ${i18n[plugin_description_key]}
-    </#if>
+    <div class="col-md-12">
+        <div id="plugin-container">
+            <#if app_settings.logoTopHref?has_content>
+                <script>
+                    // Calculate the amount of pixels that the content needs to
+                    // be pushed down based on the height of the uploaded banner
+                    var maxHeight = 0
+
+                    function setContainerHeight() {
+                        var img = document.getElementById('logo-top');
+                        img.style['height'] = 'auto'
+
+                        <#if app_settings.fixedHeightLogo??>
+                        img.style['max-height'] = '${app_settings.fixedHeightLogo?string}px'
+                        </#if>
+
+                        var height = img.height
+                        maxHeight = height + 60
+
+                        var container = document.querySelector('body>.container-fluid')
+                        container.setAttribute("style", "padding-top: " + maxHeight + "px;")
+                    }
+
+                    $(window).resize(function() {
+                        setContainerHeight()
+                    })
+
+                    setContainerHeight()
+                </script>
+            </#if>
+
+            <#assign plugin_description_key = plugin_id + '_description_text'>
+            <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
+                ${i18n[plugin_description_key]}
+            </#if>
 </#macro>
 
 
@@ -186,14 +215,12 @@
 <#macro topmenu menu plugin_id pluginid_with_query_string>
     <nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
         <div class="container-fluid">
+            <#if app_settings.logoTopHref?has_content>
+            <header id="top-logo-banner">
+                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"></a>
+            </header>
+            </#if>
             <div class="navbar-header">
-            <#-- Logo start -->
-                <#if app_settings.logoTopHref?has_content>
-                    <div id="Intro">
-                        <a href="/"><img src="${app_settings.logoTopHref?html}" alt="" border="0" height="150"></a>
-                    </div>
-                </#if>
-
                 <#list menu.items as item>
                     <#if item.type != "MENU" && item.name == "Home" && app_settings.logoNavBarHref?has_content>
                         <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
