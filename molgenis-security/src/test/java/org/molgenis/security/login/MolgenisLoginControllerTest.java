@@ -38,6 +38,15 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
+	public void getLoginErrorPageSessionExpired() throws Exception
+	{
+		this.mockMvc.perform(get("/login").param("expired", ""))
+					.andExpect(status().isOk())
+					.andExpect(view().name("view-login"))
+					.andExpect(model().attribute("errorMessage", "Your login session has expired."));
+	}
+
+	@Test
 	public void getLoginErrorPage() throws Exception
 	{
 		this.mockMvc.perform(get("/login").param("error", ""))
