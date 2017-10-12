@@ -1,19 +1,19 @@
-package org.molgenis.data.rest;
+package org.molgenis.api.tests.rest.v1;
 
 import com.google.common.base.Strings;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
+import org.hamcrest.Matchers;
+import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.COUNT;
+import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
 
 public class RestControllerIT
 {
@@ -40,29 +40,28 @@ public class RestControllerIT
 	{
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
-		RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
-		LOG.info("baseURI: " + baseURI);
+		RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
+		LOG.info("baseURI: " + RestAssured.baseURI);
 
 		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
+		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
+		String adminPassword = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
 
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-
 		testUserId = getUserId(adminToken, REST_TEST_USER);
-		LOG.info("testUserId: " + testUserId);
-		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", Permission.WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", Permission.READ);
-		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", Permission.COUNT);
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", Permission.WRITEMETA);
 
-		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", WRITE);
+		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", READ);
+		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", COUNT);
+		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITEMETA);
+
+		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -72,23 +71,23 @@ public class RestControllerIT
 
 		response = getWithoutToken("sys_FreemarkerTemplate");
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]",
-						equalTo("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+				.body("errors.message[0]", Matchers.equalTo(
+						"No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		response = getWithoutToken("sys_scr_ScriptType");
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]",
-						equalTo("No read permission on entity type 'Script type' with id 'sys_scr_ScriptType'"));
+				.body("errors.message[0]", Matchers.equalTo(
+						"No read permission on entity type 'Script type' with id 'sys_scr_ScriptType'"));
 
 		response = getWithoutToken("sys_sec_UserAuthority");
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]",
-						equalTo("No read permission on entity type 'User authority' with id 'sys_sec_UserAuthority'"));
+				.body("errors.message[0]", Matchers.equalTo(
+						"No read permission on entity type 'User authority' with id 'sys_sec_UserAuthority'"));
 
 		response = getWithoutToken("sys_sec_GroupAuthority");
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]",
-						equalTo("No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
+				.body("errors.message[0]", Matchers.equalTo(
+						"No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -103,8 +102,8 @@ public class RestControllerIT
 	{
 		ValidatableResponse response = getWithToken("sys_sec_UserAuthority", this.testUserToken);
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]",
-						equalTo("No [READ] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
+				.body("errors.message[0]", Matchers.equalTo(
+						"No [READ] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 	}
 
 	@Test
@@ -112,8 +111,8 @@ public class RestControllerIT
 	{
 		ValidatableResponse response = getWithToken("sys_sec_GroupAuthority", this.testUserToken);
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]",
-						equalTo("No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
+				.body("errors.message[0]", Matchers.equalTo(
+						"No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -128,7 +127,7 @@ public class RestControllerIT
 			   .log()
 			   .all()
 			   .statusCode(NOT_FOUND)
-			   .body("errors.message[0]", equalTo("Unknown [File metadata] with id [non-existing-entity_id]"));
+			   .body("errors.message[0]", Matchers.equalTo("Unknown [File metadata] with id [non-existing-entity_id]"));
 	}
 
 	@Test
@@ -143,8 +142,8 @@ public class RestControllerIT
 			   .delete(PATH + "sys_scr_ScriptType/R")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]",
-					   equalTo("No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
+			   .body("errors.message[0]", Matchers.equalTo(
+					   "No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
 
 		given().log()
 			   .method()
@@ -155,8 +154,8 @@ public class RestControllerIT
 			   .delete(PATH + "sys_sec_UserAuthority")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]",
-					   equalTo("No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
+			   .body("errors.message[0]", Matchers.equalTo(
+					   "No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 
 		given().log()
 			   .method()
@@ -167,8 +166,8 @@ public class RestControllerIT
 			   .delete(PATH + "sys_sec_GroupAuthority")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]",
-					   equalTo("No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
+			   .body("errors.message[0]", Matchers.equalTo(
+					   "No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -184,7 +183,7 @@ public class RestControllerIT
 			   .statusCode(BAD_REQUEST)
 			   .log()
 			   .all()
-			   .body("errors.message[0]", equalTo("Missing token in header"));
+			   .body("errors.message[0]", Matchers.equalTo("Missing token in header"));
 	}
 
 	@Test
@@ -198,7 +197,7 @@ public class RestControllerIT
 			   .when()
 			   .post(PATH + "logout")
 			   .then()
-			   .statusCode(OKE)
+			   .statusCode(RestTestUtils.OKE)
 			   .log()
 			   .all();
 
@@ -211,8 +210,8 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]",
-					   equalTo("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+			   .body("errors.message[0]", Matchers.equalTo(
+					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		given().log()
 			   .uri()
@@ -222,8 +221,8 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]",
-					   equalTo("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+			   .body("errors.message[0]", Matchers.equalTo(
+					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		// clean up after test
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
@@ -242,7 +241,7 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate/test.csv")
 			   .then()
 			   .statusCode(NOT_FOUND)
-			   .body("errors.message[0]", equalTo("sys_FreemarkerTemplate test.csv not found"));
+			   .body("errors.message[0]", Matchers.equalTo("sys_FreemarkerTemplate test.csv not found"));
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
@@ -256,7 +255,8 @@ public class RestControllerIT
 			   .get(PATH + "sys_sec_User/meta")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", equalTo("No read permission on entity type 'User' with id 'sys_sec_User'"));
+			   .body("errors.message[0]",
+					   Matchers.equalTo("No read permission on entity type 'User' with id 'sys_sec_User'"));
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
@@ -271,8 +271,8 @@ public class RestControllerIT
 			   .when()
 			   .get(PATH + "sys_sec_User/meta")
 			   .then()
-			   .statusCode(OKE)
-			   .body("name", equalTo("sys_sec_User"));
+			   .statusCode(RestTestUtils.OKE)
+			   .body("name", Matchers.equalTo("sys_sec_User"));
 	}
 
 	private ValidatableResponse getWithoutToken(String requestedEntity)
@@ -292,17 +292,17 @@ public class RestControllerIT
 
 	}
 
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post("api/v1/logout");
+		cleanupUserToken(testUserToken);
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
+		cleanupUser(adminToken, testUserId);
 	}
 
 }

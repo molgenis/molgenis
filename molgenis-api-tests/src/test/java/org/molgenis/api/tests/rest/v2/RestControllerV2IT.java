@@ -1,22 +1,29 @@
-package org.molgenis.data.rest.v2;
+package org.molgenis.api.tests.rest.v2;
 
 import com.google.common.base.Strings;
 import io.restassured.RestAssured;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.molgenis.data.rest.RestControllerIT;
-import org.molgenis.data.rest.convert.RestTestUtils;
+import org.hamcrest.Matchers;
+import org.molgenis.api.tests.rest.v1.RestControllerIT;
+import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static io.restassured.RestAssured.baseURI;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.molgenis.data.rest.convert.RestTestUtils.*;
-import static org.molgenis.data.rest.convert.RestTestUtils.Permission.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 public class RestControllerV2IT
 {
@@ -31,6 +38,9 @@ public class RestControllerV2IT
 	private String adminToken;
 	private String testUserId;
 
+	private List<String> testEntities = newArrayList("it_emx_datatypes_TypeTestv2", "it_emx_datatypes_TypeTestRefv2",
+			"it_emx_datatypes_Locationv2", "it_emx_datatypes_Personv2");
+
 	/**
 	 * Pass down system properties via the mvn commandline argument
 	 * example:
@@ -42,7 +52,7 @@ public class RestControllerV2IT
 		LOG.info("Read environment variables");
 		String envHost = System.getProperty("REST_TEST_HOST");
 		RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
-		LOG.info("baseURI: " + baseURI);
+		LOG.info("baseURI: " + RestAssured.baseURI);
 
 		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
 		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
@@ -52,10 +62,10 @@ public class RestControllerV2IT
 		String adminPassword = Strings.isNullOrEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
-		adminToken = RestTestUtils.login(adminUserName, adminPassword);
+		adminToken = login(adminUserName, adminPassword);
 
 		LOG.info("Clean up test entities if they already exist...");
-		removeEntities();
+		removeEntities(adminToken, testEntities);
 		LOG.info("Cleaned up existing test entities.");
 
 		LOG.info("Importing RestControllerV2_TestEMX.xlsx...");
@@ -63,33 +73,16 @@ public class RestControllerV2IT
 		LOG.info("Importing Done");
 
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-
 		testUserId = getUserId(adminToken, REST_TEST_USER);
-		String adminUserId = getUserId(adminToken, adminUserName);
-		LOG.info("testUserId: " + testUserId);
-		LOG.info("adminUserId " + adminUserId);
 
-		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", READ);
-		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
+		grantSystemRights(adminToken, testUserId, PACKAGE, WRITE);
+		grantSystemRights(adminToken, testUserId, ENTITY_TYPE_META_DATA, WRITE);
+		grantSystemRights(adminToken, testUserId, ATTRIBUTE_META_DATA, WRITE);
+		grantSystemRights(adminToken, testUserId, FILE_META, READ);
+		grantSystemRights(adminToken, testUserId, OWNED, READ);
 
-		grantRights(adminToken, testUserId, "it_emx_datatypes_TypeTestv2", WRITE);
-		grantRights(adminToken, testUserId, "it_emx_datatypes_TypeTestRefv2", WRITE);
-		grantRights(adminToken, testUserId, "it_emx_datatypes_Locationv2", WRITE);
-		grantRights(adminToken, testUserId, "it_emx_datatypes_Personv2", WRITE);
-
-		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
-		LOG.info("Test user token:" + this.testUserToken);
-	}
-
-	private void removeEntities()
-	{
-		removeEntity(adminToken, "it_emx_datatypes_TypeTestv2");
-		removeEntity(adminToken, "it_emx_datatypes_TypeTestRefv2");
-		removeEntity(adminToken, "it_emx_datatypes_Locationv2");
-		removeEntity(adminToken, "it_emx_datatypes_Personv2");
+		testEntities.forEach(entity -> grantRights(adminToken, testUserId, entity, WRITE));
+		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -114,16 +107,17 @@ public class RestControllerV2IT
 			   .method()
 			   .log()
 			   .uri()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(jsonObject.toJSONString())
 			   .when()
 			   .post(API_V2 + "it_emx_datatypes_TypeTestRefv2")
 			   .then()
-			   .statusCode(CREATED)
+			   .statusCode(RestTestUtils.CREATED)
 			   .log()
 			   .all()
-			   .body("location", equalTo("/api/v2/it_emx_datatypes_TypeTestRefv2?q=value=in=(\"ref55\",\"ref57\")"));
+			   .body("location",
+					   Matchers.equalTo("/api/v2/it_emx_datatypes_TypeTestRefv2?q=value=in=(\"ref55\",\"ref57\")"));
 	}
 
 	@Test
@@ -144,16 +138,17 @@ public class RestControllerV2IT
 
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(jsonObject.toJSONString())
 			   .when()
 			   .post(API_V2 + "it_emx_datatypes_Locationv2")
 			   .then()
-			   .statusCode(CREATED)
+			   .statusCode(RestTestUtils.CREATED)
 			   .log()
 			   .all()
-			   .body("location", equalTo(expectedLocation), "resources[0].href", equalTo(expectedHref));
+			   .body("location", Matchers.equalTo(expectedLocation), "resources[0].href",
+					   Matchers.equalTo(expectedHref));
 
 	}
 
@@ -165,18 +160,18 @@ public class RestControllerV2IT
 
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(entities.toJSONString())
 			   .when()
 			   .post(API_V2 + "it_emx_datatypes_TypeTestv2")
 			   .then()
-			   .statusCode(CREATED)
+			   .statusCode(RestTestUtils.CREATED)
 			   .log()
 			   .all()
-			   .body("location", equalTo("/api/v2/it_emx_datatypes_TypeTestv2?q=id=in=(\"55\",\"57\")"),
-					   "resources[0].href", equalTo("/api/v2/it_emx_datatypes_TypeTestv2/55"), "resources[1].href",
-					   equalTo("/api/v2/it_emx_datatypes_TypeTestv2/57"));
+			   .body("location", Matchers.equalTo("/api/v2/it_emx_datatypes_TypeTestv2?q=id=in=(\"55\",\"57\")"),
+					   "resources[0].href", Matchers.equalTo("/api/v2/it_emx_datatypes_TypeTestv2/55"),
+					   "resources[1].href", Matchers.equalTo("/api/v2/it_emx_datatypes_TypeTestv2/57"));
 
 	}
 
@@ -187,7 +182,7 @@ public class RestControllerV2IT
 
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(entities.toJSONString())
 			   .when()
@@ -218,7 +213,7 @@ public class RestControllerV2IT
 
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(jsonObject.toJSONString())
 			   .when()
@@ -240,7 +235,7 @@ public class RestControllerV2IT
 
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(jsonObject.toJSONString())
 			   .when()
@@ -257,7 +252,7 @@ public class RestControllerV2IT
 	{
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .when()
 			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
 			   .then()
@@ -272,27 +267,27 @@ public class RestControllerV2IT
 
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
+			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .when()
-			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
+			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser;distinct==active")
 			   .then()
 			   .statusCode(OKE)
-			   .body("aggs.matrix[0][0]", equalTo(1));
+			   .body("aggs.matrix[0][0]", Matchers.equalTo(1));
 	}
 
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Clean up TestEMX
-		removeEntities();
+		removeEntities(adminToken, testEntities);
 
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post("api/v1/logout");
+		cleanupUserToken(testUserToken);
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
+		cleanupUser(adminToken, testUserId);
 	}
 }
