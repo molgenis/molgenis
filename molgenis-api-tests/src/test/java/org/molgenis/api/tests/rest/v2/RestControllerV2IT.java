@@ -260,8 +260,7 @@ public class RestControllerV2IT
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
-	// Sometimes fails, so disabled for now
-	@Test(dependsOnMethods = { "testRetrieveSystemEntityCollectionAggregatesNotAllowed" }, enabled = false)
+	@Test(dependsOnMethods = { "testRetrieveSystemEntityCollectionAggregatesNotAllowed" })
 	public void testRetrieveSystemEntityCollectionAggregates()
 	{
 		grantSystemRights(adminToken, testUserId, "sys_sec_User", COUNT);
