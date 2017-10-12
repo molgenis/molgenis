@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@molgenis/molgenis-api-client@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.0.2.tgz#78e898f9abae24863b0995d79226827e2741ae75"
+"@molgenis/molgenis-api-client@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.1.0.tgz#66cdcca5c4a2e0b413be7aef27cd5559ffdcb2e2"
   dependencies:
     babel-runtime "^6.11.6"
     form-data "^2.3.1"
@@ -5752,10 +5752,6 @@ vm-browserify@0.0.4:
 void-elements@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
-
-vue-add-globals@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/vue-add-globals/-/vue-add-globals-2.0.1.tgz#c9fba6faac44f679ec15d5a9637f518b181fc44d"
 
 vue-hot-reload-api@^2.0.1:
   version "2.1.0"
