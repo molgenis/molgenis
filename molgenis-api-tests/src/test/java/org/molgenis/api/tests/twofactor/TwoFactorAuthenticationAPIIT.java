@@ -8,7 +8,6 @@ import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -101,21 +100,17 @@ public class TwoFactorAuthenticationAPIIT
 		testUserToken = response.extract().path("token");
 	}
 
-	@AfterMethod
-	public void afterMethod()
-	{
-		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
-	}
-
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);
 
+		// Clean up Token for user
+		cleanupUserToken(testUserToken);
+
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
+		cleanupUser(adminToken, testUserId);
 
 		// Disable two factor authentication
 		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);

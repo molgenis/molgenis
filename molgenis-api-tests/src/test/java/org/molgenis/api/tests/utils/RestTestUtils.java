@@ -83,19 +83,22 @@ public class RestTestUtils
 	 */
 	public static void createUser(String adminToken, String userName, String password)
 	{
-		JSONObject createTestUserBody = new JSONObject();
-		createTestUserBody.put("active", true);
-		createTestUserBody.put("username", userName);
-		createTestUserBody.put("password_", password);
-		createTestUserBody.put("superuser", false);
-		createTestUserBody.put("changePassword", false);
-		createTestUserBody.put("Email", userName + "@example.com");
+		if (adminToken != null)
+		{
+			JSONObject createTestUserBody = new JSONObject();
+			createTestUserBody.put("active", true);
+			createTestUserBody.put("username", userName);
+			createTestUserBody.put("password_", password);
+			createTestUserBody.put("superuser", false);
+			createTestUserBody.put("changePassword", false);
+			createTestUserBody.put("Email", userName + "@example.com");
 
-		given().header(X_MOLGENIS_TOKEN, adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .body(createTestUserBody.toJSONString())
-			   .when()
-			   .post("api/v1/sys_sec_User");
+			given().header(X_MOLGENIS_TOKEN, adminToken)
+				   .contentType(APPLICATION_JSON)
+				   .body(createTestUserBody.toJSONString())
+				   .when()
+				   .post("api/v1/sys_sec_User");
+		}
 	}
 
 	/**
@@ -225,7 +228,7 @@ public class RestTestUtils
 	 * @param entityName the entity name
 	 * @return the id of the given entity
 	 */
-	public static String getEntityTypeId(String adminToken, String attribute, String value, String entityName)
+	private static String getEntityTypeId(String adminToken, String attribute, String value, String entityName)
 	{
 		Map<String, Object> query = of("q",
 				singletonList(of("field", attribute, "operator", "EQUALS", "value", value)));
@@ -240,6 +243,7 @@ public class RestTestUtils
 					  .then()
 					  .extract()
 					  .path("items[0].id");
+
 	}
 
 	/**
@@ -284,14 +288,17 @@ public class RestTestUtils
 	 */
 	public static void grantSystemRights(String adminToken, String userId, String entity, Permission permission)
 	{
-		String right = "ROLE_ENTITY_" + permission + "_" + entity;
-		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
+		if (adminToken != null)
+		{
+			String right = "ROLE_ENTITY_" + permission + "_" + entity;
+			JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
 
-		given().header("x-molgenis-token", adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .body(body.toJSONString())
-			   .when()
-			   .post("api/v1/" + "sys_sec_UserAuthority");
+			given().header("x-molgenis-token", adminToken)
+				   .contentType(APPLICATION_JSON)
+				   .body(body.toJSONString())
+				   .when()
+				   .post("api/v1/" + "sys_sec_UserAuthority");
+		}
 	}
 
 	public static void removePackages(String adminToken, List<String> packageNames)
@@ -299,11 +306,14 @@ public class RestTestUtils
 		packageNames.forEach(packageName -> removePackage(adminToken, packageName));
 	}
 
-	public static void removePackage(String adminToken, String packageName)
+	private static void removePackage(String adminToken, String packageName)
 	{
-		given().header("x-molgenis-token", adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .delete("api/v1/sys_md_Package/" + packageName);
+		if (adminToken != null && packageName != null)
+		{
+			given().header("x-molgenis-token", adminToken)
+				   .contentType(APPLICATION_JSON)
+				   .delete("api/v1/sys_md_Package/" + packageName);
+		}
 	}
 
 	public static void removeEntities(String adminToken, List<String> entities)
@@ -313,9 +323,12 @@ public class RestTestUtils
 
 	public static void removeEntity(String adminToken, String entityId)
 	{
-		given().header("x-molgenis-token", adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .delete("api/v1/" + entityId + "/meta");
+		if (adminToken != null && entityId != null)
+		{
+			given().header("x-molgenis-token", adminToken)
+				   .contentType(APPLICATION_JSON)
+				   .delete("api/v1/" + entityId + "/meta");
+		}
 	}
 
 	public static void removeImportJobs(String adminToken, List<String> jobIds)
@@ -323,11 +336,14 @@ public class RestTestUtils
 		jobIds.forEach(jobId -> removeImportJob(adminToken, jobId));
 	}
 
-	public static void removeImportJob(String adminToken, String jobId)
+	private static void removeImportJob(String adminToken, String jobId)
 	{
-		given().header("x-molgenis-token", adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .delete("api/v2/sys_job_OneClickImportJobExecution/" + jobId);
+		if (adminToken != null && jobId != null)
+		{
+			given().header("x-molgenis-token", adminToken)
+				   .contentType(APPLICATION_JSON)
+				   .delete("api/v2/sys_job_OneClickImportJobExecution/" + jobId);
+		}
 	}
 
 	/**
@@ -335,31 +351,56 @@ public class RestTestUtils
 	 */
 	public static void removeRightsForUser(String adminToken, String testUserId)
 	{
-		// get identifiers for permissions this user owns
-		Map<String, Object> query = of("q",
-				singletonList(of("field", "User", "operator", "EQUALS", "value", testUserId)));
-		JSONObject body = new JSONObject(query);
+		if (adminToken != null && testUserId != null)
+		{
+			// get identifiers for permissions this user owns
+			Map<String, Object> query = of("q",
+					singletonList(of("field", "User", "operator", "EQUALS", "value", testUserId)));
+			JSONObject body = new JSONObject(query);
 
-		List<Map> permissions = given().header("x-molgenis-token", adminToken)
-									   .contentType(APPLICATION_JSON)
-									   .queryParam("_method", "GET")
-									   .body(body.toJSONString())
-									   .when()
-									   .post("api/v1/" + "sys_sec_UserAuthority")
-									   .then()
-									   .extract()
-									   .path("items");
+			List<Map> permissions = given().header("x-molgenis-token", adminToken)
+										   .contentType(APPLICATION_JSON)
+										   .queryParam("_method", "GET")
+										   .body(body.toJSONString())
+										   .when()
+										   .post("api/v1/" + "sys_sec_UserAuthority")
+										   .then()
+										   .extract()
+										   .path("items");
 
-		List<String> identifiers = permissions.stream()
-											  .map(jsonObject -> jsonObject.get("id").toString())
-											  .collect(Collectors.toList());
+			List<String> identifiers = permissions.stream()
+												  .map(jsonObject -> jsonObject.get("id").toString())
+												  .collect(Collectors.toList());
 
-		// use identifiers to batch delete from User Authority table
-		Map<String, List<String>> requestBody = newHashMap();
-		requestBody.put("entityIds", identifiers);
-		given().header(X_MOLGENIS_TOKEN, adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .body(requestBody)
-			   .delete("api/v2/sys_sec_UserAuthority");
+			// use identifiers to batch delete from User Authority table
+			Map<String, List<String>> requestBody = newHashMap();
+			requestBody.put("entityIds", identifiers);
+			given().header(X_MOLGENIS_TOKEN, adminToken)
+				   .contentType(APPLICATION_JSON)
+				   .body(requestBody)
+				   .delete("api/v2/sys_sec_UserAuthority");
+		}
+	}
+
+	/**
+	 * Removes the token for the test user by logging out
+	 */
+	public static void cleanupUserToken(String testUserToken)
+	{
+		if (testUserToken != null)
+		{
+			given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
+		}
+	}
+
+	/**
+	 * Remove the test user by deleting the row from the User table
+	 */
+	public static void cleanupUser(String adminToken, String testUserId)
+	{
+		if (adminToken != null && testUserId != null)
+		{
+			given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
+		}
 	}
 }

@@ -189,7 +189,7 @@ public class OneClickImporterControllerAPIIT
 		entityResponse.body("items[9].Age", equalTo(32));
 	}
 
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Clean up created entities
@@ -205,10 +205,10 @@ public class OneClickImporterControllerAPIIT
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
+		cleanupUserToken(testUserToken);
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
+		cleanupUser(adminToken, testUserId);
 	}
 
 	private String pollJobForStatus(String jobUrl)

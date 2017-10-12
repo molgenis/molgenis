@@ -275,7 +275,7 @@ public class RestControllerV2IT
 			   .body("aggs.matrix[0][0]", Matchers.equalTo(1));
 	}
 
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Clean up TestEMX
@@ -285,9 +285,9 @@ public class RestControllerV2IT
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
+		cleanupUserToken(testUserToken);
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
+		cleanupUser(adminToken, testUserId);
 	}
 }

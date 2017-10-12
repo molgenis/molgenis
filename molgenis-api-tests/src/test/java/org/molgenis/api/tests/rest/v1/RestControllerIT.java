@@ -61,7 +61,7 @@ public class RestControllerIT
 		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", COUNT);
 		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITEMETA);
 
-		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -292,17 +292,17 @@ public class RestControllerIT
 
 	}
 
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, this.testUserToken).when().post("api/v1/logout");
+		cleanupUserToken(testUserToken);
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, this.adminToken).when().delete("api/v1/sys_sec_User/" + this.testUserId);
+		cleanupUser(adminToken, testUserId);
 	}
 
 }

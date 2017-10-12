@@ -949,7 +949,7 @@ public class RestControllerV1APIIT
 				"items[4].label", Matchers.equalTo("label5"));
 	}
 
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Clean up TestEMX
@@ -970,16 +970,9 @@ public class RestControllerV1APIIT
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout").then().log().all();
+		cleanupUserToken(testUserToken);
 
 		// Clean up user
-		given().log()
-			   .all()
-			   .header(X_MOLGENIS_TOKEN, adminToken)
-			   .when()
-			   .delete("api/v1/sys_sec_User/" + testUserId)
-			   .then()
-			   .log()
-			   .all();
+		cleanupUser(adminToken, testUserId);
 	}
 }

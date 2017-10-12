@@ -640,7 +640,7 @@ public class RestControllerV2APIIT
 				"questionnaires_no_questionnaires_found_message", Matchers.equalTo("No questionnaires found"));
 	}
 
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
 		// Delete imported file
@@ -671,10 +671,10 @@ public class RestControllerV2APIIT
 		removeRightsForUser(adminToken, testUserId);
 
 		// Clean up Token for user
-		given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
+		cleanupUserToken(testUserToken);
 
 		// Clean up user
-		given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
+		cleanupUser(adminToken, testUserId);
 	}
 
 }
