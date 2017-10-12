@@ -38,6 +38,7 @@ public class VcfImporterService implements ImportService
 	private final PermissionSystemService permissionSystemService;
 	private final MetaDataService metaDataService;
 	private final DefaultPackage defaultPackage;
+	private Package package_;
 
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
 			MetaDataService metaDataService, DefaultPackage defaultPackage)
@@ -150,10 +151,16 @@ public class VcfImporterService implements ImportService
 		EntityType entityType = inRepository.getEntityType();
 		entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
-		Package package_ = dataService.getMeta().getPackage(packageId);
-		if (package_ == null) package_ = defaultPackage;
-		entityType.setPackage(package_);
-
+		if (packageId != null)
+		{
+			package_ = dataService.getMeta().getPackage(packageId);
+			if (package_ == null) throw new MolgenisDataException(String.format("Unknown package [%s]", packageId));
+			entityType.setPackage(package_);
+		}
+		else
+		{
+			package_ = defaultPackage;
+		}
 		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{

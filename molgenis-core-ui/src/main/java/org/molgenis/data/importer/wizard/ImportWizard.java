@@ -34,7 +34,7 @@ public class ImportWizard extends Wizard
 	private boolean allowPermissions;
 	private List<String> packages;
 	private List<String> entitiesInDefaultPackage;
-	private String defaultEntity;
+	private String selectedPackage;
 
 	public File getFile()
 	{
@@ -200,14 +200,14 @@ public class ImportWizard extends Wizard
 		this.entitiesInDefaultPackage = entitiesInDefaultPackage;
 	}
 
-	public String getDefaultEntity()
+	public String getSelectedPackage()
 	{
-		return defaultEntity;
+		return selectedPackage;
 	}
 
-	public void setDefaultEntity(String defaultEntity)
+	public void setSelectedPackage(String selectedPackage)
 	{
-		this.defaultEntity = defaultEntity;
+		this.selectedPackage = selectedPackage;
 	}
 
 	public boolean getAllowPermissions()
