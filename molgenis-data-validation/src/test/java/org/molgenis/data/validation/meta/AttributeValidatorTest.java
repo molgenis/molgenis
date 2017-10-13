@@ -295,6 +295,30 @@ public class AttributeValidatorTest
 		attributeValidator.validateDefaultValue(attr);
 	}
 
+	@Test
+	public void testDefaultXref()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "todo")
+	public void testDefaultXrefInvalid()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Test
+	public void testDefaultMref()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "todo")
+	public void testDefaultMrefInvalid()
+	{
+		throw new UnsupportedOperationException();
+	}
+
 	@DataProvider(name = "allowedTransitionProvider")
 	private static Object[][] allowedTransitionProvider()
 	{

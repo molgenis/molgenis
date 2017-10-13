@@ -65,7 +65,7 @@ class PostgreSqlRepository extends AbstractRepository
 	/**
 	 * JDBC batch operation size
 	 */
-	private static final int BATCH_SIZE = 1000;
+	static final int BATCH_SIZE = 1000;
 	/**
 	 * Repository capabilities
 	 */
@@ -491,16 +491,24 @@ class PostgreSqlRepository extends AbstractRepository
 				seqNr.set(0);
 				for (Entity val : refEntities)
 				{
-					Map<String, Object> mref = Maps.newHashMapWithExpectedSize(3);
-					mref.put(getJunctionTableOrderColumnName(), seqNr.getAndIncrement());
-					mref.put(idAttr.getName(), entity.get(idAttr.getName()));
-					mref.put(attr.getName(), val);
+					Map<String, Object> mref = createJunctionTableRowData(seqNr.getAndIncrement(), idAttr, val, attr,
+							entity);
 					mrefs.get(attr.getName()).add(mref);
 				}
 			}
 		}
 
 		return mrefs;
+	}
+
+	static Map<String, Object> createJunctionTableRowData(int seqNr, Attribute idAttr, Entity refEntity,
+			Attribute junctionTableAttr, Entity entity)
+	{
+		Map<String, Object> mref = Maps.newHashMapWithExpectedSize(3);
+		mref.put(getJunctionTableOrderColumnName(), seqNr);
+		mref.put(idAttr.getName(), entity.get(idAttr.getName()));
+		mref.put(junctionTableAttr.getName(), refEntity);
+		return mref;
 	}
 
 	private void updateBatching(Iterator<? extends Entity> entities)
@@ -562,7 +570,7 @@ class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	private void addMrefs(final List<Map<String, Object>> mrefs, final Attribute attr)
+	void addMrefs(final List<Map<String, Object>> mrefs, final Attribute attr)
 	{
 		// database doesn't validate NOT NULL constraint for attribute values referencing multiple entities,
 		// so validate it ourselves

@@ -544,7 +544,28 @@ public class PostgreSqlRepositoryCollectionTest
 		when(attr.getDataType()).thenReturn(STRING);
 		postgreSqlRepoCollection.addAttribute(entityType, attr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity#6844280e\" ADD \"attr\" character varying(255) NOT NULL");
+		verifyNoMoreInteractions(jdbcTemplate);
 	}
+
+	@Test
+	public void addAttributeDefaultValueString()
+	{
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
+		when(idAttr.getIdentifier()).thenReturn("idAttrId");
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+		when(attr.getIdentifier()).thenReturn("attrId");
+		when(attr.getDataType()).thenReturn(STRING);
+		when(attr.getDefaultValue()).thenReturn("defaultValue");
+		postgreSqlRepoCollection.addAttribute(entityType, attr);
+		verify(jdbcTemplate).execute(
+				"ALTER TABLE \"entity#6844280e\" ADD \"attr\" character varying(255) NOT NULL DEFAULT 'defaultValue'");
+		verify(jdbcTemplate).execute("ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" DROP DEFAULT");
+		verifyNoMoreInteractions(jdbcTemplate);
+	}
+
+	// TODO add addAttributeDefaultValueMref test once PostgreSqlRepository does not create new JdbcTemplate instances
 
 	@Test
 	public void addAttributeUnique()

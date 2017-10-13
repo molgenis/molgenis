@@ -2,10 +2,7 @@ package org.molgenis.data.validation.meta;
 
 import com.google.common.collect.Iterables;
 import org.hibernate.validator.constraints.impl.EmailValidator;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Sort;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
@@ -21,14 +18,17 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
@@ -141,7 +141,7 @@ public class AttributeValidator
 	void validateDefaultValue(Attribute attr)
 	{
 		String value = attr.getDefaultValue();
-		if (attr.getDefaultValue() != null)
+		if (value != null)
 		{
 			if (attr.isUnique())
 			{
@@ -154,12 +154,6 @@ public class AttributeValidator
 			}
 
 			AttributeType fieldType = attr.getDataType();
-			if (fieldType == AttributeType.XREF || fieldType == AttributeType.MREF)
-			{
-				throw new MolgenisDataException("Attribute " + attr.getName()
-						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
-			}
-
 			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
 			{
 				throw new MolgenisDataException(
@@ -183,14 +177,43 @@ public class AttributeValidator
 			}
 
 			// Get typed value to check if the value is of the right type.
+			Object typedValue;
 			try
 			{
-				EntityUtils.getTypedValue(value, attr, entityManager);
+				typedValue = EntityUtils.getTypedValue(value, attr, entityManager);
 			}
 			catch (NumberFormatException e)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Invalid default value [%s] for data type [%s]", value, attr.getDataType())));
+			}
+
+			if (isSingleReferenceType(attr))
+			{
+				Entity refEntity = (Entity) typedValue;
+				EntityType refEntityType = attr.getRefEntity();
+				if (dataService.query(refEntityType.getId())
+							   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
+							   .count() == 0)
+				{
+					throw new MolgenisValidationException(
+							new ConstraintViolation(format("Default value [%s] refers to an unknown entity", value)));
+				}
+			}
+			else if (isMultipleReferenceType(attr))
+			{
+				Iterable<Entity> refEntitiesValue = (Iterable<Entity>) typedValue;
+				EntityType refEntityType = attr.getRefEntity();
+				if (dataService.query(refEntityType.getId())
+							   .in(refEntityType.getIdAttribute().getName(),
+									   StreamSupport.stream(refEntitiesValue.spliterator(), false)
+													.map(Entity::getIdValue)
+													.collect(toList()))
+							   .count() < Iterables.size(refEntitiesValue))
+				{
+					throw new MolgenisValidationException(new ConstraintViolation(
+							format("Default value [%s] refers to one or more unknown entities", value)));
+				}
 			}
 		}
 	}
