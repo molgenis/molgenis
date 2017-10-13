@@ -332,16 +332,15 @@ public class DataExplorerController extends PluginController
 
 		if (entityType != null)
 		{
-			Package package_ = entityType.getPackage();
-			if (package_ != null)
+			Package pack = entityType.getPackage();
+			if (pack != null)
 			{
-				result.put("href", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + package_.getId());
+				result.put("href", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + pack.getId());
 				LinkedList<String> packages = new LinkedList<>();
-				packages.add(package_.getLabel());
-				while (package_.getParent() != null)
+				while (pack != null)
 				{
-					package_ = package_.getParent();
-					if (package_ != null) packages.add(package_.getLabel());
+					packages.add(pack.getLabel());
+					pack = pack.getParent();
 				}
 				Collections.reverse(packages);
 				result.put("fullLabel", String.join(" / ", packages));
