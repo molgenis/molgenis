@@ -339,6 +339,26 @@ public class AttributeValidatorTest
 		attributeValidator.validateDefaultValue(attr);
 	}
 
+	@DataProvider(name = "allowedTransitionProvider")
+	private static Object[][] allowedTransitionProvider()
+	{
+		Attribute currentAttr1 = makeMockAttribute("attr1");
+		Attribute currentAttr2 = makeMockAttribute("attr2");
+		Attribute currentAttr3 = makeMockAttribute("attr3");
+		when(currentAttr1.getDataType()).thenReturn(BOOL);
+		when(currentAttr2.getDataType()).thenReturn(CATEGORICAL);
+		when(currentAttr3.getDataType()).thenReturn(COMPOUND);
+
+		Attribute newAttr1 = makeMockAttribute("attr1");
+		Attribute newAttr2 = makeMockAttribute("attr2");
+		Attribute newAttr3 = makeMockAttribute("attr3");
+		when(newAttr1.getDataType()).thenReturn(INT);
+		when(newAttr2.getDataType()).thenReturn(INT);
+		when(newAttr3.getDataType()).thenReturn(INT);
+
+		return new Object[][] { { currentAttr1, newAttr1 }, { currentAttr2, newAttr2 }, { currentAttr3, newAttr3 } };
+	}
+
 	@DataProvider(name = "disallowedTransitionProvider")
 	private static Object[][] disallowedTransitionProvider()
 	{
