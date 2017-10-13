@@ -1,9 +1,6 @@
 package org.molgenis.data.validation.meta;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Sort;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -14,10 +11,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -27,12 +22,13 @@ public class AttributeValidatorTest
 {
 	private AttributeValidator attributeValidator;
 	private DataService dataService;
+	private EntityManager entityManager;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		dataService = mock(DataService.class);
-		EntityManager entityManager = mock(EntityManager.class);
+		dataService = mock(DataService.class, RETURNS_DEEP_STUBS);
+		entityManager = mock(EntityManager.class);
 		attributeValidator = new AttributeValidator(dataService, entityManager);
 	}
 
@@ -223,7 +219,7 @@ public class AttributeValidatorTest
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDefaultValue()).thenReturn("test");
-		when(attr.getEnumOptions()).thenReturn(Arrays.asList("a", "b", "c"));
+		when(attr.getEnumOptions()).thenReturn(asList("a", "b", "c"));
 		when(attr.getDataType()).thenReturn(AttributeType.ENUM);
 		try
 		{
@@ -242,7 +238,7 @@ public class AttributeValidatorTest
 	{
 		Attribute attr = mock(Attribute.class);
 		when(attr.getDefaultValue()).thenReturn("b");
-		when(attr.getEnumOptions()).thenReturn(Arrays.asList("a", "b", "c"));
+		when(attr.getEnumOptions()).thenReturn(asList("a", "b", "c"));
 		when(attr.getDataType()).thenReturn(AttributeType.ENUM);
 		attributeValidator.validateDefaultValue(attr);
 
@@ -298,45 +294,49 @@ public class AttributeValidatorTest
 	@Test
 	public void testDefaultXref()
 	{
-		throw new UnsupportedOperationException();
+		String refEntityTypeId = "refEntityTypeId";
+		String refIdAttributeName = "refIdAttributeName";
+
+		Attribute refIdAttribute = mock(Attribute.class);
+		when(refIdAttribute.getDataType()).thenReturn(STRING);
+		when(refIdAttribute.getName()).thenReturn(refIdAttributeName);
+		EntityType refEntityType = mock(EntityType.class);
+
+		when(refEntityType.getId()).thenReturn(refEntityTypeId);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
+		Attribute attr = mock(Attribute.class);
+		when(attr.getDefaultValue()).thenReturn("entityId");
+		when(attr.getDataType()).thenReturn(AttributeType.XREF);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
+
+		when(dataService.query(refEntityTypeId).eq(refIdAttributeName, "entityId").count()).thenReturn(1L);
+		Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
+		when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
+		attributeValidator.validateDefaultValue(attr);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "todo")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Default value \\[entityId\\] refers to an unknown entity")
 	public void testDefaultXrefInvalid()
 	{
-		throw new UnsupportedOperationException();
-	}
+		String refEntityTypeId = "refEntityTypeId";
+		String refIdAttributeName = "refIdAttributeName";
 
-	@Test
-	public void testDefaultMref()
-	{
-		throw new UnsupportedOperationException();
-	}
+		Attribute refIdAttribute = mock(Attribute.class);
+		when(refIdAttribute.getDataType()).thenReturn(STRING);
+		when(refIdAttribute.getName()).thenReturn(refIdAttributeName);
+		EntityType refEntityType = mock(EntityType.class);
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "todo")
-	public void testDefaultMrefInvalid()
-	{
-		throw new UnsupportedOperationException();
-	}
+		when(refEntityType.getId()).thenReturn(refEntityTypeId);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
+		Attribute attr = mock(Attribute.class);
+		when(attr.getDefaultValue()).thenReturn("entityId");
+		when(attr.getDataType()).thenReturn(AttributeType.XREF);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
 
-	@DataProvider(name = "allowedTransitionProvider")
-	private static Object[][] allowedTransitionProvider()
-	{
-		Attribute currentAttr1 = makeMockAttribute("attr1");
-		Attribute currentAttr2 = makeMockAttribute("attr2");
-		Attribute currentAttr3 = makeMockAttribute("attr3");
-		when(currentAttr1.getDataType()).thenReturn(BOOL);
-		when(currentAttr2.getDataType()).thenReturn(CATEGORICAL);
-		when(currentAttr3.getDataType()).thenReturn(COMPOUND);
-
-		Attribute newAttr1 = makeMockAttribute("attr1");
-		Attribute newAttr2 = makeMockAttribute("attr2");
-		Attribute newAttr3 = makeMockAttribute("attr3");
-		when(newAttr1.getDataType()).thenReturn(INT);
-		when(newAttr2.getDataType()).thenReturn(INT);
-		when(newAttr3.getDataType()).thenReturn(INT);
-
-		return new Object[][] { { currentAttr1, newAttr1 }, { currentAttr2, newAttr2 }, { currentAttr3, newAttr3 } };
+		when(dataService.query(refEntityTypeId).eq(refIdAttributeName, "entityId").count()).thenReturn(0L);
+		Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
+		when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
+		attributeValidator.validateDefaultValue(attr);
 	}
 
 	@DataProvider(name = "disallowedTransitionProvider")
