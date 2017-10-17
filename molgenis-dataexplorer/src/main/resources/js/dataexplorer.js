@@ -305,10 +305,10 @@ $.when($,
             });
 
             $.get(molgenis.getContextUrl() + '/packageHref?entity=' + state.entity).done(function (data) {
-                if (data.href !== undefined) {
+                console.log(data.join(" / "));
+                if (data.length > 0) {
                     $("#entity-package-path").removeClass('hidden');
-                    $("#entity-package-path").prop("href", data.href);
-                    $("#entity-package-path").html('(<span class="glyphicon glyphicon-home" aria-hidden="true"></span> / ' + data.fullLabel + ')');
+                    $("#entity-package-path").html(data.join(" / "));
                 } else {
                     $("#entity-package-path").addClass('hidden');
                 }
