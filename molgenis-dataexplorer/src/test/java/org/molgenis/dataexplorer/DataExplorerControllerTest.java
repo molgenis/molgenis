@@ -256,7 +256,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		LinkedList<String> expected = new LinkedList();
 		expected.add(
-				"<a href='menu/main/navigation/navigator/'><span class='glyphicon glyphicon-home' aria-hidden='true'></span></a>");
+				"<a href='menu/main/navigation/navigator/'><span class='glyphicon glyphicon-home' aria-hidden='true'></span> </a>");
 		expected.add("<a href='menu/main/navigation/navigator/parentId'>parent</a>");
 		expected.add("<a href='menu/main/navigation/navigator/packId'>pack</a>");
 		assertEquals(controller.getPackageLink(entityTypeId), expected);
