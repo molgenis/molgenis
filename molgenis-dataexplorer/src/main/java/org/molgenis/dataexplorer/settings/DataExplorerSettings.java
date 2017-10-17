@@ -136,6 +136,23 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 											  .setDefaultValue(String.valueOf(DEFAULT_SHOW_PACKAGE_HREF))
 											  .setLabel(
 													  "Show a link to the navigator for the package of the selected entity");
+			addAttribute("Satan").setDataType(BOOL)
+								 .setNillable(true)
+								 .setDefaultValue(String.valueOf(DEFAULT_SHOW_PACKAGE_HREF))
+								 .setLabel("Duivels goed");
+			addAttribute("Satannnnn").setDataType(BOOL)
+									 .setNillable(true)
+									 .setDefaultValue(String.valueOf(DEFAULT_SHOW_PACKAGE_HREF))
+									 .setLabel("Duivelsssss goed");
+			addAttribute("Loki").setDataType(BOOL)
+								.setNillable(true)
+								.setDefaultValue(String.valueOf(DEFAULT_SHOW_PACKAGE_HREF))
+								.setLabel("Not Odin");
+			addAttribute("Thor").setDataType(BOOL)
+								.setNillable(true)
+								.setDefaultValue(String.valueOf(DEFAULT_SHOW_PACKAGE_HREF))
+								.setLabel("Not Odin");
+
 		}
 
 		private void addModulesSettings()

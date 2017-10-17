@@ -325,9 +325,9 @@ public class DataExplorerController extends PluginController
 
 	@GetMapping("/packageHref")
 	@ResponseBody
-	public Map<String, String> getPackageLink(@RequestParam("entity") String entityTypeId)
+	public LinkedList<String> getPackageLink(@RequestParam("entity") String entityTypeId)
 	{
-		Map<String, String> result = new HashMap<>();
+		LinkedList<String> result = new LinkedList<>();
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 
 		if (entityType != null)
@@ -335,15 +335,17 @@ public class DataExplorerController extends PluginController
 			Package pack = entityType.getPackage();
 			if (pack != null)
 			{
-				result.put("href", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + pack.getId());
-				LinkedList<String> packages = new LinkedList<>();
 				while (pack != null)
 				{
-					packages.add(pack.getLabel());
+					String label = pack.getLabel();
+					String href = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + pack.getId();
+					result.add(String.format("<a href='%s'>%s</a>", href, label));
 					pack = pack.getParent();
 				}
-				Collections.reverse(packages);
-				result.put("fullLabel", String.join(" / ", packages));
+				result.add(String.format("<a href='%s'>%s </a>",
+						menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/",
+						"<span class='glyphicon glyphicon-home' aria-hidden='true'></span>"));
+				Collections.reverse(result);
 			}
 		}
 		return result;

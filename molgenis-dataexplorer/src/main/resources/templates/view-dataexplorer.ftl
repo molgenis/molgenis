@@ -26,8 +26,8 @@
                 <div class="col-md-7">
                     <h3 id="entity-class-name"></h3>
                 <#if showPackageHref??>
-                    <a id="entity-package-path" <#if !plugin_settings.get("show_package_href")?? || plugin_settings.get("show_package_href") == false>
-                       style="display:none"</#if>></a>
+                    <span id="entity-package-path" <#if !plugin_settings.get("show_package_href")?? || plugin_settings.get("show_package_href") == false>
+                          style="display:none"</#if>></span>
                 </#if>
                     <span id="entity-class-description"></span>
                 </div>
