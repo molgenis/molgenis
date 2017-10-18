@@ -2,8 +2,6 @@ package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
@@ -13,6 +11,8 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.security.model.UserEntity;
+import org.molgenis.data.security.model.UserFactory;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -45,8 +45,8 @@ import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.security.model.UserMetadata.USER;
 import static org.molgenis.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
@@ -59,18 +59,6 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	private final static Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
 
 	static final String ROLE_SU = "SU";
-	static final String ROLE_READ_PACKAGE = "ENTITY_READ_sys_md_Package";
-	static final String ROLE_COUNT_PACKAGE = "ENTITY_COUNT_sys_md_Package";
-	static final String ROLE_READ_ENTITY_TYPE = "ENTITY_READ_sys_md_EntityType";
-	static final String ROLE_COUNT_ENTITY_TYPE = "ENTITY_COUNT_sys_md_EntityType";
-	static final String ROLE_READ_ATTRIBUTE = "ENTITY_READ_sys_md_Attribute";
-	static final String ROLE_COUNT_ATTRIBUTE = "ENTITY_COUNT_sys_md_Attribute";
-	static final String ROLE_READ_TAG = "ENTITY_READ_sys_md_Tag";
-	static final String ROLE_COUNT_TAG = "ENTITY_COUNT_sys_md_Tag";
-	static final String ROLE_READ_OWNED = "ENTITY_READ_sys_sec_Owned";
-	static final String ROLE_COUNT_OWNED = "ENTITY_COUNT_sys_sec_Owned";
-	static final String ROLE_READ_FILE_META = "ENTITY_READ_sys_FileMeta";
-	static final String ROLE_COUNT_FILE_META = "ENTITY_COUNT_sys_FileMeta";
 
 	@Autowired
 	UserFactory userFactory;
@@ -96,7 +84,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		RunAsSystemAspect.runAsSystem(() -> dataService.add(USER, getTestUser()));
 	}
 
-	abstract User getTestUser();
+	abstract UserEntity getTestUser();
 
 	static void validateImportReport(EntityImportReport importReport, Map<String, Integer> entityTypeCountMap,
 			Set<String> addedEntityTypeIds)

@@ -1,6 +1,6 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.auth.SecurityPackage;
+import org.molgenis.data.security.model.SecurityPackage;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;

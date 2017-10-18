@@ -2,7 +2,6 @@ package org.molgenis.oneclickimporter.controller;
 
 import com.google.common.io.Resources;
 import org.mockito.Mock;
-import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.meta.model.EntityType;
@@ -10,7 +9,8 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -88,6 +88,7 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 		when(appSettings.getLanguageCode()).thenReturn("en");
 		User user = mock(User.class);
 		when(user.isSuperuser()).thenReturn(false);
+		when(user.getUsername()).thenReturn("user");
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		OneClickImportJobExecution jobExecution = mock(OneClickImportJobExecution.class);

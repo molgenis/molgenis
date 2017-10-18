@@ -3,10 +3,10 @@ package org.molgenis.integrationtest.platform.importservice;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.security.model.UserEntity;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -25,17 +25,16 @@ public class VcfImportServiceIT extends ImportServiceIT
 	private static final String USERNAME = "vcf_user";
 
 	@Override
-	User getTestUser()
+	UserEntity getTestUser()
 	{
-		User user = userFactory.create();
+		UserEntity user = userFactory.create();
 		user.setUsername(USERNAME);
 		user.setPassword("password");
 		user.setEmail("v@mail.com");
 		return user;
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportVcfWithoutSamplesAsNonSuperuser()
 	{
@@ -105,8 +104,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		assertEquals(lastRow.getString("SAS_AF"), "0.0");
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportVcfWithSamplesAsNonSuperuser()
 	{
@@ -191,8 +189,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		assertEquals(lastRowSample.getString(VcfAttributes.FORMAT_GT), "1|1");
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportVcfGzWithSamplesAsNonSuperuser()
 	{

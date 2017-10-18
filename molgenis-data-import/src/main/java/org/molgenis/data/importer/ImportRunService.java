@@ -3,7 +3,7 @@ package org.molgenis.data.importer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.user.UserService;
+import org.molgenis.security.core.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
@@ -81,7 +81,8 @@ public class ImportRunService
 		try
 		{
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(userService.getUser(importRun.getUsername()).getEmail());
+			String username = importRun.getUsername();
+			mailMessage.setTo(userService.findByUsername(username).getEmail());
 			mailMessage.setSubject(createMailTitle(importRun));
 			mailMessage.setText(createEnglishMailText(importRun, ZoneId.systemDefault()));
 			mailSender.send(mailMessage);

@@ -44,7 +44,6 @@ public class EntityTypeRepositoryDecoratorFactory
 	{
 		repository = new EntityTypeRepositoryDecorator(repository, dataService, entityTypeDependencyResolver);
 		repository = new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);
-		return new EntityTypeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService,
-				dataService);
+		return new EntityTypeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService);
 	}
 }

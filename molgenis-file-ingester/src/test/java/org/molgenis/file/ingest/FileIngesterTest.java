@@ -3,7 +3,7 @@ package org.molgenis.file.ingest;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.config.UserTestConfig;
+import org.molgenis.data.config.UserEntityTestConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -92,7 +92,7 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import({ UserTestConfig.class, FileIngestTestConfig.class })
+	@Import({ UserEntityTestConfig.class, FileIngestTestConfig.class })
 	public static class Config
 	{
 		@Autowired

@@ -1,10 +1,10 @@
 package org.molgenis.security.twofactor.auth;
 
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
-import org.molgenis.security.user.UserAccountService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.RedirectStrategy;

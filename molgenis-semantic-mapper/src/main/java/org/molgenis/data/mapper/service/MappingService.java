@@ -1,12 +1,12 @@
 package org.molgenis.data.mapper.service;
 
-import org.molgenis.auth.User;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.core.model.User;
 
 import java.util.List;
 import java.util.stream.Stream;

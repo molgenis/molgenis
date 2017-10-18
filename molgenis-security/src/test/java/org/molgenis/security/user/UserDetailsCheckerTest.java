@@ -1,5 +1,6 @@
 package org.molgenis.security.user;
 
+import org.molgenis.data.security.user.MolgenisUserDetailsChecker;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.testng.annotations.Test;

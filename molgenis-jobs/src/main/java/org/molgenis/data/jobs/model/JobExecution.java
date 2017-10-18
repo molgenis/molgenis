@@ -1,7 +1,6 @@
 package org.molgenis.data.jobs.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -66,11 +65,6 @@ public class JobExecution extends StaticEntity
 	public void setUser(String username)
 	{
 		set(USER, username);
-	}
-
-	public void setUser(User value)
-	{
-		set(USER, value.getUsername());
 	}
 
 	public Status getStatus()

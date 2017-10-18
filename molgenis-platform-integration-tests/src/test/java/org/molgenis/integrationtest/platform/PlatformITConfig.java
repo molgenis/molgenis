@@ -19,6 +19,7 @@ import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
+import org.molgenis.data.security.DataSecurityConfig;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
 import org.molgenis.data.settings.AppSettings;
@@ -27,8 +28,6 @@ import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
-import org.molgenis.security.MolgenisRoleHierarchy;
-import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PermissionServiceImpl;
@@ -72,11 +71,11 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
  in org.molgenis.data and subpackages from included modules
   */
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
-		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.data.platform",
+		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.data.platform",
 		"org.molgenis.data.meta.model", "org.molgenis.data.meta.util", "org.molgenis.data.system.model",
 		"org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
-		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
-		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
+		"org.molgenis.security.owned", "org.molgenis.data.validation", "org.molgenis.data.transaction",
+		"org.molgenis.data.importer.emx",
 		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
 @Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class,
 		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class,
@@ -89,9 +88,9 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class, PrincipalSecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class, SecurityContextRegistryImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
+		PermissionServiceImpl.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
-		SystemEntityTypeRegistryImpl.class, })
+		SystemEntityTypeRegistryImpl.class, DataSecurityConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
@@ -167,7 +166,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public PasswordEncoder passwordEncoder()
 	{
-		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
+		return new BCryptPasswordEncoder();
 	}
 
 	// FIXME The bootstrapping of the data platform should be delegated to a specific bootstrapper so that updates

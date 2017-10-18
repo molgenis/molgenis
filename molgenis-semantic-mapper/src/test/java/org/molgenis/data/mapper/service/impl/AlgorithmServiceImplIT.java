@@ -3,13 +3,10 @@ package org.molgenis.data.mapper.service.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Sets;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -34,10 +31,10 @@ import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.security.core.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -91,9 +88,6 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private AlgorithmTemplateService algorithmTemplateService;
-
-	@Autowired
-	private UserFactory userFactory;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -332,14 +326,15 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("height");
 		sourceEntityType.addAttribute(sourceAttribute);
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
+		User owner = User.builder()
+						 .username("flup")
+						 .password("geheim")
+						 .id("12345")
+						 .active(true)
+						 .email("flup@blah.com")
+						 .firstName("Flup")
+						 .lastName("de Flap")
+						 .build();
 
 		MappingProject project = new MappingProject("project", owner);
 		project.addTarget(targetEntityType);
@@ -375,14 +370,15 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("weight");
 		sourceEntityType.addAttribute(sourceAttribute);
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
+		User owner = User.builder()
+						 .username("flup")
+						 .password("geheim")
+						 .id("12345")
+						 .active(true)
+						 .email("flup@blah.com")
+						 .firstName("Flup")
+						 .lastName("de Flap")
+						 .build();
 
 		MappingProject project = new MappingProject("project", owner);
 		project.addTarget(targetEntityType);
@@ -416,14 +412,15 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		sourceEntityType.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
+		User owner = User.builder()
+						 .username("flup")
+						 .password("geheim")
+						 .id("12345")
+						 .active(true)
+						 .email("flup@blah.com")
+						 .firstName("Flup")
+						 .lastName("de Flap")
+						 .build();
 
 		MappingProject project = new MappingProject("project", owner);
 		project.addTarget(targetEntityType);
@@ -447,7 +444,6 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import(UserTestConfig.class)
 	public static class Config
 	{
 		@Autowired

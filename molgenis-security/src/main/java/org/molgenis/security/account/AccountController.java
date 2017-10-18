@@ -1,22 +1,21 @@
 package org.molgenis.security.account;
 
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
+import org.molgenis.security.core.service.UserAccountService;
+import org.molgenis.security.core.service.exception.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.exception.MolgenisUserException;
+import org.molgenis.security.core.service.exception.UsernameAlreadyExistsException;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,7 +36,7 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.URI;
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+import static org.molgenis.security.core.service.UserAccountService.MIN_PASSWORD_LENGTH;
 
 @Controller
 @RequestMapping(URI)
@@ -52,20 +51,21 @@ public class AccountController
 	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been sent to your email.";
 	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
 
+	private final UserAccountService userAccountService;
 	private final AccountService accountService;
 	private final CaptchaService captchaService;
 	private final RedirectStrategy redirectStrategy;
 	private final AuthenticationSettings authenticationSettings;
-	private final UserFactory userFactory;
 
-	public AccountController(AccountService accountService, CaptchaService captchaService,
-			RedirectStrategy redirectStrategy, AuthenticationSettings authenticationSettings, UserFactory userFactory)
+	public AccountController(UserAccountService userAccountService, AccountService accountService,
+			CaptchaService captchaService, RedirectStrategy redirectStrategy,
+			AuthenticationSettings authenticationSettings)
 	{
+		this.userAccountService = requireNonNull(userAccountService);
 		this.accountService = requireNonNull(accountService);
 		this.captchaService = requireNonNull(captchaService);
 		this.redirectStrategy = requireNonNull(redirectStrategy);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
-		this.userFactory = requireNonNull(userFactory);
 	}
 
 	@GetMapping("/login")
@@ -103,12 +103,8 @@ public class AccountController
 	{
 		try
 		{
-			// Change password of current user
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			if (authentication != null)
-			{
-				accountService.changePassword(authentication.getName(), form.getPassword1());
-			}
+			String username = userAccountService.getCurrentUser().getUsername();
+			accountService.changePassword(username, form.getPassword1());
 
 			// Redirect to homepage
 			redirectStrategy.sendRedirect(request, response, "/");
@@ -135,7 +131,6 @@ public class AccountController
 			{
 				throw new CaptchaException("invalid captcha answer");
 			}
-			User user = toUser(registerRequest);
 			String activationUri = null;
 			if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
 			{
@@ -150,7 +145,7 @@ public class AccountController
 				if (scheme == null) scheme = request.getScheme();
 				activationUri = scheme + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
 			}
-			accountService.createUser(user, activationUri);
+			accountService.register(registerRequest, activationUri);
 
 			String successMessage = authenticationSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
 			captchaService.removeCaptcha();
@@ -191,13 +186,13 @@ public class AccountController
 
 	@ExceptionHandler(MolgenisDataAccessException.class)
 	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-	private void handleMolgenisDataAccessException(MolgenisDataAccessException e)
+	public void handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
 	}
 
 	@ExceptionHandler(CaptchaException.class)
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	private void handleCaptchaException(CaptchaException e)
+	public void handleCaptchaException(CaptchaException e)
 	{
 	}
 
@@ -205,6 +200,15 @@ public class AccountController
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
+	{
+		LOG.debug("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleIllegalArgumentException(IllegalArgumentException e)
 	{
 		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
@@ -244,26 +248,5 @@ public class AccountController
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	private User toUser(RegisterRequest request)
-	{
-		User user = userFactory.create();
-		user.setUsername(request.getUsername());
-		user.setPassword(request.getPassword());
-		user.setEmail(request.getEmail());
-		user.setPhone(request.getPhone());
-		user.setFax(request.getFax());
-		user.setTollFreePhone(request.getTollFreePhone());
-		user.setAddress(request.getAddress());
-		user.setTitle(request.getTitle());
-		user.setLastName(request.getLastname());
-		user.setFirstName(request.getFirstname());
-		user.setDepartment(request.getDepartment());
-		user.setCity(request.getCity());
-		user.setCountry(CountryCodes.get(request.getCountry()));
-		user.setChangePassword(false);
-		user.setSuperuser(false);
-		return user;
 	}
 }

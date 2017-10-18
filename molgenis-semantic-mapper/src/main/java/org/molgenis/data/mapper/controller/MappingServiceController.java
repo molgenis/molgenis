@@ -1,8 +1,10 @@
 package org.molgenis.data.mapper.controller;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.importer.wizard.ImportWizardController;
@@ -28,9 +30,11 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.security.user.UserAccountService;
-import org.molgenis.security.user.UserService;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -83,9 +87,6 @@ public class MappingServiceController extends PluginController
 	private static final String VIEW_ATTRIBUTE_MAPPING_FEEDBACK = "view-attribute-mapping-feedback";
 
 	@Autowired
-	private UserService userService;
-
-	@Autowired
 	private MappingService mappingService;
 
 	@Autowired
@@ -115,6 +116,9 @@ public class MappingServiceController extends PluginController
 	@Autowired
 	private JobsController jobsController;
 
+	@Autowired
+	private PermissionService permissionService;
+
 	public MappingServiceController()
 	{
 		super(URI);
@@ -131,7 +135,7 @@ public class MappingServiceController extends PluginController
 	{
 		model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
 		model.addAttribute("entityTypes", getWritableEntityTypes());
-		model.addAttribute("user", getCurrentUsername());
+		model.addAttribute("user", userAccountService.getCurrentUser().getUsername());
 		model.addAttribute("admin", currentUserIsSu());
 		model.addAttribute("importerUri", menuReaderService.getMenu().findMenuItemPath(ImportWizardController.ID));
 		return VIEW_MAPPING_PROJECTS;
@@ -149,7 +153,8 @@ public class MappingServiceController extends PluginController
 			@RequestParam("target-entity") String targetEntity)
 	{
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
-		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + newMappingProject.getIdentifier();
+		return String.format("redirect:%s/mappingproject/%s", getMappingServiceMenuUrl(),
+				newMappingProject.getIdentifier());
 	}
 
 	/**
@@ -167,7 +172,7 @@ public class MappingServiceController extends PluginController
 			LOG.info("Deleting mappingProject " + project.getName());
 			mappingService.deleteMappingProject(mappingProjectId);
 		}
-		return "redirect:" + getMappingServiceMenuUrl();
+		return String.format("redirect:%s", getMappingServiceMenuUrl());
 	}
 
 	/**
@@ -188,7 +193,7 @@ public class MappingServiceController extends PluginController
 			project.getMappingTarget(target).getMappingForSource(source).deleteAttributeMapping(attribute);
 			mappingService.updateMappingProject(project);
 		}
-		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + project.getIdentifier();
+		return String.format("redirect:%s/mappingproject/%s", getMappingServiceMenuUrl(), project.getIdentifier());
 	}
 
 	/**
@@ -216,7 +221,7 @@ public class MappingServiceController extends PluginController
 			autoGenerateAlgorithms(mapping, sourceEntityType, targetEntityType, attributes, project);
 		}
 
-		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
+		return String.format("redirect:%s/mappingproject/%s", getMappingServiceMenuUrl(), mappingProjectId);
 	}
 
 	/**
@@ -236,7 +241,7 @@ public class MappingServiceController extends PluginController
 			project.getMappingTarget(target).removeSource(source);
 			mappingService.updateMappingProject(project);
 		}
-		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
+		return String.format("redirect:%s/mappingproject/%s", getMappingServiceMenuUrl(), mappingProjectId);
 	}
 
 	@PostMapping("/validateAttrMapping")
@@ -263,7 +268,8 @@ public class MappingServiceController extends PluginController
 		Iterable<Entity> sourceEntities = () -> dataService.findAll(sourceEntityName, query).iterator();
 
 		long total = dataService.count(sourceEntityName, new QueryImpl<>());
-		long nrSuccess = 0, nrErrors = 0;
+		long nrSuccess = 0;
+		long nrErrors = 0;
 
 		Map<String, String> errorMessages = new LinkedHashMap<>();
 		for (AlgorithmEvaluation evaluation : algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities))
@@ -359,7 +365,8 @@ public class MappingServiceController extends PluginController
 			}
 			mappingService.updateMappingProject(mappingProject);
 		}
-		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProject.getIdentifier();
+		return String.format("redirect:%s/mappingproject/%s", getMappingServiceMenuUrl(),
+				mappingProject.getIdentifier());
 	}
 
 	/**
@@ -516,10 +523,8 @@ public class MappingServiceController extends PluginController
 																   .map(sourceEntityType::getAttribute)
 																   .collect(Collectors.toList());
 
-		String generateAlgorithm = algorithmService.generateAlgorithm(targetAttribute, targetEntityType,
+		return algorithmService.generateAlgorithm(targetAttribute, targetEntityType,
 				sourceAttributes, sourceEntityType);
-
-		return generateAlgorithm;
 	}
 
 	/**
@@ -621,7 +626,7 @@ public class MappingServiceController extends PluginController
 			Boolean addSourceAttribute, String packageId, String label)
 	{
 		MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
-		mappingJobExecution.setUser(userAccountService.getCurrentUser());
+		mappingJobExecution.setUser(getCurrentUser().getUsername());
 		mappingJobExecution.setMappingProjectId(mappingProjectId);
 		mappingJobExecution.setTargetEntityTypeId(targetEntityTypeId);
 		mappingJobExecution.setAddSourceAttribute(addSourceAttribute);
@@ -724,9 +729,7 @@ public class MappingServiceController extends PluginController
 		model.addAttribute("source", source);
 		model.addAttribute("targetAttribute", dataService.getEntityType(target).getAttribute(targetAttribute));
 
-		FluentIterable<Entity> sourceEntities = FluentIterable.from(() -> dataService.findAll(source).iterator())
-															  .limit(10);
-		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(sourceEntity ->
+		List<AlgorithmResult> algorithmResults = dataService.findAll(source).limit(10).map(sourceEntity ->
 		{
 			try
 			{
@@ -738,7 +741,7 @@ public class MappingServiceController extends PluginController
 			{
 				return AlgorithmResult.createFailure(e, sourceEntity);
 			}
-		}).toList();
+		}).collect(Collectors.toList());
 		model.addAttribute("feedbackRows", algorithmResults);
 
 		long missing = algorithmResults.stream().filter(r -> r.isSuccess() && r.getValue() == null).count();
@@ -990,8 +993,7 @@ public class MappingServiceController extends PluginController
 
 	private boolean hasWritePermission(MappingProject project, boolean logInfractions)
 	{
-		boolean result = currentUserIsSu() || project.getOwner().getUsername().equals(getCurrentUsername());
-
+		boolean result = permissionService.hasPermissionOnMappingProject(project.getIdentifier(), Permission.WRITE);
 		if (logInfractions && !result)
 		{
 			LOG.warn("User " + getCurrentUsername() + " illegally tried to modify mapping project with id "
@@ -1002,7 +1004,7 @@ public class MappingServiceController extends PluginController
 
 	private User getCurrentUser()
 	{
-		return userService.getUser(getCurrentUsername());
+		return userAccountService.getCurrentUser();
 	}
 
 	private Map<String, List<OntologyTerm>> getTagsForAttribute(String target, MappingProject project)

@@ -1,20 +1,42 @@
 package org.molgenis.security.account;
 
-import org.molgenis.auth.User;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.exception.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.exception.UsernameAlreadyExistsException;
 
+/**
+ * User account management.
+ */
 public interface AccountService
 {
-	String ALL_USER_GROUP = "All Users";
-
-	void createUser(User user, String baseActivationUri)
+	/**
+	 * Registers a new {@link org.molgenis.security.core.model.User} and sends activation email to the relevant addresses.
+	 *
+	 * @param registerRequest   {@link RegisterRequest} for the new user
+	 * @param baseActivationUri URI where the user can be activated
+	 * @return the registered User
+	 * @throws UsernameAlreadyExistsException if the username is already taken
+	 * @throws EmailAlreadyExistsException    if the email address is already taken
+	 */
+	User register(RegisterRequest registerRequest, String baseActivationUri)
 			throws UsernameAlreadyExistsException, EmailAlreadyExistsException;
 
 	/**
-	 * Activate a registered user
+	 * Activates an inactive user
 	 */
 	void activateUser(String activationCode);
 
+	/**
+	 * Changes a {@link User}'s password.
+	 * @param username username of the user
+	 * @param newPassword new password
+	 */
 	void changePassword(String username, String newPassword);
 
-	void resetPassword(String userEmail);
+	/**
+	 * Resets a user's password and sends the new password to their email address.
+	 *
+	 * @param email email address of the user
+	 */
+	void resetPassword(String email);
 }

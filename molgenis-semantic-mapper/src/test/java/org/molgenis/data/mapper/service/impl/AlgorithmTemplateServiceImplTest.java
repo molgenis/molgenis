@@ -15,7 +15,7 @@ import org.molgenis.file.FileStore;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.*;
 import org.molgenis.script.config.ScriptTestConfig;
-import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

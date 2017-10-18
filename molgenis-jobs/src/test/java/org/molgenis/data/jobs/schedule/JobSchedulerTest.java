@@ -1,7 +1,7 @@
 package org.molgenis.data.jobs.schedule;
 
 import org.mockito.Mock;
-import org.molgenis.auth.SecurityPackage;
+import org.molgenis.data.security.model.SecurityPackage;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;

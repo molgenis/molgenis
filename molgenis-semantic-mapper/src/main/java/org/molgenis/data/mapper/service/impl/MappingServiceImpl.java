@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import org.molgenis.auth.User;
 import org.molgenis.data.*;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -17,6 +16,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;

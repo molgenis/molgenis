@@ -1,73 +1,318 @@
 package org.molgenis.data;
 
-import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoSession;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.molgenis.security.core.PermissionService;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
+import static org.mockito.quality.Strictness.STRICT_STUBS;
+import static org.molgenis.security.core.Permission.*;
+import static org.testng.Assert.*;
 
 public class RepositorySecurityDecoratorTest
 {
-	private String entityTypeId;
-	private String entityId;
+	private final static String ENTITY_TYPE_ID = "entity";
+	private final static String ENTITY_TYPE_LABEL = "Entity under test";
+	@Mock
 	private Repository<Entity> delegateRepository;
+	@Mock
+	private PermissionService permissionService;
+	@Mock
+	private EntityType entityType;
+	@Mock
+	private Iterator<Entity> entityIterator;
+	@Mock
+	private Stream<Entity> entities;
+	@Mock
+	private Stream<Object> ids;
+	@Mock
+	private Object id;
+	@Mock
+	private Entity entity;
+	@Mock
+	private Consumer<List<Entity>> consumer;
+	@Mock
+	private Fetch fetch;
+	@Mock
+	private Query<Entity> query;
+	@Mock
+	private AggregateQuery aggregateQuery;
+	@Mock
+	private AggregateResult aggregateResult;
+	@InjectMocks
 	private RepositorySecurityDecorator repositorySecurityDecorator;
+
+	private MockitoSession mockitoSession;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
-	public void setUp()
+	public void beforeMethod()
 	{
-		entityTypeId = "entity";
-		entityId = "entityID";
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(entityTypeId);
-		when(entityType.getLabel()).thenReturn(entityTypeId);
-		delegateRepository = mock(Repository.class);
-		when(delegateRepository.getName()).thenReturn(entityTypeId);
+		repositorySecurityDecorator = null;
+		mockitoSession = mockitoSession().strictness(STRICT_STUBS).initMocks(this).startMocking();
+	}
+
+	@AfterMethod
+	public void afterMethod()
+	{
+		mockitoSession.finishMocking();
+	}
+
+	@Test
+	public void iterator()
+	{
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
-		when(entityType.getId()).thenReturn("entityID");
-		repositorySecurityDecorator = new RepositorySecurityDecorator(delegateRepository);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
+		when(delegateRepository.iterator()).thenReturn(entityIterator);
+
+		assertSame(repositorySecurityDecorator.iterator(), entityIterator);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void iteratorNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.iterator();
+			fail("Should've thrown exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void count()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, COUNT)).thenReturn(true);
+		long count = 123;
+		when(delegateRepository.count()).thenReturn(count);
+
+		assertSame(repositorySecurityDecorator.count(), count);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void countNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.count();
+			fail("Should've thrown exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void countQuery()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, COUNT)).thenReturn(true);
+		long count = 123;
+		when(delegateRepository.count(query)).thenReturn(count);
+
+		assertSame(repositorySecurityDecorator.count(query), count);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void countQueryNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.count(query);
+			fail("Should've thrown exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void findOneQuery()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
+		when(delegateRepository.findOne(query)).thenReturn(entity);
+
+		assertSame(repositorySecurityDecorator.findOne(query), entity);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void findOneQueryNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.findOne(query);
+			fail("Should've thrown exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void findOneById()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
+		when(delegateRepository.findOneById(id)).thenReturn(entity);
+
+		assertSame(repositorySecurityDecorator.findOneById(id), entity);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void findOneByIdNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.findOneById(id);
+			fail("Should've thrown exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void findOneByIdAndFetch()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
+		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
+
+		assertSame(repositorySecurityDecorator.findOneById(id, fetch), entity);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void findOneByIdAndFetchNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.findOneById(id, fetch);
+			fail("Should've thrown exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void addEntity()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
+
+		repositorySecurityDecorator.add(entity);
+
+		verify(delegateRepository).add(entity);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void addEntityNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.add(entity);
+			fail("Should've thrown exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
 	}
 
 	@Test
 	public void addStream()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
+		Integer count = 123;
+		when(delegateRepository.add(entities)).thenReturn(count);
 
-		Stream<Entity> entities = Stream.empty();
-		when(delegateRepository.add(entities)).thenReturn(123);
-		assertEquals(repositorySecurityDecorator.add(entities), Integer.valueOf(123));
+		assertSame(repositorySecurityDecorator.add(entities), count);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void addStreamNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
 
-		Stream<Entity> entities = Stream.empty();
 		try
 		{
 			repositorySecurityDecorator.add(entities);
+			fail("Should've thrown exception");
 		}
 		catch (MolgenisDataAccessException e)
 		{
@@ -75,51 +320,30 @@ public class RepositorySecurityDecoratorTest
 			verifyNoMoreInteractions(delegateRepository);
 			throw e;
 		}
-	}
-
-	@Test
-	public void findAllPermission()
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Stream<Object> ids = Stream.of(0, 1);
-		Fetch fetch = new Fetch();
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		Stream<Entity> entities = Stream.of(entity0, entity1);
-		when(delegateRepository.findAll(ids, fetch)).thenReturn(Stream.of(entity0, entity1));
-		assertEquals(entities.collect(toList()), repositorySecurityDecorator.findAll(ids, fetch).collect(toList()));
-		verify(delegateRepository, times(1)).findAll(ids, fetch);
 	}
 
 	@Test
 	public void deleteStream()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
 
-		Stream<Entity> entities = Stream.empty();
 		repositorySecurityDecorator.delete(entities);
+
 		verify(delegateRepository, times(1)).delete(entities);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void deleteStreamNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Stream<Entity> entities = Stream.empty();
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
 		try
 		{
 			repositorySecurityDecorator.delete(entities);
+			fail("Should've thrown security exception");
 		}
 		catch (MolgenisDataAccessException e)
 		{
@@ -129,35 +353,189 @@ public class RepositorySecurityDecoratorTest
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void delete()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
+
+		repositorySecurityDecorator.delete(entity);
+
+		verify(delegateRepository).delete(entity);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void deleteNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.delete(entity);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void deleteById()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
+
+		repositorySecurityDecorator.deleteById(id);
+
+		verify(delegateRepository).deleteById(id);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void deleteByIdNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.deleteById(id);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void deleteAllIdStream()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
+
+		repositorySecurityDecorator.deleteAll(ids);
+
+		verify(delegateRepository).deleteAll(ids);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void deleteAllIdStreamNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.deleteAll(ids);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void deleteAll()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
+
+		repositorySecurityDecorator.deleteAll();
+
+		verify(delegateRepository).deleteAll();
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void deleteAllNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.deleteAll();
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void update()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
+
+		repositorySecurityDecorator.update(entity);
+
+		verify(delegateRepository).update(entity);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void updateNoPermission()
+	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+
+		try
+		{
+			repositorySecurityDecorator.update(entity);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw e;
+		}
+	}
+
 	@Test
 	public void updateStream()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, WRITE)).thenReturn(true);
 
-		Entity entity0 = mock(Entity.class);
-		Stream<Entity> entities = Stream.of(entity0);
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		doNothing().when(delegateRepository).update(captor.capture());
 		repositorySecurityDecorator.update(entities);
-		assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(entity0));
+
+		verify(delegateRepository).update(entities);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void updateStreamNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
 
-		Stream<Entity> entities = Stream.empty();
 		try
 		{
 			repositorySecurityDecorator.update(entities);
+			fail("Should've thrown security exception");
 		}
 		catch (MolgenisDataAccessException e)
 		{
@@ -170,201 +548,163 @@ public class RepositorySecurityDecoratorTest
 	@Test
 	public void findAllStream()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
+		when(delegateRepository.findAll(ids)).thenReturn(entities);
 
-		Object id0 = "id0";
-		Object id1 = "id1";
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = repositorySecurityDecorator.findAll(entityIds);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		assertSame(repositorySecurityDecorator.findAll(ids), entities);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void findAllStreamNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
 
-		Object id0 = "id0";
-		Object id1 = "id1";
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
-		repositorySecurityDecorator.findAll(entityIds);
+		repositorySecurityDecorator.findAll(ids);
 	}
 
 	@Test
 	public void findAllStreamFetch()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
+		when(delegateRepository.findAll(ids, fetch)).thenReturn(entities);
 
-		Fetch fetch = new Fetch();
-		Object id0 = "id0";
-		Object id1 = "id1";
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = repositorySecurityDecorator.findAll(entityIds, fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		assertSame(repositorySecurityDecorator.findAll(ids, fetch), entities);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void findAllStreamFetchNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Fetch fetch = new Fetch();
-		Object id0 = "id0";
-		Object id1 = "id1";
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
-		repositorySecurityDecorator.findAll(entityIds, fetch);
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void findAllNoPermission()
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Stream<Object> ids = Stream.of(0, 1);
-		Fetch fetch = new Fetch();
-		Stream<Entity> entities = Stream.of(mock(Entity.class), mock(Entity.class));
-		when(delegateRepository.findAll(ids, fetch)).thenReturn(entities);
-		repositorySecurityDecorator.findAll(ids, fetch);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+		try
+		{
+			repositorySecurityDecorator.findAll(ids, fetch);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataException expected)
+		{
+			verify(delegateRepository).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw expected;
+		}
 	}
 
 	@Test
 	public void findOnePermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Object id = 0;
-		Fetch fetch = new Fetch();
-		Entity entity = mock(Entity.class);
 		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
-		assertEquals(entity, delegateRepository.findOneById(id, fetch));
+		assertEquals(delegateRepository.findOneById(id, fetch), entity);
 		verify(delegateRepository, times(1)).findOneById(id, fetch);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void findOneNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Object id = 0;
-		Fetch fetch = new Fetch();
-		Entity entity = mock(Entity.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
-		repositorySecurityDecorator.findOneById(id, fetch);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
+		try
+		{
+			repositorySecurityDecorator.findOneById(id, fetch);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataException expected)
+		{
+			verify(delegateRepository).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw expected;
+		}
 	}
 
 	@Test
-	public void findAllAsStreamPermission()
+	public void findAllQueryPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
+		when(delegateRepository.findAll(query)).thenReturn(entities);
 
-		Entity entity0 = mock(Entity.class);
-		@SuppressWarnings("unchecked")
-		Query<Entity> query = mock(Query.class);
-		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
-		assertEquals(entities.collect(Collectors.toList()), singletonList(entity0));
+		assertSame(repositorySecurityDecorator.findAll(query), entities);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void findAllAsStreamNoPermission()
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
+	public void findAllQueryNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
 
-		Entity entity0 = mock(Entity.class);
-		@SuppressWarnings("unchecked")
-		Query<Entity> query = mock(Query.class);
-		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
-		assertEquals(entities.collect(Collectors.toList()), singletonList(entity0));
+		try
+		{
+			repositorySecurityDecorator.findAll(query);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataException expected)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw expected;
+		}
 	}
 
 	@Test
 	public void streamFetch()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, READ)).thenReturn(true);
 
-		Fetch fetch = new Fetch();
-		@SuppressWarnings("unchecked")
-		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
 
 		verify(delegateRepository).forEachBatched(fetch, consumer, 1000);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void streamFetchNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
 
-		Fetch fetch = new Fetch();
-		@SuppressWarnings("unchecked")
-		Consumer<List<Entity>> consumer = mock(Consumer.class);
-		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
-
-		verifyZeroInteractions(delegateRepository);
+		try
+		{
+			repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
+			fail("Should've thrown security exception");
+		}
+		catch (MolgenisDataException expected)
+		{
+			verify(delegateRepository, times(1)).getEntityType();
+			verifyNoMoreInteractions(delegateRepository);
+			throw expected;
+		}
 	}
 
 	@Test
 	public void aggregate()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_COUNT_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
-		AggregateResult aggregateResult = mock(AggregateResult.class);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, COUNT)).thenReturn(true);
 		when(repositorySecurityDecorator.aggregate(aggregateQuery)).thenReturn(aggregateResult);
-		assertEquals(aggregateResult, repositorySecurityDecorator.aggregate(aggregateQuery));
+
+		assertEquals(repositorySecurityDecorator.aggregate(aggregateQuery), aggregateResult);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[entity\\] with id \\[entityID\\]")
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[Entity under test\\] with id \\[entity\\]")
 	public void aggregateNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
+		when(entityType.getId()).thenReturn(ENTITY_TYPE_ID);
+		when(permissionService.hasPermissionOnEntityType(ENTITY_TYPE_ID, COUNT)).thenReturn(false);
+		when(entityType.getLabel()).thenReturn(ENTITY_TYPE_LABEL);
 
-		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		repositorySecurityDecorator.aggregate(aggregateQuery);
 	}
 }
