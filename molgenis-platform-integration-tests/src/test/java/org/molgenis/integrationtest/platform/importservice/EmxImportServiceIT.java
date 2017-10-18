@@ -31,8 +31,7 @@ import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 public class EmxImportServiceIT extends ImportServiceIT
 {
@@ -236,9 +235,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE,
-			ROLE_READ_TAG, ROLE_READ_OWNED, ROLE_READ_FILE_META, ROLE_COUNT_FILE_META, ROLE_COUNT_OWNED,
-			ROLE_COUNT_TAG })
+			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_TAG, ROLE_READ_OWNED,
+			ROLE_READ_FILE_META, ROLE_COUNT_FILE_META, ROLE_COUNT_OWNED, ROLE_COUNT_TAG })
 	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
@@ -285,9 +283,14 @@ public class EmxImportServiceIT extends ImportServiceIT
 	private void verifyItEmxAddUpdate()
 	{
 		List<Entity> importedEntities = findAllAsList("it_emx_addupdate_TestAddUpdate");
-		assertEquals(entityToMap(importedEntities.get(0)), testAddUpdateFirstRow);
-		assertEquals(entityToMap(importedEntities.get(1)), testAddUpdateSecondRow);
-		assertEquals(entityToMap(getLast(importedEntities)), testAddUpdateLastRow);
+
+		Set<Map<String, Object>> importedEntityValuesSet = importedEntities.stream()
+																		   .map(ImportServiceIT::entityToMap)
+																		   .collect(Collectors.toSet());
+
+		List<Map<String, Object>> someExpectedEntityValues = asList(testAddUpdateFirstRow, testAddUpdateSecondRow,
+				testAddUpdateLastRow);
+		assertTrue(importedEntityValuesSet.containsAll(someExpectedEntityValues));
 	}
 
 	private void verifyItEmxAttrToAbstract()
