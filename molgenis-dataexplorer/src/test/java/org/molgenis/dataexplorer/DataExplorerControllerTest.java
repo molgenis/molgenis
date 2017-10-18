@@ -15,6 +15,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.dataexplorer.controller.Href;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -254,11 +255,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	{
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn("menu/main/navigation/navigator");
 		when(menuReaderService.getMenu()).thenReturn(menu);
-		LinkedList<String> expected = new LinkedList();
-		expected.add(
-				"<a href='menu/main/navigation/navigator/'><span class='glyphicon glyphicon-home' aria-hidden='true'></span> </a>");
-		expected.add("<a href='menu/main/navigation/navigator/parentId'>parent</a>");
-		expected.add("<a href='menu/main/navigation/navigator/packId'>pack</a>");
+		LinkedList<Href> expected = new LinkedList();
+		expected.add(Href.create("menu/main/navigation/navigator/", "glyphicon-home"));
+		expected.add(Href.create("menu/main/navigation/navigator/parentId", "parent"));
+		expected.add(Href.create("menu/main/navigation/navigator/packId", "pack"));
 		assertEquals(controller.getPackageLink(entityTypeId), expected);
 	}
 }

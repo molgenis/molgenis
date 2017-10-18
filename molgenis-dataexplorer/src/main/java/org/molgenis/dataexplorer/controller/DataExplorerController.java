@@ -325,30 +325,30 @@ public class DataExplorerController extends PluginController
 
 	@GetMapping("/packageHref")
 	@ResponseBody
-	public LinkedList<String> getPackageLink(@RequestParam("entity") String entityTypeId)
+	public LinkedList<Href> getPackageLink(@RequestParam("entity") String entityTypeId)
 	{
-		LinkedList<String> result = new LinkedList<>();
+		LinkedList<Href> result = new LinkedList<>();
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 
 		if (entityType != null)
 		{
 			Package pack = entityType.getPackage();
-			if (pack != null)
-			{
-				while (pack != null)
-				{
-					String label = pack.getLabel();
-					String href = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + pack.getId();
-					result.add(String.format("<a href='%s'>%s</a>", href, label));
-					pack = pack.getParent();
-				}
-				result.add(String.format("<a href='%s'>%s </a>",
-						menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/",
-						"<span class='glyphicon glyphicon-home' aria-hidden='true'></span>"));
-				Collections.reverse(result);
-			}
+			getPackageHrefs(result, pack);
+
+			//add root navigator link
+			result.add(Href.create(menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/", "glyphicon-home"));
+			Collections.reverse(result);
 		}
 		return result;
+	}
+
+	private void getPackageHrefs(LinkedList<Href> result, Package pack)
+	{
+		String label = pack.getLabel();
+		String href = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + pack.getId();
+		result.add(Href.create(href, label));
+		pack = pack.getParent();
+		if (pack != null) getPackageHrefs(result, pack);
 	}
 
 	/**
