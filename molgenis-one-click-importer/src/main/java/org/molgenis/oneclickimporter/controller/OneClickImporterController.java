@@ -11,7 +11,7 @@ import org.molgenis.navigator.NavigatorController;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -28,7 +28,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -71,7 +70,7 @@ public class OneClickImporterController extends VuePluginController
 		fileStore.store(multipartFile.getInputStream(), filename);
 
 		OneClickImportJobExecution jobExecution = oneClickImportJobExecutionFactory.create();
-		jobExecution.setUser(getCurrentUsername());
+		jobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		jobExecution.setFile(filename);
 		jobExecutor.submit(jobExecution);
 

@@ -5,6 +5,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import java.time.Instant;
+import java.util.Optional;
+
+import static java.time.Instant.now;
 
 public class UserSecret extends StaticEntity
 {
@@ -74,4 +77,16 @@ public class UserSecret extends StaticEntity
 		set(UserSecretMetaData.FAILED_LOGIN_ATTEMPTS, failedLoginAttempts);
 	}
 
+	public void incrementFailedLoginAttempts()
+	{
+		setFailedLoginAttempts(getFailedLoginAttempts() + 1);
+	}
+
+	public boolean hasRecentFailedLoginAttempt(int blockedUserInterval)
+	{
+		return Optional.ofNullable(getLastFailedAuthentication())
+					   .map(lastFailure -> lastFailure.plusSeconds(blockedUserInterval))
+					   .filter(now()::isBefore)
+					   .isPresent();
+	}
 }

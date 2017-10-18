@@ -4,12 +4,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
-import org.molgenis.auth.*;
-import org.molgenis.data.DataService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.UserService;
+import org.molgenis.security.core.service.UsernameAlreadyExistsException;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -17,7 +19,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -27,18 +28,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.GroupMetaData.NAME;
-import static org.molgenis.auth.UserMetaData.*;
-import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -52,27 +47,22 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private static final String PROFILE_KEY_FAMILY_NAME = "family_name";
 
 	private final GooglePublicKeysManager googlePublicKeysManager;
-	private final DataService dataService;
-	private final UserDetailsService userDetailsService;
+	private final UserDetailsServiceImpl userDetailsService;
 	private final AuthenticationSettings authenticationSettings;
-	private final UserFactory userFactory;
-	private final GroupMemberFactory groupMemberFactory;
+	private final UserService userService;
 
 	public GoogleAuthenticationProcessingFilter(GooglePublicKeysManager googlePublicKeysManager,
-			DataService dataService, UserDetailsService userDetailsService,
-			AuthenticationSettings authenticationSettings, UserFactory userFactory,
-			GroupMemberFactory groupMemberFactory)
+			UserDetailsServiceImpl userDetailsService, AuthenticationSettings authenticationSettings,
+			UserService userService)
 	{
 		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
-		this.userFactory = requireNonNull(userFactory);
-		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 
 		setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
 
 		this.googlePublicKeysManager = requireNonNull(googlePublicKeysManager);
-		this.dataService = requireNonNull(dataService);
 		this.userDetailsService = requireNonNull(userDetailsService);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
+		this.userService = requireNonNull(userService);
 	}
 
 	@Override
@@ -109,7 +99,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 				throw new BadCredentialsException(format("Token [%s] verification failed", idTokenString));
 			}
 		}
-		throw new UnknownTokenException(idTokenString);
+		throw new UnknownTokenException(PARAM_ID_TOKEN + " parameter not present in request.");
 	}
 
 	private GoogleIdToken verify(String idTokenString) throws GeneralSecurityException, IOException
@@ -134,46 +124,22 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 			throw new AuthenticationServiceException("Google account email is not verified");
 		}
 		String principal = payload.getSubject();
-		String credentials = payload.getAccessTokenHash();
 
 		return runAsSystem(() ->
 		{
-			User user;
-
-			user = dataService.query(USER, User.class).eq(GOOGLEACCOUNTID, principal).findOne();
-			if (user == null)
-			{
-				// no user with google account
-				user = dataService.query(USER, User.class).eq(EMAIL, email).findOne();
-				if (user != null)
-				{
-					// connect google account to user
-					user.setGoogleAccountId(principal);
-					dataService.update(USER, user);
-				}
-				else
-				{
-					// create new user
-					String username = email;
-					String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME) ? payload.get(PROFILE_KEY_GIVEN_NAME)
-																							.toString() : null;
-					String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME) ? payload.get(
-							PROFILE_KEY_FAMILY_NAME).toString() : null;
-					user = createMolgenisUser(username, email, givenName, familyName, principal);
-				}
-			}
+			User user = userService.findByGoogleAccountIdIfPresent(principal)
+								   .orElseGet(() -> userService.connectExistingUser(email, principal).orElseGet(
+										   () -> createNewUser(payload, email, principal)));
 			if (!user.isActive())
 			{
 				throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
 			}
-			// create authentication
-			Collection<? extends GrantedAuthority> authorities = userDetailsService.getAuthorities(user);
-			return new UsernamePasswordAuthenticationToken(user.getUsername(), credentials, authorities);
+			return new UsernamePasswordAuthenticationToken(user.getUsername(), payload.getAccessTokenHash(),
+					userDetailsService.getAuthorities(user));
 		});
 	}
 
-	private User createMolgenisUser(String username, String email, String givenName, String familyName,
-			String googleAccountId)
+	private User createNewUser(Payload payload, String email, String principal)
 	{
 		if (!authenticationSettings.getSignUp())
 		{
@@ -184,34 +150,31 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		{
 			throw new AuthenticationServiceException("Google authentication not possible: sign up moderation enabled");
 		}
-
-		// create user
-		LOG.info("first login for [{}], creating MOLGENIS user", username);
-		User user = userFactory.create();
-		user.setUsername(username);
-		user.setPassword(UUID.randomUUID().toString());
-		user.setEmail(email);
-		user.setActive(true);
-		user.setSuperuser(false);
-		user.setChangePassword(false);
-		if (givenName != null)
+		User.Builder builder = User.builder()
+								   .username(email)
+								   .password(UUID.randomUUID().toString())
+								   .email(email)
+								   .active(true)
+								   .superuser(false)
+								   .changePassword(false)
+								   .googleAccountId(principal);
+		if (payload.containsKey(PROFILE_KEY_GIVEN_NAME))
 		{
-			user.setFirstName(givenName);
+			builder.firstName(payload.get(PROFILE_KEY_GIVEN_NAME).toString());
 		}
-		if (familyName != null)
+		if (payload.containsKey(PROFILE_KEY_FAMILY_NAME))
 		{
-			user.setLastName(familyName);
+			builder.lastName(payload.get(PROFILE_KEY_FAMILY_NAME).toString());
 		}
-		user.setGoogleAccountId(googleAccountId);
-		dataService.add(USER, user);
-
-		// add user to all-users group
-		GroupMember groupMember = groupMemberFactory.create();
-		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
-		groupMember.setGroup(group);
-		groupMember.setUser(user);
-		dataService.add(GROUP_MEMBER, groupMember);
-
-		return user;
+		LOG.info("first login for [{}], creating MOLGENIS user", email);
+		try
+		{
+			return userService.add(builder.build());
+		}
+		catch (UsernameAlreadyExistsException | EmailAlreadyExistsException e)
+		{
+			throw new AuthenticationServiceException("User already registered", e);
+		}
 	}
+
 }

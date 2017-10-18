@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.molgenis.catalogue.CatalogueController.URI;
-import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Controller
 @RequestMapping(URI)
@@ -40,14 +39,11 @@ public class CatalogueController extends PluginController
 		List<EntityType> emds = Lists.newArrayList();
 		dataService.getEntityTypeIds().forEach(entityTypeId ->
 		{
-			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityTypeId))
+			emds.add(dataService.getEntityType(entityTypeId));
+			if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityTypeId))
 			{
-				emds.add(dataService.getEntityType(entityTypeId));
-				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityTypeId))
-				{
-					// Hide entity dropdown
-					showEntitySelectBoolean.set(false);
-				}
+				// Hide entity dropdown
+				showEntitySelectBoolean.set(false);
 			}
 		});
 		boolean showEntitySelect = showEntitySelectBoolean.get();

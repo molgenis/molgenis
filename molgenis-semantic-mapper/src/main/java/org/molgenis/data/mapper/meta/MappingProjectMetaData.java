@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.meta;
 
-import org.molgenis.auth.UserMetaData;
+import org.molgenis.data.security.model.UserMetadata;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +23,10 @@ public class MappingProjectMetaData extends SystemEntityType
 	public static final String MAPPING_TARGETS = "mappingtargets";
 
 	private final MapperPackage mapperPackage;
-	private final UserMetaData userMetaData;
+	private final UserMetadata userMetaData;
 	private final MappingTargetMetaData mappingTargetMetaData;
 
-	public MappingProjectMetaData(MapperPackage mapperPackage, UserMetaData userMetaData,
+	public MappingProjectMetaData(MapperPackage mapperPackage, UserMetadata userMetaData,
 			MappingTargetMetaData mappingTargetMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_MAPPER);

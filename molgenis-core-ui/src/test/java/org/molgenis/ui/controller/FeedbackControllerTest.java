@@ -1,27 +1,26 @@
 package org.molgenis.ui.controller;
 
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
-import org.molgenis.security.user.UserService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
+import org.molgenis.security.core.service.UserService;
 import org.molgenis.ui.controller.FeedbackControllerTest.Config;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -31,6 +30,7 @@ import org.testng.annotations.Test;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { Config.class, GsonConfig.class })
+@TestExecutionListeners(WithSecurityContextTestExecutionListener.class)
 public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
@@ -47,6 +48,9 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private UserAccountService userAccountService;
 
 	@Autowired
 	private MailSender mailSender;
@@ -60,9 +64,6 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private AppSettings appSettings;
 
-	@Autowired
-	private UserFactory userFactory;
-
 	private MockMvc mockMvcFeedback;
 
 	@BeforeMethod
@@ -73,20 +74,16 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 		mockMvcFeedback = MockMvcBuilders.standaloneSetup(feedbackController)
 										 .setMessageConverters(gsonHttpMessageConverter)
 										 .build();
-		Authentication authentication = new TestingAuthenticationToken("userName", null);
-		authentication.setAuthenticated(true);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
 	}
 
 	@Test
+	@WithAnonymousUser
 	public void initFeedbackAnonymous() throws Exception
 	{
-		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("anonymous", null));
-
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		when(userService.getSuEmailAddresses()).thenReturn(adminEmails);
-		verify(userService, never()).getUser("anonymous");
+		verify(userService, never()).findByUsername("anonymous");
 
 		mockMvcFeedback.perform(get(FeedbackController.URI))
 					   .andExpect(status().isOk())
@@ -98,14 +95,14 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
+	@WithMockUser
 	public void initFeedbackLoggedIn() throws Exception
 	{
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
-		User user = userFactory.create();
-		user.setFirstName("First");
-		user.setLastName("Last");
-		user.setEmail("user@blah.org");
-		when(userService.getUser("userName")).thenReturn(user);
+		User user = mock(User.class);
+		when(user.getFormattedName()).thenReturn("First Last");
+		when(user.getEmail()).thenReturn("user@blah.org");
+		when(userAccountService.getCurrentUser()).thenReturn(user);
 		when(userService.getSuEmailAddresses()).thenReturn(adminEmails);
 		mockMvcFeedback.perform(get(FeedbackController.URI))
 					   .andExpect(status().isOk())
@@ -118,8 +115,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void initFeedbackLoggedInDetailsUnknown() throws Exception
 	{
-		User user = userFactory.create();
-		when(userService.getUser("userName")).thenReturn(user);
+		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.empty());
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		when(userService.getSuEmailAddresses()).thenReturn(adminEmails);
 		mockMvcFeedback.perform(get(FeedbackController.URI))
@@ -213,19 +209,25 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import(UserTestConfig.class)
 	public static class Config
 	{
 		@Bean
 		public FeedbackController feedbackController()
 		{
-			return new FeedbackController(molgenisUserService(), appSettings(), captchaService(), mailSender());
+			return new FeedbackController(userService(), userAccountService(), appSettings(), captchaService(),
+					mailSender());
 		}
 
 		@Bean
-		public UserService molgenisUserService()
+		public UserService userService()
 		{
 			return mock(UserService.class);
+		}
+
+		@Bean
+		public UserAccountService userAccountService()
+		{
+			return mock(UserAccountService.class);
 		}
 
 		@Bean

@@ -2,9 +2,6 @@ package org.molgenis.data.rest;
 
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
-import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
@@ -12,6 +9,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -22,9 +20,11 @@ import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
+import org.molgenis.security.core.service.UserService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +51,8 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 
 @WebAppConfiguration
@@ -94,6 +96,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
+	@Autowired
+	private UserService userService;
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
@@ -102,68 +107,68 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.reset(permissionService);
 		Mockito.reset(dataService);
 		Mockito.reset(metaDataService);
-		Mockito.when(dataService.getMeta()).thenReturn(metaDataService);
+		when(dataService.getMeta()).thenReturn(metaDataService);
 
 		@SuppressWarnings("unchecked")
-		Repository<Entity> repo = Mockito.mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 
 		// test entity meta data
-		EntityType entityType = Mockito.mock(EntityType.class);
+		EntityType entityType = mock(EntityType.class);
 
-		Attribute attrId = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("id").getMock();
-		Mockito.when(attrId.getLabel()).thenReturn("id");
-		Mockito.when(attrId.getLabel(ArgumentMatchers.isNull())).thenReturn("id");
-		Mockito.when(attrId.getDataType()).thenReturn(AttributeType.STRING);
-		Mockito.when(attrId.isReadOnly()).thenReturn(true);
-		Mockito.when(attrId.isUnique()).thenReturn(true);
-		Mockito.when(attrId.isNillable()).thenReturn(false);
-		Mockito.when(attrId.isVisible()).thenReturn(false);
-		Mockito.when(attrId.getChildren()).thenReturn(emptyList());
-		Mockito.when(attrId.getEnumOptions()).thenReturn(emptyList());
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
+		when(attrId.getLabel()).thenReturn("id");
+		when(attrId.getLabel(ArgumentMatchers.isNull())).thenReturn("id");
+		when(attrId.getDataType()).thenReturn(AttributeType.STRING);
+		when(attrId.isReadOnly()).thenReturn(true);
+		when(attrId.isUnique()).thenReturn(true);
+		when(attrId.isNillable()).thenReturn(false);
+		when(attrId.isVisible()).thenReturn(false);
+		when(attrId.getChildren()).thenReturn(emptyList());
+		when(attrId.getEnumOptions()).thenReturn(emptyList());
 
-		Attribute attrName = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("name").getMock();
-		Mockito.when(attrName.getLabel()).thenReturn("name");
-		Mockito.when(attrName.getLabel(ArgumentMatchers.isNull())).thenReturn("name");
-		Mockito.when(attrName.getDataType()).thenReturn(AttributeType.STRING);
-		Mockito.when(attrName.isNillable()).thenReturn(true);
-		Mockito.when(attrName.isVisible()).thenReturn(true);
-		Mockito.when(attrName.getChildren()).thenReturn(emptyList());
-		Mockito.when(attrName.getEnumOptions()).thenReturn(emptyList());
+		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
+		when(attrName.getLabel()).thenReturn("name");
+		when(attrName.getLabel(ArgumentMatchers.isNull())).thenReturn("name");
+		when(attrName.getDataType()).thenReturn(AttributeType.STRING);
+		when(attrName.isNillable()).thenReturn(true);
+		when(attrName.isVisible()).thenReturn(true);
+		when(attrName.getChildren()).thenReturn(emptyList());
+		when(attrName.getEnumOptions()).thenReturn(emptyList());
 
-		Attribute attrEnum = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("enum").getMock();
-		Mockito.when(attrEnum.getLabel()).thenReturn("enum");
-		Mockito.when(attrEnum.getLabel(ArgumentMatchers.isNull())).thenReturn("enum");
-		Mockito.when(attrEnum.getDataType()).thenReturn(AttributeType.ENUM);
-		Mockito.when(attrEnum.getEnumOptions()).thenReturn(singletonList("enum0, enum1"));
-		Mockito.when(attrEnum.isNillable()).thenReturn(true);
-		Mockito.when(attrEnum.isVisible()).thenReturn(true);
-		Mockito.when(attrEnum.getChildren()).thenReturn(emptyList());
+		Attribute attrEnum = when(mock(Attribute.class).getName()).thenReturn("enum").getMock();
+		when(attrEnum.getLabel()).thenReturn("enum");
+		when(attrEnum.getLabel(ArgumentMatchers.isNull())).thenReturn("enum");
+		when(attrEnum.getDataType()).thenReturn(AttributeType.ENUM);
+		when(attrEnum.getEnumOptions()).thenReturn(singletonList("enum0, enum1"));
+		when(attrEnum.isNillable()).thenReturn(true);
+		when(attrEnum.isVisible()).thenReturn(true);
+		when(attrEnum.getChildren()).thenReturn(emptyList());
 
-		Attribute attrInt = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("int").getMock();
-		Mockito.when(attrInt.getLabel()).thenReturn("int");
-		Mockito.when(attrInt.getLabel(ArgumentMatchers.isNull())).thenReturn("int");
-		Mockito.when(attrInt.getDataType()).thenReturn(AttributeType.INT);
-		Mockito.when(attrInt.isNillable()).thenReturn(true);
-		Mockito.when(attrInt.isVisible()).thenReturn(true);
-		Mockito.when(attrInt.getChildren()).thenReturn(emptyList());
+		Attribute attrInt = when(mock(Attribute.class).getName()).thenReturn("int").getMock();
+		when(attrInt.getLabel()).thenReturn("int");
+		when(attrInt.getLabel(ArgumentMatchers.isNull())).thenReturn("int");
+		when(attrInt.getDataType()).thenReturn(AttributeType.INT);
+		when(attrInt.isNillable()).thenReturn(true);
+		when(attrInt.isVisible()).thenReturn(true);
+		when(attrInt.getChildren()).thenReturn(emptyList());
 
-		Mockito.when(entityType.getAttribute("id")).thenReturn(attrId);
-		Mockito.when(entityType.getAttribute("name")).thenReturn(attrName);
-		Mockito.when(entityType.getAttribute("enum")).thenReturn(attrEnum);
-		Mockito.when(entityType.getAttribute("int")).thenReturn(attrInt);
-		Mockito.when(entityType.getMappedByAttributes()).thenReturn(Stream.empty());
-		Mockito.when(entityType.getIdAttribute()).thenReturn(attrId);
+		when(entityType.getAttribute("id")).thenReturn(attrId);
+		when(entityType.getAttribute("name")).thenReturn(attrName);
+		when(entityType.getAttribute("enum")).thenReturn(attrEnum);
+		when(entityType.getAttribute("int")).thenReturn(attrInt);
+		when(entityType.getMappedByAttributes()).thenReturn(Stream.empty());
+		when(entityType.getIdAttribute()).thenReturn(attrId);
 		//TODO: This upgrades the test to mockito 2 but actually shows an error in the test
-		Mockito.when(entityType.getLookupAttributes()).thenReturn(null);
-		Mockito.when(entityType.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
-		Mockito.when(entityType.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
-		Mockito.when(entityType.getId()).thenReturn(ENTITY_NAME);
-		Mockito.when(entityType.getLabel(ArgumentMatchers.isNull())).thenReturn(null);
+		when(entityType.getLookupAttributes()).thenReturn(null);
+		when(entityType.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
+		when(entityType.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
+		when(entityType.getId()).thenReturn(ENTITY_NAME);
+		when(entityType.getLabel(ArgumentMatchers.isNull())).thenReturn(null);
 
-		Mockito.when(repo.getEntityType()).thenReturn(entityType);
-		Mockito.when(repo.getName()).thenReturn(ENTITY_NAME);
-		Mockito.when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
-		Mockito.when(entityManager.create(entityType, POPULATE)).thenReturn(new DynamicEntity(entityType));
+		when(repo.getEntityType()).thenReturn(entityType);
+		when(repo.getName()).thenReturn(ENTITY_NAME);
+		when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
+		when(entityManager.create(entityType, POPULATE)).thenReturn(new DynamicEntity(entityType));
 
 		// test entities
 		Entity entityXref = new DynamicEntity(entityType);
@@ -181,18 +186,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entity2.set("name", "Klaas");
 		entity2.set("int", 2);
 
-		Mockito.when(dataService.getEntityTypeIds()).thenReturn(Stream.of(ENTITY_NAME));
-		Mockito.when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
+		when(dataService.getEntityTypeIds()).thenReturn(Stream.of(ENTITY_NAME));
+		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 
-		Mockito.when(dataService.findOneById(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.eq(ENTITY_UNTYPED_ID),
+		when(dataService.findOneById(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.eq(ENTITY_UNTYPED_ID),
 				ArgumentMatchers.any(Fetch.class))).thenReturn(entity);
-		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(entity);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(entity);
 
 		Query<Entity> q = new QueryImpl<>().eq("name", "Piet").pageSize(10).offset(5);
-		Mockito.when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
+		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
 		Query<Entity> q2 = new QueryImpl<>().sort(new Sort().on("name", Sort.Direction.DESC)).pageSize(100).offset(0);
-		Mockito.when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
+		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
@@ -205,17 +210,16 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		String username = "henk";
 		String password = "123henk";
 
-		Authentication authentication = Mockito.mock(Authentication.class);
-		Mockito.when(authentication.isAuthenticated()).thenReturn(true);
-		Mockito.when(authentication.getName()).thenReturn(username);
-		Mockito.when(
+		Authentication authentication = mock(Authentication.class);
+		when(authentication.isAuthenticated()).thenReturn(true);
+		when(authentication.getName()).thenReturn(username);
+		when(
 				authenticationManager.authenticate(ArgumentMatchers.any(UsernamePasswordAuthenticationToken.class)))
 			   .thenReturn(authentication);
 
-		User user = Mockito.mock(User.class);
-		Mockito.when(user.isChangePassword()).thenReturn(true);
-		Mockito.when(dataService.findOne(UserMetaData.USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
-				User.class)).thenReturn(user);
+		User user = mock(User.class);
+		when(userService.findByUsername("henk")).thenReturn(user);
+		when(user.isChangePassword()).thenReturn(true);
 
 		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/login")
 											  .content(String.format("{username: '%s', password: '%s'}", username,
@@ -309,8 +313,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeWritable() throws Exception
 	{
-		Mockito.when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
-		Mockito.when(dataService.getCapabilities(ENTITY_NAME))
+		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(dataService.getCapabilities(ENTITY_NAME))
 			   .thenReturn(new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_META))
 			   .andExpect(MockMvcResultMatchers.status().isOk())
@@ -326,8 +330,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeNotWritable() throws Exception
 	{
-		Mockito.when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
-		Mockito.when(dataService.getCapabilities(ENTITY_NAME))
+		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(dataService.getCapabilities(ENTITY_NAME))
 			   .thenReturn(new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
 		mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_META))
 			   .andExpect(MockMvcResultMatchers.status().isOk())
@@ -462,17 +466,17 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
 		@SuppressWarnings("unchecked")
-		Repository<Entity> repo = Mockito.mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 
-		EntityType entityType = Mockito.mock(EntityType.class);
-		Mockito.when(entityType.getAttribute("name")).thenReturn(null);
-		Attribute idAttr = Mockito.when(Mockito.mock(Attribute.class).getDataType())
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getAttribute("name")).thenReturn(null);
+		Attribute idAttr = when(mock(Attribute.class).getDataType())
 								  .thenReturn(AttributeType.STRING)
 								  .getMock();
-		Mockito.when(entityType.getIdAttribute()).thenReturn(idAttr);
-		Mockito.when(repo.getEntityType()).thenReturn(entityType);
-		Mockito.when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
-		Mockito.when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(repo.getEntityType()).thenReturn(entityType);
+		when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
+		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID + "/name"))
 			   .andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
@@ -480,7 +484,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityAttributeUnknownEntity() throws Exception
 	{
-		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(null);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(null);
 		mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID + "/name"))
 			   .andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
@@ -491,60 +495,60 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.reset(dataService);
 
 		@SuppressWarnings("unchecked")
-		Repository<Entity> repo = Mockito.mock(Repository.class);
-		Mockito.when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
-		Mockito.when(dataService.getEntityTypeIds()).thenReturn(Stream.of(ENTITY_NAME));
+		Repository<Entity> repo = mock(Repository.class);
+		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
+		when(dataService.getEntityTypeIds()).thenReturn(Stream.of(ENTITY_NAME));
 
 		// entity meta data
-		EntityType refEntityType = Mockito.when(Mockito.mock(EntityType.class).getId())
+		EntityType refEntityType = when(mock(EntityType.class).getId())
 										  .thenReturn("refEntity")
 										  .getMock();
 
-		Attribute attrId = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("id").getMock();
-		Mockito.when(attrId.getLabel()).thenReturn("id");
-		Mockito.when(attrId.getLabel(ArgumentMatchers.anyString())).thenReturn("id");
-		Mockito.when(attrId.getDataType()).thenReturn(AttributeType.STRING);
-		Mockito.when(attrId.isReadOnly()).thenReturn(true);
-		Mockito.when(attrId.isUnique()).thenReturn(true);
-		Mockito.when(attrId.isNillable()).thenReturn(false);
-		Mockito.when(attrId.isVisible()).thenReturn(false);
-		Mockito.when(attrId.getChildren()).thenReturn(emptyList());
-		Mockito.when(attrId.getEnumOptions()).thenReturn(emptyList());
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
+		when(attrId.getLabel()).thenReturn("id");
+		when(attrId.getLabel(ArgumentMatchers.anyString())).thenReturn("id");
+		when(attrId.getDataType()).thenReturn(AttributeType.STRING);
+		when(attrId.isReadOnly()).thenReturn(true);
+		when(attrId.isUnique()).thenReturn(true);
+		when(attrId.isNillable()).thenReturn(false);
+		when(attrId.isVisible()).thenReturn(false);
+		when(attrId.getChildren()).thenReturn(emptyList());
+		when(attrId.getEnumOptions()).thenReturn(emptyList());
 
-		Attribute attrName = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("name").getMock();
-		Mockito.when(attrName.getLabel()).thenReturn("name");
-		Mockito.when(attrName.getLabel(ArgumentMatchers.anyString())).thenReturn("name");
-		Mockito.when(attrName.getDataType()).thenReturn(AttributeType.STRING);
-		Mockito.when(attrName.isNillable()).thenReturn(true);
-		Mockito.when(attrName.isVisible()).thenReturn(true);
-		Mockito.when(attrName.getChildren()).thenReturn(emptyList());
-		Mockito.when(attrName.getEnumOptions()).thenReturn(emptyList());
+		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
+		when(attrName.getLabel()).thenReturn("name");
+		when(attrName.getLabel(ArgumentMatchers.anyString())).thenReturn("name");
+		when(attrName.getDataType()).thenReturn(AttributeType.STRING);
+		when(attrName.isNillable()).thenReturn(true);
+		when(attrName.isVisible()).thenReturn(true);
+		when(attrName.getChildren()).thenReturn(emptyList());
+		when(attrName.getEnumOptions()).thenReturn(emptyList());
 
-		Mockito.when(refEntityType.getAttribute("id")).thenReturn(attrId);
-		Mockito.when(refEntityType.getAttribute("name")).thenReturn(attrName);
-		Mockito.when(refEntityType.getIdAttribute()).thenReturn(attrId);
-		Mockito.when(refEntityType.getAttributes()).thenReturn(asList(attrId, attrName));
-		Mockito.when(refEntityType.getAtomicAttributes()).thenReturn(asList(attrId, attrName));
-		Mockito.when(refEntityType.getId()).thenReturn("refEntity");
+		when(refEntityType.getAttribute("id")).thenReturn(attrId);
+		when(refEntityType.getAttribute("name")).thenReturn(attrName);
+		when(refEntityType.getIdAttribute()).thenReturn(attrId);
+		when(refEntityType.getAttributes()).thenReturn(asList(attrId, attrName));
+		when(refEntityType.getAtomicAttributes()).thenReturn(asList(attrId, attrName));
+		when(refEntityType.getId()).thenReturn("refEntity");
 
-		EntityType entityType = Mockito.when(Mockito.mock(EntityType.class).getId()).thenReturn(ENTITY_NAME).getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(ENTITY_NAME).getMock();
 
-		Attribute attrXref = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("xrefValue").getMock();
-		Mockito.when(attrXref.getLabel()).thenReturn("xrefValue");
-		Mockito.when(attrXref.getLabel(ArgumentMatchers.anyString())).thenReturn("xrefValue");
-		Mockito.when(attrXref.getDataType()).thenReturn(AttributeType.XREF);
-		Mockito.when(attrXref.isNillable()).thenReturn(true);
-		Mockito.when(attrXref.isVisible()).thenReturn(true);
-		Mockito.when(attrXref.getChildren()).thenReturn(emptyList());
-		Mockito.when(attrXref.getEnumOptions()).thenReturn(emptyList());
-		Mockito.when(attrXref.getRefEntity()).thenReturn(refEntityType);
+		Attribute attrXref = when(mock(Attribute.class).getName()).thenReturn("xrefValue").getMock();
+		when(attrXref.getLabel()).thenReturn("xrefValue");
+		when(attrXref.getLabel(ArgumentMatchers.anyString())).thenReturn("xrefValue");
+		when(attrXref.getDataType()).thenReturn(AttributeType.XREF);
+		when(attrXref.isNillable()).thenReturn(true);
+		when(attrXref.isVisible()).thenReturn(true);
+		when(attrXref.getChildren()).thenReturn(emptyList());
+		when(attrXref.getEnumOptions()).thenReturn(emptyList());
+		when(attrXref.getRefEntity()).thenReturn(refEntityType);
 
-		Mockito.when(entityType.getAttribute("id")).thenReturn(attrId);
-		Mockito.when(entityType.getAttribute("xrefValue")).thenReturn(attrXref);
-		Mockito.when(entityType.getIdAttribute()).thenReturn(attrId);
-		Mockito.when(entityType.getAttributes()).thenReturn(asList(attrId, attrXref));
-		Mockito.when(entityType.getAtomicAttributes()).thenReturn(asList(attrId, attrXref));
-		Mockito.when(entityType.getId()).thenReturn(ENTITY_NAME);
+		when(entityType.getAttribute("id")).thenReturn(attrId);
+		when(entityType.getAttribute("xrefValue")).thenReturn(attrXref);
+		when(entityType.getIdAttribute()).thenReturn(attrId);
+		when(entityType.getAttributes()).thenReturn(asList(attrId, attrXref));
+		when(entityType.getAtomicAttributes()).thenReturn(asList(attrId, attrXref));
+		when(entityType.getId()).thenReturn(ENTITY_NAME);
 
 		Entity entityXref = new DynamicEntity(refEntityType);
 		entityXref.set("id", ENTITY_UNTYPED_ID);
@@ -554,10 +558,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entity.set("id", ENTITY_UNTYPED_ID);
 		entity.set("xrefValue", entityXref);
 
-		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(entity);
-		Mockito.when(dataService.findOneById("refEntity", ENTITY_UNTYPED_ID)).thenReturn(entityXref);
-		Mockito.when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
-		Mockito.when(dataService.getEntityType("refEntity")).thenReturn(refEntityType);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(entity);
+		when(dataService.findOneById("refEntity", ENTITY_UNTYPED_ID)).thenReturn(entityXref);
+		when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
+		when(dataService.getEntityType("refEntity")).thenReturn(refEntityType);
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .build();
@@ -584,8 +588,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void updateInternalRepoNotUpdateable() throws Exception
 	{
 		@SuppressWarnings("unchecked")
-		Repository<Entity> repo = Mockito.mock(Repository.class);
-		Mockito.when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
+		Repository<Entity> repo = mock(Repository.class);
+		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		Mockito.doThrow(new MolgenisDataException())
 			   .when(dataService)
 			   .update(ArgumentMatchers.anyString(), ArgumentMatchers.any(Entity.class));
@@ -599,12 +603,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void updateInternalRepoIdAttributeIsNull() throws Exception
 	{
 		@SuppressWarnings("unchecked")
-		Repository<Entity> repo = Mockito.mock(Repository.class);
-		Mockito.when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
-		EntityType entityType = Mockito.mock(EntityType.class);
-		Mockito.when(entityType.getIdAttribute()).thenReturn(null);
-		Mockito.when(repo.getEntityType()).thenReturn(entityType);
-		Mockito.when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
+		Repository<Entity> repo = mock(Repository.class);
+		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getIdAttribute()).thenReturn(null);
+		when(repo.getEntityType()).thenReturn(entityType);
+		when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
 		mockMvc.perform(MockMvcRequestBuilders.put(HREF_ENTITY_ID)
 											  .content("{name:Klaas}")
 											  .contentType(MediaType.APPLICATION_JSON))
@@ -614,7 +618,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoExistingIsNull() throws Exception
 	{
-		Mockito.when(dataService.findOneById(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.eq(ENTITY_UNTYPED_ID),
+		when(dataService.findOneById(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.eq(ENTITY_UNTYPED_ID),
 				ArgumentMatchers.any(Fetch.class))).thenReturn(null);
 
 		mockMvc.perform(MockMvcRequestBuilders.put(HREF_ENTITY_ID)
@@ -699,7 +703,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void molgenisDataAccessException() throws Exception
 	{
-		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
 			   .thenThrow(new MolgenisDataAccessException());
 		mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID))
 			   .andExpect(MockMvcResultMatchers.status().isUnauthorized());
@@ -736,79 +740,85 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public AuthenticationSettings authenticationSettings()
 		{
-			return Mockito.mock(AuthenticationSettings.class);
+			return mock(AuthenticationSettings.class);
 		}
 
 		@Bean
 		public DataService dataService()
 		{
-			return Mockito.mock(DataService.class);
+			return mock(DataService.class);
 		}
 
 		@Bean
 		public MetaDataService metaDataService()
 		{
-			return Mockito.mock(MetaDataService.class);
+			return mock(MetaDataService.class);
 		}
 
 		@Bean
 		public TokenService tokenService()
 		{
-			return Mockito.mock(TokenService.class);
+			return mock(TokenService.class);
 		}
 
 		@Bean
 		public AuthenticationManager authenticationManager()
 		{
-			return Mockito.mock(AuthenticationManager.class);
+			return mock(AuthenticationManager.class);
 		}
 
 		@Bean
 		public PermissionService permissionService()
 		{
-			return Mockito.mock(PermissionService.class);
+			return mock(PermissionService.class);
 		}
 
 		@Bean
 		public UserAccountService userAccountService()
 		{
-			return Mockito.mock(UserAccountService.class);
+			return mock(UserAccountService.class);
 		}
 
 		@Bean
 		public IdGenerator idGenerator()
 		{
-			return Mockito.mock(IdGenerator.class);
+			return mock(IdGenerator.class);
 		}
 
 		@Bean
 		public FileStore fileStore()
 		{
-			return Mockito.mock(FileStore.class);
+			return mock(FileStore.class);
 		}
 
 		@Bean
 		public LanguageService languageService()
 		{
-			return Mockito.mock(LanguageService.class);
+			return mock(LanguageService.class);
 		}
 
 		@Bean
 		public FileMetaFactory fileMetaFactory()
 		{
-			return Mockito.mock(FileMetaFactory.class);
+			return mock(FileMetaFactory.class);
 		}
 
 		@Bean
 		public EntityManager entityManager()
 		{
-			return Mockito.mock(EntityManager.class);
+			return mock(EntityManager.class);
 		}
 
 		@Bean
 		public ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory()
 		{
-			return Mockito.mock(ServletUriComponentsBuilderFactory.class);
+			return mock(ServletUriComponentsBuilderFactory.class);
+		}
+
+		@Bean
+		public UserService userService()
+		{
+			return mock(UserService.class);
 		}
 
 		@Bean
@@ -817,7 +827,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			return new RestController(authenticationSettings(), dataService(), tokenService(), authenticationManager(),
 					permissionService(), userAccountService(), new MolgenisRSQL(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
-							servletUriComponentsBuilderFactory()), languageService());
+							servletUriComponentsBuilderFactory()), languageService(), userService());
 		}
 	}
 }

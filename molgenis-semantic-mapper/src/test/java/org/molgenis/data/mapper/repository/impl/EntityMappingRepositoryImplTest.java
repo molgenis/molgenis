@@ -25,7 +25,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.security.user.UserService;
+import org.molgenis.security.core.service.UserService;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

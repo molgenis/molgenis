@@ -2,7 +2,6 @@ package org.molgenis.gavin.controller;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.core.EffectBasedAnnotator;
@@ -16,7 +15,8 @@ import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionMetaData;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ResourceUtils;

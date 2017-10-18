@@ -1,7 +1,6 @@
 package org.molgenis.data.mapper.repository.impl;
 
 import com.google.common.collect.Lists;
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -12,8 +11,10 @@ import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.model.UserEntity;
+import org.molgenis.data.security.model.UserFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.security.user.UserService;
+import org.molgenis.security.core.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -29,15 +30,18 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	private final UserService userService;
 	private final IdGenerator idGenerator;
 	private final MappingProjectMetaData mappingProjectMeta;
+	private final UserFactory userFactory;
 
 	public MappingProjectRepositoryImpl(DataService dataService, MappingTargetRepository mappingTargetRepo,
-			UserService userService, IdGenerator idGenerator, MappingProjectMetaData mappingProjectMeta)
+			UserService userService, IdGenerator idGenerator, MappingProjectMetaData mappingProjectMeta,
+			UserFactory userFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mappingTargetRepo = requireNonNull(mappingTargetRepo);
 		this.userService = requireNonNull(userService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.mappingProjectMeta = requireNonNull(mappingProjectMeta);
+		this.userFactory = requireNonNull(userFactory);
 	}
 
 	@Override
@@ -101,12 +105,13 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	{
 		String identifier = mappingProjectEntity.getString(MappingProjectMetaData.IDENTIFIER);
 		String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
-		User owner = mappingProjectEntity.getEntity(MappingProjectMetaData.OWNER, User.class);
+		String ownerUserName = mappingProjectEntity.getEntity(MappingProjectMetaData.OWNER, UserEntity.class)
+												   .getUsername();
 		List<Entity> mappingTargetEntities = Lists.newArrayList(
 				mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPING_TARGETS));
 		List<MappingTarget> mappingTargets = mappingTargetRepo.toMappingTargets(mappingTargetEntities);
 
-		return new MappingProject(identifier, name, owner, mappingTargets);
+		return new MappingProject(identifier, name, userService.findByUsername(ownerUserName), mappingTargets);
 	}
 
 	/**
@@ -124,7 +129,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 			mappingProject.setIdentifier(idGenerator.generateId());
 		}
 		result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
-		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
+		result.set(MappingProjectMetaData.OWNER, userFactory.create().updateFrom(mappingProject.getOwner()));
 		result.set(MappingProjectMetaData.NAME, mappingProject.getName());
 		List<Entity> mappingTargetEntities = mappingTargetRepo.upsert(mappingProject.getMappingTargets());
 		result.set(MappingProjectMetaData.MAPPING_TARGETS, mappingTargetEntities);

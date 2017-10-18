@@ -4,19 +4,14 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,10 +30,8 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.Permission.COUNT;
+import static org.molgenis.security.core.Permission.WRITEMETA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -50,7 +43,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private static final String USERNAME_SYSTEM = "SYSTEM";
 	private static final String ROLE_SU = "SU";
 	private static final String ROLE_SYSTEM = "SYSTEM";
-	private static final String ROLE_WRITEMETA_ENTITY_TYPE = "ENTITY_WRITEMETA_entity";
 
 	private final String entityTypeId1 = "EntityType1";
 	private final String entityTypeId2 = "EntityType2";
@@ -59,10 +51,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private EntityTypeRepositorySecurityDecorator repo;
 	@Mock
 	private Repository<EntityType> delegateRepository;
-	@Mock
-	private DataService dataService;
-	@Mock
-	private MetaDataService metaDataService;
 	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	@Mock
@@ -81,7 +69,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(entityType1.getId()).thenReturn(entityTypeId1);
 		when(entityType1.getLabel()).thenReturn(entityTypeId1);
 		when(entityType2.getId()).thenReturn(entityTypeId2);
@@ -91,7 +78,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType4.getId()).thenReturn(entityTypeId4);
 		when(entityType4.getLabel()).thenReturn(entityTypeId1);
 		repo = new EntityTypeRepositorySecurityDecorator(delegateRepository, systemEntityTypeRegistry,
-				permissionService, dataService);
+				permissionService);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
@@ -132,18 +119,17 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	@Test
 	public void addWithKnownBackend()
 	{
-		SecurityContextHolder.getContext()
-							 .setAuthentication(new TestingAuthenticationToken("anonymous", null, "ROLE_SU"));
+		when(permissionService.hasPermissionOnEntityType("entity", WRITEMETA)).thenReturn(true);
+
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getAttributes()).thenReturn(emptyList());
 		String backendName = "knownBackend";
 		when(entityType.getBackend()).thenReturn(backendName);
-		MetaDataService metaDataService = mock(MetaDataService.class);
-		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
-		when(metaDataService.getBackend(entityType)).thenReturn(repoCollection);
-		when(dataService.getMeta()).thenReturn(metaDataService);
+
 		repo.add(entityType);
+
 		verify(delegateRepository).add(entityType);
+		verify(permissionService).hasPermissionOnEntityType("entity", WRITEMETA);
 	}
 
 	@Test
@@ -336,8 +322,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	@Test
 	public void forEachBatchedUser() throws Exception
 	{
-		List<Entity> entities = newArrayList();
-		repo.forEachBatched(entities::addAll, 2);
+		List<Entity> actual = newArrayList();
+		repo.forEachBatched(actual::addAll, 2);
 
 		when(permissionService.hasPermissionOnEntityType(entityTypeId1, COUNT)).thenReturn(true);
 		when(permissionService.hasPermissionOnEntityType(entityTypeId2, COUNT)).thenReturn(false);
@@ -349,7 +335,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		consumerCaptor.getValue().accept(Lists.newArrayList(entityType1, entityType2));
 		consumerCaptor.getValue().accept(Lists.newArrayList(entityType3, entityType4));
 
-		assertEquals(entities, newArrayList(entityType1, entityType4));
+		List<EntityType> expected = newArrayList(entityType1, entityType4);
+		assertEquals(actual, expected);
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
@@ -609,61 +596,30 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		repo.aggregate(aggregateQuery);
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
-	public void deleteSu()
+	public void deleteAllowed()
 	{
+		when(permissionService.hasPermissionOnEntityType("entity", WRITEMETA)).thenReturn(true);
 		delete();
 	}
 
-	@WithMockUser(username = USERNAME_SYSTEM, roles = { ROLE_SYSTEM })
-	@Test
-	public void deleteSystem()
-	{
-		delete();
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_WRITEMETA_ENTITY_TYPE })
-	@Test
-	public void deleteUser()
-	{
-		delete();
-	}
-
-	@WithMockUser(username = USERNAME)
 	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity type \\[entity\\] with id \\[entity\\]")
-	public void deleteUserNotAllowed()
+	public void deleteNotAllowed()
 	{
+		when(permissionService.hasPermissionOnEntityType("entity", WRITEMETA)).thenReturn(false);
 		delete();
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity meta data \\[entity\\] is not allowed")
 	public void deleteSystemEntityType()
 	{
+		when(permissionService.hasPermissionOnEntityType("entity", WRITEMETA)).thenReturn(true);
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);
 		delete();
 	}
 
 	private void delete()
 	{
-		@SuppressWarnings("unchecked")
-		Query<UserAuthority> userAuthorityQ = mock(Query.class);
-		when(userAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
-						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(userAuthorityQ);
-		UserAuthority userAuthority = mock(UserAuthority.class);
-		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
-		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
-		@SuppressWarnings("unchecked")
-		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
-		when(groupAuthorityQ.in(ROLE,
-				newArrayList("ROLE_ENTITY_READ_entity", "ROLE_ENTITY_WRITE_entity", "ROLE_ENTITY_COUNT_entity",
-						"ROLE_ENTITY_NONE_entity", "ROLE_ENTITY_WRITEMETA_entity"))).thenReturn(groupAuthorityQ);
-		GroupAuthority groupAuthority = mock(GroupAuthority.class);
-		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
-		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
-
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn("entity").getMock();
 		when(entityType.getLabel()).thenReturn("entity").getMock();
@@ -672,24 +628,10 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		verifyNoMoreInteractions(delegateRepository);
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test
-	public void updateSu()
+	public void updateHasPermission()
 	{
-		update();
-	}
-
-	@WithMockUser(username = USERNAME_SYSTEM, roles = { ROLE_SYSTEM })
-	@Test
-	public void updateSystem()
-	{
-		update();
-	}
-
-	@WithMockUser(username = USERNAME, roles = { ROLE_WRITEMETA_ENTITY_TYPE })
-	@Test
-	public void updateUser()
-	{
+		when(permissionService.hasPermissionOnEntityType("entity", WRITEMETA)).thenReturn(true);
 		update();
 	}
 
@@ -697,6 +639,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating system entity meta data \\[entity\\] is not allowed")
 	public void updateSystemEntityType()
 	{
+		when(permissionService.hasPermissionOnEntityType("entity", WRITEMETA)).thenReturn(true);
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);
 		update();
 	}

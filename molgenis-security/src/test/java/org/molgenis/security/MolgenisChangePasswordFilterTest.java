@@ -1,20 +1,18 @@
 package org.molgenis.security;
 
-import org.molgenis.auth.User;
-import org.molgenis.security.user.UserService;
-import org.molgenis.security.user.UserServiceImpl;
+import org.mockito.Mock;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserService;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,35 +25,34 @@ import static org.molgenis.security.account.AccountController.CHANGE_PASSWORD_UR
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { MolgenisChangePasswordFilterTest.Config.class })
-@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
-public class MolgenisChangePasswordFilterTest extends AbstractTestNGSpringContextTests
+public class MolgenisChangePasswordFilterTest extends AbstractMockitoTestNGSpringContextTests
 {
 	@Autowired
 	private MolgenisChangePasswordFilter filter;
-
 	@Autowired
 	private UserService userService;
 
+	@Mock
+	private User user;
+	@Mock
+	private FilterChain chain;
+
 	private MockHttpServletRequest request;
 	private MockHttpServletResponse response;
-	private FilterChain chain;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
-		chain = mock(FilterChain.class);
+		when(userService.findByUsername("user")).thenReturn(user);
 	}
 
 	@Test
 	@WithMockUser(username = "user")
 	public void testDoFilterChangePassword() throws IOException, ServletException
 	{
-		User user = mock(User.class);
 		when(user.isChangePassword()).thenReturn(true);
-		when(userService.getUser("user")).thenReturn(user);
-
 		request.setRequestURI("/login");
 
 		filter.doFilter(request, response, chain);
@@ -67,10 +64,7 @@ public class MolgenisChangePasswordFilterTest extends AbstractTestNGSpringContex
 	@WithMockUser(username = "user")
 	public void testDoFilterNoChangePassword() throws IOException, ServletException
 	{
-		User user = mock(User.class);
 		when(user.isChangePassword()).thenReturn(false);
-		when(userService.getUser("user")).thenReturn(user);
-
 		request.setRequestURI("/login");
 
 		filter.doFilter(request, response, chain);
@@ -87,16 +81,14 @@ public class MolgenisChangePasswordFilterTest extends AbstractTestNGSpringContex
 		filter.doFilter(request, response, chain);
 
 		verify(chain).doFilter(request, response);
+		verifyZeroInteractions(userService);
 	}
 
 	@Test
 	@WithMockUser(username = "user")
 	public void testDoFilterChangePasswordHackyUri() throws IOException, ServletException
 	{
-		User user = mock(User.class);
 		when(user.isChangePassword()).thenReturn(true);
-		when(userService.getUser("user")).thenReturn(user);
-
 		request.setRequestURI("/api/v2/account/password/change");
 
 		filter.doFilter(request, response, chain);
@@ -122,7 +114,7 @@ public class MolgenisChangePasswordFilterTest extends AbstractTestNGSpringContex
 		@Bean
 		public UserService userService()
 		{
-			return mock(UserServiceImpl.class);
+			return mock(UserService.class);
 		}
 	}
 }

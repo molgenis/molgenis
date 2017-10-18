@@ -1,69 +1,50 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.Group;
-import org.molgenis.auth.User;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
+import org.molgenis.security.core.service.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserAccountServiceImpl implements UserAccountService
 {
-	@Autowired
-	private UserService userService;
+	private final UserService userService;
+	private final PasswordEncoder passwordEncoder;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-
-	@Override
-	@Transactional(readOnly = true)
-	public User getCurrentUser()
+	public UserAccountServiceImpl(UserService userService, PasswordEncoder passwordEncoder)
 	{
-		return userService.getUser(SecurityUtils.getCurrentUsername());
+		this.userService = Objects.requireNonNull(userService);
+		this.passwordEncoder = Objects.requireNonNull(passwordEncoder);
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public Iterable<Group> getCurrentUserGroups()
-	{
-		return userService.getUserGroups(SecurityUtils.getCurrentUsername());
-	}
-
-	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_useraccount')")
-	@Transactional
 	public void updateCurrentUser(User updatedCurrentUser)
 	{
-		String currentUsername = SecurityUtils.getCurrentUsername();
+		// TODO: Use Row level security for this
+		String currentUsername = SecurityUtils.getCurrentUsername()
+											  .orElseThrow(() -> new IllegalStateException("Current user not found."));
 		if (!currentUsername.equals(updatedCurrentUser.getUsername()))
 		{
-			throw new RuntimeException("Updated user differs from the current user");
-		}
-
-		User currentUser = userService.getUser(currentUsername);
-		if (currentUser == null)
-		{
-			throw new RuntimeException("User does not exist [" + currentUsername + "]");
+			throw new IllegalArgumentException("Can only update current user.");
 		}
 		userService.update(updatedCurrentUser);
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_useraccount')")
-	@Transactional
 	public boolean validateCurrentUserPassword(String password)
 	{
-		if (password == null || password.isEmpty()) return false;
+		return password != null && !password.isEmpty() && passwordEncoder.matches(password,
+				getCurrentUser().getPassword());
+	}
 
-		String currentUsername = SecurityUtils.getCurrentUsername();
-		User currentUser = userService.getUser(currentUsername);
-		if (currentUser == null)
-		{
-			throw new RuntimeException("User does not exist [" + SecurityUtils.getCurrentUsername() + "]");
-		}
-		return passwordEncoder.matches(password, currentUser.getPassword());
+	@Override
+	public Optional<User> getCurrentUserIfPresent()
+	{
+		return SecurityUtils.getCurrentUsername().flatMap(userService::findByUsernameIfPresent);
 	}
 }

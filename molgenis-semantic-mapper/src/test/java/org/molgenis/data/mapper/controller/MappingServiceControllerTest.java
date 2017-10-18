@@ -2,11 +2,10 @@ package org.molgenis.data.mapper.controller;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.stubbing.OngoingStubbing;
-import org.molgenis.auth.User;
+import org.mockito.Mockito;
+import org.mockito.MockitoSession;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.jobs.JobExecutor;
@@ -21,12 +20,13 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.security.user.UserAccountService;
-import org.molgenis.security.user.UserService;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
+import org.molgenis.security.core.service.UserService;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -36,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,6 +43,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -53,11 +52,13 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
+import static org.mockito.quality.Strictness.STRICT_STUBS;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.security.core.Permission.WRITE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -69,49 +70,38 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
-
 	@Autowired
 	private AttributeFactory attrMetaFactory;
-
-	@InjectMocks
-	private MappingServiceController controller = new MappingServiceController();
-
-	@Mock
-	private UserService userService;
-
-	@Mock
-	private MappingJobExecutionFactory mappingJobExecutionFactory;
-
-	@Mock
-	private MappingService mappingService;
-
-	@Mock
-	private AlgorithmService algorithmService;
-
-	@Mock
-	private DataService dataService;
-
-	@Mock
-	private OntologyTagService ontologyTagService;
-
-	@Mock
-	private SemanticSearchService semanticSearchService;
-
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
+	@InjectMocks
+	private MappingServiceController controller;
+
+	@Mock
+	private UserService userService;
+	@Mock
+	private MappingJobExecutionFactory mappingJobExecutionFactory;
+	@Mock
+	private MappingService mappingService;
+	@Mock
+	private AlgorithmService algorithmService;
+	@Mock
+	private DataService dataService;
+	@Mock
+	private OntologyTagService ontologyTagService;
+	@Mock
+	private SemanticSearchService semanticSearchService;
 	@Mock
 	private MenuReaderService menuReaderService;
-
 	@Mock
 	private Model model;
-
 	@Mock
 	private MappingTarget mappingTarget;
-
 	@Mock
 	private EntityType targetEntityType;
-
+	@Mock
+	private PermissionService permissionService;
 	@Mock
 	private EntityType target1;
 	@Mock
@@ -139,20 +129,19 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private EntityType hop;
 	private MappingProject mappingProject;
 	private static final String ID = "mappingservice";
+	private static final String USERNAME = "user";
 	private Attribute ageAttr;
 	private Attribute dobAttr;
 
 	private MockMvc mockMvc;
-	private OngoingStubbing<Multimap<Relation, OntologyTerm>> multimapOngoingStubbing;
+
+	private MockitoSession mockitoSession;
 
 	@BeforeMethod
 	public void beforeTest()
 	{
-		me = mock(User.class);
-		when(me.getUsername()).thenReturn("fdlk");
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("fdlk", null);
-		authentication.setAuthenticated(true);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		controller = null;
+		mockitoSession = Mockito.mockitoSession().strictness(STRICT_STUBS).initMocks(this).startMocking();
 
 		hop = entityTypeFactory.create("HOP");
 		ageAttr = attrMetaFactory.create().setName("age").setDataType(INT);
@@ -170,16 +159,21 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = entityMapping.addAttributeMapping("age");
 		attributeMapping.setAlgorithm("$('dob').age()");
 
-		when(dataService.getMeta()).thenReturn(metaDataService);
-
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setMessageConverters(gsonHttpMessageConverter, new StringHttpMessageConverter())
 								 .build();
 	}
 
+	@AfterMethod
+	public void afterMethod()
+	{
+		mockitoSession.finishMocking();
+	}
+
 	@Test
 	public void itShouldUpdateExistingAttributeMappingWhenSaving() throws Exception
 	{
+		when(permissionService.hasPermissionOnMappingProject("asdf", WRITE)).thenReturn(true);
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
 		Menu menu = mock(Menu.class);
 		when(menuReaderService.getMenu()).thenReturn(menu);
@@ -206,6 +200,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void itShouldCreateNewAttributeMappingWhenSavingIfNonePresent() throws Exception
 	{
+		when(permissionService.hasPermissionOnMappingProject("asdf", WRITE)).thenReturn(true);
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
 		Menu menu = mock(Menu.class);
 		when(menuReaderService.getMenu()).thenReturn(menu);
@@ -235,6 +230,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void itShouldRemoveEmptyAttributeMappingsWhenSaving() throws Exception
 	{
+		when(permissionService.hasPermissionOnMappingProject("asdf", WRITE)).thenReturn(true);
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
 		Menu menu = mock(Menu.class);
 		when(menuReaderService.getMenu()).thenReturn(menu);
@@ -258,10 +254,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getFirstAttributeMappingInfo_age() throws Exception
 	{
+		when(permissionService.hasPermissionOnMappingProject("asdf", WRITE)).thenReturn(true);
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
-		Menu menu = mock(Menu.class);
-		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
 		MvcResult result = mockMvc.perform(post(URI + "/firstattributemapping").param("mappingProjectId", "asdf")
 																			   .param("target", "HOP")
@@ -280,11 +274,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getFirstAttributeMappingInfo_dob() throws Exception
 	{
+		when(permissionService.hasPermissionOnMappingProject("asdf", WRITE)).thenReturn(true);
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
-		Menu menu = mock(Menu.class);
-		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
-
 		mappingProject.getMappingTarget("HOP")
 					  .getMappingForSource("LifeLines")
 					  .getAttributeMapping("age")
@@ -333,9 +324,6 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	public void getFirstAttributeMappingInfo_none() throws Exception
 	{
 		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
-		Menu menu = mock(Menu.class);
-		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
 		mappingProject.getMappingTarget("HOP")
 					  .getMappingForSource("LifeLines")
@@ -377,6 +365,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testScheduleMappingJobUnknownPackage() throws Exception
 	{
+		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
 		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
@@ -392,6 +381,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testScheduleMappingJobSystemPackage() throws Exception
 	{
+		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 		Package systemPackage = mock(Package.class);
 		when(systemPackage.getId()).thenReturn("sys");
@@ -410,6 +400,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testMap() throws Exception
 	{
+		when(userAccountService.getCurrentUser()).thenReturn(me);
+		when(me.getUsername()).thenReturn(USERNAME);
+
+		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 		Package aPackage = mock(Package.class);
 		when(aPackage.getId()).thenReturn("base");
@@ -438,7 +432,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		verify(mappingJobExecution).setAddSourceAttribute(null);
 		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
 		verify(mappingJobExecution).setPackageId("base");
-		verify(mappingJobExecution).setUser(me);
+		verify(mappingJobExecution).setUser(USERNAME);
 		verify(mappingJobExecution).getEntityType();
 		verify(mappingJobExecution).getIdValue();
 		verifyNoMoreInteractions(mappingJobExecution);
@@ -447,16 +441,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testCreateIntegratedEntity() throws Exception
 	{
-		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
-		Package aPackage = mock(Package.class);
-		when(aPackage.getId()).thenReturn("base");
-		when(aPackage.getRootPackage()).thenReturn(null);
-		when(metaDataService.getPackage("base")).thenReturn(aPackage);
+		when(userAccountService.getCurrentUser()).thenReturn(me);
+		when(me.getUsername()).thenReturn(USERNAME);
 
 		when(mappingJobExecutionFactory.create()).thenReturn(mappingJobExecution);
-		when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);
-		when(mappingJobExecution.getIdValue()).thenReturn("abcde");
-		when(mappingJobExecutionMetadata.getId()).thenReturn("MappingJobExecution");
 
 		when(userAccountService.getCurrentUser()).thenReturn(me);
 		when(jobsController.createJobExecutionViewHref(mappingJobExecution, 1000)).thenReturn(
@@ -476,33 +464,34 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		verify(mappingJobExecution).setAddSourceAttribute(null);
 		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
 		verify(mappingJobExecution).setPackageId("base");
-		verify(mappingJobExecution).setUser(me);
+		verify(mappingJobExecution).setUser(USERNAME);
 		verifyNoMoreInteractions(mappingJobExecution);
 	}
 
 	@Test
 	public void testViewMappingProject()
 	{
-		when(mappingService.getMappingProject("hop hop hop")).thenReturn(mappingProject);
+		when(permissionService.hasPermissionOnMappingProject("asdf", WRITE)).thenReturn(true);
+		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
 		when(dataService.getEntityTypeIds()).thenReturn(Stream.of("LifeLines", "entity1", "entity2"));
 		when(mappingService.getCompatibleEntityTypes(hop)).thenReturn(Stream.of(lifeLines, target1, target2));
 
-		when(dataService.getEntityType("HOP")).thenReturn(hop);
+		doReturn(hop).when(dataService).getEntityType("HOP");
 		OntologyTerm ontologyTermAge = OntologyTerm.create("iri1", "label1");
 		OntologyTerm ontologyTermDateOfBirth = OntologyTerm.create("iri2", "label2");
-		when(ontologyTagService.getTagsForAttribute(hop, ageAttr)).thenReturn(
-				ImmutableMultimap.of(isAssociatedWith, ontologyTermAge));
-		when(ontologyTagService.getTagsForAttribute(hop, dobAttr)).thenReturn(
-				ImmutableMultimap.of(isAssociatedWith, ontologyTermDateOfBirth));
+		doReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermAge)).when(ontologyTagService)
+																		 .getTagsForAttribute(hop, ageAttr);
+		doReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermDateOfBirth)).when(ontologyTagService)
+																				 .getTagsForAttribute(hop, dobAttr);
 
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(metaDataService.getPackages()).thenReturn(asList(system, base));
 		when(system.getId()).thenReturn(PACKAGE_SYSTEM); // system package, not a valid choice
 		when(base.getId()).thenReturn("base");
-		when(dataService.getEntityType("entity1")).thenReturn(target1);
-		when(dataService.getEntityType("entity2")).thenReturn(target2);
+		doReturn(target1).when(dataService).getEntityType("entity1");
+		doReturn(target2).when(dataService).getEntityType("entity2");
 
-		String view = controller.viewMappingProject("hop hop hop", model);
+		String view = controller.viewMappingProject("asdf", model);
 
 		assertEquals(view, "view-single-mapping-project");
 		verify(model).addAttribute("entityTypes", asList(target1, target2));

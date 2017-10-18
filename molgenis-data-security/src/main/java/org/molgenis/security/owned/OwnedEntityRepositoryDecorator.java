@@ -4,13 +4,11 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -175,7 +173,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 		if (isOwnedEntityType())
 		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
-			String currentUsername = SecurityUtils.getCurrentUsername();
+			String currentUsername = SecurityUtils.getCurrentUsername().orElse(null);
 			entities = entities.map(entity ->
 			{
 				if (mustAddRowLevelSecurity || entity.get(OwnedEntityType.OWNER_USERNAME) == null)
@@ -262,7 +260,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 		if (isOwnedEntityType())
 		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
-			String currentUsername = SecurityUtils.getCurrentUsername();
+			String currentUsername = SecurityUtils.getCurrentUsername().orElse(null);
 			entities = entities.map(entity ->
 			{
 				if (mustAddRowLevelSecurity || entity.get(OwnedEntityType.OWNER_USERNAME) == null)
@@ -278,8 +276,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 
 	private boolean mustAddRowLevelSecurity()
 	{
-		return !(SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
-				&& isOwnedEntityType();
+		return !SecurityUtils.currentUserIsSuOrSystem() && isOwnedEntityType();
 	}
 
 	private boolean isOwnedEntityType()
@@ -289,12 +286,11 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 
 	private static void addRowLevelSecurity(Query<Entity> q)
 	{
-		String user = SecurityUtils.getCurrentUsername();
-		if (user != null)
+		SecurityUtils.getCurrentUsername().ifPresent(user ->
 		{
 			if (!q.getRules().isEmpty()) q.and();
 			q.eq(OwnedEntityType.OWNER_USERNAME, user);
-		}
+		});
 	}
 
 	private static String getOwnerUserName(Entity questionnaire)
@@ -304,6 +300,8 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 
 	private static boolean currentUserIsOwner(Entity entity)
 	{
-		return null != entity && Objects.equals(SecurityUtils.getCurrentUsername(), getOwnerUserName(entity));
+		return null != entity && SecurityUtils.getCurrentUsername()
+											  .map(username -> username.equals(getOwnerUserName(entity)))
+											  .orElse(false);
 	}
 }

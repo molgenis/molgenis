@@ -1,26 +1,19 @@
 package org.molgenis.data.i18n;
 
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.DynamicEntity;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static com.google.common.collect.ImmutableMap.of;
-import static org.mockito.ArgumentMatchers.any;
+import java.util.Optional;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 
 public class LanguageServiceTest
@@ -28,49 +21,62 @@ public class LanguageServiceTest
 	private LanguageService languageService;
 	private LocalizationService localizationService;
 	private DataService dataServiceMock;
-	private AppSettings appSettingsMock;
-	private Query<Entity> queryMock;
+	private AppSettings appSettings;
+	private UserAccountService userAccountService;
+	private User user = mock(User.class);
 
-	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		dataServiceMock = mock(DataService.class);
-		queryMock = mock(Query.class);
 		localizationService = mock(LocalizationService.class);
-		when(dataServiceMock.query(USER)).thenReturn(queryMock);
-		when(queryMock.eq(any(), any())).thenReturn(queryMock);
-		appSettingsMock = mock(AppSettings.class);
-		languageService = new LanguageService(dataServiceMock, appSettingsMock, localizationService);
+		appSettings = mock(AppSettings.class);
+		userAccountService = mock(UserAccountService.class);
+		when(dataServiceMock.findOneById(LANGUAGE, "nl")).thenReturn(mock(Language.class));
+		languageService = new LanguageService(dataServiceMock, appSettings, localizationService, userAccountService);
 	}
 
 	@Test
-	public void getCurrentUserLanguageCode()
+	@WithMockUser
+	public void getCurrentUserLanguageCodePrefersUserLanguageCode()
 	{
-		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
-		EntityType nlEntityMeta = mock(EntityType.class);
-		Attribute langCodeAtrr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-		when(nlEntityMeta.getAttribute("languageCode")).thenReturn(langCodeAtrr);
-		DynamicEntity langEntity = new DynamicEntity(nlEntityMeta, of("languageCode", "nl"));
-		when(queryMock.findOne()).thenReturn(langEntity);
-		Attribute nlAtrr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-		EntityType languageMeta = mock(EntityType.class);
-		when(languageMeta.getAttribute("nl")).thenReturn(nlAtrr);
-		DynamicEntity nlEntity = new DynamicEntity(languageMeta, of("nl", "Nederlands"));
-		when(dataServiceMock.findOneById(LANGUAGE, "nl")).thenReturn(nlEntity);
+		when(user.getLanguageCode()).thenReturn("nl");
+		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.of(user));
 		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
 	}
 
 	@Test
-	public void getCurrentUserLanguageAppSettings()
+	@WithMockUser
+	public void getCurrentUserLanguageCodeUserCodeUnknown()
 	{
-		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
-		User user = mock(User.class);
-		when(user.getLanguageCode()).thenReturn("de");
-		when(queryMock.findOne()).thenReturn(user);
-		when(appSettingsMock.getLanguageCode()).thenReturn("de");
-		Language language = mock(Language.class);
-		when(dataServiceMock.findOneById(LANGUAGE, "de")).thenReturn(language);
-		assertEquals(languageService.getCurrentUserLanguageCode(), "de");
+		when(user.getLanguageCode()).thenReturn("??");
+		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.of(user));
+		when(appSettings.getLanguageCode()).thenReturn("nl");
+		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
+	}
+
+	@Test
+	@WithMockUser
+	public void getCurrentUserLanguageCodeNoUserLanguageCode()
+	{
+		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.of(user));
+		when(appSettings.getLanguageCode()).thenReturn("nl");
+		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
+	}
+
+	@Test
+	public void getCurrentUserLanguageNoCurrentUserAppSettings()
+	{
+		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.empty());
+		when(appSettings.getLanguageCode()).thenReturn("nl");
+		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
+	}
+
+	@Test
+	public void getCurrentUserLanguageNoCurrentUserAppSettingsLanguageCodeUnknownFallbackToDefaultLanguage()
+	{
+		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.empty());
+		when(appSettings.getLanguageCode()).thenReturn("??");
+		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
 	}
 }

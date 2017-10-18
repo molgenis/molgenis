@@ -1,9 +1,13 @@
 package org.molgenis.data;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -22,34 +26,32 @@ import static org.testng.Assert.assertEquals;
 
 public class RepositorySecurityDecoratorTest
 {
-	private String entityTypeId;
-	private String entityId;
+	private String entityTypeId = "entity";
+	private String entityId = "entityID";
+	@Mock
 	private Repository<Entity> delegateRepository;
+	@Mock
+	private PermissionService permissionService;
+	@Mock
+	private EntityType entityType;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp()
 	{
-		entityTypeId = "entity";
-		entityId = "entityID";
-		EntityType entityType = mock(EntityType.class);
+		MockitoAnnotations.initMocks(this);
 		when(entityType.getId()).thenReturn(entityTypeId);
 		when(entityType.getLabel()).thenReturn(entityTypeId);
-		delegateRepository = mock(Repository.class);
 		when(delegateRepository.getName()).thenReturn(entityTypeId);
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
-		when(entityType.getId()).thenReturn("entityID");
-		repositorySecurityDecorator = new RepositorySecurityDecorator(delegateRepository);
+		repositorySecurityDecorator = new RepositorySecurityDecorator(delegateRepository, permissionService);
 	}
 
 	@Test
 	public void addStream()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_WRITE_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITE)).thenReturn(true);
 
 		Stream<Entity> entities = Stream.empty();
 		when(delegateRepository.add(entities)).thenReturn(123);
@@ -59,10 +61,7 @@ public class RepositorySecurityDecoratorTest
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void addStreamNoPermission()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_" + entityId);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITE)).thenReturn(false);
 
 		Stream<Entity> entities = Stream.empty();
 		try
@@ -263,7 +262,7 @@ public class RepositorySecurityDecoratorTest
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
-		assertEquals(entity, delegateRepository.findOneById(id, fetch));
+		assertEquals(delegateRepository.findOneById(id, fetch), entity);
 		verify(delegateRepository, times(1)).findOneById(id, fetch);
 	}
 
@@ -354,7 +353,7 @@ public class RepositorySecurityDecoratorTest
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		AggregateResult aggregateResult = mock(AggregateResult.class);
 		when(repositorySecurityDecorator.aggregate(aggregateQuery)).thenReturn(aggregateResult);
-		assertEquals(aggregateResult, repositorySecurityDecorator.aggregate(aggregateQuery));
+		assertEquals(repositorySecurityDecorator.aggregate(aggregateQuery), aggregateResult);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[entity\\] with id \\[entityID\\]")

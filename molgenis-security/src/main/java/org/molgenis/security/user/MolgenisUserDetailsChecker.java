@@ -19,7 +19,7 @@ public class MolgenisUserDetailsChecker implements UserDetailsChecker
 		if (!userDetails.isEnabled())
 		{
 			throw new DisabledException(
-					messages.getMessage("AccountStatusUserDetailsChecker.disabled", "User is not active") + ' '
+					messages.getMessage("MolgenisUserDetailsChecker.disabled", "User is not active") + ' '
 							+ userDetails.toString());
 		}
 	}

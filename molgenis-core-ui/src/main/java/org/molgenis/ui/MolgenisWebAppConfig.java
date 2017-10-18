@@ -7,6 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
@@ -14,6 +15,7 @@ import org.molgenis.file.FileStore;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -91,10 +93,13 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private RdfConverter rdfConverter;
 
 	@Autowired
-	private LanguageService languageService;
+	private StyleService styleService;
 
 	@Autowired
-	private StyleService styleService;
+	private LocalizationService localizationService;
+
+	@Autowired
+	private UserAccountService userAccountService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -163,6 +168,13 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public LanguageService languageService()
+	{
+		return new LanguageService(dataService, appSettings, localizationService, userAccountService);
+	}
+
+
+	@Bean
 	public MappedInterceptor mappedCorsInterceptor()
 	{
 		/*
@@ -204,7 +216,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisInterceptor molgenisInterceptor()
 	{
 		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(), appSettings,
-				authenticationSettings, languageService, environment);
+				authenticationSettings, languageService(), environment);
 	}
 
 	@Bean

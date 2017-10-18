@@ -132,6 +132,6 @@ public class ScheduledJobRepositoryDecorator extends AbstractRepositoryDecorator
 
 	private static void setUsername(ScheduledJob job)
 	{
-		job.setUser(SecurityUtils.getCurrentUsername());
+		job.setUser(SecurityUtils.getCurrentUsername().orElse(null));
 	}
 }

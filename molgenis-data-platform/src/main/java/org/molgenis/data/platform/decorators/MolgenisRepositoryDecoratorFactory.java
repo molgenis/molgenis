@@ -18,6 +18,7 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.*;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
 import org.springframework.stereotype.Component;
@@ -45,6 +46,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final L3Cache l3Cache;
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
+	private final PermissionService permissionService;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
@@ -53,8 +55,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			IndexActionRegisterService indexActionRegisterService,
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			L3Cache l3Cache,
-			PlatformTransactionManager transactionManager, QueryValidator queryValidator)
+			L3Cache l3Cache, PlatformTransactionManager transactionManager, QueryValidator queryValidator,
+			PermissionService permissionService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -73,6 +75,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.l3Cache = requireNonNull(l3Cache);
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -122,7 +125,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 				appSettings);
 
 		// 2. security decorator
-		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository);
+		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, permissionService);
 
 		// 1. transaction decorator
 		decoratedRepository = new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);

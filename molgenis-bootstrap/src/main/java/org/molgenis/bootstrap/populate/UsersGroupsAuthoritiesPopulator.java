@@ -1,8 +1,8 @@
 package org.molgenis.bootstrap.populate;
 
 /**
- * Populates empty data store with security entities such as {@link org.molgenis.auth.UserMetaData users},
- * {@link org.molgenis.auth.GroupMetaData groups} and {@link org.molgenis.auth.AuthorityMetaData authorities}.
+ * Populates empty data store with security entities such as {@link org.molgenis.data.security.model.UserMetadata users},
+ * {@link org.molgenis.data.security.model.GroupMetadata groups} and {@link org.molgenis.data.security.model.RoleMetadata roles}.
  */
 public interface UsersGroupsAuthoritiesPopulator
 {

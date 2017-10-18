@@ -10,7 +10,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.security.model.UserMetadata.USER;
 
 /**
  * Populates {@link org.molgenis.data.Repository repositories} with data during bootstrapping.

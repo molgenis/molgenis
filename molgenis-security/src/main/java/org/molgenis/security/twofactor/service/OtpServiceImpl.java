@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Optional;
 
 @Service
 public class OtpServiceImpl implements OtpService
@@ -60,10 +61,10 @@ public class OtpServiceImpl implements OtpService
 	@Override
 	public String getAuthenticatorURI(String secretKey)
 	{
-		String userName = SecurityUtils.getCurrentUsername();
+		Optional<String> userName = SecurityUtils.getCurrentUsername();
 
 		String appName = appSettings.getTitle();
-		if (userName == null)
+		if (!userName.isPresent())
 		{
 			String errorMessage = "User is not available";
 			LOG.error(errorMessage);
@@ -73,7 +74,7 @@ public class OtpServiceImpl implements OtpService
 		try
 		{
 			return String.format("otpauth://totp/%s?secret=%s&issuer=%s",
-					URLEncoder.encode(appName + ":" + userName, "UTF-8").replace("+", "%20"),
+					URLEncoder.encode(appName + ":" + userName.get(), "UTF-8").replace("+", "%20"),
 					URLEncoder.encode(normalizedBase32Key, "UTF-8").replace("+", "%20"),
 					URLEncoder.encode(appName, "UTF-8").replace("+", "%20"));
 		}

@@ -1,9 +1,9 @@
 package org.molgenis.security;
 
-import org.molgenis.auth.User;
-import org.molgenis.security.user.UserService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -36,26 +36,27 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		if ((authentication != null) && authentication.isAuthenticated() && !authentication.getName()
-																						   .equals(ANONYMOUS_USERNAME)
-				&& !httpRequest.getRequestURI().equalsIgnoreCase(CHANGE_PASSWORD_URI))
+		if (!isPasswordChangeRequest(httpRequest) && currentUserNeedsPasswordChange())
 		{
-			User user = userService.getUser(authentication.getName());
-			if (user == null)
-			{
-				throw new RuntimeException("Unknown username [" + authentication.getName() + "]");
-			}
-
-			if (user.isChangePassword() != null && user.isChangePassword())
-			{
-				redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
-				return;
-			}
+			redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
 		}
-
 		chain.doFilter(request, response);
+	}
+
+	private boolean isPasswordChangeRequest(HttpServletRequest httpRequest)
+	{
+		return httpRequest.getRequestURI().equalsIgnoreCase(CHANGE_PASSWORD_URI);
+	}
+
+	private boolean currentUserNeedsPasswordChange()
+	{
+		return SecurityUtils.getAuthenticationFromContext()
+							.filter(Authentication::isAuthenticated)
+							.map(Authentication::getName)
+							.filter(name -> !name.equals(ANONYMOUS_USERNAME))
+							.map(userService::findByUsername)
+							.filter(User::isChangePassword)
+							.isPresent();
 	}
 
 }

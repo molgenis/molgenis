@@ -82,9 +82,10 @@ public class SavedScriptRunner
 
 		if (script.isGenerateToken())
 		{
-			String token = tokenService.generateAndStoreToken(SecurityUtils.getCurrentUsername(),
-					"For script " + script.getName());
-			parameters.put("molgenisToken", token);
+			SecurityUtils.getCurrentUsername()
+						 .map(username -> tokenService.generateAndStoreToken(username,
+								 "For script " + script.getName()))
+						 .ifPresent(token -> parameters.put("molgenisToken", token));
 		}
 
 		FileMeta fileMeta = null;

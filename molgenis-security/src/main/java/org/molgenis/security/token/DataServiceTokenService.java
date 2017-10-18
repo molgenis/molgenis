@@ -1,9 +1,9 @@
 package org.molgenis.security.token;
 
-import org.molgenis.auth.Token;
-import org.molgenis.auth.TokenFactory;
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.model.Token;
+import org.molgenis.data.security.model.TokenFactory;
+import org.molgenis.data.security.model.UserEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -15,10 +15,10 @@ import static java.lang.String.format;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.TokenMetaData.TOKEN;
-import static org.molgenis.auth.TokenMetaData.TOKEN_ATTR;
-import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.model.TokenMetaData.TOKEN;
+import static org.molgenis.data.security.model.TokenMetaData.TOKEN_ATTR;
+import static org.molgenis.data.security.model.UserMetadata.USER;
+import static org.molgenis.data.security.model.UserMetadata.USERNAME;
 
 /**
  * TokensService implementation that uses the DataService
@@ -68,7 +68,7 @@ public class DataServiceTokenService implements TokenService
 	@RunAsSystem
 	public String generateAndStoreToken(String username, String description)
 	{
-		User user = dataService.query(USER, User.class).eq(USERNAME, username).findOne();
+		UserEntity user = dataService.query(USER, UserEntity.class).eq(USERNAME, username).findOne();
 		if (user == null)
 		{
 			throw new IllegalArgumentException(format("Unknown username [%s]", username));

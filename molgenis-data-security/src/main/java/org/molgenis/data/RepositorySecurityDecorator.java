@@ -4,6 +4,7 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -11,16 +12,20 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Repository decorated that validates that current user has permission to perform an operation for an entity type.
  */
 public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Entity>
 {
-	public RepositorySecurityDecorator(Repository<Entity> delegateRepository)
+	private final PermissionService permissionService;
+
+	public RepositorySecurityDecorator(Repository<Entity> delegateRepository, PermissionService permissionService)
 	{
 		super(delegateRepository);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -179,7 +184,8 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Integer add(Stream<Entity> entities)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, Permission.WRITE);
+		Permission permission = Permission.WRITE;
+		validatePermission(entityType, permission);
 		return delegate().add(entities);
 	}
 
@@ -189,5 +195,15 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		EntityType entityType = delegate().getEntityType();
 		validatePermission(entityType, Permission.COUNT);
 		return delegate().aggregate(aggregateQuery);
+	}
+
+	private void validatePermission(EntityType entityType, Permission permission)
+	{
+		if (!permissionService.hasPermissionOnEntityType(entityType.getId(), permission))
+		{
+			throw new MolgenisDataAccessException(
+					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
+							entityType.getLabel(), entityType.getId()));
+		}
 	}
 }

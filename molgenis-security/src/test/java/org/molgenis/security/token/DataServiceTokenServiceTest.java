@@ -1,9 +1,9 @@
 package org.molgenis.security.token;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.Token;
-import org.molgenis.auth.TokenFactory;
-import org.molgenis.auth.User;
+import org.molgenis.data.security.model.Token;
+import org.molgenis.data.security.model.TokenFactory;
+import org.molgenis.data.security.model.UserEntity;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -15,10 +15,10 @@ import org.testng.annotations.Test;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.TokenMetaData.TOKEN;
-import static org.molgenis.auth.TokenMetaData.TOKEN_ATTR;
-import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.model.TokenMetaData.TOKEN;
+import static org.molgenis.data.security.model.TokenMetaData.TOKEN_ATTR;
+import static org.molgenis.data.security.model.UserMetadata.USER;
+import static org.molgenis.data.security.model.UserMetadata.USERNAME;
 import static org.testng.Assert.assertEquals;
 
 public class DataServiceTokenServiceTest
@@ -42,7 +42,7 @@ public class DataServiceTokenServiceTest
 	@Test
 	public void findUserByToken()
 	{
-		User user = mock(User.class);
+		UserEntity user = mock(UserEntity.class);
 		when(user.getUsername()).thenReturn("admin");
 		Token token = mock(Token.class);
 		when(token.getToken()).thenReturn("token");
@@ -80,13 +80,13 @@ public class DataServiceTokenServiceTest
 	@Test
 	public void generateAndStoreToken()
 	{
-		User user = mock(User.class);
+		UserEntity user = mock(UserEntity.class);
 
 		@SuppressWarnings("unchecked")
-		Query<User> q = mock(Query.class);
+		Query<UserEntity> q = mock(Query.class);
 		when(q.eq(USERNAME, "admin")).thenReturn(q);
 		when(q.findOne()).thenReturn(user);
-		when(dataService.query(USER, User.class)).thenReturn(q);
+		when(dataService.query(USER, UserEntity.class)).thenReturn(q);
 
 		when(tokenGenerator.generateToken()).thenReturn("token");
 		assertEquals(tokenService.generateAndStoreToken("admin", "description"), "token");

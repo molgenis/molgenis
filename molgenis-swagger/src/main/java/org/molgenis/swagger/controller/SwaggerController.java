@@ -52,11 +52,9 @@ public class SwaggerController extends PluginController
 	{
 		model.addAttribute("url",
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(URI + "/swagger.yml").toUriString());
-		final String currentUsername = SecurityUtils.getCurrentUsername();
-		if (currentUsername != null)
-		{
-			model.addAttribute("token", tokenService.generateAndStoreToken(currentUsername, "For Swagger UI"));
-		}
+		SecurityUtils.getCurrentUsername()
+					 .map(username -> tokenService.generateAndStoreToken(username, "For Swagger UI"))
+					 .ifPresent(token -> model.addAttribute("token", token));
 		return "view-swagger-ui";
 	}
 
