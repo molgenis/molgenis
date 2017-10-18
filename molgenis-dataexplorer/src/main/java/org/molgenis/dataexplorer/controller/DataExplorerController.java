@@ -17,6 +17,7 @@ import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
+import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
@@ -80,7 +81,7 @@ public class DataExplorerController extends PluginController
 	private DataExplorerSettings dataExplorerSettings;
 
 	@Autowired
-	private DirectoryController directoryController;
+	private NegotiatorController directoryController;
 
 	@Autowired
 	private DataService dataService;
@@ -208,6 +209,7 @@ public class DataExplorerController extends PluginController
 					model.addAttribute("chrom_attr", track.getGenomeBrowserAttrs().getChrom());
 				}
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
+				model.addAttribute("NegotiatorEnabled", directoryController.showDirectoryButton(entityTypeId));
 				break;
 			case MOD_ENTITIESREPORT:
 				//TODO: figure out if we need to know pos and chrom attrs here
@@ -215,6 +217,7 @@ public class DataExplorerController extends PluginController
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
+				model.addAttribute("NegotiatorEnabled", directoryController.showDirectoryButton(entityTypeId));
 
 				model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
 				model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));
