@@ -38,7 +38,10 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.OneToManyTestHarness.*;
 import static org.molgenis.data.OneToManyTestHarness.TestCaseType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.*;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.assertEquals;
@@ -65,6 +68,9 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Book" + i, true, true, true));
 			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Person" + i, true, true, true));
 		}
+		authorities.addAll(makeAuthorities(ENTITY_TYPE_META_DATA, false, true, true));
+		authorities.addAll(makeAuthorities(ATTRIBUTE_META_DATA, false, true, true));
+		authorities.addAll(makeAuthorities(PACKAGE, false, true, true));
 
 		SecurityContextHolder.getContext()
 							 .setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
