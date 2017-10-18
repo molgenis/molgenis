@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.directory;
+package org.molgenis.dataexplorer.negotiator;
 
 import com.google.gson.Gson;
 import org.molgenis.util.GsonConfig;

@@ -1,11 +1,10 @@
-package org.molgenis.dataexplorer.directory;
+package org.molgenis.dataexplorer.negotiator;
 
 import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.dataexplorer.controller.DirectoryController;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -25,9 +24,9 @@ import static org.testng.Assert.assertFalse;
 
 public class DirectoryControllerTest extends AbstractMockitoTest
 {
-	private DirectoryController controller;
+	private NegotiatorController controller;
 	@Mock
-	private DirectorySettings directorySettings;
+	private NegotiatorSettings directorySettings;
 	@Mock
 	private RestTemplate restTemplate;
 	@Mock
@@ -41,7 +40,7 @@ public class DirectoryControllerTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		controller = new DirectoryController(directorySettings, restTemplate, permissions);
+		controller = new NegotiatorController(directorySettings, restTemplate, permissions);
 	}
 
 	@Test

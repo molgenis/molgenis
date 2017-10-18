@@ -18,6 +18,7 @@ import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
+import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
@@ -81,7 +82,7 @@ public class DataExplorerController extends PluginController
 	private DataExplorerSettings dataExplorerSettings;
 
 	@Autowired
-	private DirectoryController directoryController;
+	private NegotiatorController directoryController;
 
 	@Autowired
 	private DataService dataService;

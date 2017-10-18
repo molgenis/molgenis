@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.directory;
+package org.molgenis.dataexplorer.negotiator;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Nullable;
 
 @Component
-public class DirectorySettings extends DefaultSettingsEntity
+public class NegotiatorSettings extends DefaultSettingsEntity
 {
 	private static final long serialVersionUID = 1L;
 	public static final String COLLECTION_ENTITY = "collection_entity";
@@ -20,7 +20,7 @@ public class DirectorySettings extends DefaultSettingsEntity
 	private static final String NEGOTIATOR_URL_DEFAULT = "https://bbmri-dev.mitro.dkfz.de/api/directory/create_query";
 	private static final String ID = "directory";
 
-	public DirectorySettings()
+	public NegotiatorSettings()
 	{
 		super(ID);
 	}

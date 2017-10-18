@@ -1,8 +1,6 @@
-package org.molgenis.dataexplorer.controller;
+package org.molgenis.dataexplorer.negotiator;
 
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.dataexplorer.directory.DirectorySettings;
-import org.molgenis.dataexplorer.directory.NegotiatorQuery;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -22,21 +20,21 @@ import java.util.Base64;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.dataexplorer.controller.DirectoryController.URI;
+import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class DirectoryController extends PluginController
+public class NegotiatorController extends PluginController
 {
-	private static final Logger LOG = LoggerFactory.getLogger(DirectoryController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(NegotiatorController.class);
 	public static final String ID = "directory";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	private final DirectorySettings settings;
+	private final NegotiatorSettings settings;
 	private final RestTemplate restTemplate;
 	private final PermissionService permissions;
 
-	public DirectoryController(DirectorySettings settings, RestTemplate restTemplate, PermissionService permissions)
+	public NegotiatorController(NegotiatorSettings settings, RestTemplate restTemplate, PermissionService permissions)
 	{
 		super(URI);
 		this.settings = requireNonNull(settings);
@@ -47,6 +45,7 @@ public class DirectoryController extends PluginController
 	@RunAsSystem
 	public boolean showDirectoryButton(String selectedEntityName)
 	{
+		//TODO: get settings for this entity from db
 		if (!permissions.hasPermissionOnPlugin(ID, Permission.READ))
 		{
 			return false;
@@ -59,6 +58,7 @@ public class DirectoryController extends PluginController
 	@ResponseBody
 	public String exportToNegotiator(@RequestBody NegotiatorQuery query) throws Exception
 	{
+		//TODO: get settings for this entity from db
 		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
 
 		String username = settings.getUsername();
