@@ -1,6 +1,15 @@
 package org.molgenis.dataexplorer.negotiator;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
+import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
+import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -17,9 +26,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
 
 @Controller
@@ -30,58 +41,88 @@ public class NegotiatorController extends PluginController
 	public static final String ID = "directory";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	private final NegotiatorSettings settings;
 	private final RestTemplate restTemplate;
 	private final PermissionService permissions;
+	private final DataService dataService;
+	private final MolgenisRSQL molgenisRSQL;
 
-	public NegotiatorController(NegotiatorSettings settings, RestTemplate restTemplate, PermissionService permissions)
+	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
+			MolgenisRSQL molgenisRSQL)
 	{
 		super(URI);
-		this.settings = requireNonNull(settings);
 		this.restTemplate = requireNonNull(restTemplate);
 		this.permissions = requireNonNull(permissions);
+		this.dataService = requireNonNull(dataService);
+		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 	}
 
 	@RunAsSystem
 	public boolean showDirectoryButton(String selectedEntityName)
 	{
-		//TODO: get settings for this entity from db
-		if (!permissions.hasPermissionOnPlugin(ID, Permission.READ))
-		{
-			return false;
-		}
-		final EntityType collectionEntityType = settings.getCollectionEntityType();
-		return collectionEntityType != null && collectionEntityType.getId().equals(selectedEntityName);
+		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(selectedEntityName);
+		return settings != null && permissions.hasPermissionOnPlugin(ID, Permission.READ) && settings.getBoolean(
+				NegotiatorEntityConfigMeta.ENABLED);
 	}
 
 	@PostMapping("/export")
 	@ResponseBody
-	public String exportToNegotiator(@RequestBody NegotiatorQuery query) throws Exception
+	public String exportToNegotiator(@RequestBody NegotiatorRequest request) throws Exception
 	{
-		//TODO: get settings for this entity from db
-		LOG.info("NegotiatorQuery\n\n" + query + "\n\nreceived, sending request");
-
-		String username = settings.getUsername();
-		String password = settings.getPassword();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", generateBase64Authentication(username, password));
-
-		HttpEntity<NegotiatorQuery> entity = new HttpEntity<>(query, headers);
-
-		try
+		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
+		if (entityConfig != null)
 		{
-			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", settings.getNegotiatorURL());
-			String redirectURL = restTemplate.postForLocation(settings.getNegotiatorURL(), entity).toASCIIString();
-			LOG.trace("Redirecting to " + redirectURL);
-			return redirectURL;
+			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
+			LOG.info("NegotiatorRequest\n\n" + request + "\n\nreceived, sending request");
+
+			String username = config.getUsername();
+			String password = config.getPassword();
+
+			EntityType selectedEntityType = dataService.getEntityType(request.getEntityId());
+			Query<Entity> molgenisQuery = molgenisRSQL.createQuery(request.getRsql(), selectedEntityType);
+
+			List<Collection> collections = dataService.findAll(selectedEntityType.getId(), molgenisQuery)
+													  .map(entity -> Collection.create(
+															  entity.get("collectionID").toString(),
+															  entity.get("biobankID").toString()))
+													  .collect(toList());
+			if (collections.size() == 0)
+			{
+				throw new EmptyCollectionSelectionException("Please make sure your filters result in at least 1 row");
+			}
+			NegotiatorQuery query = NegotiatorQuery.create(request.getURL(), collections, request.getHumanReadable(),
+					request.getnToken());
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.set("Authorization", generateBase64Authentication(username, password));
+
+			HttpEntity<NegotiatorQuery> entity = new HttpEntity<>(query, headers);
+
+			try
+			{
+				LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", config.getNegotiatorURL());
+				String redirectURL = restTemplate.postForLocation(config.getNegotiatorURL(), entity).toASCIIString();
+				LOG.trace("Redirecting to " + redirectURL);
+				return redirectURL;
+			}
+			catch (Exception e)
+			{
+				LOG.error("Posting to the directory went wrong: ", e);
+				throw e;
+			}
 		}
-		catch (Exception e)
+		else
 		{
-			LOG.error("Posting to the directory went wrong: ", e);
-			throw e;
+			throw new MolgenisDataException("No negotiator configuration found for the selected entity");
 		}
+	}
+
+	private NegotiatorEntityConfig getNegotiatorEntityConfig(String entityId)
+	{
+		Query query = new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMeta.ENTITY, entityId);
+		NegotiatorEntityConfig config = dataService.findOne(NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query,
+				NegotiatorEntityConfig.class);
+		return config;
 	}
 
 	/**

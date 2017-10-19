@@ -8,16 +8,13 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-
 @ContextConfiguration(classes = GsonConfig.class)
 public class NegotiatorQueryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private Gson gson;
 
-	private NegotiatorQuery negotiatorQuery = NegotiatorQuery.createQuery("url", Collections.emptyList(),
-			"humanReadable", null);
+	private NegotiatorQuery negotiatorQuery = null;//NegotiatorQuery.createQuery("url", Collections.emptyList(),			"humanReadable", null);
 
 	private String json = "{\"URL\":\"url\",\"collections\":[],\"humanReadable\":\"humanReadable\"}";
 

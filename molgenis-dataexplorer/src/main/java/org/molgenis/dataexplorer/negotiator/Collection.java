@@ -14,7 +14,7 @@ public abstract class Collection
 	@Nullable
 	public abstract String getBiobankId();
 
-	public static Collection createCollection(String collectionId, String biobankId)
+	public static Collection create(String collectionId, String biobankId)
 	{
 		return new AutoValue_Collection(collectionId, biobankId);
 	}

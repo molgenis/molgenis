@@ -1,0 +1,67 @@
+package org.molgenis.dataexplorer.negotiator.config;
+
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+
+@Component
+public class NegotiatorEntityConfigMeta extends SystemEntityType
+{
+	public static final String SIMPLE_NAME = "NegotiatorEntityConfig";
+
+	public static final String NEGOTIATORENTITYCONFIG =
+			NegotiatorPackage.PACKAGE_NEGOTIATOR + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
+	public static final String IDENTIFIER = "id";
+	public static final String COLLECTION_ID = "collectionId";
+	public static final String BIOBANK_ID = "biobankId";
+	public static final String ENTITY = "entity";
+	public static final String ENABLED = "enabled";
+	public static final String NEGOTIATOR_CONFIG = "negotiatorConfig";
+
+	private final EntityTypeMetadata entityTypeMetadata;
+	private final AttributeMetadata attributeMetadata;
+	private final NegotiatorPackage negotiatorPackage;
+	private final NegotiatorConfigMeta negotiatorConfigMeta;
+
+	public NegotiatorEntityConfigMeta(AttributeMetadata attributeMetadata, EntityTypeMetadata entityTypeMetadata,
+			NegotiatorPackage negotiatorPackage, NegotiatorConfigMeta negotiatorConfigMeta)
+	{
+		super(SIMPLE_NAME, NegotiatorPackage.PACKAGE_NEGOTIATOR);
+		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
+		this.attributeMetadata = requireNonNull(attributeMetadata);
+		this.negotiatorPackage = requireNonNull(negotiatorPackage);
+		this.negotiatorConfigMeta = requireNonNull(negotiatorConfigMeta);
+	}
+
+	@Override
+	protected void init()
+	{
+		setLabel("Negotiator Entity Config");
+		setPackage(negotiatorPackage);
+		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier").setAuto(false).setNillable(false);
+		addAttribute(ENABLED).setDataType(AttributeType.BOOL).setNillable(false);
+		addAttribute(ENTITY).setDataType(AttributeType.XREF)
+							.setRefEntity(entityTypeMetadata)
+							.setNillable(false)
+							.setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+		addAttribute(NEGOTIATOR_CONFIG).setDataType(AttributeType.XREF)
+									   .setRefEntity(negotiatorConfigMeta)
+									   .setNillable(false)
+									   .setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+		addAttribute(COLLECTION_ID).setDataType(AttributeType.XREF)
+								   .setRefEntity(attributeMetadata)
+								   .setNillable(false)
+								   .setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+		addAttribute(BIOBANK_ID).setDataType(AttributeType.XREF)
+								.setRefEntity(attributeMetadata)
+								.setNillable(false)
+								.setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+	}
+}

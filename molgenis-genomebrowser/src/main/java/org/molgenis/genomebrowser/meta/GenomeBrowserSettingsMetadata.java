@@ -47,6 +47,7 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType
 			GenomeBrowserAttributesMetadata genomeBrowserAttributesMetadata, GenomeBrowserPackage genomeBrowserPackage)
 	{
 		super(SIMPLE_NAME, GenomeBrowserPackage.PACKAGE_GENOME_BROWSER);
+
 		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
 		this.attributeMetadata = requireNonNull(attributeMetadata);
 		this.genomeBrowserAttributesMetadata = requireNonNull(genomeBrowserAttributesMetadata);
