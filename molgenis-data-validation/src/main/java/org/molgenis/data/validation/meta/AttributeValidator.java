@@ -30,6 +30,8 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD;
+import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 
 /**
  * Attribute metadata validator
@@ -39,7 +41,7 @@ public class AttributeValidator
 {
 	public enum ValidationMode
 	{
-		ADD, UPDATE
+		ADD, ADD_SKIP_ENTITY_VALIDATION, UPDATE, UPDATE_SKIP_ENTITY_VALIDATION
 	}
 
 	private final DataService dataService;
@@ -56,16 +58,18 @@ public class AttributeValidator
 	public void validate(Attribute attr, ValidationMode validationMode)
 	{
 		validateName(attr);
-		validateDefaultValue(attr);
+		validateDefaultValue(attr, validationMode == ADD || validationMode == UPDATE);
 		validateParent(attr);
 		validateChildren(attr);
 
 		switch (validationMode)
 		{
 			case ADD:
+			case ADD_SKIP_ENTITY_VALIDATION:
 				validateAdd(attr);
 				break;
 			case UPDATE:
+			case UPDATE_SKIP_ENTITY_VALIDATION:
 				Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(),
 						Attribute.class);
 				validateUpdate(attr, currentAttr);
@@ -138,7 +142,7 @@ public class AttributeValidator
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
 	}
 
-	void validateDefaultValue(Attribute attr)
+	void validateDefaultValue(Attribute attr, boolean validateEntityReferences)
 	{
 		String value = attr.getDefaultValue();
 		if (value != null)
@@ -188,31 +192,34 @@ public class AttributeValidator
 						format("Invalid default value [%s] for data type [%s]", value, attr.getDataType())));
 			}
 
-			if (isSingleReferenceType(attr))
+			if (validateEntityReferences)
 			{
-				Entity refEntity = (Entity) typedValue;
-				EntityType refEntityType = attr.getRefEntity();
-				if (dataService.query(refEntityType.getId())
-							   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
-							   .count() == 0)
+				if (isSingleReferenceType(attr))
 				{
-					throw new MolgenisValidationException(
-							new ConstraintViolation(format("Default value [%s] refers to an unknown entity", value)));
+					Entity refEntity = (Entity) typedValue;
+					EntityType refEntityType = attr.getRefEntity();
+					if (dataService.query(refEntityType.getId())
+								   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
+								   .count() == 0)
+					{
+						throw new MolgenisValidationException(new ConstraintViolation(
+								format("Default value [%s] refers to an unknown entity", value)));
+					}
 				}
-			}
-			else if (isMultipleReferenceType(attr))
-			{
-				Iterable<Entity> refEntitiesValue = (Iterable<Entity>) typedValue;
-				EntityType refEntityType = attr.getRefEntity();
-				if (dataService.query(refEntityType.getId())
-							   .in(refEntityType.getIdAttribute().getName(),
-									   StreamSupport.stream(refEntitiesValue.spliterator(), false)
-													.map(Entity::getIdValue)
-													.collect(toList()))
-							   .count() < Iterables.size(refEntitiesValue))
+				else if (isMultipleReferenceType(attr))
 				{
-					throw new MolgenisValidationException(new ConstraintViolation(
-							format("Default value [%s] refers to one or more unknown entities", value)));
+					Iterable<Entity> refEntitiesValue = (Iterable<Entity>) typedValue;
+					EntityType refEntityType = attr.getRefEntity();
+					if (dataService.query(refEntityType.getId())
+								   .in(refEntityType.getIdAttribute().getName(),
+										   StreamSupport.stream(refEntitiesValue.spliterator(), false)
+														.map(Entity::getIdValue)
+														.collect(toList()))
+								   .count() < Iterables.size(refEntitiesValue))
+					{
+						throw new MolgenisValidationException(new ConstraintViolation(
+								format("Default value [%s] refers to one or more unknown entities", value)));
+					}
 				}
 			}
 		}
