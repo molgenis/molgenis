@@ -6,16 +6,16 @@ import org.molgenis.gson.AutoGson;
 import javax.annotation.Nullable;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_Href.class)
-public abstract class Href
+@AutoGson(autoValueClass = AutoValue_NavigatorLink.class)
+public abstract class NavigatorLink
 {
 	public abstract String getHref();
 
 	@Nullable
 	public abstract String getLabel();
 
-	public static Href create(String href, String label)
+	public static NavigatorLink create(String href, String label)
 	{
-		return new AutoValue_Href(href, label);
+		return new AutoValue_NavigatorLink(href, label);
 	}
 }

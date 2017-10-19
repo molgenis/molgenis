@@ -563,8 +563,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	}
 
 	@Nullable
-	public void setShowPackageHref(boolean showPackageHref)
+	public void setShowNavigatorLink(boolean showNavigatorLink)
 	{
-		set(Meta.GENERAL_NAVIGATOR_LINK, showPackageHref);
+		set(Meta.GENERAL_NAVIGATOR_LINK, showNavigatorLink);
 	}
 }

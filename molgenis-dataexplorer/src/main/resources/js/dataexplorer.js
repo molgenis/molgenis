@@ -304,7 +304,7 @@ $.when($,
                 }
             });
 
-            $.get(molgenis.getContextUrl() + '/packageHref?entity=' + state.entity).done(function (data) {
+            $.get(molgenis.getContextUrl() + '/navigatorLinks?entity=' + state.entity).done(function (data) {
 
                 if (data.length > 0) {
                     $("#entity-package-path").removeClass('hidden');

@@ -25,8 +25,8 @@
             <div class="row">
                 <div class="col-md-7">
                     <h3 id="entity-class-name"></h3>
-                <#if show_navigator_link??>
-                    <span id="entity-package-path" <#if !plugin_settings.get("show_package_href")?? || plugin_settings.get("show_package_href") == false>
+                <#if showNavigatorLink??>
+                    <span id="entity-package-path" <#if !plugin_settings.get("show_navigator_link")?? || plugin_settings.get("show_navigator_link") == false>
                           style="display:none"</#if>></span>
                 </#if>
                     <span id="entity-class-description"></span>
