@@ -182,7 +182,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	{
 		EditorAttribute editorAttribute = EditorAttribute.create("1", null, null, null, null, null, null, null, false,
 				false, false, null, ImmutableMap.of(), null, ImmutableMap.of(), false, ImmutableList.of(), null, null,
-				false, false, ImmutableList.of(), null, null, null, 1);
+				false, false, ImmutableList.of(), null, null, null, null, 1);
 
 		return EditorAttributeResponse.create(editorAttribute,
 				newArrayList("en", "nl", "de", "es", "it", "pt", "fr", "xx"));

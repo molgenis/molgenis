@@ -40,6 +40,7 @@ class AttributeResponseV2
 	private Boolean isAggregatable;
 	private Range range;
 	private String expression;
+	private String nullableExpression;
 	private String visibleExpression;
 	private String validationExpression;
 
@@ -122,6 +123,7 @@ class AttributeResponseV2
 		this.isAggregatable = attr.isAggregatable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();
+		this.nullableExpression = attr.getNullableExpression();
 		this.visibleExpression = attr.getVisibleExpression();
 		this.validationExpression = attr.getValidationExpression();
 	}
@@ -280,6 +282,11 @@ class AttributeResponseV2
 	public String getExpression()
 	{
 		return expression;
+	}
+
+	public String getNullableExpression()
+	{
+		return nullableExpression;
 	}
 
 	public String getVisibleExpression()

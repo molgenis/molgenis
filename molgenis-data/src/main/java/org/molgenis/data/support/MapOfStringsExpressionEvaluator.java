@@ -355,6 +355,12 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		}
 
 		@Override
+		public String getNullableExpression()
+		{
+			return attr.getNullableExpression();
+		}
+
+		@Override
 		public String getVisibleExpression()
 		{
 			return attr.getVisibleExpression();

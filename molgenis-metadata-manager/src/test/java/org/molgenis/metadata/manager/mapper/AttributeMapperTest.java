@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.*;
@@ -32,8 +31,6 @@ public class AttributeMapperTest
 	private TagMapper tagMapper;
 	@Mock
 	private EntityTypeReferenceMapper entityTypeReferenceMapper;
-	@Mock
-	private DataService dataService;
 	@Mock
 	private AttributeReferenceMapper attributeReferenceMapper;
 	@Mock
@@ -78,7 +75,7 @@ public class AttributeMapperTest
 		assertEquals(editorAttribute,
 				EditorAttribute.create(id, null, "string", null, null, null, null, null, false, false, false, null,
 						ImmutableMap.of(), null, ImmutableMap.of(), false, of(), null, null, false, false, editorTags,
-						null, null, null, sequenceNumber));
+						null, null, null, null, sequenceNumber));
 	}
 
 	@Test
@@ -113,6 +110,7 @@ public class AttributeMapperTest
 		boolean unique = false;
 		@SuppressWarnings("unchecked")
 		ImmutableList<EditorTagIdentifier> editorTagIdentifiers = mock(ImmutableList.class);
+		String nullableExpression = "nullableExpression";
 		String visibleExpression = "visibleExpression";
 		String validationExpression = "validationExpression";
 		String defaultValue = "defaultValue";
@@ -146,11 +144,13 @@ public class AttributeMapperTest
 		EditorAttribute editorAttribute = EditorAttribute.create(id, name, type, editorParentAttributeIdentifier,
 				editorRefEntityType, editorMappedByAttribute, editorSort, expression, nullable, auto, visible, label,
 				i18nLabel, description, i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly,
-				unique, editorTagIdentifiers, visibleExpression, validationExpression, defaultValue, sequenceNumber);
+				unique, editorTagIdentifiers, nullableExpression, visibleExpression, validationExpression, defaultValue,
+				sequenceNumber);
 		EditorAttribute editorParentAttribute = EditorAttribute.create(parentId, name, type, null, editorRefEntityType,
 				editorMappedByAttribute, editorSort, expression, nullable, auto, visible, label, i18nLabel, description,
 				i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique,
-				editorTagIdentifiers, visibleExpression, validationExpression, defaultValue, sequenceNumber);
+				editorTagIdentifiers, nullableExpression, visibleExpression, validationExpression, defaultValue,
+				sequenceNumber);
 		ImmutableList<Attribute> attributes = copyOf(
 				attributeMapper.toAttributes(of(editorAttribute, editorParentAttribute), editorEntityType));
 		assertEquals(attributes.size(), 2);
@@ -228,6 +228,7 @@ public class AttributeMapperTest
 		Long rangeMax = 10L;
 		boolean readonly = false;
 		boolean unique = false;
+		String nullableExpression = "nullableExpression";
 		String visibleExpression = "visibleExpression";
 		String validationExpression = "validationExpression";
 		String defaultValue = "defaultValue";
@@ -265,6 +266,7 @@ public class AttributeMapperTest
 		@SuppressWarnings("unchecked")
 		Iterable<Tag> tags = mock(Iterable.class);
 		when(attribute.getTags()).thenReturn(tags);
+		when(attribute.getNullableExpression()).thenReturn(nullableExpression);
 		when(attribute.getVisibleExpression()).thenReturn(visibleExpression);
 		when(attribute.getValidationExpression()).thenReturn(validationExpression);
 		when(attribute.getDefaultValue()).thenReturn(defaultValue);
@@ -287,8 +289,8 @@ public class AttributeMapperTest
 		EditorAttribute expectedEditorAttribute = EditorAttribute.create(id, name, type, editorParentAttribute,
 				editorRefEntityType, editorMappedByAttribute, editorSort, expression, nullable, auto, visible, label,
 				i18nLabel, description, i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly,
-				unique, editorTags, visibleExpression, validationExpression, defaultValue, sequenceNumber);
+				unique, editorTags, nullableExpression, visibleExpression, validationExpression, defaultValue,
+				sequenceNumber);
 		assertEquals(editorAttributes, of(expectedEditorAttribute));
-
 	}
 }

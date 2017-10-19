@@ -7,6 +7,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -39,7 +40,8 @@ public class EntityAttributesValidator
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityType meta)
 	{
-		Set<ConstraintViolation> violations = checkValidationExpressions(entity, meta);
+		Set<ConstraintViolation> violations = checkNullableExpressions(entity, meta);
+		violations.addAll(checkValidationExpressions(entity, meta));
 
 		for (Attribute attr : meta.getAtomicAttributes())
 		{
@@ -171,6 +173,39 @@ public class EntityAttributesValidator
 			return createConstraintViolation(entity, attr, entityType, "Not a valid entity type.");
 		}
 		return null;
+	}
+
+	private Set<ConstraintViolation> checkNullableExpressions(Entity entity, EntityType entityType)
+	{
+		List<String> nullableExpressions = new ArrayList<>();
+		List<Attribute> expressionAttributes = new ArrayList<>();
+
+		for (Attribute attribute : entityType.getAtomicAttributes())
+		{
+			String nullableExpression = attribute.getNullableExpression();
+			if (nullableExpression != null)
+			{
+				expressionAttributes.add(attribute);
+				nullableExpressions.add(nullableExpression);
+			}
+		}
+
+		Set<ConstraintViolation> violations = new LinkedHashSet<>();
+
+		if (!nullableExpressions.isEmpty())
+		{
+			List<Boolean> results = expressionValidator.resolveBooleanExpressions(nullableExpressions, entity);
+			for (int i = 0; i < results.size(); i++)
+			{
+				if (!results.get(i) && EntityUtils.isNullValue(entity, expressionAttributes.get(i)))
+				{
+					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), entityType,
+							format("Offended expression: %s", nullableExpressions.get(i))));
+				}
+			}
+		}
+
+		return violations;
 	}
 
 	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta)
