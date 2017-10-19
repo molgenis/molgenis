@@ -325,9 +325,9 @@ public class DataExplorerController extends PluginController
 
 	@GetMapping("/navigatorLinks")
 	@ResponseBody
-	public LinkedList<NavigatorLink> getNavigatorLinks(@RequestParam("entity") String entityTypeId)
+	public List<NavigatorLink> getNavigatorLinks(@RequestParam("entity") String entityTypeId)
 	{
-		LinkedList<NavigatorLink> result = new LinkedList<>();
+		List<NavigatorLink> result = new LinkedList<>();
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 
 		if (entityType != null)
@@ -343,7 +343,7 @@ public class DataExplorerController extends PluginController
 		return result;
 	}
 
-	private void getNavigatorLinks(LinkedList<NavigatorLink> result, Package pack)
+	private void getNavigatorLinks(List<NavigatorLink> result, Package pack)
 	{
 		if (pack != null)
 		{
