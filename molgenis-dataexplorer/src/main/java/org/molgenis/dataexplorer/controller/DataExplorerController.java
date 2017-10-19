@@ -209,6 +209,7 @@ public class DataExplorerController extends PluginController
 					model.addAttribute("chrom_attr", track.getGenomeBrowserAttrs().getChrom());
 				}
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
+				model.addAttribute("NegotiatorEnabled", directoryController.isNegotiatorEnabled(entityTypeId));
 				break;
 			case MOD_ENTITIESREPORT:
 				//TODO: figure out if we need to know pos and chrom attrs here
@@ -216,6 +217,7 @@ public class DataExplorerController extends PluginController
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
+				model.addAttribute("NegotiatorEnabled", directoryController.isNegotiatorEnabled(entityTypeId));
 
 				model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
 				model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));

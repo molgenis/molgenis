@@ -1,11 +1,9 @@
 package org.molgenis.dataexplorer.negotiator;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
@@ -44,16 +42,16 @@ public class NegotiatorController extends PluginController
 	private final RestTemplate restTemplate;
 	private final PermissionService permissions;
 	private final DataService dataService;
-	private final MolgenisRSQL molgenisRSQL;
+	private final QueryRsqlConverter rsqlQueryConverter;
 
 	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
-			MolgenisRSQL molgenisRSQL)
+			QueryRsqlConverter rsqlQueryConverter)
 	{
 		super(URI);
 		this.restTemplate = requireNonNull(restTemplate);
 		this.permissions = requireNonNull(permissions);
 		this.dataService = requireNonNull(dataService);
-		this.molgenisRSQL = requireNonNull(molgenisRSQL);
+		this.rsqlQueryConverter = requireNonNull(rsqlQueryConverter);
 	}
 
 	@RunAsSystem
@@ -62,6 +60,14 @@ public class NegotiatorController extends PluginController
 		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(selectedEntityName);
 		return settings != null && permissions.hasPermissionOnPlugin(ID, Permission.READ) && settings.getBoolean(
 				NegotiatorEntityConfigMeta.ENABLED);
+	}
+
+	@RunAsSystem
+	public boolean isNegotiatorEnabled(String entityTypeId)
+	{
+		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(entityTypeId);
+		return settings == null || settings.getBoolean(NegotiatorEntityConfigMeta.ENABLED);
+
 	}
 
 	@PostMapping("/export")
@@ -74,47 +80,72 @@ public class NegotiatorController extends PluginController
 			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
 			LOG.info("NegotiatorRequest\n\n" + request + "\n\nreceived, sending request");
 
-			String username = config.getUsername();
-			String password = config.getPassword();
+			List<Collection> collections = getCollections(request, entityConfig);
 
-			EntityType selectedEntityType = dataService.getEntityType(request.getEntityId());
-			Query<Entity> molgenisQuery = molgenisRSQL.createQuery(request.getRsql(), selectedEntityType);
+			HttpEntity<NegotiatorQuery> queryHttpEntity = getNegotiatorQueryHttpEntity(request, config, collections);
 
-			List<Collection> collections = dataService.findAll(selectedEntityType.getId(), molgenisQuery)
-													  .map(entity -> Collection.create(
-															  entity.get("collectionID").toString(),
-															  entity.get("biobankID").toString()))
-													  .collect(toList());
-			if (collections.size() == 0)
-			{
-				throw new EmptyCollectionSelectionException("Please make sure your filters result in at least 1 row");
-			}
-			NegotiatorQuery query = NegotiatorQuery.create(request.getURL(), collections, request.getHumanReadable(),
-					request.getnToken());
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			headers.set("Authorization", generateBase64Authentication(username, password));
-
-			HttpEntity<NegotiatorQuery> entity = new HttpEntity<>(query, headers);
-
-			try
-			{
-				LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", config.getNegotiatorURL());
-				String redirectURL = restTemplate.postForLocation(config.getNegotiatorURL(), entity).toASCIIString();
-				LOG.trace("Redirecting to " + redirectURL);
-				return redirectURL;
-			}
-			catch (Exception e)
-			{
-				LOG.error("Posting to the directory went wrong: ", e);
-				throw e;
-			}
+			return postQueryToNegotiator(config, queryHttpEntity);
 		}
 		else
 		{
 			throw new MolgenisDataException("No negotiator configuration found for the selected entity");
 		}
+	}
+
+	private String postQueryToNegotiator(NegotiatorConfig config, HttpEntity<NegotiatorQuery> queryHttpEntity)
+	{
+		try
+		{
+			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", config.getNegotiatorURL());
+			String redirectURL = restTemplate.postForLocation(config.getNegotiatorURL(), queryHttpEntity)
+											 .toASCIIString();
+			LOG.trace("Redirecting to " + redirectURL);
+			return redirectURL;
+		}
+		catch (Exception e)
+		{
+			LOG.error("Posting to the directory went wrong: ", e);
+			throw e;
+		}
+	}
+
+	private List<Collection> getCollections(@RequestBody NegotiatorRequest request, NegotiatorEntityConfig entityConfig)
+	{
+		EntityType selectedEntityType = dataService.getEntityType(request.getEntityId());
+		Query<Entity> molgenisQuery = rsqlQueryConverter.convert(request.getRsql()).createQuery(selectedEntityType);
+		Fetch fetch = new Fetch().field(
+				entityConfig.getEntity(NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class).getName())
+								 .field(entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class)
+													.getName());
+		molgenisQuery.fetch(fetch);
+		List<Collection> collections = dataService.findAll(selectedEntityType.getId(), molgenisQuery)
+												  .map(entity -> Collection.create(entity.get(entityConfig.getEntity(
+														  NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class)
+																										  .getName())
+																						 .toString(), entity.get(
+														  entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID,
+																  Attribute.class).getName()).toString()))
+												  .collect(toList());
+		if (collections.size() == 0)
+		{
+			throw new EmptyCollectionSelectionException("Please make sure your filters result in at least 1 row");
+		}
+		return collections;
+	}
+
+	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(@RequestBody NegotiatorRequest request,
+			NegotiatorConfig config, List<Collection> collections)
+	{
+		NegotiatorQuery query = NegotiatorQuery.create(request.getURL(), collections, request.getHumanReadable(),
+				request.getnToken());
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		String username = config.getUsername();
+		String password = config.getPassword();
+		headers.set("Authorization", generateBase64Authentication(username, password));
+
+		return new HttpEntity<>(query, headers);
 	}
 
 	private NegotiatorEntityConfig getNegotiatorEntityConfig(String entityId)

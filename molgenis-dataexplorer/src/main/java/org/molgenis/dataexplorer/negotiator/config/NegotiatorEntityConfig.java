@@ -26,6 +26,6 @@ public class NegotiatorEntityConfig extends StaticEntity
 	@Nullable
 	public NegotiatorConfig getNegotiatorConfig()
 	{
-		return getEntity(NegotiatorConfigMeta.NEGOTIATORENTITYCONFIG, NegotiatorConfig.class);
+		return getEntity(NegotiatorEntityConfigMeta.NEGOTIATOR_CONFIG, NegotiatorConfig.class);
 	}
 }
