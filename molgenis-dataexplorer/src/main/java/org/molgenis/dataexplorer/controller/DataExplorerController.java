@@ -159,7 +159,7 @@ public class DataExplorerController extends PluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", currentUserIsSu);
-		model.addAttribute("showPackageHref", dataExplorerSettings.isShowPackageHref());
+		model.addAttribute("showNavigatorLink", dataExplorerSettings.isShowNavigatorLink());
 
 		return "view-dataexplorer";
 	}
