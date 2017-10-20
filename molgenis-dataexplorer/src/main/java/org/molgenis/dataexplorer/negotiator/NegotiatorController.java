@@ -72,13 +72,13 @@ public class NegotiatorController extends PluginController
 
 	@PostMapping("/export")
 	@ResponseBody
-	public String exportToNegotiator(@RequestBody NegotiatorRequest request) throws Exception
+	public String exportToNegotiator(@RequestBody NegotiatorRequest request)
 	{
 		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
 		if (entityConfig != null)
 		{
 			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
-			LOG.info("NegotiatorRequest\n\n" + request + "\n\nreceived, sending request");
+			LOG.info("NegotiatorRequest\n\n%s\n\nreceived, sending request", request);
 
 			List<Collection> collections = getCollections(request, entityConfig);
 
@@ -96,15 +96,15 @@ public class NegotiatorController extends PluginController
 	{
 		try
 		{
-			LOG.trace("DirectorySettings.NEGOTIATOR_URL: [{}]", config.getNegotiatorURL());
+			LOG.trace("NEGOTIATOR_URL: [{}]", config.getNegotiatorURL());
 			String redirectURL = restTemplate.postForLocation(config.getNegotiatorURL(), queryHttpEntity)
 											 .toASCIIString();
-			LOG.trace("Redirecting to " + redirectURL);
+			LOG.trace("Redirecting to %s", redirectURL);
 			return redirectURL;
 		}
 		catch (Exception e)
 		{
-			LOG.error("Posting to the directory went wrong: ", e);
+			LOG.error("Posting to the negotiator went wrong: ", e);
 			throw e;
 		}
 	}
@@ -126,7 +126,7 @@ public class NegotiatorController extends PluginController
 														  entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID,
 																  Attribute.class).getName()).toString()))
 												  .collect(toList());
-		if (collections.size() == 0)
+		if (collections.isEmpty())
 		{
 			throw new EmptyCollectionSelectionException("Please make sure your filters result in at least 1 row");
 		}
@@ -151,9 +151,8 @@ public class NegotiatorController extends PluginController
 	private NegotiatorEntityConfig getNegotiatorEntityConfig(String entityId)
 	{
 		Query query = new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMeta.ENTITY, entityId);
-		NegotiatorEntityConfig config = dataService.findOne(NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query,
+		return dataService.findOne(NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query,
 				NegotiatorEntityConfig.class);
-		return config;
 	}
 
 	/**
