@@ -99,8 +99,8 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		assertEquals(resultEntity.get(GONL_GENOME_AF), null);
-		assertEquals(resultEntity.get(GONL_GENOME_GTC), null);
+		assertNull(resultEntity.get(GONL_GENOME_AF));
+		assertNull(resultEntity.get(GONL_GENOME_GTC));
 	}
 
 	@Test
@@ -153,8 +153,8 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		assertEquals(resultEntity.get(GONL_GENOME_AF), null);
-		assertEquals(resultEntity.get(GONL_GENOME_GTC), null);
+		assertNull(resultEntity.get(GONL_GENOME_AF));
+		assertNull(resultEntity.get(GONL_GENOME_GTC));
 	}
 
 	@Test
@@ -189,8 +189,8 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		assertEquals(resultEntity.get(GONL_GENOME_AF), null);
-		assertEquals(resultEntity.get(GONL_GENOME_GTC), null);
+		assertNull(resultEntity.get(GONL_GENOME_AF));
+		assertNull(resultEntity.get(GONL_GENOME_GTC));
 	}
 
 	@Test
@@ -225,8 +225,8 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		assertEquals(resultEntity.get(GONL_GENOME_AF), null);
-		assertEquals(resultEntity.get(GONL_GENOME_GTC), null);
+		assertNull(resultEntity.get(GONL_GENOME_AF));
+		assertNull(resultEntity.get(GONL_GENOME_GTC));
 	}
 
 	@Test
@@ -279,8 +279,8 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		assertEquals(resultEntity.get(GONL_GENOME_AF), null);
-		assertEquals(resultEntity.get(GONL_GENOME_GTC), null);
+		assertNull(resultEntity.get(GONL_GENOME_AF));
+		assertNull(resultEntity.get(GONL_GENOME_GTC));
 	}
 
 	@Test
@@ -354,8 +354,8 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		assertEquals(resultEntity.get(GONL_GENOME_AF), null);
-		assertEquals(resultEntity.get(GONL_GENOME_GTC), null);
+		assertNull(resultEntity.get(GONL_GENOME_AF));
+		assertNull(resultEntity.get(GONL_GENOME_GTC));
 	}
 
 	@Configuration
