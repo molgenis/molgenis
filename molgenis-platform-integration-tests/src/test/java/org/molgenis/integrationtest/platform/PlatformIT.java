@@ -1228,7 +1228,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private Stream<Entity> createTestEntities(EntityType entityType, EntityType refEntityType, int count)
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityType, 6);
-		runAsSystem(() -> dataService.add(refEntityType.getId(), refEntities.stream()));
+		//noinspection RedundantCast
+		runAsSystem((Runnable) () -> dataService.add(refEntityType.getId(), refEntities.stream()));
 		return testHarness.createTestEntities(entityType, count, refEntities);
 	}
 
