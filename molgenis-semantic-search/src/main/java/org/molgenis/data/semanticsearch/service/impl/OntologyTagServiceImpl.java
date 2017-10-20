@@ -1,11 +1,11 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -20,10 +20,9 @@ import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -31,9 +30,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.LinkedHashMultimap.create;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -51,8 +50,6 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private final IdGenerator idGenerator;
 	private final TagMetadata tagMetadata;
 
-	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagServiceImpl.class);
-
 	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
 			IdGenerator idGenerator, TagMetadata tagMetadata)
 	{
@@ -68,7 +65,9 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
 		Iterable<Entity> tags = attributeEntity.getEntities(AttributeMetadata.TAGS);
-		Iterable<Entity> newTags = Iterables.filter(tags, e -> !isSameTag(relationIRI, ontologyTermIRI, e));
+		Iterable<Entity> newTags = StreamSupport.stream(tags.spliterator(), false)
+												.filter(e -> !isSameTag(relationIRI, ontologyTermIRI, e))
+												.collect(Collectors.toList());
 		attributeEntity.set(AttributeMetadata.TAGS, newTags);
 		dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
 		updateEntityTypeEntityWithNewAttributeEntity(entity, attribute, attributeEntity);
@@ -97,16 +96,14 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityType entityType, Attribute attribute)
 	{
 		Multimap<Relation, OntologyTerm> tags = create();
-		Entity entity = findAttributeEntity(entityType.getId(), attribute.getName());
-		if (entity == null)
-		{
-			LOG.warn("Cannot find attribute {}.{}", entityType.getId(), attribute.getName());
-			return tags;
-		}
-		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
+
+		for (Tag tagEntity : attribute.getTags())
 		{
 			SemanticTag<Attribute, OntologyTerm, Ontology> tag = asTag(attribute, tagEntity);
-			tags.put(tag.getRelation(), tag.getObject());
+			if (tag != null)
+			{
+				tags.put(tag.getRelation(), tag.getObject());
+			}
 		}
 		return tags;
 	}
@@ -244,7 +241,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	 */
 	private void updateEntityTypeEntityWithNewAttributeEntity(String entity, String attribute, Entity attributeEntity)
 	{
-		EntityType entityEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entity, EntityType.class);
+		EntityType entityEntity = dataService.getEntityType(entity);
 		Iterable<Attribute> attributes = entityEntity.getOwnAllAttributes();
 		entityEntity.set(ATTRIBUTES, StreamSupport.stream(attributes.spliterator(), false)
 												  .map(att -> att.getName().equals(attribute) ? attributeEntity : att)
@@ -259,19 +256,18 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@RunAsSystem
-	private Entity findAttributeEntity(String entityTypeId, String attributeName)
+	private @NotNull
+	Entity findAttributeEntity(String entityTypeId, String attributeName)
 	{
-		EntityType entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
+		EntityType entityTypeEntity = dataService.getEntityType(entityTypeId);
+		Attribute attributeEntity = entityTypeEntity.getAttribute(attributeName);
 
-		Optional<Attribute> result = stream(entityTypeEntity.getAttributes().spliterator(), false).filter(
-				att -> attributeName.equals(att.getName())).findFirst();
-
-		if (!result.isPresent() && entityTypeEntity.getExtends() != null)
+		if (attributeEntity == null)
 		{
-			return findAttributeEntity(entityTypeEntity.getExtends().getId(), attributeName);
+			throw new UnknownAttributeException(format("Unknown attribute [%s]", attributeName));
 		}
 
-		return result.orElse(null);
+		return attributeEntity;
 	}
 
 	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,

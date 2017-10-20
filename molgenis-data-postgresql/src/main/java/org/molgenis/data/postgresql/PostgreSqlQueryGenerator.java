@@ -17,11 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.QueryRule.Operator.NESTED;
+import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
@@ -32,6 +33,8 @@ import static org.molgenis.data.support.EntityTypeUtils.*;
  */
 class PostgreSqlQueryGenerator
 {
+	private static final String UNSPECIFIED_ATTRIBUTE_MSG = "Can't use %s without specifying an attribute";
+
 	final static String ERR_CODE_READONLY_VIOLATION = "23506";
 
 	private PostgreSqlQueryGenerator()
@@ -735,6 +738,7 @@ class PostgreSqlQueryGenerator
 					result.append(" OR ");
 					break;
 				case LIKE:
+					requireNonNull(attr, format(UNSPECIFIED_ATTRIBUTE_MSG, LIKE));
 					String columnName;
 					if (isPersistedInOtherTable(attr))
 					{
@@ -759,6 +763,7 @@ class PostgreSqlQueryGenerator
 					break;
 				case IN:
 				{
+					requireNonNull(attr, format(UNSPECIFIED_ATTRIBUTE_MSG, IN));
 					Object inValue = r.getValue();
 					if (inValue == null)
 					{
@@ -811,6 +816,7 @@ class PostgreSqlQueryGenerator
 					result.append(" NOT ");
 					break;
 				case RANGE:
+					requireNonNull(attr, format(UNSPECIFIED_ATTRIBUTE_MSG, RANGE));
 					Object range = r.getValue();
 					if (range == null)
 					{
@@ -900,6 +906,8 @@ class PostgreSqlQueryGenerator
 				case GREATER_EQUAL:
 				case LESS:
 				case LESS_EQUAL:
+					requireNonNull(attr, format(UNSPECIFIED_ATTRIBUTE_MSG,
+							format("%s, %s, %s or %s", GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)));
 					if (isPersistedInOtherTable(attr))
 					{
 						predicate.append(getFilterColumnName(attr, mrefFilterIndex.get()));
