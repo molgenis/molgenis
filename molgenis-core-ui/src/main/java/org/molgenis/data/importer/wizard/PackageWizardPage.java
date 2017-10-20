@@ -2,6 +2,7 @@ package org.molgenis.data.importer.wizard;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -15,7 +16,10 @@ import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -77,8 +81,8 @@ public class PackageWizardPage extends AbstractWizardPage
 					String selectedPackage = request.getParameter("selectedPackage");
 
 					// The entities that can be imported
-					LinkedHashMap<String, Boolean> entitiesImportable = importService.determineImportableEntities(
-							metaDataService, repositoryCollection, selectedPackage);
+					Map<String, Boolean> entitiesImportable = importService.determineImportableEntities(metaDataService,
+							repositoryCollection, selectedPackage);
 
 					// The results of the attribute checks are stored in maps with the entityname as key, those need to be updated with the packagename
 					updateFieldReports(importWizard, selectedPackage, entitiesImportable);
@@ -88,11 +92,11 @@ public class PackageWizardPage extends AbstractWizardPage
 					// The entities that can not be imported. If even one entity can not be imported, everything fails
 					List<String> entitiesNotImportable = entitiesImportable.entrySet()
 																		   .stream()
-																		   .filter(entity -> entity.getValue() == false)
+																		   .filter(entity -> !entity.getValue())
 																		   .map(Map.Entry::getKey)
 																		   .collect(toList());
 
-					if (!entitiesNotImportable.isEmpty()) throw new RuntimeException(
+					if (!entitiesNotImportable.isEmpty()) throw new MolgenisDataException(
 							"You are trying to upload entities that are not compatible with the already existing entities: "
 									+ entitiesNotImportable.toString());
 				}
@@ -106,8 +110,7 @@ public class PackageWizardPage extends AbstractWizardPage
 		return null;
 	}
 
-	private void updateFieldReports(ImportWizard importWizard, String pack,
-			LinkedHashMap<String, Boolean> entitiesImportable)
+	private void updateFieldReports(ImportWizard importWizard, String pack, Map<String, Boolean> entitiesImportable)
 	{
 		importWizard.setFieldsAvailable(renameKeys(importWizard.getFieldsAvailable(), pack, entitiesImportable));
 		importWizard.setFieldsDetected(renameKeys(importWizard.getFieldsDetected(), pack, entitiesImportable));
@@ -116,7 +119,7 @@ public class PackageWizardPage extends AbstractWizardPage
 	}
 
 	private Map<String, Collection<String>> renameKeys(Map<String, Collection<String>> map, String pack,
-			LinkedHashMap<String, Boolean> entitiesImportable)
+			Map<String, Boolean> entitiesImportable)
 	{
 		Map<String, Collection<String>> result = new HashMap<>();
 		//if the key is not in the importable entities, this must be caused by the entity being moved into a package

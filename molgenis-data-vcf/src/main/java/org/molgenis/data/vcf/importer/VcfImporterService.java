@@ -38,7 +38,6 @@ public class VcfImporterService implements ImportService
 	private final PermissionSystemService permissionSystemService;
 	private final MetaDataService metaDataService;
 	private final DefaultPackage defaultPackage;
-	private Package package_;
 
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
 			MetaDataService metaDataService, DefaultPackage defaultPackage)
@@ -139,8 +138,9 @@ public class VcfImporterService implements ImportService
 	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities,
 			String packageId) throws IOException
 	{
+
 		EntityImportReport report = new EntityImportReport();
-		Repository<Entity> sampleRepository;
+
 		String entityTypeId = inRepository.getName();
 
 		if (runAsSystem(() -> dataService.hasRepository(entityTypeId)))
@@ -151,34 +151,11 @@ public class VcfImporterService implements ImportService
 		EntityType entityType = inRepository.getEntityType();
 		entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
-		if (packageId != null)
-		{
-			package_ = dataService.getMeta().getPackage(packageId);
-			if (package_ == null) throw new MolgenisDataException(String.format("Unknown package [%s]", packageId));
-			entityType.setPackage(package_);
-		}
-		else
-		{
-			package_ = defaultPackage;
-		}
-		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
-		if (sampleAttribute != null)
-		{
-			EntityType samplesEntityType = sampleAttribute.getRefEntity();
-			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
-			samplesEntityType.setPackage(package_);
-			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
-			permissionSystemService.giveUserWriteMetaPermissions(samplesEntityType);
-			addedEntities.add(sampleAttribute.getRefEntity());
-		}
-		else
-		{
-			sampleRepository = null;
-		}
+		Package targetPackage = determineTargetPackage(packageId, entityType);
+
+		Repository<Entity> sampleRepository = createSampleRepository(addedEntities, entityType, targetPackage);
 
 		Iterator<Entity> inIterator = inRepository.iterator();
-		int sampleEntityCount = 0;
-		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository<Entity> outRepository = runAsSystem(() -> dataService.getMeta().createRepository(entityType)))
 		{
 			permissionSystemService.giveUserWriteMetaPermissions(entityType);
@@ -187,33 +164,7 @@ public class VcfImporterService implements ImportService
 
 			if (sampleRepository != null)
 			{
-				while (inIterator.hasNext())
-				{
-					Entity entity = inIterator.next();
-
-					Iterable<Entity> samples = entity.getEntities(VcfAttributes.SAMPLES);
-					if (samples != null)
-					{
-						for (Entity sample : samples)
-						{
-							sampleEntities.add(sample);
-
-							if (sampleEntities.size() == BATCH_SIZE)
-							{
-								sampleRepository.add(sampleEntities.stream());
-								sampleEntityCount += sampleEntities.size();
-								sampleEntities.clear();
-							}
-						}
-					}
-
-				}
-
-				if (!sampleEntities.isEmpty())
-				{
-					runAsSystem(() -> sampleRepository.add(sampleEntities.stream()));
-					sampleEntityCount += sampleEntities.size();
-				}
+				int sampleEntityCount = addSampleEntities(sampleRepository, inIterator);
 
 				report.addNewEntity(sampleRepository.getName());
 				if (sampleEntityCount > 0)
@@ -237,6 +188,78 @@ public class VcfImporterService implements ImportService
 		report.addNewEntity(entityTypeId);
 
 		return report;
+	}
+
+	private int addSampleEntities(Repository<Entity> sampleRepository, Iterator<Entity> inIterator)
+	{
+		int sampleEntityCount = 0;
+		List<Entity> batch = new ArrayList<>();
+		while (inIterator.hasNext())
+		{
+			Entity entity = inIterator.next();
+
+			Iterable<Entity> samples = entity.getEntities(VcfAttributes.SAMPLES);
+			if (samples != null)
+			{
+				for (Entity sample : samples)
+				{
+					batch.add(sample);
+
+					if (batch.size() == BATCH_SIZE)
+					{
+						sampleRepository.add(batch.stream());
+						sampleEntityCount += batch.size();
+						batch.clear();
+					}
+				}
+			}
+
+		}
+
+		if (!batch.isEmpty())
+		{
+			runAsSystem(() -> sampleRepository.add(batch.stream()));
+			sampleEntityCount += batch.size();
+		}
+		return sampleEntityCount;
+	}
+
+	private Repository<Entity> createSampleRepository(List<EntityType> addedEntities, EntityType entityType,
+			Package targetPackage)
+	{
+		Repository<Entity> sampleRepository;
+		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
+		if (sampleAttribute != null)
+		{
+			EntityType samplesEntityType = sampleAttribute.getRefEntity();
+			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
+			samplesEntityType.setPackage(targetPackage);
+			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
+			permissionSystemService.giveUserWriteMetaPermissions(samplesEntityType);
+			addedEntities.add(sampleAttribute.getRefEntity());
+		}
+		else
+		{
+			sampleRepository = null;
+		}
+		return sampleRepository;
+	}
+
+	private Package determineTargetPackage(String packageId, EntityType entityType)
+	{
+		Package targetPackage;
+		if (packageId != null)
+		{
+			targetPackage = dataService.getMeta().getPackage(packageId);
+			if (targetPackage == null)
+				throw new MolgenisDataException(String.format("Unknown package [%s]", packageId));
+			entityType.setPackage(targetPackage);
+		}
+		else
+		{
+			targetPackage = defaultPackage;
+		}
+		return targetPackage;
 	}
 
 	@Override
@@ -264,7 +287,7 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
+	public Map<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage)
 	{
 		return metaDataService.determineImportableEntities(repositoryCollection);
