@@ -159,7 +159,8 @@ public class DataExplorerController extends PluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", currentUserIsSu);
-		model.addAttribute("showNavigatorLink", dataExplorerSettings.isShowNavigatorLink());
+		boolean navigatorAvailable = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) != null;
+		model.addAttribute("showNavigatorLink", dataExplorerSettings.isShowNavigatorLink() && navigatorAvailable);
 
 		return "view-dataexplorer";
 	}
@@ -329,29 +330,28 @@ public class DataExplorerController extends PluginController
 	{
 		List<NavigatorLink> result = new LinkedList<>();
 		EntityType entityType = dataService.getEntityType(entityTypeId);
-
+		String navigatorPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
 		if (entityType != null)
 		{
 			Package pack = entityType.getPackage();
-			getNavigatorLinks(result, pack);
+			getNavigatorLinks(result, pack, navigatorPath);
 
 			//add root navigator link
-			result.add(NavigatorLink.create(menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/",
-					"glyphicon-home"));
+			result.add(NavigatorLink.create(navigatorPath + "/", "glyphicon-home"));
 			Collections.reverse(result);
 		}
 		return result;
 	}
 
-	private void getNavigatorLinks(List<NavigatorLink> result, Package pack)
+	private void getNavigatorLinks(List<NavigatorLink> result, Package pack, String navigatorPath)
 	{
 		if (pack != null)
 		{
 			String label = pack.getLabel();
-			String href = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + pack.getId();
+			String href = navigatorPath + "/" + pack.getId();
 			result.add(NavigatorLink.create(href, label));
 			pack = pack.getParent();
-			getNavigatorLinks(result, pack);
+			getNavigatorLinks(result, pack, navigatorPath);
 		}
 	}
 

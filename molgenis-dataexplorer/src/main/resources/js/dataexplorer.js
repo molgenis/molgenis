@@ -316,7 +316,7 @@ $.when($,
                         hyperlinks.push(link);
                     });
 
-                    $("#entity-package-path").html(hyperlinks.join(" / "));
+                    $("#entity-package-path").html("(" + hyperlinks.join(" / ") + ")");
                 } else {
                     $("#entity-package-path").addClass('hidden');
                 }
