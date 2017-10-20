@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 public abstract class MultiFileResource implements Resource
 {
@@ -58,15 +59,14 @@ public abstract class MultiFileResource implements Resource
 		}
 	}
 
-	private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
+	private static Optional<Object> getFirstEqualsValueFor(String attributeName, Query<Entity> q)
 	{
 		return q.getRules()
 				.stream()
-				.filter(rule -> attributeName.equals(rule.getField())
-						&& rule.getOperator() == QueryRule.Operator.EQUALS)
+				.filter(rule -> attributeName.equals(rule.getField()))
+				.filter(rule -> rule.getOperator() == QueryRule.Operator.EQUALS)
 				.findFirst()
-				.get()
-				.getValue();
+				.map(QueryRule::getValue);
 	}
 
 	@Override
@@ -77,15 +77,7 @@ public abstract class MultiFileResource implements Resource
 		{
 			initializeResources();
 		}
-
-		for (Resource chrom : resources.values())
-		{
-			if (!chrom.isAvailable())
-			{
-				return false;
-			}
-		}
-		return true;
+		return resources.values().stream().allMatch(ResourceImpl::isAvailable);
 	}
 
 	@Override
@@ -99,24 +91,10 @@ public abstract class MultiFileResource implements Resource
 	{
 		// initialize after autowiring is complete and resources is empty
 		isAvailable();
-		Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
-		Iterable<Entity> result = new ArrayList<>();
-
-		if (chromValue != null)
-		{
-			String chromStringValue = chromValue.toString();
-			Resource resource = resources.get(chromStringValue);
-
-			try
-			{
-				result = resource.findAll(q);
-			}
-			catch (NullPointerException e)
-			{
-				LOG.debug("No file for chromosome %s skipping..", chromStringValue);
-			}
-		}
-
-		return result;
+		return getFirstEqualsValueFor(VcfAttributes.CHROM, q).map(Object::toString)
+															 .filter(resources::containsKey)
+															 .map(resources::get)
+															 .map(resource -> resource.findAll(q))
+															 .orElse(new ArrayList<>());
 	}
 }
