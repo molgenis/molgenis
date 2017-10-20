@@ -62,6 +62,7 @@
         <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
         <node.version>v6.11.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
+        <awaitility.version>3.0.0</awaitility.version>
     </properties>
 
     <distributionManagement>

@@ -24,13 +24,14 @@ import java.util.List;
 import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
-import static java.lang.Thread.sleep;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class OneClickImporterControllerAPIIT
@@ -132,19 +133,9 @@ public class OneClickImporterControllerAPIIT
 		List<String> validJobStats = Arrays.asList("PENDING", "RUNNING", "SUCCESS");
 		assertTrue(validJobStats.contains(jobStatus));
 
-		// Poll job until it finishes
-		int pollIndex = 0;
-		int maxPolls = 10;
-		long pollInterval = 500L;
-		while ((!jobStatus.equals("SUCCESS")) && pollIndex < maxPolls)
-		{
-			LOG.info("Import job status : " + jobStatus);
-			jobStatus = pollJobForStatus(jobUrl);
-			waitForNMillis(pollInterval);
-			pollIndex++;
-		}
-		LOG.info("Import job status : " + jobStatus);
-		assertEquals(jobStatus, "SUCCESS");
+		await().pollDelay(500, MILLISECONDS)
+			   .atMost(10, SECONDS)
+			   .until(() -> pollJobForStatus(jobUrl), equalTo("SUCCESS"));
 
 		// Extract the id of the entity created by the import
 		ValidatableResponse completedJobResponse = given().log()
@@ -213,18 +204,9 @@ public class OneClickImporterControllerAPIIT
 
 	private String pollJobForStatus(String jobUrl)
 	{
-		return given().header(X_MOLGENIS_TOKEN, testUserToken).get(jobUrl).then().extract().path("status");
+		String status = given().header(X_MOLGENIS_TOKEN, testUserToken).get(jobUrl).then().extract().path("status");
+		LOG.info("Import job status : {}", status);
+		return status;
 	}
 
-	private void waitForNMillis(Long numberOfMillis)
-	{
-		try
-		{
-			sleep(numberOfMillis);
-		}
-		catch (InterruptedException e)
-		{
-			LOG.error(e.getMessage());
-		}
-	}
 }
