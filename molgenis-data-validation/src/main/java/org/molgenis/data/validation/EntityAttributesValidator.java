@@ -200,7 +200,7 @@ public class EntityAttributesValidator
 				if (!results.get(i) && EntityUtils.isNullValue(entity, expressionAttributes.get(i)))
 				{
 					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), entityType,
-							format("Offended expression: %s", nullableExpressions.get(i))));
+							format("Offended nullable expression: %s", nullableExpressions.get(i))));
 				}
 			}
 		}
@@ -232,7 +232,7 @@ public class EntityAttributesValidator
 				if (!results.get(i))
 				{
 					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), meta,
-							format("Offended expression: %s", validationExpressions.get(i))));
+							format("Offended validation expression: %s", validationExpressions.get(i))));
 				}
 			}
 		}

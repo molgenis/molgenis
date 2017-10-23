@@ -345,9 +345,9 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest
 				entity)).thenReturn(expressionResults);
 		Set<ConstraintViolation> constraintViolations = entityAttributesValidator.validate(entity, entityType);
 		Set<ConstraintViolation> expectedConstraintViolations = newHashSet(new ConstraintViolation(
-				"Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended expression: expression1",
+				"Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression1",
 				null, entity, attr1, entityType, null), new ConstraintViolation(
-				"Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended expression: expression2",
+				"Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2",
 				emptyList().toString(), entity, attr2, entityType, null));
 		assertEquals(newHashSet(constraintViolations), expectedConstraintViolations);
 	}
