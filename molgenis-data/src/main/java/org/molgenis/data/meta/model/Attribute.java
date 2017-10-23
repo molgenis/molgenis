@@ -110,6 +110,7 @@ public class Attribute extends StaticEntity
 		}
 
 		attrMetaCopy.setTags(Lists.newArrayList(attrMeta.getTags())); // do not deep-copy
+		attrMetaCopy.setValidationExpression(attrMeta.getValidationExpression());
 		attrMetaCopy.setVisibleExpression(attrMeta.getVisibleExpression());
 		attrMetaCopy.setDefaultValue(attrMeta.getDefaultValue());
 		return attrMetaCopy;
