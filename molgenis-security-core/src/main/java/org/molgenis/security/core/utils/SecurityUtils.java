@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -151,16 +150,5 @@ public class SecurityUtils
 		}
 
 		return authorities;
-	}
-
-	/**
-	 * Checks if client session is expired (by checking the requested sessionId).
-	 *
-	 * @return true if session is expired
-	 */
-	public static boolean isSessionExpired(HttpServletRequest request)
-	{
-		return request.getRequestedSessionId() != null && !request.isRequestedSessionIdValid();
-
 	}
 }
