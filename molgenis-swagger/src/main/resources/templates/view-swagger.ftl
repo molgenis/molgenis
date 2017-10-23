@@ -785,6 +785,8 @@ definitions:
         $ref: "#/definitions/Range"
       expression:
         type: string
+      nullableExpression:
+        type: string
       visibleExpression:
         type: string
       validationExpression:
