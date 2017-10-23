@@ -212,7 +212,7 @@ public class AttributeResponse
 		{
 			this.nullableExpression = attr.getNullableExpression();
 		}
-		else this.visibleExpression = null;
+		else this.nullableExpression = null;
 
 		if (attributesSet == null || attributesSet.contains("visibleExpression".toLowerCase()))
 		{
