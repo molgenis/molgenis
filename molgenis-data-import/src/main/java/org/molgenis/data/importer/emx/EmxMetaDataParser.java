@@ -841,7 +841,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				if (emxAttrNillable.equalsIgnoreCase("true") || emxAttrNillable.equalsIgnoreCase("false"))
 				{
-					attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_VISIBLE));
+					attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_NILLABLE));
 				}
 				else
 				{
