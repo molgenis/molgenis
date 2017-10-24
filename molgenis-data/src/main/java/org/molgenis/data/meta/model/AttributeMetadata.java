@@ -66,6 +66,7 @@ public class AttributeMetadata extends SystemEntityType
 	public static final String PARENT = "parent";
 	public static final String CHILDREN = "children";
 	public static final String TAGS = "tags";
+	public static final String NULLABLE_EXPRESSION = "nullableExpression";
 	public static final String VISIBLE_EXPRESSION = "visibleExpression";
 	public static final String VALIDATION_EXPRESSION = "validationExpression";
 	public static final String DEFAULT_VALUE = "defaultValue";
@@ -134,7 +135,11 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(EXPRESSION).setNillable(true)
 								.setLabel("Expression")
 								.setDescription("Computed value expression in Magma JavaScript");
-		addAttribute(IS_NULLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable").setDefaultValue("true");
+		addAttribute(IS_NULLABLE).setDataType(BOOL)
+								 .setNillable(false)
+								 .setLabel("Nillable")
+								 .setDefaultValue("true")
+								 .setValidationExpression(getNullableValidationExpression());
 		addAttribute(IS_AUTO).setDataType(BOOL)
 							 .setNillable(false)
 							 .setLabel("Auto")
@@ -160,6 +165,7 @@ public class AttributeMetadata extends SystemEntityType
 		addAttribute(IS_READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
 		addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
+		addAttribute(NULLABLE_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Nullable expression");
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Visible expression");
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Validation expression");
 		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true).setLabel("Default value");
@@ -190,6 +196,11 @@ public class AttributeMetadata extends SystemEntityType
 		String regex = "/^\\w+(,(ASC|DESC))?(;\\w+(,(ASC|DESC))?)*$/";
 		return "$('" + ORDER_BY + "').isNull().or(" + "$('" + ORDER_BY + "').matches(" + regex + ").and($('" + TYPE
 				+ "').eq('" + getValueString(ONE_TO_MANY) + "'))).value()";
+	}
+
+	private static String getNullableValidationExpression()
+	{
+		return "$('" + IS_NULLABLE + "').eq(true).or(" + "$('" + NULLABLE_EXPRESSION + "').isNull()).value()";
 	}
 
 	private static String getEnumOptionsValidationExpression()

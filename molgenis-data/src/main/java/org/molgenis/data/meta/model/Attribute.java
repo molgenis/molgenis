@@ -110,6 +110,8 @@ public class Attribute extends StaticEntity
 		}
 
 		attrMetaCopy.setTags(Lists.newArrayList(attrMeta.getTags())); // do not deep-copy
+		attrMetaCopy.setNullableExpression(attrMeta.getNullableExpression());
+		attrMetaCopy.setValidationExpression(attrMeta.getValidationExpression());
 		attrMetaCopy.setVisibleExpression(attrMeta.getVisibleExpression());
 		attrMetaCopy.setDefaultValue(attrMeta.getDefaultValue());
 		return attrMetaCopy;
@@ -544,7 +546,24 @@ public class Attribute extends StaticEntity
 	}
 
 	/**
-	 * Javascript expression to determine at runtime if the attribute must be visible or not in the form
+	 * JavaScript expression to determine at runtime if the attribute value is required
+	 *
+	 * @return expression
+	 */
+	@Nullable
+	public String getNullableExpression()
+	{
+		return getString(NULLABLE_EXPRESSION);
+	}
+
+	public Attribute setNullableExpression(String nullableExpression)
+	{
+		set(NULLABLE_EXPRESSION, nullableExpression);
+		return this;
+	}
+
+	/**
+	 * JavaScript expression to determine at runtime if the attribute must be visible or not in the form
 	 *
 	 * @return expression
 	 */
@@ -561,7 +580,7 @@ public class Attribute extends StaticEntity
 	}
 
 	/**
-	 * Javascript expression to validate the value of the attribute
+	 * JavaScript expression to validate the value of the attribute
 	 */
 	@Nullable
 	public String getValidationExpression()

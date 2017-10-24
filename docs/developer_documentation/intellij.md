@@ -13,12 +13,18 @@ Before you start, make sure the following middleware is installed on your system
 * ElasticSearch
 See [quickstart](./quickstart/guide-tomcat.html) for details
 
-Create a database called omx with a user molgenis that has full permissions on the database.
+Create a molgenis superuser in postgres.
+ ```
+ create user molgenis superuser password ‘molgenis’;
+ ```
+ Create a database called molgenis as user molgenis.
+ ```
+ create database molgenis owner molgenis;
+  ```
 
 ## Molgenis settings
 You'll need a molgenis-server.properties file. In your home dir, create a folder
-`.molgenis`. In it create a folder called `omx`.
-Put a file in there called `molgenis-server.properties` and fill it with this information:
+`.molgenis`. Put a file in there called `molgenis-server.properties` and fill it with this information:
 
 ```
 	db_user=molgenis  
@@ -66,7 +72,7 @@ Select it for the molgenis project.
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
 * (Add and) select your Tomcat installation
-* VM options: `-Dmolgenis.home=<path to dir containing molgenis-server.properties> -Xmx4g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost`
+* VM options: `-Dmolgenis.home=<path to dir containing molgenis-server.properties> -Xmx4g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost` 
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
 * Go back to the first tab, you should now have more options in the update and frame deactivation pulldowns.

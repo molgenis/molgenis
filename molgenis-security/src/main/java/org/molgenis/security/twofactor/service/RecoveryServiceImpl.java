@@ -50,7 +50,8 @@ public class RecoveryServiceImpl implements RecoveryService
 		String userId = getUser().getId();
 		deleteOldRecoveryCodes(userId);
 		List<RecoveryCode> newRecoveryCodes = generateRecoveryCodes(userId);
-		runAsSystem(() -> dataService.add(RECOVERY_CODE, newRecoveryCodes.stream()));
+		//noinspection RedundantCast
+		runAsSystem((Runnable) () -> dataService.add(RECOVERY_CODE, newRecoveryCodes.stream()));
 		return newRecoveryCodes.stream();
 	}
 

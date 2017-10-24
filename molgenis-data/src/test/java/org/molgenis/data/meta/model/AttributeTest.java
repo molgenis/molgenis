@@ -122,7 +122,11 @@ public class AttributeTest
 
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.isVisible()).thenReturn(true);
+		when(attribute.getNullableExpression()).thenReturn("nullableExpression");
+		when(attribute.getValidationExpression()).thenReturn("expression");
 		Attribute attributeCopy = Attribute.newInstance(attribute, SHALLOW_COPY_ATTRS, attributeFactory);
 		verify(attributeCopy).setVisible(true);
+		verify(attributeCopy).setNullableExpression("nullableExpression");
+		verify(attributeCopy).setValidationExpression("expression");
 	}
 }

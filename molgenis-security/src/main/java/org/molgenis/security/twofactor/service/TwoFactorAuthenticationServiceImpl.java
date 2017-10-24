@@ -125,7 +125,8 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		User user = getUser();
 		Stream<UserSecret> userSecrets = runAsSystem(
 				() -> dataService.query(USER_SECRET, UserSecret.class).eq(USER_ID, user.getId()).findAll());
-		runAsSystem(() -> dataService.delete(USER_SECRET, userSecrets));
+		//noinspection RedundantCast
+		runAsSystem((Runnable) () -> dataService.delete(USER_SECRET, userSecrets));
 	}
 
 	@Override

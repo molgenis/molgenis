@@ -1,36 +1,45 @@
 package org.molgenis.data.validation;
 
+import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public class EntityAttributesValidatorTest
+public class EntityAttributesValidatorTest extends AbstractMockitoTest
 {
+	@Mock
+	private ExpressionValidator expressionValidator;
+
 	private EntityAttributesValidator entityAttributesValidator;
+
 	private EntityType intRangeMinMeta;
 	private EntityType intRangeMaxMeta;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		ExpressionValidator expressionValidator = mock(ExpressionValidator.class);
+		expressionValidator = mock(ExpressionValidator.class);
 		entityAttributesValidator = new EntityAttributesValidator(expressionValidator);
 
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
@@ -306,5 +315,51 @@ public class EntityAttributesValidatorTest
 
 		Set<ConstraintViolation> constraints = entityAttributesValidator.validate(entity0, entity0.getEntityType());
 		assertEquals(constraints.size(), 1);
+	}
+
+	@Test
+	public void validateNullableExpression()
+	{
+		String expression0 = "expression0";
+		String expression1 = "expression1";
+		String expression2 = "expression2";
+		Attribute attr0 = createMockAttribute("attr0", STRING, expression0);
+		Attribute attr1 = createMockAttribute("attr1", STRING, expression1);
+		Attribute attr2 = createMockAttribute("attr2", MREF, expression2);
+		Attribute attr3 = createMockAttribute("attr2", INT, null);
+
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn("entityType");
+		when(entityType.getAtomicAttributes()).thenReturn(asList(attr0, attr1, attr2, attr3));
+		when(entityType.toString()).thenReturn("entityType");
+
+		Entity entity = mock(Entity.class);
+		when(entity.getLabelValue()).thenReturn("lbl-entity");
+		when(entity.getString("attr0")).thenReturn(null);
+		when(entity.getString("attr1")).thenReturn(null);
+		when(entity.getEntities("attr2")).thenReturn(emptyList());
+		when(entity.getInt("attr3")).thenReturn(null);
+
+		List<Boolean> expressionResults = asList(true, false, false);
+		when(expressionValidator.resolveBooleanExpressions(asList(expression0, expression1, expression2),
+				entity)).thenReturn(expressionResults);
+		Set<ConstraintViolation> constraintViolations = entityAttributesValidator.validate(entity, entityType);
+		Set<ConstraintViolation> expectedConstraintViolations = newHashSet(new ConstraintViolation(
+				"Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression1",
+				null, entity, attr1, entityType, null), new ConstraintViolation(
+				"Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2",
+				emptyList().toString(), entity, attr2, entityType, null));
+		assertEquals(newHashSet(constraintViolations), expectedConstraintViolations);
+	}
+
+	private Attribute createMockAttribute(String attributeName, AttributeType attributeType, String expression)
+	{
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getName()).thenReturn(attributeName);
+		when(attribute.getLabel()).thenReturn("lbl-" + attributeName);
+		when(attribute.getDataType()).thenReturn(attributeType);
+		when(attribute.getNullableExpression()).thenReturn(expression);
+		when(attribute.toString()).thenReturn(attributeName);
+		return attribute;
 	}
 }
