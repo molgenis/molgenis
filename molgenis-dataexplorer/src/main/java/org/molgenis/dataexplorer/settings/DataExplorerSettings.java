@@ -36,7 +36,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String GENERAL_ITEM_SELECT_PANEL = "item_select_panel";
 		public static final String GENERAL_LAUNCH_WIZARD = "launch_wizard";
 		public static final String GENERAL_HEADER_ABBREVIATE = "header_abbreviate";
-		public static final String GENERAL_NAVIGATOR_LINK = "show_navigator_link";
+		public static final String GENERAL_PACKAGE_HREF = "show_package_href";
 
 		private static final boolean DEFAULT_GENERAL_SEARCHBOX = true;
 		private static final boolean DEFAULT_GENERAL_ITEM_SELECT_PANEL = true;
@@ -90,7 +90,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private static final boolean DEFAULT_AGGREGATES_DISTINCT_SELECT = true;
 
-		private static final boolean DEFAULT_SHOW_NAVIGATOR_LINK = true;
+		private static final boolean DEFAULT_SHOW_PACKAGE_HREF = true;
 
 		public Meta()
 		{
@@ -131,11 +131,10 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												   .setNillable(false)
 												   .setDefaultValue(String.valueOf(DEFAULT_GENERAL_HEADER_ABBREVIATE))
 												   .setLabel("Entity description abbreviation length");
-			addAttribute(GENERAL_NAVIGATOR_LINK).setParent(generalAttr)
-												.setDataType(BOOL)
-												.setNillable(true)
-												.setDefaultValue(String.valueOf(DEFAULT_SHOW_NAVIGATOR_LINK))
-												.setLabel(
+			addAttribute(GENERAL_PACKAGE_HREF).setDataType(BOOL)
+											  .setNillable(true)
+											  .setDefaultValue(String.valueOf(DEFAULT_SHOW_PACKAGE_HREF))
+											  .setLabel(
 													  "Show a link to the navigator for the package of the selected entity");
 		}
 
@@ -556,15 +555,15 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	}
 
 	@Nullable
-	public boolean isShowNavigatorLink()
+	public boolean isShowPackageHref()
 	{
-		Boolean result = getBoolean(Meta.GENERAL_NAVIGATOR_LINK);
+		Boolean result = getBoolean(Meta.GENERAL_PACKAGE_HREF);
 		return result == null ? false : result.booleanValue();
 	}
 
 	@Nullable
-	public void setShowNavigatorLink(boolean showNavigatorLink)
+	public void setShowPackageHref(boolean showPackageHref)
 	{
-		set(Meta.GENERAL_NAVIGATOR_LINK, showNavigatorLink);
+		set(Meta.GENERAL_PACKAGE_HREF, showPackageHref);
 	}
 }

@@ -304,19 +304,11 @@ $.when($,
                 }
             });
 
-            $.get(molgenis.getContextUrl() + '/navigatorLinks?entity=' + state.entity).done(function (data) {
-
-                if (data.length > 0) {
+            $.get(molgenis.getContextUrl() + '/packageHref?entity=' + state.entity).done(function (data) {
+                if (data.href !== undefined) {
                     $("#entity-package-path").removeClass('hidden');
-
-                    const hyperlinks = [];
-                    data.forEach(function (element) {
-                        if (element.label === "glyphicon-home") element.label = "<span class='glyphicon glyphicon-home' aria-hidden='true'></span> ";
-                        var link = "<a href='" + element.href + "'>" + element.label + "</a>"
-                        hyperlinks.push(link);
-                    });
-
-                    $("#entity-package-path").html("(" + hyperlinks.join(" / ") + ")");
+                    $("#entity-package-path").prop("href", data.href);
+                    $("#entity-package-path").html('(<span class="glyphicon glyphicon-home" aria-hidden="true"></span> / ' + data.fullLabel + ')');
                 } else {
                     $("#entity-package-path").addClass('hidden');
                 }

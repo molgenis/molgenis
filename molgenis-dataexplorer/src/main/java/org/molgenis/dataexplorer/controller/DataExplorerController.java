@@ -159,8 +159,7 @@ public class DataExplorerController extends PluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("isAdmin", currentUserIsSu);
-		boolean navigatorAvailable = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) != null;
-		model.addAttribute("showNavigatorLink", dataExplorerSettings.isShowNavigatorLink() && navigatorAvailable);
+		model.addAttribute("showPackageHref", dataExplorerSettings.isShowPackageHref());
 
 		return "view-dataexplorer";
 	}
@@ -324,35 +323,30 @@ public class DataExplorerController extends PluginController
 		return modulesConfig;
 	}
 
-	@GetMapping("/navigatorLinks")
+	@GetMapping("/packageHref")
 	@ResponseBody
-	public List<NavigatorLink> getNavigatorLinks(@RequestParam("entity") String entityTypeId)
+	public Map<String, String> getPackageLink(@RequestParam("entity") String entityTypeId)
 	{
-		List<NavigatorLink> result = new LinkedList<>();
+		Map<String, String> result = new HashMap<>();
 		EntityType entityType = dataService.getEntityType(entityTypeId);
-		String navigatorPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
+
 		if (entityType != null)
 		{
 			Package pack = entityType.getPackage();
-			getNavigatorLinks(result, pack, navigatorPath);
-
-			//add root navigator link
-			result.add(NavigatorLink.create(navigatorPath + "/", "glyphicon-home"));
-			Collections.reverse(result);
+			if (pack != null)
+			{
+				result.put("href", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) + "/" + pack.getId());
+				LinkedList<String> packages = new LinkedList<>();
+				while (pack != null)
+				{
+					packages.add(pack.getLabel());
+					pack = pack.getParent();
+				}
+				Collections.reverse(packages);
+				result.put("fullLabel", String.join(" / ", packages));
+			}
 		}
 		return result;
-	}
-
-	private void getNavigatorLinks(List<NavigatorLink> result, Package pack, String navigatorPath)
-	{
-		if (pack != null)
-		{
-			String label = pack.getLabel();
-			String href = navigatorPath + "/" + pack.getId();
-			result.add(NavigatorLink.create(href, label));
-			pack = pack.getParent();
-			getNavigatorLinks(result, pack, navigatorPath);
-		}
 	}
 
 	/**
