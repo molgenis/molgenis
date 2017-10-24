@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
+import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 public class UserDetailsServiceImpl implements UserDetailsService
 {
@@ -48,6 +48,10 @@ public class UserDetailsServiceImpl implements UserDetailsService
 		if (user.isSuperuser())
 		{
 			return Sets.union(groupAuthorities, singleton(new SimpleGrantedAuthority(AUTHORITY_SU)));
+		}
+		if (user.getUsername().equals(ANONYMOUS_USERNAME))
+		{
+			return Sets.union(groupAuthorities, singleton(new SimpleGrantedAuthority(AUTHORITY_ANONYMOUS)));
 		}
 		else return groupAuthorities;
 	}
