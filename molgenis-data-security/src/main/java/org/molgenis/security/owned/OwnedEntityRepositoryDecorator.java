@@ -248,7 +248,7 @@ public class OwnedEntityRepositoryDecorator extends AbstractRepositoryDecorator<
 	{
 		if (isOwnedEntityType() && (mustAddRowLevelSecurity() || entity.get(OwnedEntityType.OWNER_USERNAME) == null))
 		{
-			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername().orElse(null));
 		}
 
 		delegate().add(entity);

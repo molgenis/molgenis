@@ -1,12 +1,13 @@
-package org.molgenis.security.token;
+package org.molgenis.data.security.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.Token;
 import org.molgenis.data.security.model.TokenFactory;
 import org.molgenis.data.security.model.UserEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.token.TokenService;
-import org.molgenis.security.core.token.UnknownTokenException;
+import org.molgenis.security.core.service.TokenService;
+import org.molgenis.security.core.service.exception.UnknownTokenException;
+import org.molgenis.security.core.service.impl.TokenGenerator;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.annotation.Transactional;

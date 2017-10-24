@@ -7,7 +7,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.model.SecurityPackage.PACKAGE_SECURITY;
 
@@ -40,20 +39,19 @@ public class GroupMembershipMetadata extends SystemEntityType
 	{
 		setLabel("Group membership");
 		setPackage(securityPackage);
-
 		addAttribute(ID, ROLE_ID).setLabel("Id").setAuto(true).setVisible(false);
-		addAttribute(USER, ROLE_LOOKUP).setLabel("User")
-									   .setDataType(XREF)
-									   .setRefEntity(userMetaData)
-									   .setAggregatable(true)
-									   .setNillable(false)
-									   .setCascadeDelete(true);
-		addAttribute(GROUP, ROLE_LOOKUP).setLabel("Group")
-										.setDataType(XREF)
-										.setRefEntity(groupMetaData)
-										.setAggregatable(true)
-										.setNillable(false)
-										.setCascadeDelete(true);
+		addAttribute(USER).setLabel("User")
+						  .setDataType(XREF)
+						  .setRefEntity(userMetaData)
+						  .setAggregatable(true)
+						  .setNillable(false)
+						  .setCascadeDelete(true);
+		addAttribute(GROUP).setLabel("Group")
+						   .setDataType(XREF)
+						   .setRefEntity(groupMetaData)
+						   .setAggregatable(true)
+						   .setNillable(false)
+						   .setCascadeDelete(true);
 		addAttribute(START).setLabel("Start").setDataType(DATE).setNillable(false);
 		addAttribute(END).setLabel("End").setDataType(DATE).setNillable(true);
 	}

@@ -1,4 +1,4 @@
-package org.molgenis.security.user;
+package org.molgenis.data.security.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.UserEntity;
@@ -7,9 +7,9 @@ import org.molgenis.data.security.model.UserMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.service.EmailAlreadyExistsException;
 import org.molgenis.security.core.service.UserService;
-import org.molgenis.security.core.service.UsernameAlreadyExistsException;
+import org.molgenis.security.core.service.exception.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.exception.UsernameAlreadyExistsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 

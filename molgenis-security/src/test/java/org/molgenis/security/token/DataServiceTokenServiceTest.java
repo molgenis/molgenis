@@ -1,12 +1,14 @@
 package org.molgenis.security.token;
 
 import org.mockito.ArgumentCaptor;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.security.model.Token;
 import org.molgenis.data.security.model.TokenFactory;
 import org.molgenis.data.security.model.UserEntity;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Query;
-import org.molgenis.security.core.token.UnknownTokenException;
+import org.molgenis.data.security.service.impl.DataServiceTokenService;
+import org.molgenis.security.core.service.exception.UnknownTokenException;
+import org.molgenis.security.core.service.impl.TokenGenerator;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

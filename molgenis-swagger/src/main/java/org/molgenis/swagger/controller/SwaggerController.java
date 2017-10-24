@@ -3,7 +3,7 @@ package org.molgenis.swagger.controller;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.service.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;

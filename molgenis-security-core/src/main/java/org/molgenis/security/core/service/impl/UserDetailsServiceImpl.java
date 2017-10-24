@@ -1,4 +1,4 @@
-package org.molgenis.security.user;
+package org.molgenis.security.core.service.impl;
 
 import com.google.common.collect.Sets;
 import org.molgenis.security.core.model.Group;

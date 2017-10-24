@@ -1,4 +1,4 @@
-package org.molgenis.security.user;
+package org.molgenis.data.security.user;
 
 import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.service.UserAccountService;

@@ -42,10 +42,10 @@ public class GroupMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
-		Attribute parentAttribute = addAttribute(PARENT, ROLE_LOOKUP).setLabel("Parent")
-																	 .setDataType(AttributeType.XREF)
-																	 .setRefEntity(this)
-																	 .setNillable(true);
+		Attribute parentAttribute = addAttribute(PARENT).setLabel("Parent")
+														.setDataType(AttributeType.XREF)
+														.setRefEntity(this)
+														.setNillable(true);
 		addAttribute(CHILDREN).setLabel("Children")
 							  .setDataType(ONE_TO_MANY)
 							  .setRefEntity(this)

@@ -1,4 +1,4 @@
-package org.molgenis.security.core.token;
+package org.molgenis.security.core.service.exception;
 
 import org.springframework.security.core.AuthenticationException;
 

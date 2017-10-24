@@ -2,9 +2,9 @@ package org.molgenis.security.google;
 
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import org.molgenis.security.core.service.UserService;
-import org.molgenis.security.core.token.UnknownTokenException;
+import org.molgenis.security.core.service.exception.UnknownTokenException;
+import org.molgenis.security.core.service.impl.UserDetailsServiceImpl;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.testng.annotations.BeforeMethod;

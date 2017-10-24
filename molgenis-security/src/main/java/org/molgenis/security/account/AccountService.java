@@ -1,8 +1,8 @@
 package org.molgenis.security.account;
 
 import org.molgenis.security.core.model.User;
-import org.molgenis.security.core.service.EmailAlreadyExistsException;
-import org.molgenis.security.core.service.UsernameAlreadyExistsException;
+import org.molgenis.security.core.service.exception.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.exception.UsernameAlreadyExistsException;
 
 /**
  * User account management.

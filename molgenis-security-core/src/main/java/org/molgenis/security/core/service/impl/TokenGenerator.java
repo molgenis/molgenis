@@ -1,4 +1,4 @@
-package org.molgenis.security.token;
+package org.molgenis.security.core.service.impl;
 
 import java.util.UUID;
 

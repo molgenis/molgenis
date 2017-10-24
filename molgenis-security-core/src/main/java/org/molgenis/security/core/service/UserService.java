@@ -1,6 +1,8 @@
 package org.molgenis.security.core.service;
 
 import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.exception.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.exception.UsernameAlreadyExistsException;
 
 import java.util.List;
 import java.util.Optional;

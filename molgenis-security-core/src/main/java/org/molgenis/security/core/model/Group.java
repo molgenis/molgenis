@@ -11,6 +11,7 @@ import java.util.Optional;
  */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_Group.class)
+@SuppressWarnings("squid:S1610")
 public abstract class Group
 {
 	public abstract String getId();

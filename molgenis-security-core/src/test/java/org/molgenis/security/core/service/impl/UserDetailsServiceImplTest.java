@@ -1,4 +1,4 @@
-package org.molgenis.security.user;
+package org.molgenis.security.core.service.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.mockito.Mock;

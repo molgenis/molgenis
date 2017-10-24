@@ -1,4 +1,4 @@
-package org.molgenis.security.core.service;
+package org.molgenis.security.core.service.exception;
 
 public class UsernameAlreadyExistsException extends Exception
 {

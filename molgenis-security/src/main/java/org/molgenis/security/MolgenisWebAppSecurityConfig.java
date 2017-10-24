@@ -7,32 +7,27 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.model.TokenFactory;
-import org.molgenis.data.security.model.UserFactory;
+import org.molgenis.data.security.DataSecurityConfig;
+import org.molgenis.data.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.account.AccountController;
-import org.molgenis.security.core.service.GroupService;
+import org.molgenis.security.core.service.TokenService;
 import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.security.core.service.UserService;
-import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.service.impl.UserDetailsServiceImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
-import org.molgenis.security.token.TokenGenerator;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.auth.*;
 import org.molgenis.security.twofactor.model.RecoveryCodeFactory;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
 import org.molgenis.security.twofactor.service.*;
-import org.molgenis.security.user.MolgenisUserDetailsChecker;
-import org.molgenis.security.user.UserAccountServiceImpl;
-import org.molgenis.security.user.UserDetailsServiceImpl;
-import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.access.intercept.RunAsImplAuthenticationProvider;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,7 +39,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -67,6 +62,7 @@ import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 
+@Import(DataSecurityConfig.class)
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
 	private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
@@ -76,25 +72,22 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	private DataService dataService;
 
 	@Autowired
-	private UserFactory userFactory;
+	private UserDetailsService userDetailsService;
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private UserAccountService userAccountService;
 
 	@Autowired
 	private RecoveryCodeFactory recoveryCodeFactory;
-
-	@Bean
-	public UserService userService()
-	{
-		return new UserServiceImpl(dataService, userFactory);
-	}
-
-	@Autowired
-	private GroupService groupService;
 
 	@Autowired
 	private AuthenticationSettings authenticationSettings;
 
 	@Autowired
-	private TokenFactory tokenFactory;
+	private TokenService tokenService;
 
 	@Autowired
 	private OtpService otpService;
@@ -105,23 +98,20 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Autowired
 	private UserSecretFactory userSecretFactory;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	@Bean
 	public TwoFactorAuthenticationService twoFactorAuthenticationService()
 	{
-		return new TwoFactorAuthenticationServiceImpl(otpService, dataService, userAccountService(), userService(),
+		return new TwoFactorAuthenticationServiceImpl(otpService, dataService, userAccountService, userService,
 				idGenerator, userSecretFactory);
 	}
 
 	@Bean
 	public RecoveryService recoveryService()
 	{
-		return new RecoveryServiceImpl(dataService, userAccountService(), recoveryCodeFactory, idGenerator);
-	}
-
-	@Bean
-	public UserAccountService userAccountService()
-	{
-		return new UserAccountServiceImpl(userService(), passwordEncoder());
+		return new RecoveryServiceImpl(dataService, userAccountService, recoveryCodeFactory, idGenerator);
 	}
 
 	@Override
@@ -325,15 +315,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
-	public TokenService tokenService()
-	{
-		return new DataServiceTokenService(new TokenGenerator(), dataService, userDetailsService(), tokenFactory);
-	}
-
-	@Bean
 	public AuthenticationProvider tokenAuthenticationProvider()
 	{
-		return new TokenAuthenticationProvider(tokenService());
+		return new TokenAuthenticationProvider(tokenService);
 	}
 
 	@Bean
@@ -355,7 +339,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(
 				googlePublicKeysManager(), (UserDetailsServiceImpl) userDetailsService(), authenticationSettings,
-				userService());
+				userService);
 		googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
 		return googleAuthenticationProcessingFilter;
 	}
@@ -363,14 +347,14 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public Filter changePasswordFilter()
 	{
-		return new MolgenisChangePasswordFilter(userService(), redirectStrategy());
+		return new MolgenisChangePasswordFilter(userService, redirectStrategy());
 	}
 
 	@Bean
 	public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
 	{
 		return new TwoFactorAuthenticationFilter(authenticationSettings, twoFactorAuthenticationService(),
-				redirectStrategy(), userAccountService());
+				redirectStrategy(), userAccountService);
 	}
 
 	@Bean
@@ -391,16 +375,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		return new DefaultRedirectStrategy();
 	}
 
-	@Bean
-	public PasswordEncoder passwordEncoder()
-	{
-		return new BCryptPasswordEncoder();
-	}
-
 	@Override
 	protected org.springframework.security.core.userdetails.UserDetailsService userDetailsService()
 	{
-		return new UserDetailsServiceImpl(userService(), groupService);
+		return userDetailsService;
 	}
 
 	@Override
@@ -423,7 +401,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		{
 			auth.userDetailsService(userDetailsServiceBean());
 			DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-			authenticationProvider.setPasswordEncoder(passwordEncoder());
+			authenticationProvider.setPasswordEncoder(passwordEncoder);
 			authenticationProvider.setUserDetailsService(userDetailsServiceBean());
 			authenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
 			auth.authenticationProvider(authenticationProvider);

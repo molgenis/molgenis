@@ -1,4 +1,4 @@
-package org.molgenis.security.user;
+package org.molgenis.data.security.user;
 
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.authentication.DisabledException;
@@ -19,8 +19,8 @@ public class MolgenisUserDetailsChecker implements UserDetailsChecker
 		if (!userDetails.isEnabled())
 		{
 			throw new DisabledException(
-					messages.getMessage("MolgenisUserDetailsChecker.disabled", "User is not active") + ' '
-							+ userDetails.toString());
+					messages.getMessage("MolgenisUserDetailsChecker.disabled", "User is not active") + ' ' + userDetails
+							.toString());
 		}
 	}
 }

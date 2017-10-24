@@ -6,7 +6,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.service.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 

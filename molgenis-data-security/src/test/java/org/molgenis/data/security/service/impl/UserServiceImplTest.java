@@ -1,4 +1,4 @@
-package org.molgenis.security.user;
+package org.molgenis.data.security.service.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.mockito.Mock;
@@ -7,11 +7,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.UserEntity;
 import org.molgenis.data.security.model.UserFactory;
 import org.molgenis.data.security.model.UserMetadata;
+import org.molgenis.data.security.service.impl.UserServiceImplTest.Config;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.model.User;
-import org.molgenis.security.core.service.EmailAlreadyExistsException;
-import org.molgenis.security.core.service.UsernameAlreadyExistsException;
-import org.molgenis.security.user.UserServiceImplTest.Config;
+import org.molgenis.security.core.service.exception.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.exception.UsernameAlreadyExistsException;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
