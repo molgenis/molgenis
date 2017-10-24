@@ -3,6 +3,7 @@ package org.molgenis.util;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -11,7 +12,10 @@ import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -664,6 +668,142 @@ public class EntityUtilsTest
 		}
 
 		return testCases.iterator();
+	}
+
+	// TODO COMPOUND
+	@DataProvider(name = "testIsNullValueProvider")
+	public Iterator<Object[]> testIsNullValueProvider()
+	{
+		String attrName = "attr";
+		List<Object[]> dataList = new ArrayList<>();
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getBoolean(attrName)).thenReturn(true);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, BOOL), false });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getBoolean(attrName)).thenReturn(null);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, BOOL), true });
+		}
+		EnumSet.of(CATEGORICAL, FILE, XREF).forEach(attributeType ->
+		{
+			{
+				Entity entity = getIsNullValueMockEntity();
+				when(entity.getEntity(attrName)).thenReturn(mock(Entity.class));
+				dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, attributeType), false });
+			}
+			{
+				Entity entity = getIsNullValueMockEntity();
+				when(entity.getEntity(attrName)).thenReturn(null);
+				dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, attributeType), true });
+			}
+		});
+		EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY).forEach(attributeType ->
+		{
+			{
+				Entity entity = getIsNullValueMockEntity();
+				when(entity.getEntities(attrName)).thenReturn(singletonList(mock(Entity.class)));
+				dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, attributeType), false });
+			}
+			{
+				Entity entity = getIsNullValueMockEntity();
+				when(entity.getEntities(attrName)).thenReturn(emptyList());
+				dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, attributeType), true });
+			}
+		});
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getLocalDate(attrName)).thenReturn(LocalDate.now());
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, DATE), false });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getLocalDate(attrName)).thenReturn(null);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, DATE), true });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getInstant(attrName)).thenReturn(Instant.now());
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, DATE_TIME), false });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getInstant(attrName)).thenReturn(null);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, DATE_TIME), true });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getDouble(attrName)).thenReturn(1.23);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, DECIMAL), false });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getDouble(attrName)).thenReturn(null);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, DECIMAL), true });
+		}
+		EnumSet.of(ENUM, EMAIL, HTML, HYPERLINK, SCRIPT, STRING, TEXT).forEach(attributeType ->
+		{
+			{
+				Entity entity = getIsNullValueMockEntity();
+				when(entity.getString(attrName)).thenReturn("str");
+				dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, attributeType), false });
+			}
+			{
+				Entity entity = getIsNullValueMockEntity();
+				when(entity.getDouble(attrName)).thenReturn(null);
+				dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, attributeType), true });
+			}
+		});
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getInt(attrName)).thenReturn(123);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, INT), false });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getInt(attrName)).thenReturn(null);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, INT), true });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getLong(attrName)).thenReturn(123L);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, LONG), false });
+		}
+		{
+			Entity entity = getIsNullValueMockEntity();
+			when(entity.getLong(attrName)).thenReturn(null);
+			dataList.add(new Object[] { entity, getIsNullValueMockAttribute(attrName, LONG), true });
+		}
+		return dataList.iterator();
+	}
+
+	@Test(dataProvider = "testIsNullValueProvider")
+	public void isNullValue(Entity entity, Attribute attribute, boolean expectedIsNullValue)
+	{
+		assertEquals(EntityUtils.isNullValue(entity, attribute), expectedIsNullValue);
+	}
+
+	@Test(expectedExceptions = RuntimeException.class)
+	public void isNullValueCompoundAttribute()
+	{
+		EntityUtils.isNullValue(getIsNullValueMockEntity(), getIsNullValueMockAttribute("attribute", COMPOUND));
+	}
+
+	private Entity getIsNullValueMockEntity()
+	{
+		Entity entity = mock(Entity.class);
+		when(entity.toString()).thenReturn("entity");
+		return entity;
+	}
+
+	private Attribute getIsNullValueMockAttribute(String attributeName, AttributeType attributeType)
+	{
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getName()).thenReturn(attributeName);
+		when(attribute.getDataType()).thenReturn(attributeType);
+		when(attribute.toString()).thenReturn(attributeType.toString());
+		return attribute;
 	}
 
 	private Attribute getMockAttr(String toString)

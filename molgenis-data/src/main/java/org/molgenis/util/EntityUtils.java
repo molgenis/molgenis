@@ -1,9 +1,11 @@
 package org.molgenis.util;
 
+import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -27,6 +29,10 @@ import static org.molgenis.util.MolgenisDateFormat.*;
 
 public class EntityUtils
 {
+	private EntityUtils()
+	{
+	}
+
 	/**
 	 * Convert a string value to a typed value based on a non-entity-referencing attribute data type.
 	 *
@@ -402,6 +408,7 @@ public class EntityUtils
 		if (!Objects.equals(attr.getRangeMax(), otherAttr.getRangeMax())) return false;
 		if (!Objects.equals(attr.isReadOnly(), otherAttr.isReadOnly())) return false;
 		if (!Objects.equals(attr.isUnique(), otherAttr.isUnique())) return false;
+		if (!Objects.equals(attr.getNullableExpression(), otherAttr.getNullableExpression())) return false;
 		if (!Objects.equals(attr.getVisibleExpression(), otherAttr.getVisibleExpression())) return false;
 		if (!Objects.equals(attr.getValidationExpression(), otherAttr.getValidationExpression())) return false;
 		if (!Objects.equals(attr.getDefaultValue(), otherAttr.getDefaultValue())) return false;
@@ -589,5 +596,61 @@ public class EntityUtils
 		}
 		Package rootPackage = pack.getRootPackage();
 		return rootPackage != null && rootPackage.getId().equals(PACKAGE_SYSTEM);
+	}
+
+	/**
+	 * Returns whether an entity attribute value is <tt>null</tt> or empty for attributes referencing multiple entities.
+	 */
+	public static boolean isNullValue(Entity entity, Attribute attribute)
+	{
+		boolean isNullValue;
+		String attributeName = attribute.getName();
+		AttributeType attributeType = attribute.getDataType();
+		switch (attributeType)
+		{
+			case BOOL:
+				isNullValue = entity.getBoolean(attributeName) == null;
+				break;
+			case CATEGORICAL:
+			case FILE:
+			case XREF:
+				isNullValue = entity.getEntity(attributeName) == null;
+				break;
+			case CATEGORICAL_MREF:
+			case MREF:
+			case ONE_TO_MANY:
+				Iterable<Entity> refEntities = entity.getEntities(attributeName);
+				isNullValue = Iterables.isEmpty(refEntities);
+				break;
+			case COMPOUND:
+				throw new RuntimeException(format("Invalid data type [%s]", attribute.getDataType()));
+			case DATE:
+				isNullValue = entity.getLocalDate(attributeName) == null;
+				break;
+			case DATE_TIME:
+				isNullValue = entity.getInstant(attributeName) == null;
+				break;
+			case DECIMAL:
+				isNullValue = entity.getDouble(attributeName) == null;
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				isNullValue = entity.getString(attributeName) == null;
+				break;
+			case INT:
+				isNullValue = entity.getInt(attributeName) == null;
+				break;
+			case LONG:
+				isNullValue = entity.getLong(attributeName) == null;
+				break;
+			default:
+				throw new RuntimeException(format("Unknown data type [%s]", attributeType));
+		}
+		return isNullValue;
 	}
 }

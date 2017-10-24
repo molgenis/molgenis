@@ -39,6 +39,7 @@ public class AttributeResponse
 	private Boolean isAggregatable;
 	private Range range;
 	private String expression;
+	private String nullableExpression;
 	private String visibleExpression;
 	private String validationExpression;
 
@@ -207,6 +208,12 @@ public class AttributeResponse
 		}
 		else this.visible = null;
 
+		if (attributesSet == null || attributesSet.contains("nullableExpression".toLowerCase()))
+		{
+			this.nullableExpression = attr.getNullableExpression();
+		}
+		else this.nullableExpression = null;
+
 		if (attributesSet == null || attributesSet.contains("visibleExpression".toLowerCase()))
 		{
 			this.visibleExpression = attr.getVisibleExpression();
@@ -343,6 +350,11 @@ public class AttributeResponse
 	public String getExpression()
 	{
 		return expression;
+	}
+
+	public String getNullableExpression()
+	{
+		return nullableExpression;
 	}
 
 	public String getVisibleExpression()

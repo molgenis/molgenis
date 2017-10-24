@@ -838,7 +838,16 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			if (emxAttrNillable != null)
-				attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_NILLABLE));
+			{
+				if (emxAttrNillable.equalsIgnoreCase("true") || emxAttrNillable.equalsIgnoreCase("false"))
+				{
+					attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_NILLABLE));
+				}
+				else
+				{
+					attr.setNullableExpression(emxAttrNillable);
+				}
+			}
 			if (emxIdAttrValue != null)
 			{
 				if (!emxIdAttrValue.equalsIgnoreCase("true") && !emxIdAttrValue.equalsIgnoreCase("false")

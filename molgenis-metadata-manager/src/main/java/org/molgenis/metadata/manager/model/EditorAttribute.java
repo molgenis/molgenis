@@ -68,6 +68,9 @@ public abstract class EditorAttribute
 	public abstract List<EditorTagIdentifier> getTags();
 
 	@Nullable
+	public abstract String getNullableExpression();
+
+	@Nullable
 	public abstract String getVisibleExpression();
 
 	@Nullable
@@ -84,12 +87,14 @@ public abstract class EditorAttribute
 			boolean auto, boolean visible, @Nullable String label, Map<String, String> i18nLabel,
 			@Nullable String description, Map<String, String> i18nDescription, boolean aggregatable,
 			@Nullable List<String> enumOptions, @Nullable Long rangeMin, @Nullable Long rangeMax, boolean readonly,
-			boolean unique, List<EditorTagIdentifier> tags, @Nullable String visibleExpression,
+			boolean unique, List<EditorTagIdentifier> tags, @Nullable String nullableExpression,
+			@Nullable String visibleExpression,
 			@Nullable String validationExpression, @Nullable String defaultValue, Integer sequenceNumber)
 	{
 		return new AutoValue_EditorAttribute(id, name, type, parent, refEntityType, mappedByAttribute, orderBy,
 				expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription, aggregatable,
-				enumOptions, rangeMin, rangeMax, readonly, unique, tags, visibleExpression, validationExpression,
+				enumOptions, rangeMin, rangeMax, readonly, unique, tags, nullableExpression, visibleExpression,
+				validationExpression,
 				defaultValue, sequenceNumber);
 	}
 }

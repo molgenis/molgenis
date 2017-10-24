@@ -110,13 +110,15 @@ public class AttributeMapper
 		boolean readonly = attribute.isReadOnly();
 		boolean unique = attribute.isUnique();
 		ImmutableList<EditorTagIdentifier> tags = tagMapper.toEditorTags(attribute.getTags());
+		String nullableExpression = attribute.getNullableExpression();
 		String visibleExpression = attribute.getVisibleExpression();
 		String validationExpression = attribute.getValidationExpression();
 		String defaultValue = attribute.getDefaultValue();
 		Integer sequenceNumber = attribute.getSequenceNumber() != null ? attribute.getSequenceNumber() : 0;
 		return EditorAttribute.create(id, name, type, parent, refEntityType, mappedByEntityType, orderBy, expression,
 				nullable, auto, visible, label, i18nLabel, description, i18nDescription, aggregatable, enumOptions,
-				rangeMin, rangeMax, readonly, unique, tags, visibleExpression, validationExpression, defaultValue,
+				rangeMin, rangeMax, readonly, unique, tags, nullableExpression, visibleExpression, validationExpression,
+				defaultValue,
 				sequenceNumber);
 	}
 
