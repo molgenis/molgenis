@@ -15,6 +15,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -38,9 +39,9 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -118,6 +119,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(package_.getLabel()).thenReturn("pack");
 		when(package_.getId()).thenReturn("packId");
 		when(parentPackage.getLabel()).thenReturn("parent");
+		when(parentPackage.getId()).thenReturn("parentId");
 		when(package_.getParent()).thenReturn(parentPackage);
 		when(entityType.getPackage()).thenReturn(package_);
 		when(repository.findOneById(entityId)).thenReturn(entity);
@@ -140,7 +142,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	public void initSetNavigatorMenuPathNoNavigator() throws Exception
 	{
 		String selectedEntityname = "selectedEntityname";
-		String selectedEntityId= "selectedEntityId";
+		String selectedEntityId = "selectedEntityId";
 		String navigatorPath = "path/to-navigator";
 
 		MetaDataService metaDataService = mock(MetaDataService.class);
@@ -153,7 +155,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	}
 
 	@Test
-	public void initSortEntitiesByLabel ()
+	public void initSortEntitiesByLabel()
 	{
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
@@ -171,8 +173,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
 		controller.init(null, null, model);
 
-		LinkedHashMap expected = new LinkedHashMap<>(Stream.of(entity1, entity2).sorted(Comparator.comparing(EntityType::getLabel))
-				.collect(Collectors.toMap(EntityType::getId, Function.identity())));
+		LinkedHashMap expected = new LinkedHashMap<>(Stream.of(entity1, entity2)
+														   .sorted(Comparator.comparing(EntityType::getLabel))
+														   .collect(Collectors.toMap(EntityType::getId,
+																   Function.identity())));
 
 		verify(model).addAttribute("entitiesMeta", expected);
 	}
@@ -252,9 +256,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	{
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn("menu/main/navigation/navigator");
 		when(menuReaderService.getMenu()).thenReturn(menu);
-		Map<String, String> expected = new HashMap<>();
-		expected.put("href", "menu/main/navigation/navigator/packId");
-		expected.put("fullLabel", "parent / pack");
-		assertEquals(controller.getPackageLink(entityTypeId), expected);
+		List<NavigatorLink> expected = new LinkedList<>();
+		expected.add(NavigatorLink.create("menu/main/navigation/navigator/", "glyphicon-home"));
+		expected.add(NavigatorLink.create("menu/main/navigation/navigator/parentId", "parent"));
+		expected.add(NavigatorLink.create("menu/main/navigation/navigator/packId", "pack"));
+		assertEquals(controller.getNavigatorLinks(entityTypeId), expected);
 	}
 }
