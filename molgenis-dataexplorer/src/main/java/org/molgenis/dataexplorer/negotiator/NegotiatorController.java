@@ -41,6 +41,7 @@ public class NegotiatorController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(NegotiatorController.class);
 	private static final String ID = "directory";
+	@SuppressWarnings("WeakerAccess")
 	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final RestTemplate restTemplate;
@@ -71,6 +72,8 @@ public class NegotiatorController extends PluginController
 	@ResponseBody
 	public ExportResponse exportToNegotiator(@RequestBody NegotiatorRequest request)
 	{
+		ResourceBundle i18n = languageService.getBundle();
+
 		String redirectUrl = "";
 		String warning = "";
 		boolean success = true;
@@ -108,21 +111,19 @@ public class NegotiatorController extends PluginController
 				else
 				{
 					success = false;
-					ResourceBundle i18n = languageService.getBundle();
 					warning = i18n.getString("dataexplorer_directory_no_rows");
 				}
 			}
 			else
 			{
 				success = false;
-				ResourceBundle i18n = languageService.getBundle();
 				warning = String.format(i18n.getString("dataexplorer_directory_disabled"),
 						String.join(",", disabledCollections));
 			}
 		}
 		else
 		{
-			throw new MolgenisDataException("No negotiator configuration found for the selected entity");
+			throw new MolgenisDataException(i18n.getString("dataexplorer_directory_no_config"));
 		}
 		return ExportResponse.create(success, warning, redirectUrl);
 	}
@@ -132,11 +133,14 @@ public class NegotiatorController extends PluginController
 		List<String> disabledLabels = new ArrayList<>();
 		for (Entity collection : collectionEntities)
 		{
-			String enabledAttributeName = config.getEntity(NegotiatorEntityConfigMeta.ENABLED_ATTR, Attribute.class)
-												.toString();
-			Object value = collection.get(enabledAttributeName);
-			Boolean enabled = value != null ? Boolean.valueOf(value.toString()) : false;
-			if (!enabled) disabledLabels.add(collection.getLabelValue().toString());
+			Attribute enabledAttribute = config.getEntity(NegotiatorEntityConfigMeta.ENABLED_ATTR, Attribute.class);
+			if (enabledAttribute != null)
+			{
+				String enabledAttributeName = enabledAttribute.getName();
+				Object value = collection.get(enabledAttributeName);
+				Boolean enabled = value != null ? Boolean.valueOf(value.toString()) : false;
+				if (!enabled) disabledLabels.add(collection.getLabelValue().toString());
+			}
 		}
 		return disabledLabels;
 	}

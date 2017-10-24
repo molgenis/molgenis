@@ -5,7 +5,7 @@ import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NegotiatorConfigFactory extends AbstractSystemEntityFactory<NegotiatorConfig, NegotiatorConfigMeta, String>
+class NegotiatorConfigFactory extends AbstractSystemEntityFactory<NegotiatorConfig, NegotiatorConfigMeta, String>
 {
 	NegotiatorConfigFactory(NegotiatorConfigMeta myEntityMeta, EntityPopulator entityPopulator)
 	{

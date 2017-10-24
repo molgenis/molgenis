@@ -24,22 +24,6 @@ public class NegotiatorConfig extends StaticEntity
 	{
 		super(identifier, entityType);
 	}
-
-	public void setUsername(String username)
-	{
-		set(USERNAME, username);
-	}
-
-	public void setPassword(String password)
-	{
-		set(PASSWORD, password);
-	}
-
-	public void setNegotiatorURL(String url)
-	{
-		set(NEGOTIATOR_URL, url);
-	}
-
 	@Nullable
 	public String getUsername()
 	{
