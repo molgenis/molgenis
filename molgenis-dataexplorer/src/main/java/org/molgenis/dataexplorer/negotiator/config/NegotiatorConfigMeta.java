@@ -15,7 +15,6 @@ public class NegotiatorConfigMeta extends SystemEntityType
 
 	public static final String NEGOTIATORENTITYCONFIG =
 			NegotiatorPackage.PACKAGE_NEGOTIATOR + PACKAGE_SEPARATOR + SIMPLE_NAME;
-	;
 
 	public static final String NEGOTIATOR_URL = "negotiator_url";
 	public static final String USERNAME = "username";

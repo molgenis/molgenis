@@ -55,10 +55,11 @@ $.when($,
             data: JSON.stringify(request),
             contentType: 'application/json',
             success: function (response) {
-                window.location.href = response
-            },
-            error: function (error) {
-                console.log(error)
+                if (response.success) {
+                    window.location.href = response.redirectUrl
+                } else {
+                    molgenis.createAlert([{message: response.warning}], 'warning')
+                }
             }
         })
     }

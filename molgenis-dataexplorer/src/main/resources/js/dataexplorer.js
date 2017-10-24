@@ -305,7 +305,6 @@ $.when($,
             });
 
             $.get(molgenis.getContextUrl() + '/packageHref?entity=' + state.entity).done(function (data) {
-                console.log(data.join(" / "));
                 if (data.length > 0) {
                     $("#entity-package-path").removeClass('hidden');
                     $("#entity-package-path").html(data.join(" / "));

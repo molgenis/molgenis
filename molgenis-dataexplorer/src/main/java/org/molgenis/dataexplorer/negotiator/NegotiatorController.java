@@ -1,6 +1,7 @@
 package org.molgenis.dataexplorer.negotiator;
 
 import org.molgenis.data.*;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
@@ -21,10 +22,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
@@ -36,60 +40,105 @@ import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
 public class NegotiatorController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(NegotiatorController.class);
-	public static final String ID = "directory";
-	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+	private static final String ID = "directory";
+	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final RestTemplate restTemplate;
 	private final PermissionService permissions;
 	private final DataService dataService;
 	private final QueryRsqlConverter rsqlQueryConverter;
+	private final LanguageService languageService;
 
 	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
-			QueryRsqlConverter rsqlQueryConverter)
+			QueryRsqlConverter rsqlQueryConverter, LanguageService languageService)
 	{
 		super(URI);
 		this.restTemplate = requireNonNull(restTemplate);
 		this.permissions = requireNonNull(permissions);
 		this.dataService = requireNonNull(dataService);
 		this.rsqlQueryConverter = requireNonNull(rsqlQueryConverter);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@RunAsSystem
-	public boolean showDirectoryButton(String selectedEntityName)
-	{
-		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(selectedEntityName);
-		return settings != null && permissions.hasPermissionOnPlugin(ID, Permission.READ) && settings.getBoolean(
-				NegotiatorEntityConfigMeta.ENABLED);
-	}
-
-	@RunAsSystem
-	public boolean isNegotiatorEnabled(String entityTypeId)
+	public boolean showDirectoryButton(String entityTypeId)
 	{
 		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(entityTypeId);
-		return settings == null || settings.getBoolean(NegotiatorEntityConfigMeta.ENABLED);
-
+		return settings != null && permissions.hasPermissionOnPlugin(ID, Permission.READ);
 	}
 
 	@PostMapping("/export")
 	@ResponseBody
-	public String exportToNegotiator(@RequestBody NegotiatorRequest request)
+	public ExportResponse exportToNegotiator(@RequestBody NegotiatorRequest request)
 	{
+		String redirectUrl = "";
+		String warning = "";
+		boolean success = true;
+
 		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
+
 		if (entityConfig != null)
 		{
 			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
 			LOG.info("NegotiatorRequest\n\n%s\n\nreceived, sending request", request);
 
-			List<Collection> collections = getCollections(request, entityConfig);
+			List<Entity> collectionEntities = getCollectionEntities(request, entityConfig);
+			List<String> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
 
-			HttpEntity<NegotiatorQuery> queryHttpEntity = getNegotiatorQueryHttpEntity(request, config, collections);
+			if (disabledCollections.isEmpty())
+			{
+				List<Collection> collections = collectionEntities.stream()
+																 .map(entity -> Collection.create(entity.get(
+																		 entityConfig.getEntity(
+																				 NegotiatorEntityConfigMeta.COLLECTION_ID,
+																				 Attribute.class).getName()).toString(),
+																		 entity.get(entityConfig.getEntity(
+																				 NegotiatorEntityConfigMeta.BIOBANK_ID,
+																				 Attribute.class).getName())
+																			   .toString()))
+																 .collect(toList());
 
-			return postQueryToNegotiator(config, queryHttpEntity);
+				if (!collections.isEmpty())
+				{
+					HttpEntity<NegotiatorQuery> queryHttpEntity = getNegotiatorQueryHttpEntity(request, config,
+							collections);
+					postQueryToNegotiator(config, queryHttpEntity);
+					redirectUrl = postQueryToNegotiator(config, queryHttpEntity);
+				}
+				else
+				{
+					success = false;
+					ResourceBundle i18n = languageService.getBundle();
+					warning = i18n.getString("dataexplorer_directory_no_rows");
+				}
+			}
+			else
+			{
+				success = false;
+				ResourceBundle i18n = languageService.getBundle();
+				warning = String.format(i18n.getString("dataexplorer_directory_disabled"),
+						String.join(",", disabledCollections));
+			}
 		}
 		else
 		{
 			throw new MolgenisDataException("No negotiator configuration found for the selected entity");
 		}
+		return ExportResponse.create(success, warning, redirectUrl);
+	}
+
+	private List<String> getDisabledCollections(List<Entity> collectionEntities, NegotiatorEntityConfig config)
+	{
+		List<String> disabledLabels = new ArrayList<>();
+		for (Entity collection : collectionEntities)
+		{
+			String enabledAttributeName = config.getEntity(NegotiatorEntityConfigMeta.ENABLED_ATTR, Attribute.class)
+												.toString();
+			Object value = collection.get(enabledAttributeName);
+			Boolean enabled = value != null ? Boolean.valueOf(value.toString()) : false;
+			if (!enabled) disabledLabels.add(collection.getLabelValue().toString());
+		}
+		return disabledLabels;
 	}
 
 	private String postQueryToNegotiator(NegotiatorConfig config, HttpEntity<NegotiatorQuery> queryHttpEntity)
@@ -102,14 +151,14 @@ public class NegotiatorController extends PluginController
 			LOG.trace("Redirecting to %s", redirectURL);
 			return redirectURL;
 		}
-		catch (Exception e)
+		catch (RestClientException e)
 		{
 			LOG.error("Posting to the negotiator went wrong: ", e);
 			throw e;
 		}
 	}
 
-	private List<Collection> getCollections(@RequestBody NegotiatorRequest request, NegotiatorEntityConfig entityConfig)
+	private List<Entity> getCollectionEntities(NegotiatorRequest request, NegotiatorEntityConfig entityConfig)
 	{
 		EntityType selectedEntityType = dataService.getEntityType(request.getEntityId());
 		Query<Entity> molgenisQuery = rsqlQueryConverter.convert(request.getRsql()).createQuery(selectedEntityType);
@@ -118,23 +167,11 @@ public class NegotiatorController extends PluginController
 								 .field(entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class)
 													.getName());
 		molgenisQuery.fetch(fetch);
-		List<Collection> collections = dataService.findAll(selectedEntityType.getId(), molgenisQuery)
-												  .map(entity -> Collection.create(entity.get(entityConfig.getEntity(
-														  NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class)
-																										  .getName())
-																						 .toString(), entity.get(
-														  entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID,
-																  Attribute.class).getName()).toString()))
-												  .collect(toList());
-		if (collections.isEmpty())
-		{
-			throw new EmptyCollectionSelectionException("Please make sure your filters result in at least 1 row");
-		}
-		return collections;
+		return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
 	}
 
-	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(@RequestBody NegotiatorRequest request,
-			NegotiatorConfig config, List<Collection> collections)
+	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(NegotiatorRequest request, NegotiatorConfig config,
+			List<Collection> collections)
 	{
 		NegotiatorQuery query = NegotiatorQuery.create(request.getURL(), collections, request.getHumanReadable(),
 				request.getnToken());
@@ -150,7 +187,8 @@ public class NegotiatorController extends PluginController
 
 	private NegotiatorEntityConfig getNegotiatorEntityConfig(String entityId)
 	{
-		Query query = new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMeta.ENTITY, entityId);
+		Query<NegotiatorEntityConfig> query = new QueryImpl<NegotiatorEntityConfig>().eq(
+				NegotiatorEntityConfigMeta.ENTITY, entityId);
 		return dataService.findOne(NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query,
 				NegotiatorEntityConfig.class);
 	}

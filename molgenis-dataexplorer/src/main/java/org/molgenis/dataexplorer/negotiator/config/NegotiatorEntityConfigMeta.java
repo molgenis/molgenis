@@ -22,7 +22,7 @@ public class NegotiatorEntityConfigMeta extends SystemEntityType
 	public static final String COLLECTION_ID = "collectionId";
 	public static final String BIOBANK_ID = "biobankId";
 	public static final String ENTITY = "entity";
-	public static final String ENABLED = "enabled";
+	public static final String ENABLED_ATTR = "enabledAttr";
 	public static final String NEGOTIATOR_CONFIG = "negotiatorConfig";
 
 	private final EntityTypeMetadata entityTypeMetadata;
@@ -46,22 +46,14 @@ public class NegotiatorEntityConfigMeta extends SystemEntityType
 		setLabel("Negotiator Entity Config");
 		setPackage(negotiatorPackage);
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier").setAuto(false).setNillable(false);
-		addAttribute(ENABLED).setDataType(AttributeType.BOOL).setNillable(false);
 		addAttribute(ENTITY).setDataType(AttributeType.XREF)
-							.setRefEntity(entityTypeMetadata)
-							.setNillable(false)
-							.setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+							.setRefEntity(entityTypeMetadata).setNillable(false);
 		addAttribute(NEGOTIATOR_CONFIG).setDataType(AttributeType.XREF)
-									   .setRefEntity(negotiatorConfigMeta)
-									   .setNillable(false)
-									   .setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+									   .setRefEntity(negotiatorConfigMeta).setNillable(true);
 		addAttribute(COLLECTION_ID).setDataType(AttributeType.XREF)
-								   .setRefEntity(attributeMetadata)
-								   .setNillable(false)
-								   .setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+								   .setRefEntity(attributeMetadata).setNillable(true);
 		addAttribute(BIOBANK_ID).setDataType(AttributeType.XREF)
-								.setRefEntity(attributeMetadata)
-								.setNillable(false)
-								.setVisibleExpression("$('" + ENABLED + "').eq(true).value()");
+								.setRefEntity(attributeMetadata).setNillable(true);
+		addAttribute(ENABLED_ATTR).setDataType(AttributeType.XREF).setRefEntity(attributeMetadata).setNillable(true);
 	}
 }
