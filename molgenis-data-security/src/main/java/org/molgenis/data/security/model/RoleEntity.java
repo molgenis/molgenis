@@ -3,9 +3,10 @@ package org.molgenis.data.security.model;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.security.core.model.Role;
 
-import static org.molgenis.data.security.model.GroupMetadata.ID;
-import static org.molgenis.data.security.model.GroupMetadata.LABEL;
+import static org.molgenis.data.security.model.RoleMetadata.ID;
+import static org.molgenis.data.security.model.RoleMetadata.LABEL;
 
 public class RoleEntity extends StaticEntity
 {
@@ -43,5 +44,10 @@ public class RoleEntity extends StaticEntity
 	public void setLabel(String label)
 	{
 		set(LABEL, label);
+	}
+
+	public Role toRole()
+	{
+		return Role.builder().id(getId()).label(getLabel()).build();
 	}
 }

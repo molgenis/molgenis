@@ -5,13 +5,13 @@ import org.molgenis.data.security.model.SecurityMetadataConfig;
 import org.molgenis.data.security.model.TokenFactory;
 import org.molgenis.data.security.model.UserFactory;
 import org.molgenis.data.security.service.impl.DataServiceTokenService;
+import org.molgenis.data.security.service.impl.GroupServiceImpl;
 import org.molgenis.data.security.service.impl.UserServiceImpl;
 import org.molgenis.data.security.user.UserAccountServiceImpl;
 import org.molgenis.security.core.service.GroupService;
 import org.molgenis.security.core.service.TokenService;
 import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.security.core.service.UserService;
-import org.molgenis.security.core.service.impl.GroupServiceImpl;
 import org.molgenis.security.core.service.impl.TokenGenerator;
 import org.molgenis.security.core.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class DataSecurityConfig
 	@Bean
 	public GroupService groupService()
 	{
-		return new GroupServiceImpl();
+		return new GroupServiceImpl(dataService);
 	}
 
 	@Bean

@@ -86,9 +86,9 @@ public class UserDetailsServiceImplTest
 	@Test
 	public void loadUserByUsername_NonSuperUser()
 	{
-		Role editorRole = Role.create("zzzzz", "ABCDE Editor");
-		Role parentGroupRole1 = Role.create("qqqqq", "Role 1");
-		Role parentGroupRole2 = Role.create("rrrrr", "Role 2");
+		Role editorRole = Role.builder().id("zzzzz").label("ABCDE Editor").build();
+		Role parentGroupRole1 = Role.builder().id("ggggg").label("Role 1").build();
+		Role parentGroupRole2 = Role.builder().id("rrrrr").label("Role 2").build();
 
 		Group parentGroup = Group.builder()
 								 .id("aaaaa")

@@ -3,6 +3,7 @@ package org.molgenis.data.security.model;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.security.core.model.GroupMembership;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -65,5 +66,16 @@ public class GroupMembershipEntity extends StaticEntity
 	public Optional<Instant> getEnd()
 	{
 		return Optional.ofNullable(getInstant(END));
+	}
+
+	public GroupMembership toGroupMembership()
+	{
+		GroupMembership.Builder result = GroupMembership.builder()
+														.id(getId())
+														.user(getUser().toUser())
+														.group(getGroup().toGroup())
+														.start(getStart());
+		getEnd().ifPresent(result::end);
+		return result.build();
 	}
 }

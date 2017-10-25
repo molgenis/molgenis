@@ -4,7 +4,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -52,7 +52,7 @@ public class GroupMembershipMetadata extends SystemEntityType
 						   .setAggregatable(true)
 						   .setNillable(false)
 						   .setCascadeDelete(true);
-		addAttribute(START).setLabel("Start").setDataType(DATE).setNillable(false);
-		addAttribute(END).setLabel("End").setDataType(DATE).setNillable(true);
+		addAttribute(START).setLabel("Start").setDataType(DATE_TIME).setNillable(false);
+		addAttribute(END).setLabel("End").setDataType(DATE_TIME).setNillable(true);
 	}
 }

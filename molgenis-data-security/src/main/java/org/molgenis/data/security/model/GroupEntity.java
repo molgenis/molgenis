@@ -4,10 +4,12 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.security.core.model.Group;
 
-import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.collect.Streams.stream;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.model.GroupMetadata.*;
 
 public class GroupEntity extends StaticEntity
@@ -63,8 +65,18 @@ public class GroupEntity extends StaticEntity
 		return Lists.newArrayList(getEntities(CHILDREN, GroupEntity.class));
 	}
 
-	public List<RoleEntity> getRoles()
+	public Iterable<RoleEntity> getRoles()
 	{
-		return Lists.newArrayList(getEntities(ROLES, RoleEntity.class));
+		return getEntities(ROLES, RoleEntity.class);
+	}
+
+	public Group toGroup()
+	{
+		Group.Builder result = Group.builder()
+									.id(getId())
+									.label(getLabel())
+									.roles(stream(getRoles()).map(RoleEntity::toRole).collect(toList()));
+		getParent().ifPresent(parent -> result.parent(parent.toGroup()));
+		return result.build();
 	}
 }
