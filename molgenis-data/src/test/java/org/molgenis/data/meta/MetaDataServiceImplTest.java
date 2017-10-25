@@ -3,6 +3,7 @@ package org.molgenis.data.meta;
 import com.google.common.collect.ImmutableList;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -10,6 +11,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -34,21 +36,26 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertNull;
 
-public class MetaDataServiceImplTest
+public class MetaDataServiceImplTest extends AbstractMockitoTest
 {
-	private MetaDataServiceImpl metaDataServiceImpl;
+	@Mock
 	private DataService dataService;
+	@Mock
 	private RepositoryCollectionRegistry repoCollectionRegistry;
-	private EntityTypeDependencyResolver entityTypeDependencyResolver;
-	private PackagePersister packagePersister;
+	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	@Mock
+	private EntityTypeDependencyResolver entityTypeDependencyResolver;
+	@Mock
+	private PackagePersister packagePersister;
+
+	private MetaDataServiceImpl metaDataServiceImpl;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		dataService = mock(DataService.class);
 		repoCollectionRegistry = mock(RepositoryCollectionRegistry.class);
-
 		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
 		entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
 		packagePersister = mock(PackagePersister.class);
@@ -413,6 +420,34 @@ public class MetaDataServiceImplTest
 		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(packagePersister).upsertPackages(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(package0, package1));
+	}
+
+	@Test
+	public void hasEntityTypeSystemEntityType()
+	{
+		String entityTypeId = "entityTypeId";
+		when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(true);
+		assertTrue(metaDataServiceImpl.hasEntityType(entityTypeId));
+	}
+
+	@Test
+	public void hasEntityTypeNonSystemEntityType()
+	{
+		String entityTypeId = "entityTypeId";
+		when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(false);
+		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class),
+				eq(EntityType.class))).thenReturn(mock(EntityType.class));
+		assertTrue(metaDataServiceImpl.hasEntityType(entityTypeId));
+	}
+
+	@Test
+	public void hasEntityTypeUnknownEntityType()
+	{
+		String entityTypeId = "entityTypeId";
+		when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(false);
+		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class),
+				eq(EntityType.class))).thenReturn(null);
+		assertFalse(metaDataServiceImpl.hasEntityType(entityTypeId));
 	}
 
 	@Test

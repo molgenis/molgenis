@@ -3,14 +3,17 @@ package org.molgenis.data.importer.emx;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.model.L10nStringFactory;
-import org.molgenis.data.i18n.model.L10nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.data.importer.DataPersister;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.TagValidator;
@@ -27,19 +30,13 @@ public class ImporterConfiguration
 	private DataService dataService;
 
 	@Autowired
+	private MetaDataService metaDataService;
+
+	@Autowired
 	private PermissionSystemService permissionSystemService;
 
 	@Autowired
-	private ImportServiceFactory importServiceFactory;
-
-	@Autowired
 	private PermissionService permissionService;
-
-	@Autowired
-	private TagMetadata tagMetadata;
-
-	@Autowired
-	private L10nStringMetaData l10nStringMetaData;
 
 	@Autowired
 	private PackageFactory packageFactory;
@@ -77,6 +74,9 @@ public class ImporterConfiguration
 	@Autowired
 	private DefaultPackage defaultPackage;
 
+	@Autowired
+	private DataPersister dataPersister;
+
 	@Bean
 	public ImportService emxImportService()
 	{
@@ -86,8 +86,8 @@ public class ImporterConfiguration
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, permissionSystemService, permissionService, entityManager,
-				entityTypeDependencyResolver);
+		return new ImportWriter(metaDataService, permissionSystemService, permissionService, entityManager,
+				dataPersister);
 	}
 
 	@Bean

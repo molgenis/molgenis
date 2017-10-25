@@ -157,6 +157,13 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void upsertTags(Collection<Tag> tags);
 
 	/**
+	 * Returns whether an entity type with the given id exists.
+	 *
+	 * @return <tt>true</tt> if entity type exists for the given entity id
+	 */
+	boolean hasEntityType(String entityTypeId);
+
+	/**
 	 * Gets the entity type for a given entity.
 	 *
 	 * @param name the fullyQualifiedName of the entity

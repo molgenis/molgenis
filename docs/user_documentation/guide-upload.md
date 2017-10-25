@@ -141,7 +141,8 @@ action: the database action to import with, options are:
 	UPDATE: update records, throw an error if records are missing in the database
 	ADD_IGNORE_EXISTING: Adds new records, ignores existing records
 
-Note that for VCF files only "add" is supported
+Note that for VCF files only ADD is supported
+Note that for EMX files only ADD, ADD_UPDATE_EXISTING and UPDATE are supported
 
 Default value is "ADD".
 
