@@ -1,4 +1,4 @@
-package org.molgenis.ontology.controller;
+package org.molgenis.ontology.sorta.controller;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -25,11 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -37,14 +37,15 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.molgenis.ontology.controller.SortaServiceAnonymousController.URI;
+import static org.molgenis.ontology.sorta.controller.SortaAnonymousController.URI;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.SCORE;
 
 @Controller
 @RequestMapping(URI)
-public class SortaServiceAnonymousController extends PluginController
+public class SortaAnonymousController extends PluginController
 {
+	public static final Double DEFAULT_THRESHOLD = 100.0;
 	@Autowired
 	private SortaService sortaService;
 
@@ -60,11 +61,11 @@ public class SortaServiceAnonymousController extends PluginController
 	@Autowired
 	private AttributeFactory attrMetaFactory;
 
-	public static final String VIEW_NAME = "sorta-match-anonymous-view";
+	public static final String MATCH_VIEW_NAME = "sorta-match-anonymous-view";
 	public static final String ID = "sorta_anonymous";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	public SortaServiceAnonymousController()
+	public SortaAnonymousController()
 	{
 		super(URI);
 	}
@@ -73,7 +74,7 @@ public class SortaServiceAnonymousController extends PluginController
 	public String init(Model model)
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
-		return VIEW_NAME;
+		return MATCH_VIEW_NAME;
 	}
 
 	@PostMapping("/match")
@@ -91,7 +92,7 @@ public class SortaServiceAnonymousController extends PluginController
 
 	@PostMapping("/match/upload")
 	public String upload(@RequestParam(value = "selectOntologies") String ontologyIri,
-			@RequestParam(value = "file") Part file, HttpServletRequest httpServletRequest, Model model)
+			@RequestParam(value = "file") MultipartFile file, HttpServletRequest httpServletRequest, Model model)
 			throws IOException
 	{
 

@@ -1,4 +1,4 @@
-package org.molgenis.ontology.controller;
+package org.molgenis.ontology.sorta.controller;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +19,7 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
+import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
@@ -46,10 +47,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -71,24 +72,24 @@ import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.ontology.controller.SortaServiceController.URI;
+import static org.molgenis.ontology.sorta.controller.SortaController.URI;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.*;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 
 @Controller
 @RequestMapping(URI)
-public class SortaServiceController extends PluginController
+public class SortaController extends PluginController
 {
-	private static final Logger LOG = LoggerFactory.getLogger(SortaServiceController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SortaController.class);
 
 	public static final String ID = "sortaservice";
-	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final int BATCH_SIZE = 1000;
 	private static final String MODEL_KEY_MESSAGE = "message";
-	private static final String MATCH_VIEW_NAME = "sorta-match-view";
-	private static final double DEFAULT_THRESHOLD = 100.0;
+	public static final String MATCH_VIEW_NAME = "sorta-match-view";
+	public static final double DEFAULT_THRESHOLD = 100.0;
 
 	private final OntologyService ontologyService;
 	private final SortaService sortaService;
@@ -109,7 +110,7 @@ public class SortaServiceController extends PluginController
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attrMetaFactory;
 
-	public SortaServiceController(OntologyService ontologyService, SortaService sortaService,
+	public SortaController(OntologyService ontologyService, SortaService sortaService,
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
 			FileStore fileStore, PermissionService permissionService, DataService dataService,
 			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
@@ -352,8 +353,9 @@ public class SortaServiceController extends PluginController
 
 	@PostMapping(value = "/match/upload", headers = "Content-Type=multipart/form-data")
 	public String upload(@RequestParam(value = "taskName") String jobName,
-			@RequestParam(value = "selectOntologies") String ontologyIri, @RequestParam(value = "file") Part file,
-			Model model, HttpServletRequest httpServletRequest) throws IOException
+			@RequestParam(value = "selectOntologies") String ontologyIri,
+			@RequestParam(value = "file") MultipartFile file, Model model, HttpServletRequest httpServletRequest)
+			throws IOException
 	{
 		if (isEmpty(ontologyIri) || file == null) return init(model);
 		InputStream inputStream = file.getInputStream();
@@ -366,14 +368,13 @@ public class SortaServiceController extends PluginController
 	{
 		// TODO: less obfuscated request object, let Spring do the matching
 		if (request.containsKey("sortaJobExecutionId") && !isEmpty(request.get("sortaJobExecutionId").toString())
-				&& request.containsKey(MatchingTaskContentMetaData.IDENTIFIER) && !isEmpty(
-				request.get(MatchingTaskContentMetaData.IDENTIFIER).toString()))
+				&& request.containsKey(IDENTIFIER) && !isEmpty(request.get(IDENTIFIER).toString()))
 		{
 			String sortaJobExecutionId = request.get("sortaJobExecutionId").toString();
 			SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
 			if (sortaJobExecution == null) return new SortaServiceResponse("sortaJobExecutionId is invalid!");
 
-			String inputTermIdentifier = request.get(MatchingTaskContentMetaData.IDENTIFIER).toString();
+			String inputTermIdentifier = request.get(IDENTIFIER).toString();
 			Entity inputEntity = dataService.findOneById(sortaJobExecution.getSourceEntityName(), inputTermIdentifier);
 
 			if (inputEntity == null) return new SortaServiceResponse("inputTerm identifier is invalid!");

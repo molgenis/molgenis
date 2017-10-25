@@ -1,4 +1,4 @@
-package org.molgenis.ontology.sorta;
+package org.molgenis.ontology.sorta.services;
 
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
