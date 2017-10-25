@@ -35,13 +35,14 @@
     </developers>
 
     <properties>
-        <compile-source.version>1.8</compile-source.version>
+        <!-- maven properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
 
         <!-- molgenis specific properties -->
+        <molgenis.source.compile.version>1.8</molgenis.source.compile.version>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
 
         <!-- code quality monitoring properties -->
@@ -215,8 +216,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>${compile-source.version}</source>
-                        <target>${compile-source.version}</target>
+                        <source>${molgenis.source.compile.version}</source>
+                        <target>${molgenis.source.compile.version}</target>
                         <compilerArguments>
                             <Xlint/>
                         </compilerArguments>
