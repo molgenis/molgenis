@@ -35,8 +35,38 @@
     </developers>
 
     <properties>
+        <compile-source.version>1.8</compile-source.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
+        <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
+
+        <!-- molgenis specific properties -->
+        <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
+
+        <!-- code quality monitoring properties -->
+        <sonatype.id>sonatype-nexus-staging</sonatype.id>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+
+        <!-- plugin versions -->
+        <maven-failsafe-plugin.version>2.8.1</maven-failsafe-plugin.version>
+        <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.7.2.201409121644</jacoco-maven-plugin.version>
+        <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+        <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
+        <maven-war-plugin.version>2.4</maven-war-plugin.version>
+        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+        <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
+        <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
+        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+        <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
+        <maven-dependency-plugin.version>3.0.1</maven-dependency-plugin.version>
+        <maven-site-plugin.version>3.3</maven-site-plugin.version>
+        <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
+        <minify-maven-plugin.version>1.7.4</minify-maven-plugin.version>
+
+        <!-- dependency versions -->
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
         <logback.version>1.2.2</logback.version>
         <spring.version>4.3.10.RELEASE</spring.version>
@@ -49,19 +79,20 @@
         <google.gson.version>2.2.4</google.gson.version>
         <apache.commons.lang.version>3.1</apache.commons.lang.version>
         <apache.commons.io.version>2.4</apache.commons.io.version>
-        <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
-        <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
         <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
         <jsr305.version>3.0.1</jsr305.version>
-        <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
-        <sonatype.id>sonatype-nexus-staging</sonatype.id>
         <elasticsearch.version>5.5.1</elasticsearch.version>
         <postgres.version>9.4.1211</postgres.version>
-        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-        <mockito.version>2.7.22</mockito.version>
-        <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+        <findbugs-annotations.version>3.0.1</findbugs-annotations.version>
         <node.version>v6.11.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
+
+        <!-- test-dependency versions -->
+        <jsonpath.version>2.4.0</jsonpath.version>
+        <testng.version>6.8</testng.version>
+        <mockito.version>2.7.22</mockito.version>
+        <hamcrest-all.version>1.3</hamcrest-all.version>
+
     </properties>
 
     <distributionManagement>
@@ -182,10 +213,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>${compile-source.version}</source>
+                        <target>${compile-source.version}</target>
                         <compilerArguments>
                             <Xlint/>
                         </compilerArguments>
@@ -195,7 +226,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>${maven-war-plugin.version}</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                     </configuration>
@@ -204,7 +235,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>${maven-jar-plugin.version}</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -222,7 +253,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>${maven-resources-plugin.version}</version>
                     <executions>
                         <!-- copy generated resources to target folder -->
                         <execution>
@@ -247,19 +278,19 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>1.5</version>
+                    <version>${jaxb2-maven-plugin.version}</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.jvnet.jax-ws-commons</groupId>
                     <artifactId>jaxws-maven-plugin</artifactId>
-                    <version>2.1</version>
+                    <version>${jaxws-maven-plugin.version}</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.19.1</version>
+                    <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <argLine>${argLine}</argLine>
                     </configuration>
@@ -268,7 +299,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.7</version>
+                    <version>${maven-antrun-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>generate-sources</id>
@@ -317,7 +348,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>${build-helper-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>reserve-network-port</id>
@@ -400,31 +431,31 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>${maven-dependency-plugin.version}</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.3</version>
+                    <version>${maven-site-plugin.version}</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
-                    <version>1.0-alpha-2</version>
+                    <version>${properties-maven-plugin.version}</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.2.201409121644</version>
+                    <version>${jacoco-maven-plugin.version}</version>
                 </plugin>
                 <!-- Eclipse m2e mappings -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
+                    <version>${lifecycle-mapping.version}</version>
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>
@@ -432,7 +463,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-antrun-plugin</artifactId>
-                                        <versionRange>[1.7,)</versionRange>
+                                        <versionRange>[${maven-antrun-plugin.version},)</versionRange>
                                         <goals>
                                             <goal>run</goal>
                                         </goals>
@@ -458,7 +489,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.jvnet.jax-ws-commons</groupId>
                                         <artifactId>jaxws-maven-plugin</artifactId>
-                                        <versionRange>[2.1,)</versionRange>
+                                        <versionRange>[${jaxws-maven-plugin.version},)</versionRange>
                                         <goals>
                                             <goal>wsimport</goal>
                                         </goals>
@@ -471,7 +502,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.codehaus.mojo</groupId>
                                         <artifactId>properties-maven-plugin</artifactId>
-                                        <versionRange>[1.0-alpha-2,)</versionRange>
+                                        <versionRange>[${properties-maven-plugin.version},)</versionRange>
                                         <goals>
                                             <goal>read-project-properties</goal>
                                         </goals>
@@ -514,7 +545,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.8.1</version>
+                    <version>${maven-failsafe-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>integration-test</id>
@@ -536,7 +567,7 @@
                 <plugin>
                     <groupId>com.samaxes.maven</groupId>
                     <artifactId>minify-maven-plugin</artifactId>
-                    <version>1.7.4</version>
+                    <version>${minify-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>default-minify</id>
@@ -804,7 +835,7 @@
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>findbugs-annotations</artifactId>
-                <version>${findbugs.annotations.version}</version>
+                <version>${findbugs-annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
@@ -834,12 +865,28 @@
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.8</version>
+                <version>${testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jayway.jsonpath</groupId>
+                <artifactId>json-path</artifactId>
+                <version>${jsonpath.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-all</artifactId>
+                <version>${hamcrest-all.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
