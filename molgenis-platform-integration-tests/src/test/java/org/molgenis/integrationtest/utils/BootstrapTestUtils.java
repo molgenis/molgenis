@@ -104,10 +104,6 @@ public class BootstrapTestUtils
 			settingsPopulator.initialize(event);
 			LOG.trace("Populated settings entities");
 
-			LOG.trace("Populating settings entities ...");
-			settingsPopulator.initialize(event);
-			LOG.trace("Populated settings entities");
-
 			event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
 			return (Void) null;
 		});

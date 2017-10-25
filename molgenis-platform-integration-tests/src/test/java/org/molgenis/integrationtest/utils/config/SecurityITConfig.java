@@ -4,8 +4,7 @@ import org.molgenis.auth.*;
 import org.molgenis.integrationtest.data.aggregation.AggregationTestConfig;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.owned.OwnedEntityType;
-import org.molgenis.security.permission.PermissionServiceImpl;
-import org.molgenis.security.permission.PermissionSystemServiceImpl;
+import org.molgenis.security.permission.*;
 import org.molgenis.security.settings.AuthenticationSettingsImpl;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenGenerator;
@@ -36,7 +35,8 @@ import static org.mockito.Mockito.when;
 		PermissionSystemServiceImpl.class, UserAuthorityFactory.class, UserAuthorityMetaData.class, UserFactory.class,
 		AuthorityMetaData.class, AggregationTestConfig.class, RoleHierarchyAuthoritiesMapper.class,
 		GroupAuthorityFactory.class, GroupAuthorityMetaData.class, GroupMetaData.class,
-		AuthenticationSettingsImpl.class })
+		AuthenticationSettingsImpl.class, PrincipalSecurityContextRegistryImpl.class, SecurityContextRegistryImpl.class,
+		AuthenticationAuthoritiesUpdaterImpl.class })
 public class SecurityITConfig
 {
 	public final static String ANONYMOUSE_USER = "anonymouse";

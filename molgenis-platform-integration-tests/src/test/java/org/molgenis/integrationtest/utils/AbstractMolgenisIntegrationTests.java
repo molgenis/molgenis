@@ -1,7 +1,7 @@
 package org.molgenis.integrationtest.utils;
 
-import org.molgenis.integrationtest.data.platform.BootStrapperConfig;
-import org.molgenis.integrationtest.data.postgresql.PostgreSqlConfig;
+import org.molgenis.integrationtest.data.platform.BootStrapperTestConfig;
+import org.molgenis.integrationtest.data.postgresql.PostgreSqlTestConfig;
 import org.molgenis.integrationtest.utils.config.SecurityITConfig;
 import org.molgenis.integrationtest.utils.config.WebAppITConfig;
 import org.molgenis.security.core.token.TokenService;
@@ -10,6 +10,7 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -28,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @WebAppConfiguration
-@EnableWebMvc
 @TestPropertySource("/conf/molgenis.properties")
 @ContextConfiguration(classes = AbstractMolgenisIntegrationTests.Config.class)
 public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpringContextTests
@@ -78,8 +78,10 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
 	 * <p>The {@link ApplicationContextProvider} must be in this configuration because of the autowiring from context</p>
 	 */
 	@Configuration
-	@Import({ BootstrapTestUtils.class, BootStrapperConfig.class, DataServiceTokenService.class, WebAppITConfig.class,
-			SecurityITConfig.class, PostgreSqlConfig.class })
+	@EnableWebMvc // use this annotation in your controller configuration to test the GetMapping annotations
+	@EnableAspectJAutoProxy
+	@Import({ BootstrapTestUtils.class, BootStrapperTestConfig.class, DataServiceTokenService.class,
+			WebAppITConfig.class, SecurityITConfig.class, PostgreSqlTestConfig.class })
 	static class Config
 	{
 		@Bean

@@ -5,6 +5,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan("org.molgenis.data.postgresql")
-public class PostgreSqlConfig
+public class PostgreSqlTestConfig
 {
 }

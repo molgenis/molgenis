@@ -6,6 +6,6 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({ SystemEntityTypeBootstrapper.class })
-public class BootStrapperConfig
+public class BootStrapperTestConfig
 {
 }
