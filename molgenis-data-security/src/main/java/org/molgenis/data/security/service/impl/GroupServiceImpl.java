@@ -10,7 +10,7 @@ import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.service.GroupService;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,25 +30,25 @@ public class GroupServiceImpl implements GroupService
 	}
 
 	@Override
-	public void addUserToGroup(User user, Group group)
+	public void addUserToGroup(String userId, String groupId)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addUserToGroup(User user, Group group, LocalDate start)
+	public void addUserToGroup(String userId, String groupId, Instant start)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addUserToGroup(User user, Group group, LocalDate start, LocalDate end)
+	public void addUserToGroup(String userId, String groupId, Instant start, Instant end)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removeUserFromGroup(User user, Group group)
+	public void removeUserFromGroup(String userId, String groupId)
 	{
 		throw new UnsupportedOperationException();
 	}
