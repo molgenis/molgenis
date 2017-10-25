@@ -83,16 +83,16 @@ public interface UserService
 	/**
 	 * Activates user
 	 *
-	 * @param username the username of the user to activate
+	 * @param id the ID of the user to activate
 	 */
-	void activateUser(String username);
+	void activateUser(String id);
 
 	/**
 	 * Deactivates user
 	 *
-	 * @param username the username of the user to activate
+	 * @param id the ID of the user to activate
 	 */
-	void deactivateUser(String username);
+	void deactivateUser(String id);
 
 	/**
 	 * Connects an existing user to a googleAccountId.

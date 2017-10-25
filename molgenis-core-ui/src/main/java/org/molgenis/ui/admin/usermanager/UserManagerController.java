@@ -33,29 +33,35 @@ public class UserManagerController extends PluginController
 		return "view-usermanager";
 	}
 
-	@PutMapping("/activation")
+	@PostMapping("/activation")
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
-	ActivationResponse setActive(@RequestParam String id, @RequestParam boolean active)
+	ActivationResponse setActive(@RequestParam("id") String id, @RequestParam("active") boolean active)
 	{
 		ActivationResponse activationResponse = new ActivationResponse();
 		activationResponse.setId(id);
-		if (active)
+		try
 		{
-			userService.activateUser(id);
+			if (active)
+			{
+				userService.activateUser(id);
+			}
+			else
+			{
+				userService.deactivateUser(id);
+			}
+			activationResponse.setSuccess(true);
 		}
-		else
+		catch (IllegalArgumentException e)
 		{
-			userService.deactivateUser(id);
+			activationResponse.setSuccess(false);
 		}
-		activationResponse.setSuccess(true);
 		return activationResponse;
 	}
 
 	public class ActivationResponse
 	{
 		private boolean success = false;
-		private String type;
 		private String id;
 
 		public boolean isSuccess()
@@ -66,16 +72,6 @@ public class UserManagerController extends PluginController
 		public void setSuccess(boolean success)
 		{
 			this.success = success;
-		}
-
-		public String getType()
-		{
-			return type;
-		}
-
-		public void setType(String type)
-		{
-			this.type = type;
 		}
 
 		public String getId()

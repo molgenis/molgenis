@@ -51,6 +51,11 @@ public class UserServiceImpl implements UserService
 					   .map(UserEntity::toUser);
 	}
 
+	private Optional<User> findByIdIfPresent(String id)
+	{
+		return Optional.ofNullable(dataService.findOneById(USER, id, UserEntity.class)).map(UserEntity::toUser);
+	}
+
 	@Override
 	public Optional<User> findByGoogleAccountIdIfPresent(String googleAccountId)
 	{
@@ -97,20 +102,21 @@ public class UserServiceImpl implements UserService
 	}
 
 	@Override
-	public void activateUser(String username)
+	public void activateUser(String id)
 	{
-		setActive(username, true);
+		setActive(id, true);
 	}
 
 	@Override
-	public void deactivateUser(String username)
+	public void deactivateUser(String id)
 	{
-		setActive(username, false);
+		setActive(id, false);
 	}
 
-	private void setActive(String username, boolean active)
+	private void setActive(String id, boolean active)
 	{
-		User user = findByUsername(username);
+		User user = findByIdIfPresent(id).orElseThrow(
+				() -> new IllegalArgumentException(String.format("No user found with id [%s].", id)));
 		User activated = user.toBuilder().active(active).build();
 		update(activated);
 	}

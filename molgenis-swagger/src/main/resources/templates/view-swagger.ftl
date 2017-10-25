@@ -22,6 +22,27 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /plugin/usermanager/activation:
+    post:
+      tags:
+        - User manager
+      consumes:
+        - application/x-www-form-urlencoded
+      description: Sets activation status for a user
+      parameters:
+        - in: formData
+          name: id
+          type: string
+          required: true
+        - in: formData
+          name: active
+          type: boolean
+          required: true
+      responses:
+        200:
+          description: Ok. If response doesn't have success set to true, the user wasn't found.
+          schema:
+            $ref: "#/definitions/ActivationResponse"
   /plugin/useraccount/language/update:
     post:
       tags:
@@ -621,6 +642,13 @@ definitions:
         type: string
     required:
       - newEntityName
+  ActivationResponse:
+    type: object
+    properties:
+      succes:
+        type: boolean
+      id:
+        type: string
   LoginRequest:
     type: object
     properties:
