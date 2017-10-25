@@ -26,5 +26,4 @@ public class TransactionTestConfig
 		TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry = new TransactionExceptionTranslatorRegistry();
 		return new PostgreSqlTransactionManager(idGenerator, dataSource, transactionExceptionTranslatorRegistry);
 	}
-
 }

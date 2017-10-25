@@ -17,6 +17,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testng.annotations.BeforeMethod;
 
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @WebAppConfiguration
+@EnableWebMvc
 @TestPropertySource("/conf/molgenis.properties")
 @ContextConfiguration(classes = AbstractMolgenisIntegrationTests.Config.class)
 public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpringContextTests

@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 		AuthenticationSettingsImpl.class })
 public class SecurityITConfig
 {
-
 	public final static String ANONYMOUSE_USER = "anonymouse";
 	public final static String SUPERUSER_NAME = "admin";
 	public final static String SUPERUSER_ROLE = "SU";

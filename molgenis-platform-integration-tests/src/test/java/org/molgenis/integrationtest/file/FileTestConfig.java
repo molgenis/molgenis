@@ -1,17 +1,18 @@
 package org.molgenis.integrationtest.file;
 
 import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.io.File;
 
 @Configuration
-@ComponentScan("org.molgenis.file.model")
+@Import({ FileMetaFactory.class, FileMetaMetaData.class })
 public class FileTestConfig
 {
-
 	@Bean
 	public FileStore fileStore()
 	{
@@ -30,8 +31,7 @@ public class FileTestConfig
 		{
 			throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
 		}
-
+		
 		return new FileStore(molgenisFileStoreDirStr);
 	}
-
 }

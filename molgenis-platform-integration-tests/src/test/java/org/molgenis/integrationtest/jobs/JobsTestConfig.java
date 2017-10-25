@@ -23,5 +23,4 @@ import org.springframework.context.annotation.Import;
 		MailPackage.class })
 public class JobsTestConfig
 {
-
 }
