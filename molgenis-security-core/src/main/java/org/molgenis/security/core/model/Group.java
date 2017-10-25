@@ -22,6 +22,11 @@ public abstract class Group
 
 	public abstract List<Role> getRoles();
 
+	public boolean hasSameParentAs(Group other)
+	{
+		return getParent().filter(parent -> other.getParent().filter(parent::equals).isPresent()).isPresent();
+	}
+
 	public static Builder builder()
 	{
 		return new AutoValue_Group.Builder();

@@ -48,6 +48,11 @@ public class GroupMembershipEntity extends StaticEntity
 		set(USER, user);
 	}
 
+	public void setUser(String userId)
+	{
+		set(USER, userId);
+	}
+
 	public GroupEntity getGroup()
 	{
 		return getEntity(GROUP, GroupEntity.class);
@@ -58,14 +63,29 @@ public class GroupMembershipEntity extends StaticEntity
 		set(GROUP, group);
 	}
 
+	public void setGroup(String groupId)
+	{
+		set(GROUP, groupId);
+	}
+
 	public Instant getStart()
 	{
 		return getInstant(START);
 	}
 
+	public void setStart(Instant start)
+	{
+		set(START, start);
+	}
+
 	public Optional<Instant> getEnd()
 	{
 		return Optional.ofNullable(getInstant(END));
+	}
+
+	public void setEnd(Instant end)
+	{
+		set(END, end);
 	}
 
 	public GroupMembership toGroupMembership()
@@ -77,5 +97,15 @@ public class GroupMembershipEntity extends StaticEntity
 														.start(getStart());
 		getEnd().ifPresent(result::end);
 		return result.build();
+	}
+
+	public GroupMembershipEntity updateFrom(GroupMembership groupMembership)
+	{
+		setUser(groupMembership.getUser().getId());
+		setGroup(groupMembership.getGroup().getId());
+		setStart(groupMembership.getStart());
+		groupMembership.getId().ifPresent(this::setId);
+		groupMembership.getEnd().ifPresent(this::setEnd);
+		return this;
 	}
 }

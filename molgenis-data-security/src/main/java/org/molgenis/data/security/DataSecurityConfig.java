@@ -1,6 +1,7 @@
 package org.molgenis.data.security;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.model.GroupMembershipFactory;
 import org.molgenis.data.security.model.SecurityMetadataConfig;
 import org.molgenis.data.security.model.TokenFactory;
 import org.molgenis.data.security.model.UserFactory;
@@ -34,6 +35,9 @@ public class DataSecurityConfig
 	private UserFactory userFactory;
 
 	@Autowired
+	private GroupMembershipFactory groupMembershipFactory;
+
+	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -60,7 +64,7 @@ public class DataSecurityConfig
 	@Bean
 	public GroupMembershipServiceImpl groupMembershipService()
 	{
-		return new GroupMembershipServiceImpl(dataService);
+		return new GroupMembershipServiceImpl(dataService, groupMembershipFactory);
 	}
 
 	@Bean

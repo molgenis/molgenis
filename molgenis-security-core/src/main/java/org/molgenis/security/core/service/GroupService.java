@@ -5,7 +5,6 @@ import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.User;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -17,29 +16,29 @@ public interface GroupService
 	/**
 	 * Adds a {@link User} to a {@link Group} effective immediately.
 	 *
-	 * @param userId  ID of the User to add to the Group
-	 * @param groupId ID of the Group to add the User to
+	 * @param user  the User to add to the Group
+	 * @param group the Group to add the User to
 	 */
-	void addUserToGroup(String userId, String groupId);
+	void addUserToGroup(User user, Group group);
 
 	/**
-	 * Adds a {@link User} to a {@link Group} effective at some {@link LocalDate} in the future.
+	 * Adds a {@link User} to a {@link Group} effective at some {@link Instant}.
 	 *
-	 * @param userId  ID of the User to add to the Group
-	 * @param groupId ID of the Group to add the User to
-	 * @param start the first {@link Instant} that the membership becomes effective, must be now or later
+	 * @param user  the User to add to the Group
+	 * @param group the Group to add the User to
+	 * @param start the first {@link Instant} that the membership becomes effective
 	 */
-	void addUserToGroup(String userId, String groupId, Instant start);
+	void addUserToGroup(User user, Group group, Instant start);
 
 	/**
-	 * Adds a {@link User} to a {@link Group} effective at some {@link Instant} in the future, until a later {@link Instant} in the future.
+	 * Adds a {@link User} to a {@link Group} effective at some {@link Instant}, until a later {@link Instant}.
 	 *
-	 * @param userId  ID of the User to add to the Group
-	 * @param groupId ID of the Group to add the User to
-	 * @param start the first {@link LocalDate} that the membership becomes effective, must be today or later
-	 * @param end   the last {@link LocalDate} that the membership is effective, must be on or after start
+	 * @param user  the User to add to the Group
+	 * @param group the Group to add the User to
+	 * @param start the first {@link Instant} that the membership becomes effective
+	 * @param end   the last {@link Instant} that the membership is effective
 	 */
-	void addUserToGroup(String userId, String groupId, Instant start, Instant end);
+	void addUserToGroup(User user, Group group, Instant start, Instant end);
 
 	/**
 	 * Removes a User from a Group, effective immediately.
