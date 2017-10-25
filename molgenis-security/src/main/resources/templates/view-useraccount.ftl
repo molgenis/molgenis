@@ -196,7 +196,7 @@
                         <div class="col-md-4">
                             <ul id="groups" class="inline">
                             <#list groups as group>
-                                <li>${group.name?html}</li>
+                                <li>${group.label?html}</li>
                             </#list>
                             </ul>
                         </div>
