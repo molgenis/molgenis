@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({ ScriptTypeMetaData.class, ScriptPackage.class })
-public class ScriptConfig
+public class ScriptTestConfig
 {
 }

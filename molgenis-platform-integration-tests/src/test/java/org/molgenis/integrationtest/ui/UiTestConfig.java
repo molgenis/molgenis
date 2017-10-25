@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 @Import({ JobsController.class, MenuManagerServiceImpl.class, StyleSheetFactory.class, StyleSheetMetadata.class })
 public class UiTestConfig
 {
-
 	@Autowired
 	private AppSettings appSettings;
 
@@ -37,19 +36,10 @@ public class UiTestConfig
 	}
 
 	@Bean
-	public ThemeFingerprintRegistry themeFingerprintRegistry()
+	public ThemeFingerprintRegistry themeFingerprintRegistry() throws IOException, MolgenisStyleException
 	{
-
 		ThemeFingerprintRegistry themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
-		try
-		{
-			when(themeFingerprintRegistry.getFingerprint("")).thenReturn("");
-		}
-		catch (IOException | MolgenisStyleException err)
-		{
-
-		}
+		when(themeFingerprintRegistry.getFingerprint("")).thenReturn("");
 		return themeFingerprintRegistry;
 	}
-
 }

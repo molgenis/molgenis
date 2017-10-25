@@ -16,14 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.context.WebApplicationContext;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 @Component
 public class BootstrapTestUtils
 {
-
 	private static final Logger LOG = LoggerFactory.getLogger(BootstrapTestUtils.class);
 
 	@Autowired
@@ -45,66 +47,70 @@ public class BootstrapTestUtils
 	@Autowired
 	private SettingsPopulator settingsPopulator;
 
-	public void bootstrap(ContextRefreshedEvent event)
+	public void bootstrap(WebApplicationContext context)
 	{
-		TransactionTemplate transactionTemplate = new TransactionTemplate();
-		transactionTemplate.setTransactionManager(transactionManager);
+		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
+		when(event.getApplicationContext()).thenReturn(context);
+
+		TransactionTemplate template = new TransactionTemplate();
+		template.setTransactionManager(transactionManager);
 		try
 		{
-			runAsSystem(() ->
-			{
-				transactionTemplate.execute((action) ->
-				{
-
-					LOG.info("Bootstrapping registries ...");
-					LOG.trace("Registering repository collections ...");
-					repoCollectionBootstrapper.bootstrap(event, POSTGRESQL);
-					LOG.trace("Registered repository collections");
-
-					LOG.trace("Registering system entity meta data ...");
-					systemEntityTypeRegistrar.register(event);
-					LOG.trace("Registered system entity meta data");
-
-					LOG.trace("Registering system packages ...");
-					systemPackageRegistrar.register(event);
-					LOG.trace("Registered system packages");
-
-					LOG.trace("Registering entity factories ...");
-					entityFactoryRegistrar.register(event);
-					LOG.trace("Registered entity factories");
-
-					LOG.trace("Registering entity factories ...");
-					systemRepositoryDecoratorFactoryRegistrar.register(event);
-					LOG.trace("Registered entity factories");
-					LOG.debug("Bootstrapped registries");
-
-					LOG.trace("Bootstrapping system entity types ...");
-					systemEntityTypeBootstrapper.bootstrap(event);
-					LOG.debug("Bootstrapped system entity types");
-
-					LOG.trace("Registering job factories ...");
-					jobFactoryRegistrar.register(event);
-					LOG.trace("Registered job factories");
-
-					// Settings to database instead of using TestAppSettings
-					LOG.trace("Populating settings entities ...");
-					settingsPopulator.initialize(event);
-					LOG.trace("Populated settings entities");
-
-					LOG.trace("Populating settings entities ...");
-					settingsPopulator.initialize(event);
-					LOG.trace("Populated settings entities");
-
-					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
-					return (Void) null;
-				});
-			});
+			runAsSystem(() -> initialize(template, event));
 		}
 		catch (Exception unexpected)
 		{
 			LOG.error("Error bootstrapping tests!", unexpected);
 			throw new RuntimeException(unexpected);
 		}
-
 	}
+
+	private void initialize(TransactionTemplate template, ContextRefreshedEvent event)
+	{
+		template.execute((action) ->
+		{
+			LOG.info("Bootstrapping registries ...");
+			LOG.trace("Registering repository collections ...");
+			repoCollectionBootstrapper.bootstrap(event, POSTGRESQL);
+			LOG.trace("Registered repository collections");
+
+			LOG.trace("Registering system entity meta data ...");
+			systemEntityTypeRegistrar.register(event);
+			LOG.trace("Registered system entity meta data");
+
+			LOG.trace("Registering system packages ...");
+			systemPackageRegistrar.register(event);
+			LOG.trace("Registered system packages");
+
+			LOG.trace("Registering entity factories ...");
+			entityFactoryRegistrar.register(event);
+			LOG.trace("Registered entity factories");
+
+			LOG.trace("Registering entity factories ...");
+			systemRepositoryDecoratorFactoryRegistrar.register(event);
+			LOG.trace("Registered entity factories");
+			LOG.debug("Bootstrapped registries");
+
+			LOG.trace("Bootstrapping system entity types ...");
+			systemEntityTypeBootstrapper.bootstrap(event);
+			LOG.debug("Bootstrapped system entity types");
+
+			LOG.trace("Registering job factories ...");
+			jobFactoryRegistrar.register(event);
+			LOG.trace("Registered job factories");
+
+			// Settings to database instead of using TestAppSettings
+			LOG.trace("Populating settings entities ...");
+			settingsPopulator.initialize(event);
+			LOG.trace("Populated settings entities");
+
+			LOG.trace("Populating settings entities ...");
+			settingsPopulator.initialize(event);
+			LOG.trace("Populated settings entities");
+
+			event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
+			return (Void) null;
+		});
+	}
+
 }
