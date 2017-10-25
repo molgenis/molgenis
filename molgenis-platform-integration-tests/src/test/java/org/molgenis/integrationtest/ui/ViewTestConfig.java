@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 @Configuration
 @Import({ JobsController.class, MenuManagerServiceImpl.class, StyleSheetFactory.class, StyleSheetMetadata.class })
-public class UiTestConfig
+public class ViewTestConfig
 {
 	@Autowired
 	private AppSettings appSettings;
