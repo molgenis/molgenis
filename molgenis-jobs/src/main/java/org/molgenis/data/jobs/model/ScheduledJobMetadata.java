@@ -60,12 +60,12 @@ public class ScheduledJobMetadata extends SystemEntityType
 						  .setDescription(
 								  "Name of the user to run the job as. Will be automatically filled in by the system.")
 						  .setNillable(true);
-		addAttribute(FAILURE_EMAIL).setDataType(EMAIL)
+		addAttribute(FAILURE_EMAIL).setDataType(STRING)
 								   .setLabel("Failure email")
 								   .setDescription(
 										   "Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs failed.")
 								   .setNillable(true);
-		addAttribute(SUCCESS_EMAIL).setDataType(EMAIL)
+		addAttribute(SUCCESS_EMAIL).setDataType(STRING)
 								   .setLabel("Success email")
 								   .setDescription(
 										   "Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs succeed.")
