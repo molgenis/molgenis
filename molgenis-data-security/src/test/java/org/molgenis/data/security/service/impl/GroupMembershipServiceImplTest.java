@@ -6,9 +6,12 @@ import org.mockito.*;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupMembershipEntity;
 import org.molgenis.data.security.model.GroupMembershipFactory;
+import org.molgenis.data.security.model.GroupMetadata;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.User;
 import org.testng.annotations.AfterMethod;
@@ -20,8 +23,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.model.GroupMembershipMetadata.*;
+import static org.molgenis.data.security.model.GroupMetadata.PARENT;
 import static org.testng.Assert.assertEquals;
 
 public class GroupMembershipServiceImplTest
@@ -30,6 +35,10 @@ public class GroupMembershipServiceImplTest
 	private GroupMembershipEntity groupMembershipEntity1;
 	@Mock
 	private GroupMembershipEntity groupMembershipEntity2;
+	@Mock
+	private GroupEntity groupEntity1;
+	@Mock
+	private GroupEntity groupEntity2;
 	@Mock
 	private GroupMembership groupMembership1;
 	@Mock
@@ -92,7 +101,7 @@ public class GroupMembershipServiceImplTest
 	}
 
 	@Test
-	public void testGetGroupMemberships()
+	public void testGetGroupMembershipsForUser()
 	{
 		String userId = "abcde";
 		when(user.getId()).thenReturn(userId);
@@ -104,6 +113,37 @@ public class GroupMembershipServiceImplTest
 		when(groupMembershipEntity2.toGroupMembership()).thenReturn(groupMembership2);
 
 		assertEquals(groupMembershipService.getGroupMemberships(user),
+				ImmutableList.of(groupMembership1, groupMembership2));
+	}
+
+	@Test
+	public void testGetGroupMembershipsForGroup()
+	{
+		Group parent = mock(Group.class);
+		when(parent.getId()).thenReturn("parent");
+		Group child1 = mock(Group.class);
+		when(child1.getId()).thenReturn("child1");
+		Group child2 = mock(Group.class);
+		when(child2.getId()).thenReturn("child2");
+
+		Query<GroupEntity> withParent = new QueryImpl<GroupEntity>().eq(PARENT, "parent");
+		doReturn(Stream.of(groupEntity1, groupEntity2)).when(dataService)
+													   .findAll(GroupMetadata.GROUP, withParent, GroupEntity.class);
+
+		when(groupEntity1.toGroup()).thenReturn(child1);
+		when(groupEntity2.toGroup()).thenReturn(child2);
+
+		Query<GroupMembershipEntity> forGroups = new QueryImpl<GroupMembershipEntity>().in(GROUP,
+				asList("parent", "child1", "child2"));
+		forGroups.sort().on(START);
+
+		doReturn(Stream.of(groupMembershipEntity1, groupMembershipEntity2)).when(dataService)
+																		   .findAll(GROUP_MEMBERSHIP, forGroups,
+																				   GroupMembershipEntity.class);
+		when(groupMembershipEntity1.toGroupMembership()).thenReturn(groupMembership1);
+		when(groupMembershipEntity2.toGroupMembership()).thenReturn(groupMembership2);
+
+		assertEquals(groupMembershipService.getGroupMemberships(parent),
 				ImmutableList.of(groupMembership1, groupMembership2));
 	}
 }

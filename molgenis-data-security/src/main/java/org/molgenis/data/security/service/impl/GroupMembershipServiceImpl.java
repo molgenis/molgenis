@@ -2,8 +2,10 @@ package org.molgenis.data.security.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupMembershipEntity;
 import org.molgenis.data.security.model.GroupMembershipFactory;
+import org.molgenis.data.security.model.GroupMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
@@ -16,7 +18,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.model.GroupMembershipMetadata.*;
+import static org.molgenis.data.security.model.GroupMetadata.PARENT;
 
 @Component
 public class GroupMembershipServiceImpl implements GroupMembershipService
@@ -53,16 +57,25 @@ public class GroupMembershipServiceImpl implements GroupMembershipService
 		forUser.sort().on(START);
 		return dataService.findAll(GROUP_MEMBERSHIP, forUser, GroupMembershipEntity.class)
 						  .map(GroupMembershipEntity::toGroupMembership)
-						  .collect(Collectors.toList());
+						  .collect(toList());
+	}
+
+	private Stream<Group> getChildGroups(Group parent)
+	{
+		Query<GroupEntity> forGroup = new QueryImpl<GroupEntity>().eq(PARENT, parent.getId());
+		return dataService.findAll(GroupMetadata.GROUP, forGroup, GroupEntity.class).map(GroupEntity::toGroup);
 	}
 
 	@Override
-	public List<GroupMembership> getGroupMemberships(Group group)
+	public List<GroupMembership> getGroupMemberships(Group parent)
 	{
-		Query<GroupMembershipEntity> forGroup = new QueryImpl<GroupMembershipEntity>().eq(GROUP, group.getId());
-		forGroup.sort().on(START);
-		return dataService.findAll(GROUP_MEMBERSHIP, forGroup, GroupMembershipEntity.class)
+		List<String> groupIds = Stream.concat(Stream.of(parent), getChildGroups(parent))
+									  .map(Group::getId)
+									  .collect(Collectors.toList());
+		Query<GroupMembershipEntity> forGroups = new QueryImpl<GroupMembershipEntity>().in(GROUP, groupIds);
+		forGroups.sort().on(START);
+		return dataService.findAll(GROUP_MEMBERSHIP, forGroups, GroupMembershipEntity.class)
 						  .map(GroupMembershipEntity::toGroupMembership)
-						  .collect(Collectors.toList());
+						  .collect(toList());
 	}
 }
