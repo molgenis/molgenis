@@ -7,6 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
@@ -96,9 +97,11 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 		when(negotiatorEntityConfig.getEntity(NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class)).thenReturn(
 				collectionAttr);
 		when(collectionAttr.getName()).thenReturn("collectionAttr");
+		when(collectionAttr.getDataType()).thenReturn(AttributeType.STRING);
 		when(negotiatorEntityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class)).thenReturn(
 				biobackAttr);
 		when(biobackAttr.getName()).thenReturn("biobackAttr");
+		when(biobackAttr.getDataType()).thenReturn(AttributeType.STRING);
 		when(negotiatorEntityConfig.getEntity(NegotiatorEntityConfigMeta.ENABLED_ATTR, Attribute.class)).thenReturn(
 				enabledAttr);
 		when(enabledAttr.getName()).thenReturn("enabledAttr");

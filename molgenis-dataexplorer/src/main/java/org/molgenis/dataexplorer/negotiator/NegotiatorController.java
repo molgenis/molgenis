@@ -5,6 +5,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
@@ -83,7 +84,7 @@ public class NegotiatorController extends PluginController
 		if (entityConfig != null)
 		{
 			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
-			LOG.info("NegotiatorRequest\n\n%s\n\nreceived, sending request", request);
+			LOG.info(String.format("NegotiatorRequest\n\n%s\n\nreceived, sending request", request));
 
 			List<Entity> collectionEntities = getCollectionEntities(request, entityConfig);
 			List<String> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
@@ -91,14 +92,8 @@ public class NegotiatorController extends PluginController
 			if (disabledCollections.isEmpty())
 			{
 				List<Collection> collections = collectionEntities.stream()
-																 .map(entity -> Collection.create(entity.get(
-																		 entityConfig.getEntity(
-																				 NegotiatorEntityConfigMeta.COLLECTION_ID,
-																				 Attribute.class).getName()).toString(),
-																		 entity.get(entityConfig.getEntity(
-																				 NegotiatorEntityConfigMeta.BIOBANK_ID,
-																				 Attribute.class).getName())
-																			   .toString()))
+																 .map(entity -> getEntityCollection(entityConfig,
+																		 entity))
 																 .collect(toList());
 
 				if (!collections.isEmpty())
@@ -126,6 +121,40 @@ public class NegotiatorController extends PluginController
 			throw new MolgenisDataException(i18n.getString("dataexplorer_directory_no_config"));
 		}
 		return ExportResponse.create(success, warning, redirectUrl);
+	}
+
+	private Collection getEntityCollection(NegotiatorEntityConfig entityConfig, Entity entity)
+	{
+		Attribute collectionAttr = entityConfig.getEntity(NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class);
+
+		Attribute biobankAttr = entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class);
+
+		String biobankString = getStringValue(biobankAttr, entity);
+		String collectionString = getStringValue(collectionAttr, entity);
+
+		return Collection.create(collectionString, biobankString);
+	}
+
+	private String getStringValue(Attribute attribute, Entity entity)
+	{
+		String stringValue;
+		Object value = entity.get(attribute.getName());
+
+		if (EntityTypeUtils.isMultipleReferenceType(attribute))
+		{
+			throw new MolgenisDataException("The biobank ID cannot be a mref of categorical mref");
+		}
+
+		//If the configured attr is an xref or categorical we asume the id value should be used
+		if (EntityTypeUtils.isReferenceType(attribute))
+		{
+			stringValue = value != null ? ((Entity) value).getIdValue().toString() : "";
+		}
+		else
+		{
+			stringValue = value != null ? value.toString() : "";
+		}
+		return stringValue;
 	}
 
 	private List<String> getDisabledCollections(List<Entity> collectionEntities, NegotiatorEntityConfig config)
