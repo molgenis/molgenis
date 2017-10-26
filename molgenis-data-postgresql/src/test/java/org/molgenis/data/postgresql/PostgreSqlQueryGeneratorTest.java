@@ -765,18 +765,21 @@ public class PostgreSqlQueryGeneratorTest
 	@DataProvider(name = "getSqlAddColumnInvalidType")
 	public static Iterator<Object[]> getSqlAddColumnInvalidTypeProvider()
 	{
-		return Arrays.asList(new Object[] { COMPOUND }, new Object[] { CATEGORICAL_MREF }, new Object[] { MREF })
-					 .iterator();
+		return Arrays.asList(new Object[] { COMPOUND, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { CATEGORICAL_MREF, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { MREF, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { COMPOUND, ColumnMode.INCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { CATEGORICAL_MREF, ColumnMode.INCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { MREF, ColumnMode.INCLUDE_DEFAULT_CONSTRAINT }).iterator();
 	}
 
 	@Test(dataProvider = "getSqlAddColumnInvalidType", expectedExceptions = RuntimeException.class)
-	public void getSqlAddColumnInvalidType(AttributeType attrType)
+	public void getSqlAddColumnInvalidType(AttributeType attrType, ColumnMode columnMode)
 	{
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(attrType);
-		PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr,
-				null); // // FIXME test and make sure we have tests for both modes
+		PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr, columnMode);
 	}
 
 	@Test

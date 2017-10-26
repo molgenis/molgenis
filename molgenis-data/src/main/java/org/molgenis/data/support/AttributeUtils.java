@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -48,7 +49,7 @@ public class AttributeUtils
 		return getValidIdAttributeTypes().contains(attr.getDataType());
 	}
 
-	public static EnumSet<AttributeType> getValidIdAttributeTypes()
+	public static Set<AttributeType> getValidIdAttributeTypes()
 	{
 		return EnumSet.of(STRING, INT, LONG, EMAIL, HYPERLINK);
 	}

@@ -565,8 +565,6 @@ public class PostgreSqlRepositoryCollectionTest
 		verifyNoMoreInteractions(jdbcTemplate);
 	}
 
-	// TODO add addAttributeDefaultValueMref test once PostgreSqlRepository does not create new JdbcTemplate instances
-
 	@Test
 	public void addAttributeUnique()
 	{

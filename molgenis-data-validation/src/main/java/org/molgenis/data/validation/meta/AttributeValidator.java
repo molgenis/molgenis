@@ -14,10 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
@@ -354,7 +351,7 @@ public class AttributeValidator
 		// transitions to CATEGORICAL_MREF and MREF not allowed because junction tables updated not implemented
 		// transitions to FILE not allowed because associated file in FileStore not created/removed, see github issue https://github.com/molgenis/molgenis/issues/3217
 		DATA_TYPE_ALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
-		EnumSet<AttributeType> allowedIdAttributeTypes = getValidIdAttributeTypes();
+		Set<AttributeType> allowedIdAttributeTypes = getValidIdAttributeTypes();
 
 		// TRUE and FALSE can either be expressed in string or 0 and 1
 		// Postgres does not support boolean to bigint or double precision (LONG and DECIMAL)
