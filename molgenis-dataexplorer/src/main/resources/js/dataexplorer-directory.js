@@ -39,7 +39,6 @@ $.when($,
         // Remove the nToken from the URL to prevent duplication on the negotiator side
         // when a query is edited more than once
         var url = window.location.href.replace(/&nToken=\w{32}/, '')
-        console.log(rsqlParts);
         var request = {
             URL: url,
             entityId: entityTypeId,
