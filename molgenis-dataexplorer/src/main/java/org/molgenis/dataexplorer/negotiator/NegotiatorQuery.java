@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.directory;
+package org.molgenis.dataexplorer.negotiator;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
@@ -19,7 +19,7 @@ public abstract class NegotiatorQuery
 	@Nullable
 	public abstract String getnToken();
 
-	public static NegotiatorQuery createQuery(String url, List<Collection> collections, String humanReadable,
+	public static NegotiatorQuery create(String url, List<Collection> collections, String humanReadable,
 			String nToken)
 	{
 		return new AutoValue_NegotiatorQuery(url, collections, humanReadable, nToken);

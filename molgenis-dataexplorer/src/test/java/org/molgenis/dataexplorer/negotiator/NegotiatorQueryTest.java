@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.directory;
+package org.molgenis.dataexplorer.negotiator;
 
 import com.google.gson.Gson;
 import org.molgenis.util.GsonConfig;
@@ -16,8 +16,8 @@ public class NegotiatorQueryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private Gson gson;
 
-	private NegotiatorQuery negotiatorQuery = NegotiatorQuery.createQuery("url", Collections.emptyList(),
-			"humanReadable", null);
+	private NegotiatorQuery negotiatorQuery = NegotiatorQuery.create("url", Collections.emptyList(), "humanReadable",
+			null);
 
 	private String json = "{\"URL\":\"url\",\"collections\":[],\"humanReadable\":\"humanReadable\"}";
 

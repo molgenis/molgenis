@@ -7,6 +7,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Service;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Rsql/fiql parser
  * <p>
@@ -17,7 +19,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class MolgenisRSQL
 {
-	private final RSQLParser rsqlParser = new RSQLParser();
+	private final RSQLParser rsqlParser;
+
+	public MolgenisRSQL(RSQLParser rsqlParser)
+	{
+		this.rsqlParser = requireNonNull(rsqlParser);
+	}
 
 	public Query<Entity> createQuery(String rsql, EntityType entityType)
 	{
