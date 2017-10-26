@@ -142,7 +142,8 @@ public class NegotiatorController extends PluginController
 
 		if (EntityTypeUtils.isMultipleReferenceType(attribute))
 		{
-			throw new MolgenisDataException("The biobank ID cannot be a mref of categorical mref");
+			throw new MolgenisDataException(
+					String.format("The %s cannot be a mref of categorical mref", attribute.getName()));
 		}
 
 		//If the configured attr is an xref or categorical we asume the id value should be used
