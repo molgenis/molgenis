@@ -13,16 +13,18 @@ import org.springframework.context.annotation.Import;
 import javax.sql.DataSource;
 
 @Configuration
-@Import({ TransactionExceptionTranslatorRegistry.class })
+@Import({ TransactionExceptionTranslatorRegistry.class, IdGeneratorImpl.class })
 public class TransactionTestConfig
 {
+
+	@Autowired
+	private IdGenerator idGenerator;
 	@Autowired
 	private DataSource dataSource;
 
 	@Bean
 	public TransactionManager transactionManager()
 	{
-		IdGenerator idGenerator = new IdGeneratorImpl();
 		TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry = new TransactionExceptionTranslatorRegistry();
 		return new PostgreSqlTransactionManager(idGenerator, dataSource, transactionExceptionTranslatorRegistry);
 	}

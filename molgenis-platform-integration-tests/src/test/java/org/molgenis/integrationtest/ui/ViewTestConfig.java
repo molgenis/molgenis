@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 
 import java.io.IOException;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +40,7 @@ public class ViewTestConfig
 	public ThemeFingerprintRegistry themeFingerprintRegistry() throws IOException, MolgenisStyleException
 	{
 		ThemeFingerprintRegistry themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
-		when(themeFingerprintRegistry.getFingerprint("")).thenReturn("");
+		when(themeFingerprintRegistry.getFingerprint(anyString())).thenReturn("");
 		return themeFingerprintRegistry;
 	}
 }

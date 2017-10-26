@@ -1,14 +1,15 @@
 package org.molgenis.integrationtest.utils;
 
+import org.molgenis.file.FileStore;
 import org.molgenis.integrationtest.data.platform.BootStrapperTestConfig;
 import org.molgenis.integrationtest.data.postgresql.PostgreSqlTestConfig;
+import org.molgenis.integrationtest.file.FileTestConfig;
 import org.molgenis.integrationtest.utils.config.SecurityITConfig;
 import org.molgenis.integrationtest.utils.config.WebAppITConfig;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
@@ -19,7 +20,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
+
+import java.io.IOException;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.integrationtest.utils.config.SecurityITConfig.SUPERUSER_NAME;
@@ -42,11 +46,13 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
 	private BootstrapTestUtils bootstrapTestUtils;
 	@Autowired
 	private TokenService tokenService;
+	@Autowired
+	private FileStore fileStore;
 
 	private String adminToken;
 
 	@BeforeMethod
-	public void beforeMethodSetup()
+	private void beforeMethodSetup()
 	{
 		initMocks(this);
 		if (mockMvc == null)
@@ -63,7 +69,13 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
 	 * <p>Use this method as a beforeMethod in the integration test</p>
 	 * <p>Do not annotate this method to ensure this method is called in the <code>beforeMethodSetup</code></p>
 	 */
-	public abstract void beforeMethod();
+	protected abstract void beforeMethod();
+
+	@AfterClass
+	public void afterClass() throws IOException
+	{
+		fileStore.deleteDirectory(fileStore.getStorageDir());
+	}
 
 	protected String getAdminToken()
 	{
@@ -81,13 +93,8 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
 	@EnableWebMvc // use this annotation in your controller configuration to test the GetMapping annotations
 	@EnableAspectJAutoProxy
 	@Import({ BootstrapTestUtils.class, BootStrapperTestConfig.class, DataServiceTokenService.class,
-			WebAppITConfig.class, SecurityITConfig.class, PostgreSqlTestConfig.class })
+			WebAppITConfig.class, SecurityITConfig.class, PostgreSqlTestConfig.class, FileTestConfig.class })
 	static class Config
 	{
-		@Bean
-		public ApplicationContextProvider applicationContextProvider()
-		{
-			return new ApplicationContextProvider();
-		}
 	}
 }

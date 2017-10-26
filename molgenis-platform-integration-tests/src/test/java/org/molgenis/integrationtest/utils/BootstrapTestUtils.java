@@ -65,6 +65,7 @@ public class BootstrapTestUtils
 		}
 	}
 
+	//TODO Synchronise integration test bootstrapper with production bootstrapper (see https://github.com/molgenis/molgenis/issues/5934)
 	private void initialize(TransactionTemplate template, ContextRefreshedEvent event)
 	{
 		template.execute((action) ->

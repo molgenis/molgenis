@@ -3,7 +3,9 @@ package org.molgenis.integrationtest.utils.config;
 import org.molgenis.integrationtest.data.settings.SettingsTestConfig;
 import org.molgenis.integrationtest.ui.ViewTestConfig;
 import org.molgenis.ui.MolgenisWebAppConfig;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonConfig;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -11,4 +13,9 @@ import org.springframework.context.annotation.Import;
 @Import({ GsonConfig.class, ViewTestConfig.class, SettingsTestConfig.class })
 public class WebAppITConfig extends MolgenisWebAppConfig
 {
+	@Bean
+	public ApplicationContextProvider applicationContextProvider()
+	{
+		return new ApplicationContextProvider();
+	}
 }

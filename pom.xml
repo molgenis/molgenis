@@ -39,33 +39,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
-        <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
 
         <!-- molgenis specific properties -->
-        <molgenis.source.compile.version>1.8</molgenis.source.compile.version>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
 
         <!-- code quality monitoring properties -->
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-
-        <!-- plugin versions -->
-        <maven-failsafe-plugin.version>2.8.1</maven-failsafe-plugin.version>
-        <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.7.2.201409121644</jacoco-maven-plugin.version>
-        <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
-        <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
-        <maven-war-plugin.version>2.4</maven-war-plugin.version>
-        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
-        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
-        <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
-        <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
-        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
-        <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
-        <maven-dependency-plugin.version>3.0.1</maven-dependency-plugin.version>
-        <maven-site-plugin.version>3.3</maven-site-plugin.version>
-        <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
-        <minify-maven-plugin.version>1.7.4</minify-maven-plugin.version>
 
         <!-- dependency versions -->
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
@@ -85,6 +65,12 @@
         <elasticsearch.version>5.5.1</elasticsearch.version>
         <postgres.version>9.4.1211</postgres.version>
         <findbugs-annotations.version>3.0.1</findbugs-annotations.version>
+        <snakeyaml.version>1.15</snakeyaml.version>
+        <jackson-annotations.version>2.8.8</jackson-annotations.version>
+        <jackson-core.version>2.8.8</jackson-core.version>
+        <jackson-databind.version>2.8.8.1</jackson-databind.version>
+        <javax-servlet-api.version>3.0.1</javax-servlet-api.version>
+        <freemarker.version>2.3.23</freemarker.version>
         <node.version>v6.11.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
 
@@ -214,10 +200,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
+                    <version>3.6.1</version>
                     <configuration>
-                        <source>${molgenis.source.compile.version}</source>
-                        <target>${molgenis.source.compile.version}</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <compilerArguments>
                             <Xlint/>
                         </compilerArguments>
@@ -227,7 +213,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>${maven-war-plugin.version}</version>
+                    <version>2.4</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                     </configuration>
@@ -236,7 +222,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
+                    <version>2.4</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -254,7 +240,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>${maven-resources-plugin.version}</version>
+                    <version>2.6</version>
                     <executions>
                         <!-- copy generated resources to target folder -->
                         <execution>
@@ -279,19 +265,19 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>${jaxb2-maven-plugin.version}</version>
+                    <version>1.5</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.jvnet.jax-ws-commons</groupId>
                     <artifactId>jaxws-maven-plugin</artifactId>
-                    <version>${jaxws-maven-plugin.version}</version>
+                    <version>2.1</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin.version}</version>
+                    <version>2.19.1</version>
                     <configuration>
                         <argLine>${argLine}</argLine>
                     </configuration>
@@ -300,7 +286,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>${maven-antrun-plugin.version}</version>
+                    <version>1.7</version>
                     <executions>
                         <execution>
                             <id>generate-sources</id>
@@ -349,7 +335,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${build-helper-maven-plugin.version}</version>
+                    <version>3.0.0</version>
                     <executions>
                         <execution>
                             <id>reserve-network-port</id>
@@ -432,31 +418,31 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven-dependency-plugin.version}</version>
+                    <version>3.0.1</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>${maven-site-plugin.version}</version>
+                    <version>3.3</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
-                    <version>${properties-maven-plugin.version}</version>
+                    <version>1.0-alpha-2</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco-maven-plugin.version}</version>
+                    <version>0.7.2.201409121644</version>
                 </plugin>
                 <!-- Eclipse m2e mappings -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
-                    <version>${lifecycle-mapping.version}</version>
+                    <version>1.0.0</version>
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>
@@ -464,7 +450,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-antrun-plugin</artifactId>
-                                        <versionRange>[${maven-antrun-plugin.version},)</versionRange>
+                                        <versionRange>[1.7,)</versionRange>
                                         <goals>
                                             <goal>run</goal>
                                         </goals>
@@ -490,7 +476,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.jvnet.jax-ws-commons</groupId>
                                         <artifactId>jaxws-maven-plugin</artifactId>
-                                        <versionRange>[${jaxws-maven-plugin.version},)</versionRange>
+                                        <versionRange>[2.1,)</versionRange>
                                         <goals>
                                             <goal>wsimport</goal>
                                         </goals>
@@ -503,7 +489,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.codehaus.mojo</groupId>
                                         <artifactId>properties-maven-plugin</artifactId>
-                                        <versionRange>[${properties-maven-plugin.version},)</versionRange>
+                                        <versionRange>[1.0-alpha-2,)</versionRange>
                                         <goals>
                                             <goal>read-project-properties</goal>
                                         </goals>
@@ -546,7 +532,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven-failsafe-plugin.version}</version>
+                    <version>2.8.1</version>
                     <executions>
                         <execution>
                             <id>integration-test</id>
@@ -568,7 +554,7 @@
                 <plugin>
                     <groupId>com.samaxes.maven</groupId>
                     <artifactId>minify-maven-plugin</artifactId>
-                    <version>${minify-maven-plugin.version}</version>
+                    <version>1.7.4</version>
                     <executions>
                         <execution>
                             <id>default-minify</id>
@@ -728,7 +714,7 @@
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.15</version>
+                <version>${snakeyaml.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -743,22 +729,22 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.8.8</version>
+                <version>${jackson-annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.8.8</version>
+                <version>${jackson-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.8.8.1</version>
+                <version>${jackson-databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.freemarker</groupId>
                 <artifactId>freemarker</artifactId>
-                <version>2.3.23</version>
+                <version>${freemarker.version}</version>
             </dependency>
             <!-- see http://docs.spring.io/spring-security/site/docs/3.2.x/reference/htmlsingle/#maven-bom -->
             <dependency>
@@ -851,7 +837,7 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>3.0.1</version>
+                <version>${javax-servlet-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
