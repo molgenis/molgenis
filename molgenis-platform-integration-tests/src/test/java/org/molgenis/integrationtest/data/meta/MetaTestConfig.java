@@ -4,7 +4,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.EntityFactoryRegistry;
 import org.molgenis.data.EntityManagerImpl;
-import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.i18n.SystemEntityTypeI18nInitializer;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.DefaultPackage;
@@ -20,19 +19,21 @@ import org.molgenis.data.platform.decorators.SystemRepositoryDecoratorRegistryIm
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import javax.annotation.PostConstruct;
 
 @Configuration
-@Import({ MetadataTestConfig.class, DataServiceImpl.class, MetaDataServiceImpl.class, EntityManagerImpl.class,
+@Import({ DataServiceImpl.class, MetaDataServiceImpl.class, EntityManagerImpl.class,
 		SystemRepositoryDecoratorRegistryImpl.class, EntityFactoryRegistry.class, EntityListenersService.class,
 		AttributeFactory.class, SystemEntityTypeRegistryImpl.class, EntityTypeDependencyResolver.class,
 		SystemPackageRegistry.class, PackagePersister.class, SystemEntityTypePersister.class,
 		SystemEntityTypeRegistrar.class, SystemPackageRegistrar.class, EntityFactoryRegistrar.class,
 		SystemEntityTypeInitializer.class, SystemEntityTypeI18nInitializer.class, DefaultPackage.class,
 		EntityTypeCopierImpl.class, AttributeCopierImpl.class })
+@ComponentScan("org.molgenis.data.meta.model")
 public class MetaTestConfig
 {
 	@Autowired
