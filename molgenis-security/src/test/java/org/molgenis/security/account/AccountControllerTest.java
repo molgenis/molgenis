@@ -91,6 +91,15 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void getPasswordChangeForm() throws Exception
+	{
+		this.mockMvc.perform(get("/account/password/change"))
+					.andExpect(status().isOk())
+					.andExpect(model().attribute("min_password_length", 6))
+					.andExpect(view().name("view-change-password"));
+	}
+
+	@Test
 	public void getRegisterForm() throws Exception
 	{
 		this.mockMvc.perform(get("/account/register"))

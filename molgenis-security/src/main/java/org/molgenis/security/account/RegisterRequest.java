@@ -30,10 +30,7 @@ class RegisterRequest
 	private String lastname;
 	@NotBlank
 	private String firstname;
-	private String middleNames;
-	private Integer institute;
 	private String department;
-	private Integer position;
 	private String address;
 	private String city;
 	private String country;
@@ -138,26 +135,6 @@ class RegisterRequest
 		this.firstname = firstname;
 	}
 
-	public String getMiddleNames()
-	{
-		return middleNames;
-	}
-
-	public void setMiddleNames(String middleNames)
-	{
-		this.middleNames = middleNames;
-	}
-
-	public Integer getInstitute()
-	{
-		return institute;
-	}
-
-	public void setInstitute(Integer institute)
-	{
-		this.institute = institute;
-	}
-
 	public String getDepartment()
 	{
 		return department;
@@ -166,16 +143,6 @@ class RegisterRequest
 	public void setDepartment(String department)
 	{
 		this.department = department;
-	}
-
-	public Integer getPosition()
-	{
-		return position;
-	}
-
-	public void setPosition(Integer position)
-	{
-		this.position = position;
 	}
 
 	public String getAddress()
@@ -218,16 +185,14 @@ class RegisterRequest
 				confirmPassword, that.confirmPassword) && Objects.equals(email, that.email) && Objects.equals(phone,
 				that.phone) && Objects.equals(fax, that.fax) && Objects.equals(tollFreePhone, that.tollFreePhone)
 				&& Objects.equals(title, that.title) && Objects.equals(lastname, that.lastname) && Objects.equals(
-				firstname, that.firstname) && Objects.equals(middleNames, that.middleNames) && Objects.equals(institute,
-				that.institute) && Objects.equals(department, that.department) && Objects.equals(position,
-				that.position) && Objects.equals(address, that.address) && Objects.equals(city, that.city)
-				&& Objects.equals(country, that.country);
+				firstname, that.firstname) && Objects.equals(department, that.department) && Objects.equals(address,
+				that.address) && Objects.equals(city, that.city) && Objects.equals(country, that.country);
 	}
 
 	@Override
 	public int hashCode()
 	{
 		return Objects.hash(username, password, confirmPassword, email, phone, fax, tollFreePhone, title, lastname,
-				firstname, middleNames, institute, department, position, address, city, country);
+				firstname, department, address, city, country);
 	}
 }

@@ -72,59 +72,61 @@
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="phone">Phone</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="phone"<#if user.phone??>
-                                               value="${user.phone?html}"</#if>>
+                                        <input type="text" class="form-control" name="phone"<#if user.phone.present>
+                                               value="${user.phone.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="phone">Fax</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="fax"<#if user.fax??>
-                                               value="${user.fax?html}"</#if>>
+                                        <input type="text" class="form-control" name="fax"<#if user.fax.present>
+                                               value="${user.fax.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="tollFreePhone">Toll-free phone</label>
                                     <div class="col-md-5">
                                         <input type="text" class="form-control"
-                                               name="tollFreePhone"<#if user.tollFreePhone??>
-                                               value="${user.tollFreePhone?html}"</#if>>
+                                               name="tollFreePhone"<#if user.tollFreePhone.present>
+                                               value="${user.tollFreePhone.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="address">Address</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="address"<#if user.address??>
-                                               value="${user.address?html}"</#if>>
+                                        <input type="text" class="form-control" name="address"<#if user.address.present>
+                                               value="${user.address.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="title">Title</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="title"<#if user.title??>
-                                               value="${user.title?html}"</#if>>
+                                        <input type="text" class="form-control" name="title"<#if user.title.present>
+                                               value="${user.title.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="firstname">First name</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="firstname"<#if user.firstName??>
-                                               value="${user.firstName?html}"</#if>>
+                                        <input type="text" class="form-control"
+                                               name="firstname"<#if user.firstName.present>
+                                               value="${user.firstName.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="firstname">Middle names</label>
                                     <div class="col-md-5">
                                         <input type="text" class="form-control"
-                                               name="middleNames"<#if user.middleNames??>
-                                               value="${user.middleNames?html}"</#if>>
+                                               name="middleNames"<#if user.middleNames.present>
+                                               value="${user.middleNames.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="lastname">Last name</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="lastname"<#if user.lastName??>
-                                               value="${user.lastName?html}"</#if>>
+                                        <input type="text" class="form-control"
+                                               name="lastname"<#if user.lastName.present>
+                                               value="${user.lastName.get()?html}"</#if>>
                                     </div>
                                 </div>
                             </div>
@@ -132,40 +134,43 @@
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="institute">Institute</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="institute"<#if user.affiliation??>
-                                               value="${user.affiliation?html}"</#if>>
+                                        <input type="text" class="form-control"
+                                               name="institute"<#if user.affiliation.present>
+                                               value="${user.affiliation.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="department">Department</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="department"<#if user.department??>
-                                               value="${user.department?html}"</#if>>
+                                        <input type="text" class="form-control"
+                                               name="department"<#if user.department.present>
+                                               value="${user.department.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="position">Position</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="position"<#if user.role??>
-                                               value="${user.role?html}"</#if>>
+                                        <input type="text" class="form-control" name="position"<#if user.role.present>
+                                               value="${user.role.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="city">City</label>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control" name="city"<#if user.city??>
-                                               value="${user.city?html}"</#if>>
+                                        <input type="text" class="form-control" name="city"<#if user.city.present>
+                                               value="${user.city.get()?html}"</#if>>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="country">Country</label>
                                     <div class="col-md-5">
                                         <select class="form-control" name="country">
-                                        <#if !user.country??>
+                                        <#if !user.country.present>
                                             <option value="" disabled selected>Please Select</option>
                                         </#if>
                                         <#list countries?keys as countryCode>
-                                            <option value="${countryCode?html}"<#if user.country?? && user.country == countries[countryCode]>
+                                            <#assign country = countries[countryCode]>
+                                            <option value="${countryCode?html}"<#if user.country.present && (user.country.get() == country)>
                                                     selected</#if>>${countries[countryCode]?html}</option>
                                         </#list>
                                         </select>
@@ -416,7 +421,7 @@
         }
 
         function showRecoveryCodes() {
-            $.get('${context_url?html}/recoveryCodes', function (codes) {
+            $.get()('${context_url?html}/recoveryCodes', function (codes) {
                 listRecoveryCodes(codes['recoveryCodes'])
             })
             $('.recovery-code-list-toggle').collapse('toggle')
@@ -425,7 +430,7 @@
         recoveryCodesBtn.click(showRecoveryCodes)
 
         generateCodesBtn.click(function (e) {
-            $.get('${context_url?html}/generateRecoveryCodes', function (codes) {
+            $.get()('${context_url?html}/generateRecoveryCodes', function (codes) {
                 listRecoveryCodes(codes['recoveryCodes'])
             })
         })

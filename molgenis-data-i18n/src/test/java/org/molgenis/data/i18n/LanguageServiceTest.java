@@ -40,7 +40,7 @@ public class LanguageServiceTest
 	@WithMockUser
 	public void getCurrentUserLanguageCodePrefersUserLanguageCode()
 	{
-		when(user.getLanguageCode()).thenReturn("nl");
+		when(user.getLanguageCode()).thenReturn(Optional.of("nl"));
 		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.of(user));
 		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
 	}
@@ -49,7 +49,17 @@ public class LanguageServiceTest
 	@WithMockUser
 	public void getCurrentUserLanguageCodeUserCodeUnknown()
 	{
-		when(user.getLanguageCode()).thenReturn("??");
+		when(user.getLanguageCode()).thenReturn(Optional.of("??"));
+		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.of(user));
+		when(appSettings.getLanguageCode()).thenReturn("nl");
+		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
+	}
+
+	@Test
+	@WithMockUser
+	public void getCurrentUserLanguageCodeUserCodeNotSpecified()
+	{
+		when(user.getLanguageCode()).thenReturn(Optional.empty());
 		when(userAccountService.getCurrentUserIfPresent()).thenReturn(Optional.of(user));
 		when(appSettings.getLanguageCode()).thenReturn("nl");
 		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");

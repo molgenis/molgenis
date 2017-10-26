@@ -45,7 +45,9 @@ public class RecoveryServiceImpl implements RecoveryService
 	@Transactional
 	public Stream<RecoveryCode> generateRecoveryCodes()
 	{
-		String userId = userAccountService.getCurrentUser().getId();
+		String userId = userAccountService.getCurrentUser()
+										  .getId()
+										  .orElseThrow(() -> new IllegalArgumentException("User has empty id."));
 		deleteOldRecoveryCodes(userId);
 		List<RecoveryCode> newRecoveryCodes = generateRecoveryCodes(userId);
 		//noinspection RedundantCast
@@ -57,7 +59,9 @@ public class RecoveryServiceImpl implements RecoveryService
 	@Transactional
 	public void useRecoveryCode(String recoveryCode)
 	{
-		String userId = userAccountService.getCurrentUser().getId();
+		String userId = userAccountService.getCurrentUser()
+										  .getId()
+										  .orElseThrow(() -> new IllegalStateException("User has empty id."));
 		RecoveryCode existingCode = runAsSystem(() -> dataService.findOne(RECOVERY_CODE,
 				new QueryImpl<RecoveryCode>().eq(USER_ID, userId).and().eq(CODE, recoveryCode), RecoveryCode.class));
 		if (existingCode != null)
@@ -77,7 +81,9 @@ public class RecoveryServiceImpl implements RecoveryService
 	@Override
 	public Stream<RecoveryCode> getRecoveryCodes()
 	{
-		String userId = userAccountService.getCurrentUser().getId();
+		String userId = userAccountService.getCurrentUser()
+										  .getId()
+										  .orElseThrow(() -> new IllegalArgumentException("User has empty id."));
 		return runAsSystem(() -> dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, userId),
 				RecoveryCode.class));
 	}

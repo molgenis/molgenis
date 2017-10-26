@@ -15,6 +15,7 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -27,6 +28,7 @@ import static org.testng.Assert.assertEquals;
 public class RecoveryServiceImplTest extends AbstractMockitoTest
 {
 	private final static String USERNAME = "molgenisUser";
+	private final String userId = "1234";
 
 	private RecoveryServiceImpl recoveryService;
 	@Mock
@@ -50,8 +52,8 @@ public class RecoveryServiceImplTest extends AbstractMockitoTest
 		recoveryService = new RecoveryServiceImpl(dataService, userAccountService, recoveryCodeFactory, idGenerator);
 		when(userAccountService.getCurrentUser()).thenReturn(molgenisUser);
 		when(molgenisUser.getUsername()).thenReturn(USERNAME);
-		when(molgenisUser.getId()).thenReturn("1234");
-		when(dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, "1234"),
+		when(molgenisUser.getId()).thenReturn(Optional.of(userId));
+		when(dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, userId),
 				RecoveryCode.class)).thenReturn(IntStream.range(0, 1).mapToObj(i -> recoveryCode));
 	}
 
@@ -69,12 +71,11 @@ public class RecoveryServiceImplTest extends AbstractMockitoTest
 	public void testUseRecoveryCode()
 	{
 		String recoveryCodeId = "lkfsdufash";
-		Query<RecoveryCode> recoveryCodeQuery = new QueryImpl<RecoveryCode>().eq(USER_ID, molgenisUser.getId())
+		Query<RecoveryCode> recoveryCodeQuery = new QueryImpl<RecoveryCode>().eq(USER_ID, userId)
 																			 .and()
 																			 .eq(CODE, recoveryCodeId);
 		when(dataService.findOne(RECOVERY_CODE, recoveryCodeQuery, RecoveryCode.class)).thenReturn(recoveryCode);
-		when(dataService.findOne(USER_SECRET,
-				new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, molgenisUser.getId()),
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, userId),
 				UserSecret.class)).thenReturn(userSecret);
 
 		recoveryService.useRecoveryCode(recoveryCodeId);

@@ -286,58 +286,58 @@ public class UserEntity extends StaticEntity
 
 	public User toUser()
 	{
-		return User.builder()
-				   .id(getId())
-				   .username(getUsername())
-				   .password(getPassword())
-				   .activationCode(getActivationCode())
-				   .twoFactorAuthentication(isTwoFactorAuthentication())
-				   .active(isActive())
-				   .superuser(isSuperuser())
-				   .firstName(getFirstName())
-				   .middleNames(getMiddleNames())
-				   .lastName(getLastName())
-				   .title(getTitle())
-				   .affiliation(getAffiliation())
-				   .department(getDepartment())
-				   .address(getAddress())
-				   .phone(getPhone())
-				   .email(getEmail())
-				   .fax(getFax())
-				   .tollFreePhone(getTollFreePhone())
-				   .city(getCity())
-				   .country(getCountry())
-				   .changePassword(isChangePassword())
-				   .languageCode(getLanguageCode())
-				   .googleAccountId(getGoogleAccountId())
-				   .build();
+		User.Builder result = User.builder()
+								  .username(getUsername())
+								  .password(getPassword())
+								  .email(getEmail())
+								  .twoFactorAuthentication(isTwoFactorAuthentication())
+								  .active(isActive())
+								  .superuser(isSuperuser())
+								  .changePassword(isChangePassword());
+		Optional.ofNullable(getId()).ifPresent(result::id);
+		Optional.ofNullable(getActivationCode()).ifPresent(result::activationCode);
+		Optional.ofNullable(getFirstName()).ifPresent(result::firstName);
+		Optional.ofNullable(getMiddleNames()).ifPresent(result::middleNames);
+		Optional.ofNullable(getLastName()).ifPresent(result::lastName);
+		Optional.ofNullable(getTitle()).ifPresent(result::title);
+		Optional.ofNullable(getAffiliation()).ifPresent(result::affiliation);
+		Optional.ofNullable(getDepartment()).ifPresent(result::department);
+		Optional.ofNullable(getAddress()).ifPresent(result::address);
+		Optional.ofNullable(getPhone()).ifPresent(result::phone);
+		Optional.ofNullable(getFax()).ifPresent(result::fax);
+		Optional.ofNullable(getTollFreePhone()).ifPresent(result::tollFreePhone);
+		Optional.ofNullable(getCity()).ifPresent(result::city);
+		Optional.ofNullable(getCountry()).ifPresent(result::country);
+		Optional.ofNullable(getLanguageCode()).ifPresent(result::languageCode);
+		Optional.ofNullable(getGoogleAccountId()).ifPresent(result::googleAccountId);
+		return result.build();
 	}
 
 	public UserEntity updateFrom(User user)
 	{
-		setId(user.getId());
 		setUsername(user.getUsername());
 		setPassword(user.getPassword());
-		setActivationCode(user.getActivationCode());
+		setEmail(user.getEmail());
 		setTwoFactorAuthentication(user.isTwoFactorAuthentication());
 		setActive(user.isActive());
 		setSuperuser(user.isSuperuser());
-		setFirstName(user.getFirstName());
-		setMiddleNames(user.getMiddleNames());
-		setLastName(user.getLastName());
-		setTitle(user.getTitle());
-		setAffiliation(user.getAffiliation());
-		setDepartment(user.getDepartment());
-		setAddress(user.getAddress());
-		setPhone(user.getPhone());
-		setEmail(user.getEmail());
-		setFax(user.getFax());
-		setTollFreePhone(user.getTollFreePhone());
-		setCity(user.getCity());
-		setCountry(user.getCountry());
 		setChangePassword(user.isChangePassword());
-		setLanguageCode(user.getLanguageCode());
-		setGoogleAccountId(user.getGoogleAccountId());
+		user.getId().ifPresent(this::setId);
+		user.getActivationCode().ifPresent(this::setActivationCode);
+		user.getFirstName().ifPresent(this::setFirstName);
+		user.getMiddleNames().ifPresent(this::setMiddleNames);
+		user.getLastName().ifPresent(this::setLastName);
+		user.getTitle().ifPresent(this::setTitle);
+		user.getAffiliation().ifPresent(this::setAffiliation);
+		user.getDepartment().ifPresent(this::setDepartment);
+		user.getAddress().ifPresent(this::setAddress);
+		user.getPhone().ifPresent(this::setPhone);
+		user.getFax().ifPresent(this::setFax);
+		user.getTollFreePhone().ifPresent(this::setTollFreePhone);
+		user.getCity().ifPresent(this::setCity);
+		user.getCountry().ifPresent(this::setCountry);
+		user.getLanguageCode().ifPresent(this::setLanguageCode);
+		user.getGoogleAccountId().ifPresent(this::setGoogleAccountId);
 		return this;
 	}
 }

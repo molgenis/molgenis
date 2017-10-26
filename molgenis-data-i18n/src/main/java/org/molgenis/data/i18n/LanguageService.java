@@ -2,6 +2,7 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.service.UserAccountService;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
@@ -94,8 +95,7 @@ public class LanguageService
 	 */
 	public String getCurrentUserLanguageCode()
 	{
-		return userAccountService.getCurrentUserIfPresent()
-								 .flatMap(user -> Optional.ofNullable(user.getLanguageCode()))
+		return userAccountService.getCurrentUserIfPresent().flatMap(User::getLanguageCode)
 								 .filter(this::languageExists)
 								 .orElse(Optional.ofNullable(appSettings.getLanguageCode())
 										  .filter(this::languageExists)

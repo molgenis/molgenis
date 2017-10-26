@@ -109,7 +109,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 		{
 			User user = userAccountService.getCurrentUser();
 			UserSecret userSecret = userSecretFactory.create();
-			userSecret.setUserId(user.getId());
+			userSecret.setUserId(user.getId().orElseThrow(() -> new IllegalArgumentException("User has empty id.")));
 			userSecret.setSecret(secret);
 			runAsSystem(() -> dataService.add(USER_SECRET, userSecret));
 		}
@@ -118,9 +118,11 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 	@Override
 	public void resetSecretForUser()
 	{
-		User user = userAccountService.getCurrentUser();
+		String userId = userAccountService.getCurrentUser()
+										  .getId()
+										  .orElseThrow(() -> new IllegalStateException("User has empty ID"));
 		Stream<UserSecret> userSecrets = runAsSystem(
-				() -> dataService.findAll(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, user.getId()),
+				() -> dataService.findAll(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, userId),
 						UserSecret.class));
 		//noinspection RedundantCast
 		runAsSystem((Runnable) () -> dataService.delete(USER_SECRET, userSecrets));
@@ -203,8 +205,9 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
 
 	private Optional<UserSecret> getSecret(User user)
 	{
-		return runAsSystem(() -> Optional.ofNullable(
-				dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, user.getId()),
+		return runAsSystem(() -> Optional.ofNullable(dataService.findOne(USER_SECRET,
+				new QueryImpl<UserSecret>().eq(USER_ID,
+						user.getId().orElseThrow(() -> new IllegalStateException("User has empty ID"))),
 						UserSecret.class)));
 	}
 

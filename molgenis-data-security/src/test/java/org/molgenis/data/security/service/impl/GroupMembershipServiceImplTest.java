@@ -104,7 +104,7 @@ public class GroupMembershipServiceImplTest
 	public void testGetGroupMembershipsForUser()
 	{
 		String userId = "abcde";
-		when(user.getId()).thenReturn(userId);
+		when(user.getId()).thenReturn(Optional.of(userId));
 		Query<GroupMembershipEntity> forUser = new QueryImpl<GroupMembershipEntity>().eq(USER, userId);
 		forUser.sort().on(START);
 		when(dataService.findAll(GROUP_MEMBERSHIP, forUser, GroupMembershipEntity.class)).thenReturn(

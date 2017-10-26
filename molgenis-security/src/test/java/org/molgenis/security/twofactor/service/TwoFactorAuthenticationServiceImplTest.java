@@ -14,7 +14,6 @@ import org.molgenis.security.core.service.UserService;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
-import org.molgenis.security.twofactor.model.UserSecretMetaData;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -24,6 +23,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_ID;
 import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_SECRET;
 import static org.testng.Assert.*;
 
@@ -112,7 +112,7 @@ public class TwoFactorAuthenticationServiceImplTest
 	public void testResetSecretForUser()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
-		when(dataService.findAll(USER_SECRET, new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, "userId"),
+		when(dataService.findAll(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
 				UserSecret.class)).thenReturn(userSecrets);
 
 		twoFactorAuthenticationService.resetSecretForUser();
@@ -124,7 +124,7 @@ public class TwoFactorAuthenticationServiceImplTest
 	public void isConfiguredForUserTest()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
-		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, "userId"),
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
 				UserSecret.class)).thenReturn(userSecret);
 		when(userSecret.getSecret()).thenReturn("secretKey");
 
@@ -135,7 +135,7 @@ public class TwoFactorAuthenticationServiceImplTest
 	public void testUserIsBlocked()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
-		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, "userId"),
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
 				UserSecret.class)).thenReturn(userSecret);
 		when(userSecret.getFailedLoginAttempts()).thenReturn(3);
 		when(userSecret.hasRecentFailedLoginAttempt(30)).thenReturn(true);
@@ -147,7 +147,7 @@ public class TwoFactorAuthenticationServiceImplTest
 	public void testUserisBlockedMoreAttemptsLeft()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
-		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, "userId"),
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
 				UserSecret.class)).thenReturn(userSecret);
 		when(userSecret.getFailedLoginAttempts()).thenReturn(2);
 
@@ -158,7 +158,7 @@ public class TwoFactorAuthenticationServiceImplTest
 	public void testUserisBlockedTimeoutPassed()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
-		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, "userId"),
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
 				UserSecret.class)).thenReturn(userSecret);
 		when(userSecret.getFailedLoginAttempts()).thenReturn(3);
 		when(userSecret.hasRecentFailedLoginAttempt(30)).thenReturn(false);
@@ -170,7 +170,7 @@ public class TwoFactorAuthenticationServiceImplTest
 	public void testDisableForUser()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
-		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, "userId"),
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
 				UserSecret.class)).thenReturn(userSecret);
 
 		twoFactorAuthenticationService.disableForUser();

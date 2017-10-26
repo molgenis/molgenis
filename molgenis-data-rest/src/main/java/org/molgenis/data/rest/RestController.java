@@ -785,7 +785,8 @@ public class RestController
 
 			// Generate a new token for the user
 			String token = tokenService.generateAndStoreToken(authentication.getName(), "REST API login");
-			return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
+			return new LoginResponse(token, user.getUsername(), user.getFirstName().orElse(null),
+					user.getLastName().orElse(null));
 		});
 	}
 

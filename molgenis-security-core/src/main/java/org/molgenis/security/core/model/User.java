@@ -4,9 +4,9 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a User.
@@ -16,101 +16,70 @@ import java.util.List;
 @SuppressWarnings("squid:S1610")
 public abstract class User
 {
-	@Nullable
-	public abstract String getId();
+	public abstract Optional<String> getId();
 
 	public abstract String getUsername();
 
 	public abstract String getPassword();
 
-	@Nullable
-	public abstract String getActivationCode();
+	public abstract String getEmail();
 
 	public abstract boolean isTwoFactorAuthentication();
 
 	public abstract boolean isActive();
 
 	public abstract boolean isSuperuser();
+	
+	public abstract Optional<String> getActivationCode();
 
-	@Nullable
-	public abstract String getFirstName();
+	public abstract Optional<String> getFirstName();
 
-	@Nullable
-	public abstract String getMiddleNames();
+	public abstract Optional<String> getMiddleNames();
 
-	@Nullable
-	public abstract String getLastName();
+	public abstract Optional<String> getLastName();
 
-	@Nullable
-	public abstract String getTitle();
+	public abstract Optional<String> getTitle();
 
-	@Nullable
-	public abstract String getAffiliation();
+	public abstract Optional<String> getAffiliation();
 
-	@Nullable
-	public abstract String getDepartment();
+	public abstract Optional<String> getDepartment();
 
-	@Nullable
-	public abstract String getAddress();
+	public abstract Optional<String> getAddress();
 
-	@Nullable
-	public abstract String getPhone();
+	public abstract Optional<String> getPhone();
 
-	public abstract String getEmail();
+	public abstract Optional<String> getFax();
 
-	@Nullable
-	public abstract String getFax();
+	public abstract Optional<String> getTollFreePhone();
 
-	@Nullable
-	public abstract String getTollFreePhone();
-
-	@Nullable
-	public abstract String getCity();
+	public abstract Optional<String> getCity();
 
 	// TODO: is this duplicate with the whole Role/Group administration?
-	@Nullable
-	public abstract String getRole();
+	public abstract Optional<String> getRole();
 
-	@Nullable
-	public abstract String getCountry();
+	public abstract Optional<String> getCountry();
 
 	public abstract boolean isChangePassword();
 
-	@Nullable
-	public abstract String getLanguageCode();
+	public abstract Optional<String> getLanguageCode();
 
-	@Nullable
-	public abstract String getGoogleAccountId();
+	public abstract Optional<String> getGoogleAccountId();
 
 	/**
 	 * Formats the User's name.
 	 *
-	 * @return String containing the user's first name, middle names and last name.
+	 * @return String containing the user's first name, middle names and last name, or the user name if none of those present.
 	 */
-	@Nullable
 	public String getFormattedName()
 	{
 		List<String> parts = new ArrayList<>();
-		if (getTitle() != null)
-		{
-			parts.add(getTitle());
-		}
-		if (getFirstName() != null)
-		{
-			parts.add(getFirstName());
-		}
-		if (getMiddleNames() != null)
-		{
-			parts.add(getMiddleNames());
-		}
-		if (getLastName() != null)
-		{
-			parts.add(getLastName());
-		}
-
+		getTitle().ifPresent(parts::add);
+		getFirstName().ifPresent(parts::add);
+		getMiddleNames().ifPresent(parts::add);
+		getLastName().ifPresent(parts::add);
 		if (parts.isEmpty())
 		{
-			return null;
+			return getUsername();
 		}
 		else
 		{

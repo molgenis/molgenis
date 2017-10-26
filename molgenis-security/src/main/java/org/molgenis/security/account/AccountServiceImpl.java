@@ -111,17 +111,19 @@ public class AccountServiceImpl implements AccountService
 	{
 		User.Builder result = User.builder()
 								  .username(request.getUsername())
-								  .firstName(request.getFirstname())
-								  .lastName(request.getLastname())
 								  .email(request.getEmail())
 								  .password(request.getPassword())
 								  .activationCode(activationCode)
 								  .active(false)
 								  .changePassword(false)
 								  .superuser(false);
-		if (isNotBlank(request.getMiddleNames()))
+		if (isNotBlank(request.getFirstname()))
 		{
-			result.middleNames(request.getMiddleNames());
+			result.firstName(request.getFirstname());
+		}
+		if (isNotBlank(request.getLastname()))
+		{
+			result.lastName(request.getLastname());
 		}
 		if (isNotBlank(request.getPhone()))
 		{

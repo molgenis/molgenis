@@ -53,7 +53,8 @@ public class GroupMembershipServiceImpl implements GroupMembershipService
 	@Override
 	public List<GroupMembership> getGroupMemberships(User user)
 	{
-		Query<GroupMembershipEntity> forUser = new QueryImpl<GroupMembershipEntity>().eq(USER, user.getId());
+		Query<GroupMembershipEntity> forUser = new QueryImpl<GroupMembershipEntity>().eq(USER,
+				user.getId().orElseThrow(() -> new IllegalStateException("User has empty ID")));
 		forUser.sort().on(START);
 		return dataService.findAll(GROUP_MEMBERSHIP, forUser, GroupMembershipEntity.class)
 						  .map(GroupMembershipEntity::toGroupMembership)
