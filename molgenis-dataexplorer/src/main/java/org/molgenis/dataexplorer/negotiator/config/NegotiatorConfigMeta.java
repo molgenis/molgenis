@@ -30,9 +30,15 @@ class NegotiatorConfigMeta extends SystemEntityType
 	{
 		setLabel("Negotiator Config");
 		setPackage(negotiatorPackage);
-		addAttribute(ID, ROLE_ID).setDataType(AttributeType.STRING).setNillable(false);
+		addAttribute(ID, ROLE_ID).setDataType(AttributeType.STRING)
+								 .setNillable(false)
+								 .setLabel("Identifier for this config");
 		addAttribute(NEGOTIATOR_URL).setLabel("Negotiator URL").setNillable(false);
-		addAttribute(USERNAME).setDataType(AttributeType.STRING).setNillable(false);
-		addAttribute(PASSWORD).setDataType(AttributeType.STRING).setNillable(false);
+		addAttribute(USERNAME).setDataType(AttributeType.STRING)
+							  .setNillable(false)
+							  .setLabel("Username for the negotiator");
+		addAttribute(PASSWORD).setDataType(AttributeType.STRING)
+							  .setNillable(false)
+							  .setLabel("Password for the negotiator");
 	}
 }

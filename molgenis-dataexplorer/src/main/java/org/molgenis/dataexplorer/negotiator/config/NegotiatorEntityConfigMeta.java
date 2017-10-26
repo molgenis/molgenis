@@ -45,14 +45,30 @@ public class NegotiatorEntityConfigMeta extends SystemEntityType
 	{
 		setLabel("Negotiator Entity Config");
 		setPackage(negotiatorPackage);
-		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier").setAuto(false).setNillable(false);
+		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier")
+										 .setAuto(false)
+										 .setNillable(false)
+										 .setDescription("Identifier for this entity config");
 		addAttribute(ENTITY).setDataType(AttributeType.XREF)
-							.setRefEntity(entityTypeMetadata).setNillable(false);
+							.setRefEntity(entityTypeMetadata)
+							.setNillable(false)
+							.setLabel("Entity to use in negotiator");
 		addAttribute(NEGOTIATOR_CONFIG).setDataType(AttributeType.XREF)
 									   .setRefEntity(negotiatorConfigMeta)
-									   .setNillable(false);
-		addAttribute(COLLECTION_ID).setDataType(AttributeType.XREF).setRefEntity(attributeMetadata).setNillable(false);
-		addAttribute(BIOBANK_ID).setDataType(AttributeType.XREF).setRefEntity(attributeMetadata).setNillable(false);
-		addAttribute(ENABLED_ATTR).setDataType(AttributeType.XREF).setRefEntity(attributeMetadata).setNillable(true);
+									   .setNillable(false)
+									   .setLabel("General negotiator settings");
+		addAttribute(COLLECTION_ID).setDataType(AttributeType.XREF)
+								   .setRefEntity(attributeMetadata)
+								   .setNillable(false)
+								   .setLabel("Attribute containing the collection");
+		addAttribute(BIOBANK_ID).setDataType(AttributeType.XREF)
+								.setRefEntity(attributeMetadata)
+								.setNillable(false)
+								.setLabel("Attribute containing the biobank");
+		addAttribute(ENABLED_ATTR).setDataType(AttributeType.XREF)
+								  .setRefEntity(attributeMetadata)
+								  .setNillable(true)
+								  .setLabel("Negotiator enabled attribute")
+								  .setDescription("Attribute to determine if the row is usable for the negotiator");
 	}
 }
