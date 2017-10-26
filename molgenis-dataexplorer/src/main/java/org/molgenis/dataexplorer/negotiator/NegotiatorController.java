@@ -199,7 +199,7 @@ public class NegotiatorController extends PluginController
 		Fetch fetch = new Fetch().field(
 				entityConfig.getEntity(NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class).getName())
 								 .field(entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class)
-													.getName());
+													.getName()).field(selectedEntityType.getLabelAttribute().getName());
 		molgenisQuery.fetch(fetch);
 		return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
 	}
