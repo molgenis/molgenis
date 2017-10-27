@@ -358,7 +358,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	private void verifyItEmxUpdateDefaultValue()
 	{
 		Map<String, Object> expectedRow0 = newHashMap();
-		expectedRow0.put("id", 0);
+		expectedRow0.put("id", "0");
 		expectedRow0.put("label", "Test #0");
 		expectedRow0.put("bool", true);
 		expectedRow0.put("categorical", "ref0");
@@ -378,7 +378,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		expectedRow0.put("xref", "ref0");
 
 		Map<String, Object> expectedRow1 = newHashMap();
-		expectedRow1.put("id", 1);
+		expectedRow1.put("id", "1");
 		expectedRow1.put("label", "Test #1");
 		expectedRow1.put("bool", true);
 		expectedRow1.put("categorical", "ref0");
