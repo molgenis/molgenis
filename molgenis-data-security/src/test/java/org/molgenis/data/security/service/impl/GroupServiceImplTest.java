@@ -1,4 +1,4 @@
-package org.molgenis.security.core.service.impl;
+package org.molgenis.data.security.service.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.mockito.InjectMocks;
@@ -7,6 +7,7 @@ import org.mockito.MockitoSession;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.impl.GroupMembershipService;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

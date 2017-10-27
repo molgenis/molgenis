@@ -6,6 +6,7 @@ import org.molgenis.security.core.model.User;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -13,6 +14,8 @@ import java.util.Set;
  */
 public interface GroupService
 {
+	Optional<Group> findGroupById(String groupId);
+
 	/**
 	 * Adds a {@link User} to a {@link Group} effective immediately.
 	 *
@@ -55,6 +58,14 @@ public interface GroupService
 	 * @return List containing the User's {@link GroupMembership}s
 	 */
 	List<GroupMembership> getGroupMemberships(User user);
+
+	/**
+	 * Retrieves all {@link GroupMembership}s of a particular {@link Group} in past, present and future.
+	 *
+	 * @param group the Group
+	 * @return List containing the Group's {@link GroupMembership}s
+	 */
+	List<GroupMembership> getGroupMemberships(Group group);
 
 	/**
 	 * Retrieves all {@link Group}s a particular {@link User} is currently a member of.

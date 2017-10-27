@@ -1,17 +1,22 @@
-package org.molgenis.security.core.service.impl;
+package org.molgenis.data.security.service.impl;
 
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
+import org.molgenis.data.DataService;
+import org.molgenis.data.security.model.GroupEntity;
+import org.molgenis.data.security.model.GroupMetadata;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.service.GroupService;
+import org.molgenis.security.core.service.impl.GroupMembershipService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,10 +29,12 @@ import static java.util.stream.Collectors.toList;
 public class GroupServiceImpl implements GroupService
 {
 	private final GroupMembershipService groupMembershipService;
+	private final DataService dataService;
 
-	public GroupServiceImpl(GroupMembershipService groupMembershipService)
+	public GroupServiceImpl(GroupMembershipService groupMembershipService, DataService dataService)
 	{
 		this.groupMembershipService = requireNonNull(groupMembershipService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -42,6 +49,13 @@ public class GroupServiceImpl implements GroupService
 	public void addUserToGroup(User user, Group group, Instant start)
 	{
 		add(GroupMembership.builder().user(user).group(group).start(start).build());
+	}
+
+	@Override
+	public Optional<Group> findGroupById(String groupId)
+	{
+		return Optional.ofNullable(dataService.findOneById(GroupMetadata.GROUP, groupId, GroupEntity.class))
+					   .map(GroupEntity::toGroup);
 	}
 
 	@Override
@@ -115,6 +129,12 @@ public class GroupServiceImpl implements GroupService
 	public List<GroupMembership> getGroupMemberships(User user)
 	{
 		return groupMembershipService.getGroupMemberships(user);
+	}
+
+	@Override
+	public List<GroupMembership> getGroupMemberships(Group group)
+	{
+		return groupMembershipService.getGroupMemberships(group);
 	}
 
 	@Override

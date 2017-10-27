@@ -220,6 +220,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.antMatchers("/dataindexerstatus")
 				.authenticated()
 
+				.antMatchers("/group/**").authenticated()
+
 				.antMatchers("/permission/**/read/**")
 				.permitAll()
 
