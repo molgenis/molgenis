@@ -52,9 +52,8 @@ public class ScheduledJobMetadata extends SystemEntityType
 													 + "These fields are: Seconds, Minutes, Hours, Day of month, Month, Day of week, and optionally Year. "
 													 + "An example input is 0 0 12 * * ? for a job that fires at noon every day. "
 													 + "See http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html")
-									 .setValidationExpression(
-											 "$('" + CRON_EXPRESSION + "').matches(" + RegexUtils.CRON_REGEX
-													 + ").value()");
+									 .setValidationExpression(buildValidationExpressionString(CRON_EXPRESSION,
+											 RegexUtils.JAVA_SCRIPT_CRON_REGEX));
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
 		addAttribute(USER).setLabel("Username")
 						  .setDescription(
@@ -69,8 +68,14 @@ public class ScheduledJobMetadata extends SystemEntityType
 								   .setLabel("Success email")
 								   .setDescription(
 										   "Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs succeed.")
-								   .setNillable(true);
+								   .setNillable(true)
+								   .setValidationExpression(buildValidationExpressionString(SUCCESS_EMAIL,
+										   RegexUtils.JAVA_SCRIPT_COMMA_SEPARATED_EMAIL_LIST_REGEX));
 		addAttribute(TYPE).setDataType(CATEGORICAL).setRefEntity(scheduledJobTypeMetadata).setNillable(false);
 		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("Job parameters").setNillable(false);
+	}
+
+	private String buildValidationExpressionString(String field, String regex) {
+		return  "$('" + field + "').matches(" + regex + ").value()";
 	}
 }
