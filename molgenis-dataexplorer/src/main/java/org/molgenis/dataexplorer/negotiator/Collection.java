@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.directory;
+package org.molgenis.dataexplorer.negotiator;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
@@ -14,7 +14,7 @@ public abstract class Collection
 	@Nullable
 	public abstract String getBiobankId();
 
-	public static Collection createCollection(String collectionId, String biobankId)
+	public static Collection create(String collectionId, String biobankId)
 	{
 		return new AutoValue_Collection(collectionId, biobankId);
 	}

@@ -1044,15 +1044,15 @@ public class EmxMetaDataParser implements MetaDataParser
 			String partOfAttribute = attributeEntity.getString(EMX_ATTRIBUTES_PART_OF_ATTRIBUTE);
 			if (partOfAttribute != null && !partOfAttribute.isEmpty())
 			{
-				Attribute compoundAttribute = entityMap.get(partOfAttribute).getAttr();
-
-				if (compoundAttribute == null)
+				EmxAttribute emxCompoundAttribute = entityMap.get(partOfAttribute);
+				if (emxCompoundAttribute == null)
 				{
 					throw new IllegalArgumentException(
 							"partOfAttribute [" + partOfAttribute + "] of attribute [" + attributeName + "] of entity ["
 									+ entityTypeId + "] must refer to an existing compound attribute on line "
 									+ rowIndex);
 				}
+				Attribute compoundAttribute = emxCompoundAttribute.getAttr();
 
 				if (compoundAttribute.getDataType() != COMPOUND)
 				{
