@@ -363,8 +363,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		expectedRow0.put("bool", true);
 		expectedRow0.put("categorical", "ref0");
 		expectedRow0.put("categoricalMref", "ref0,ref1");
-		expectedRow0.put("date", "2017-10-26");
-		expectedRow0.put("datetime", "1985-08-12T11:12:13+0500");
+		expectedRow0.put("date", LocalDate.of(2017, 10, 26));
+		expectedRow0.put("datetime", Instant.parse("1985-08-12T11:12:13+0500"));
 		expectedRow0.put("decimal", 1.23);
 		expectedRow0.put("email", "mail@molgenis.org");
 		expectedRow0.put("enum", "enum0");
@@ -383,8 +383,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		expectedRow1.put("bool", true);
 		expectedRow1.put("categorical", "ref0");
 		expectedRow1.put("categoricalMref", "ref0,ref1");
-		expectedRow1.put("date", "2017-10-26");
-		expectedRow1.put("datetime", "1985-08-12T11:12:13+0500");
+		expectedRow1.put("date", LocalDate.of(2017, 10, 26));
+		expectedRow1.put("datetime", Instant.parse("1985-08-12T11:12:13+0500"));
 		expectedRow1.put("decimal", 1.23);
 		expectedRow1.put("email", "mail@molgenis.org");
 		expectedRow1.put("enum", "enum0");
