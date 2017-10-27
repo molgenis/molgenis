@@ -25,6 +25,9 @@ import org.springframework.context.annotation.Import;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * <p>Uses {@link ComponentScan} because of unclarified issues in metadata model.</p>
+ */
 @Configuration
 @Import({ DataServiceImpl.class, MetaDataServiceImpl.class, EntityManagerImpl.class,
 		SystemRepositoryDecoratorRegistryImpl.class, EntityFactoryRegistry.class, EntityListenersService.class,
