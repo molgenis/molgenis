@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
+import org.molgenis.data.DataService;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.User;
@@ -43,6 +44,8 @@ public class GroupServiceImplTest
 	private Group group4;
 	@Mock
 	private GroupMembershipService groupMembershipService;
+	@Mock
+	private DataService dataService;
 
 	@InjectMocks
 	private GroupServiceImpl groupService;
@@ -146,4 +149,23 @@ public class GroupServiceImplTest
 		assertEquals(groupService.getCurrentGroups(user), singleton(group1));
 	}
 
+	@Test
+	public void testGetGroupMembershipsForGroup()
+	{
+		when(groupMembershipService.getGroupMemberships(group1)).thenReturn(
+				ImmutableList.of(groupMembership1, groupMembership2, groupMembership3));
+
+		assertEquals(groupService.getGroupMemberships(group1),
+				ImmutableList.of(groupMembership1, groupMembership2, groupMembership3));
+	}
+
+	@Test
+	public void testGetGroupMembershipsForUser()
+	{
+		when(groupMembershipService.getGroupMemberships(user)).thenReturn(
+				ImmutableList.of(groupMembership1, groupMembership2, groupMembership3));
+
+		assertEquals(groupService.getGroupMemberships(user),
+				ImmutableList.of(groupMembership1, groupMembership2, groupMembership3));
+	}
 }
