@@ -63,7 +63,9 @@ public class ScheduledJobMetadata extends SystemEntityType
 								   .setLabel("Failure email")
 								   .setDescription(
 										   "Comma-separated list of emails. Leave blank if you don't want to receive emails if the jobs failed.")
-								   .setNillable(true);
+								   .setNillable(true)
+								   .setValidationExpression(buildValidationExpressionString(FAILURE_EMAIL,
+										   RegexUtils.JAVA_SCRIPT_COMMA_SEPARATED_EMAIL_LIST_REGEX));
 		addAttribute(SUCCESS_EMAIL).setDataType(STRING)
 								   .setLabel("Success email")
 								   .setDescription(

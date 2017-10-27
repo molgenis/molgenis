@@ -20,6 +20,7 @@ public class RegexUtilsTest
 	@Test
 	public void cronJobRegex() {
 		assertTrue("0 0 12 * * ?".matches(javaCronJobRegex));
+		assertTrue("".matches(javaCronJobRegex));
 	}
 
 	@Test
@@ -27,13 +28,16 @@ public class RegexUtilsTest
 		assertTrue("c.stroomberg@umcg.nl".matches(javaCommaSeparatedEmailListRegex));
 		assertTrue("c.stroomberg@umcg.nl, janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
 		assertTrue("c.stroomberg@umcg.nl,janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
+		assertTrue("".matches(javaCommaSeparatedEmailListRegex));
+		assertTrue("undefined".matches(javaCommaSeparatedEmailListRegex));
+		assertTrue("null".matches(javaCommaSeparatedEmailListRegex));
 
-		assertFalse("".matches(javaCommaSeparatedEmailListRegex));
 		assertFalse("c.stroomberg".matches(javaCommaSeparatedEmailListRegex));
 		assertFalse("c.stroomberg@".matches(javaCommaSeparatedEmailListRegex));
 		assertFalse("umcg.nl".matches(javaCommaSeparatedEmailListRegex));
 		assertFalse("c.stroomberg@umcg.nljanjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
 		assertFalse("c.stroomberg@umcg.nl janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
+
 	}
 
 	private String toJavaRegex(String javaScriptRegex) {
