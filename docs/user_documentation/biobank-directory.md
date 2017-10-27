@@ -33,10 +33,12 @@ the following permissions in the Permission manager:
 | sys_set_directory            | Read       |
 
 ## Configuration
-An admin can configure integration with the negotiator in the *Directory settings* in the *Settings* plugin.
-The collections entity that you configure should be an entity that has an `id` attribute which will
-be sent as the `collectionID` for that collection and a `biobank` attribute with an `id` attribute,
-which will be sent as the `biobankID` for that collection.
+The integration with the negotiator can be configured in the *Negotiator Config* and *Negotiator Entity Config* in the *Data Explorer* plugin.
+
+The *Negotiator Config* is used to configure the technical link to the negotiator, for example URL and username. 
+
+The *Negotiator Entity Config* is used to configure which attributes of an entity to use for the interaction with the negotiator.
+An optional attribute is available to disable certain rows in the entity for negotiator interaction, this attribute should contain values that can be evaluated to a boolean value.
 
 # Interaction between Directory and Negotiator
 

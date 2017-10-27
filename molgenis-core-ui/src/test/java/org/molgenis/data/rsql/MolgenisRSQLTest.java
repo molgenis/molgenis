@@ -1,5 +1,6 @@
 package org.molgenis.data.rsql;
 
+import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
@@ -28,7 +29,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		molgenisRSQL = new MolgenisRSQL();
+		molgenisRSQL = new MolgenisRSQL(new RSQLParser());
 		when(entityType.getId()).thenReturn("Person").getMock();
 		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(nameAttr.getDataType()).thenReturn(STRING);
