@@ -371,7 +371,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		expectedRow0.put("html", "<h1>html</h1>");
 		expectedRow0.put("hyperlink", "http://www.molgenis.org/");
 		expectedRow0.put("int", 5);
-		expectedRow0.put("long", 1234567);
+		expectedRow0.put("long", 1234567L);
 		expectedRow0.put("mref", newHashSet("ref0", "ref1"));
 		expectedRow0.put("string", "str");
 		expectedRow0.put("text", "text");
@@ -391,7 +391,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		expectedRow1.put("html", "<h1>html</h1>");
 		expectedRow1.put("hyperlink", "http://www.molgenis.org/");
 		expectedRow1.put("int", 5);
-		expectedRow1.put("long", 1234567);
+		expectedRow1.put("long", 1234567L);
 		expectedRow1.put("mref", newHashSet("ref0", "ref1"));
 		expectedRow1.put("string", "str");
 		expectedRow1.put("text", "text");
