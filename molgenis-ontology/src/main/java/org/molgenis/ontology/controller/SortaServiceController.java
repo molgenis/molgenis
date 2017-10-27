@@ -19,7 +19,6 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
@@ -384,28 +383,6 @@ public class SortaServiceController extends PluginController
 		}
 		return new SortaServiceResponse(
 				"Please check that sortaJobExecutionId and identifier keys exist in input and have nonempty value!");
-	}
-
-	@PostMapping("/search")
-	@ResponseBody
-	public SortaServiceResponse search(@RequestBody Map<String, Object> request)
-	{
-		// TODO: less obfuscated request object, let Spring do the matching
-		if (request.containsKey("queryString") && !StringUtils.isEmpty(request.get("queryString").toString()) && request
-				.containsKey(OntologyMetaData.ONTOLOGY_IRI) && !StringUtils.isEmpty(
-				request.get(OntologyMetaData.ONTOLOGY_IRI).toString()))
-		{
-			String queryString = request.get("queryString").toString();
-			String ontologyIri = request.get(OntologyMetaData.ONTOLOGY_IRI).toString();
-			// FIXME pass entity meta data instead of null
-			Entity inputEntity = new DynamicEntity(null);
-			inputEntity.set(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
-
-			return new SortaServiceResponse(inputEntity,
-					sortaService.findOntologyTermEntities(ontologyIri, inputEntity));
-		}
-		return new SortaServiceResponse(
-				"Please check that queryString and ontologyIRI keys exist in input and have nonempty value!");
 	}
 
 	private Entity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity,
