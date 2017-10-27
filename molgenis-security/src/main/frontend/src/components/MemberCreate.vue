@@ -74,7 +74,7 @@
         }
       }
     },
-    created() {
+    created () {
       this.fetchData()
     },
     watch: {

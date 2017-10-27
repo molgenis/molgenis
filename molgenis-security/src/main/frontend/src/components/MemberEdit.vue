@@ -77,7 +77,7 @@
         this.$store.dispatch(DELETE_MEMBER, this.updatedMember).then(() => this.$router.go(-1))
       }
     },
-    created() {
+    created () {
       this.fetchData()
     },
     watch: {

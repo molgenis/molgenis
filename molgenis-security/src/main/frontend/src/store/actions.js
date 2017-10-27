@@ -1,8 +1,8 @@
 // @flow
 // $FlowFixMe
-import {SET_MEMBER, SET_MEMBERS, SET_ROLES, SET_USERS_GROUPS} from './mutations'
+import {SET_MEMBER, SET_MEMBERS, SET_ROLES, SET_USERS, SET_GROUPS} from './mutations'
 
-import type {Member, State} from './utils/flow.types'
+import type { Member, State } from './utils/flow.types'
 
 export const QUERY_MEMBERS = '__QUERY_MEMBERS__'
 export const GET_MEMBER = '__GET_MEMBER__'
@@ -20,15 +20,18 @@ const roles = [
   {id: 'role4', label: 'Radboud editor'}
 ]
 
-const usersAndGroups = [
-  {type: 'group', id: 'group0', label: 'Authenticated user'},
-  {type: 'group', id: 'group1', label: 'Anonyous users'},
-  {type: 'group', id: 'group2', label: 'BBMRI-ERIC directory'},
-  {type: 'user', id: 'user0', label: 'David van Enckevort'},
-  {type: 'user', id: 'user1', label: 'Morris Swertz'},
-  {type: 'user', id: 'user2', label: 'Mariska Slofstra'},
-  {type: 'user', id: 'user3', label: 'Marieke Bijlsma'},
-  {type: 'user', id: 'user4', label: 'Remco den Ouden'}
+const groups = [
+  {id: 'group0', label: 'Authenticated user'},
+  {id: 'group1', label: 'Anonyous users'},
+  {id: 'group2', label: 'BBMRI-ERIC directory'}
+]
+
+const users = [
+  {id: 'user0', label: 'David van Enckevort'},
+  {id: 'user1', label: 'Morris Swertz'},
+  {id: 'user2', label: 'Mariska Slofstra'},
+  {id: 'user3', label: 'Marieke Bijlsma'},
+  {id: 'user4', label: 'Remco den Ouden'}
 ]
 
 let members = [{
@@ -74,42 +77,44 @@ let members = [{
 }]
 
 export default {
-  [QUERY_MEMBERS]({commit}: { commit: Function }, query: Object) {
+  [QUERY_MEMBERS] ({commit, state}: { commit: Function, state: State }) {
     let newMembers
-    if (query.query === '' || query.query === undefined) {
+    if (!state.filter) {
       newMembers = members.slice()
     } else {
+      const filter: string = state.filter
       newMembers = members.filter(member => {
-        const userGroup = usersAndGroups.find(userGroup => userGroup.id === member.id)
-        return userGroup ? userGroup.label.toLowerCase().indexOf(query.query) !== -1 : false
+        const userGroup = [...users, ...groups].find(userGroup => userGroup.id === member.id)
+        return userGroup ? userGroup.label.toLowerCase().indexOf(filter) !== -1 : false
       })
     }
-    if (query.sort === 'descending') {
+    if (state.sort === 'descending') {
       newMembers = newMembers.reverse()
     }
     commit(SET_MEMBERS, newMembers)
   },
-  [GET_MEMBER]({commit}: { commit: Function }, id: string) {
+  [GET_MEMBER] ({commit}: { commit: Function }, id: string) {
     const member = JSON.parse(JSON.stringify(members.find(member => member.id === id)))
     commit(SET_MEMBER, member)
   },
-  [GET_ROLES]({commit}: { commit: Function }) {
+  [GET_ROLES] ({commit}: { commit: Function }) {
     commit(SET_ROLES, roles)
   },
-  [GET_USERS_GROUPS]({commit}: { commit: Function }) {
-    commit(SET_USERS_GROUPS, usersAndGroups)
+  [GET_USERS_GROUPS] ({commit}: { commit: Function }, groupId: string) {
+    commit(SET_USERS, users)
+    commit(SET_GROUPS, groups)
   },
-  [CREATE_MEMBER]({commit}: { commit: Function }, member: Member) {
+  [CREATE_MEMBER] ({commit}: { commit: Function }, member: Member) {
     members.push(JSON.parse(JSON.stringify(member)))
   },
-  [UPDATE_MEMBER]({commit, state}: { commit: Function, state: State }, member: Member) {
+  [UPDATE_MEMBER] ({commit, state}: { commit: Function, state: State }, member: Member) {
     for (let i = 0; i < members.length; i++) {
       if (members[i].type === member.type && members[i].id === member.id) {
         members[i] = JSON.parse(JSON.stringify(member))
       }
     }
   },
-  [DELETE_MEMBER]({commit, state}: { commit: Function, state: State }, memberId: Object) {
+  [DELETE_MEMBER] ({commit, state}: { commit: Function, state: State }, memberId: Object) {
     members = members.filter(dummyMember => !(dummyMember.type === memberId.type && dummyMember.id === memberId.id))
   }
 }

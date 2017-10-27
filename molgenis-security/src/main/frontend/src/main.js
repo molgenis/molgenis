@@ -23,7 +23,7 @@ Vue.use(i18n, {
   lng: INITIAL_STATE.lng,
   fallbackLng: INITIAL_STATE.fallbackLng,
   namespace: 'members',
-  callback() {
+  callback () {
     /* eslint-disable no-new */
     new Vue({
       el: '#app',

@@ -14,12 +14,13 @@
 
 <script>
   import MembersGridBodyCard from './MembersGridBodyCard'
-  import {mapState} from 'vuex'
+  import {mapState, mapGetters} from 'vuex'
 
   export default {
     name: 'members-grid-body',
     computed: {
-      ...mapState(['roles', 'usersGroups', 'members']),
+      ...mapGetters({usersGroups: 'getUsersGroups'}),
+      ...mapState(['roles', 'members']),
       usersGroupsMap: function () {
         return this.usersGroups.reduce(function (map, obj) {
           map[obj.id] = obj

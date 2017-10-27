@@ -6,8 +6,12 @@ export type Role = {
   label: string
 }
 
-export type UserOrGroup = {
-  type: string,
+export type User = {
+  id: string,
+  label: string
+}
+
+export type Group = {
   id: string,
   label: string
 }
@@ -22,10 +26,12 @@ export type Member = {
 }
 
 export type State = {
-  query: ?string,
+  filter: ?string,
   sort: ?string,
   members: Array<Member>,
   member: ?Member,
   roles: Array<Role>,
-  usersGroups: Array<UserOrGroup>
+  users: Array<User>,
+  groups:Array<Group>,
+  context: Group
 }

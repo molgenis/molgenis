@@ -7,8 +7,10 @@ const state: State = {
   members: [],
   member: undefined,
   roles: [],
-  usersGroups: [],
-  query: undefined,
+  users: [],
+  groups: [],
+  filter: undefined,
+  context: {id: 'BBMRI-NL', label: 'BBMRI-NL'},
   sort: 'ascending'
 }
 

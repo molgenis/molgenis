@@ -13,15 +13,13 @@
 </template>
 
 <script>
-  import {mapState} from 'vuex'
-
   export default {
     name: 'members-grid-body-card',
     props: {
       type: {
         type: String,
         required: true,
-        validator(type) {
+        validator (type) {
           return ['user', 'group'].indexOf(type) >= 0
         }
       },
@@ -38,11 +36,8 @@
         required: true
       }
     },
-    computed: {
-      ...mapState(['roles', 'usersGroups'])
-    },
     methods: {
-      editMember(type, id) {
+      editMember (type, id) {
         this.$router.push('/edit/' + type + '/' + id)
       }
     }

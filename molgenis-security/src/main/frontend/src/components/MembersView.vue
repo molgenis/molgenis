@@ -13,7 +13,7 @@
   import MembersGrid from './MembersGrid'
   import PermissionControls from './PermissionControls'
   import {QUERY_MEMBERS} from '../store/actions'
-  import {mapGetters} from 'vuex'
+  import {mapGetters, mapActions} from 'vuex'
 
   export default {
     name: 'members-view',
@@ -23,11 +23,11 @@
       })
     },
     methods: {
-      fetchMember: function () {
-        this.$store.dispatch(QUERY_MEMBERS, {query: this.$store.state.query, sort: this.$store.state.sort})
-      }
+      ...mapActions({
+        fetchMember: QUERY_MEMBERS
+      })
     },
-    created() {
+    created () {
       this.fetchMember()
     },
     watch: {

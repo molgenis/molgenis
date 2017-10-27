@@ -24,7 +24,7 @@
         this.$store.dispatch(GET_USERS_GROUPS)
       }
     },
-    created() {
+    created () {
       this.fetchRoles()
     },
     watch: {

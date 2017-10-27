@@ -23,25 +23,25 @@
 <script>
   import _ from 'lodash'
   import {QUERY_MEMBERS} from '../store/actions'
-  import {SET_QUERY, SET_SORT} from '../store/mutations'
+  import {SET_FILTER, SET_SORT} from '../store/mutations'
 
   export default {
     name: 'members-grid-controls',
     computed: {
       query: {
-        get() {
+        get () {
           return this.$store.state.query
         },
-        set(query) {
-          this.$store.commit(SET_QUERY, query)
+        set (query) {
+          this.$store.commit(SET_FILTER, query)
           this.submitQuery()
         }
       },
       sort: {
-        get() {
+        get () {
           return this.$store.state.sort
         },
-        set(sort) {
+        set (sort) {
           this.$store.commit(SET_SORT, sort)
           this.submitQuery()
         }
@@ -60,7 +60,7 @@
       toggleSort: function () {
         this.sort = this.sort === 'ascending' ? 'descending' : 'ascending'
       },
-      addMembers() {
+      addMembers () {
         this.$router.push('/create')
       }
     }

@@ -11,10 +11,10 @@
   export default {
     name: 'permission-controls',
     methods: {
-      showRolePermissions() {
+      showRolePermissions () {
         alert('TODO navigate to role permissions screen')
       },
-      showPermissionHistory() {
+      showPermissionHistory () {
         alert('TODO navigate to permission history screen')
       }
     }
