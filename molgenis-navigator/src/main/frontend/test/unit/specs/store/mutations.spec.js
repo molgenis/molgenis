@@ -69,7 +69,7 @@ describe('mutations', () => {
     })
   })
 
-  describe('Testing mutation SET_QUERY', () => {
+  describe('Testing mutation SET_FILTER', () => {
     it('should set the query in the state', () => {
       const state = {
         query: null

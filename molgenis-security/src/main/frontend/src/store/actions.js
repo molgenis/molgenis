@@ -1,5 +1,6 @@
 // @flow
 // $FlowFixMe
+import api from '@molgenis/molgenis-api-client'
 import {SET_MEMBER, SET_MEMBERS, SET_ROLES, SET_USERS, SET_GROUPS} from './mutations'
 
 import type { Member, State } from './utils/flow.types'
@@ -78,20 +79,9 @@ let members = [{
 
 export default {
   [QUERY_MEMBERS] ({commit, state}: { commit: Function, state: State }) {
-    let newMembers
-    if (!state.filter) {
-      newMembers = members.slice()
-    } else {
-      const filter: string = state.filter
-      newMembers = members.filter(member => {
-        const userGroup = [...users, ...groups].find(userGroup => userGroup.id === member.id)
-        return userGroup ? userGroup.label.toLowerCase().indexOf(filter) !== -1 : false
-      })
-    }
-    if (state.sort === 'descending') {
-      newMembers = newMembers.reverse()
-    }
-    commit(SET_MEMBERS, newMembers)
+    api.get(`/group/${state.context.id}/members`).then(response => {
+      commit(SET_MEMBERS, response)
+    })
   },
   [GET_MEMBER] ({commit}: { commit: Function }, id: string) {
     const member = JSON.parse(JSON.stringify(members.find(member => member.id === id)))
