@@ -142,7 +142,6 @@ public class RScriptExecutor
 		else
 		{
 			responseValue = executeScriptGetValueRequest(openCpuSessionKey);
-
 		}
 		return responseValue;
 	}
@@ -177,10 +176,10 @@ public class RScriptExecutor
 	}
 
 	/**
-	 * Retrieve and return R script response value using OpenCPU
+	 * Retrieve and return R script STDOUT response using OpenCPU
 	 *
 	 * @param openCpuSessionKey OpenCPU session key
-	 * @return R script response value
+	 * @return R script STDOUT
 	 * @throws IOException if error occured during script response retrieval
 	 */
 	private String executeScriptGetValueRequest(String openCpuSessionKey) throws IOException
@@ -226,7 +225,7 @@ public class RScriptExecutor
 	{
 		try
 		{
-			return new URI(getOpenCpuUri() + "tmp/" + openCpuSessionKey + "/R/.val");
+			return new URI(getOpenCpuUri() + "tmp/" + openCpuSessionKey + "/stdout");
 		}
 		catch (URISyntaxException e)
 		{
