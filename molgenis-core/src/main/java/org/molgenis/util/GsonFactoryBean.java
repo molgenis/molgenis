@@ -1,9 +1,9 @@
 package org.molgenis.util;
 
-import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
+import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -26,7 +26,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 
 	private String dateFormatPattern = null;
 
-	private boolean registerJavaTimeConverters = true;
+	private boolean registerJava8DatatypeConverters = true;
 
 	private List<TypeAdapterFactory> typeAdapterFactoryList;
 
@@ -87,23 +87,22 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	}
 
 	/**
-	 * Indicates if the java 8 date time {@link com.fatboyindustrial.gsonjavatime.Converters} should be registered
+	 * Indicates if the java 8 datetype {@link GsonJava8TypeAdapterFactory} should be registered
 	 * with Gson.
 	 * <p>
 	 * This is equivalent to writing
 	 * <code>
 	 * GsonBuilder builder = new GsonBuilder()
-	 * Converters.registerInstant(builder);
-	 * Converters.registerLocalDate(builder);
+	 * builder.registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory());
 	 * builder.create();
 	 * </code>
 	 * The builders will be registered after the other type adapters and type adapter factories you set.
 	 *
-	 * @param registerJavaTimeConverters true if they should be registered
+	 * @param registerJava8DatatypeConverters true if they should be registered
 	 */
-	public void setRegisterJavaTimeConverters(boolean registerJavaTimeConverters)
+	public void setRegisterJava8DatatypeConverters(boolean registerJava8DatatypeConverters)
 	{
-		this.registerJavaTimeConverters = registerJavaTimeConverters;
+		this.registerJava8DatatypeConverters = registerJava8DatatypeConverters;
 	}
 
 	public void registerTypeAdapterFactory(TypeAdapterFactory typeAdapterFactory)
@@ -146,10 +145,9 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 		{
 			typeAdapterHierarchyFactoryMap.forEach(builder::registerTypeHierarchyAdapter);
 		}
-		if (this.registerJavaTimeConverters)
+		if (this.registerJava8DatatypeConverters)
 		{
-			Converters.registerInstant(builder);
-			Converters.registerLocalDate(builder);
+			builder.registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory());
 		}
 		this.gson = builder.create();
 	}

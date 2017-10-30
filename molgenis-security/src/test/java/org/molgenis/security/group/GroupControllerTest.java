@@ -1,8 +1,8 @@
 package org.molgenis.security.group;
 
-import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.GsonBuilder;
+import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -48,7 +48,7 @@ public class GroupControllerTest
 		mockitoSession = Mockito.mockitoSession().strictness(Strictness.STRICT_STUBS).initMocks(this).startMocking();
 		GsonHttpMessageConverter gsonHttpMessageConverter = new GsonHttpMessageConverter();
 		GsonBuilder gsonBuilder = new GsonBuilder();
-		Converters.registerInstant(gsonBuilder);
+		gsonBuilder.registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory());
 		gsonHttpMessageConverter.setGson(gsonBuilder.create());
 		mockMvc = MockMvcBuilders.standaloneSetup(groupController)
 								 .setMessageConverters(gsonHttpMessageConverter)
@@ -68,7 +68,7 @@ public class GroupControllerTest
 				Group.builder().id("abcde").label("BBMRI-NL").roles(emptyList()).build());
 		mockMvc.perform(post("/group/").param("label", "BBMRI-NL"))
 			   .andExpect(status().isCreated())
-			   .andExpect(header().string("Location", "/group/abcde"));
+			   .andExpect(header().string("Location", "http://localhost/group/abcde"));
 	}
 
 	@Test
