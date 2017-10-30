@@ -74,4 +74,9 @@ public interface GroupService
 	 * @return Set of current {@link Group}s.
 	 */
 	Set<Group> getCurrentGroups(User user);
+
+	/**
+	 * Creates a parent group with children.
+	 */
+	Group createGroups(String label);
 }

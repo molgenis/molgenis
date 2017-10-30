@@ -120,11 +120,11 @@ public class GroupMembershipServiceImplTest
 	public void testGetGroupMembershipsForGroup()
 	{
 		Group parent = mock(Group.class);
-		when(parent.getId()).thenReturn("parent");
+		when(parent.getId()).thenReturn(Optional.of("parent"));
 		Group child1 = mock(Group.class);
-		when(child1.getId()).thenReturn("child1");
+		when(child1.getId()).thenReturn(Optional.of("child1"));
 		Group child2 = mock(Group.class);
-		when(child2.getId()).thenReturn("child2");
+		when(child2.getId()).thenReturn(Optional.of("child2"));
 
 		Query<GroupEntity> withParent = new QueryImpl<GroupEntity>().eq(PARENT, "parent");
 		doReturn(Stream.of(groupEntity1, groupEntity2)).when(dataService)

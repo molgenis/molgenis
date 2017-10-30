@@ -102,7 +102,9 @@ public class GroupMembershipEntity extends StaticEntity
 	public GroupMembershipEntity updateFrom(GroupMembership groupMembership)
 	{
 		setUser(groupMembership.getUser().getId().orElseThrow(() -> new IllegalArgumentException("User has empty id")));
-		setGroup(groupMembership.getGroup().getId());
+		setGroup(groupMembership.getGroup()
+								.getId()
+								.orElseThrow(() -> new IllegalArgumentException("Group has empty id")));
 		setStart(groupMembership.getStart());
 		groupMembership.getId().ifPresent(this::setId);
 		groupMembership.getEnd().ifPresent(this::setEnd);

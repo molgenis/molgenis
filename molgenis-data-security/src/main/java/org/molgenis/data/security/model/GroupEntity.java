@@ -55,9 +55,9 @@ public class GroupEntity extends StaticEntity
 		return Optional.ofNullable(getEntity(PARENT, GroupEntity.class));
 	}
 
-	public void setParent(GroupEntity parent)
+	public void setParent(String parentId)
 	{
-		set(PARENT, parent);
+		set(PARENT, parentId);
 	}
 
 	public Iterable<GroupEntity> getChildren()
@@ -78,5 +78,13 @@ public class GroupEntity extends StaticEntity
 									.roles(stream(getRoles()).map(RoleEntity::toRole).collect(toList()));
 		getParent().ifPresent(parent -> result.parent(parent.toGroup()));
 		return result.build();
+	}
+
+	public GroupEntity updateFrom(Group group)
+	{
+		group.getId().ifPresent(this::setId);
+		group.getParent().flatMap(Group::getId).ifPresent(this::setParent);
+		setLabel(group.getLabel());
+		return this;
 	}
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.GroupEntity;
+import org.molgenis.data.security.model.GroupFactory;
 import org.molgenis.data.security.model.GroupMetadata;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
@@ -29,12 +30,15 @@ import static java.util.stream.Collectors.toList;
 public class GroupServiceImpl implements GroupService
 {
 	private final GroupMembershipService groupMembershipService;
+	private final GroupFactory groupFactory;
 	private final DataService dataService;
 
-	public GroupServiceImpl(GroupMembershipService groupMembershipService, DataService dataService)
+	public GroupServiceImpl(GroupMembershipService groupMembershipService, DataService dataService,
+			GroupFactory groupFactory)
 	{
 		this.groupMembershipService = requireNonNull(groupMembershipService);
 		this.dataService = requireNonNull(dataService);
+		this.groupFactory = requireNonNull(groupFactory);
 	}
 
 	@Override
@@ -144,5 +148,14 @@ public class GroupServiceImpl implements GroupService
 										.filter(GroupMembership::isCurrent)
 										.map(GroupMembership::getGroup)
 										.collect(Collectors.toSet());
+	}
+
+	@Override
+	public Group createGroups(String label)
+	{
+		GroupEntity parentEntity = groupFactory.create().updateFrom(Group.builder().label(label).build());
+		dataService.add(GroupMetadata.GROUP, parentEntity);
+		//TODO: Also add child groups and roles
+		return parentEntity.toGroup();
 	}
 }

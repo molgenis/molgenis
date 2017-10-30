@@ -14,7 +14,7 @@ import java.util.Optional;
 @SuppressWarnings("squid:S1610")
 public abstract class Group
 {
-	public abstract String getId();
+	public abstract Optional<String> getId();
 
 	public abstract String getLabel();
 

@@ -1,12 +1,13 @@
 package org.molgenis.security.group;
 
-import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.service.GroupService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @Controller
@@ -26,16 +27,20 @@ public class GroupController
 	 * @param label the label of the new group
 	 */
 	@PostMapping("/")
-	public void createGroup(@RequestParam String label)
+	public ResponseEntity<String> createGroup(@RequestParam String label)
 	{
-		throw new UnsupportedOperationException("Not yet implemented");
+		String id = groupService.createGroups(label).getId().orElseThrow(IllegalStateException::new);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
+		return ResponseEntity.created(location).build();
 	}
 
 	@GetMapping(value = "/{groupId}/members", produces = "application/json")
 	public ResponseEntity<List<GroupMembership>> getGroupMembers(@PathVariable String groupId,
 			@RequestParam(required = false) String filter, @RequestParam(required = false) String sort)
 	{
-		Group group = groupService.findGroupById(groupId).orElseThrow(() -> new IllegalArgumentException(""));
-		return ResponseEntity.ok().body(groupService.getGroupMemberships(group));
+		return groupService.findGroupById(groupId)
+						   .map(groupService::getGroupMemberships)
+						   .map(ResponseEntity.ok()::body)
+						   .orElse(ResponseEntity.notFound().build());
 	}
 }

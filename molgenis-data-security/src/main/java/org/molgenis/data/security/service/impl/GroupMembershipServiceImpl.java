@@ -14,6 +14,7 @@ import org.molgenis.security.core.service.impl.GroupMembershipService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,16 +64,20 @@ public class GroupMembershipServiceImpl implements GroupMembershipService
 
 	private Stream<Group> getChildGroups(Group parent)
 	{
-		Query<GroupEntity> forGroup = new QueryImpl<GroupEntity>().eq(PARENT, parent.getId());
+		Query<GroupEntity> forGroup = new QueryImpl<GroupEntity>().eq(PARENT,
+				parent.getId().orElseThrow(() -> new IllegalStateException("Parent group has empty ID")));
 		return dataService.findAll(GroupMetadata.GROUP, forGroup, GroupEntity.class).map(GroupEntity::toGroup);
 	}
 
 	@Override
 	public List<GroupMembership> getGroupMemberships(Group parent)
 	{
-		List<String> groupIds = Stream.concat(Stream.of(parent), getChildGroups(parent))
-									  .map(Group::getId)
-									  .collect(Collectors.toList());
+		List<String> groupIds;
+		groupIds = Stream.concat(Stream.of(parent), getChildGroups(parent))
+						 .map(Group::getId)
+						 .filter(Optional::isPresent)
+						 .map(Optional::get)
+						 .collect(Collectors.toList());
 		Query<GroupMembershipEntity> forGroups = new QueryImpl<GroupMembershipEntity>().in(GROUP, groupIds);
 		forGroups.sort().on(START);
 		return dataService.findAll(GROUP_MEMBERSHIP, forGroups, GroupMembershipEntity.class)
