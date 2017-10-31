@@ -59,7 +59,7 @@ public class RScriptExecutorTest extends AbstractMockitoTest
 
 		List<HttpUriRequest> requests = requestsCaptor.getAllValues();
 		assertEquals(requests.get(0).getURI(), new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"));
-		assertEquals(requests.get(1).getURI(), new URI("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/R/.val"));
+		assertEquals(requests.get(1).getURI(), new URI("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/stdout"));
 	}
 
 	@Test

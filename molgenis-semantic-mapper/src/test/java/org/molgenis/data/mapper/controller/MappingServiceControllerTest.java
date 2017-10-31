@@ -141,6 +141,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private static final String ID = "mappingservice";
 	private Attribute ageAttr;
 	private Attribute dobAttr;
+	private Attribute heightAttr;
 
 	private MockMvc mockMvc;
 	private OngoingStubbing<Multimap<Relation, OntologyTerm>> multimapOngoingStubbing;
@@ -210,6 +211,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		Menu menu = mock(Menu.class);
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+
+		heightAttr = attrMetaFactory.create().setName("height").setDataType(INT);
+		hop.addAttribute(heightAttr);
 
 		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf")
 														   .param("target", "HOP")

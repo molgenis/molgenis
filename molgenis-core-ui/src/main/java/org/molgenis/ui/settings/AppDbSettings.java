@@ -97,7 +97,8 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 							  .setNillable(true)
 							  .setDefaultValue(getDefaultMenuValue())
 							  .setLabel("Menu")
-							  .setDescription("JSON object that describes menu content.");
+							  .setDescription("JSON object that describes menu content.")
+							  .setValidationExpression("$('" + MENU + "').isValidJson().value()");
 			addAttribute(LANGUAGE_CODE).setDataType(STRING)
 									   .setNillable(false)
 									   .setDefaultValue(DEFAULT_LANGUAGE_CODE)

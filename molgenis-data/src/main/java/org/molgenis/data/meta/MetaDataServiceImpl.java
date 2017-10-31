@@ -377,6 +377,13 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public boolean hasEntityType(String entityTypeId)
+	{
+		return systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)
+				|| getEntityTypeBypassingRegistry(entityTypeId) != null;
+	}
+
+	@Override
 	public EntityType getEntityType(String entityTypeId)
 	{
 		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
@@ -604,17 +611,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	 * Entity meta data that wraps a entity meta data and hides the mappedBy attributes. In code both a new and an existing
 	 * entity meta data are provided only the new mappedBy attributes are hidden.
 	 */
-	private static class EntityTypeWithoutMappedByAttributes extends EntityType
+	public static class EntityTypeWithoutMappedByAttributes extends EntityType
 	{
 		private final EntityType entityType;
 		private final EntityType existingEntityType;
 
-		EntityTypeWithoutMappedByAttributes(EntityType entityType)
+		public EntityTypeWithoutMappedByAttributes(EntityType entityType)
 		{
 			this(entityType, null);
 		}
 
-		EntityTypeWithoutMappedByAttributes(EntityType entityType, EntityType existingEntityType)
+		public EntityTypeWithoutMappedByAttributes(EntityType entityType, EntityType existingEntityType)
 		{
 			this.entityType = requireNonNull(entityType);
 			this.existingEntityType = existingEntityType;

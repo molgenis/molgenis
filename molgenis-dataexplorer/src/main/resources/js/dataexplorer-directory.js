@@ -35,42 +35,34 @@ $.when($,
         }
         var rsql = molgenis.rsql.encodeRsqlValue(rsqlParts.join(';'))
         var humanReadable = humanReadableParts.join(' and ')
-        var uri = '/api/v2/' + entityTypeId + '?num=10000&attrs=id,biobank&q=' + rsql
 
-        restApi.getAsync(uri).then(function (response) {
-            var collections = response.items.map(function (item) {
-                return {
-                    collectionId: item.id,
-                    biobankId: item.biobank ? item.biobank.id : null
+        // Remove the nToken from the URL to prevent duplication on the negotiator side
+        // when a query is edited more than once
+        var url = window.location.href.replace(/&nToken=\w{32}/, '')
+        var request = {
+            URL: url,
+            entityId: entityTypeId,
+            rsql: rsql,
+            humanReadable: humanReadable,
+            nToken: molgenis.dataexplorer.getnToken()
+        }
+
+        $.ajax({
+            method: 'POST',
+            dataType: 'json',
+            url: '/plugin/directory/export',
+            data: JSON.stringify(request),
+            contentType: 'application/json',
+            success: function (response) {
+                if (response.success) {
+                    window.location.href = response.redirectUrl
+                } else {
+                    molgenis.createAlert([{message: response.warning}], 'warning')
                 }
-            })
-            if (collections.length === 0) {
-                molgenis.createAlert([{message: 'Please make sure your filters result in at least 1 row'}], 'warning')
-            } else {
-                // Remove the nToken from the URL to prevent duplication on the negotiator side
-                // when a query is edited more than once
-                var url = window.location.href.replace(/&nToken=\w{32}/, '')
-
-                var request = {
-                    URL: url,
-                    collections: collections,
-                    humanReadable: humanReadable,
-                    nToken: molgenis.dataexplorer.getnToken()
-                }
-
-                $.ajax({
-                    method: 'POST',
-                    dataType: 'json',
-                    url: '/plugin/directory/export',
-                    data: JSON.stringify(request),
-                    contentType: 'application/json',
-                    success: function (response) {
-                        window.location.href = response
-                    }
-                })
             }
         })
     }
+
 
     $(function () {
         $('#directory-export-button').on('click', function () {

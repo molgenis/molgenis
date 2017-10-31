@@ -9,6 +9,7 @@ import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
+import org.molgenis.data.importer.DataPersisterImpl;
 import org.molgenis.data.jobs.JobConfig;
 import org.molgenis.data.jobs.JobExecutionConfig;
 import org.molgenis.data.jobs.JobFactoryRegistrar;
@@ -84,7 +85,8 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactoryImpl.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
-		org.molgenis.data.importer.emx.EmxImportService.class, org.molgenis.data.importer.ImportServiceFactory.class,
+		org.molgenis.data.importer.emx.EmxImportService.class, DataPersisterImpl.class,
+		org.molgenis.data.importer.ImportServiceFactory.class,
 		org.molgenis.data.FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class, PrincipalSecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class, SecurityContextRegistryImpl.class,

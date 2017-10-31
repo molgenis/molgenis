@@ -6,12 +6,10 @@ import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 
-/**
- * Created by charbonb on 14/01/15.
- */
 public class AttributeMapping
 {
 	private String identifier;
+	private String targetAttributeName;
 	private final Attribute targetAttribute;
 	private final List<Attribute> sourceAttributes;
 	private String algorithm;
@@ -19,7 +17,7 @@ public class AttributeMapping
 
 	public enum AlgorithmState
 	{
-		CURATED("CURATED"), GENERATED_HIGH("GENERATED_HIGH"), GENERATED_LOW("GENERATED_LOW"), DISCUSS("DISCUSS");
+		CURATED("CURATED"), GENERATED_HIGH("GENERATED_HIGH"), GENERATED_LOW("GENERATED_LOW"), DISCUSS("DISCUSS"), MISSING_TARGET("MISSING_TARGET");
 
 		private String label;
 
@@ -35,16 +33,17 @@ public class AttributeMapping
 		}
 	}
 
-	public AttributeMapping(String identifier, Attribute targetAttribute, String algorithm,
+	public AttributeMapping(String identifier, String targetAttributeName, Attribute targetAttribute, String algorithm,
 			List<Attribute> sourceAttributes)
 	{
-		this(identifier, targetAttribute, algorithm, sourceAttributes, null);
+		this(identifier, targetAttributeName, targetAttribute, algorithm, sourceAttributes, null);
 	}
 
-	public AttributeMapping(String identifier, Attribute targetAttribute, String algorithm,
+	public AttributeMapping(String identifier, String targetAttributeName, Attribute targetAttribute, String algorithm,
 			List<Attribute> sourceAttributes, String algorithmState)
 	{
 		this.identifier = identifier;
+		this.targetAttributeName = targetAttributeName;
 		this.targetAttribute = targetAttribute;
 		this.sourceAttributes = sourceAttributes;
 		this.algorithm = algorithm;
@@ -59,6 +58,7 @@ public class AttributeMapping
 	public AttributeMapping(Attribute target)
 	{
 		this.identifier = null;
+		this.targetAttributeName = target.getName();
 		this.targetAttribute = target;
 		this.sourceAttributes = Lists.newArrayList();
 		this.algorithm = null;
@@ -68,6 +68,11 @@ public class AttributeMapping
 	public String getIdentifier()
 	{
 		return identifier;
+	}
+
+	public String getTargetAttributeName()
+	{
+		return targetAttributeName;
 	}
 
 	public Attribute getTargetAttribute()

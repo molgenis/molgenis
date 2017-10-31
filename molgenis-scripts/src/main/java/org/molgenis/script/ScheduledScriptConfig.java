@@ -49,7 +49,6 @@ public class ScheduledScriptConfig
 	{
 		return new JobFactory<ScriptJobExecution>()
 		{
-
 			@Override
 			public Job<ScriptResult> createJob(ScriptJobExecution scriptJobExecution)
 			{
