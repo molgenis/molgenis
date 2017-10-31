@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.MISSING_TARGET;
 
 public class EntityMapping
 {
@@ -25,7 +28,7 @@ public class EntityMapping
 		this.targetEntityType = target;
 		this.attributeMappings = new LinkedHashMap<>();
 	}
-	
+
 	public EntityMapping(String identifier, EntityType sourceEntityType, EntityType targetEntityType,
 			List<AttributeMapping> attributeMappings)
 	{
@@ -39,6 +42,11 @@ public class EntityMapping
 			if (targetAttribute != null)
 			{
 				this.attributeMappings.put(mapping.getTargetAttribute().getName(), mapping);
+			}
+			else
+			{
+				mapping.setAlgorithmState(MISSING_TARGET);
+				this.attributeMappings.put(mapping.getTargetAttributeName(), mapping);
 			}
 		}
 	}
@@ -95,6 +103,14 @@ public class EntityMapping
 	public AttributeMapping getAttributeMapping(String name)
 	{
 		return attributeMappings.get(name);
+	}
+
+	public Stream<String> getMissingTargetAttributeNames()
+	{
+		return attributeMappings.values()
+								.stream()
+								.filter(attributeMapping -> attributeMapping.getAlgorithmState() == MISSING_TARGET)
+								.map(AttributeMapping::getTargetAttributeName);
 	}
 
 	/**
