@@ -22,6 +22,19 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
+  /group/:
+    post:
+      tags:
+        - Group manager
+      description: Creates a new group
+      parameters:
+        - in: query
+          name: label
+          type: string
+          description: Label of the group
+      responses:
+        201:
+          description: Group was created
   /plugin/usermanager/activation:
     post:
       tags:

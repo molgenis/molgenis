@@ -33,15 +33,15 @@
           </div>
         </div>
         <button type="submit" class="btn btn-success">Save</button>
-        <button v-if="isDeletable" type="button" class="btn btn-danger" @click="removeMember">Remove</button>
+        <button v-if="" type="button" class="btn btn-danger" @click="removeMember">Remove</button>
       </form>
     </div>
   </div>
 </template>
 
 <script>
-  import {GET_MEMBER, UPDATE_MEMBER, DELETE_MEMBER, GET_ROLES} from '../store/actions'
-  import {mapGetters} from 'vuex'
+  import { UPDATE_MEMBER, DELETE_MEMBER } from '../store/actions'
+  import { mapGetters, mapState } from 'vuex'
   import moment from 'moment'
 
   export default {
@@ -53,6 +53,7 @@
       }
     },
     computed: {
+      ...mapState(['users', 'groups']),
       ...mapGetters({
         member: 'getMember',
         roles: 'getRoles'
@@ -62,10 +63,6 @@
       }
     },
     methods: {
-      fetchData: function () {
-        this.$store.dispatch(GET_ROLES)
-        this.$store.dispatch(GET_MEMBER, this.$route.params.id)
-      },
       onSubmit: function () {
         if (this.updatedMember.until && moment(this.updatedMember.until, 'YYYY-MM-DD[T]HH:mm').isBefore(moment(this.updatedMember.from, 'YYYY-MM-DD[T]HH:mm'))) {
           this.untilDateBeforeFromDateError = true
@@ -81,7 +78,6 @@
       this.fetchData()
     },
     watch: {
-      '$route': 'fetchData',
       member: function () {
         this.updatedMember = JSON.parse(JSON.stringify(this.member))
       }

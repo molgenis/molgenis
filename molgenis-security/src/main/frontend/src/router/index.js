@@ -1,9 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import MembersView from '../components/MembersView.vue'
-import MemberEdit from '../components/MemberEdit.vue'
 import MemberCreate from '../components/MemberCreate.vue'
-import {INITIAL_STATE} from '../store/state'
+import { INITIAL_STATE } from '../store/state'
 
 Vue.use(Router)
 export default new Router({
@@ -11,15 +10,16 @@ export default new Router({
   base: INITIAL_STATE.baseUrl,
   routes: [
     {
-      path: '/',
+      path: '/:groupId',
       component: MembersView
     },
     {
-      path: '/edit/:type/:id',
-      component: MemberEdit
+      path: '/:groupId/:membershipId',
+      component: MemberCreate,
+      name: 'edit'
     },
     {
-      path: '/create',
+      path: '/:groupId/create',
       component: MemberCreate
     }
   ]

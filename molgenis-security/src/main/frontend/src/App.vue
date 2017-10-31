@@ -1,6 +1,9 @@
 <template>
   <div class="container">
-    <div id="app">
+    <div v-if="loading">
+      <i class="fa fa-spinner"></i>
+    </div>
+    <div id="app" v-else>
       <members-breadcrumb></members-breadcrumb>
       <router-view></router-view>
     </div>
@@ -13,22 +16,20 @@
 </style>
 
 <script>
-  import {GET_ROLES, GET_USERS_GROUPS} from './store/actions'
+  import { FETCH_DATA } from './store/actions'
   import MembersBreadcrumb from 'components/MembersBreadcrumb'
+  import { mapActions, mapState } from 'vuex'
 
   export default {
     name: 'molgenis-app',
+    computed: {
+      ...mapState(['loading'])
+    },
     methods: {
-      fetchRoles: function () {
-        this.$store.dispatch(GET_ROLES)
-        this.$store.dispatch(GET_USERS_GROUPS)
-      }
+      ...mapActions({'fetchData': FETCH_DATA})
     },
     created () {
-      this.fetchRoles()
-    },
-    watch: {
-      '$route': 'fetchRoles'
+      this.fetchData()
     },
     components: {
       MembersBreadcrumb

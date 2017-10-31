@@ -10,58 +10,41 @@
     </div>
     <div class="row mt-1">
       <div class="col-4">
-        <p>Sort by join data <i :class="['fa', sort === 'ascending' ? 'fa-caret-down' : 'fa-caret-up']"
+        <p>Sort by join date <i :class="['fa', sort === 'ascending' ? 'fa-caret-down' : 'fa-caret-up']"
                                 @click="toggleSort"></i></p>
       </div>
       <div class="offset-4 col-4">
-        <p>{{nrMembers}} member{{nrMembers !== 1 ? 's' : ''}}, {{nrGroups}} group{{nrGroups !== 1 ? 's' : ''}}</p>
+        <p>{{nrMembers}} {{$t('member', {count: nrMembers}) }}, {{nrGroups}} {{$t('group', {count: nrGroups})}}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import _ from 'lodash'
-  import {QUERY_MEMBERS} from '../store/actions'
   import {SET_FILTER, SET_SORT} from '../store/mutations'
+  import { mapState, mapGetters, mapMutations } from 'vuex'
 
   export default {
     name: 'members-grid-controls',
     computed: {
+      ...mapState(['sort', 'filter']),
+      ...mapGetters(['nrMembers', 'nrGroups', 'contextId']),
       query: {
         get () {
-          return this.$store.state.query
+          return this.filter
         },
-        set (query) {
-          this.$store.commit(SET_FILTER, query)
-          this.submitQuery()
+        set (filter) {
+          this.setFilter(filter)
         }
-      },
-      sort: {
-        get () {
-          return this.$store.state.sort
-        },
-        set (sort) {
-          this.$store.commit(SET_SORT, sort)
-          this.submitQuery()
-        }
-      },
-      nrMembers: function () {
-        return this.$store.state.members.filter(member => this.$store.state.usersGroups.find(userGroup => userGroup.id === member.id && userGroup.type === 'user')).length
-      },
-      nrGroups: function () {
-        return this.$store.state.members.filter(member => this.$store.state.usersGroups.find(userGroup => userGroup.id === member.id && userGroup.type === 'group')).length
       }
     },
     methods: {
-      submitQuery: _.throttle(function () {
-        this.$store.dispatch(QUERY_MEMBERS, {query: this.$store.state.query, sort: this.$store.state.sort})
-      }),
+      ...mapMutations({'setSort': SET_SORT, 'setFilter': SET_FILTER}),
       toggleSort: function () {
-        this.sort = this.sort === 'ascending' ? 'descending' : 'ascending'
+        this.setSort(this.sort === 'ascending' ? 'descending' : 'ascending')
       },
       addMembers () {
-        this.$router.push('/create')
+        this.$router.push(`/${this.contextId}/create`)
       }
     }
   }

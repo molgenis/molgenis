@@ -12,8 +12,7 @@
   import MembersHeader from './MembersHeader'
   import MembersGrid from './MembersGrid'
   import PermissionControls from './PermissionControls'
-  import {QUERY_MEMBERS} from '../store/actions'
-  import {mapGetters, mapActions} from 'vuex'
+  import { mapGetters } from 'vuex'
 
   export default {
     name: 'members-view',
@@ -21,17 +20,6 @@
       ...mapGetters({
         members: 'getMembers'
       })
-    },
-    methods: {
-      ...mapActions({
-        fetchMember: QUERY_MEMBERS
-      })
-    },
-    created () {
-      this.fetchMember()
-    },
-    watch: {
-      '$route': 'fetchMember'
     },
     components: {
       MembersHeader,

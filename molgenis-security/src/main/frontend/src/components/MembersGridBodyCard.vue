@@ -4,8 +4,8 @@
       <div class="row">
         <div class="col text-center">
           <i :class="['fa', type === 'user' ? 'fa-user' : 'fa-users', 'fa-4x']" aria-hidden="true"
-             @click="editMember(type, id)"></i>
-          <p>{{ label }}<br>({{ role.label }})</p>
+             @click="editMember(id)"></i>
+          <p>{{ label }}<br>({{ role }})</p>
         </div>
       </div>
     </div>
@@ -13,6 +13,8 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
+
   export default {
     name: 'members-grid-body-card',
     props: {
@@ -32,13 +34,14 @@
         required: true
       },
       role: {
-        type: Object,
+        type: String,
         required: true
       }
     },
+    computed: {...mapGetters(['contextId'])},
     methods: {
-      editMember (type, id) {
-        this.$router.push('/edit/' + type + '/' + id)
+      editMember (id) {
+        this.$router.push({name: 'edit', params: {groupId: this.contextId, membershipId: id}})
       }
     }
   }
