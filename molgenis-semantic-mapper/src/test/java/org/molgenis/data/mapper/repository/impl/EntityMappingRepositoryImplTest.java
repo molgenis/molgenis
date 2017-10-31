@@ -77,7 +77,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		targetEntityType.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
-		attributeMappings.add(new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes));
+		attributeMappings.add(
+				new AttributeMapping("1", "targetAttribute", targetAttribute, "algorithm", sourceAttributes));
 
 		List<EntityMapping> entityMappings = singletonList(
 				new EntityMapping(AUTO_ID, sourceEntityType, targetEntityType, attributeMappings));
@@ -118,7 +119,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
 		attributeMappings.add(
-				new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes, CURATED.toString()));
+				new AttributeMapping("1", "targetAttribute", targetAttribute, "algorithm", sourceAttributes,
+						CURATED.toString()));
 
 		Collection<EntityMapping> entityMappings = singletonList(
 				new EntityMapping(AUTO_ID, sourceEntityType, targetEntityType, attributeMappings));

@@ -98,21 +98,21 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 			EntityType targetEntityType)
 	{
 		String identifier = attributeMappingEntity.getString(IDENTIFIER);
-		String targetAtributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
-		Attribute targetAttribute = targetEntityType.getAttribute(targetAtributeName);
+		String targetAttributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
+		Attribute targetAttribute = targetEntityType.getAttribute(targetAttributeName);
 		String algorithm = attributeMappingEntity.getString(ALGORITHM);
 		String algorithmState = attributeMappingEntity.getString(ALGORITHM_STATE);
 		List<Attribute> sourceAttributes = retrieveAttributesFromAlgorithm(algorithm, sourceEntityType);
 
-		return new AttributeMapping(identifier, targetAttribute, algorithm, sourceAttributes, algorithmState);
+		return new AttributeMapping(identifier, targetAttributeName, targetAttribute, algorithm, sourceAttributes,
+				algorithmState);
 	}
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
 	{
 		Entity attributeMappingEntity = new DynamicEntity(attributeMappingMetaData);
 		attributeMappingEntity.set(IDENTIFIER, attributeMapping.getIdentifier());
-		attributeMappingEntity.set(TARGET_ATTRIBUTE,
-				attributeMapping.getTargetAttribute() != null ? attributeMapping.getTargetAttribute().getName() : null);
+		attributeMappingEntity.set(TARGET_ATTRIBUTE, attributeMapping.getTargetAttributeName());
 		attributeMappingEntity.set(ALGORITHM, attributeMapping.getAlgorithm());
 		attributeMappingEntity.set(SOURCE_ATTRIBUTES, attributeMapping.getSourceAttributes()
 																	  .stream()

@@ -7,6 +7,8 @@ import org.molgenis.data.support.EntityTypeUtils;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MappingTarget
 {
@@ -60,6 +62,14 @@ public class MappingTarget
 	public EntityMapping getMappingForSource(String source)
 	{
 		return entityMappings.get(source);
+	}
+
+	public Set<String> getMissingTargetAttributeNames()
+	{
+		return entityMappings.values()
+							 .stream()
+							 .flatMap(EntityMapping::getMissingTargetAttributeNames)
+							 .collect(Collectors.toSet());
 	}
 
 	/**
