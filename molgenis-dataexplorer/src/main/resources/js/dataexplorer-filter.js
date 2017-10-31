@@ -92,10 +92,12 @@
             if (complexFilterElements) {
                 var items = [];
                 var elementHasAndOperator = false;
+                var lastOperator;
                 $.each(complexFilterElements, function (index, complexFilterElement) {
                     var s = '';
                     if (index > 0) {
-                        if (complexFilterElement.operator === 'AND') {
+                        //Analog to the inner workings of the createQueryRule function
+                        if (lastOperator === 'AND') {
                             if (!elementHasAndOperator) {
                                 elementHasAndOperator = true;
                                 items[items.length - 1] = '(' + items[items.length - 1];
@@ -108,10 +110,9 @@
                                 s += ') ';
                             }
                         }
-
-                        items.push(' ' + complexFilterElement.operator.toLowerCase() + ' ');
+                        items.push(' ' + lastOperator.toLowerCase() + ' ');
                     }
-
+                    lastOperator = complexFilterElement.operator;
                     items.push(self.createSimpleFilterValuesRepresentation(complexFilterElement.simpleFilter));
                 });
 
@@ -888,8 +889,6 @@
 
             $.each(complexFilterElements, function (index, complexFilterElement) {
                 if (index > 0) {
-                    lastOperator = complexFilterElement.operator;
-
                     if (lastOperator === 'AND') {
                         lastNestedRule.nestedRules.push({
                             operator: lastOperator
@@ -903,7 +902,7 @@
                         });
                     }
                 }
-
+                lastOperator = complexFilterElement.operator;
                 if (lastNestedRule === null) {
                     lastNestedRule = {
                         operator: 'NESTED',
