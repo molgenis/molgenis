@@ -141,9 +141,35 @@
                 </#list>
             </tr>
             </#list>
+            <#list mappingProject.getMappingTarget(selectedTarget).getMissingTargetAttributeNames() as missing>
+                <tr>
+                    <td><b>${missing}</b> <span class="label label-danger">missing</span></td>
+                    <#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
+                        <td style="overflow-y:auto;max-width:50px;">
+                            <#if hasWritePermission && source.getAttributeMapping(missing)??>
+                                <form method="post" action="${context_url}/removeAttributeMapping"
+                                      class="pull-right verify">
+                                    <button type="submit" class="btn btn-default btn-xs">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </button>
+                                    <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+                                    <input type="hidden" name="target" value="${selectedTarget}"/>
+                                    <input type="hidden" name="source" value="${source.name}"/>
+                                    <input type="hidden" name="attribute" value="${missing}"/>
+                                </form>
+                            </#if>
+                            <#if source.getAttributeMapping(missing)??>
+                                <#assign attributeMapping = source.getAttributeMapping(missing)>
+                                <#if attributeMapping.algorithm??>
+                                    <p><pre>${attributeMapping.algorithm?html}</pre></p>
+                                </#if>
+                            </#if>
+                        </td>
+                    </#list>
+                </tr>
+            </#list>
             </tbody>
         </table>
-
     </div>
 <#if entityTypes?has_content && hasWritePermission>
     <div class="col-md-2">
@@ -283,4 +309,5 @@
         </div>
     </div>
 </div>
+
 <@footer/>
