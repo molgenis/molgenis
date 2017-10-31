@@ -25,7 +25,7 @@ public class EntityMapping
 		this.targetEntityType = target;
 		this.attributeMappings = new LinkedHashMap<>();
 	}
-
+	
 	public EntityMapping(String identifier, EntityType sourceEntityType, EntityType targetEntityType,
 			List<AttributeMapping> attributeMappings)
 	{
@@ -35,7 +35,11 @@ public class EntityMapping
 		this.attributeMappings = new LinkedHashMap<>();
 		for (AttributeMapping mapping : attributeMappings)
 		{
-			this.attributeMappings.put(mapping.getTargetAttribute().getName(), mapping);
+			Attribute targetAttribute = mapping.getTargetAttribute();
+			if (targetAttribute != null)
+			{
+				this.attributeMappings.put(mapping.getTargetAttribute().getName(), mapping);
+			}
 		}
 	}
 

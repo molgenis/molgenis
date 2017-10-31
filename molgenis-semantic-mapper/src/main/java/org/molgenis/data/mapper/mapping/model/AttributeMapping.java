@@ -6,9 +6,6 @@ import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 
-/**
- * Created by charbonb on 14/01/15.
- */
 public class AttributeMapping
 {
 	private String identifier;
