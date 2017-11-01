@@ -5,6 +5,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.model.GroupFactory;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.User;
@@ -44,6 +45,8 @@ public class GroupServiceImplTest
 	private Group group4;
 	@Mock
 	private GroupMembershipService groupMembershipService;
+	@Mock
+	private GroupFactory groupFactory;
 	@Mock
 	private DataService dataService;
 

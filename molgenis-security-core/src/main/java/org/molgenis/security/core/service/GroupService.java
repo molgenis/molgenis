@@ -79,4 +79,5 @@ public interface GroupService
 	 * Creates a parent group with children.
 	 */
 	Group createGroups(String label);
+
 }

@@ -1,8 +1,10 @@
 package org.molgenis.data.security.service.impl;
 
 import com.google.common.collect.RangeSet;
+import com.google.common.collect.Streams;
 import com.google.common.collect.TreeRangeSet;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.model.ConceptualRoles;
 import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupFactory;
 import org.molgenis.data.security.model.GroupMetadata;
@@ -15,16 +17,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.security.model.ConceptualRoles.values;
 
 @Component
 public class GroupServiceImpl implements GroupService
@@ -155,7 +156,14 @@ public class GroupServiceImpl implements GroupService
 	{
 		GroupEntity parentEntity = groupFactory.create().updateFrom(Group.builder().label(label).build());
 		dataService.add(GroupMetadata.GROUP, parentEntity);
-		//TODO: Also add child groups and roles
+		stream(values()).forEach(conceptualRole -> addChildGroups(parentEntity, conceptualRole));
 		return parentEntity.toGroup();
+	}
+
+	private Group addChildGroups(GroupEntity parent, ConceptualRoles conceptualRole) {
+		GroupEntity childEntity = groupFactory.create().updateFrom(Group.builder().label(parent.getLabel() + "-" + conceptualRole.getDescription()).build());
+		dataService.add(GroupMetadata.GROUP, childEntity);
+		parent.setParent(childEntity.getId());
+		return childEntity.toGroup();
 	}
 }
