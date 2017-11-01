@@ -53,14 +53,14 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	public UiMenuItem getActiveItem()
 	{
 		List<MenuItem> items = menu.getItems();
-		if (items != null)
+		if (items != null && !items.isEmpty())
 		{
-			if (!items.isEmpty())
-			{
-				return new MenuItemToMolgenisUiMenuItemAdapter(items.iterator().next());
-			}
+			return new MenuItemToMolgenisUiMenuItemAdapter(items.iterator().next());
 		}
-		return null;
+		else
+		{
+			return null;
+		}
 	}
 
 	@Override
