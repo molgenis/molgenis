@@ -64,8 +64,8 @@ public class GroupControllerTest
 	@Test
 	public void testCreateGroup() throws Exception
 	{
-		when(groupService.createGroups("BBMRI-NL")).thenReturn(
-				Group.builder().id("abcde").label("BBMRI-NL").roles(emptyList()).build());
+		Group group = Group.builder().id("abcde").label("BBMRI-NL").roles(emptyList()).build();
+		when(groupService.createGroup(group)).thenReturn(group);
 		mockMvc.perform(post("/group/").param("label", "BBMRI-NL"))
 			   .andExpect(status().isCreated())
 			   .andExpect(header().string("Location", "http://localhost/group/abcde"));

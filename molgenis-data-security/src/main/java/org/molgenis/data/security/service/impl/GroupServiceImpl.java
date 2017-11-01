@@ -1,16 +1,13 @@
 package org.molgenis.data.security.service.impl;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.RangeSet;
-import com.google.common.collect.Streams;
 import com.google.common.collect.TreeRangeSet;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.model.ConceptualRoles;
 import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupFactory;
 import org.molgenis.data.security.model.GroupMetadata;
-import org.molgenis.security.core.model.Group;
-import org.molgenis.security.core.model.GroupMembership;
-import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.model.*;
 import org.molgenis.security.core.service.GroupService;
 import org.molgenis.security.core.service.impl.GroupMembershipService;
 import org.springframework.stereotype.Component;
@@ -25,7 +22,7 @@ import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.model.ConceptualRoles.values;
+import static org.molgenis.security.core.model.ConceptualRoles.values;
 
 @Component
 public class GroupServiceImpl implements GroupService
@@ -152,18 +149,19 @@ public class GroupServiceImpl implements GroupService
 	}
 
 	@Override
-	public Group createGroups(String label)
+	public Group createGroup(Group group)
 	{
-		GroupEntity parentEntity = groupFactory.create().updateFrom(Group.builder().label(label).build());
+		GroupEntity parentEntity = groupFactory.create().updateFrom(group);
 		dataService.add(GroupMetadata.GROUP, parentEntity);
-		stream(values()).forEach(conceptualRole -> addChildGroups(parentEntity, conceptualRole));
+		group.getRoles().forEach(role -> addChildGroups(parentEntity, Group.builder().label(role.getLabel()).roles(
+				Lists.newArrayList(role)).build()));
 		return parentEntity.toGroup();
 	}
 
-	private Group addChildGroups(GroupEntity parent, ConceptualRoles conceptualRole) {
-		GroupEntity childEntity = groupFactory.create().updateFrom(Group.builder().label(parent.getLabel() + "-" + conceptualRole.getDescription()).build());
-		dataService.add(GroupMetadata.GROUP, childEntity);
-		parent.setParent(childEntity.getId());
-		return childEntity.toGroup();
+	private Group addChildGroups(GroupEntity parent, Group childGroup) {
+		GroupEntity childGroupEntity = groupFactory.create().updateFrom(childGroup);
+		childGroupEntity.setParent(parent.getId());
+		dataService.add(GroupMetadata.GROUP, childGroupEntity);
+		return childGroupEntity.toGroup();
 	}
 }

@@ -1,21 +1,29 @@
 package org.molgenis.data.security.service.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.model.GroupFactory;
-import org.molgenis.security.core.model.Group;
-import org.molgenis.security.core.model.GroupMembership;
-import org.molgenis.security.core.model.User;
+import org.molgenis.data.security.model.*;
+import org.molgenis.security.core.model.*;
+import org.molgenis.security.core.service.GroupService;
 import org.molgenis.security.core.service.impl.GroupMembershipService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static java.time.Month.JANUARY;
@@ -25,8 +33,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.quality.Strictness.STRICT_STUBS;
 import static org.testng.Assert.assertEquals;
 
-public class GroupServiceImplTest
-{
+public class GroupServiceImplTest {
 	@Mock
 	private User user;
 	@Mock
@@ -45,7 +52,7 @@ public class GroupServiceImplTest
 	private Group group4;
 	@Mock
 	private GroupMembershipService groupMembershipService;
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private GroupFactory groupFactory;
 	@Mock
 	private DataService dataService;
@@ -171,4 +178,19 @@ public class GroupServiceImplTest
 		assertEquals(groupService.getGroupMemberships(user),
 				ImmutableList.of(groupMembership1, groupMembership2, groupMembership3));
 	}
+
+	@Test
+	public void testCreateGroup() {
+		String label ="BBMRI_NL";
+		List<Role> roles = Lists.newArrayList(Role.builder().id("abab").label(label + ConceptualRoles.GROUPADMIN.name()).build());
+		Group group = Group.builder().label(label).roles(roles).build();
+
+		GroupEntity groupParentEntity = mock(GroupEntity.class);
+		when(groupParentEntity.toGroup()).thenReturn(group);
+		when(groupFactory.create().updateFrom(group)).thenReturn(groupParentEntity);
+
+		Group createdGroup = groupService.createGroup(group);
+		assertEquals(createdGroup.getLabel(), label);
+	}
+
 }

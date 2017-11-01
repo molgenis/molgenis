@@ -1,4 +1,4 @@
-package org.molgenis.data.security.model;
+package org.molgenis.security.core.model;
 
 public enum ConceptualRoles
 {

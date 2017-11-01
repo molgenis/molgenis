@@ -2,6 +2,7 @@ package org.molgenis.security.core.service;
 
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
+import org.molgenis.security.core.model.Role;
 import org.molgenis.security.core.model.User;
 
 import java.time.Instant;
@@ -77,7 +78,9 @@ public interface GroupService
 
 	/**
 	 * Creates a parent group with children.
+	 *
+	 * @param group with roles
 	 */
-	Group createGroups(String label);
+	Group createGroup(Group group);
 
 }
