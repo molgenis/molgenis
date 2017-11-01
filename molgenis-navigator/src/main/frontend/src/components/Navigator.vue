@@ -77,7 +77,7 @@
 
 <script>
   import _ from 'lodash'
-  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE, GET_ENTITY_PACKAGES } from '../store/actions'
+  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE } from '../store/actions'
   import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
   import { Package, INITIAL_STATE } from '../store/state'
   import { mapState } from 'vuex'
@@ -146,8 +146,8 @@
       }
     },
     mounted: function () {
-         this.$route.params.package ? this.selectPackage(this.$route.params.package) : this.$store.dispatch(RESET_STATE)
-     },
+      this.$route.params.package ? this.selectPackage(this.$route.params.package) : this.$store.dispatch(RESET_STATE)
+    },
     watch: {
       '$route' (to, from) {
         this.selectPackage(this.$route.params.package)
