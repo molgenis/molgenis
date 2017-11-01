@@ -878,6 +878,11 @@
                 <artifactId>hamcrest-all</artifactId>
                 <version>${hamcrest-all.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -5,7 +5,6 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -25,6 +24,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.apache.commons.io.FileUtils.readFileToString;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -139,10 +139,9 @@ public class RestTestUtils
 		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
 
 		LOG.info("############ " + importJobURL);
-		Awaitility.await()
-				  .pollDelay(500, MILLISECONDS)
-				  .atMost(5, MINUTES)
-				  .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
+		await().pollDelay(500, MILLISECONDS)
+			   .atMost(5, MINUTES)
+			   .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
 		LOG.info("Import completed");
 	}
 

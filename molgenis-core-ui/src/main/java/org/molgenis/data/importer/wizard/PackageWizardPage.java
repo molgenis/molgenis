@@ -66,7 +66,10 @@ public class PackageWizardPage extends AbstractWizardPage
 			{
 				// convert input to database action
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
-				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
+				if (entityDbAction == null)
+				{
+					throw new IOException("unknown database action: " + entityImportOption);
+				}
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 						importWizard.getFile());
@@ -96,9 +99,12 @@ public class PackageWizardPage extends AbstractWizardPage
 																		   .map(Map.Entry::getKey)
 																		   .collect(toList());
 
-					if (!entitiesNotImportable.isEmpty()) throw new MolgenisDataException(
-							"You are trying to upload entities that are not compatible with the already existing entities: "
-									+ entitiesNotImportable.toString());
+					if (!entitiesNotImportable.isEmpty())
+					{
+						throw new MolgenisDataException(
+								"You are trying to upload entities that are not compatible with the already existing entities: "
+										+ entitiesNotImportable.toString());
+					}
 				}
 
 			}
