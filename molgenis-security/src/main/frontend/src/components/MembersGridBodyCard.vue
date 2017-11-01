@@ -5,7 +5,7 @@
         <div class="col text-center">
           <i :class="['fa', type === 'user' ? 'fa-user' : 'fa-users', 'fa-4x']" aria-hidden="true"
              @click="editMember(id)"></i>
-          <p>{{ label }}<br>({{ role }})</p>
+          <p>{{ label }}<br>({{ role.label }})</p>
         </div>
       </div>
     </div>
@@ -34,8 +34,10 @@
         required: true
       },
       role: {
-        type: String,
-        required: true
+        id: {
+          type: String,
+          required: true
+        }
       }
     },
     computed: {...mapGetters(['contextId'])},

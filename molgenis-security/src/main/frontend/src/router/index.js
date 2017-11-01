@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import MembersView from '../components/MembersView.vue'
-import MemberCreate from '../components/MemberCreate.vue'
+import MemberEdit from '../components/MemberEdit.vue'
 import { INITIAL_STATE } from '../store/state'
 
 Vue.use(Router)
@@ -15,12 +15,13 @@ export default new Router({
     },
     {
       path: '/:groupId/:membershipId',
-      component: MemberCreate,
+      component: MemberEdit,
       name: 'edit'
     },
     {
       path: '/:groupId/create',
-      component: MemberCreate
+      component: MemberEdit,
+      name: 'create'
     }
   ]
 })

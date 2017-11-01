@@ -1,86 +1,102 @@
 <template>
-  <div class="row" v-if="updatedMember && roles">
+  <div class="row">
     <div class="col">
       <form @submit.prevent="onSubmit">
-        <div class="form-group">
-          <label for="memberSelect">User or group</label>
-          <select v-model="updatedMember.id" class="form-control" id="memberSelect" required disabled>
-            <option value="group0">Authenticated user</option>
-            <option value="group1">Anonyous users</option>
-            <option value="group2">BBMRI-ERIC directory</option>
-            <option value="user0">David van Enckevort</option>
-            <option value="user1">Morris Swertz</option>
-            <option value="user2">Mariska Slofstra</option>
-            <option value="user3">Marieke Bijlsma</option>
-            <option value="user4">Remco den Ouden</option>
+        <div class="form-group" v-if="edit">
+          <label for="memberSelect">{{type | upperFirst}}</label>
+          <p class="form-control-static">{{label}}</p>
+        </div>
+        <div class="form-group" v-else>
+          <label for="memberSelect">User or Group</label>
+          <select v-model="id" class="form-control" id="memberSelect" required>
+            <optgroup label="Groups">
+              <option v-for="role in unassignedGroups" :value="role.id">{{ role.label }}</option>
+            </optgroup>
+            <optgroup label="Users">
+              <option v-for="user in unassignedUsers" :value="user.id">{{ user.label }}</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
           <label for="roleSelect">Role</label>
-          <select v-model="updatedMember.role" class="form-control" id="roleSelect" required>
-            <option v-for="role in roles" :value="role.id">{{ role.label }}</option>
+          <select v-model="role" class="form-control" id="roleSelect" required>
+            <option v-for="role in roleOptions" :value="role.id">{{ role.label }}</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="fromDate">From</label>
-          <input v-model="updatedMember.from" type="datetime-local" class="form-control" id="fromDate" required>
-        </div>
-        <div :class="['form-group', untilDateBeforeFromDateError ? 'has-danger' : '']">
-          <label for="untilDate">Until</label>
-          <input v-model="updatedMember.until" type="datetime-local" class="form-control" id="untilDate">
-          <div v-if="untilDateBeforeFromDateError" class="form-control-feedback">
-            Until date must be after the from date
+        <div v-show="!groupSelected">
+          <div class="form-group">
+            <label for="fromDate">From</label>
+            <input v-model="from" type="date" class="form-control" id="fromDate" required>
+          </div>
+          <div class="form-group" :class="{'has-danger': untilDateBeforeFromDateError}" v-show="!groupSelected">
+            <label for="untilDate">Until</label>
+            <input v-model="until" type="date" class="form-control" id="untilDate">
+            <div v-if="untilDateBeforeFromDateError" class="form-control-feedback">
+              Until date must be after the from date
+            </div>
           </div>
         </div>
-        <button type="submit" class="btn btn-success">Save</button>
-        <button v-if="" type="button" class="btn btn-danger" @click="removeMember">Remove</button>
+        <button type="submit" class="btn btn-success" :disabled="untilDateBeforeFromDateError">Save</button>
+        <button v-if="edit" type="button" class="btn btn-danger" @click="deleteMember">Remove</button>
       </form>
     </div>
   </div>
 </template>
 
 <script>
-  import { UPDATE_MEMBER, DELETE_MEMBER } from '../store/actions'
-  import { mapGetters, mapState } from 'vuex'
+  import { CREATE_MEMBER, DELETE_MEMBER } from '../store/actions'
+  import { mapGetters, mapState, mapActions } from 'vuex'
   import moment from 'moment'
+  import _ from 'lodash'
 
   export default {
-    name: 'member-edit',
+    name: 'member-create',
+    created () {
+      if (this.member) {
+        this.edit = true
+        this.type = this.member.type
+        this.id = this.member.id
+        this.label = this.member.label
+        this.role = this.member.role.id
+//        this.from = this.member.from TODO: update if in future
+        if (this.member.until) {
+          this.until = this.member.until.substring(0, 10)
+        }
+      }
+    },
     data: function () {
       return {
-        updatedMember: null,
-        untilDateBeforeFromDateError: false
+        id: null,
+        role: null,
+        from: moment().format('YYYY-MM-DD'),
+        until: null,
+        edit: false
       }
     },
     computed: {
-      ...mapState(['users', 'groups']),
-      ...mapGetters({
-        member: 'getMember',
-        roles: 'getRoles'
-      }),
-      isDeletable: function () {
-        return this.updatedMember && (this.updatedMember.id !== 'group0' && this.updatedMember.id !== 'group1')
+      ...mapState(['users']),
+      ...mapGetters(['members', 'unassignedUsers', 'unassignedGroups', 'context', 'member', 'roles', 'context']),
+      roleOptions () { return this.groupSelected ? this.roles : this.context.children },
+      groupSelected () { return this.type === 'group' || this.unassignedGroups.some(role => role.id === this.id) },
+      untilDate () { return this.until && moment(this.until, 'YYYY-MM-DD') },
+      fromDate () { return this.from && moment(this.from, 'YYYY-MM-DD') },
+      untilDateBeforeFromDateError () {
+        return !!this.untilDate && this.untilDate.isSameOrBefore(this.fromDate)
       }
     },
     methods: {
-      onSubmit: function () {
-        if (this.updatedMember.until && moment(this.updatedMember.until, 'YYYY-MM-DD[T]HH:mm').isBefore(moment(this.updatedMember.from, 'YYYY-MM-DD[T]HH:mm'))) {
-          this.untilDateBeforeFromDateError = true
-        } else {
-          this.$store.dispatch(UPDATE_MEMBER, this.updatedMember).then(() => this.$router.go(-1))
-        }
-      },
-      removeMember: function () {
-        this.$store.dispatch(DELETE_MEMBER, this.updatedMember).then(() => this.$router.go(-1))
+      ...mapActions({createMember: CREATE_MEMBER, deleteMember: DELETE_MEMBER}),
+      onSubmit () {
+        this.createMember({
+          id: this.id,
+          role: this.role,
+          until: this.until,
+          from: this.from
+        }).then(() => this.$router.go(-1))
       }
     },
-    created () {
-      this.fetchData()
-    },
-    watch: {
-      member: function () {
-        this.updatedMember = JSON.parse(JSON.stringify(this.member))
-      }
+    filters: {
+      upperFirst: _.upperFirst
     }
   }
 </script>
