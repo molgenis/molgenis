@@ -4,6 +4,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.*;
@@ -31,6 +32,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -40,6 +42,9 @@ import static org.testng.Assert.assertEquals;
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
 public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private Config config;
+
 	private OntologyTagServiceImpl ontologyTagService;
 
 	@Autowired
@@ -85,7 +90,8 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		reset(dataService);
+		config.resetMocks();
+
 		chromosomeNameTagEntity = tagFactory.create();
 		chromosomeNameTagEntity.set(TagMetadata.ID, "1234");
 		chromosomeNameTagEntity.set(TagMetadata.LABEL, "Chromosome name");
@@ -215,12 +221,15 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testgetTagsForPackage()
+	public void testGetTagsForPackage()
 	{
 		Package p = packageFactory.create("test", "desc");
 
 		Package pack = packageFactory.create();
 		pack.setTags(singletonList(chromosomeNameTagEntity));
+				when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
+		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(
+				CHROMOSOME_NAME_ONTOLOGY_TERM);
 
 		when(dataService.findOneById(PACKAGE, "test")).thenReturn(pack);
 
@@ -288,22 +297,41 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	@Configuration
 	public static class Config
 	{
+		@Mock
+		private DataService dataService;
+
+		@Mock
+		private OntologyService ontologyService;
+
+		@Mock
+		private TagRepository tagRepository;
+
+		public Config()
+		{
+			initMocks(this);
+		}
+
 		@Bean
 		DataService dataService()
 		{
-			return mock(DataService.class);
+			return dataService;
 		}
 
 		@Bean
 		OntologyService ontologyService()
 		{
-			return mock(OntologyService.class);
+			return ontologyService;
 		}
 
 		@Bean
 		TagRepository tagRepository()
 		{
-			return mock(TagRepository.class);
+			return tagRepository;
+		}
+
+		void resetMocks()
+		{
+			reset(dataService, ontologyService, tagRepository);
 		}
 	}
 }
