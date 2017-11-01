@@ -43,6 +43,11 @@ public class UserManagerController extends PluginController
 		return "view-usermanager";
 	}
 
+	@ApiOperation("Sets viewState")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Ok"),
+			@ApiResponse(code = 500, message = "ViesState could not be set")
+	})
 	@PutMapping("/setViewState/{viewState}")
 	@ResponseStatus(HttpStatus.OK)
 	public void setViewState(@PathVariable String viewState, Model model)
@@ -179,6 +184,10 @@ public class UserManagerController extends PluginController
 		}
 	}
 
+	@ApiOperation("Change group membership")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Updated groupmembership", response = GroupMembershipResponse.class),
+	})
 	@PutMapping("/changeGroupMembership")
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
