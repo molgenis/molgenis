@@ -433,7 +433,9 @@ public class EntityUtils
 	{
 		if (entity == null && otherEntity != null) return false;
 		if (entity != null && otherEntity == null) return false;
+		if (entity == null) return true;
 		if (!entity.getEntityType().getId().equals(otherEntity.getEntityType().getId())) return false;
+
 		for (Attribute attr : entity.getEntityType().getAtomicAttributes())
 		{
 			String attrName = attr.getName();

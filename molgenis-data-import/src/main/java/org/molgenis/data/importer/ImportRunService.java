@@ -120,20 +120,25 @@ public class ImportRunService
 	public void failImportRun(String importRunId, String message)
 	{
 		ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
-		try
+		if (importRun != null)
 		{
-			if (importRun != null)
+			try
 			{
 				importRun.setStatus(ImportStatus.FAILED.toString());
 				importRun.setEndDate(now());
 				importRun.setMessage(message);
 				dataService.update(IMPORT_RUN, importRun);
+
+			}
+			catch (Exception e)
+			{
+				LOG.error("Error updating run status", e);
+			}
+
+			if (importRun.getNotify())
+			{
+				createAndSendStatusMail(importRun);
 			}
 		}
-		catch (Exception e)
-		{
-			LOG.error("Error updating run status", e);
-		}
-		if (importRun.getNotify()) createAndSendStatusMail(importRun);
 	}
 }
