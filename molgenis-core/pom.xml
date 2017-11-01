@@ -11,6 +11,11 @@
 
     <name>core</name>
 
+    <properties>
+        <gson-java8-datatype.version>1.0.3</gson-java8-datatype.version>
+
+    </properties>
+
     <build>
         <resources>
             <resource>
@@ -42,7 +47,7 @@
         <dependency>
             <groupId>net.dongliu</groupId>
             <artifactId>gson-java8-datatype</artifactId>
-            <version>1.0.3</version>
+            <version>${gson-java8-datatype.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
