@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,6 +46,8 @@ public class DefaultValuePopulatorTest
 		when(entityReferenceCreator.getReference(any(EntityType.class), eq(1))).thenReturn(entity1);
 		when(entityReferenceCreator.getReference(any(EntityType.class), eq("a"))).thenReturn(entityA);
 		when(entityReferenceCreator.getReference(any(EntityType.class), eq("b"))).thenReturn(entityB);
+		when(entityReferenceCreator.getReferences(any(EntityType.class), eq(Arrays.asList("a", "b")))).thenReturn(
+				asList(entityA, entityB));
 		this.defaultValuePopulator = new DefaultValuePopulator(entityReferenceCreator);
 	}
 

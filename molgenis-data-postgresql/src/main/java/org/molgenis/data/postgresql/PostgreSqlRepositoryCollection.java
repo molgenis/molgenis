@@ -1,9 +1,11 @@
 package org.molgenis.data.postgresql;
 
+import com.google.common.collect.Iterables;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepositoryCollection;
+import org.molgenis.data.support.AttributeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +15,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -28,6 +31,8 @@ import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.postgresql.PostgreSqlRepository.BATCH_SIZE;
+import static org.molgenis.data.postgresql.PostgreSqlRepository.createJunctionTableRowData;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
 public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
@@ -271,12 +276,45 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			if (isMultipleReferenceType(attr))
 			{
 				createJunctionTable(entityType, attr);
+
+				if (attr.getDefaultValue() != null && !attr.isNillable())
+				{
+					@SuppressWarnings("unchecked")
+					Iterable<Entity> defaultRefEntities = (Iterable<Entity>) AttributeUtils.getDefaultTypedValue(attr);
+					if (!Iterables.isEmpty(defaultRefEntities))
+					{
+						createJunctionTableRows(entityType, attr, defaultRefEntities);
+					}
+				}
 			}
 			else
 			{
 				createColumn(entityType, attr);
 			}
 		}
+	}
+
+	private void createJunctionTableRows(EntityType entityType, Attribute attr, Iterable<Entity> defaultRefEntities)
+	{
+		int nrRefEntities = Iterables.size(defaultRefEntities);
+
+		PostgreSqlRepository postgreSqlRepository = createPostgreSqlRepository();
+		postgreSqlRepository.setEntityType(entityType);
+
+		Attribute idAttribute = entityType.getIdAttribute();
+		String idAttributeName = idAttribute.getName();
+		postgreSqlRepository.forEachBatched(new Fetch().field(idAttributeName), entities ->
+		{
+			List<Map<String, Object>> mrefs = new ArrayList<>(entities.size() * nrRefEntities);
+			entities.forEach(entity ->
+			{
+				AtomicInteger seqNr = new AtomicInteger(0);
+				defaultRefEntities.forEach(defaultRefEntity -> mrefs.add(
+						createJunctionTableRowData(seqNr.getAndIncrement(), idAttribute, defaultRefEntity, attr,
+								entity)));
+			});
+			postgreSqlRepository.addMrefs(mrefs, attr);
+		}, BATCH_SIZE);
 	}
 
 	/**
@@ -401,6 +439,21 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 				createCheckConstraint(entityType, updatedAttr);
 			}
 		}
+	}
+
+	private void dropColumnDefaultValue(EntityType entityType, Attribute attr)
+	{
+		String dropColumnDefaultValueSql = getSqlDropColumnDefault(entityType, attr);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Dropping column default constraint for entity [{}] attribute [{}]", entityType.getId(),
+					attr.getName());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("SQL: {}", dropColumnDefaultValueSql);
+			}
+		}
+		jdbcTemplate.execute(dropColumnDefaultValueSql);
 	}
 
 	/**
@@ -769,7 +822,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
 	private void createColumn(EntityType entityType, Attribute attr)
 	{
-		String addColumnSql = getSqlAddColumn(entityType, attr);
+		String addColumnSql = getSqlAddColumn(entityType, attr, ColumnMode.INCLUDE_DEFAULT_CONSTRAINT);
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Creating column for entity [{}] attribute [{}]", entityType.getId(), attr.getName());
@@ -779,6 +832,11 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			}
 		}
 		jdbcTemplate.execute(addColumnSql);
+
+		if (generateSqlColumnDefaultConstraint(attr))
+		{
+			dropColumnDefaultValue(entityType, attr);
+		}
 
 		if (attr.isReadOnly())
 		{

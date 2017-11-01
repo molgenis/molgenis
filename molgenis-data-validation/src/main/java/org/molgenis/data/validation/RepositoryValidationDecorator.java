@@ -29,15 +29,16 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 	private final DataService dataService;
 	private final EntityAttributesValidator entityAttributesValidator;
-	private final ExpressionValidator expressionValidator;
+	private final DefaultValueReferenceValidator defaultValueReferenceValidator;
 
 	public RepositoryValidationDecorator(DataService dataService, Repository<Entity> delegateRepository,
-			EntityAttributesValidator entityAttributesValidator, ExpressionValidator expressionValidator)
+			EntityAttributesValidator entityAttributesValidator,
+			DefaultValueReferenceValidator defaultValueReferenceValidator)
 	{
 		super(delegateRepository);
 		this.dataService = requireNonNull(dataService);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
-		this.expressionValidator = requireNonNull(expressionValidator);
+		this.defaultValueReferenceValidator = defaultValueReferenceValidator;
 	}
 
 	@Override
@@ -78,6 +79,39 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			entities = validate(entities, validationResource, ValidationMode.ADD);
 			return delegate().add(entities);
 		}
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		defaultValueReferenceValidator.validateEntityNotReferenced(entity);
+		delegate().delete(entity);
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		defaultValueReferenceValidator.validateEntityNotReferencedById(id, getEntityType());
+		delegate().deleteById(id);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		defaultValueReferenceValidator.validateEntityTypeNotReferenced(getEntityType());
+		delegate().deleteAll();
+	}
+
+	@Override
+	public void delete(Stream<Entity> entities)
+	{
+		delegate().delete(defaultValueReferenceValidator.validateEntitiesNotReferenced(entities, getEntityType()));
+	}
+
+	@Override
+	public void deleteAll(Stream<Object> ids)
+	{
+		delegate().deleteAll(defaultValueReferenceValidator.validateEntitiesNotReferencedById(ids, getEntityType()));
 	}
 
 	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,

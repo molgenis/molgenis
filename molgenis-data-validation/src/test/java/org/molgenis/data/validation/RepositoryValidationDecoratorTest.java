@@ -14,11 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
@@ -50,6 +49,7 @@ public class RepositoryValidationDecoratorTest
 	private MetaDataService metaDataService;
 	private EntityAttributesValidator entityAttributesValidator;
 	private ExpressionValidator expressionValidator;
+	private DefaultValueReferenceValidator defaultValueReferenceValidator;
 	private RepositoryValidationDecorator repositoryValidationDecorator;
 	private Entity refEntity0;
 	private Entity refEntity0Clone;
@@ -180,8 +180,9 @@ public class RepositoryValidationDecoratorTest
 
 		expressionValidator = mock(ExpressionValidator.class);
 		entityAttributesValidator = mock(EntityAttributesValidator.class);
+		defaultValueReferenceValidator = mock(DefaultValueReferenceValidator.class);
 		repositoryValidationDecorator = new RepositoryValidationDecorator(dataService, delegateRepository,
-				entityAttributesValidator, expressionValidator);
+				entityAttributesValidator, defaultValueReferenceValidator);
 	}
 
 	@Test
@@ -809,7 +810,7 @@ public class RepositoryValidationDecoratorTest
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
@@ -868,7 +869,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -913,7 +914,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -958,7 +959,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -995,7 +996,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -1042,7 +1043,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -1101,7 +1102,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
 	}
@@ -1165,7 +1166,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -1238,7 +1239,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
 	}
@@ -1302,7 +1303,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -1370,7 +1371,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -1438,7 +1439,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).add(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -1494,7 +1495,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -1562,7 +1563,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -1572,14 +1573,6 @@ public class RepositoryValidationDecoratorTest
 			assertEquals(e.getMessage(),
 					"Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)");
 		}
-	}
-
-	@Test
-	public void deleteStream()
-	{
-		Stream<Entity> stream = Stream.empty();
-		repositoryValidationDecorator.delete(stream);
-		verify(delegateRepository, times(1)).delete(stream);
 	}
 
 	@Test
@@ -2530,7 +2523,7 @@ public class RepositoryValidationDecoratorTest
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
@@ -2589,7 +2582,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -2634,7 +2627,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -2679,7 +2672,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -2716,7 +2709,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -2763,7 +2756,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -2822,7 +2815,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
 	}
@@ -2886,7 +2879,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -2959,7 +2952,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
 	}
@@ -3023,7 +3016,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -3091,7 +3084,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -3159,7 +3152,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
 	}
 
@@ -3215,7 +3208,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -3283,7 +3276,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -3363,7 +3356,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -3442,7 +3435,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
 	}
 
@@ -3514,7 +3507,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -3595,7 +3588,7 @@ public class RepositoryValidationDecoratorTest
 		verify(delegateRepository, times(1)).update(captor.capture());
 		Stream<Entity> stream = captor.getValue();
 
-		stream.collect(Collectors.toList()); // process stream to enable validation
+		stream.collect(toList()); // process stream to enable validation
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
 	}
 
@@ -3670,7 +3663,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> stream = captor.getValue();
 		try
 		{
-			stream.collect(Collectors.toList()); // process stream to enable validation
+			stream.collect(toList()); // process stream to enable validation
 
 			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
 		}
@@ -3692,7 +3685,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = repositoryValidationDecorator.findAll(entityIds);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		assertEquals(expectedEntities.collect(toList()), Arrays.asList(entity0, entity1));
 	}
 
 	@Test
@@ -3706,7 +3699,7 @@ public class RepositoryValidationDecoratorTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = repositoryValidationDecorator.findAll(entityIds, fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		assertEquals(expectedEntities.collect(toList()), Arrays.asList(entity0, entity1));
 	}
 
 	@Test
@@ -3721,7 +3714,7 @@ public class RepositoryValidationDecoratorTest
 
 		@SuppressWarnings("resource")
 		RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
-				decoratedRepository, entityAttributesValidator, expressionValidator);
+				decoratedRepository, entityAttributesValidator, null); // FIXME
 
 		Object id = 0;
 		Fetch fetch = new Fetch();
@@ -3739,7 +3732,7 @@ public class RepositoryValidationDecoratorTest
 		Query<Entity> query = mock(Query.class);
 		when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositoryValidationDecorator.findAll(query);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), Arrays.asList(entity0));
 	}
 
 	@Test
@@ -3750,5 +3743,110 @@ public class RepositoryValidationDecoratorTest
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		repositoryValidationDecorator.forEachBatched(fetch, consumer, 234);
 		verify(delegateRepository, times(1)).forEachBatched(fetch, consumer, 234);
+	}
+
+	@Test
+	public void testDelete()
+	{
+		Entity entity = mock(Entity.class);
+		repositoryValidationDecorator.delete(entity);
+		verify(delegateRepository).delete(entity);
+		verify(defaultValueReferenceValidator).validateEntityNotReferenced(entity);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class)
+	public void testDeleteValidationException()
+	{
+		Entity entity = mock(Entity.class);
+		doThrow(MolgenisValidationException.class).when(defaultValueReferenceValidator)
+												  .validateEntityNotReferenced(entity);
+		repositoryValidationDecorator.delete(entity);
+	}
+
+	@Test
+	public void testDeleteById()
+	{
+		Object entityId = "id";
+		repositoryValidationDecorator.deleteById(entityId);
+		verify(delegateRepository).deleteById(entityId);
+		verify(defaultValueReferenceValidator).validateEntityNotReferencedById(entityId, entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class)
+	public void testDeleteByIdValidationException()
+	{
+		Object entityId = "id";
+		doThrow(MolgenisValidationException.class).when(defaultValueReferenceValidator)
+												  .validateEntityNotReferencedById(entityId, entityType);
+		repositoryValidationDecorator.deleteById(entityId);
+	}
+
+	@Test
+	public void testDeleteStream()
+	{
+		Entity entity = mock(Entity.class);
+		Stream<Entity> entityStream = Stream.of(entity);
+		Stream<Entity> validatedEntityStream = Stream.of(entity);
+		when(defaultValueReferenceValidator.validateEntitiesNotReferenced(entityStream, entityType)).thenReturn(
+				validatedEntityStream);
+		repositoryValidationDecorator.delete(entityStream);
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
+		verify(delegateRepository).delete(captor.capture());
+		verify(defaultValueReferenceValidator).validateEntitiesNotReferenced(entityStream, entityType);
+		assertEquals(captor.getValue().collect(toList()), singletonList(entity));
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class)
+	public void testDeleteStreamValidationException()
+	{
+		Entity entity = mock(Entity.class);
+		Stream<Entity> entityStream = Stream.of(entity);
+		doThrow(MolgenisValidationException.class).when(defaultValueReferenceValidator)
+												  .validateEntitiesNotReferenced(entityStream, entityType);
+		repositoryValidationDecorator.delete(entityStream);
+	}
+
+	@Test
+	public void testDeleteAll()
+	{
+		repositoryValidationDecorator.deleteAll();
+		verify(delegateRepository).deleteAll();
+		verify(defaultValueReferenceValidator).validateEntityTypeNotReferenced(entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class)
+	public void testDeleteAllValidationException()
+	{
+		doThrow(MolgenisValidationException.class).when(defaultValueReferenceValidator)
+												  .validateEntityTypeNotReferenced(entityType);
+		repositoryValidationDecorator.deleteAll();
+	}
+
+	@Test
+	public void testDeleteAllStream()
+	{
+		Object entityId = mock(Object.class);
+		Stream<Object> entityIdStream = Stream.of(entityId);
+		Stream<Object> validatedEntityIdStream = Stream.of(entityId);
+		when(defaultValueReferenceValidator.validateEntitiesNotReferencedById(entityIdStream, entityType)).thenReturn(
+				validatedEntityIdStream);
+		repositoryValidationDecorator.deleteAll(entityIdStream);
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
+		verify(delegateRepository).deleteAll(captor.capture());
+		verify(defaultValueReferenceValidator).validateEntitiesNotReferencedById(entityIdStream, entityType);
+		assertEquals(captor.getValue().collect(toList()), singletonList(entityId));
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class)
+	public void testDeleteAllStreamValidationException()
+	{
+		Object entityId = mock(Object.class);
+		Stream<Object> entityIdStream = Stream.of(entityId);
+		Stream<Object> validatedEntityIdStream = Stream.of(entityId);
+		doThrow(MolgenisValidationException.class).when(defaultValueReferenceValidator)
+												  .validateEntitiesNotReferencedById(entityIdStream, entityType);
+		repositoryValidationDecorator.deleteAll(entityIdStream);
 	}
 }

@@ -5,6 +5,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -23,6 +24,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode.INCLUDE_DEFAULT_CONSTRAINT;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlQueryGeneratorTest
@@ -637,66 +640,109 @@ public class PostgreSqlQueryGeneratorTest
 		when(refEntityTypeInt.getId()).thenReturn("refEntityInt");
 		when(refEntityTypeInt.getIdAttribute()).thenReturn(refIdAttrInt);
 
-		return Arrays.asList(
-				new Object[] { BOOL, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean" },
-				new Object[] { CATEGORICAL, true, refEntityTypeInt,
+		return Arrays.asList(new Object[] { BOOL, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean" },
+				new Object[] { CATEGORICAL, null, EXCLUDE_DEFAULT_CONSTRAINT, true, refEntityTypeInt,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
-				new Object[] { DATE, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date" },
-				new Object[] { DATE_TIME, true, null,
+				new Object[] { DATE, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date" },
+				new Object[] { DATE_TIME, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" timestamp with time zone" },
-				new Object[] { DECIMAL, true, null,
+				new Object[] { DECIMAL, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" double precision" },
-				new Object[] { EMAIL, true, null,
+				new Object[] { EMAIL, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
-				new Object[] { ENUM, true, null,
+				new Object[] { ENUM, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
-				new Object[] { FILE, true, refEntityTypeString,
+				new Object[] { FILE, null, EXCLUDE_DEFAULT_CONSTRAINT, true, refEntityTypeString,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
-				new Object[] { HTML, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
-				new Object[] { HYPERLINK, true, null,
+				new Object[] { HTML, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
+				new Object[] { HYPERLINK, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
-				new Object[] { INT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer" },
-				new Object[] { LONG, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint" },
-				new Object[] { SCRIPT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
-				new Object[] { STRING, true, null,
+				new Object[] { INT, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer" },
+				new Object[] { LONG, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint" },
+				new Object[] { SCRIPT, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
+				new Object[] { STRING, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255)" },
-				new Object[] { TEXT, true, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
-				new Object[] { XREF, true, refEntityTypeString,
+				new Object[] { TEXT, null, EXCLUDE_DEFAULT_CONSTRAINT, true, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text" },
+				new Object[] { XREF, null, EXCLUDE_DEFAULT_CONSTRAINT, true, refEntityTypeString,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255),ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
-				new Object[] { BOOL, false, null,
+				new Object[] { BOOL, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean NOT NULL" },
-				new Object[] { CATEGORICAL, false, refEntityTypeInt,
+				new Object[] { CATEGORICAL, null, EXCLUDE_DEFAULT_CONSTRAINT, false, refEntityTypeInt,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
-				new Object[] { DATE, false, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date NOT NULL" },
-				new Object[] { DATE_TIME, false, null,
+				new Object[] { DATE, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date NOT NULL" },
+				new Object[] { DATE_TIME, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" timestamp with time zone NOT NULL" },
-				new Object[] { DECIMAL, false, null,
+				new Object[] { DECIMAL, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" double precision NOT NULL" },
-				new Object[] { EMAIL, false, null,
+				new Object[] { EMAIL, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
-				new Object[] { ENUM, false, null,
+				new Object[] { ENUM, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
-				new Object[] { FILE, false, refEntityTypeString,
+				new Object[] { FILE, null, EXCLUDE_DEFAULT_CONSTRAINT, false, refEntityTypeString,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
-				new Object[] { HTML, false, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
-				new Object[] { HYPERLINK, false, null,
-						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
-				new Object[] { INT, false, null,
-						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL" },
-				new Object[] { LONG, false, null,
-						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint NOT NULL" },
-				new Object[] { SCRIPT, false, null,
+				new Object[] { HTML, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
-				new Object[] { STRING, false, null,
+				new Object[] { HYPERLINK, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
 						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
-				new Object[] { TEXT, false, null, "ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
-				new Object[] { XREF, false, refEntityTypeString,
-						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" })
-					 .iterator();
+				new Object[] { INT, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL" },
+				new Object[] { LONG, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint NOT NULL" },
+				new Object[] { SCRIPT, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
+				new Object[] { STRING, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { TEXT, null, EXCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL" },
+				new Object[] { XREF, null, EXCLUDE_DEFAULT_CONSTRAINT, false, refEntityTypeString,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+				new Object[] { BOOL, Boolean.TRUE.toString(), INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean NOT NULL DEFAULT TRUE" },
+				new Object[] { CATEGORICAL, "1", INCLUDE_DEFAULT_CONSTRAINT, false, refEntityTypeInt,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL DEFAULT 1,ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityInt#78255ee1\"(\"refIdAttrInt\")" },
+				new Object[] { DATE, "2010-01-13", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" date NOT NULL DEFAULT '2010-01-13'" },
+				new Object[] { DATE_TIME, "1985-08-12T06:12:13Z", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" timestamp with time zone NOT NULL DEFAULT '1985-08-12T06:12:13Z'" },
+				new Object[] { DECIMAL, "3.14", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" double precision NOT NULL DEFAULT 3.14" },
+				new Object[] { EMAIL, "mail@molgenis.org", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL DEFAULT 'mail@molgenis.org'" },
+				new Object[] { ENUM, "enum1", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL DEFAULT 'enum1',ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0, enum1'))" },
+				new Object[] { FILE, "refEntityId", INCLUDE_DEFAULT_CONSTRAINT, false, refEntityTypeString,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL DEFAULT 'refEntityId',ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+				new Object[] { HTML, "html", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL DEFAULT 'html'" },
+				new Object[] { HYPERLINK, "http://www.molgenis.org/", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL DEFAULT 'http://www.molgenis.org/'" },
+				new Object[] { INT, "123", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" integer NOT NULL DEFAULT 123" },
+				new Object[] { LONG, "34359738368", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" bigint NOT NULL DEFAULT 34359738368" },
+				new Object[] { SCRIPT, "script", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL DEFAULT 'script'" },
+				new Object[] { STRING, "string", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL DEFAULT 'string'" },
+				new Object[] { TEXT, "text", INCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" text NOT NULL DEFAULT 'text'" },
+				new Object[] { XREF, "entityTypeId", INCLUDE_DEFAULT_CONSTRAINT, false, refEntityTypeString,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" character varying(255) NOT NULL DEFAULT 'entityTypeId',ADD CONSTRAINT \"entityTypeId#c34894ba_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntityStr#305ca1a9\"(\"refIdAttrStr\")" },
+				new Object[] { BOOL, Boolean.TRUE.toString(), EXCLUDE_DEFAULT_CONSTRAINT, false, null,
+						"ALTER TABLE \"entityTypeId#c34894ba\" ADD \"attr\" boolean NOT NULL" }).iterator();
 	}
 
 	@Test(dataProvider = "getSqlAddColumnProvider")
-	public void getSqlAddColumn(AttributeType attrType, boolean nillable, EntityType refEntityType, String sql)
+	public void getSqlAddColumn(AttributeType attrType, String defaultValueStr, ColumnMode columnMode, boolean nillable,
+			EntityType refEntityType, String sql)
 	{
 		Attribute idAttr = mock(Attribute.class);
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
@@ -712,24 +758,28 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.isNillable()).thenReturn(nillable);
 		when(attr.getRefEntity()).thenReturn(refEntityType);
 		when(attr.getEnumOptions()).thenReturn(attrType == ENUM ? newArrayList("enum0, enum1") : emptyList());
-
-		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr), sql);
+		when(attr.getDefaultValue()).thenReturn(defaultValueStr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr, columnMode), sql);
 	}
 
 	@DataProvider(name = "getSqlAddColumnInvalidType")
 	public static Iterator<Object[]> getSqlAddColumnInvalidTypeProvider()
 	{
-		return Arrays.asList(new Object[] { COMPOUND }, new Object[] { CATEGORICAL_MREF }, new Object[] { MREF })
-					 .iterator();
+		return Arrays.asList(new Object[] { COMPOUND, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { CATEGORICAL_MREF, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { MREF, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { COMPOUND, ColumnMode.INCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { CATEGORICAL_MREF, ColumnMode.INCLUDE_DEFAULT_CONSTRAINT },
+				new Object[] { MREF, ColumnMode.INCLUDE_DEFAULT_CONSTRAINT }).iterator();
 	}
 
 	@Test(dataProvider = "getSqlAddColumnInvalidType", expectedExceptions = RuntimeException.class)
-	public void getSqlAddColumnInvalidType(AttributeType attrType)
+	public void getSqlAddColumnInvalidType(AttributeType attrType, ColumnMode columnMode)
 	{
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(attrType);
-		PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr);
+		PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr, columnMode);
 	}
 
 	@Test
@@ -741,6 +791,34 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getIdentifier()).thenReturn("attrId");
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropColumn(entityType, attr),
 				"ALTER TABLE \"entityTypeId#c34894ba\" DROP COLUMN \"attr\"");
+	}
+
+	@Test
+	public void getSqlDropColumnDefault()
+	{
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+		when(entityType.getId()).thenReturn("entityTypeId");
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+		when(attr.getIdentifier()).thenReturn("attrId");
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropColumnDefault(entityType, attr),
+				"ALTER TABLE \"entityTypeId#c34894ba\" ALTER COLUMN \"attr\" DROP DEFAULT");
+	}
+
+	@DataProvider(name = "generateSqlColumnDefaultConstraint")
+	public static Iterator<Object[]> generateSqlColumnDefaultConstraintProvider()
+	{
+		return Arrays.asList(new Object[] { null, STRING, false }, new Object[] { null, XREF, false },
+				new Object[] { "str", STRING, true }, new Object[] { "refEntityId", XREF, true }).iterator();
+	}
+
+	@Test(dataProvider = "generateSqlColumnDefaultConstraint")
+	public void generateSqlColumnDefaultConstraint(String defaultValue, AttributeType attributeType,
+			boolean expectedResult)
+	{
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getDefaultValue()).thenReturn(defaultValue);
+		when(attribute.getDataType()).thenReturn(attributeType);
+		assertEquals(PostgreSqlQueryGenerator.generateSqlColumnDefaultConstraint(attribute), expectedResult);
 	}
 
 	@Test
@@ -855,7 +933,7 @@ public class PostgreSqlQueryGeneratorTest
 		return result;
 	}
 
-	public Package createPackage(String packageName)
+	private Package createPackage(String packageName)
 	{
 		return when(mock(Package.class).getId()).thenReturn(packageName).getMock();
 	}
