@@ -1,5 +1,9 @@
 package org.molgenis.ui.admin.usermanager;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -8,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static org.molgenis.ui.admin.usermanager.UserManagerController.URI;
 
+@Api("User manager")
 @Controller
 @RequestMapping(URI)
 @SessionAttributes("viewState")
@@ -45,6 +50,11 @@ public class UserManagerController extends PluginController
 		model.addAttribute("viewState", viewState);
 	}
 
+	@ApiOperation("Sets activation status for a user")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Ok", response = ActivationResponse.class),
+			@ApiResponse(code = 404, message = "If response doesn't have success set to true, the user wasn't found", response = ActivationResponse.class)
+	})
 	@PutMapping("/activation")
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody

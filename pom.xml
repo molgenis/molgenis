@@ -264,6 +264,11 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>com.github.kongchen</groupId>
+                    <artifactId>swagger-maven-plugin</artifactId>
+                    <version>3.1.5</version>
+                </plugin>
                 <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -877,6 +882,11 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-all</artifactId>
                 <version>${hamcrest-all.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>1.5.16</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

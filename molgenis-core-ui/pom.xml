@@ -114,6 +114,36 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <info>
+                                <title>${project.name}</title>
+                                <version>${project.version}</version>
+                                <description>${project.description}</description>
+                            </info>
+                            <springmvc>true</springmvc>
+                            <locations>
+                                <location>org.molgenis.ui.admin.user</location>
+                                <location>org.molgenis.ui.admin.usermanager</location>
+                            </locations>
+                            <swaggerDirectory>${build.directory}/generated-resources/swagger</swaggerDirectory>
+                            <swaggerFileName>${project.name}-swagger</swaggerFileName>
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -304,6 +334,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
