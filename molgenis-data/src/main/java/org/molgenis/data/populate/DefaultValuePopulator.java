@@ -5,6 +5,7 @@ import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.stereotype.Component;
 
@@ -53,8 +54,7 @@ public class DefaultValuePopulator
 
 	private Object getDefaultValue(Attribute attr)
 	{
-		String valueAsString = attr.getDefaultValue();
-		return convertToTypedValue(attr, valueAsString);
+		return AttributeUtils.getDefaultTypedValue(attr, entityReferenceCreator);
 	}
 
 	private Object convertToTypedValue(Attribute attr, String valueAsString)

@@ -51,4 +51,6 @@ public class AttributeUtilsTest
 	{
 		assertEquals(AttributeUtils.getI18nAttributeName(attrName, languageCode), i18nAttrName);
 	}
+
+	// AttributeUtils.getDefaultTypedValue tested through DefaultValuePopulator
 }

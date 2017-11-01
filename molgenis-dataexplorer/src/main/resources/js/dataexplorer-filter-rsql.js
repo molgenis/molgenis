@@ -128,8 +128,12 @@
 
             var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute)
             complexFilterElement.simpleFilter = simpleFilter
-            complexFilterElement.operator = lines[index + 1]
-
+            //every complex filter element gets an operator to state how it relates to the previous one
+            //so the operator for the first complexfilterelement is not meaningfull since there is no previous element
+            //so if the index is 0 we can skip adding the operator
+            if (index != 0) {
+                complexFilterElement.operator = lines[index - 1]
+            }
             complexFilter.addComplexFilterElement(complexFilterElement)
         }
         return complexFilter

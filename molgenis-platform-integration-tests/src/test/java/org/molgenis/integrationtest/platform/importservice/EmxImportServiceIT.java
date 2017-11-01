@@ -349,8 +349,55 @@ public class EmxImportServiceIT extends ImportServiceIT
 		data.add(createUpdateData("it_emx_update.xlsx", "it_emx_update-update.xlsx", asList("it", "emx", "update"),
 				ImmutableMap.<String, Integer>builder().put("TestUpdate", 2).build(), Collections.emptySet(),
 				this::verifyItEmxUpdate));
-
+		data.add(createUpdateData("it_emx_requiredDefaultValue.xlsx", "it_emx_requiredDefaultValue-update.xlsx",
+				asList("it", "emx", "default"), emptyMap(), Collections.emptySet(),
+				this::verifyItEmxUpdateDefaultValue));
 		return data.iterator();
+	}
+
+	private void verifyItEmxUpdateDefaultValue()
+	{
+		Map<String, Object> expectedRow0 = newHashMap();
+		expectedRow0.put("id", "0");
+		expectedRow0.put("label", "Test #0");
+		expectedRow0.put("bool", true);
+		expectedRow0.put("categorical", "ref0");
+		expectedRow0.put("categoricalMref", newHashSet("ref0", "ref1"));
+		expectedRow0.put("date", LocalDate.of(2017, 10, 26));
+		expectedRow0.put("datetime", Instant.parse("1985-08-12T06:12:13Z"));
+		expectedRow0.put("decimal", 1.23);
+		expectedRow0.put("email", "mail@molgenis.org");
+		expectedRow0.put("enum", "enum0");
+		expectedRow0.put("html", "<h1>html</h1>");
+		expectedRow0.put("hyperlink", "http://www.molgenis.org/");
+		expectedRow0.put("int", 5);
+		expectedRow0.put("long", 1234567L);
+		expectedRow0.put("mref", newHashSet("ref0", "ref1"));
+		expectedRow0.put("string", "str");
+		expectedRow0.put("text", "text");
+		expectedRow0.put("xref", "ref0");
+
+		Map<String, Object> expectedRow1 = newHashMap();
+		expectedRow1.put("id", "1");
+		expectedRow1.put("label", "Test #1");
+		expectedRow1.put("bool", true);
+		expectedRow1.put("categorical", "ref0");
+		expectedRow1.put("categoricalMref", newHashSet("ref0", "ref1"));
+		expectedRow1.put("date", LocalDate.of(2017, 10, 26));
+		expectedRow1.put("datetime", Instant.parse("1985-08-12T06:12:13Z"));
+		expectedRow1.put("decimal", 1.23);
+		expectedRow1.put("email", "mail@molgenis.org");
+		expectedRow1.put("enum", "enum0");
+		expectedRow1.put("html", "<h1>html</h1>");
+		expectedRow1.put("hyperlink", "http://www.molgenis.org/");
+		expectedRow1.put("int", 5);
+		expectedRow1.put("long", 1234567L);
+		expectedRow1.put("mref", newHashSet("ref0", "ref1"));
+		expectedRow1.put("string", "str");
+		expectedRow1.put("text", "text");
+		expectedRow1.put("xref", "ref0");
+
+		verifyFirstAndLastRows("it_emx_default_RequiredDefault", expectedRow0, expectedRow1);
 	}
 
 	private void verifyItEmxUpdate()

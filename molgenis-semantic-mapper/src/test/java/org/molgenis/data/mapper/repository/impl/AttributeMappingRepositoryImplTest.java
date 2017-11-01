@@ -70,7 +70,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 
 		List<AttributeMapping> attributeMappings = newArrayList();
 		attributeMappings.add(
-				new AttributeMapping("attributeMappingID", targetAttribute, "algorithm", sourceAttributes));
+				new AttributeMapping("attributeMappingID", "targetAttribute", targetAttribute, "algorithm",
+						sourceAttributes));
 
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
@@ -98,8 +99,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		targetAttribute.setDataType(STRING);
 
 		Collection<AttributeMapping> attributeMappings = singletonList(
-				new AttributeMapping("attributeMappingID", targetAttribute, "algorithm", sourceAttributes,
-						CURATED.toString()));
+				new AttributeMapping("attributeMappingID", "targetAttribute", targetAttribute, "algorithm",
+						sourceAttributes, CURATED.toString()));
 
 		List<Entity> result = newArrayList();
 		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
@@ -127,7 +128,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		targetAttribute.setDataType(STRING);
 
 		Collection<AttributeMapping> attributeMappings = singletonList(
-				new AttributeMapping(null, targetAttribute, "algorithm", sourceAttributes, CURATED.toString()));
+				new AttributeMapping(null, "targetAttribute", targetAttribute, "algorithm", sourceAttributes,
+						CURATED.toString()));
 
 		Mockito.when(idGenerator.generateId()).thenReturn("attributeMappingID");
 

@@ -24,8 +24,8 @@ public class JobFactoryRegistrar
 	public void register(ContextRefreshedEvent event)
 	{
 		ApplicationContext ctx = event.getApplicationContext();
-		Map<String, JobFactory> scriptRunnerMap = ctx.getBeansOfType(JobFactory.class);
-		scriptRunnerMap.values().forEach(this::register);
+		Map<String, JobFactory> jobFactoryMap = ctx.getBeansOfType(JobFactory.class);
+		jobFactoryMap.values().forEach(this::register);
 	}
 
 	private void register(JobFactory jobFactory)

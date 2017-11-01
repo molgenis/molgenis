@@ -17,6 +17,7 @@ public class HelloWorldService
 	 * @param who      Who shall we greet?
 	 * @param delay    job duration in seconds
 	 */
+	@SuppressWarnings("squid:S2925")
 	public String helloWorld(Progress progress, String who, int delay) throws InterruptedException
 	{
 		progress.setProgressMax(delay);

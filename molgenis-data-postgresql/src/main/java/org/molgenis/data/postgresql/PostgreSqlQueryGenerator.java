@@ -7,9 +7,14 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.AttributeUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +23,7 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -25,6 +31,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode.INCLUDE_DEFAULT_CONSTRAINT;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 
@@ -144,13 +151,14 @@ class PostgreSqlQueryGenerator
 	 *
 	 * @param entityType entity meta data
 	 * @param attr       attribute
+	 * @param columnMode column mode
 	 * @return SQL string
 	 */
-	static String getSqlAddColumn(EntityType entityType, Attribute attr)
+	static String getSqlAddColumn(EntityType entityType, Attribute attr, ColumnMode columnMode)
 	{
 		StringBuilder sql = new StringBuilder("ALTER TABLE ");
 
-		String columnSql = getSqlColumn(entityType, attr);
+		String columnSql = getSqlColumn(entityType, attr, columnMode);
 		sql.append(getTableName(entityType)).append(" ADD ").append(columnSql);
 
 		List<String> sqlTableConstraints = getSqlTableConstraints(entityType, attr);
@@ -159,6 +167,18 @@ class PostgreSqlQueryGenerator
 			sqlTableConstraints.forEach(sqlTableConstraint -> sql.append(",ADD ").append(sqlTableConstraint));
 		}
 		return sql.toString();
+	}
+
+	/**
+	 * Returns SQL string to remove the default value from an existing column.
+	 *
+	 * @param entityType entity meta data
+	 * @param attr       attribute
+	 * @return SQL string
+	 */
+	static String getSqlDropColumnDefault(EntityType entityType, Attribute attr)
+	{
+		return "ALTER TABLE " + getTableName(entityType) + " ALTER COLUMN " + getColumnName(attr) + " DROP DEFAULT";
 	}
 
 	static String getSqlCreateTable(EntityType entityType)
@@ -171,7 +191,7 @@ class PostgreSqlQueryGenerator
 		for (Iterator<Attribute> it = persistedTableAttrs.iterator(); it.hasNext(); )
 		{
 			Attribute attr = it.next();
-			sql.append(getSqlColumn(entityType, attr));
+			sql.append(getSqlColumn(entityType, attr, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT));
 
 			if (it.hasNext())
 			{
@@ -612,7 +632,7 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	private static String getSqlColumn(EntityType entityType, Attribute attr)
+	private static String getSqlColumn(EntityType entityType, Attribute attr, ColumnMode columnMode)
 	{
 		StringBuilder sqlBuilder = new StringBuilder(getColumnName(attr)).append(' ');
 
@@ -648,7 +668,7 @@ class PostgreSqlQueryGenerator
 				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 
-		String sqlColumnConstraints = getSqlColumnConstraints(entityType, attr);
+		String sqlColumnConstraints = getSqlColumnConstraints(entityType, attr, columnMode);
 		if (!sqlColumnConstraints.isEmpty())
 		{
 			sqlBuilder.append(' ').append(sqlColumnConstraints);
@@ -656,7 +676,26 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	private static String getSqlColumnConstraints(EntityType entityType, Attribute attr)
+	enum ColumnMode
+	{
+		INCLUDE_DEFAULT_CONSTRAINT, EXCLUDE_DEFAULT_CONSTRAINT
+	}
+
+	static boolean generateSqlColumnDefaultConstraint(Attribute attr)
+	{
+		return attr.getDefaultValue() != null && !EntityTypeUtils.isMultipleReferenceType(attr);
+	}
+
+	/**
+	 * Generates column constraint SQL, e.g. 'NOT NULL DEFAULT 123'
+	 *
+	 * @param entityType            entity type
+	 * @param attr                  attribute
+	 * @param columnConstraintsMode whether or not to add default constraint to generated SQL
+	 * @return column constraint SQL
+	 */
+	private static String getSqlColumnConstraints(EntityType entityType, Attribute attr,
+			ColumnMode columnConstraintsMode)
 	{
 		StringBuilder sqlBuilder = new StringBuilder();
 		if (!attr.getName().equals(entityType.getIdAttribute().getName()))
@@ -666,7 +705,83 @@ class PostgreSqlQueryGenerator
 				sqlBuilder.append("NOT NULL");
 			}
 		}
+		if (columnConstraintsMode == INCLUDE_DEFAULT_CONSTRAINT && generateSqlColumnDefaultConstraint(attr))
+		{
+			if (sqlBuilder.length() > 0)
+			{
+				sqlBuilder.append(' ');
+			}
+			sqlBuilder.append("DEFAULT ").append(getSqlDefaulValue(attr));
+		}
 		return sqlBuilder.toString();
+	}
+
+	private static String getSqlDefaulValue(Attribute attribute)
+	{
+		return getSqlDefaulValue(attribute, attribute.getDefaultValue());
+	}
+
+	private static String getSqlDefaulValue(Attribute attribute, String defaultValueAsString)
+	{
+		String sqlDefaultValue;
+
+		Object defaultTypedValue = AttributeUtils.getDefaultTypedValue(attribute, defaultValueAsString);
+
+		AttributeType attributeType = attribute.getDataType();
+		switch (attributeType)
+		{
+			case BOOL:
+				Boolean booleanDefaultValue = (Boolean) defaultTypedValue;
+				sqlDefaultValue = booleanDefaultValue ? "TRUE" : "FALSE";
+				break;
+			case CATEGORICAL:
+			case FILE:
+			case XREF:
+				Entity refDefaultValue = (Entity) defaultTypedValue;
+				sqlDefaultValue = getSqlDefaulValue(attribute.getRefEntity().getIdAttribute(),
+						refDefaultValue.getIdValue().toString());
+				break;
+			case DATE:
+				LocalDate dateDefaultValue = (LocalDate) defaultTypedValue;
+				sqlDefaultValue = '\'' + dateDefaultValue.toString() + '\'';
+				break;
+			case DATE_TIME:
+				Instant instantDefaultValue = (Instant) defaultTypedValue;
+				// As a workaround for #5674, we don't store milliseconds
+				sqlDefaultValue =
+						'\'' + instantDefaultValue.truncatedTo(ChronoUnit.SECONDS).atOffset(UTC).toString() + '\'';
+				break;
+			case DECIMAL:
+				Double doubleDefaultValue = (Double) defaultTypedValue;
+				sqlDefaultValue = doubleDefaultValue.toString();
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				sqlDefaultValue = '\'' + (String) defaultTypedValue + '\'';
+				break;
+			case INT:
+				Integer intDefaultValue = (Integer) defaultTypedValue;
+				sqlDefaultValue = intDefaultValue.toString();
+				break;
+			case LONG:
+				Long longDefaultValue = (Long) defaultTypedValue;
+				sqlDefaultValue = longDefaultValue.toString();
+				break;
+			case CATEGORICAL_MREF:
+			case COMPOUND:
+			case MREF:
+			case ONE_TO_MANY:
+				throw new RuntimeException(format("Illegal attribute type [%s]", attributeType.toString()));
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attributeType.toString()));
+		}
+
+		return sqlDefaultValue;
 	}
 
 	private static List<String> getSqlTableConstraints(EntityType entityType, Attribute attr)

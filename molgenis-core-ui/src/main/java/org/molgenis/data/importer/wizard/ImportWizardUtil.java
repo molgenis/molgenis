@@ -7,9 +7,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 import java.io.File;
+import java.util.Optional;
 
 public class ImportWizardUtil
 {
+	private ImportWizardUtil()
+	{
+
+	}
+
 	public static DatabaseAction toDatabaseAction(String actionStr)
 	{
 		// convert input to database action
@@ -34,13 +40,16 @@ public class ImportWizardUtil
 		return dbAction;
 	}
 
-	public static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger LOG,
+	public static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
 			String entityImportOption)
 	{
 		File file = importWizard.getFile();
 
-		LOG.warn("Import of file [" + (file != null ? file.getName() : "UNKNOWN") + "] failed for action ["
-				+ entityImportOption + "]", e);
+		if (logger.isWarnEnabled())
+		{
+			logger.warn("Import of file [{}] failed for action [{}]",
+					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), entityImportOption, e);
+		}
 
 		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
 	}

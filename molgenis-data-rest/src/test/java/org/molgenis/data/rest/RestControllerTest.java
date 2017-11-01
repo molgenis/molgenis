@@ -1,10 +1,10 @@
 package org.molgenis.data.rest;
 
+import cz.jirutka.rsql.parser.RSQLParser;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
-import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
@@ -12,6 +12,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rsql.MolgenisRSQL;
@@ -815,7 +816,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public RestController restController()
 		{
 			return new RestController(authenticationSettings(), dataService(), tokenService(), authenticationManager(),
-					permissionService(), userAccountService(), new MolgenisRSQL(),
+					permissionService(), userAccountService(), new MolgenisRSQL(new RSQLParser()),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService());
 		}
