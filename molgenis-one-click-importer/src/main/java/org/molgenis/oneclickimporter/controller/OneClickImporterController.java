@@ -14,7 +14,7 @@ import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

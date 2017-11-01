@@ -56,6 +56,7 @@ public class MolgenisWebAppInitializer
 			dispatcherServlet.setMultipartConfig(
 					new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
+			dispatcherServlet.setInitParameter("throwExceptionIfNoHandlerFound", "true");
 
 		}
 

@@ -10,8 +10,8 @@ import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.util.CountryCodes;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -232,15 +232,6 @@ public class AccountController
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));

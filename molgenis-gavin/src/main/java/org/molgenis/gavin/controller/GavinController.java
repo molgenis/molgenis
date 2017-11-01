@@ -10,13 +10,11 @@ import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -254,15 +252,6 @@ public class GavinController extends AbstractStaticContentController
 	public void handleJobNotFound(JobNotFoundException ex, HttpServletResponse res) throws IOException
 	{
 		res.sendError(404, ex.getMessage());
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.warn(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
 	}
 
 	/**

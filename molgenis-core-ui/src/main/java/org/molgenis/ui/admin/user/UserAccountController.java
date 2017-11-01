@@ -14,8 +14,8 @@ import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.CountryCodes;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,16 +247,6 @@ public class UserAccountController extends PluginController
 	private ErrorMessageResponse handleAccessDeniedException(AccessDeniedException e)
 	{
 		LOG.warn("Access denied", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	@ResponseBody
-	private ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 }

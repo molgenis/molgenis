@@ -26,8 +26,8 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -561,15 +561,4 @@ public class DataExplorerController extends PluginController
 		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessage(
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
-	}
-
 }

@@ -26,8 +26,8 @@ import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionException;
@@ -923,15 +923,6 @@ public class RestController
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
 		LOG.info("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 

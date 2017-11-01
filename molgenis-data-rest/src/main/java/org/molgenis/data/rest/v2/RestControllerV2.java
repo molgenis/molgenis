@@ -19,8 +19,8 @@ import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -624,15 +624,6 @@ public class RestControllerV2
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
 		LOG.debug("Data access exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("Runtime exception occurred.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
