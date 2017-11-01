@@ -1,9 +1,7 @@
 package org.molgenis.data.annotation.core.resources.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -16,11 +14,12 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.when;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 public class MultiFileResourceTest extends AbstractMockitoTest
@@ -62,9 +61,17 @@ public class MultiFileResourceTest extends AbstractMockitoTest
 		when(chrom3Config.getFile()).thenReturn(chrom3File);
 		when(factory.createRepository(chrom3File)).thenReturn(chrom3Repository);
 		Query<Entity> q = QueryImpl.EQ("#CHROM", "3").and().eq("POS", 12345);
-		List<Entity> result = Lists.newArrayList();
-		when(chrom3Repository.findAll(q)).thenReturn(Stream.empty());
-		assertEquals(result, Lists.newArrayList(multiFileResource.findAll(q)));
+		Entity entity = mock(Entity.class);
+		when(chrom3Repository.findAll(q)).thenReturn(Stream.of(entity));
+		assertEquals(newArrayList(multiFileResource.findAll(q)), Collections.singletonList(entity));
+		verify(chrom3Repository).findAll(q);
+	}
+
+	@Test
+	public void findAllNoResourceForChrom() throws IOException
+	{
+		Query<Entity> q = QueryImpl.EQ("#CHROM", "MT").and().eq("POS", 12345);
+		assertEquals(newArrayList(multiFileResource.findAll(q)), Collections.emptyList());
 	}
 
 	@Test
@@ -117,7 +124,7 @@ public class MultiFileResourceTest extends AbstractMockitoTest
 	@Test
 	public void whenConfigsChangeThenIsAvailableUpdates() throws IOException
 	{
-		SingleResourceConfig chrom5Config = Mockito.mock(SingleResourceConfig.class);
+		SingleResourceConfig chrom5Config = mock(SingleResourceConfig.class);
 		when(config.getConfigs()).thenReturn(ImmutableMap.of("5", chrom5Config));
 
 		File chrom5File = new File("Bogus");
