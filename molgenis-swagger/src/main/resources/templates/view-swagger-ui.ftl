@@ -75,7 +75,9 @@
         const ui = SwaggerUIBundle({
             urls: [
               { name: 'molgenis', url: '${molgenisUrl}' },
-              { name: 'core-ui', url: '${baseUrl}/swagger/core-ui-swagger.json'} ],
+              { name: 'core-ui', url: '${baseUrl}/swagger/core-ui-swagger.json'},
+              { name: 'security', url: '${baseUrl}/swagger/security-swagger.json'}
+            ],
             dom_id: '#swagger-ui',
             deepLinking: true,
             presets: [
