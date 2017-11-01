@@ -1,5 +1,9 @@
 package org.molgenis.security.login;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static org.molgenis.security.login.MolgenisLoginController.URI;
 
+@Api("Login")
 @Controller
 @RequestMapping(URI)
 public class MolgenisLoginController
@@ -30,12 +35,20 @@ public class MolgenisLoginController
 
 	private static final String VIEW_LOGIN = "view-login";
 
+	@ApiOperation("Return login page")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns login page", response = String.class)
+	})
 	@GetMapping
 	public String getLoginPage()
 	{
 		return VIEW_LOGIN;
 	}
 
+	@ApiOperation("Return login page wth error parameters")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns error login page with error parameters", response = String.class)
+	})
 	@GetMapping(params = PARAM_SESSION_EXPIRED)
 	public String getLoginErrorPage(Model model)
 	{
@@ -43,6 +56,10 @@ public class MolgenisLoginController
 		return VIEW_LOGIN;
 	}
 
+	@ApiOperation("Return error login page")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns error login page", response = String.class)
+	})
 	@GetMapping(params = "error")
 	public String getLoginErrorPage(Model model, HttpServletRequest request)
 	{

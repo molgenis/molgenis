@@ -1,5 +1,9 @@
 package org.molgenis.security.account;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.captcha.CaptchaException;
@@ -38,6 +42,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.core.service.UserAccountService.MIN_PASSWORD_LENGTH;
 
+@Api("Account")
 @Controller
 @RequestMapping(URI)
 public class AccountController
@@ -68,12 +73,20 @@ public class AccountController
 		this.authenticationSettings = requireNonNull(authenticationSettings);
 	}
 
+	@ApiOperation("User login")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Login successfully", response = String.class)
+	})
 	@GetMapping("/login")
 	public String getLoginForm()
 	{
 		return "login-modal";
 	}
 
+	@ApiOperation("Return register form")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Register form is returned", response = ModelAndView.class)
+	})
 	@GetMapping("/register")
 	public ModelAndView getRegisterForm()
 	{
@@ -83,12 +96,20 @@ public class AccountController
 		return model;
 	}
 
+	@ApiOperation("Return reset password form")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns reset password form", response = String.class)
+	})
 	@GetMapping("/password/reset")
 	public String getPasswordResetForm()
 	{
 		return "resetpassword-modal";
 	}
 
+	@ApiOperation("Return password form")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns password form", response = String.class)
+	})
 	@GetMapping(CHANGE_PASSWORD_RELATIVE_URI)
 	public ModelAndView getChangePasswordForm()
 	{
@@ -97,6 +118,10 @@ public class AccountController
 		return model;
 	}
 
+	@ApiOperation("Reset password for user")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Reset password for user", response = String.class)
+	})
 	@PostMapping(CHANGE_PASSWORD_RELATIVE_URI)
 	public void changePassword(@Valid ChangePasswordForm form, HttpServletRequest request, HttpServletResponse response)
 			throws IOException
@@ -115,6 +140,11 @@ public class AccountController
 		}
 	}
 
+	@ApiOperation("Register user")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "User is registered", response = Map.class),
+			@ApiResponse(code = 403, message = "No permission to register", response = NoPermissionException.class)
+	})
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@PostMapping(value = "/register", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
@@ -157,6 +187,11 @@ public class AccountController
 		}
 	}
 
+	@ApiOperation("Activate user")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "User is registered", response = Map.class),
+			@ApiResponse(code = 400, message = "User not found", response = ErrorMessageResponse.class)
+	})
 	@GetMapping("/activate/{activationCode}")
 	public String activateUser(@Valid @NotNull @PathVariable String activationCode, Model model)
 	{
@@ -176,6 +211,10 @@ public class AccountController
 		return "forward:/";
 	}
 
+	@ApiOperation("Password reset")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Password is reset"),
+	})
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@PostMapping(value = "/password/reset", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)

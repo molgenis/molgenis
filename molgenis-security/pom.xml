@@ -33,8 +33,11 @@
                             </info>
                             <springmvc>true</springmvc>
                             <locations>
+                                <location>org.molgenis.security.account</location>
+                                <location>org.molgenis.security.captcha</location>
                                 <location>org.molgenis.security.group</location>
-                                <location>org.molgenis.security.user</location>
+                                <location>org.molgenis.security.login</location>
+                                <location>org.molgenis.security.twofactor</location>
                             </locations>
                             <swaggerDirectory>${build.directory}/generated-resources/swagger</swaggerDirectory>
                             <swaggerFileName>${project.name}-swagger</swaggerFileName>

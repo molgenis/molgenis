@@ -35,8 +35,8 @@ public class GroupController
 	@ApiOperation("Create a group")
 	@ApiResponses({
 			@ApiResponse(code= 200, message = "Group will be returned", response = Group.class),
-			@ApiResponse(code = 400, message = "Invalid label supplied"),
-			@ApiResponse(code = 404, message = "Could not add label")
+			@ApiResponse(code = 400, message = "Invalid label supplied", response = IllegalStateException.class),
+			@ApiResponse(code = 404, message = "Could not add label", response = IllegalStateException.class)
 	})
 	@PostMapping("/")
 	public ResponseEntity<Group> createGroup(@RequestParam String id)
