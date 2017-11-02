@@ -22,64 +22,6 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
-  /group/:
-    post:
-      tags:
-        - Group manager
-      description: Creates a new group
-      parameters:
-        - in: query
-          name: label
-          type: string
-          description: Label of the group
-      responses:
-        201:
-          description: Group was created
-  /plugin/usermanager/activation:
-    post:
-      tags:
-        - User manager
-      consumes:
-        - application/x-www-form-urlencoded
-      description: Sets activation status for a user
-      parameters:
-        - in: formData
-          name: id
-          type: string
-          required: true
-        - in: formData
-          name: active
-          type: boolean
-          required: true
-      responses:
-        200:
-          description: Ok. If response doesn't have success set to true, the user wasn't found.
-          schema:
-            $ref: "#/definitions/ActivationResponse"
-  /plugin/useraccount/language/update:
-    post:
-      tags:
-        - User Account
-      description: Updates the selected user language
-      parameters:
-        - in: query
-          name: languageCode
-          type: string
-          enum:
-<#list languageCodes as languageCode>
-            - ${languageCode}
-</#list>
-      responses:
-        204:
-          description: Update succeeded
-        403:
-          description: "Access denied. You need write permission on the UserAccount plugin."
-          schema:
-            $ref: "#/definitions/ErrorMessageResponse"
-        400:
-          description: "Bad request. You need to provide a valid language code."
-          schema:
-            $ref: "#/definitions/ErrorMessageResponse"
   /api/searchall/search:
     get:
       tags:
@@ -583,6 +525,7 @@ paths:
               description: The HREF where the mapping job can be found
               type: string
               format: uri
+
 definitions:
   SearchAllResult:
     type: object
@@ -655,13 +598,6 @@ definitions:
         type: string
     required:
       - newEntityName
-  ActivationResponse:
-    type: object
-    properties:
-      succes:
-        type: boolean
-      id:
-        type: string
   LoginRequest:
     type: object
     properties:

@@ -27,6 +27,8 @@ public abstract class Group
 		return getParent().filter(parent -> other.getParent().filter(parent::equals).isPresent()).isPresent();
 	}
 
+	public abstract Group.Builder toBuilder();
+
 	public static Builder builder()
 	{
 		return new AutoValue_Group.Builder();

@@ -125,6 +125,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler(PATTERN_FONTS)
 				.addResourceLocations("/fonts/", "classpath:/fonts/")
 				.setCachePeriod(cachePeriod);
+		registry.addResourceHandler(PATTERN_SWAGGER)
+				.addResourceLocations("/swagger/", "classpath:/swagger/")
+				.setCachePeriod(cachePeriod);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 

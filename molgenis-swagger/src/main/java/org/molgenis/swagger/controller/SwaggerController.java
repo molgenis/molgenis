@@ -50,8 +50,12 @@ public class SwaggerController extends PluginController
 	@GetMapping
 	public String init(Model model)
 	{
-		model.addAttribute("url",
-				ServletUriComponentsBuilder.fromCurrentContextPath().path(URI + "/swagger.yml").toUriString());
+
+		final UriComponents uriComponents = ServletUriComponentsBuilder.fromCurrentContextPath().build();
+		model.addAttribute("molgenisUrl", uriComponents.toUriString() + URI + "/swagger.yml");
+		model.addAttribute("baseUrl", uriComponents.toUriString());
+
+
 		SecurityUtils.getCurrentUsername()
 					 .map(username -> tokenService.generateAndStoreToken(username, "For Swagger UI"))
 					 .ifPresent(token -> model.addAttribute("token", token));

@@ -1,18 +1,17 @@
 package org.molgenis.security.group;
 
-import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
+import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
-import org.molgenis.security.core.model.Group;
-import org.molgenis.security.core.model.GroupMembership;
-import org.molgenis.security.core.model.Role;
-import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.model.*;
 import org.molgenis.security.core.service.GroupService;
+import org.molgenis.security.core.service.RoleService;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -21,6 +20,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -36,6 +36,8 @@ public class GroupControllerTest
 {
 	@Mock
 	private GroupService groupService;
+	@Mock
+	private RoleService roleService;
 	@InjectMocks
 	private GroupController groupController;
 	private MockMvc mockMvc;
@@ -48,7 +50,7 @@ public class GroupControllerTest
 		mockitoSession = Mockito.mockitoSession().strictness(Strictness.STRICT_STUBS).initMocks(this).startMocking();
 		GsonHttpMessageConverter gsonHttpMessageConverter = new GsonHttpMessageConverter();
 		GsonBuilder gsonBuilder = new GsonBuilder();
-		Converters.registerInstant(gsonBuilder);
+		gsonBuilder.registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory());
 		gsonHttpMessageConverter.setGson(gsonBuilder.create());
 		mockMvc = MockMvcBuilders.standaloneSetup(groupController)
 								 .setMessageConverters(gsonHttpMessageConverter)
@@ -64,11 +66,14 @@ public class GroupControllerTest
 	@Test
 	public void testCreateGroup() throws Exception
 	{
-		when(groupService.createGroups("BBMRI-NL")).thenReturn(
-				Group.builder().id("abcde").label("BBMRI-NL").roles(emptyList()).build());
+		List<Role> roles = Lists.newArrayList(Role.builder().id("abab").label(ConceptualRoles.GROUPADMIN.name()).build());
+		when(roleService.createRolesForGroup("BBMRI-NL")).thenReturn(roles);
+		Group group = Group.builder().id("abcde").label("BBMRI-NL").roles(roles).build();
+		when(groupService.createGroup(group)).thenReturn(group);
+
 		mockMvc.perform(post("/group/").param("label", "BBMRI-NL"))
 			   .andExpect(status().isCreated())
-			   .andExpect(header().string("Location", "/group/abcde"));
+			   .andExpect(header().string("Location", "http://localhost/group/abcde"));
 	}
 
 	@Test
