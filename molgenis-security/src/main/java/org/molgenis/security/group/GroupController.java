@@ -34,7 +34,7 @@ public class GroupController
 	private final UserService userService;
 
 	private final String GROUP_NOT_FOUND_MESSAGE = "Group not found";
-	private final String ROLE_NOT_FOUND_MESSAGE ="Role not found";
+	private final String ROLE_NOT_FOUND_MESSAGE = "Role not found";
 
 	public GroupController(GroupService groupService, RoleService roleService, UserService userService)
 	{
@@ -46,19 +46,17 @@ public class GroupController
 	/**
 	 * Creates a new group with standard subgroups and roles
 	 *
-	 * @param id the label of the new group
+	 * @param label the label of the new group
 	 */
 	@ApiOperation("Create a group with roles")
-	@ApiResponses({
-			@ApiResponse(code= 200, message = "Group with roles will be returned", response = Group.class),
+	@ApiResponses({ @ApiResponse(code = 200, message = "Group with roles will be returned", response = Group.class),
 			@ApiResponse(code = 400, message = "Invalid group-label supplied", response = IllegalStateException.class),
-			@ApiResponse(code = 404, message = "Could not add group", response = IllegalStateException.class)
-	})
+			@ApiResponse(code = 404, message = "Could not add group", response = IllegalStateException.class) })
 	@PostMapping("/")
-	public ResponseEntity<Group> createGroup(@RequestParam("id") String id)
+	public ResponseEntity<Group> createGroup(@RequestParam("label") String label)
 	{
-		List<Role> roles = roleService.createRolesForGroup(id);
-		Group group = groupService.createGroup(Group.builder().label(id).roles(roles).build());
+		List<Role> roles = roleService.createRolesForGroup(label);
+		Group group = groupService.createGroup(Group.builder().label(label).roles(roles).build());
 		String groupId = group.getId().orElseThrow(IllegalStateException::new);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(groupId).toUri();
 		return ResponseEntity.created(location).body(group);
@@ -68,8 +66,7 @@ public class GroupController
 	@ApiResponses({
 			@ApiResponse(code = 200, message = "Returns a list of GroupMemberships", response = GroupMembership.class),
 			@ApiResponse(code = 400, message = "Invalid groupId supplied"),
-			@ApiResponse(code = 404, message = "Not allowed to see groupId")
-	})
+			@ApiResponse(code = 404, message = "Not allowed to see groupId") })
 	@GetMapping(value = "/{groupId}/members", produces = "application/json")
 	public ResponseEntity<List<GroupMembership>> getGroupMembers(@PathVariable String groupId,
 			@RequestParam(required = false) String filter, @RequestParam(required = false) String sort)
@@ -81,39 +78,41 @@ public class GroupController
 	}
 
 	@ApiOperation("Add a role the a group")
-	@ApiResponses({
-			@ApiResponse(code = 200, message = "Role is added to group"),
-			@ApiResponse(code = 400, message = "User or group is not found", response = MolgenisDataException.class)
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "Role is added to group"),
+			@ApiResponse(code = 400, message = "User or group is not found", response = MolgenisDataException.class) })
 	@PostMapping("addGroupRole")
-	public void addGroupRole(@RequestBody GroupRole groupRole) {
-		Group group = groupService.findGroupById(groupRole.getGroupId()).orElseThrow(() -> new MolgenisDataException(GROUP_NOT_FOUND_MESSAGE));
-		Role role = roleService.findRoleById(groupRole.getRoleId()).orElseThrow(() -> new MolgenisDataException(ROLE_NOT_FOUND_MESSAGE));
+	public void addGroupRole(@RequestBody GroupRole groupRole)
+	{
+		Group group = groupService.findGroupById(groupRole.getGroupId())
+								  .orElseThrow(() -> new MolgenisDataException(GROUP_NOT_FOUND_MESSAGE));
+		Role role = roleService.findRoleById(groupRole.getRoleId())
+							   .orElseThrow(() -> new MolgenisDataException(ROLE_NOT_FOUND_MESSAGE));
 		groupService.addRoleToGroup(group, role);
 	}
 
 	@ApiOperation("Remove a role from a group")
-	@ApiResponses({
-			@ApiResponse(code = 200, message = "Role is removed from group"),
-			@ApiResponse(code = 400, message = "User or group is not found", response = MolgenisDataException.class)
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "Role is removed from group"),
+			@ApiResponse(code = 400, message = "User or group is not found", response = MolgenisDataException.class) })
 	@DeleteMapping("removeGroupRole")
-	public void removeGroupRole(@RequestBody GroupRole groupRole) {
-		Group group = groupService.findGroupById(groupRole.getGroupId()).orElseThrow(() -> new MolgenisDataException(GROUP_NOT_FOUND_MESSAGE));
-		Role role = roleService.findRoleById(groupRole.getRoleId()).orElseThrow(() -> new MolgenisDataException(ROLE_NOT_FOUND_MESSAGE));
+	public void removeGroupRole(@RequestBody GroupRole groupRole)
+	{
+		Group group = groupService.findGroupById(groupRole.getGroupId())
+								  .orElseThrow(() -> new MolgenisDataException(GROUP_NOT_FOUND_MESSAGE));
+		Role role = roleService.findRoleById(groupRole.getRoleId())
+							   .orElseThrow(() -> new MolgenisDataException(ROLE_NOT_FOUND_MESSAGE));
 		groupService.removeRoleFromGroup(group, role);
 	}
 
-
 	@ApiOperation("Add a user tot group")
-	@ApiResponses({
-			@ApiResponse(code = 200, message = "User is added in group"),
-			@ApiResponse(code = 400, message = "User or group is not found", response = MolgenisDataException.class)
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "User is added in group"),
+			@ApiResponse(code = 400, message = "User or group is not found", response = MolgenisDataException.class) })
 	@PostMapping("updateUserMembership")
-	public void updateUserMembership(@RequestBody UpdateUserMembership updateUserMembership) {
-		Group group = groupService.findGroupById(updateUserMembership.getGroupId()).orElseThrow(() -> new MolgenisDataException(GROUP_NOT_FOUND_MESSAGE));
-		User user = userService.findUserById(updateUserMembership.getUserId()).orElseThrow(() -> new MolgenisDataException(ROLE_NOT_FOUND_MESSAGE));
+	public void updateUserMembership(@RequestBody UpdateUserMembership updateUserMembership)
+	{
+		Group group = groupService.findGroupById(updateUserMembership.getGroupId())
+								  .orElseThrow(() -> new MolgenisDataException(GROUP_NOT_FOUND_MESSAGE));
+		User user = userService.findUserById(updateUserMembership.getUserId())
+							   .orElseThrow(() -> new MolgenisDataException(ROLE_NOT_FOUND_MESSAGE));
 
 		Instant startDate = updateUserMembership.getStart().atStartOfDay(ZoneId.systemDefault()).toInstant();
 		groupService.addUserToGroup(user, group, startDate);

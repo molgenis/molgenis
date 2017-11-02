@@ -12,6 +12,7 @@ import org.mockito.quality.Strictness;
 import org.molgenis.security.core.model.*;
 import org.molgenis.security.core.service.GroupService;
 import org.molgenis.security.core.service.RoleService;
+import org.molgenis.security.core.service.UserService;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -38,6 +39,8 @@ public class GroupControllerTest
 	private GroupService groupService;
 	@Mock
 	private RoleService roleService;
+	@Mock
+	private UserService userService;
 	@InjectMocks
 	private GroupController groupController;
 	private MockMvc mockMvc;
@@ -66,7 +69,8 @@ public class GroupControllerTest
 	@Test
 	public void testCreateGroup() throws Exception
 	{
-		List<Role> roles = Lists.newArrayList(Role.builder().id("abab").label(ConceptualRoles.GROUPADMIN.name()).build());
+		List<Role> roles = Lists.newArrayList(
+				Role.builder().id("abcde").label(ConceptualRoles.GROUPADMIN.name()).build());
 		when(roleService.createRolesForGroup("BBMRI-NL")).thenReturn(roles);
 		Group group = Group.builder().id("abcde").label("BBMRI-NL").roles(roles).build();
 		when(groupService.createGroup(group)).thenReturn(group);

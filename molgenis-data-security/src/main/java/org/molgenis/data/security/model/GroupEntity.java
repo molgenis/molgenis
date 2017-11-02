@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.security.core.model.Group;
+import org.molgenis.security.core.model.Role;
 
 import java.util.Optional;
 
@@ -55,9 +56,9 @@ public class GroupEntity extends StaticEntity
 		return Optional.ofNullable(getEntity(PARENT, GroupEntity.class));
 	}
 
-	public void setParent(String parentId)
+	public void setParent(GroupEntity parent)
 	{
-		set(PARENT, parentId);
+		set(PARENT, parent);
 	}
 
 	public Iterable<GroupEntity> getChildren()
@@ -65,9 +66,19 @@ public class GroupEntity extends StaticEntity
 		return Lists.newArrayList(getEntities(CHILDREN, GroupEntity.class));
 	}
 
+	public void setChildren(Iterable<GroupEntity> groupEntities)
+	{
+		set(CHILDREN, groupEntities);
+	}
+
 	public Iterable<RoleEntity> getRoles()
 	{
 		return getEntities(ROLES, RoleEntity.class);
+	}
+
+	public void setRoles(Iterable<RoleEntity> roleEntities)
+	{
+		set(ROLES, roleEntities);
 	}
 
 	public Group toGroup()
@@ -80,11 +91,19 @@ public class GroupEntity extends StaticEntity
 		return result.build();
 	}
 
-	public GroupEntity updateFrom(Group group)
+	public GroupEntity updateFrom(Group group, GroupFactory groupFactory, RoleFactory roleFactory)
 	{
 		group.getId().ifPresent(this::setId);
-		group.getParent().flatMap(Group::getId).ifPresent(this::setParent);
+		group.getParent().flatMap(Group::getId).map(groupFactory::create).ifPresent(this::setParent);
+		setRoles(group.getRoles().stream().map(role -> mapToRoleEntity(role, roleFactory)).collect(toList()));
 		setLabel(group.getLabel());
 		return this;
+	}
+
+	private RoleEntity mapToRoleEntity(Role role, RoleFactory roleFactory)
+	{
+		RoleEntity roleEntity = roleFactory.create(role.getId());
+		roleEntity.setLabel(role.getLabel());
+		return roleEntity;
 	}
 }

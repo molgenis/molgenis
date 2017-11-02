@@ -1,12 +1,12 @@
 package org.molgenis.data.security.service.impl;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupFactory;
 import org.molgenis.data.security.model.GroupMetadata;
+import org.molgenis.data.security.model.RoleFactory;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.Role;
@@ -24,23 +24,27 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.security.core.model.Group.builder;
 
 @Component
 public class GroupServiceImpl implements GroupService
 {
 	private final GroupMembershipService groupMembershipService;
-	private final GroupFactory groupFactory;
 	private final DataService dataService;
+	private final GroupFactory groupFactory;
+	private final RoleFactory roleFactory;
 
 	public GroupServiceImpl(GroupMembershipService groupMembershipService, DataService dataService,
-			GroupFactory groupFactory)
+			GroupFactory groupFactory, RoleFactory roleFactory)
 	{
 		this.groupMembershipService = requireNonNull(groupMembershipService);
 		this.dataService = requireNonNull(dataService);
 		this.groupFactory = requireNonNull(groupFactory);
+		this.roleFactory = requireNonNull(roleFactory);
 	}
 
 	@Override
@@ -155,18 +159,18 @@ public class GroupServiceImpl implements GroupService
 	@Override
 	public Group createGroup(Group group)
 	{
-		GroupEntity parentEntity = groupFactory.create().updateFrom(group);
+		GroupEntity parentEntity = groupFactory.create().updateFrom(group, groupFactory, roleFactory);
 		dataService.add(GroupMetadata.GROUP, parentEntity);
 		group.getRoles()
 			 .forEach(role -> addChildGroups(parentEntity,
-					 Group.builder().label(role.getLabel()).roles(Lists.newArrayList(role)).build()));
-		return parentEntity.toGroup();
+					 builder().label(role.getLabel()).roles(newArrayList(role)).build()));
+		return parentEntity.toGroup().toBuilder().roles(group.getRoles()).build();
 	}
 
 	private Group addChildGroups(GroupEntity parent, Group childGroup)
 	{
-		GroupEntity childGroupEntity = groupFactory.create().updateFrom(childGroup);
-		childGroupEntity.setParent(parent.getId());
+		GroupEntity childGroupEntity = groupFactory.create().updateFrom(childGroup, groupFactory, roleFactory);
+		childGroupEntity.setParent(parent);
 		dataService.add(GroupMetadata.GROUP, childGroupEntity);
 		return childGroupEntity.toGroup();
 	}
@@ -181,7 +185,7 @@ public class GroupServiceImpl implements GroupService
 											  .collect(toList()))
 								  .build();
 		GroupEntity groupEntity = dataService.findOneById(GroupMetadata.ID, group.getId(), GroupEntity.class);
-		groupEntity.updateFrom(updatedGroup);
+		groupEntity.updateFrom(updatedGroup, groupFactory, roleFactory);
 		dataService.update(GroupMetadata.GROUP, groupEntity);
 	}
 
@@ -190,7 +194,7 @@ public class GroupServiceImpl implements GroupService
 	{
 		Group updatedGroup = group.toBuilder().addRole(role).build();
 		GroupEntity groupEntity = dataService.findOneById(GroupMetadata.ID, group.getId(), GroupEntity.class);
-		groupEntity.updateFrom(updatedGroup);
+		groupEntity.updateFrom(updatedGroup, groupFactory, roleFactory);
 		dataService.update(GroupMetadata.GROUP, groupEntity);
 	}
 
