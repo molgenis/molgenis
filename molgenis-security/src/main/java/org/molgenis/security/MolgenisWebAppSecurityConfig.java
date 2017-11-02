@@ -179,6 +179,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.antMatchers("/account/**")
 				.permitAll()
 
+				.antMatchers(PATTERN_SWAGGER)
+				.permitAll()
+
 				.antMatchers(PATTERN_CSS)
 				.permitAll()
 

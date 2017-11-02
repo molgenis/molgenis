@@ -22,30 +22,6 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
-  /plugin/useraccount/language/update:
-    post:
-      tags:
-        - User Account
-      description: Updates the selected user language
-      parameters:
-        - in: query
-          name: languageCode
-          type: string
-          enum:
-<#list languageCodes as languageCode>
-            - ${languageCode}
-</#list>
-      responses:
-        204:
-          description: Update succeeded
-        403:
-          description: "Access denied. You need write permission on the UserAccount plugin."
-          schema:
-            $ref: "#/definitions/ErrorMessageResponse"
-        400:
-          description: "Bad request. You need to provide a valid language code."
-          schema:
-            $ref: "#/definitions/ErrorMessageResponse"
   /api/searchall/search:
     get:
       tags:
