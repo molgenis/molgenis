@@ -20,9 +20,13 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.restassured.RestAssured.given;
-import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.apache.commons.io.FileUtils.readFileToString;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -122,41 +126,34 @@ public class RestTestUtils
 			LOG.error(e.getMessage());
 		}
 
-		String importJobURL = given().multiPart(file)
-									 .param("file")
-									 .param("action", "ADD_UPDATE_EXISTING")
-									 .header(X_MOLGENIS_TOKEN, adminToken)
-									 .post("plugin/importwizard/importFile")
-									 .then()
-									 .extract()
-									 .asString();
+		String importJobURLString = given().multiPart(file)
+										   .param("file")
+										   .param("action", "ADD_UPDATE_EXISTING")
+										   .header(X_MOLGENIS_TOKEN, adminToken)
+										   .post("plugin/importwizard/importFile")
+										   .then()
+										   .extract()
+										   .asString();
 
 		// Remove the leading '/' character and leading and trailing '"' characters
-		importJobURL = importJobURL.substring(2, importJobURL.length() - 1);
-		LOG.info("############ " + importJobURL);
+		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
 
-		// As importing is done async in the backend we poll the success url to check if importing is done.
-		String importStatus = "RUNNING";
-		while (importStatus.equals("RUNNING"))
-		{
-			importStatus = given().contentType(APPLICATION_JSON)
-								  .header(X_MOLGENIS_TOKEN, adminToken)
-								  .get(importJobURL)
-								  .then()
-								  .extract()
-								  .path("status")
-								  .toString();
-			try
-			{
-				sleep(500L);
-			}
-			catch (InterruptedException e)
-			{
-				LOG.error(e.getMessage());
-			}
-			LOG.info("Status: " + importStatus);
-		}
+		LOG.info("############ " + importJobURL);
+		await().pollDelay(500, MILLISECONDS)
+			   .atMost(5, MINUTES)
+			   .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
 		LOG.info("Import completed");
+	}
+
+	private static String pollForStatus(String adminToken, String importJobURL)
+	{
+		return given().contentType(APPLICATION_JSON)
+					  .header(X_MOLGENIS_TOKEN, adminToken)
+					  .get(importJobURL)
+					  .then()
+					  .extract()
+					  .path("status")
+					  .toString();
 	}
 
 	/**

@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Value object to store the result of parsing a source.
  */
-public final class ParsedMetaData
+public class ParsedMetaData
 {
 	private final ImmutableMap<String, EntityType> entities;
 	private final ImmutableMap<String, Package> packages;

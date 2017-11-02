@@ -74,7 +74,7 @@
         <jackson-databind.version>2.8.8.1</jackson-databind.version>
         <javax-servlet-api.version>3.0.1</javax-servlet-api.version>
         <freemarker.version>2.3.23</freemarker.version>
-        <node.version>v6.11.0</node.version>
+        <node.version>v8.9.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
 
         <!-- test-dependency versions -->
@@ -82,7 +82,7 @@
         <testng.version>6.8</testng.version>
         <mockito.version>2.7.22</mockito.version>
         <hamcrest-all.version>1.3</hamcrest-all.version>
-
+        <awaitility.version>3.0.0</awaitility.version>
     </properties>
 
     <distributionManagement>
@@ -882,6 +882,11 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-all</artifactId>
                 <version>${hamcrest-all.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>

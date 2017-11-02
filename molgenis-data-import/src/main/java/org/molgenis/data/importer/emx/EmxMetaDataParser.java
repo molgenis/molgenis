@@ -287,7 +287,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		metaDataMap.values().forEach(entityTypeValidator::validate);
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
-			attributeValidator.validate(attr, ValidationMode.ADD);
+			attributeValidator.validate(attr, ValidationMode.ADD_SKIP_ENTITY_VALIDATION);
 		}));
 
 		// validate package/entity/attribute tags
@@ -743,9 +743,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					if (emxAttrMetaAttr.equalsIgnoreCase(attr.getName()))
 					{
-						throw new IllegalArgumentException(String.format(
-								"Unsupported attribute metadata: attributes.%s, did you mean attributes.%s?",
-								attr.getName(), emxAttrMetaAttr));
+						throw new IllegalArgumentException(
+								format("Unsupported attribute metadata: attributes.%s, did you mean attributes.%s?",
+										attr.getName(), emxAttrMetaAttr));
 					}
 				});
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes." + attr.getName());
@@ -1115,6 +1115,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (Attribute.getDataType().equals(FILE))
 			{
 				// If attribute is of type file, set refEntity to file meta and continue to the next attribute
+				requireNonNull(dataService, format("Can't set %s if dataService is null", FILE_META));
 				Attribute.setRefEntity(dataService.getEntityType(FILE_META));
 				continue;
 			}

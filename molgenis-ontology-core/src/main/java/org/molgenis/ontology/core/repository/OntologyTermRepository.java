@@ -183,12 +183,7 @@ public class OntologyTermRepository
 		Iterable<Entity> ontologyTermNodePathEntities = ontologyTermEntity.getEntities(
 				OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH);
 
-		for (Entity ontologyTermNodePathEntity : ontologyTermNodePathEntities)
-		{
-			return ontologyTermNodePathEntity.getString(OntologyTermNodePathMetaData.NODE_PATH);
-		}
-
-		return null;
+		return ontologyTermNodePathEntities.iterator().next().getString(OntologyTermNodePathMetaData.NODE_PATH);
 	}
 
 	/**

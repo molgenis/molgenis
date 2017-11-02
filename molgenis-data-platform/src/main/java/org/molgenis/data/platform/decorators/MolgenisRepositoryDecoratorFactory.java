@@ -45,6 +45,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final L3Cache l3Cache;
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
+	private final DefaultValueReferenceValidator defaultValueReferenceValidator;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
@@ -53,8 +54,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			IndexActionRegisterService indexActionRegisterService,
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			L3Cache l3Cache,
-			PlatformTransactionManager transactionManager, QueryValidator queryValidator)
+			L3Cache l3Cache, PlatformTransactionManager transactionManager, QueryValidator queryValidator,
+			DefaultValueReferenceValidator defaultValueReferenceValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -73,6 +74,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.l3Cache = requireNonNull(l3Cache);
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
+		this.defaultValueReferenceValidator = requireNonNull(defaultValueReferenceValidator);
 	}
 
 	@Override
@@ -115,7 +117,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 4. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
-				entityAttributesValidator, expressionValidator);
+				entityAttributesValidator, defaultValueReferenceValidator);
 
 		// 3. aggregate anonymization decorator
 		decoratedRepository = new AggregateAnonymizerRepositoryDecorator<>(decoratedRepository, aggregateAnonymizer,

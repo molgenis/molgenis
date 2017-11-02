@@ -1,10 +1,7 @@
 package org.molgenis.data.importer.emx;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.importer.DataProvider;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -20,6 +17,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 class EmxDataProvider implements DataProvider
 {
@@ -35,20 +34,51 @@ class EmxDataProvider implements DataProvider
 	@Override
 	public Stream<EntityType> getEntityTypes()
 	{
-		return job.parsedMetaData.getEntities().stream();
+		return job.getParsedMetaData().getEntities().stream();
 	}
 
 	@Override
 	public boolean hasEntities(EntityType entityType)
 	{
-		return job.source.hasRepository(entityType);
+		if (job.getSource().hasRepository(entityType))
+		{
+			return true;
+		}
+		else if (isDefaultPackageEntityType(entityType))
+		{
+			String alternativeEntityTypeId = getDefaultPackageEntityTypeAlternativeId(entityType);
+			return job.getSource().hasRepository(alternativeEntityTypeId);
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	@Override
 	public Stream<Entity> getEntities(EntityType entityType)
 	{
-		Repository<Entity> repository = job.source.getRepository(entityType);
+		Repository<Entity> repository = job.getSource().getRepository(entityType);
+		if (repository == null && isDefaultPackageEntityType(entityType))
+		{
+			String alternativeEntityTypeId = getDefaultPackageEntityTypeAlternativeId(entityType);
+			repository = job.getSource().getRepository(alternativeEntityTypeId);
+		}
+		if (repository == null)
+		{
+			throw new UnknownRepositoryException(entityType.getId());
+		}
 		return stream(repository.spliterator(), false).map(sourceEntity -> toEntity(entityType, sourceEntity));
+	}
+
+	private boolean isDefaultPackageEntityType(EntityType entityType)
+	{
+		return entityType.getId().startsWith(PACKAGE_DEFAULT + PACKAGE_SEPARATOR);
+	}
+
+	private String getDefaultPackageEntityTypeAlternativeId(EntityType entityType)
+	{
+		return entityType.getId().substring(PACKAGE_DEFAULT.length() + PACKAGE_SEPARATOR.length());
 	}
 
 	/**

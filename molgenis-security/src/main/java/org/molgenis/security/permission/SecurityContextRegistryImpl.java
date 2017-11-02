@@ -59,7 +59,7 @@ public class SecurityContextRegistryImpl implements SecurityContextRegistry
 		}
 		if (!(securityContext instanceof SecurityContext))
 		{
-			throw new RuntimeException(
+			throw new IllegalStateException(
 					String.format("Session attribute '%s' is of type '%s' instead of '%s'", SPRING_SECURITY_CONTEXT_KEY,
 							securityContext.getClass().getSimpleName(), SecurityContext.class.getSimpleName()));
 		}

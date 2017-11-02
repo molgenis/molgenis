@@ -1,11 +1,12 @@
 package org.molgenis.data.elasticsearch.client;
 
-import org.elasticsearch.client.Client;
 import org.molgenis.data.index.IndexConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.InetSocketAddress;
@@ -22,7 +23,7 @@ import static java.util.stream.Collectors.toList;
  */
 @Configuration
 @EnableScheduling
-@Import({ IndexConfig.class })
+@Import({ IndexConfig.class, ConnectionRetryConfig.class })
 public class ElasticsearchConfig
 {
 	@Value("${elasticsearch.cluster.name:molgenis}")
@@ -31,8 +32,22 @@ public class ElasticsearchConfig
 	@Value("${elasticsearch.transport.addresses:127.0.0.1:9300}")
 	private List<String> transportAddresses;
 
+	final RetryTemplate retryTemplate;
+
+	@Autowired
+	public ElasticsearchConfig(RetryTemplate retryTemplate)
+	{
+		this.retryTemplate = retryTemplate;
+	}
+
 	@Bean(destroyMethod = "close")
 	public ClientFacade elasticsearchClientFacade() throws InterruptedException
+	{
+		return new ClientFacade(clientFactory().createClient());
+	}
+
+	@Bean
+	public ClientFactory clientFactory()
 	{
 		if (clusterName == null)
 		{
@@ -42,11 +57,8 @@ public class ElasticsearchConfig
 		{
 			throw new IllegalArgumentException("Property 'elasticsearch.transport.addresses' cannot be null or empty");
 		}
-
-		List<InetSocketAddress> ipSocketAddresses = toIpSocketAddresses(transportAddresses);
-		Client client = ClientFactory
-				.createClient(clusterName, ipSocketAddresses, new PreBuiltTransportClientFactory());
-		return new ClientFacade(client);
+		return new ClientFactory(retryTemplate, clusterName, toIpSocketAddresses(transportAddresses),
+				new PreBuiltTransportClientFactory());
 	}
 
 	private List<InetSocketAddress> toIpSocketAddresses(List<String> elasticsearchTransportAddresses)

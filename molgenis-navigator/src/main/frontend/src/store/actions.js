@@ -45,8 +45,7 @@ function toEntity (item: any) {
     'id': item.id,
     'type': 'entity',
     'label': item.label,
-    'description': item.description,
-    'isRoot': !item['package']
+    'description': item.description
   }
 }
 
@@ -154,25 +153,16 @@ export default {
     })
   },
   [RESET_STATE] ({commit}: { commit: Function }) {
-    api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
-      const visiblePackages = filterNonVisiblePackages(response.items)
-      const homePackages = visiblePackages.filter(function (packageItem) {
-        return !packageItem.hasOwnProperty('parent')
-      })
-      commit(SET_PACKAGES, homePackages)
+    api.get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""').then(response => {
+      const visibleRootPackages = filterNonVisiblePackages(response.items)
+      commit(SET_PACKAGES, visibleRootPackages)
     }, error => {
       commit(SET_ERROR, error)
     })
-
-    // The Rest API offers no way the filter on missing attributes, as a work around we fetch 'all' entities and
-    // then filter out the non route packages
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false').then(response => {
+    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""').then(response => {
       const entities = response.items.map(toEntity)
-      const visibleEntities = filterNonVisibleEntities(entities)
-      const rootEntities = visibleEntities.filter(function (entity) {
-        return entity.isRoot
-      })
-      commit(SET_ENTITIES, rootEntities)
+      const visibleRootEntities = filterNonVisibleEntities(entities)
+      commit(SET_ENTITIES, visibleRootEntities)
     }, error => {
       commit(SET_ERROR, error)
     })
