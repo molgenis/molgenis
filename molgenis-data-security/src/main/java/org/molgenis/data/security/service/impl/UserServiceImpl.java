@@ -162,4 +162,10 @@ public class UserServiceImpl implements UserService
 		return dataService.findAll(USER, UserEntity.class).map(UserEntity::toUser).collect(toList());
 	}
 
+	@Override
+	public Optional<User> findUserById(String userId)
+	{
+		return Optional.ofNullable(dataService.findOneById(USER, userId, UserEntity.class)).map(UserEntity::toUser);
+	}
+
 }

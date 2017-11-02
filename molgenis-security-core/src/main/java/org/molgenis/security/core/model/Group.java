@@ -1,6 +1,7 @@
 package org.molgenis.security.core.model;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import org.molgenis.gson.AutoGson;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public abstract class Group
 
 	public abstract Optional<Group> getParent();
 
-	public abstract List<Role> getRoles();
+	public abstract ImmutableList<Role> getRoles();
 
 	public boolean hasSameParentAs(Group other)
 	{
@@ -44,6 +45,14 @@ public abstract class Group
 		public abstract Builder parent(Group parent);
 
 		public abstract Builder roles(List<Role> roles);
+
+		protected abstract ImmutableList.Builder<Role> rolesBuilder();
+
+		public Builder addRole(Role role)
+		{
+			rolesBuilder().add(role);
+			return this;
+		}
 
 		public abstract Group build();
 	}
