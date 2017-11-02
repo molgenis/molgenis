@@ -35,6 +35,9 @@ public class DataSecurityConfig
 	private GroupFactory groupFactory;
 
 	@Autowired
+	private RoleFactory roleFactory;
+
+	@Autowired
 	private GroupMembershipFactory groupMembershipFactory;
 
 	@Autowired
@@ -70,7 +73,7 @@ public class DataSecurityConfig
 	@Bean
 	public GroupService groupService()
 	{
-		return new GroupServiceImpl(groupMembershipService(), dataService, groupFactory);
+		return new GroupServiceImpl(groupMembershipService(), dataService, groupFactory, roleFactory);
 	}
 
 	@Bean
