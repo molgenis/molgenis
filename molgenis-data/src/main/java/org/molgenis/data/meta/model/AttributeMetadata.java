@@ -224,11 +224,6 @@ public class AttributeMetadata extends SystemEntityType
 
 	private static String getCascadeDeleteValidationExpression()
 	{
-		String regex = "/^(" + Arrays.stream(AttributeType.values())
-									 .filter(EntityTypeUtils::isReferenceType)
-									 .map(AttributeType::getValueString)
-									 .collect(Collectors.joining("|")) + ")$/";
-
 		return "$('" + IS_CASCADE_DELETE + "').isNull().or(" + "$('" + REF_ENTITY_TYPE + "').isNull().not()).value()";
 	}
 
