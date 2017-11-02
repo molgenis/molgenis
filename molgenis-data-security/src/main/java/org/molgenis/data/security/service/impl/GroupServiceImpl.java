@@ -188,10 +188,10 @@ public class GroupServiceImpl implements GroupService
 	@Override
 	public void addRoleToGroup(Group group, Role role)
 	{
-		Group updatedGroup = group.toBuilder().roles().build();
-		GroupEntity groupEntity = dataService.findOneById(GroupMetadata.ID, group.getId(), GroupEntity.class);
-		groupEntity.updateFrom(updatedGroup);
-		dataService.update(GroupMetadata.GROUP, groupEntity);
+		//		Group updatedGroup = group.toBuilder().roles().build();
+		//		GroupEntity groupEntity = dataService.findOneById(GroupMetadata.ID, group.getId(), GroupEntity.class);
+		//		groupEntity.updateFrom(updatedGroup);
+		//		dataService.update(GroupMetadata.GROUP, groupEntity);
 	}
 
 }
