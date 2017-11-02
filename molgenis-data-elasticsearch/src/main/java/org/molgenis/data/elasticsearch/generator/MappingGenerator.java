@@ -6,6 +6,7 @@ import org.molgenis.data.elasticsearch.generator.model.MappingType;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -83,7 +84,7 @@ class MappingGenerator
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type '%s'", attributeType));
 			default:
-				throw new RuntimeException(format("Unknown attribute type '%s'", attributeType));
+				throw new UnexpectedEnumException(attributeType);
 		}
 	}
 
@@ -123,7 +124,7 @@ class MappingGenerator
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type '%s'", attributeType));
 			default:
-				throw new RuntimeException(format("Unknown attribute type '%s'", attributeType));
+				throw new UnexpectedEnumException(attributeType);
 		}
 	}
 

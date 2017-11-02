@@ -3,13 +3,13 @@ package org.molgenis.data.populate;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -78,7 +78,7 @@ public class AutoValuePopulator
 						entity.set(attr.getName(), Instant.now());
 						break;
 					default:
-						throw new RuntimeException(format("Unexpected data type [%s]", type.toString()));
+						throw new UnexpectedEnumException(type);
 				}
 			}
 		}

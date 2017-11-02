@@ -3,6 +3,7 @@ package org.molgenis.data.rsql;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -59,7 +60,7 @@ public class RSQLValueParser
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 

@@ -16,6 +16,7 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.genotype.Allele;
 import org.molgenis.genotype.GenotypeDataException;
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.vcf.VcfInfo;
 import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.VcfSample;
@@ -213,7 +214,7 @@ public class VcfToEntity
 				}
 				return TEXT;
 			default:
-				throw new MolgenisDataException(format("Unknown vcf info type [%s]", vcfMetaInfo.getType()));
+				throw new UnexpectedEnumException(vcfMetaInfo.getType());
 		}
 	}
 
@@ -262,7 +263,7 @@ public class VcfToEntity
 				}
 				return STRING;
 			default:
-				throw new MolgenisDataException(format("Unknown vcf field type [%s]", format.getType()));
+				throw new UnexpectedEnumException(format.getType());
 		}
 	}
 

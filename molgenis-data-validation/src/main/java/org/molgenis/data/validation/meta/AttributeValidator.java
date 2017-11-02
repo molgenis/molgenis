@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -72,7 +73,7 @@ public class AttributeValidator
 				validateUpdate(attr, currentAttr);
 				break;
 			default:
-				throw new RuntimeException(format("Unknown attribute validation mode [%s]", validationMode.toString()));
+				throw new UnexpectedEnumException(validationMode);
 		}
 	}
 

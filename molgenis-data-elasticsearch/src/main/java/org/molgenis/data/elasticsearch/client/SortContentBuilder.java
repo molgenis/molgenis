@@ -6,10 +6,10 @@ import org.elasticsearch.search.sort.SortMode;
 import org.molgenis.data.elasticsearch.generator.model.Sort;
 import org.molgenis.data.elasticsearch.generator.model.SortDirection;
 import org.molgenis.data.elasticsearch.generator.model.SortOrder;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.List;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -39,7 +39,7 @@ class SortContentBuilder
 			case DESC:
 				return org.elasticsearch.search.sort.SortOrder.DESC;
 			default:
-				throw new RuntimeException(format("Unknown sort order '%s'", sortDirection));
+				throw new UnexpectedEnumException(sortDirection);
 		}
 	}
 }

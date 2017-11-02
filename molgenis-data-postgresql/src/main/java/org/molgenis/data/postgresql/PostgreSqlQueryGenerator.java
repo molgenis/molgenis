@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.text.MessageFormat;
 import java.time.Instant;
@@ -22,8 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -665,7 +666,7 @@ class PostgreSqlQueryGenerator
 			case MREF:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 
 		String sqlColumnConstraints = getSqlColumnConstraints(entityType, attr, columnMode);
@@ -778,7 +779,7 @@ class PostgreSqlQueryGenerator
 			case ONE_TO_MANY:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attributeType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attributeType.toString()));
+				throw new UnexpectedEnumException(attributeType);
 		}
 
 		return sqlDefaultValue;
@@ -1072,7 +1073,7 @@ class PostgreSqlQueryGenerator
 					throw new UnsupportedOperationException(
 							format("Query operator [%s] not supported by PostgreSQL repository", operator.toString()));
 				default:
-					throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
+					throw new UnexpectedEnumException(operator);
 			}
 		}
 
@@ -1226,7 +1227,7 @@ class PostgreSqlQueryGenerator
 				case COMPOUND:
 					throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 				default:
-					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+					throw new UnexpectedEnumException(attrType);
 			}
 		}
 	}

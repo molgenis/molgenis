@@ -1,5 +1,6 @@
 package org.molgenis.ui.menu;
 
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;
@@ -43,7 +44,7 @@ public class MenuItemToMolgenisUiMenuItemAdapter implements UiMenuItem
 			case PLUGIN:
 				return UiMenuItemType.PLUGIN;
 			default:
-				throw new RuntimeException("Unknown MolgenisUiMenuItemType [" + menuItem.getType() + "]");
+				throw new UnexpectedEnumException(menuItem.getType());
 		}
 	}
 

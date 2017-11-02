@@ -7,12 +7,12 @@ import org.molgenis.data.elasticsearch.generator.model.SortOrder;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -94,7 +94,7 @@ class SortGenerator
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+				throw new UnexpectedEnumException(dataType);
 		}
 		return sortField;
 	}
@@ -108,7 +108,7 @@ class SortGenerator
 			case DESC:
 				return SortDirection.DESC;
 			default:
-				throw new RuntimeException(format("Unknown sort direction '%s'", direction));
+				throw new UnexpectedEnumException(direction);
 		}
 	}
 }
