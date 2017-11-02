@@ -274,7 +274,7 @@
     name: 'metadata-manager-attribute-edit-form',
     methods: {
       deleteAttribute (selectedAttribute) {
-        this.$swal(getConfirmBeforeDeletingProperties(selectedAttribute.label)).then(() => {
+        this.$swal(getConfirmBeforeDeletingProperties(selectedAttribute.label, this.$t)).then(() => {
           this.$store.commit(DELETE_SELECTED_ATTRIBUTE, selectedAttribute.id)
         }).catch(this.$swal.noop)
       },
