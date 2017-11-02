@@ -58,7 +58,7 @@ public class SortaControllerIT extends AbstractMolgenisIntegrationTests
 
 	public void beforeMethod()
 	{
-		sortaITUtils.addUserIfExists(SUPERUSER_NAME);
+		sortaITUtils.addUserUnlessExists(SUPERUSER_NAME);
 		appSettings.setMenu(
 				"{\"type\":\"menu\",\"id\":\"main\",\"label\":\"Home\",\"items\":[{\"type\":\"plugin\",\"id\":\"sorta\",\"label\":\"SORTA\",\"params\":\"\"}]}");
 	}
@@ -158,7 +158,7 @@ public class SortaControllerIT extends AbstractMolgenisIntegrationTests
 
 	@Test(groups = "withData", dependsOnMethods = "testUploadFile")
 	@WithMockUser(username = SUPERUSER_NAME, roles = SUPERUSER_ROLE)
-	public void testMathEntity() throws Exception
+	public void testMatchEntity() throws Exception
 	{
 
 		Map<String, Object> request = new HashMap<>();
@@ -202,7 +202,7 @@ public class SortaControllerIT extends AbstractMolgenisIntegrationTests
 			   .andExpect(status().isOk())
 			   .andExpect(view().name(MATCH_VIEW_NAME));
 	}
-	
+
 	public void afterClass()
 	{
 		sortaITUtils.cleanUp();

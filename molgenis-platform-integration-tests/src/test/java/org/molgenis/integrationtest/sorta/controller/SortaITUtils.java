@@ -60,7 +60,7 @@ public class SortaITUtils
 		});
 	}
 
-	public void addUserIfExists(String userName)
+	public void addUserUnlessExists(String userName)
 	{
 		User existingUser = dataService.getRepository(UserMetaData.USER, User.class)
 									   .query()
