@@ -48,22 +48,6 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 	@Override
 	public void delete(Attribute attr)
 	{
-		// If compound attribute is deleted then change the parent of children to null
-		// This will change the children attributes into regular attributes.
-		if (AttributeType.COMPOUND.equals(attr.getDataType()))
-		{
-			attr.getChildren().forEach(e ->
-			{
-				if (null != e.getParent())
-				{
-					dataService.getMeta()
-							   .getRepository(AttributeMetadata.ATTRIBUTE_META_DATA)
-							   .update(e.setParent(null));
-				}
-			});
-		}
-
-		// remove this attribute
 		delegate().delete(attr);
 	}
 

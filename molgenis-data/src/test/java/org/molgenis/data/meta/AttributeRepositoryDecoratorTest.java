@@ -106,7 +106,6 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 		repo.delete(compound);
 
 		//Test
-		verify(child).setParent(null);
 		verify(delegateRepository).delete(compound);
 	}
 

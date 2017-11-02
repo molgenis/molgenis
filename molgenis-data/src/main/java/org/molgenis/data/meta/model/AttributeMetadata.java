@@ -112,7 +112,8 @@ public class AttributeMetadata extends SystemEntityType
 							  .setRefEntity(this)
 							  .setMappedBy(parentAttr)
 							  .setOrderBy(new Sort(SEQUENCE_NR))
-							  .setLabel("Attribute parts");
+							  .setLabel("Attribute parts")
+		                      .setCascadeDelete(true);
 		addAttribute(REF_ENTITY_TYPE).setDataType(XREF)
 									 .setRefEntity(entityTypeMeta)
 									 .setLabel("Referenced entity")
