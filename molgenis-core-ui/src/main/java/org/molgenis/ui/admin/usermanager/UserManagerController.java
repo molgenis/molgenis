@@ -19,7 +19,7 @@ import static org.molgenis.ui.admin.usermanager.UserManagerController.URI;
 // either users or groups
 public class UserManagerController extends PluginController
 {
-	public final static String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
+	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
 	private final UserManagerService pluginUserManagerService;
 
 	public UserManagerController(UserManagerService pluginUserManagerService)
@@ -32,6 +32,8 @@ public class UserManagerController extends PluginController
 		this.pluginUserManagerService = pluginUserManagerService;
 	}
 
+	@ApiOperation("Return user manager view")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Return the user manager view") })
 	@GetMapping
 	public String init(Model model)
 	{
@@ -45,7 +47,7 @@ public class UserManagerController extends PluginController
 
 	@ApiOperation("Sets viewState")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Ok"),
-			@ApiResponse(code = 500, message = "ViesState could not be set") })
+			@ApiResponse(code = 500, message = "ViewState could not be set") })
 	@PutMapping("/setViewState/{viewState}")
 	@ResponseStatus(HttpStatus.OK)
 	public void setViewState(@PathVariable("viewState") String viewState, Model model)
