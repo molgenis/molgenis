@@ -120,7 +120,7 @@ public class EntityUtils
 			case LONG:
 				return Long.valueOf(valueStr);
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attr.getDataType().toString()));
+				throw new UnexpectedEnumException(attr.getDataType());
 		}
 	}
 
@@ -500,7 +500,7 @@ public class EntityUtils
 					if (!Objects.equals(entity.getLong(attrName), otherEntity.getLong(attrName))) return false;
 					break;
 				default:
-					throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType()));
+					throw new UnexpectedEnumException(attr.getDataType());
 			}
 		}
 		return true;
@@ -561,7 +561,7 @@ public class EntityUtils
 					hValue = Objects.hashCode(entity.getLong(attrName));
 					break;
 				default:
-					throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType()));
+					throw new UnexpectedEnumException(attr.getDataType());
 			}
 			h += Objects.hashCode(attrName) ^ hValue;
 		}
@@ -651,7 +651,7 @@ public class EntityUtils
 				isNullValue = entity.getLong(attributeName) == null;
 				break;
 			default:
-				throw new RuntimeException(format("Unknown data type [%s]", attributeType));
+				throw new UnexpectedEnumException(attributeType);
 		}
 		return isNullValue;
 	}

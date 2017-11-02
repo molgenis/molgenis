@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;
@@ -72,7 +73,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 				case PLUGIN:
 					return molgenisUiMenuItem;
 				default:
-					throw new RuntimeException("Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
+					throw new UnexpectedEnumException(molgenisUiMenuItem.getType());
 			}
 		}), this::hasPermission));
 	}
@@ -111,7 +112,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 				hasPermission = permissionService.hasPermissionOnPlugin(menuItemId, Permission.READ);
 				break;
 			default:
-				throw new RuntimeException("Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
+				throw new UnexpectedEnumException(molgenisUiMenuItem.getType());
 		}
 		return hasPermission;
 	}

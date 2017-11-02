@@ -8,6 +8,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -111,7 +112,7 @@ public class EntityAttributesValidator
 					// no op
 					break;
 				default:
-					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+					throw new UnexpectedEnumException(attrType);
 			}
 
 			if (violation != null)

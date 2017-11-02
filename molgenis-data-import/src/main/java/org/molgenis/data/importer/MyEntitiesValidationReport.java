@@ -3,6 +3,7 @@ package org.molgenis.data.importer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -122,7 +123,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 				addField(fieldsRequired, entityTypeId, attributeName);
 				break;
 			default:
-				throw new IllegalArgumentException();
+				throw new UnexpectedEnumException(state);
 		}
 		return this;
 	}

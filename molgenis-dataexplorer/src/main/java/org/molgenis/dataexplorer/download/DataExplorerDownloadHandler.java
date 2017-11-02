@@ -16,6 +16,7 @@ import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -70,6 +71,8 @@ public class DataExplorerDownloadHandler
 					excelSheetWriter = excelWriter.createWritable(entityTypeId, attributes,
 							AttributeWriteMode.ATTRIBUTE_NAMES);
 					break;
+				default:
+					throw new UnexpectedEnumException(dataRequest.getColNames());
 			}
 			switch (dataRequest.getEntityValues())
 			{
@@ -80,7 +83,7 @@ public class DataExplorerDownloadHandler
 					excelSheetWriter.setEntityWriteMode(EntityWriteMode.ENTITY_LABELS);
 					break;
 				default:
-					break;
+					throw new UnexpectedEnumException(dataRequest.getEntityValues());
 			}
 
 			excelSheetWriter.add(dataService.findAll(entityTypeId, query));
@@ -113,7 +116,7 @@ public class DataExplorerDownloadHandler
 				csvWriter.setEntityWriteMode(EntityWriteMode.ENTITY_LABELS);
 				break;
 			default:
-				break;
+				throw new UnexpectedEnumException(dataRequest.getEntityValues());
 		}
 		String entityTypeId = dataRequest.getEntityName();
 
@@ -132,6 +135,8 @@ public class DataExplorerDownloadHandler
 				case ATTRIBUTE_NAMES:
 					csvWriter.writeAttributeNames(transform(attributes, Attribute::getName));
 					break;
+				default:
+					throw new UnexpectedEnumException(dataRequest.getColNames());
 			}
 
 			QueryImpl<Entity> query = dataRequest.getQuery();

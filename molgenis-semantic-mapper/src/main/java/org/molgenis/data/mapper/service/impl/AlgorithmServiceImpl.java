@@ -19,6 +19,7 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,7 +218,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 
 		return convertedValue;

@@ -6,12 +6,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NGRAM_ANALYZED;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
@@ -102,7 +102,7 @@ class MappingContentBuilder
 				createFieldMappingText(fieldMapping.isAnalyzeNGrams(), contentBuilder);
 				break;
 			default:
-				throw new RuntimeException(format("Unknown mapping type '%s'", fieldMapping.getType()));
+				throw new UnexpectedEnumException(fieldMapping.getType());
 		}
 		contentBuilder.endObject();
 	}

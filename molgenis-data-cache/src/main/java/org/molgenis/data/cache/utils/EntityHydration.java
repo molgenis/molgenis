@@ -6,6 +6,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityWithComputedAttributes;
+import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -148,7 +149,7 @@ public class EntityHydration
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type [%s]", type.toString()));
 			default:
-				throw new RuntimeException(String.format("Unknown attribute type [%s]", type));
+				throw new UnexpectedEnumException(type);
 		}
 
 		LOG.trace("Dehydrating attribute '{}' of type [{}] resulted in value: {}", name, type.toString(), value);

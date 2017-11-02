@@ -5,6 +5,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.file.model.FileMeta;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -79,7 +80,7 @@ class PostgreSqlUtils
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -212,7 +213,7 @@ class PostgreSqlUtils
 				case COMPOUND:
 					throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 				default:
-					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+					throw new UnexpectedEnumException(attrType);
 			}
 		}
 	}

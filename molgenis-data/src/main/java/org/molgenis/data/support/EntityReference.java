@@ -4,6 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -225,7 +226,7 @@ public class EntityReference implements Entity
 								id.toString(), id.getClass().getSimpleName(), idAttribute.getName(),
 								idAttribute.getDataType().toString()));
 			default:
-				throw new RuntimeException(format("Unknown data type [%s]", idAttribute.getDataType().toString()));
+				throw new UnexpectedEnumException(idAttribute.getDataType());
 		}
 		return id;
 	}

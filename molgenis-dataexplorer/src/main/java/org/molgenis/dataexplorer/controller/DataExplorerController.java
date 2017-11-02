@@ -28,6 +28,7 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -321,7 +322,7 @@ public class DataExplorerController extends PluginController
 				case NONE:
 					break;
 				default:
-					throw new RuntimeException("unknown plugin permission: " + pluginPermission);
+					throw new UnexpectedEnumException(pluginPermission);
 			}
 		}
 		return modulesConfig;
@@ -404,6 +405,8 @@ public class DataExplorerController extends PluginController
 				outputStream = response.getOutputStream();
 				download.writeToExcel(dataRequest, outputStream);
 				break;
+			default:
+				throw new UnexpectedEnumException(dataRequest.getDownloadType());
 		}
 	}
 
