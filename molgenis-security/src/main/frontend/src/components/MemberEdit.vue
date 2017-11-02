@@ -44,7 +44,7 @@
 </template>
 
 <script>
-  import { CREATE_MEMBER, DELETE_MEMBER } from '../store/actions'
+  import { CREATE_MEMBER, DELETE_MEMBER, UPDATE_GROUP_ROLE } from '../store/actions'
   import { mapGetters, mapState, mapActions } from 'vuex'
   import moment from 'moment'
   import _ from 'lodash'
@@ -85,14 +85,25 @@
       }
     },
     methods: {
-      ...mapActions({createMember: CREATE_MEMBER, deleteMember: DELETE_MEMBER}),
+      ...mapActions({
+        createMember: CREATE_MEMBER,
+        deleteMember: DELETE_MEMBER,
+        updateGroupRole: UPDATE_GROUP_ROLE
+      }),
       onSubmit () {
-        this.createMember({
-          id: this.id,
-          role: this.role,
-          until: this.until,
-          from: this.from
-        }).then(() => this.$router.go(-1))
+        if (this.type === 'user') {
+          this.createMember({
+            id: this.id,
+            role: this.role,
+            until: this.until,
+            from: this.from
+          }).then(() => this.$router.go(-1))
+        } else {
+          this.updateGroupRole({
+            groupId: this.id,
+            roleId: this.role
+          }).then(() => this.$router.go(-1))
+        }
       }
     },
     filters: {

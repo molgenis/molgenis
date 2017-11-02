@@ -24,24 +24,32 @@ export type GroupMembership = {
   end: ?string
 }
 
-export type Optional<T> = {
-  value?: T
-}
-
 export type GroupResponse = {
-  id: Optional<string>,
-  parent: Optional<GroupResponse>
+  id: string,
+  parent?: GroupResponse
 }
 export type UserResponse = {
-  id: Optional<string>
+  id: string
 }
 
 export type GroupMembershipResponse = {
-  id: Optional<string>,
+  id: string,
   user: UserResponse,
   group: GroupResponse,
   start: string,
-  end: Optional<string>
+  end: string
+}
+
+export type GroupRoleMutation = {
+  groupId: string,
+  roleId: string
+}
+
+export type GroupMembershipMutation = {
+  userId: string,
+  groupId: string,
+  start: string,
+  end: ?string
 }
 
 export type Sort = 'ascending' | 'descending'

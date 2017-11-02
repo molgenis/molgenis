@@ -68,11 +68,10 @@ public class GroupController
 	@ApiResponses({
 			@ApiResponse(code = 200, message = "Returns a list of GroupMemberships", response = GroupMembership.class),
 			@ApiResponse(code = 400, message = "Invalid groupId supplied"),
-			@ApiResponse(code = 404, message = "Not allowed to see groupId")
+			@ApiResponse(code = 404, message = GROUP_NOT_FOUND_MESSAGE)
 	})
 	@GetMapping(value = "/{groupId}/members", produces = "application/json")
-	public ResponseEntity<List<GroupMembership>> getGroupMembers(@PathVariable String groupId,
-			@RequestParam(required = false) String filter, @RequestParam(required = false) String sort)
+	public ResponseEntity<List<GroupMembership>> getGroupMembers(@PathVariable("groupId") String groupId)
 	{
 		return groupService.findGroupById(groupId)
 						   .map(groupService::getGroupMemberships)

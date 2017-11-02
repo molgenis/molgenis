@@ -2,13 +2,20 @@
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
 import { CREATE_ALERT, SET_GROUP_MEMBERSHIPS, SET_GROUPS, SET_LOADING, SET_USERS } from './mutations'
-import type { GroupMembership, GroupMembershipResponse, Member, Optional, State } from './utils/flow.types'
+import type {
+  GroupMembership,
+  GroupMembershipMutation,
+  GroupMembershipResponse,
+  GroupRoleMutation,
+  State
+} from './utils/flow.types'
 
 export const FETCH_DATA = '__FETCH_DATA__'
 const QUERY_MEMBERS = '__QUERY_MEMBERS__'
 const GET_USERS_GROUPS = '__GET_USERS_GROUPS__'
+export const UPDATE_GROUP_ROLE = '__UPDATE_GROUP_ROLE__'
+export const DELETE_GROUP_ROLE = '__DELETE_GROUP_ROLE__'
 export const CREATE_MEMBER = '__CREATE_MEMBER__'
-export const UPDATE_MEMBER = '__UPDATE_MEMBER__'
 export const DELETE_MEMBER = '__DELETE_MEMBER__'
 
 const getUserLabel = (user) => {
@@ -19,23 +26,12 @@ const getUserLabel = (user) => {
   return [user.title, ...nameParts].filter(part => !!part).join(' ')
 }
 
-function getOrThrow<T> (optional: Optional<T>): T {
-  if (!optional.value) {
-    throw new Error('Optional value not specified')
-  }
-  return optional.value
-}
-
-function getOrElse<T> (optional: Optional<T>, otherwise: ?T): ?T {
-  return optional.value || otherwise
-}
-
 const toGroupMembership = (groupMembership: GroupMembershipResponse): GroupMembership => ({
-  id: getOrThrow(groupMembership.id),
-  group: getOrThrow(groupMembership.group.id),
-  user: getOrThrow(groupMembership.user.id),
+  id: groupMembership.id,
+  group: groupMembership.group.id,
+  user: groupMembership.user.id,
   start: groupMembership.start,
-  end: getOrElse(groupMembership.end, null)
+  end: groupMembership.end || null
 })
 
 const withSpinner = (commit, promise) => {
@@ -75,17 +71,27 @@ export default {
       commit(SET_GROUPS, groupsByKey)
     }))
   },
-  [CREATE_MEMBER] ({commit}: { commit: Function }, member: Member) {
-    // state.groupMemberships.push(JSON.parse(JSON.stringify(member)))
-  },
-  [UPDATE_MEMBER] ({commit, state}: { commit: Function, state: State }, member: Member) {
-    // for (let i = 0; i < members.length; i++) {
-    //   if (members[i].type === member.type && members[i].id === member.id) {
-    //     members[i] = JSON.parse(JSON.stringify(member))
-    //   }
-    // }
+  [CREATE_MEMBER] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }, mutation: GroupMembershipMutation): Promise<*> {
+    console.log('groupMembershipMutation', mutation)
+    return dispatch(QUERY_MEMBERS)
   },
   [DELETE_MEMBER] ({commit, state}: { commit: Function, state: State }, memberId: Object) {
-    // members = members.filter(dummyMember => !(dummyMember.type === memberId.type && dummyMember.id === memberId.id))
+    console.log('todo')
+  },
+  [DELETE_GROUP_ROLE] ({getters}: { commit: Function, state: State, getters: Object, dispatch: Function },
+                       mutation: GroupRoleMutation): Promise<*> {
+    return api.delete_('/group/removeGroupRole', {body: JSON.stringify(mutation)})
+  },
+  [UPDATE_GROUP_ROLE] ({commit, state, getters, dispatch}: { commit: Function, state: State, getters: Object, dispatch: Function },
+                       {groupId, roleId}: GroupRoleMutation): Promise<*> {
+    const currentMembership = getters.roleMembers.find(member => member.id === groupId)
+    if (currentMembership) {
+      const mutation = {groupId, roleId: currentMembership.role.id}
+      return dispatch(DELETE_GROUP_ROLE, mutation)
+        .then(api.post('/group/addGroupRole', {body: JSON.stringify({groupId, roleId})}))
+        .then(dispatch(FETCH_DATA))
+    } else {
+      return api.post('/group/addGroupRole', {body: JSON.stringify({groupId, roleId})}).then(dispatch(FETCH_DATA))
+    }
   }
 }
