@@ -1,5 +1,9 @@
 package org.molgenis.security.twofactor;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProvider;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationToken;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import static java.util.Objects.requireNonNull;
 
+@Api("Two factor authentication")
 @Controller
 @RequestMapping("/2fa")
 public class TwoFactorAuthenticationController
@@ -54,12 +59,21 @@ public class TwoFactorAuthenticationController
 		this.otpService = requireNonNull(otpService);
 	}
 
+	@ApiOperation("Return two factor authentication configured form")
+	@ApiResponses({
+		@ApiResponse(code = 200, message = "Returns two factor authentication form", response = String.class)
+	})
 	@GetMapping(TWO_FACTOR_CONFIGURED_URI)
 	public String configured(Model model)
 	{
 		return VIEW_2FA_CONFIGURED_MODAL;
 	}
 
+
+	@ApiOperation("Validate verificationCode")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Two factor authentication is configured", response = String.class)
+	})
 	@PostMapping(TWO_FACTOR_VALIDATION_URI)
 	public String validate(Model model, @RequestParam String verificationCode)
 	{
@@ -79,6 +93,10 @@ public class TwoFactorAuthenticationController
 		return redirectUri;
 	}
 
+	@ApiOperation("Return activation form")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns activation form", response = String.class)
+	})
 	@GetMapping(TWO_FACTOR_ACTIVATION_URI)
 	public String activation(Model model)
 	{
@@ -96,6 +114,10 @@ public class TwoFactorAuthenticationController
 		return VIEW_2FA_ACTIVATION_MODAL;
 	}
 
+	@ApiOperation("Authenticate with two factor authentication")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "User is two factor authentication authenticated", response = String.class)
+	})
 	@PostMapping(TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI)
 	public String authenticate(Model model, @RequestParam String verificationCode, @RequestParam String secretKey)
 	{
@@ -118,6 +140,10 @@ public class TwoFactorAuthenticationController
 		return redirectUrl;
 	}
 
+	@ApiOperation("Recover account with two factor authentication enabled")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Account is recoverd", response = String.class)
+	})
 	@PostMapping(TWO_FACTOR_RECOVER_URI)
 	public String recoverAccount(Model model, @RequestParam String recoveryCode)
 	{

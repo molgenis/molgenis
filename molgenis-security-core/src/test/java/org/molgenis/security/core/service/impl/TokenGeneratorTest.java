@@ -1,6 +1,5 @@
 package org.molgenis.security.core.service.impl;
 
-import org.molgenis.security.core.service.impl.TokenGenerator;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertFalse;

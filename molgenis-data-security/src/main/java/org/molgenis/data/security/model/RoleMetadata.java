@@ -12,7 +12,7 @@ import static org.molgenis.data.security.model.SecurityPackage.PACKAGE_SECURITY;
 public class RoleMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Role";
-	public static final String GROUP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String ROLE = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String LABEL = "label";
 	public static final String ID = "id";

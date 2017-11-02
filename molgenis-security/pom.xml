@@ -18,6 +18,44 @@
         </repository>
     </repositories>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <info>
+                                <title>${project.name}</title>
+                                <version>${project.version}</version>
+                                <description>${project.description}</description>
+                            </info>
+                            <springmvc>true</springmvc>
+                            <locations>
+                                <location>org.molgenis.security.account</location>
+                                <location>org.molgenis.security.captcha</location>
+                                <location>org.molgenis.security.group</location>
+                                <location>org.molgenis.security.login</location>
+                                <location>org.molgenis.security.twofactor</location>
+                            </locations>
+                            <swaggerDirectory>${build.directory}/generated-resources/swagger</swaggerDirectory>
+                            <swaggerFileName>${project.name}-swagger</swaggerFileName>
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -46,12 +84,21 @@
         </dependency>
         <!-- third party dependencies -->
         <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

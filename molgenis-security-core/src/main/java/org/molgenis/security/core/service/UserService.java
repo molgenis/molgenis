@@ -116,4 +116,11 @@ public interface UserService
 	 * @return List with all users
 	 */
 	List<User> getAllUsers();
+
+	/**
+	 *
+	 * @param userId
+	 * @return
+	 */
+	Optional<User> findUserById(String userId);
 }

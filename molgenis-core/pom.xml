@@ -11,6 +11,11 @@
 
     <name>core</name>
 
+    <properties>
+        <gson-java8-datatype.version>1.0.3</gson-java8-datatype.version>
+
+    </properties>
+
     <build>
         <resources>
             <resource>
@@ -40,9 +45,9 @@
             <version>${google.gson.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
-            <artifactId>gson-javatime-serialisers</artifactId>
-            <version>1.1.1</version>
+            <groupId>net.dongliu</groupId>
+            <artifactId>gson-java8-datatype</artifactId>
+            <version>${gson-java8-datatype.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -1,6 +1,10 @@
 package org.molgenis.ui.admin.user;
 
 import com.google.common.collect.ImmutableMap;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.core.model.User;
@@ -46,6 +50,7 @@ import static org.molgenis.security.core.service.UserAccountService.MIN_PASSWORD
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
+@Api("User account")
 @Controller
 @RequestMapping(URI)
 public class UserAccountController extends PluginController
@@ -74,6 +79,10 @@ public class UserAccountController extends PluginController
 		this.groupService = requireNonNull(groupService);
 	}
 
+	@ApiOperation("Show account")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Return the view of the account", response = String.class)
+	})
 	@GetMapping
 	public String showAccount(Model model, @RequestParam(defaultValue = "false") boolean showCodes)
 	{
@@ -92,6 +101,12 @@ public class UserAccountController extends PluginController
 		return "view-useraccount";
 	}
 
+	@ApiOperation("Updates the selected user language")
+	@ApiResponses({
+			@ApiResponse(code = 204, message = "Update succeeded"),
+			@ApiResponse(code = 403, message = "Access denied. You need write permission on the UserAccount plugin", response = ErrorMessageResponse.class),
+			@ApiResponse(code = 400, message = "Bad request. You need to provide a valid language code", response = ErrorMessageResponse.class)
+	})
 	@PostMapping(value = "/language/update", produces = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateUserLanguage(@RequestParam("languageCode") String languageCode)
@@ -104,6 +119,11 @@ public class UserAccountController extends PluginController
 				userAccountService.getCurrentUser().toBuilder().languageCode(languageCode).build());
 	}
 
+	@ApiOperation("Updated the useraccount")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Account is updated"),
+			@ApiResponse(code = 400, message = "Invalid password entered", response = ErrorMessageResponse.class)
+	})
 	@PostMapping(value = "/update", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateAccount(@Valid @NotNull AccountUpdateRequest updateRequest)
@@ -167,6 +187,11 @@ public class UserAccountController extends PluginController
 		return newPassword;
 	}
 
+	@ApiOperation("Enable two factor authentication")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Two factor authentication enabled"),
+			@ApiResponse(code = 400, message = "Could not enable two factor authentication for user")
+	})
 	@PostMapping(TwoFactorAuthenticationController.URI + "/enable")
 	public String enableTwoFactorAuthentication()
 	{
@@ -175,6 +200,11 @@ public class UserAccountController extends PluginController
 		return "redirect:" + MolgenisLoginController.URI;
 	}
 
+	@ApiOperation("Disable two factor authentication")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Two factor authentication disabled"),
+			@ApiResponse(code = 400, message = "Could not disable two factor authentication for user", response = ErrorMessageResponse.class)
+	})
 	@PostMapping(TwoFactorAuthenticationController.URI + "/disable")
 	public String disableTwoFactorAuthentication(Model model)
 	{
@@ -184,6 +214,11 @@ public class UserAccountController extends PluginController
 		return showAccount(model, false);
 	}
 
+	@ApiOperation("Reset two factor authentication")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Two factor authentication is reset"),
+			@ApiResponse(code = 400, message = "Could not rest two factor authentication for user", response = ErrorMessageResponse.class)
+	})
 	@PostMapping(TwoFactorAuthenticationController.URI + "/reset")
 	public String resetTwoFactorAuthentication()
 	{
@@ -204,6 +239,11 @@ public class UserAccountController extends PluginController
 		SecurityContextHolder.getContext().setAuthentication(token);
 	}
 
+	@ApiOperation("Get recoverycodes for two factor authentication")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns a list of recoverycodes", response = Map.class),
+			@ApiResponse(code = 500, message = "Something went wrong retrieving the recoverycodes", response = ErrorMessageResponse.class)
+	})
 	@GetMapping("recoveryCodes")
 	@ResponseBody
 	public Map<String, List<String>> getRecoveryCodes()
@@ -211,6 +251,11 @@ public class UserAccountController extends PluginController
 		return convertToRecoveryCodesMap(recoveryService.getRecoveryCodes());
 	}
 
+	@ApiOperation("Generate recoverycodes for two factor authentication")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Returns a list of generated recoverycodes", response = Map.class),
+			@ApiResponse(code = 500, message = "Something went wrong generating the recoverycodes", response = ErrorMessageResponse.class)
+	})
 	@GetMapping("generateRecoveryCodes")
 	@ResponseBody
 	public Map<String, List<String>> generateRecoveryCodes()
