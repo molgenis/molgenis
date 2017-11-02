@@ -67,7 +67,7 @@ public class DataSecurityConfig
 	@Bean
 	public GroupMembershipServiceImpl groupMembershipService()
 	{
-		return new GroupMembershipServiceImpl(dataService, groupMembershipFactory);
+		return new GroupMembershipServiceImpl(dataService, groupMembershipFactory, userFactory, groupFactory);
 	}
 
 	@Bean

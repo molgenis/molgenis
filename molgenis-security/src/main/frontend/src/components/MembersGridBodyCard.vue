@@ -3,8 +3,8 @@
     <div class="card-block">
       <div class="row">
         <div class="col text-center">
-          <i :class="['fa', type === 'user' ? 'fa-user' : 'fa-users', 'fa-4x']" aria-hidden="true"
-             @click="editMember(id)"></i>
+          <i :class="['fa', 'fa-4x', type === 'user' ? 'fa-user' : 'fa-users', { future }]" aria-hidden="true"
+             @click="editMember"></i>
           <p>{{ label }}<br>({{ role.label }})</p>
         </div>
       </div>
@@ -13,6 +13,7 @@
 </template>
 
 <script>
+  import moment from 'moment'
   import { mapGetters } from 'vuex'
 
   export default {
@@ -38,12 +39,21 @@
           type: String,
           required: true
         }
+      },
+      from: {
+        type: String,
+        required: false
       }
     },
-    computed: {...mapGetters(['contextId'])},
+    computed: {
+      ...mapGetters(['contextId']),
+      future () {
+        return this.from && moment(this.from).isAfter(moment())
+      }
+    },
     methods: {
-      editMember (id) {
-        this.$router.push({name: 'edit', params: {groupId: this.contextId, membershipId: id}})
+      editMember () {
+        this.$router.push({name: 'edit', params: {groupId: this.contextId, membershipId: this.id}})
       }
     }
   }
@@ -52,5 +62,9 @@
 <style scoped>
   i.fa {
     cursor: pointer;
+  }
+
+  i.future {
+    color: #aaa;
   }
 </style>

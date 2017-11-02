@@ -45,6 +45,11 @@ export type GroupRoleMutation = {
   roleId: string
 }
 
+export type UserGroupMembershipDeletion = {
+  userId: string,
+  groupId: string,
+}
+
 export type GroupMembershipMutation = {
   userId: string,
   groupId: string,

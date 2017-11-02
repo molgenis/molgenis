@@ -48,11 +48,6 @@ public class GroupMembershipEntity extends StaticEntity
 		set(USER, user);
 	}
 
-	public void setUser(String userId)
-	{
-		set(USER, userId);
-	}
-
 	public GroupEntity getGroup()
 	{
 		return getEntity(GROUP, GroupEntity.class);
@@ -61,11 +56,6 @@ public class GroupMembershipEntity extends StaticEntity
 	public void setGroup(GroupEntity group)
 	{
 		set(GROUP, group);
-	}
-
-	public void setGroup(String groupId)
-	{
-		set(GROUP, groupId);
 	}
 
 	public Instant getStart()
@@ -99,12 +89,11 @@ public class GroupMembershipEntity extends StaticEntity
 		return result.build();
 	}
 
-	public GroupMembershipEntity updateFrom(GroupMembership groupMembership)
+	public GroupMembershipEntity updateFrom(GroupMembership groupMembership, UserFactory userFactory,
+			GroupFactory groupFactory)
 	{
-		setUser(groupMembership.getUser().getId().orElseThrow(() -> new IllegalArgumentException("User has empty id")));
-		setGroup(groupMembership.getGroup()
-								.getId()
-								.orElseThrow(() -> new IllegalArgumentException("Group has empty id")));
+		groupMembership.getUser().getId().map(userFactory::create).ifPresent(this::setUser);
+		groupMembership.getGroup().getId().map(groupFactory::create).ifPresent(this::setGroup);
 		setStart(groupMembership.getStart());
 		groupMembership.getId().ifPresent(this::setId);
 		groupMembership.getEnd().ifPresent(this::setEnd);

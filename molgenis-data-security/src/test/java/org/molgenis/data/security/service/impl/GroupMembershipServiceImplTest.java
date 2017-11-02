@@ -6,10 +6,7 @@ import org.mockito.*;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.security.model.GroupEntity;
-import org.molgenis.data.security.model.GroupMembershipEntity;
-import org.molgenis.data.security.model.GroupMembershipFactory;
-import org.molgenis.data.security.model.GroupMetadata;
+import org.molgenis.data.security.model.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
@@ -51,6 +48,10 @@ public class GroupMembershipServiceImplTest
 	private GroupMembershipFactory groupMembershipFactory;
 	@Mock
 	private DataService dataService;
+	@Mock
+	private UserFactory userFactory;
+	@Mock
+	private GroupFactory groupFactory;
 	@Captor
 	private ArgumentCaptor<Stream<Object>> idCaptor;
 	@Captor
@@ -76,8 +77,10 @@ public class GroupMembershipServiceImplTest
 	public void testAdd()
 	{
 		when(groupMembershipFactory.create()).thenReturn(groupMembershipEntity1, groupMembershipEntity2);
-		when(groupMembershipEntity1.updateFrom(groupMembership1)).thenReturn(groupMembershipEntity1);
-		when(groupMembershipEntity2.updateFrom(groupMembership2)).thenReturn(groupMembershipEntity2);
+		when(groupMembershipEntity1.updateFrom(groupMembership1, userFactory, groupFactory)).thenReturn(
+				groupMembershipEntity1);
+		when(groupMembershipEntity2.updateFrom(groupMembership2, userFactory, groupFactory)).thenReturn(
+				groupMembershipEntity2);
 
 		groupMembershipService.add(ImmutableList.of(groupMembership1, groupMembership2));
 

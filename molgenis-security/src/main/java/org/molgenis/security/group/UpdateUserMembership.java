@@ -4,6 +4,7 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_UpdateUserMembership.class)
@@ -17,6 +18,6 @@ public abstract class UpdateUserMembership
 
 	public abstract LocalDate getStart();
 
-	public abstract LocalDate getStop();
+	public abstract Optional<LocalDate> getStop();
 
 }

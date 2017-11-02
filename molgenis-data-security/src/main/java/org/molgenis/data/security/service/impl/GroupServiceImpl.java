@@ -1,11 +1,11 @@
 package org.molgenis.data.security.service.impl;
 
+import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupFactory;
-import org.molgenis.data.security.model.GroupMetadata;
 import org.molgenis.data.security.model.RoleFactory;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
@@ -17,17 +17,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.time.Instant.now;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.security.model.GroupMetadata.GROUP;
 import static org.molgenis.security.core.model.Group.builder;
 
 @Component
@@ -51,7 +50,7 @@ public class GroupServiceImpl implements GroupService
 	@Transactional
 	public void addUserToGroup(User user, Group group)
 	{
-		addUserToGroup(user, group, Instant.now());
+		addUserToGroup(user, group, now());
 	}
 
 	@Override
@@ -64,7 +63,7 @@ public class GroupServiceImpl implements GroupService
 	@Override
 	public Optional<Group> findGroupById(String groupId)
 	{
-		return Optional.ofNullable(dataService.findOneById(GroupMetadata.GROUP, groupId, GroupEntity.class))
+		return Optional.ofNullable(dataService.findOneById(GROUP, groupId, GroupEntity.class))
 					   .map(GroupEntity::toGroup);
 	}
 
@@ -130,9 +129,19 @@ public class GroupServiceImpl implements GroupService
 	}
 
 	@Override
-	public void removeUserFromGroup(String userId, String groupId)
+	@Transactional
+	public void removeUserFromGroup(User user, Group group)
 	{
-		throw new UnsupportedOperationException();
+		Instant end = now();
+		List<GroupMembership> overlaps = getOverlapsSameUser(
+				GroupMembership.builder().user(user).group(group).validity(Range.atLeast(end)).build());
+		groupMembershipService.delete(overlaps);
+		Optional<GroupMembership> currentMembership = overlaps.stream().filter(GroupMembership::isCurrent).findFirst();
+		currentMembership.map(GroupMembership::toBuilder)
+						 .map(builder -> builder.end(end))
+						 .map(GroupMembership.Builder::build)
+						 .map(Collections::singletonList)
+						 .ifPresent(groupMembershipService::add);
 	}
 
 	@Override
@@ -160,7 +169,7 @@ public class GroupServiceImpl implements GroupService
 	public Group createGroup(Group group)
 	{
 		GroupEntity parentEntity = groupFactory.create().updateFrom(group, groupFactory, roleFactory);
-		dataService.add(GroupMetadata.GROUP, parentEntity);
+		dataService.add(GROUP, parentEntity);
 		group.getRoles()
 			 .forEach(role -> addChildGroups(parentEntity,
 					 builder().label(role.getLabel()).roles(newArrayList(role)).build()));
@@ -171,31 +180,30 @@ public class GroupServiceImpl implements GroupService
 	{
 		GroupEntity childGroupEntity = groupFactory.create().updateFrom(childGroup, groupFactory, roleFactory);
 		childGroupEntity.setParent(parent);
-		dataService.add(GroupMetadata.GROUP, childGroupEntity);
+		dataService.add(GROUP, childGroupEntity);
 		return childGroupEntity.toGroup();
 	}
 
 	@Override
 	public void removeRoleFromGroup(Group group, Role role)
 	{
-		Group updatedGroup = group.toBuilder()
-								  .roles(group.getRoles()
-											  .stream()
-											  .filter(sourceRole -> !sourceRole.getId().equals(role.getId()))
-											  .collect(toList()))
-								  .build();
-		GroupEntity groupEntity = dataService.findOneById(GroupMetadata.ID, group.getId(), GroupEntity.class);
-		groupEntity.updateFrom(updatedGroup, groupFactory, roleFactory);
-		dataService.update(GroupMetadata.GROUP, groupEntity);
+		updateGroup(group.toBuilder()
+						 .roles(group.getRoles()
+									 .stream()
+									 .filter(sourceRole -> !sourceRole.getId().equals(role.getId()))
+									 .collect(toList()))
+						 .build());
 	}
 
 	@Override
 	public void addRoleToGroup(Group group, Role role)
 	{
-		Group updatedGroup = group.toBuilder().addRole(role).build();
-		GroupEntity groupEntity = dataService.findOneById(GroupMetadata.ID, group.getId(), GroupEntity.class);
-		groupEntity.updateFrom(updatedGroup, groupFactory, roleFactory);
-		dataService.update(GroupMetadata.GROUP, groupEntity);
+		updateGroup(group.toBuilder().addRole(role).build());
+	}
+
+	private void updateGroup(Group group)
+	{
+		dataService.update(GROUP, groupFactory.create().updateFrom(group, groupFactory, roleFactory));
 	}
 
 }

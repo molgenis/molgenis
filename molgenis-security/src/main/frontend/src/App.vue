@@ -1,8 +1,6 @@
 <template>
   <div class="container">
-    <div v-if="loading">
-      <i class="fa fa-spinner"></i>
-    </div>
+    <spinner v-if="loading"></spinner>
     <div id="app" v-else>
       <members-breadcrumb></members-breadcrumb>
       <router-view></router-view>
@@ -10,15 +8,11 @@
   </div>
 </template>
 
-<style lang="scss">
-  @import "~variables";
-  @import "~mixins";
-</style>
-
 <script>
   import { FETCH_DATA } from './store/actions'
   import MembersBreadcrumb from 'components/MembersBreadcrumb'
   import { mapActions, mapState } from 'vuex'
+  import Spinner from 'components/Spinner'
 
   export default {
     name: 'molgenis-app',
@@ -32,6 +26,7 @@
       this.fetchData()
     },
     components: {
+      Spinner,
       MembersBreadcrumb
     }
   }

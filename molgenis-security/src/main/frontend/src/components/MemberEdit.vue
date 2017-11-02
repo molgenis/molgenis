@@ -37,14 +37,14 @@
           </div>
         </div>
         <button type="submit" class="btn btn-success" :disabled="untilDateBeforeFromDateError">Save</button>
-        <button v-if="edit" type="button" class="btn btn-danger" @click="deleteMember">Remove</button>
+        <button v-if="edit" type="button" class="btn btn-danger" @click="onRemove">Remove</button>
       </form>
     </div>
   </div>
 </template>
 
 <script>
-  import { CREATE_MEMBER, DELETE_MEMBER, UPDATE_GROUP_ROLE } from '../store/actions'
+  import { CREATE_MEMBER, DELETE_MEMBER, UPDATE_GROUP_ROLE, DELETE_GROUP_ROLE } from '../store/actions'
   import { mapGetters, mapState, mapActions } from 'vuex'
   import moment from 'moment'
   import _ from 'lodash'
@@ -58,9 +58,11 @@
         this.id = this.member.id
         this.label = this.member.label
         this.role = this.member.role.id
-//        this.from = this.member.from TODO: update if in future
+        if (this.member.from) {
+          this.from = moment.max(moment(this.member.from), moment()).startOf('day').format('YYYY-MM-DD')
+        }
         if (this.member.until) {
-          this.until = this.member.until.substring(0, 10)
+          this.until = moment(this.member.until).startOf('day').format('YYYY-MM-DD')
         }
       }
     },
@@ -88,8 +90,19 @@
       ...mapActions({
         createMember: CREATE_MEMBER,
         deleteMember: DELETE_MEMBER,
-        updateGroupRole: UPDATE_GROUP_ROLE
+        updateGroupRole: UPDATE_GROUP_ROLE,
+        deleteGroupRole: DELETE_GROUP_ROLE
       }),
+      onRemove () {
+        if (this.type === 'user') {
+          this.deleteMember({userId: this.id, groupId: this.role}).then(() => this.$router.go(-1))
+        } else {
+          this.deleteGroupRole({
+            groupId: this.id,
+            roleId: this.role
+          }).then(() => this.$router.go(-1))
+        }
+      },
       onSubmit () {
         if (this.type === 'user') {
           this.createMember({

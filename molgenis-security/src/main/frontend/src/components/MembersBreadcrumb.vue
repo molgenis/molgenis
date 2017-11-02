@@ -2,7 +2,7 @@
   <div class="row mb-">
     <div class="col">
       <ol class="breadcrumb">
-        <li class="breadcrumb-item">
+        <li class="breadcrumb-item" v-if="context">
           <router-link :to="{name: 'members', params: {contextId: contextId}}">{{context.label}}</router-link>
         </li>
         <li class="breadcrumb-item" v-if="member">{{member.label}}</li>

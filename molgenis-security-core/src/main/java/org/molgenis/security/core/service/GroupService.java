@@ -47,10 +47,10 @@ public interface GroupService
 	/**
 	 * Removes a User from a Group, effective immediately.
 	 *
-	 * @param userId  ID of the User to remove from the Group
-	 * @param groupId ID of the Group to remove the User from
+	 * @param user  the User to remove from the Group
+	 * @param group the Group to remove the User from
 	 */
-	void removeUserFromGroup(String userId, String groupId);
+	void removeUserFromGroup(User user, Group group);
 
 	/**
 	 * Retrieves all {@link GroupMembership}s of a particular {@link User} in past, present and future.

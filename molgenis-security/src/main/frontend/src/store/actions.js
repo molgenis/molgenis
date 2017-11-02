@@ -7,7 +7,8 @@ import type {
   GroupMembershipMutation,
   GroupMembershipResponse,
   GroupRoleMutation,
-  State
+  State,
+  UserGroupMembershipDeletion
 } from './utils/flow.types'
 
 export const FETCH_DATA = '__FETCH_DATA__'
@@ -34,9 +35,9 @@ const toGroupMembership = (groupMembership: GroupMembershipResponse): GroupMembe
   end: groupMembership.end || null
 })
 
-const withSpinner = (commit, promise) => {
+const withSpinner = (commit: Function, promise: Promise<*>): Promise<*> => {
   commit(SET_LOADING, true)
-  promise.catch(error => {
+  return promise.catch(error => {
     commit(CREATE_ALERT, {type: 'error', message: error})
   }).then(() => commit(SET_LOADING, false))
 }
@@ -49,49 +50,54 @@ export default {
   [QUERY_MEMBERS] ({commit, state}: { commit: Function, state: State }) {
     commit(SET_GROUP_MEMBERSHIPS, [])
     if (state.route && state.route.params && state.route.params.groupId) {
-      withSpinner(commit, api.get(`/group/${state.route.params.groupId}/members`).then(response => {
+      return withSpinner(commit, api.get(`/group/${state.route.params.groupId}/members`).then(response => {
         commit(SET_GROUP_MEMBERSHIPS, response.map(toGroupMembership))
       }))
     }
   },
   [GET_USERS_GROUPS] ({commit}: { commit: Function }) {
-    withSpinner(commit, api.get('/api/v2/sys_sec_User').then(json => {
-      const usersByKey = json.items.reduce((map, user) => ({
-        ...map,
-        [user.id]: ({
-          id: user.id,
-          label: getUserLabel(user),
-          active: user.active
-        })
-      }), {})
-      commit(SET_USERS, usersByKey)
-    }))
-    withSpinner(commit, api.get('/api/v2/sys_sec_Group').then(json => {
-      const groupsByKey = json.items.reduce((map, group) => ({...map, [group.id]: group}), {})
-      commit(SET_GROUPS, groupsByKey)
-    }))
+    const promises = [
+      withSpinner(commit, api.get('/api/v2/sys_sec_User').then(json => {
+        const usersByKey = json.items.reduce((map, user) => ({
+          ...map,
+          [user.id]: ({
+            id: user.id,
+            label: getUserLabel(user),
+            active: user.active
+          })
+        }), {})
+        commit(SET_USERS, usersByKey)
+      })),
+      withSpinner(commit, api.get('/api/v2/sys_sec_Group').then(json => {
+        const groupsByKey = json.items.reduce((map, group) => ({...map, [group.id]: group}), {})
+        commit(SET_GROUPS, groupsByKey)
+      }))]
+    return Promise.all(promises)
   },
   [CREATE_MEMBER] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }, mutation: GroupMembershipMutation): Promise<*> {
     console.log('groupMembershipMutation', mutation)
     return dispatch(QUERY_MEMBERS)
   },
-  [DELETE_MEMBER] ({commit, state}: { commit: Function, state: State }, memberId: Object) {
-    console.log('todo')
+  [DELETE_MEMBER] ({commit, dispatch}: { commit: Function, dispatch: Function }, mutation: UserGroupMembershipDeletion) {
+    return withSpinner(commit, api.post('/group/removeUserFromGroup', {body: JSON.stringify(mutation)})
+      .then(() => dispatch(QUERY_MEMBERS)))
   },
-  [DELETE_GROUP_ROLE] ({getters}: { commit: Function, state: State, getters: Object, dispatch: Function },
+  [DELETE_GROUP_ROLE] ({commit, dispatch}: { commit: Function, dispatch: Function },
                        mutation: GroupRoleMutation): Promise<*> {
-    return api.delete_('/group/removeGroupRole', {body: JSON.stringify(mutation)})
+    return withSpinner(commit, api.post('/group/removeGroupRole', {body: JSON.stringify(mutation)})
+      .then(() => dispatch(FETCH_DATA)))
   },
-  [UPDATE_GROUP_ROLE] ({commit, state, getters, dispatch}: { commit: Function, state: State, getters: Object, dispatch: Function },
+  [UPDATE_GROUP_ROLE] ({commit, getters, dispatch}: { commit: Function, state: State, getters: Object, dispatch: Function },
                        {groupId, roleId}: GroupRoleMutation): Promise<*> {
     const currentMembership = getters.roleMembers.find(member => member.id === groupId)
     if (currentMembership) {
       const mutation = {groupId, roleId: currentMembership.role.id}
-      return dispatch(DELETE_GROUP_ROLE, mutation)
-        .then(api.post('/group/addGroupRole', {body: JSON.stringify({groupId, roleId})}))
-        .then(dispatch(FETCH_DATA))
+      return withSpinner(commit, api.post('/group/removeGroupRole', {body: JSON.stringify(mutation)})
+        .then(() => api.post('/group/addGroupRole', {body: JSON.stringify({groupId, roleId})}))
+        .then(() => dispatch(FETCH_DATA)))
     } else {
-      return api.post('/group/addGroupRole', {body: JSON.stringify({groupId, roleId})}).then(dispatch(FETCH_DATA))
+      return withSpinner(commit, api.post('/group/addGroupRole', {body: JSON.stringify({groupId, roleId})})
+        .then(() => dispatch(FETCH_DATA)))
     }
   }
 }

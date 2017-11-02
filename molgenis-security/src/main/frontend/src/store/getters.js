@@ -1,4 +1,5 @@
 import type { GroupMembership, Member, State } from './utils/flow.types'
+import moment from 'moment'
 
 export default {
   members:
@@ -17,9 +18,11 @@ export default {
         label: group.label,
         role: group.roles.find(groupRole => getters.roles.some(role => role.id === groupRole.id))
       }))
-      .filter(result => !!result.role), // group should have role within context
+      .filter(result => !!result.role) // group should have role within context
+      .sort((member1, member2) => member1.label.localeCompare(member2.label)),
   groupMembers:
     (state: State) => state.loading ? [] : state.groupMemberships
+      .filter(candidate => !candidate.end || moment(candidate.end).isAfter(moment()))
       .map((membership: GroupMembership): Member => ({
         type: 'user',
         role: state.groups && state.groups[membership.group],

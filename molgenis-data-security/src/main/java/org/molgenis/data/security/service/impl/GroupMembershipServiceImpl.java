@@ -2,10 +2,7 @@ package org.molgenis.data.security.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.security.model.GroupEntity;
-import org.molgenis.data.security.model.GroupMembershipEntity;
-import org.molgenis.data.security.model.GroupMembershipFactory;
-import org.molgenis.data.security.model.GroupMetadata;
+import org.molgenis.data.security.model.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
@@ -27,19 +24,27 @@ import static org.molgenis.data.security.model.GroupMetadata.PARENT;
 public class GroupMembershipServiceImpl implements GroupMembershipService
 {
 	private final DataService dataService;
-	private final GroupMembershipFactory groupMembershipFactory;
+	private final GroupMembershipFactory membershipFactory;
+	private final UserFactory userFactory;
+	private final GroupFactory groupFactory;
 
-	public GroupMembershipServiceImpl(DataService dataService, GroupMembershipFactory groupMembershipFactory)
+	public GroupMembershipServiceImpl(DataService dataService, GroupMembershipFactory membershipFactory,
+			UserFactory userFactory, GroupFactory groupFactory)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.groupMembershipFactory = requireNonNull(groupMembershipFactory);
+		this.membershipFactory = requireNonNull(membershipFactory);
+		this.userFactory = requireNonNull(userFactory);
+		this.groupFactory = requireNonNull(groupFactory);
 	}
 
 	@Override
-	public void add(List<GroupMembership> groupMemberships)
+	public void add(List<GroupMembership> memberships)
 	{
-		dataService.add(GROUP_MEMBERSHIP,
-				groupMemberships.stream().map(membership -> groupMembershipFactory.create().updateFrom(membership)));
+		dataService.add(GROUP_MEMBERSHIP, memberships.stream()
+													 .map(membership -> membershipFactory.create()
+																						 .updateFrom(membership,
+																								 userFactory,
+																								 groupFactory)));
 	}
 
 	@Override

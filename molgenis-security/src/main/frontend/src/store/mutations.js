@@ -8,7 +8,7 @@ export const SET_GROUPS = '__SET_GROUPS__'
 export const SET_USERS = '__SET_USERS__'
 export const SET_LOADING = '__SET_LOADING__'
 export const CREATE_ALERT = '__CREATE_ALERT__'
-export const REMOVE_ALERT = '__REMOVE_ALERT__'
+export const DISMISS_ALERT = '__DISMISS_ALERT__'
 
 export default {
   /**
@@ -18,7 +18,7 @@ export default {
   [CREATE_ALERT] (state: State, alert: Alert) {
     state.alerts.push(alert)
   },
-  [REMOVE_ALERT] (state: State, index: number) {
+  [DISMISS_ALERT] (state: State, index: number) {
     state.alerts.splice(index, 1)
   },
   [SET_LOADING] (state: State, loading: boolean) {
