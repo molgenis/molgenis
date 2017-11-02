@@ -52,7 +52,7 @@ When you toggle the listbox in the header of the swagger documentation, you can 
 The workflow in swagger is pretty much the same as in the REST API documentation. Authentication does not work in this part of the MOLGENIS API documentation.
 
 ### Contribute to module-API documentation
-When you want to contribute to MOLGENIS and are developing a module, there a view components that you have to configure.
+When you want to contribute to MOLGENIS and are developing a module, there are a few components that you have to configure.
 
 - Update module pom with swagger-maven-plugin:
   ```
@@ -118,6 +118,5 @@ When you want to contribute to MOLGENIS and are developing a module, there a vie
   	public String exampleOperation(@RequestParam(defaultValue = "false") boolean exmapleBoolean)
   	{
   ```
-  For real live examples see the `UserAccountController.java` in MOLGENIS.
+  For real life examples see the `UserAccountController.java` in MOLGENIS.
   
-This is all concerning the generated swagger-documentation in MOLGENIS.

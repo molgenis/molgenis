@@ -44,22 +44,18 @@ public class UserManagerController extends PluginController
 	}
 
 	@ApiOperation("Sets viewState")
-	@ApiResponses({
-			@ApiResponse(code = 200, message = "Ok"),
-			@ApiResponse(code = 500, message = "ViesState could not be set")
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "Ok"),
+			@ApiResponse(code = 500, message = "ViesState could not be set") })
 	@PutMapping("/setViewState/{viewState}")
 	@ResponseStatus(HttpStatus.OK)
-	public void setViewState(@PathVariable String viewState, Model model)
+	public void setViewState(@PathVariable("viewState") String viewState, Model model)
 	{
 		model.addAttribute("viewState", viewState);
 	}
 
 	@ApiOperation("Sets activation status for a user")
-	@ApiResponses({
-			@ApiResponse(code = 200, message = "Ok", response = ActivationResponse.class),
-			@ApiResponse(code = 404, message = "If response doesn't have success set to true, the user wasn't found", response = ActivationResponse.class)
-	})
+	@ApiResponses({ @ApiResponse(code = 200, message = "Ok", response = ActivationResponse.class),
+			@ApiResponse(code = 404, message = "If response doesn't have success set to true, the user wasn't found", response = ActivationResponse.class) })
 	@PutMapping("/activation")
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
@@ -186,8 +182,7 @@ public class UserManagerController extends PluginController
 
 	@ApiOperation("Change group membership")
 	@ApiResponses({
-			@ApiResponse(code = 200, message = "Updated groupmembership", response = GroupMembershipResponse.class),
-	})
+			@ApiResponse(code = 200, message = "Updated groupMemberShip", response = GroupMembershipResponse.class), })
 	@PutMapping("/changeGroupMembership")
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
