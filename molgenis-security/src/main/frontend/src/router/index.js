@@ -10,6 +10,7 @@ export default new Router({
   base: INITIAL_STATE.baseUrl,
   routes: [
     {
+      name: 'members',
       path: '/:groupId',
       component: MembersView
     },

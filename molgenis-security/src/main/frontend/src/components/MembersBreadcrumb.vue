@@ -1,9 +1,12 @@
 <template>
   <div class="row mb-">
     <div class="col">
-      <ol class="breadcrumb" v-if="context">
-        <li class="breadcrumb-item"><a href="#" @click.stop="doSomething">{{context.label}}</a></li>
-        <li class="breadcrumb-item active">Members</li>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <router-link :to="{name: 'members', params: {contextId: contextId}}">{{context.label}}</router-link>
+        </li>
+        <li class="breadcrumb-item" v-if="member">{{member.label}}</li>
+        <li class="breadcrumb-item" v-else>Members</li>
       </ol>
     </div>
   </div>
@@ -14,7 +17,7 @@
   export default {
     name: 'members-breadcrumb',
     computed: {
-      ...mapGetters(['context'])
+      ...mapGetters(['context', 'member', 'contextId'])
     },
     methods: {
       doSomething: function () {

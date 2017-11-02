@@ -3,7 +3,7 @@
     <div class="col">
       <members-header></members-header>
       <members-grid></members-grid>
-      <permission-controls></permission-controls>
+      <permission-controls v-if="false"></permission-controls>
     </div>
   </div>
 </template>
