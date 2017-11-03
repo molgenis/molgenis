@@ -16,6 +16,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -38,6 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -76,6 +78,8 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 	private LanguageService languageService;
 	@Mock
 	private MessageSource messageSource;
+	@Mock
+	private JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	@Captor
 	private ArgumentCaptor<HttpEntity<NegotiatorQuery>> queryCaptor;
@@ -85,7 +89,7 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 	{
 
 		controller = new NegotiatorController(restTemplate, permissionService, dataService, rsqlQueryConverter,
-				languageService);
+				languageService, jsMagmaScriptEvaluator);
 		Query<NegotiatorEntityConfig> query = new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMeta.ENTITY, "blah");
 
 		when(dataService.getEntityType("blah")).thenReturn(entityType);
@@ -102,8 +106,8 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 				biobackAttr);
 		when(biobackAttr.getName()).thenReturn("biobackAttr");
 		when(biobackAttr.getDataType()).thenReturn(AttributeType.STRING);
-		when(negotiatorEntityConfig.getEntity(NegotiatorEntityConfigMeta.ENABLED_ATTR, Attribute.class)).thenReturn(
-				enabledAttr);
+		when(negotiatorEntityConfig.getString(NegotiatorEntityConfigMeta.ENABLED_EXPRESSION)).thenReturn(
+				"$(enabledAttr).value()");
 		when(enabledAttr.getName()).thenReturn("enabledAttr");
 		when(languageService.getBundle()).thenReturn(new MessageSourceResourceBundle(messageSource, Locale.ENGLISH));
 		when(messageSource.getMessage("dataexplorer_directory_no_rows", null, Locale.ENGLISH)).thenReturn("No Rows");
@@ -164,6 +168,9 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 		when(negotiatorConfig.getPassword()).thenReturn("password");
 		when(negotiatorConfig.getNegotiatorURL()).thenReturn("http://directory.com/postHere");
 
+		when(jsMagmaScriptEvaluator.eval("$(enabledAttr).value()", entity1)).thenReturn(Boolean.TRUE);
+		when(jsMagmaScriptEvaluator.eval("$(enabledAttr).value()", entity2)).thenReturn(Boolean.FALSE);
+
 		ExportResponse expected = ExportResponse.create(false, "Disabled label2", "");
 
 		assertEquals(controller.exportToNegotiator(negotiatorRequest), expected);
@@ -201,6 +208,7 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 
 		when(restTemplate.postForLocation(eq("http://directory.com/postHere"), queryCaptor.capture())).thenReturn(
 				URI.create("http://directory.com/request/1280"));
+		when(jsMagmaScriptEvaluator.eval(any(), any())).thenReturn(Boolean.TRUE);
 		ExportResponse expected = ExportResponse.create(true, "", "http://directory.com/request/1280");
 
 		assertEquals(controller.exportToNegotiator(negotiatorRequest), expected);

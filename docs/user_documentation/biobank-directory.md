@@ -38,7 +38,7 @@ The integration with the negotiator can be configured in the *Negotiator Config*
 The *Negotiator Config* is used to configure the technical link to the negotiator, for example URL and username. 
 
 The *Negotiator Entity Config* is used to configure which attributes of an entity to use for the interaction with the negotiator.
-An optional attribute is available to disable certain rows in the entity for negotiator interaction, this attribute should contain values that can be evaluated to a boolean value.
+Optionally a expression can be specified to disable certain rows in the entity for negotiator interaction. If no expression is specified, all rows are enabled for negotiator interaction.
 
 # Interaction between Directory and Negotiator
 

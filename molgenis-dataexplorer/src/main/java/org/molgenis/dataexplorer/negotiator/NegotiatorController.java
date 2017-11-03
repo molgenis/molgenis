@@ -1,6 +1,9 @@
 package org.molgenis.dataexplorer.negotiator;
 
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -10,6 +13,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -50,9 +54,10 @@ public class NegotiatorController extends PluginController
 	private final DataService dataService;
 	private final QueryRsqlConverter rsqlQueryConverter;
 	private final LanguageService languageService;
+	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
-			QueryRsqlConverter rsqlQueryConverter, LanguageService languageService)
+			QueryRsqlConverter rsqlQueryConverter, LanguageService languageService, JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
 	{
 		super(URI);
 		this.restTemplate = requireNonNull(restTemplate);
@@ -60,6 +65,7 @@ public class NegotiatorController extends PluginController
 		this.dataService = requireNonNull(dataService);
 		this.rsqlQueryConverter = requireNonNull(rsqlQueryConverter);
 		this.languageService = requireNonNull(languageService);
+		this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
 	}
 
 	@RunAsSystem
@@ -84,9 +90,9 @@ public class NegotiatorController extends PluginController
 		if (entityConfig != null)
 		{
 			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
-			LOG.info(String.format("NegotiatorRequest\n\n%s\n\nreceived, sending request", request));
+			LOG.info("NegotiatorRequest\n\n{}\n\nreceived, sending request", request);
 
-			List<Entity> collectionEntities = getCollectionEntities(request, entityConfig);
+			List<Entity> collectionEntities = getCollectionEntities(request);
 			List<String> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
 
 			if (disabledCollections.isEmpty())
@@ -161,15 +167,15 @@ public class NegotiatorController extends PluginController
 	private List<String> getDisabledCollections(List<Entity> collectionEntities, NegotiatorEntityConfig config)
 	{
 		List<String> disabledLabels = new ArrayList<>();
-		for (Entity collection : collectionEntities)
+		String expression = config.getString(NegotiatorEntityConfigMeta.ENABLED_EXPRESSION);
+
+		for (Entity collectionEntity : collectionEntities)
 		{
-			Attribute enabledAttribute = config.getEntity(NegotiatorEntityConfigMeta.ENABLED_ATTR, Attribute.class);
-			if (enabledAttribute != null)
+			if (expression != null)
 			{
-				String enabledAttributeName = enabledAttribute.getName();
-				Object value = collection.get(enabledAttributeName);
-				Boolean enabled = value != null ? Boolean.valueOf(value.toString()) : false;
-				if (!enabled) disabledLabels.add(collection.getLabelValue().toString());
+				Object result = jsMagmaScriptEvaluator.eval(expression, collectionEntity);
+				Boolean enabled = Boolean.valueOf(result.toString());
+				if (!enabled) disabledLabels.add(collectionEntity.getLabelValue().toString());
 			}
 		}
 		return disabledLabels;
@@ -192,15 +198,10 @@ public class NegotiatorController extends PluginController
 		}
 	}
 
-	private List<Entity> getCollectionEntities(NegotiatorRequest request, NegotiatorEntityConfig entityConfig)
+	private List<Entity> getCollectionEntities(NegotiatorRequest request)
 	{
 		EntityType selectedEntityType = dataService.getEntityType(request.getEntityId());
 		Query<Entity> molgenisQuery = rsqlQueryConverter.convert(request.getRsql()).createQuery(selectedEntityType);
-		Fetch fetch = new Fetch().field(
-				entityConfig.getEntity(NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class).getName())
-								 .field(entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class)
-													.getName()).field(selectedEntityType.getLabelAttribute().getName());
-		molgenisQuery.fetch(fetch);
 		return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
 	}
 

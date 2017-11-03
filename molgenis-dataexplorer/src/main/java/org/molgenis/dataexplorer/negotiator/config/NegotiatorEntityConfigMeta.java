@@ -22,7 +22,7 @@ public class NegotiatorEntityConfigMeta extends SystemEntityType
 	public static final String COLLECTION_ID = "collectionId";
 	public static final String BIOBANK_ID = "biobankId";
 	public static final String ENTITY = "entity";
-	public static final String ENABLED_ATTR = "enabledAttr";
+	public static final String ENABLED_EXPRESSION = "enabledExpression";
 	public static final String NEGOTIATOR_CONFIG = "negotiatorConfig";
 
 	private final EntityTypeMetadata entityTypeMetadata;
@@ -65,10 +65,10 @@ public class NegotiatorEntityConfigMeta extends SystemEntityType
 								.setRefEntity(attributeMetadata)
 								.setNillable(false)
 								.setLabel("Attribute containing the biobank");
-		addAttribute(ENABLED_ATTR).setDataType(AttributeType.XREF)
-								  .setRefEntity(attributeMetadata)
-								  .setNillable(true)
-								  .setLabel("Negotiator enabled attribute")
-								  .setDescription("Attribute to determine if the row is usable for the negotiator");
+		addAttribute(ENABLED_EXPRESSION).setDataType(AttributeType.SCRIPT)
+										.setNillable(true)
+										.setLabel("Negotiator enabled expression")
+										.setDescription(
+												"Expression to determine if the row is enabled for usage with the negotiator");
 	}
 }
