@@ -26,11 +26,11 @@
         <div v-show="!groupSelected">
           <div class="form-group">
             <label for="fromDate">From</label>
-            <input v-model="from" type="date" class="form-control" id="fromDate" required>
+            <flat-pickr v-model="from" class="form-control" id="fromDate" required></flat-pickr>
           </div>
           <div class="form-group" :class="{'has-danger': untilDateBeforeFromDateError}" v-show="!groupSelected">
             <label for="untilDate">Until</label>
-            <input v-model="until" type="date" class="form-control" id="untilDate">
+            <flat-pickr v-model="until" class="form-control" id="untilDate"></flat-pickr>
             <div v-if="untilDateBeforeFromDateError" class="form-control-feedback">
               Until date must be after the from date
             </div>
@@ -48,6 +48,8 @@
   import { mapGetters, mapState, mapActions } from 'vuex'
   import moment from 'moment'
   import _ from 'lodash'
+  import FlatPickr from 'vue-flatpickr-component'
+  import 'flatpickr/dist/flatpickr.css'
 
   export default {
     name: 'member-create',
@@ -122,6 +124,9 @@
           this.createMember(mutation).then(() => this.$router.go(-1))
         }
       }
+    },
+    components: {
+      FlatPickr
     },
     filters: {
       upperFirst: _.upperFirst

@@ -18,11 +18,6 @@
     name: 'members-breadcrumb',
     computed: {
       ...mapGetters(['context', 'member', 'contextId'])
-    },
-    methods: {
-      doSomething: function () {
-        alert('TODO do some unknown thing here')
-      }
     }
   }
 </script>
