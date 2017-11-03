@@ -19,7 +19,6 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
@@ -83,7 +82,7 @@ public class SortaController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SortaController.class);
 
-	public static final String ID = "sortaservice";
+	public static final String ID = "sorta";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final int BATCH_SIZE = 1000;
