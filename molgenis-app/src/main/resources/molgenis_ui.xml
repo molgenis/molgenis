@@ -11,6 +11,7 @@
 		<menu label="Data Integration" name="dataintegration">
 			<plugin id="metadata-manager" name="Metadata Manager" url="metadata-manager"/>
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
+            <plugin id="sorta" name="SORTA" url="sorta"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
             <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
 		</menu>
