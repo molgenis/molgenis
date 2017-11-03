@@ -45,40 +45,6 @@ public class AttributeRepositoryDecorator extends AbstractRepositoryDecorator<At
 		}));
 	}
 
-	@Override
-	public void delete(Attribute attr)
-	{
-		delegate().delete(attr);
-	}
-
-	@Override
-	public void delete(Stream<Attribute> attrs)
-	{
-		// The validateDeleteAllowed check if querying the table in which we are deleting. Since the decorated repo only
-		// guarantees that the attributes are deleted after the operation completes we have to delete the attributes one
-		// by one
-		attrs.forEach(this::delete);
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		Attribute attr = findOneById(id);
-		delete(attr);
-	}
-
-	@Override
-	public void deleteAll(Stream<Object> ids)
-	{
-		delete(findAll(ids));
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		delete(this.query().findAll());
-	}
-
 	/**
 	 * Updates an attribute's representation in the backend for each concrete {@link EntityType} that
 	 * has the {@link Attribute}.
