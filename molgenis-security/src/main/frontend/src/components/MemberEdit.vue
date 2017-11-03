@@ -26,11 +26,11 @@
         <div v-show="!groupSelected">
           <div class="form-group">
             <label for="fromDate">From</label>
-            <flat-pickr v-model="from" class="form-control" id="fromDate" required></flat-pickr>
+            <flat-pickr v-model="from" id="fromDate" :required="true" :config="{allowInput: true}"></flat-pickr>
           </div>
           <div class="form-group" :class="{'has-danger': untilDateBeforeFromDateError}" v-show="!groupSelected">
             <label for="untilDate">Until</label>
-            <flat-pickr v-model="until" class="form-control" id="untilDate"></flat-pickr>
+            <flat-pickr v-model="until" id="untilDate" :required="false" :config="{allowInput: true}"></flat-pickr>
             <div v-if="untilDateBeforeFromDateError" class="form-control-feedback">
               Until date must be after the from date
             </div>
