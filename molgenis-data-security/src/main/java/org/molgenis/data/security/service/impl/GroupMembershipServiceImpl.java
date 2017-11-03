@@ -7,7 +7,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.User;
-import org.molgenis.security.core.service.impl.GroupMembershipService;
+import org.molgenis.security.core.service.GroupMembershipService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

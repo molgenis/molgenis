@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.RoleEntity;
 import org.molgenis.data.security.model.RoleFactory;
 import org.molgenis.data.security.model.RoleMetadata;
+import org.molgenis.security.core.model.ConceptualRoles;
 import org.molgenis.security.core.model.Role;
 import org.molgenis.security.core.service.RoleService;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class RoleServiceImpl implements RoleService
 	@Override
 	public List<Role> createRolesForGroup(String groupLabel)
 	{
-		return stream(values()).map(role -> addRoles(groupLabel, role.name())).collect(toList());
+		return stream(values()).map(role -> addRoles(groupLabel, role)).collect(toList());
 	}
 
 	@Override
@@ -41,10 +42,10 @@ public class RoleServiceImpl implements RoleService
 					   .map(RoleEntity::toRole);
 	}
 
-	private Role addRoles(String group, String role)
+	private Role addRoles(String group, ConceptualRoles role)
 	{
 		RoleEntity roleEntity = roleFactory.create();
-		roleEntity.setLabel(role);
+		roleEntity.setLabel(group + " - " + role.getDescription());
 		dataService.add(RoleMetadata.ROLE, roleEntity);
 		return roleEntity.toRole();
 	}

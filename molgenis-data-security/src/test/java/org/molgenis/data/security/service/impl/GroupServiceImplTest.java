@@ -11,7 +11,7 @@ import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupFactory;
 import org.molgenis.data.security.model.RoleFactory;
 import org.molgenis.security.core.model.*;
-import org.molgenis.security.core.service.impl.GroupMembershipService;
+import org.molgenis.security.core.service.GroupMembershipService;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

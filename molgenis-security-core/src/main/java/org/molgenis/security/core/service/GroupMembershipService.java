@@ -1,4 +1,4 @@
-package org.molgenis.security.core.service.impl;
+package org.molgenis.security.core.service;
 
 import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;

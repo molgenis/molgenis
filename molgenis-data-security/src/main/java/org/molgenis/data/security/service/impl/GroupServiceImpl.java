@@ -12,7 +12,7 @@ import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.Role;
 import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.service.GroupService;
-import org.molgenis.security.core.service.impl.GroupMembershipService;
+import org.molgenis.security.core.service.GroupMembershipService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
