@@ -1,10 +1,14 @@
 import type { GroupMembership, Member, State } from './utils/flow.types'
 import moment from 'moment'
 
+const matches = (string: string, terms: Array<string>): boolean =>
+  terms.some(term => string.toLowerCase().indexOf(term) >= 0)
+
 export default {
+  terms: (state: State) => state.filter ? state.filter.toLowerCase().split(' ').filter(part => part.trim().length > 0) : [],
   members:
     (state: State, getters) => [...getters.roleMembers, ...getters.groupMembers]
-      .filter(member => !state.filter || member.label.toLowerCase().indexOf(state.filter.toLowerCase()) >= 0),
+      .filter(member => !state.filter || matches(member.label, getters.terms) || matches(member.role.label, getters.terms)),
   member:
     (state: State, getters) => getters.members.find(member => member.id === state.route.params.membershipId),
   groupsOutOfContext: (state: State, getters) => state.loading ? [] : Object.values(state.groups)
