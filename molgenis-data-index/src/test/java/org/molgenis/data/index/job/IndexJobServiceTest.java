@@ -3,6 +3,7 @@ package org.molgenis.data.index.job;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.config.IndexTestConfig;
@@ -67,6 +68,11 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 	private IndexActionGroup indexActionGroup;
 	private EntityType testEntityType;
 	private Entity toIndexEntity;
+
+	public IndexJobServiceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

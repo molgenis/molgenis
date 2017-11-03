@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -48,6 +49,11 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Captor
 	private ArgumentCaptor<Stream<Object>> repoIdCaptor;
 	private EntityType emd;
+
+	public L2CacheRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass()

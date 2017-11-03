@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -27,6 +28,11 @@ public class RepositoryCopierTest extends AbstractMockitoTest
 	private MetaDataService metaDataService;
 	@Mock
 	private AttributeFactory attributeFactory;
+
+	public RepositoryCopierTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

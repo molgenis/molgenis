@@ -3,6 +3,7 @@ package org.molgenis.data.importer.emx;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.model.EntityType;
@@ -31,6 +32,11 @@ public class EmxDataProviderTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		emxDataProvider = new EmxDataProvider(emxImportJob, entityManager);
+	}
+
+	public EmxDataProviderTest()
+	{
+		super(Strictness.WARN);
 	}
 
 	@Test

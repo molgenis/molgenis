@@ -3,6 +3,7 @@ package org.molgenis.data.rsql;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
@@ -25,6 +26,11 @@ public class MolgenisRSQLTest extends AbstractMockitoTest
 	private EntityType entityType;
 	@Mock
 	private EntityType genderEntityType;
+
+	public MolgenisRSQLTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

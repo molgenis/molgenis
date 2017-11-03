@@ -1,5 +1,6 @@
 package org.molgenis.ontology.sorta;
 
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -62,6 +63,11 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private OntologyTermDynamicAnnotationFactory ontologyTermDynamicAnnotationFactory;
+
+	public SortaServiceImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

@@ -5,6 +5,7 @@ import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.retry.support.RetryTemplate;
 import org.testng.annotations.BeforeMethod;
@@ -29,6 +30,11 @@ public class ClientFactoryTest extends AbstractMockitoTest
 	@Mock
 	private DiscoveryNode node;
 	private RetryTemplate retryTemplate = new RetryTemplate();
+
+	public ClientFactoryTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

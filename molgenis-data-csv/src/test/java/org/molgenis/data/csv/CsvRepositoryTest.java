@@ -2,6 +2,7 @@ package org.molgenis.data.csv;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -37,6 +38,11 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	private static File testtsv;
 	private static File emptylines;
 	private static File emptylinessinglecol;
+
+	public CsvRepositoryTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public static void beforeClass() throws IOException

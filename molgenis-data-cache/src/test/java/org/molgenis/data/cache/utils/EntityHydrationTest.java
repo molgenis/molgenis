@@ -2,6 +2,7 @@ package org.molgenis.data.cache.utils;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -47,6 +48,11 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	@Captor
 	private ArgumentCaptor<EntityType> entityTypeArgumentCaptor;
 	private List<Entity> refEntities;
+
+	public EntityHydrationTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass() throws ParseException

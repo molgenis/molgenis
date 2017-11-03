@@ -1,6 +1,7 @@
 package org.molgenis.apps;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.data.DataService;
@@ -53,6 +54,11 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
+	public AppsControllerTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

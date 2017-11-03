@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.generator.model.Document;
 import org.molgenis.data.meta.AttributeType;
@@ -35,6 +36,11 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest
 	private DocumentIdGenerator documentIdGenerator;
 
 	private DocumentContentBuilder documentContentBuilder;
+
+	public DocumentContentBuilderTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

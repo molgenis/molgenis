@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.core.resources.impl;
 
 import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -38,6 +39,11 @@ public class MultiFileResourceTest extends AbstractMockitoTest
 	private Repository<Entity> chrom3Repository;
 	@Mock
 	private Repository<Entity> chrom4Repository;
+
+	public MultiFileResourceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

@@ -1,6 +1,7 @@
 package org.molgenis.data.validation;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
@@ -35,6 +36,11 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest
 
 	private EntityType intRangeMinMeta;
 	private EntityType intRangeMaxMeta;
+
+	public EntityAttributesValidatorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

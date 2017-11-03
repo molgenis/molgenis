@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.core.resources.impl;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -45,6 +46,11 @@ public class ResourceImplTest extends AbstractMolgenisSpringTest
 	TabixRepositoryFactory factory;
 
 	private ResourceImpl resource;
+
+	public ResourceImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

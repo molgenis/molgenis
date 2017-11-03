@@ -2,6 +2,7 @@ package org.molgenis.oneclickimporter.controller;
 
 import com.google.common.io.Resources;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.JobExecutor;
@@ -71,6 +72,11 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 
 	@Mock
 	private JobExecutor jobExecutor;
+
+	public OneClickImporterControllerTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void before()

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.ScheduledJobType;
@@ -73,6 +74,11 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private Config config;
+
+	public JobBootstrapperTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

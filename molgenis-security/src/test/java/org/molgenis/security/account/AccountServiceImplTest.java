@@ -2,6 +2,7 @@ package org.molgenis.security.account;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.auth.Group;
 import org.molgenis.auth.GroupMember;
 import org.molgenis.auth.GroupMemberFactory;
@@ -56,6 +57,11 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 
 	@Autowired
 	private IdGenerator idGenerator;
+
+	public AccountServiceImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUp()
