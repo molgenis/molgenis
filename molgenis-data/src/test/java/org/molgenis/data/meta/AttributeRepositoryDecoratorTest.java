@@ -110,18 +110,6 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void deleteStream()
-	{
-		AttributeRepositoryDecorator repoSpy = spy(repo);
-		doNothing().when(repoSpy).delete(any(Attribute.class));
-		Attribute attr0 = mock(Attribute.class);
-		Attribute attr1 = mock(Attribute.class);
-		repoSpy.delete(Stream.of(attr0, attr1));
-		verify(repoSpy).delete(attr0);
-		verify(repoSpy).delete(attr1);
-	}
-
-	@Test
 	public void updateNonSystemAbstractEntity()
 	{
 		Attribute currentAttribute = mock(Attribute.class);
