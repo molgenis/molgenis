@@ -81,8 +81,6 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 	@BeforeMethod
 	public void before()
 	{
-		initMocks();
-
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
 				languageService, appSettings, userAccountService, fileStore, oneClickImportJobExecutionFactory,
 				jobExecutor);
