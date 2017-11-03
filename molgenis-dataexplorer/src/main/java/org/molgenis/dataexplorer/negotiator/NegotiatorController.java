@@ -90,7 +90,7 @@ public class NegotiatorController extends PluginController
 		if (entityConfig != null)
 		{
 			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
-			LOG.info("NegotiatorRequest\n\n%s\n\nreceived, sending request", request);
+			LOG.info("NegotiatorRequest\n\n{}\n\nreceived, sending request", request);
 
 			List<Entity> collectionEntities = getCollectionEntities(request);
 			List<String> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
