@@ -75,8 +75,9 @@ export default {
     return Promise.all(promises)
   },
   [CREATE_MEMBER] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }, mutation: GroupMembershipMutation): Promise<*> {
-    console.log('groupMembershipMutation', mutation)
-    return dispatch(QUERY_MEMBERS)
+    return withSpinner(commit, api.post('/group/updateUserMembership', {body: JSON.stringify(mutation)}).then(
+      () => dispatch(QUERY_MEMBERS)
+    ))
   },
   [DELETE_MEMBER] ({commit, dispatch}: { commit: Function, dispatch: Function }, mutation: UserGroupMembershipDeletion) {
     return withSpinner(commit, api.post('/group/removeUserFromGroup', {body: JSON.stringify(mutation)})

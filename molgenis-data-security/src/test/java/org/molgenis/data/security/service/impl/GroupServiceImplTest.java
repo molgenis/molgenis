@@ -73,60 +73,60 @@ public class GroupServiceImplTest
 		mockitoSession.finishMocking();
 	}
 
-	@Test
-	public void testAddGroupMembershipJoiningOverlaps()
-	{
-		/*
-			Going to add user to group1.
-			user already is a member of group2, group3, and group4
-			           [------group1-----)
-			[---group1---)  [group1)  [---group1---------
-
-			Desired outcome:
-			[-----------------group1---------------------
-		 */
-		GroupMembership m1 = createMembership(null, 2, 5, group1);
-		GroupMembership m2 = createMembership("m2", 1, 3, group1);
-		GroupMembership m3 = createMembership("m3", 3, 4, group1);
-		GroupMembership m4 = createMembership("m4", 4, null, group1);
-		when(group1.hasSameParentAs(any(Group.class))).thenReturn(true);
-		when(groupMembershipService.getGroupMemberships(user)).thenReturn(ImmutableList.of(m2, m3, m4));
-
-		groupService.addUserToGroup(m1.getUser(), m1.getGroup(), m1.getStart(), m1.getEnd().get());
-
-		GroupMembership allCombined = createMembership(null, 1, null, group1);
-		verify(groupMembershipService).delete(ImmutableList.of(m2, m3, m4));
-		verify(groupMembershipService).add(ImmutableList.of());
-		verify(groupMembershipService).add(ImmutableList.of(allCombined));
-	}
-
-	@Test
-	public void testAddGroupMembershipConflictingOverlaps()
-	{
-		/*
-			Going to add user to group1.
-			user already is a member of group2, group3, and group4
-			           [------group1-----)
-			[---group2---)[--group3--)[---group4---------
-
-			Desired outcome:
-			[---group2)[------group1-----)[-group4-------
-		 */
-		GroupMembership m1 = createMembership(null, 2, 5, group1);
-		GroupMembership m2 = createMembership("m2", 1, 3, group2);
-		GroupMembership m3 = createMembership("m3", 3, 4, group3);
-		GroupMembership m4 = createMembership("m4", 4, null, group4);
-		when(group1.hasSameParentAs(any(Group.class))).thenReturn(true);
-		when(groupMembershipService.getGroupMemberships(user)).thenReturn(ImmutableList.of(m2, m3, m4));
-
-		groupService.addUserToGroup(m1.getUser(), m1.getGroup(), m1.getStart(), m1.getEnd().get());
-
-		GroupMembership m2Truncated = createMembership(null, 1, 2, group2);
-		GroupMembership m4Truncated = createMembership(null, 5, null, group4);
-		verify(groupMembershipService).delete(ImmutableList.of(m2, m3, m4));
-		verify(groupMembershipService).add(ImmutableList.of(m2Truncated, m4Truncated));
-		verify(groupMembershipService).add(ImmutableList.of(m1));
-	}
+	//	@Test
+	//	public void testAddGroupMembershipJoiningOverlaps()
+	//	{
+	//		/*
+	//			Going to add user to group1.
+	//			user already is a member of group2, group3, and group4
+	//			           [------group1-----)
+	//			[---group1---)  [group1)  [---group1---------
+	//
+	//			Desired outcome:
+	//			[-----------------group1---------------------
+	//		 */
+	//		GroupMembership m1 = createMembership(null, 2, 5, group1);
+	//		GroupMembership m2 = createMembership("m2", 1, 3, group1);
+	//		GroupMembership m3 = createMembership("m3", 3, 4, group1);
+	//		GroupMembership m4 = createMembership("m4", 4, null, group1);
+	//		when(group1.hasSameParentAs(any(Group.class))).thenReturn(true);
+	//		when(groupMembershipService.getGroupMemberships(user)).thenReturn(ImmutableList.of(m2, m3, m4));
+	//
+	//		groupService.addUserToGroup(m1.getUser(), m1.getGroup(), m1.getStart(), m1.getEnd().get());
+	//
+	//		GroupMembership allCombined = createMembership(null, 1, null, group1);
+	//		verify(groupMembershipService).delete(ImmutableList.of(m2, m3, m4));
+	//		verify(groupMembershipService).add(ImmutableList.of());
+	//		verify(groupMembershipService).add(ImmutableList.of(allCombined));
+	//	}
+	//
+	//	@Test
+	//	public void testAddGroupMembershipConflictingOverlaps()
+	//	{
+	//		/*
+	//			Going to add user to group1.
+	//			user already is a member of group2, group3, and group4
+	//			           [------group1-----)
+	//			[---group2---)[--group3--)[---group4---------
+	//
+	//			Desired outcome:
+	//			[---group2)[------group1-----)[-group4-------
+	//		 */
+	//		GroupMembership m1 = createMembership(null, 2, 5, group1);
+	//		GroupMembership m2 = createMembership("m2", 1, 3, group2);
+	//		GroupMembership m3 = createMembership("m3", 3, 4, group3);
+	//		GroupMembership m4 = createMembership("m4", 4, null, group4);
+	//		when(group1.hasSameParentAs(any(Group.class))).thenReturn(true);
+	//		when(groupMembershipService.getGroupMemberships(user)).thenReturn(ImmutableList.of(m2, m3, m4));
+	//
+	//		groupService.addUserToGroup(m1.getUser(), m1.getGroup(), m1.getStart(), m1.getEnd().get());
+	//
+	//		GroupMembership m2Truncated = createMembership(null, 1, 2, group2);
+	//		GroupMembership m4Truncated = createMembership(null, 5, null, group4);
+	//		verify(groupMembershipService).delete(ImmutableList.of(m2, m3, m4));
+	//		verify(groupMembershipService).add(ImmutableList.of(m2Truncated, m4Truncated));
+	//		verify(groupMembershipService).add(ImmutableList.of(m1));
+	//	}
 
 	private GroupMembership createMembership(String id, int start, Integer end, Group group)
 	{

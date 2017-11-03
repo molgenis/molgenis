@@ -19,9 +19,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
+import static java.time.Instant.now;
+import static java.time.ZoneId.systemDefault;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -117,8 +120,19 @@ public class GroupController
 		User user = userService.findUserById(updateUserMembership.getUserId())
 							   .orElseThrow(() -> new MolgenisDataException(ROLE_NOT_FOUND_MESSAGE));
 
-		Instant startDate = updateUserMembership.getStart().atStartOfDay(ZoneId.systemDefault()).toInstant();
-		groupService.addUserToGroup(user, group, startDate);
+		groupService.removeUserFromGroup(user, group);
+
+		Instant startDate = Optional.of(updateUserMembership.getStart())
+									.map(start -> start.atStartOfDay(systemDefault()))
+									.map(ZonedDateTime::toInstant)
+									.filter(now()::isBefore)
+									.orElse(now());
+		GroupMembership.Builder newMembership = GroupMembership.builder().user(user).group(group).start(startDate);
+		updateUserMembership.getStop()
+							.map(stop -> stop.atStartOfDay(systemDefault()))
+							.map(ZonedDateTime::toInstant)
+							.ifPresent(newMembership::end);
+		groupService.addGroupMembership(newMembership.build());
 	}
 
 	@ApiOperation("Remove a user from a group")

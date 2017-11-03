@@ -94,28 +94,32 @@
         deleteGroupRole: DELETE_GROUP_ROLE
       }),
       onRemove () {
-        if (this.type === 'user') {
-          this.deleteMember({userId: this.id, groupId: this.role}).then(() => this.$router.go(-1))
-        } else {
+        if (this.groupSelected) {
           this.deleteGroupRole({
             groupId: this.id,
             roleId: this.role
           }).then(() => this.$router.go(-1))
+        } else {
+          this.deleteMember({userId: this.id, groupId: this.role}).then(() => this.$router.go(-1))
         }
       },
       onSubmit () {
-        if (this.type === 'user') {
-          this.createMember({
-            id: this.id,
-            role: this.role,
-            until: this.until,
-            from: this.from
-          }).then(() => this.$router.go(-1))
-        } else {
+        if (this.untilDateBeforeFromDateError) {
+          return
+        }
+        if (this.groupSelected) {
           this.updateGroupRole({
             groupId: this.id,
             roleId: this.role
           }).then(() => this.$router.go(-1))
+        } else {
+          const mutation = {
+            userId: this.id,
+            groupId: this.role,
+            start: this.from,
+            stop: this.until || null
+          }
+          this.createMember(mutation).then(() => this.$router.go(-1))
         }
       }
     },

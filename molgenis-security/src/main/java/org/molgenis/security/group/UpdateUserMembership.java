@@ -11,7 +11,6 @@ import java.util.Optional;
 @SuppressWarnings("squid:S1610")
 public abstract class UpdateUserMembership
 {
-
 	public abstract String getUserId();
 
 	public abstract String getGroupId();

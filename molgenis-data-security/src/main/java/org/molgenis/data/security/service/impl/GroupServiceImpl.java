@@ -1,8 +1,6 @@
 package org.molgenis.data.security.service.impl;
 
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.model.GroupEntity;
 import org.molgenis.data.security.model.GroupFactory;
@@ -11,20 +9,21 @@ import org.molgenis.security.core.model.Group;
 import org.molgenis.security.core.model.GroupMembership;
 import org.molgenis.security.core.model.Role;
 import org.molgenis.security.core.model.User;
-import org.molgenis.security.core.service.GroupService;
 import org.molgenis.security.core.service.GroupMembershipService;
+import org.molgenis.security.core.service.GroupService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.time.Instant.now;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.model.GroupMetadata.GROUP;
 import static org.molgenis.security.core.model.Group.builder;
@@ -47,20 +46,6 @@ public class GroupServiceImpl implements GroupService
 	}
 
 	@Override
-	@Transactional
-	public void addUserToGroup(User user, Group group)
-	{
-		addUserToGroup(user, group, now());
-	}
-
-	@Override
-	@Transactional
-	public void addUserToGroup(User user, Group group, Instant start)
-	{
-		add(GroupMembership.builder().user(user).group(group).start(start).build());
-	}
-
-	@Override
 	public Optional<Group> findGroupById(String groupId)
 	{
 		return Optional.ofNullable(dataService.findOneById(GROUP, groupId, GroupEntity.class))
@@ -68,20 +53,9 @@ public class GroupServiceImpl implements GroupService
 	}
 
 	@Override
-	@Transactional
-	public void addUserToGroup(User user, Group group, Instant start, Instant end)
+	public void addGroupMembership(GroupMembership membership)
 	{
-		add(GroupMembership.builder().user(user).group(group).start(start).end(end).build());
-	}
-
-	private void add(GroupMembership membership)
-	{
-		List<GroupMembership> overlaps = getOverlapsSameUser(membership);
-		groupMembershipService.delete(overlaps);
-		Map<Boolean, List<GroupMembership>> partitioned = overlaps.stream()
-																  .collect(partitioningBy(membership::isSameGroup));
-		groupMembershipService.add(processOtherGroupOverlaps(membership, partitioned.get(false)));
-		groupMembershipService.add(processSameGroupOverlaps(membership, partitioned.get(true)));
+		groupMembershipService.add(Collections.singletonList(membership));
 	}
 
 	private List<GroupMembership> getOverlapsSameUser(GroupMembership newMembership)
@@ -90,42 +64,6 @@ public class GroupServiceImpl implements GroupService
 									 .stream()
 									 .filter(newMembership::isOverlappingWith)
 									 .collect(toList());
-	}
-
-	private List<GroupMembership> processSameGroupOverlaps(GroupMembership newMembership,
-			List<GroupMembership> sameGroup)
-	{
-		RangeSet<Instant> validities = TreeRangeSet.create();
-		validities.add(newMembership.getValidity());
-		sameGroup.stream().map(GroupMembership::getValidity).forEach(validities::add);
-		return validities.asRanges()
-						 .stream()
-						 .map(validity -> GroupMembership.builder()
-														 .group(newMembership.getGroup())
-														 .user(newMembership.getUser())
-														 .validity(validity)
-														 .build())
-						 .collect(Collectors.toList());
-	}
-
-	private List<GroupMembership> processOtherGroupOverlaps(GroupMembership newMembership,
-			List<GroupMembership> conflicts)
-	{
-		return conflicts.stream().flatMap(conflict -> truncate(conflict, newMembership)).collect(toList());
-	}
-
-	private Stream<GroupMembership> truncate(GroupMembership groupMembership, GroupMembership newMembership)
-	{
-		RangeSet<Instant> leftover = TreeRangeSet.create();
-		leftover.add(groupMembership.getValidity());
-		leftover.remove(newMembership.getValidity());
-		return leftover.asRanges()
-					   .stream()
-					   .map(validity -> GroupMembership.builder()
-													   .group(groupMembership.getGroup())
-													   .user(groupMembership.getUser())
-													   .validity(validity)
-													   .build());
 	}
 
 	@Override
