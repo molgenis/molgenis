@@ -26,11 +26,13 @@
         <div v-show="!groupSelected">
           <div class="form-group">
             <label for="fromDate">From</label>
-            <flat-pickr v-model="from" id="fromDate" :required="true" :config="{allowInput: true}"></flat-pickr>
+            <flat-pickr v-model="from" id="fromDate" :required="true"
+                        :config="{allowInput: true, minDate: today, maxDate: maxFromDate}"></flat-pickr>
           </div>
           <div class="form-group" :class="{'has-danger': untilDateBeforeFromDateError}" v-show="!groupSelected">
             <label for="untilDate">Until</label>
-            <flat-pickr v-model="until" id="untilDate" :required="false" :config="{allowInput: true}"></flat-pickr>
+            <flat-pickr v-model="until" id="untilDate" :required="false"
+                        :config="{allowInput: true, minDate: minUntilDate}"></flat-pickr>
             <div v-if="untilDateBeforeFromDateError" class="form-control-feedback">
               Until date must be after the from date
             </div>
@@ -82,8 +84,9 @@
       ...mapGetters(['members', 'unassignedUsers', 'unassignedGroups', 'context', 'member', 'roles', 'context']),
       roleOptions () { return this.groupSelected ? this.roles : this.context.children },
       groupSelected () { return this.type === 'group' || this.unassignedGroups.some(role => role.id === this.id) },
-      untilDate () { return this.until && moment(this.until, 'YYYY-MM-DD') },
-      fromDate () { return this.from && moment(this.from, 'YYYY-MM-DD') },
+      today () { return moment().format('YYYY-MM-DD') },
+      maxFromDate () { return this.until && moment(this.until, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD') },
+      minUntilDate () { return this.from && moment(this.from, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD') },
       untilDateBeforeFromDateError () {
         return !!this.untilDate && this.untilDate.isSameOrBefore(this.fromDate)
       }
