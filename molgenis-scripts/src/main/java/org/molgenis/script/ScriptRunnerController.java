@@ -3,7 +3,7 @@ package org.molgenis.script;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.jobs.JobExecutor;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.jobs.JobsController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;

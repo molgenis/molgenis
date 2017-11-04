@@ -1,18 +1,17 @@
 package org.molgenis.security.account;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.Group;
-import org.molgenis.auth.GroupMember;
-import org.molgenis.auth.GroupMemberFactory;
-import org.molgenis.auth.User;
-import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.core.model.User;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.service.UserService;
+import org.molgenis.security.core.service.exception.EmailAlreadyExistsException;
+import org.molgenis.security.core.service.exception.MolgenisUserException;
+import org.molgenis.security.core.service.exception.UsernameAlreadyExistsException;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.user.MolgenisUserException;
-import org.molgenis.security.user.UserService;
+import org.molgenis.util.CountryCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
@@ -22,15 +21,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
+import java.text.MessageFormat;
 import java.util.List;
 
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.GroupMetaData.NAME;
-import static org.molgenis.auth.UserMetaData.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 
@@ -39,77 +35,54 @@ public class AccountServiceImpl implements AccountService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AccountServiceImpl.class);
 
-	private final DataService dataService;
 	private final MailSender mailSender;
 	private final UserService userService;
 	private final AppSettings appSettings;
 	private final AuthenticationSettings authenticationSettings;
-	private final GroupMemberFactory groupMemberFactory;
 	private final IdGenerator idGenerator;
 
-	public AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService,
-			AppSettings appSettings, AuthenticationSettings authenticationSettings,
-			GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)
+	public AccountServiceImpl(MailSender mailSender, UserService userService, AppSettings appSettings,
+			AuthenticationSettings authenticationSettings, IdGenerator idGenerator)
 	{
-		this.dataService = requireNonNull(dataService);
 		this.mailSender = requireNonNull(mailSender);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
-		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	@Override
 	@RunAsSystem
 	@Transactional
-	public void createUser(User user, String baseActivationUri)
+	public User register(RegisterRequest registerRequest, String baseActivationUri)
 			throws UsernameAlreadyExistsException, EmailAlreadyExistsException
 	{
-		// Check if username already exists
-		if (userService.getUser(user.getUsername()) != null)
-		{
-			throw new UsernameAlreadyExistsException("Username '" + user.getUsername() + "' already exists.");
-		}
+		String activationCode = idGenerator.generateId(SECURE_RANDOM);
 
-		// Check if email already exists
-		if (userService.getUserByEmail(user.getEmail()) != null)
-		{
-			throw new EmailAlreadyExistsException("Email '" + user.getEmail() + "' is already registered.");
-		}
+		// create user
+		User user = toUser(registerRequest, activationCode);
+		userService.add(user);
+		LOG.debug("created user " + user.getUsername());
 
 		// collect activation info
-		String activationCode = idGenerator.generateId(SECURE_RANDOM);
 		List<String> activationEmailAddresses;
 		if (authenticationSettings.getSignUpModeration())
 		{
 			activationEmailAddresses = userService.getSuEmailAddresses();
 			if (activationEmailAddresses == null || activationEmailAddresses.isEmpty())
+			{
 				throw new MolgenisDataException("Administrator account is missing required email address");
+			}
 		}
 		else
 		{
 			String activationEmailAddress = user.getEmail();
-			if (activationEmailAddress == null || activationEmailAddress.isEmpty())
-				throw new MolgenisDataException("User '" + user.getUsername() + "' is missing required email address");
-			activationEmailAddresses = asList(activationEmailAddress);
-		}
-
-		// create user
-		user.setActivationCode(activationCode);
-		user.setActive(false);
-		dataService.add(USER, user);
-		LOG.debug("created user " + user.getUsername());
-
-		// add user to group
-		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
-		GroupMember groupMember = null;
-		if (group != null)
-		{
-			groupMember = groupMemberFactory.create();
-			groupMember.setGroup(group);
-			groupMember.setUser(user);
-			dataService.add(GROUP_MEMBER, groupMember);
+			if (StringUtils.isBlank(activationEmailAddress))
+			{
+				throw new MolgenisDataException(
+						MessageFormat.format("User ''{0}'' is missing required email address", user.getUsername()));
+			}
+			activationEmailAddresses = singletonList(activationEmailAddress);
 		}
 
 		// send activation email
@@ -121,120 +94,141 @@ public class AccountServiceImpl implements AccountService
 			mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
 			mailMessage.setSubject("User registration for " + appSettings.getTitle());
 			mailMessage.setText(createActivationEmailText(user, activationUri));
+			LOG.debug("send activation email for user {} to {}", user.getUsername(), activationEmailAddresses);
 			mailSender.send(mailMessage);
 		}
 		catch (MailException mce)
 		{
 			LOG.error("Could not send signup mail", mce);
-
-			if (groupMember != null)
-			{
-				dataService.delete(GROUP_MEMBER, groupMember);
-			}
-
-			dataService.delete(USER, user);
-
 			throw new MolgenisUserException(
 					"An error occurred. Please contact the administrator. You are not signed up!");
 		}
-		LOG.debug("send activation email for user " + user.getUsername() + " to " + StringUtils.join(
-				activationEmailAddresses, ','));
 
+		return user;
+	}
+
+	private User toUser(RegisterRequest request, String activationCode)
+	{
+		User.Builder result = User.builder()
+								  .username(request.getUsername())
+								  .email(request.getEmail())
+								  .password(request.getPassword())
+								  .activationCode(activationCode)
+								  .active(false)
+								  .changePassword(false)
+								  .superuser(false);
+		if (isNotBlank(request.getFirstname()))
+		{
+			result.firstName(request.getFirstname());
+		}
+		if (isNotBlank(request.getLastname()))
+		{
+			result.lastName(request.getLastname());
+		}
+		if (isNotBlank(request.getPhone()))
+		{
+			result.phone(request.getPhone());
+		}
+		if (isNotBlank(request.getFax()))
+		{
+			result.fax(request.getFax());
+		}
+		if (isNotBlank(request.getTollFreePhone()))
+		{
+			result.tollFreePhone(request.getTollFreePhone());
+		}
+		if (isNotBlank(request.getAddress()))
+		{
+			result.address(request.getAddress());
+		}
+		if (isNotBlank(request.getTitle()))
+		{
+			result.title(request.getTitle());
+		}
+		if (isNotBlank(request.getLastname()))
+		{
+			result.lastName(request.getLastname());
+		}
+		if (isNotBlank(request.getDepartment()))
+		{
+			result.department(request.getDepartment());
+		}
+		if (isNotBlank(request.getCity()))
+		{
+			result.city(request.getCity());
+		}
+		if (isNotBlank(request.getCountry()))
+		{
+			String country = CountryCodes.get(request.getCountry());
+			if (country != null)
+			{
+				result.country(country);
+			}
+		}
+		return result.build();
 	}
 
 	@Override
 	@RunAsSystem
 	public void activateUser(String activationCode)
 	{
-		User user = dataService.query(USER, User.class)
-							   .eq(ACTIVE, false)
-							   .and()
-							   .eq(ACTIVATIONCODE, activationCode)
-							   .findOne();
-
-		if (user != null)
-		{
-			user.setActive(true);
-			dataService.update(USER, user);
-
-			// send activated email to user
-			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(user.getEmail());
-			mailMessage.setSubject("Your registration request for " + appSettings.getTitle());
-			mailMessage.setText(createActivatedEmailText(user, appSettings.getTitle()));
-			mailSender.send(mailMessage);
-		}
-		else
-		{
-			throw new MolgenisUserException("Invalid activation code or account already activated.");
-		}
+		User user = userService.activateUserUsingCode(activationCode)
+							   .orElseThrow(() -> new MolgenisUserException(
+									   "Invalid activation code or account already activated."));
+		// send activated email to user
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setTo(user.getEmail());
+		mailMessage.setSubject("Your registration request for " + appSettings.getTitle());
+		mailMessage.setText(createActivatedEmailText(user, appSettings.getTitle()));
+		mailSender.send(mailMessage);
 	}
 
 	@Override
 	@RunAsSystem
 	public void changePassword(String username, String newPassword)
 	{
-		User user = dataService.query(USER, User.class).eq(USERNAME, username).findOne();
-		if (user == null)
-		{
-			throw new MolgenisUserException(format("Unknown user [%s]", username));
-		}
-
-		user.setPassword(newPassword);
-		user.setChangePassword(false);
-		dataService.update(USER, user);
-
+		userService.update(
+				userService.findByUsername(username).toBuilder().password(newPassword).changePassword(false).build());
 		LOG.info("Changed password of user [{}]", username);
 	}
 
 	@Override
 	@RunAsSystem
-	public void resetPassword(String userEmail)
+	public void resetPassword(String email)
 	{
-		User user = dataService.query(USER, User.class).eq(EMAIL, userEmail).findOne();
+		String newPassword = idGenerator.generateId(SHORT_SECURE_RANDOM);
+		User user = userService.findByEmail(email);
+		User updated = user.toBuilder().password(newPassword).changePassword(true).build();
+		userService.update(updated);
 
-		if (user != null)
-		{
-			String newPassword = idGenerator.generateId(SHORT_SECURE_RANDOM);
-			user.setPassword(newPassword);
-			user.setChangePassword(true);
-			dataService.update(USER, user);
-
-			// send password reseted email to user
-			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(user.getEmail());
-			mailMessage.setSubject("Your new password request");
-			mailMessage.setText(createPasswordResettedEmailText(newPassword));
-			mailSender.send(mailMessage);
-		}
-		else
-		{
-			throw new MolgenisUserException("Invalid email address.");
-		}
+		// send password reset email to user
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setTo(user.getEmail());
+		mailMessage.setSubject("Your new password request");
+		mailMessage.setText(createPasswordResettedEmailText(newPassword));
+		mailSender.send(mailMessage);
+		LOG.info("Reset password of user [{}]", user.getUsername());
 	}
 
 	private String createActivationEmailText(User user, URI activationUri)
 	{
-		String strBuilder =
-				"User registration for " + appSettings.getTitle() + '\n' + "User name: " + user.getUsername()
-						+ " Full name: " + user.getFirstName() + ' ' + user.getLastName() + '\n'
-						+ "In order to activate the user visit the following URL:" + '\n' + activationUri + '\n' + '\n';
-		return strBuilder;
+		return MessageFormat.format("User registration for {0}\nUser name: {1} Full name: {2}\n"
+						+ "In order to activate the user visit the following URL:\n{3}\n\n", appSettings.getTitle(),
+				user.getUsername(), user.getFormattedName(), activationUri);
 	}
 
 	private String createActivatedEmailText(User user, String appName)
 	{
-		String strBuilder =
-				"Dear " + user.getFirstName() + " " + user.getLastName() + ",\n\n" + "your registration request for "
-						+ appName + " was approved.\n" + "Your account is now active.\n";
-		return strBuilder;
+		return MessageFormat.format(
+				"Dear {0},\n\nyour registration request for {1} was approved.\nYour account is now active.\n",
+				user.getFormattedName(), appName);
 	}
 
 	private String createPasswordResettedEmailText(String newPassword)
 	{
-		String strBuilder = "Somebody, probably you, requested a new password for " + appSettings.getTitle() + ".\n"
-				+ "The new password is: " + newPassword + '\n'
-				+ "Note: we strongly recommend you reset your password after log-in!";
-		return strBuilder;
+		return MessageFormat.format(
+				"Somebody, probably you, requested a new password for {0}.\nThe new password is: {1}\n"
+						+ "Note: we strongly recommend you reset your password after log-in!", appSettings.getTitle(),
+				newPassword);
 	}
 }

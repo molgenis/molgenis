@@ -1,161 +1,181 @@
 package org.molgenis.security.twofactor.service;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.populate.IdGeneratorImpl;
-import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
+import org.molgenis.security.core.service.UserService;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
-import org.molgenis.security.twofactor.model.UserSecretMetaData;
-import org.molgenis.security.user.UserService;
-import org.molgenis.security.user.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.Instant;
+import java.util.stream.Stream;
 
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_ID;
+import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_SECRET;
+import static org.testng.Assert.*;
 
-@ContextConfiguration(classes = { TwoFactorAuthenticationServiceImplTest.Config.class })
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpringContextTests
+public class TwoFactorAuthenticationServiceImplTest
 {
-	private final static String USERNAME = "molgenisUser";
-	private final static String ROLE_SU = "SU";
-	@Autowired
+	private User user = User.builder()
+							.id("userId")
+							.username("user")
+							.email("user@example.com")
+							.password("password")
+							.twoFactorAuthentication(true)
+							.build();
+	@Mock
+	private UserSecret userSecret;
+	@Mock
+	private OtpService otpService;
+	@Mock
 	private DataService dataService;
-	@Autowired
+	@Mock
+	private UserAccountService userAccountService;
+	@Mock
 	private UserService userService;
-	@Autowired
+	@Mock
+	private IdGenerator idGenerator;
+	@Mock
+	private Stream<UserSecret> userSecrets;
+	@Mock
 	private UserSecretFactory userSecretFactory;
-	@Autowired
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private org.molgenis.auth.User molgenisUser = mock(org.molgenis.auth.User.class);
-	private UserSecret userSecret = mock(UserSecret.class);
 
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	@InjectMocks
+	private TwoFactorAuthenticationServiceImpl twoFactorAuthenticationService;
+
+	private MockitoSession mockitoSession;
+
 	@BeforeMethod
-	@SuppressWarnings("unchecked")
 	public void setUpBeforeMethod()
 	{
-		when(molgenisUser.getUsername()).thenReturn(USERNAME);
-		when(molgenisUser.getId()).thenReturn("1324");
-		when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
-		when(dataService.query(UserSecretMetaData.USER_SECRET, UserSecret.class)
-						.eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
-						.findOne()).thenReturn(userSecret);
+		twoFactorAuthenticationService = null; // final fields won't be reset by mockito's @InjectMocks
+		mockitoSession = Mockito.mockitoSession().strictness(Strictness.STRICT_STUBS).initMocks(this).startMocking();
+	}
+
+	@AfterMethod
+	public void afterMethod()
+	{
+		mockitoSession.finishMocking();
 	}
 
 	@Test
-	public void generateSecretKeyTest()
+	public void testGenerateSecretKey()
 	{
-		String key = twoFactorAuthenticationService.generateSecretKey();
-		assertTrue(key.matches("^[a-z0-9]+$"));
+		when(idGenerator.generateId(IdGenerator.Strategy.SECURE_RANDOM)).thenReturn("secretKey");
+
+		assertEquals(twoFactorAuthenticationService.generateSecretKey(), "secretKey");
 	}
 
 	@Test
-	public void generateWrongSecretKeyTest()
+	public void testEnableForUser()
 	{
-		String key = twoFactorAuthenticationService.generateSecretKey();
-		assertTrue(!key.matches("^[A-Z0-9]+$"));
+		when(userAccountService.getCurrentUser()).thenReturn(user.toBuilder().twoFactorAuthentication(false).build());
+
+		twoFactorAuthenticationService.enableForUser();
+
+		verify(userService).update(user);
 	}
 
 	@Test
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	public void setSecretKeyTest()
+	public void testSaveSecretForUser()
 	{
-		String secretKey = "secretKey";
+		when(userAccountService.getCurrentUser()).thenReturn(user);
 		when(userSecretFactory.create()).thenReturn(userSecret);
-		twoFactorAuthenticationService.saveSecretForUser(secretKey);
+
+		twoFactorAuthenticationService.saveSecretForUser("secretKey");
+
+		verify(userSecret).setSecret("secretKey");
+		verify(userSecret).setUserId("userId");
+		verify(dataService).add(USER_SECRET, userSecret);
+	}
+
+	@Test(expectedExceptions = InternalAuthenticationServiceException.class, expectedExceptionsMessageRegExp = "No secretKey found")
+	public void testSaveSecretForUserNull()
+	{
+		twoFactorAuthenticationService.saveSecretForUser(null);
 	}
 
 	@Test
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
+	public void testResetSecretForUser()
+	{
+		when(userAccountService.getCurrentUser()).thenReturn(user);
+		when(dataService.findAll(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
+				UserSecret.class)).thenReturn(userSecrets);
+
+		twoFactorAuthenticationService.resetSecretForUser();
+
+		verify(dataService).delete(USER_SECRET, userSecrets);
+	}
+
+	@Test
 	public void isConfiguredForUserTest()
 	{
+		when(userAccountService.getCurrentUser()).thenReturn(user);
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
+				UserSecret.class)).thenReturn(userSecret);
 		when(userSecret.getSecret()).thenReturn("secretKey");
-		boolean isConfigured = twoFactorAuthenticationService.isConfiguredForUser();
-		assertEquals(true, isConfigured);
+
+		assertTrue(twoFactorAuthenticationService.isConfiguredForUser());
 	}
 
 	@Test(expectedExceptions = TooManyLoginAttemptsException.class)
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
 	public void testUserIsBlocked()
 	{
-		when(userSecret.getLastFailedAuthentication()).thenReturn(Instant.now());
+		when(userAccountService.getCurrentUser()).thenReturn(user);
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
+				UserSecret.class)).thenReturn(userSecret);
 		when(userSecret.getFailedLoginAttempts()).thenReturn(3);
-		boolean isBlocked = twoFactorAuthenticationService.userIsBlocked();
-		assertEquals(true, isBlocked);
+		when(userSecret.hasRecentFailedLoginAttempt(30)).thenReturn(true);
+
+		twoFactorAuthenticationService.userIsBlocked();
 	}
 
 	@Test
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	public void testDisableForUser()
+	public void testUserisBlockedMoreAttemptsLeft()
 	{
-		when(userService.getUser(molgenisUser.getUsername())).thenReturn(molgenisUser);
-		when(dataService.query(UserSecretMetaData.USER_SECRET, UserSecret.class)
-						.eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
-						.findOne()).thenReturn(userSecret);
-		twoFactorAuthenticationService.disableForUser();
+		when(userAccountService.getCurrentUser()).thenReturn(user);
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
+				UserSecret.class)).thenReturn(userSecret);
+		when(userSecret.getFailedLoginAttempts()).thenReturn(2);
+
+		assertFalse(twoFactorAuthenticationService.userIsBlocked());
 	}
 
-	@Configuration
-	static class Config
+	@Test
+	public void testUserisBlockedTimeoutPassed()
 	{
-		@Bean
-		public TwoFactorAuthenticationService twoFactorAuthenticationService()
-		{
-			return new TwoFactorAuthenticationServiceImpl(otpService(), dataService(), userService(), idGenerator(),
-					userSecretFactory());
-		}
+		when(userAccountService.getCurrentUser()).thenReturn(user);
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
+				UserSecret.class)).thenReturn(userSecret);
+		when(userSecret.getFailedLoginAttempts()).thenReturn(3);
+		when(userSecret.hasRecentFailedLoginAttempt(30)).thenReturn(false);
 
-		@Bean
-		public OtpService otpService()
-		{
-			return new OtpServiceImpl(appSettings());
-		}
+		assertFalse(twoFactorAuthenticationService.userIsBlocked());
+	}
 
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataServiceImpl.class, RETURNS_DEEP_STUBS);
-		}
+	@Test
+	public void testDisableForUser()
+	{
+		when(userAccountService.getCurrentUser()).thenReturn(user);
+		when(dataService.findOne(USER_SECRET, new QueryImpl<UserSecret>().eq(USER_ID, "userId"),
+				UserSecret.class)).thenReturn(userSecret);
 
-		@Bean
-		public UserService userService()
-		{
-			return mock(UserServiceImpl.class);
-		}
+		twoFactorAuthenticationService.disableForUser();
 
-		@Bean
-		public IdGenerator idGenerator()
-		{
-			return new IdGeneratorImpl();
-		}
-
-		@Bean
-		public AppSettings appSettings()
-		{
-			return mock(AppSettings.class);
-		}
-
-		@Bean
-		public UserSecretFactory userSecretFactory()
-		{
-			return mock(UserSecretFactory.class);
-		}
-
+		verify(userService).update(user.toBuilder().twoFactorAuthentication(false).build());
+		verify(dataService).delete(USER_SECRET, userSecret);
 	}
 }

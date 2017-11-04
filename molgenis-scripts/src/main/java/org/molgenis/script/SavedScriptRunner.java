@@ -6,7 +6,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.service.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 
@@ -82,9 +82,10 @@ public class SavedScriptRunner
 
 		if (script.isGenerateToken())
 		{
-			String token = tokenService.generateAndStoreToken(SecurityUtils.getCurrentUsername(),
-					"For script " + script.getName());
-			parameters.put("molgenisToken", token);
+			SecurityUtils.getCurrentUsername()
+						 .map(username -> tokenService.generateAndStoreToken(username,
+								 "For script " + script.getName()))
+						 .ifPresent(token -> parameters.put("molgenisToken", token));
 		}
 
 		FileMeta fileMeta = null;

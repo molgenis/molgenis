@@ -1,134 +1,141 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.User;
-import org.molgenis.security.user.UserAccountServiceImplTest.Config;
+import org.molgenis.data.security.user.UserAccountServiceImpl;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
-@ContextConfiguration(classes = { Config.class })
+@ContextConfiguration(classes = { UserAccountServiceImplTest.Config.class })
+@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
 public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	private static final String USERNAME_USER = "username";
-	private static Authentication AUTHENTICATION_PREVIOUS;
-	private Authentication authentication;
 	@Autowired
-	private UserAccountServiceImpl userAccountServiceImpl;
+	private UserAccountServiceImpl userAccountService;
 	@Autowired
 	private UserService userService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	@AfterClass
-	public static void tearDownAfterClass()
-	{
-		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
-	}
+	private User user = User.builder()
+							.username("user")
+							.id("1")
+							.password("encrypted-password")
+							.email("jan@example.com")
+							.build();
 
-	@BeforeClass
-	public void setUpBeforeClass()
+	private User anonymous = User.builder()
+								 .username("anonymous")
+								 .id("1")
+								 .password("encrypted-password")
+								 .email("anonymous@example.com")
+								 .build();
+
+	@Test
+	@WithMockUser
+	public void testGetCurrentUserIfPresent() throws Exception
 	{
-		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
-		authentication = mock(Authentication.class);
-		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(userService.findByUsernameIfPresent("user")).thenReturn(Optional.of(user));
+
+		assertEquals(userAccountService.getCurrentUserIfPresent(), Optional.of(user));
 	}
 
 	@Test
-	public void getCurrentUser()
+	@WithMockUser
+	public void testGetCurrentUserIfPresentNotFoundInDatabase() throws Exception
 	{
-		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
+		when(userService.findByUsernameIfPresent("user")).thenReturn(Optional.empty());
 
-		User existingUser = mock(User.class);
-		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
-		assertEquals(userAccountServiceImpl.getCurrentUser(), existingUser);
+		assertEquals(userAccountService.getCurrentUserIfPresent(), Optional.empty());
 	}
 
 	@Test
+	@WithAnonymousUser
+	public void testGetCurrentUserIfPresentAnonymous() throws Exception
+	{
+		when(userService.findByUsernameIfPresent("anonymous")).thenReturn(Optional.of(anonymous));
+
+		assertEquals(userAccountService.getCurrentUserIfPresent(), Optional.of(anonymous));
+	}
+
+	@Test
+	public void testGetCurrentUserNoAuthentication()
+	{
+		assertEquals(userAccountService.getCurrentUserIfPresent(), Optional.empty());
+	}
+
+	@Test
+	@WithMockUser
 	public void updateCurrentUser()
 	{
-		User existingUser = mock(User.class);
-		when(existingUser.getId()).thenReturn("1");
-		when(existingUser.getUsername()).thenReturn(USERNAME_USER);
-		when(existingUser.getPassword()).thenReturn("encrypted-password");
+		User updatedUser = user.toBuilder().password("updated").build();
 
-		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
-
-		User updatedUser = mock(User.class);
-		when(updatedUser.getId()).thenReturn("1");
-		when(updatedUser.getUsername()).thenReturn("username");
-		when(updatedUser.getPassword()).thenReturn("encrypted-password");
-
-		userAccountServiceImpl.updateCurrentUser(updatedUser);
-		verify(passwordEncoder, never()).encode("encrypted-password");
+		userAccountService.updateCurrentUser(updatedUser);
+		verify(passwordEncoder, never()).encode(any());
+		verify(userService).update(updatedUser);
 	}
 
-	@Test(expectedExceptions = RuntimeException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	@WithMockUser
 	public void updateCurrentUser_wrongUser()
 	{
-		User existingUser = mock(User.class);
-		when(existingUser.getId()).thenReturn("1");
-		when(existingUser.getPassword()).thenReturn("encrypted-password");
-
-		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
-
-		User updatedUser = mock(User.class);
-		when(updatedUser.getId()).thenReturn("1");
-		when(updatedUser.getUsername()).thenReturn("wrong-username");
-		when(updatedUser.getPassword()).thenReturn("encrypted-password");
-
-		userAccountServiceImpl.updateCurrentUser(updatedUser);
+		User updatedUser = user.toBuilder().username("other").password("updated").build();
+		userAccountService.updateCurrentUser(updatedUser);
 	}
 
 	@Test
+	@WithMockUser
 	public void updateCurrentUser_changePassword()
 	{
 		when(passwordEncoder.matches("new-password", "encrypted-password")).thenReturn(true);
-		User existingUser = mock(User.class);
-		when(existingUser.getId()).thenReturn("1");
-		when(existingUser.getPassword()).thenReturn("encrypted-password");
-		when(existingUser.getUsername()).thenReturn("username");
 
-		when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
+		User updatedUser = User.builder()
+							   .username("user")
+							   .id("1")
+							   .password("new-password")
+							   .twoFactorAuthentication(false)
+							   .active(true)
+							   .superuser(false)
+							   .email("jan@example.com")
+							   .changePassword(false)
+							   .build();
 
-		User updatedUser = mock(User.class);
-		when(updatedUser.getId()).thenReturn("1");
-		when(updatedUser.getPassword()).thenReturn("new-password");
-		when(updatedUser.getUsername()).thenReturn("username");
+		userAccountService.updateCurrentUser(updatedUser);
 
-		userAccountServiceImpl.updateCurrentUser(updatedUser);
+		verify(userService).update(updatedUser);
 	}
 
 	@Test
+	@WithMockUser
 	public void validateCurrentUserPassword()
 	{
-		User existingUser = mock(User.class);
-		when(existingUser.getId()).thenReturn("1");
-		when(existingUser.getPassword()).thenReturn("encrypted-password");
-		when(existingUser.getUsername()).thenReturn("username");
+		when(userService.findByUsernameIfPresent("user")).thenReturn(Optional.of(user));
 		when(passwordEncoder.matches("password", "encrypted-password")).thenReturn(true);
-		assertTrue(userAccountServiceImpl.validateCurrentUserPassword("password"));
-		assertFalse(userAccountServiceImpl.validateCurrentUserPassword("wrong-password"));
+		assertTrue(userAccountService.validateCurrentUserPassword("password"));
+		assertFalse(userAccountService.validateCurrentUserPassword("wrong-password"));
 	}
 
 	@Configuration
-	static class Config
+	public static class Config
 	{
 		@Bean
 		public UserAccountServiceImpl userAccountServiceImpl()
 		{
-			return new UserAccountServiceImpl();
+			return new UserAccountServiceImpl(userService(), passwordEncoder());
 		}
 
 		@Bean
@@ -138,7 +145,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public UserService molgenisUserService()
+		public UserService userService()
 		{
 			return mock(UserService.class);
 		}

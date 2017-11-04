@@ -1,14 +1,18 @@
 package org.molgenis.security.owned;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.molgenis.data.security.model.SecurityPackage;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -19,12 +23,15 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.security.owned.OwnedEntityType.OWNER_USERNAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-public class OwnedEntityRepositoryDecoratorTest
+@TestExecutionListeners(WithSecurityContextTestExecutionListener.class)
+@ContextConfiguration(classes = OwnedEntityRepositoryDecoratorTest.Config.class)
+public class OwnedEntityRepositoryDecoratorTest extends AbstractTestNGSpringContextTests
 {
 	private EntityType entityType;
 	private Repository<Entity> delegateRepository;
@@ -57,11 +64,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void addStreamExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity entity0 = mock(Entity.class);
@@ -92,11 +97,9 @@ public class OwnedEntityRepositoryDecoratorTest
 
 	@SuppressWarnings("rawtypes")
 	@Test
+	@WithMockUser("username")
 	public void deleteStreamEntityExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity myEntity = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
@@ -107,7 +110,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository, times(1)).delete(captor.capture());
 		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
-		assertEquals(myEntities, asList(myEntity));
+		assertEquals(myEntities, singletonList(myEntity));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -119,16 +122,34 @@ public class OwnedEntityRepositoryDecoratorTest
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(delegateRepository).update(captor.capture());
 		ownedEntityRepositoryDecorator.update(entities);
-		assertEquals(captor.getValue().collect(Collectors.toList()), asList(entity0));
+		assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(entity0));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
+	@WithMockUser("username")
+	public void updateStreamExtendsOwnedNoUser()
+	{
+		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.get(OwnedEntityType.OWNER_USERNAME)).thenReturn(null);
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
+		doNothing().when(delegateRepository).update(captor.capture());
+
+		ownedEntityRepositoryDecorator.update(entities);
+
+		List<Entity> entityList = captor.getValue().collect(Collectors.toList());
+		assertEquals(entityList, singletonList(entity0));
+		verify(entityList.get(0)).set(OwnedEntityType.OWNER_USERNAME, "username");
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	@WithMockUser("username")
 	public void updateStreamExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity entity0 = mock(Entity.class);
@@ -138,16 +159,14 @@ public class OwnedEntityRepositoryDecoratorTest
 		doNothing().when(delegateRepository).update(captor.capture());
 		ownedEntityRepositoryDecorator.update(entities);
 		List<Entity> entityList = captor.getValue().collect(Collectors.toList());
-		assertEquals(entityList, asList(entity0));
+		assertEquals(entityList, singletonList(entity0));
 		verify(entityList.get(0)).set(OwnedEntityType.OWNER_USERNAME, "username");
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void findOneByIdObjectFetchExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id = 0;
@@ -160,11 +179,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void findOneByIdObjectFetchExtendsOwnedBySomeoneElse()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id = 0;
@@ -202,11 +219,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void findAllStreamExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id0 = "id0";
@@ -220,11 +235,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void findAllStreamExtendsOwnedBySomeoneElse()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Object id0 = "id0";
@@ -253,11 +266,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void findAllStreamFetchExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
@@ -273,11 +284,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void findAllStreamFetchExtendsOwnedBySomeoneElse()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
@@ -304,11 +313,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void findAllAsStreamExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Entity entity0 = when(mock(Entity.class).getString(OWNER_USERNAME)).thenReturn("username").getMock();
@@ -321,11 +328,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void consumeBatchedExtendsOwned()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
@@ -345,11 +350,9 @@ public class OwnedEntityRepositoryDecoratorTest
 	}
 
 	@Test
+	@WithMockUser("username")
 	public void consumeBatchedOwnedBySomeoneElse()
 	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 		when(entityType.getExtends()).thenReturn(new OwnedEntityType(mock(SecurityPackage.class)));
 
 		Fetch fetch = new Fetch();
@@ -366,5 +369,11 @@ public class OwnedEntityRepositoryDecoratorTest
 		consumerCaptor.getValue().accept(asList(entity0, entity1));
 
 		verify(consumer).accept(emptyList());
+	}
+
+	@Configuration
+	public static class Config
+	{
+
 	}
 }

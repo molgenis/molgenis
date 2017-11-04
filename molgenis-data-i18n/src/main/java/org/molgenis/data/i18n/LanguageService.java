@@ -1,21 +1,20 @@
 package org.molgenis.data.i18n;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 @Service
 public class LanguageService
@@ -35,12 +34,15 @@ public class LanguageService
 	private final DataService dataService;
 	private final AppSettings appSettings;
 	private final LocalizationService localizationService;
+	private final UserAccountService userAccountService;
 
-	public LanguageService(DataService dataService, AppSettings appSettings, LocalizationService localizationService)
+	public LanguageService(DataService dataService, AppSettings appSettings, LocalizationService localizationService,
+			UserAccountService userAccountService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.appSettings = requireNonNull(appSettings);
 		this.localizationService = requireNonNull(localizationService);
+		this.userAccountService = requireNonNull(userAccountService);
 	}
 
 	/**
@@ -93,37 +95,16 @@ public class LanguageService
 	 */
 	public String getCurrentUserLanguageCode()
 	{
-		String currentUserName = SecurityUtils.getCurrentUsername();
+		return userAccountService.getCurrentUserIfPresent().flatMap(User::getLanguageCode)
+								 .filter(this::languageExists)
+								 .orElse(Optional.ofNullable(appSettings.getLanguageCode())
+										  .filter(this::languageExists)
+										  .orElse(DEFAULT_LANGUAGE_CODE));
+	}
 
-		return runAsSystem(() ->
-		{
-			String languageCode = null;
-
-			if (currentUserName != null)
-			{
-				Entity user = dataService.query(USER).eq("username", currentUserName).findOne();
-				if (user != null)
-				{
-					languageCode = user.getString("languageCode");
-					if ((languageCode != null) && (dataService.findOneById(LANGUAGE, languageCode) == null))
-					{
-						languageCode = null;
-					}
-				}
-			}
-
-			if (languageCode == null)
-			{
-				// Use app default
-				languageCode = appSettings.getLanguageCode();
-				if ((languageCode == null) || (dataService.findOneById(LANGUAGE, languageCode) == null))
-				{
-					languageCode = DEFAULT_LANGUAGE_CODE;
-				}
-			}
-
-			return languageCode;
-		});
+	private boolean languageExists(String languageCode)
+	{
+		return dataService.findOneById(LANGUAGE, languageCode) != null;
 	}
 
 	public static boolean hasLanguageCode(String code)

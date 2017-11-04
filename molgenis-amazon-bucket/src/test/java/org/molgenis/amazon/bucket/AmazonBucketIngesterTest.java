@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import org.molgenis.amazon.bucket.client.AmazonBucketClient;
 import org.molgenis.amazon.bucket.config.AmazonBucketTestConfig;
 import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
-import org.molgenis.auth.SecurityPackage;
+import org.molgenis.data.security.model.SecurityPackage;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;

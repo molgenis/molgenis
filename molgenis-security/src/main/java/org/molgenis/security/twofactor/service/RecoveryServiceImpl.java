@@ -1,16 +1,14 @@
 package org.molgenis.security.twofactor.service;
 
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.security.twofactor.model.RecoveryCode;
 import org.molgenis.security.twofactor.model.RecoveryCodeFactory;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretMetaData;
-import org.molgenis.security.user.UserService;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,13 +30,13 @@ public class RecoveryServiceImpl implements RecoveryService
 	private final DataService dataService;
 	private final RecoveryCodeFactory recoveryCodeFactory;
 	private final IdGenerator idGenerator;
-	private final UserService userService;
+	private final UserAccountService userAccountService;
 
-	public RecoveryServiceImpl(DataService dataService, UserService userService,
+	public RecoveryServiceImpl(DataService dataService, UserAccountService userAccountService,
 			RecoveryCodeFactory recoveryCodeFactory, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.userService = requireNonNull(userService);
+		this.userAccountService = requireNonNull(userAccountService);
 		this.recoveryCodeFactory = requireNonNull(recoveryCodeFactory);
 		this.idGenerator = requireNonNull(idGenerator);
 	}
@@ -47,7 +45,9 @@ public class RecoveryServiceImpl implements RecoveryService
 	@Transactional
 	public Stream<RecoveryCode> generateRecoveryCodes()
 	{
-		String userId = getUser().getId();
+		String userId = userAccountService.getCurrentUser()
+										  .getId()
+										  .orElseThrow(() -> new IllegalArgumentException("User has empty id."));
 		deleteOldRecoveryCodes(userId);
 		List<RecoveryCode> newRecoveryCodes = generateRecoveryCodes(userId);
 		//noinspection RedundantCast
@@ -59,18 +59,16 @@ public class RecoveryServiceImpl implements RecoveryService
 	@Transactional
 	public void useRecoveryCode(String recoveryCode)
 	{
-		String userId = getUser().getId();
-		RecoveryCode existingCode = runAsSystem(() -> dataService.query(RECOVERY_CODE, RecoveryCode.class)
-																 .eq(USER_ID, userId)
-																 .and()
-																 .eq(CODE, recoveryCode)
-																 .findOne());
+		String userId = userAccountService.getCurrentUser()
+										  .getId()
+										  .orElseThrow(() -> new IllegalStateException("User has empty id."));
+		RecoveryCode existingCode = runAsSystem(() -> dataService.findOne(RECOVERY_CODE,
+				new QueryImpl<RecoveryCode>().eq(USER_ID, userId).and().eq(CODE, recoveryCode), RecoveryCode.class));
 		if (existingCode != null)
 		{
 			runAsSystem(() -> dataService.delete(RECOVERY_CODE, existingCode));
-			UserSecret secret = runAsSystem(() -> dataService.query(USER_SECRET, UserSecret.class)
-															 .eq(UserSecretMetaData.USER_ID, userId)
-															 .findOne());
+			UserSecret secret = runAsSystem(() -> dataService.findOne(USER_SECRET,
+					new QueryImpl<UserSecret>().eq(UserSecretMetaData.USER_ID, userId), UserSecret.class));
 			secret.setFailedLoginAttempts(0);
 			runAsSystem(() -> dataService.update(USER_SECRET, secret));
 		}
@@ -83,17 +81,19 @@ public class RecoveryServiceImpl implements RecoveryService
 	@Override
 	public Stream<RecoveryCode> getRecoveryCodes()
 	{
-		String userId = getUser().getId();
-		return runAsSystem(() -> dataService.query(RECOVERY_CODE, RecoveryCode.class).eq(USER_ID, userId).findAll());
+		String userId = userAccountService.getCurrentUser()
+										  .getId()
+										  .orElseThrow(() -> new IllegalArgumentException("User has empty id."));
+		return runAsSystem(() -> dataService.findAll(RECOVERY_CODE, new QueryImpl<RecoveryCode>().eq(USER_ID, userId),
+				RecoveryCode.class));
 	}
 
 	private void deleteOldRecoveryCodes(String userId)
 	{
 		runAsSystem(() ->
 		{
-			Stream<RecoveryCode> recoveryCodes = dataService.query(RECOVERY_CODE, RecoveryCode.class)
-															.eq(USER_ID, userId)
-															.findAll();
+			Stream<RecoveryCode> recoveryCodes = dataService.findAll(RECOVERY_CODE,
+					new QueryImpl<RecoveryCode>().eq(USER_ID, userId), RecoveryCode.class);
 			dataService.delete(RECOVERY_CODE, recoveryCodes);
 		});
 	}
@@ -109,19 +109,5 @@ public class RecoveryServiceImpl implements RecoveryService
 			recoveryCodes.add(recoveryCode);
 		}
 		return recoveryCodes;
-	}
-
-	private User getUser()
-	{
-		User user = userService.getUser(SecurityUtils.getCurrentUsername());
-
-		if (user != null)
-		{
-			return user;
-		}
-		else
-		{
-			throw new UsernameNotFoundException("Can't find user: [" + SecurityUtils.getCurrentUsername() + "]");
-		}
 	}
 }

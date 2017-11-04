@@ -2,12 +2,12 @@ package org.molgenis.metadata.manager.controller;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.*;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonConfig;

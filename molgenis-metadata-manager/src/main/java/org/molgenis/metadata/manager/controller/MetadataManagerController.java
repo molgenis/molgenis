@@ -8,7 +8,7 @@ import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;

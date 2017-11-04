@@ -6,8 +6,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
@@ -21,11 +19,13 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.token.TokenService;
-import org.molgenis.security.core.token.UnknownTokenException;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.TokenService;
+import org.molgenis.security.core.service.UserAccountService;
+import org.molgenis.security.core.service.UserService;
+import org.molgenis.security.core.service.exception.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -60,7 +60,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -100,11 +99,12 @@ public class RestController
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
 	private final LanguageService languageService;
+	private final UserService userService;
 
 	public RestController(AuthenticationSettings authenticationSettings, DataService dataService,
 			TokenService tokenService, AuthenticationManager authenticationManager, PermissionService permissionService,
 			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService,
-			LanguageService languageService)
+			LanguageService languageService, UserService userService)
 	{
 		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.dataService = requireNonNull(dataService);
@@ -115,6 +115,7 @@ public class RestController
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 		this.restService = requireNonNull(restService);
 		this.languageService = requireNonNull(languageService);
+		this.userService = requireNonNull(userService);
 	}
 
 	/**
@@ -771,9 +772,8 @@ public class RestController
 				throw new BadCredentialsException("Unknown username or password");
 			}
 
-			User user = dataService.findOne(USER,
-					new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()), User.class);
-
+			// FIXME: Checking this is the work of the AuthenticationManager!
+			User user = userService.findByUsername(authentication.getName());
 			if (user.isChangePassword())
 			{
 				throw new BadCredentialsException(
@@ -785,7 +785,8 @@ public class RestController
 
 			// Generate a new token for the user
 			String token = tokenService.generateAndStoreToken(authentication.getName(), "REST API login");
-			return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
+			return new LoginResponse(token, user.getUsername(), user.getFirstName().orElse(null),
+					user.getLastName().orElse(null));
 		});
 	}
 

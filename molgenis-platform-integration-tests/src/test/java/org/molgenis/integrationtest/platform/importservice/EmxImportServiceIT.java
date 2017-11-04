@@ -3,13 +3,13 @@ package org.molgenis.integrationtest.platform.importservice;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.security.model.UserEntity;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
@@ -43,17 +43,16 @@ public class EmxImportServiceIT extends ImportServiceIT
 	private static final String TSV_PATIENTS = "tsv_patients";
 
 	@Override
-	User getTestUser()
+	UserEntity getTestUser()
 	{
-		User user = userFactory.create();
+		UserEntity user = userFactory.create();
 		user.setUsername(USERNAME);
 		user.setPassword("password");
 		user.setEmail("e@mail.com");
 		return user;
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportEmxCsvZipAsNonSuperuser()
 	{
@@ -80,8 +79,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		verifyFirstAndLastRows(CSV_PATIENTS, patientsFirstRow, patientsLastRow);
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportEmxTsvZipAsNonSuperuser()
 	{
@@ -235,10 +233,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Test(dataProvider = "doImportEmxAddProvider")
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE,
-			ROLE_READ_TAG, ROLE_READ_OWNED, ROLE_READ_FILE_META, ROLE_COUNT_FILE_META, ROLE_COUNT_OWNED,
-			ROLE_COUNT_TAG })
+	@WithMockUser
 	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
@@ -303,8 +298,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
+	@WithMockUser(username = USERNAME)
 	public void testDoImportAddUpdateEmxAsNonSuperuser(File file, File addUpdateFile,
 			Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
@@ -356,8 +350,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE })
+	@WithMockUser(username = USERNAME)
 	public void testDoImportUpdateEmxAsNonSuperuser(File file, File updateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{

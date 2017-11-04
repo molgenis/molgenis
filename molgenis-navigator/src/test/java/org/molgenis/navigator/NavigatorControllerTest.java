@@ -1,10 +1,10 @@
 package org.molgenis.navigator;
 
 import org.mockito.Mock;
-import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.model.User;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.context.annotation.Configuration;

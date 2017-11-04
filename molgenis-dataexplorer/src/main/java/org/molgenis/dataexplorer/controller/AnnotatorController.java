@@ -12,7 +12,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +70,7 @@ public class AnnotatorController
 	@ResponseBody
 	public Map<String, Map<String, Object>> getMapOfAvailableAnnotators(@RequestBody String dataSetName)
 	{
-		Map<String, Map<String, Object>> annotatorMap = setMapOfAnnotators(dataSetName);
-		return annotatorMap;
+		return setMapOfAnnotators(dataSetName);
 	}
 
 	/**
@@ -97,7 +96,7 @@ public class AnnotatorController
 	public String scheduleAnnotatorRun(String entityTypeId, String[] annotatorNames)
 	{
 		AnnotationJobExecution annotationJobExecution = annotationJobExecutionFactory.create();
-		annotationJobExecution.setUser(userAccountService.getCurrentUser());
+		annotationJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		annotationJobExecution.setTargetName(entityTypeId);
 		annotationJobExecution.setAnnotators(String.join(",", (CharSequence[]) annotatorNames));
 		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity=" + entityTypeId);

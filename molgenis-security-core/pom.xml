@@ -12,7 +12,21 @@
     <name>security-core</name>
 
     <dependencies>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- third party dependencies -->
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -36,6 +50,10 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
         </dependency>
         <!-- test dependencies -->
         <dependency>

@@ -7,7 +7,7 @@ import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.JobNotFoundException;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.core.service.UserAccountService;
 import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.ErrorMessageResponse;

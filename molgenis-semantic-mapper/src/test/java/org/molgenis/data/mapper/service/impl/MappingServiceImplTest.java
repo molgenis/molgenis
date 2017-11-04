@@ -3,11 +3,8 @@ package org.molgenis.data.mapper.service.impl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -22,12 +19,12 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.security.core.model.User;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -80,9 +77,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private MappingServiceImpl mappingService;
 
 	@Autowired
-	private UserFactory userFactory;
-
-	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
@@ -123,8 +117,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		reset(exonRepo);
 		reset(progress);
 
-		user = userFactory.create();
-		user.setUsername(USERNAME);
+		user = mock(User.class);
+		when(user.getUsername()).thenReturn(USERNAME);
 
 		package_ = packageFactory.create("package");
 
@@ -714,7 +708,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import(UserTestConfig.class)
 	static class Config
 	{
 

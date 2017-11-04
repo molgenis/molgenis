@@ -1,15 +1,17 @@
 package org.molgenis.security.account;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Objects;
 
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+import static org.molgenis.security.core.service.UserAccountService.MIN_PASSWORD_LENGTH;
 
 class RegisterRequest
 {
-	@NotNull
+	@NotBlank
 	private String username;
 	@NotNull
 	@Size(min = MIN_PASSWORD_LENGTH)
@@ -17,20 +19,18 @@ class RegisterRequest
 	@NotNull
 	@Size(min = MIN_PASSWORD_LENGTH)
 	private String confirmPassword;
-	@NotNull
+	@NotBlank
 	@Email
 	private String email;
 	private String phone;
 	private String fax;
 	private String tollFreePhone;
 	private String title;
-	@NotNull
+	@NotBlank
 	private String lastname;
-	@NotNull
+	@NotBlank
 	private String firstname;
-	private Integer institute;
 	private String department;
-	private Integer position;
 	private String address;
 	private String city;
 	private String country;
@@ -135,16 +135,6 @@ class RegisterRequest
 		this.firstname = firstname;
 	}
 
-	public Integer getInstitute()
-	{
-		return institute;
-	}
-
-	public void setInstitute(Integer institute)
-	{
-		this.institute = institute;
-	}
-
 	public String getDepartment()
 	{
 		return department;
@@ -153,16 +143,6 @@ class RegisterRequest
 	public void setDepartment(String department)
 	{
 		this.department = department;
-	}
-
-	public Integer getPosition()
-	{
-		return position;
-	}
-
-	public void setPosition(Integer position)
-	{
-		this.position = position;
 	}
 
 	public String getAddress()
@@ -195,4 +175,24 @@ class RegisterRequest
 		this.country = country;
 	}
 
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		RegisterRequest that = (RegisterRequest) o;
+		return Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(
+				confirmPassword, that.confirmPassword) && Objects.equals(email, that.email) && Objects.equals(phone,
+				that.phone) && Objects.equals(fax, that.fax) && Objects.equals(tollFreePhone, that.tollFreePhone)
+				&& Objects.equals(title, that.title) && Objects.equals(lastname, that.lastname) && Objects.equals(
+				firstname, that.firstname) && Objects.equals(department, that.department) && Objects.equals(address,
+				that.address) && Objects.equals(city, that.city) && Objects.equals(country, that.country);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(username, password, confirmPassword, email, phone, fax, tollFreePhone, title, lastname,
+				firstname, department, address, city, country);
+	}
 }

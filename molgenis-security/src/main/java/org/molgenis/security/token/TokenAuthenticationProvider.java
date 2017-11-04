@@ -1,7 +1,7 @@
 package org.molgenis.security.token;
 
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.service.TokenService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
