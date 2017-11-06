@@ -18,13 +18,10 @@
             <plugin id="searchAll" name="Search all data" url="searchAll"/>
             <plugin id="swagger" name="API documentation" url="swagger"/>
             <plugin id="apps" name="App store" url="apps"/>
-			<plugin id="catalogue" name="Catalogue" url="catalogue"/>
 			<plugin id="feedback" name="Feedback" url="feedback"/>
 			<plugin id="gavin-app" name="Gavin" url="gavin-app"/>
             <plugin id="jobs" name="Job overview" url="jobs" />
-			<plugin id="pathways" name="Pathways" url="pathways"/>
 			<plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
-            <plugin id="standardsregistry" name="Model registry" url="standardsregistry" />
             <plugin id="scripts" name="Scripts" url="scripts" />
 	    </menu>
         <menu label="Admin" name="admin">
