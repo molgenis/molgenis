@@ -914,7 +914,6 @@
         <module>molgenis-app</module>
         <module>molgenis-apps</module>
         <module>molgenis-bootstrap</module>
-        <module>molgenis-catalogue</module>
         <module>molgenis-charts</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
