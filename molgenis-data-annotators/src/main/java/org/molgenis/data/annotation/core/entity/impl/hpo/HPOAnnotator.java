@@ -94,7 +94,7 @@ public class HPOAnnotator implements AnnotatorConfig
 				attributes);
 
 		EntityAnnotator entityAnnotator = new AbstractAnnotator(HPO_RESOURCE, info, geneNameQueryCreator,
-				new HpoResultFilter(entityTypeFactory, attributeFactory, this), dataService, resources,
+				new HpoResultFilter(entityTypeFactory, this), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings))
 		{
 			@Override

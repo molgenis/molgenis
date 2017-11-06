@@ -2,8 +2,6 @@ package org.molgenis.data.rest.client;
 
 import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.rest.client.bean.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +22,6 @@ public class MolgenisClient
 {
 	private final RestTemplate template;
 	private final String apiHref;
-	private static final Logger LOG = LoggerFactory.getLogger(MolgenisClient.class);
 
 	public MolgenisClient(RestTemplate template, String apiHref)
 	{

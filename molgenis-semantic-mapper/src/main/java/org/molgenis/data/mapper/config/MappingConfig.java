@@ -25,7 +25,6 @@ import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,9 +36,6 @@ public class MappingConfig
 {
 	@Autowired
 	DataService dataService;
-
-	@Autowired
-	UserService userService;
 
 	@Autowired
 	OntologyTagService ontologyTagService;
@@ -109,7 +105,7 @@ public class MappingConfig
 	@Bean
 	public MappingProjectRepositoryImpl mappingProjectRepository()
 	{
-		return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), userService, idGenerator,
+		return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), idGenerator,
 				mappingProjectMeta);
 	}
 

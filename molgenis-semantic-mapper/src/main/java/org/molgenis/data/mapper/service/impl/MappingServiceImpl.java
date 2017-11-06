@@ -19,8 +19,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +43,6 @@ public class MappingServiceImpl implements MappingService
 {
 	public static final int MAPPING_BATCH_SIZE = 1000;
 
-	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
 	static final String SOURCE = "source";
 
 	private final DataService dataService;

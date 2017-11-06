@@ -7,7 +7,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.system.core.FreemarkerTemplate;
-import org.molgenis.file.FileStore;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -44,9 +43,6 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	private DataService dataService;
 
 	@Mock
-	private FileStore fileStore;
-
-	@Mock
 	private PermissionService permissionService;
 
 	private MockMvc mockMvc;
@@ -57,7 +53,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		AppsController appsController = new AppsController(dataService, fileStore, permissionService);
+		AppsController appsController = new AppsController(dataService, permissionService);
 		mockMvc = MockMvcBuilders.standaloneSetup(appsController)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .build();
@@ -66,7 +62,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Test(expectedExceptions = NullPointerException.class)
 	public void AppsController()
 	{
-		new AppsController(null, null, null);
+		new AppsController(null, null);
 	}
 
 	@DataProvider(name = "testInitProvider")

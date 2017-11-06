@@ -4,8 +4,6 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.settings.AppSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
@@ -14,7 +12,6 @@ import java.util.stream.Stream;
  */
 public class StyleSheetRepositoryDecorator extends AbstractRepositoryDecorator<StyleSheet>
 {
-	private static final Logger LOG = LoggerFactory.getLogger(StyleSheetRepositoryDecorator.class);
 	private final AppSettings appSettings;
 
 	public StyleSheetRepositoryDecorator(Repository<StyleSheet> delegateRepository, AppSettings appSettings)

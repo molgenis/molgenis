@@ -14,6 +14,7 @@ import java.util.List;
 
 public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 {
+	@SuppressWarnings("unused")
 	private final String name;//unused... however debug time you have no indication which annotator this is if bootstrapping is not done yet...
 	private EntityAnnotator entityAnnotator;
 

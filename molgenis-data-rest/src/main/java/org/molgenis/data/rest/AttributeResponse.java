@@ -272,6 +272,11 @@ public class AttributeResponse
 		return refEntity;
 	}
 
+	public String getMappedBy()
+	{
+		return mappedBy;
+	}
+
 	public boolean isAuto()
 	{
 		return auto;

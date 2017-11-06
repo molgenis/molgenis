@@ -53,14 +53,14 @@ public class EntityTypeMapperTest
 		EntityTypeMetadata entityTypeMetadata = mock(EntityTypeMetadata.class);
 		when(entityTypeFactory.getEntityType()).thenReturn(entityTypeMetadata);
 		entityTypeMapper = new EntityTypeMapper(entityTypeFactory, attributeMapper, attributeReferenceMapper,
-				packageMapper, tagMapper, entityTypeReferenceMapper, entityTypeParentMapper);
+				packageMapper, tagMapper, entityTypeParentMapper);
 
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testEntityTypeMapper()
 	{
-		new EntityTypeMapper(null, null, null, null, null, null, null);
+		new EntityTypeMapper(null, null, null, null, null, null);
 	}
 
 	@Test
@@ -92,8 +92,8 @@ public class EntityTypeMapperTest
 				EditorAttributeIdentifier.create("attr0", "attribute #0"));
 
 		EditorEntityType editorEntityType = EditorEntityType.create(id, label, i18nLabel, description, i18nDescription,
-				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes, editorReferringAttributes, editorTags,
-				idAttribute, labelAttribute, lookupAttributes);
+				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
+				editorReferringAttributes, editorTags, idAttribute, labelAttribute, lookupAttributes);
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityTypeFactory.create()).thenReturn(entityType);
@@ -211,7 +211,8 @@ public class EntityTypeMapperTest
 				editorLookupAttributes);
 		@SuppressWarnings("unchecked")
 		ImmutableList<EditorAttributeIdentifier> editorReferringAttributes = mock(ImmutableList.class);
-		when(attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes)).thenReturn(editorReferringAttributes);
+		when(attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes)).thenReturn(
+				editorReferringAttributes);
 		ImmutableList<EditorAttribute> editorAttributes = mock(ImmutableList.class);
 		when(attributeMapper.toEditorAttributes(attributes)).thenReturn(editorAttributes);
 		EditorEntityTypeParent editorEntityTypeParent = mock(EditorEntityTypeParent.class);
