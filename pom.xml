@@ -950,7 +950,6 @@
         <module>molgenis-one-click-importer</module>
         <module>molgenis-ontology-core</module>
         <module>molgenis-ontology</module>
-        <module>molgenis-pathways</module>
         <module>molgenis-platform-integration-tests</module>
         <module>molgenis-python</module>
         <module>molgenis-questionnaires</module>
