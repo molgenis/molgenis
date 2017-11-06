@@ -60,7 +60,7 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 					}
 					current = 0;
 				}
-				if (results.size() > 0)
+				if (!results.isEmpty())
 				{
 					result = results.get(current);
 				}
