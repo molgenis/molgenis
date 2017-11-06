@@ -13,8 +13,6 @@ import static java.util.Objects.requireNonNull;
 
 public class LazyEntity implements Entity
 {
-	private static final long serialVersionUID = 1L;
-
 	private final EntityType entityType;
 	private final DataService dataService;
 	private final Object id;
