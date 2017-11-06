@@ -48,9 +48,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 									  .antMatchers("/fdp/**").permitAll()
 
-									  .antMatchers("/annotators/**").authenticated()
-
-									  .antMatchers("/charts/**").authenticated();
+									  .antMatchers("/annotators/**").authenticated();
 	}
 
 	@Override
