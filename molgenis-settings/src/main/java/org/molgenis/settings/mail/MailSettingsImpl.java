@@ -8,8 +8,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.util.mail.MailSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
@@ -36,8 +34,6 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	private static final long serialVersionUID = 1L;
 	private static final String ID = "MailSettings";
 
-	private static final Logger LOG = LoggerFactory.getLogger(MailSettingsImpl.class);
-
 	public MailSettingsImpl(Entity entity)
 	{
 		super(ID);
@@ -54,6 +50,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 	@Component
 	public static class Meta extends DefaultSettingsEntityType
 	{
+		@SuppressWarnings("unused")
 		public static final String MAIL_SETTINGS = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + ID;
 		/**
 		 * For conversion: Pick up defaults from molgenis-server.properties file where these settings used to be defined.

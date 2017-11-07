@@ -49,13 +49,13 @@ public class TabixReader
 	private int mBc;
 	private int mEc;
 	private int mMeta;
-	private int mSkip;
 	private String[] mSeq;
 	private TIndex[] mIndex;
 
 	private HashMap<String, Integer> mChr2tid;
 
 	private static int MAX_BIN = 37450;
+	@SuppressWarnings("unused")
 	private static int TAD_MIN_CHUNK_GAP = 32768;
 	private static int TAD_LIDX_SHIFT = 14;
 
@@ -172,7 +172,7 @@ public class TabixReader
 		mBc = readInt(is);
 		mEc = readInt(is);
 		mMeta = readInt(is);
-		mSkip = readInt(is);
+		int mSkip = readInt(is);
 		// read sequence dictionary
 		int i, j, k, l = readInt(is);
 		buf = new byte[l];

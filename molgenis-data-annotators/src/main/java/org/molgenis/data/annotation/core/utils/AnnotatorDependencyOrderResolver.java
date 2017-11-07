@@ -84,7 +84,7 @@ public class AnnotatorDependencyOrderResolver
 			if (!selectedAnnotator.equals(requestedAnnotator))
 				resolveAnnotatorDependencies(requestedAnnotator, annotatorList, annotatorQueue, entityType);
 		}
-		if (annotatorQueue.size() == 0)
+		if (annotatorQueue.isEmpty())
 		{
 			// FIXME: what to do for ref entity annotator.
 			throw new UnresolvedAnnotatorDependencyException("unsolved for: " + requestedAnnotator);

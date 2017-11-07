@@ -13,7 +13,6 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.security.user.UserService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -26,16 +25,14 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
 	private final DataService dataService;
 	private final MappingTargetRepository mappingTargetRepo;
-	private final UserService userService;
 	private final IdGenerator idGenerator;
 	private final MappingProjectMetaData mappingProjectMeta;
 
 	public MappingProjectRepositoryImpl(DataService dataService, MappingTargetRepository mappingTargetRepo,
-			UserService userService, IdGenerator idGenerator, MappingProjectMetaData mappingProjectMeta)
+			IdGenerator idGenerator, MappingProjectMetaData mappingProjectMeta)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mappingTargetRepo = requireNonNull(mappingTargetRepo);
-		this.userService = requireNonNull(userService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.mappingProjectMeta = requireNonNull(mappingProjectMeta);
 	}

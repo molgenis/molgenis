@@ -102,7 +102,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	 */
 	public MyEntitiesValidationReport addAttribute(String attributeName, AttributeState state)
 	{
-		if (getImportOrder().size() == 0)
+		if (getImportOrder().isEmpty())
 		{
 			throw new IllegalStateException("Must add entity first");
 		}

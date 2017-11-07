@@ -61,7 +61,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
-		if (null == terms || terms.size() == 0)
+		if (null == terms || terms.isEmpty())
 		{
 			return Lists.newArrayList();
 		}
@@ -71,7 +71,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
-		if (null == terms || terms.size() == 0)
+		if (null == terms || terms.isEmpty())
 		{
 			return Lists.newArrayList();
 		}

@@ -153,7 +153,7 @@ public class CategoryMapperUtil
 			}
 		});
 
-		return candidateUnits.size() > 0 ? candidateUnits.get(0) : null;
+		return candidateUnits.isEmpty() ? null : candidateUnits.get(0);
 	}
 
 	public static List<Double> extractNumbers(String description)

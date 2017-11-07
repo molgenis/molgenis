@@ -14,8 +14,6 @@ import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuItem;
 import org.molgenis.ui.menu.MenuItemType;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +26,6 @@ import static java.util.stream.Collectors.toList;
 
 public class MenuManagerServiceImpl implements MenuManagerService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MenuManagerServiceImpl.class);
-
 	private final MenuReaderService menuReaderService;
 	private final AppSettings appSettings;
 	private final DataService dataService;

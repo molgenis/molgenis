@@ -17,14 +17,11 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Package>
 {
 	private final DataService dataService;
-	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-	public PackageRepositoryDecorator(Repository<Package> delegateRepository, DataService dataService,
-			EntityTypeDependencyResolver entityTypeDependencyResolver)
+	public PackageRepositoryDecorator(Repository<Package> delegateRepository, DataService dataService)
 	{
 		super(delegateRepository);
 		this.dataService = requireNonNull(dataService);
-		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 	}
 
 	@Override

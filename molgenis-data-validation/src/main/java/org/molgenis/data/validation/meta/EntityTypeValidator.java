@@ -201,7 +201,7 @@ public class EntityTypeValidator
 	private static void validateOwnAttributes(EntityType entityType)
 	{
 		// Validate that entity has attributes
-		if (asStream(entityType.getAllAttributes()).collect(toList()).size() == 0)
+		if (asStream(entityType.getAllAttributes()).collect(toList()).isEmpty())
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
 					format("Entity [%s] does not contain any attributes. Did you use the correct package+entity name combination in both the entities as well as the attributes sheet?",

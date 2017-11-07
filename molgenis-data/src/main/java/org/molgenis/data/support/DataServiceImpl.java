@@ -5,8 +5,6 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +20,6 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class DataServiceImpl implements DataService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
-
 	private MetaDataService metaDataService;
 
 	public void setMetaDataService(MetaDataService metaDataService)

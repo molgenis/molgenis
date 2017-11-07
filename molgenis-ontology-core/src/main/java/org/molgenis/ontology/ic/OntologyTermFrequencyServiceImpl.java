@@ -101,7 +101,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 			}
 		});
 
-		if (entitiesToAdd.size() != 0)
+		if (!entitiesToAdd.isEmpty())
 		{
 			dataService.add(TERM_FREQUENCY, entitiesToAdd.stream());
 		}
