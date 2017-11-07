@@ -19,6 +19,7 @@ public class AbstractMockitoTest
 		this(Strictness.STRICT_STUBS);
 	}
 
+	@Deprecated
 	public AbstractMockitoTest(Strictness strictness)
 	{
 		this.strictness = requireNonNull(strictness);
