@@ -21,7 +21,6 @@ We are happy to reuse as much as we can from high-quality existing open source s
 * [Bootstrap](http://getbootstrap.com/) - for responsible HTML layouts
 * [React](https://facebook.github.io/react/) - to create module user interface components
 * [jQuery](https://jquery.com/) - to ease javascript + DOM interaction
-* [Higcharts](http://www.highcharts.com/) - for graphs (can be used not-for profit only)
 
 # Backend
 * [PostGreSQL](https://www.postgresql.org/) - our work-horse for simple database storage

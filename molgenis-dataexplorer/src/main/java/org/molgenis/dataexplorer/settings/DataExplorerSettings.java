@@ -46,14 +46,12 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String MOD = "mods";
 		public static final String MOD_AGGREGATES = "mod_aggregates";
 		public static final String MOD_ANNOTATORS = "mod_annotators";
-		public static final String MOD_CHARTS = "mod_charts";
 		public static final String MOD_DATA = "mod_data";
 		public static final String MOD_REPORTS = "mod_reports";
 		public static final String MOD_STANDALONE_REPORTS = "mod_standalone_reports";
 
 		private static final boolean DEFAULT_MOD_AGGREGATES = true;
 		private static final boolean DEFAULT_MOD_ANNOTATORS = true;
-		private static final boolean DEFAULT_MOD_CHARTS = true;
 		private static final boolean DEFAULT_MOD_DATA = true;
 		private static final boolean DEFAULT_MOD_REPORT = true;
 		private static final boolean DEFAULT_MOD_STANDALONE_REPORT = false;
@@ -154,11 +152,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 										.setNillable(false)
 										.setDefaultValue(String.valueOf(DEFAULT_MOD_ANNOTATORS))
 										.setLabel("Annotators");
-			addAttribute(MOD_CHARTS).setParent(modAttr)
-									.setDataType(BOOL)
-									.setNillable(false)
-									.setDefaultValue(String.valueOf(DEFAULT_MOD_CHARTS))
-									.setLabel("Charts");
 			addAttribute(MOD_DATA).setParent(modAttr)
 								  .setDataType(BOOL)
 								  .setNillable(false)
@@ -302,17 +295,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public void setModAnnotators(boolean modAnnotators)
 	{
 		set(Meta.MOD_ANNOTATORS, modAnnotators);
-	}
-
-	public boolean getModCharts()
-	{
-		Boolean value = getBoolean(Meta.MOD_CHARTS);
-		return value != null ? value : false;
-	}
-
-	public void setModCharts(boolean modCharts)
-	{
-		set(Meta.MOD_CHARTS, modCharts);
 	}
 
 	public boolean getModData()

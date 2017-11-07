@@ -914,8 +914,6 @@
         <module>molgenis-app</module>
         <module>molgenis-apps</module>
         <module>molgenis-bootstrap</module>
-        <module>molgenis-catalogue</module>
-        <module>molgenis-charts</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
         <module>molgenis-data-annotators</module>
@@ -946,12 +944,10 @@
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>
         <module>molgenis-metadata-manager</module>
-        <module>molgenis-model-registry</module>
         <module>molgenis-navigator</module>
         <module>molgenis-one-click-importer</module>
         <module>molgenis-ontology-core</module>
         <module>molgenis-ontology</module>
-        <module>molgenis-pathways</module>
         <module>molgenis-platform-integration-tests</module>
         <module>molgenis-python</module>
         <module>molgenis-questionnaires</module>
