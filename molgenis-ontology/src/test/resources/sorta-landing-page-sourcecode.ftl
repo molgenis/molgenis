@@ -117,10 +117,7 @@
         <p style="font-size: 14pt; font-family: arial, helvetica, sans-serif;"><strong>Ontology model</strong></p>
         <p style="font-size: 14pt; font-family: arial, helvetica, sans-serif; text-align: justify;">Standard codes
             (ontologies) can be imported using the <a href="https://github.com/molgenis/molgenis/wiki/EMX-upload-format"
-                                                      target="_blank">EMX format</a>, the <a
-                    href="https://molgenis19.target.rug.nl/menu/plugins/standardsregistry?package=Ontology#"
-                    target="_blank">model</a>&nbsp;can be browsed and viewed as a UML diagram as well as a flat list in
-            the webbrowser.&nbsp;</p>
+                                                      target="_blank">EMX format</a>.&nbsp;</p>
     </div>
 </div>
 <br>
