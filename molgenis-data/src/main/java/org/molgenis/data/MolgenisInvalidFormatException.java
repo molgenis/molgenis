@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-public class MolgenisInvalidFormatException extends Exception
+public class MolgenisInvalidFormatException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
