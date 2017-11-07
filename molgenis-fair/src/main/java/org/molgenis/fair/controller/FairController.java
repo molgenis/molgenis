@@ -90,6 +90,8 @@ public class FairController
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
+	//Keep this specific handler next to the global exception handler because it has a very specific RDF response
+	//TODO: will this still work with a global exception handler
 	@ExceptionHandler(UnknownEntityException.class)
 	@ResponseBody
 	@ResponseStatus(BAD_REQUEST)

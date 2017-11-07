@@ -3,7 +3,6 @@ package org.molgenis.ui.thememanager;
 import org.molgenis.ui.style.MolgenisStyleException;
 import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
-import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -15,9 +14,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static java.util.Collections.singletonList;
 import static org.molgenis.ui.thememanager.ThemeManagerController.URI;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Controller
 @RequestMapping(URI)
@@ -84,13 +81,5 @@ public class ThemeManagerController extends PluginController
 		{
 			throw new MolgenisStyleException("unable to add style: " + styleIdentifier, e);
 		}
-	}
-
-	@ResponseBody
-	@ResponseStatus(BAD_REQUEST)
-	@ExceptionHandler({ MolgenisStyleException.class })
-	public ErrorMessageResponse handleStyleException(Exception e)
-	{
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 }

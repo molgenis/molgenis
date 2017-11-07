@@ -19,18 +19,13 @@ import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.web.ErrorMessageResponse;
-import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -45,7 +40,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
@@ -589,52 +583,6 @@ public class RestControllerV2
 			throw createMolgenisDataExceptionUnknownIdentifier(count);
 		}
 		return id;
-	}
-
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
-	ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception)
-	{
-		LOG.debug("Invalid request body.", exception);
-		return new ErrorMessageResponse(new ErrorMessage("Invalid request body."));
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
-	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
-	{
-		LOG.info("Invalid method arguments.", exception);
-		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
-				error -> new ErrorMessage(error.getDefaultMessage())));
-	}
-
-	@ExceptionHandler(MolgenisDataException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
-	{
-		LOG.info("Operation failed.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(MolgenisDataAccessException.class)
-	@ResponseStatus(UNAUTHORIZED)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
-	{
-		LOG.debug("Data access exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(ConversionFailedException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleConversionFailedException(ConversionFailedException e)
-	{
-		LOG.info("ConversionFailedException occurred", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
 	private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName)

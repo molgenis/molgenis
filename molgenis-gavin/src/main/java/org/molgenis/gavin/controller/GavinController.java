@@ -242,18 +242,6 @@ public class GavinController extends AbstractStaticContentController
 		return new FileSystemResource(file);
 	}
 
-	@ExceptionHandler(value = FileNotFoundException.class)
-	public void handleFileNotFound(FileNotFoundException ex, HttpServletResponse res) throws IOException
-	{
-		res.sendError(404, ex.getMessage());
-	}
-
-	@ExceptionHandler(value = JobNotFoundException.class)
-	public void handleJobNotFound(JobNotFoundException ex, HttpServletResponse res) throws IOException
-	{
-		res.sendError(404, ex.getMessage());
-	}
-
 	/**
 	 * Removes old files in the gavin working directory from the file store.
 	 */

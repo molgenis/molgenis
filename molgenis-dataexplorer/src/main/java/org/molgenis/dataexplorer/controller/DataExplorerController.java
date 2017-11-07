@@ -15,7 +15,6 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
-import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
@@ -26,8 +25,6 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.web.ErrorMessageResponse;
-import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -554,14 +551,5 @@ public class DataExplorerController extends PluginController
 		{
 			return false;
 		}
-	}
-
-	@ExceptionHandler(GalaxyDataExportException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorMessageResponse handleGalaxyDataExportException(GalaxyDataExportException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 }
