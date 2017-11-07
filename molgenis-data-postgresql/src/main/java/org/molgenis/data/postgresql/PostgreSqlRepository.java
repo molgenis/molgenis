@@ -15,6 +15,7 @@ import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -82,20 +83,15 @@ class PostgreSqlRepository extends AbstractRepository
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;
 	private final DataSource dataSource;
-
-	private EntityType entityType;
+	private final EntityType entityType;
 
 	PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
-			DataSource dataSource)
+			DataSource dataSource, EntityType entityType)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		this.dataSource = requireNonNull(dataSource);
-	}
-
-	void setEntityType(EntityType entityType)
-	{
-		this.entityType = entityType;
+		this.entityType = requireNonNull(entityType);
 	}
 
 	@Override
@@ -245,7 +241,7 @@ class PostgreSqlRepository extends AbstractRepository
 	{
 		if (entity == null)
 		{
-			throw new RuntimeException("PostgreSqlRepository.add() failed: entity was null");
+			throw new NullPointerException("PostgreSqlRepository.add() failed: entity was null");
 		}
 		add(Stream.of(entity));
 	}
@@ -268,7 +264,6 @@ class PostgreSqlRepository extends AbstractRepository
 		{
 			query.fetch(fetch);
 		}
-		final EntityType entityType = this.entityType;
 		final String allRowsSelect = getSqlSelect(entityType, query, emptyList(), false);
 		LOG.debug("Fetching [{}] data...", getName());
 		LOG.trace("SQL: {}", allRowsSelect);
@@ -388,7 +383,7 @@ class PostgreSqlRepository extends AbstractRepository
 					refId = row.getLong(3);
 					break;
 				default:
-					throw new RuntimeException(format("Unexpected id attribute type [%s]", refIdDataType));
+					throw new UnexpectedEnumException(refIdDataType);
 			}
 			mrefIDs.put(id, refId);
 		}, ids.toArray());
@@ -563,7 +558,8 @@ class PostgreSqlRepository extends AbstractRepository
 													  .map(Entity::getIdValue)
 													  .filter(entityId -> !existingEntityIds.contains(entityId))
 													  .findFirst()
-													  .orElse(null);
+													  .orElseThrow(() -> new IllegalStateException(
+															  "Not all entities in batch were updated but all are present in the repository."));
 			throw new MolgenisValidationException(new ConstraintViolation(
 					format("Cannot update [%s] with id [%s] because it does not exist", entityType.getId(),
 							nonExistingEntityId.toString())));
@@ -717,7 +713,8 @@ class PostgreSqlRepository extends AbstractRepository
 		{
 			Map<String, Object> mref = mrefs.get(i);
 
-			Object idValue0, idValue1;
+			Object idValue0;
+			Object idValue1;
 			if (attr.isMappedBy())
 			{
 				Entity mrefEntity = (Entity) mref.get(attr.getName());
