@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf.importer;
 
 import org.mockito.*;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
@@ -47,6 +48,11 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 
 	@Captor
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
+
+	public VcfImporterServiceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

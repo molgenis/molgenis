@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import com.google.common.collect.Lists;
 import org.mockito.Mockito;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -43,6 +44,11 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 	private EntityType sourceEntityType;
 
 	private DataService dataService;
+
+	public OneToOneCategoryAlgorithmGeneratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void init()

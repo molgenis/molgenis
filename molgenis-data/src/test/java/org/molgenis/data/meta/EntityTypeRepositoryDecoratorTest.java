@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -51,6 +52,11 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 	@Mock
 	private RepositoryCollection repositoryCollection;
+
+	public EntityTypeRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

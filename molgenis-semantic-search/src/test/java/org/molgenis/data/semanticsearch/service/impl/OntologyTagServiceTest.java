@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.*;
@@ -86,6 +87,11 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	private static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = OntologyTerm.create(
 			"http://edamontology.org/data_0919", "Gene annotation (chromosome)",
 			"This includes basic information. e.g. chromosome number...");
+
+	public OntologyTagServiceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

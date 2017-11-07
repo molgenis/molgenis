@@ -2,6 +2,7 @@ package org.molgenis.data.jobs.model.hello;
 
 import com.google.gson.Gson;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.jobs.JobExecutionConfig;
@@ -40,6 +41,11 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	HelloWorldJobExecutionFactory factory;
+
+	public HelloWorldTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@Test
 	public void helloWorld() throws InterruptedException, TimeoutException, ExecutionException

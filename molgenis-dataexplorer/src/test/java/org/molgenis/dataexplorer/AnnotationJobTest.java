@@ -3,6 +3,7 @@ package org.molgenis.dataexplorer;
 import com.google.common.collect.ImmutableList;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
@@ -44,6 +45,11 @@ public class AnnotationJobTest extends AbstractMockitoTest
 	private Authentication authentication;
 	@Mock
 	private PlatformTransactionManager transactionManager;
+
+	public AnnotationJobTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

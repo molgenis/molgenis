@@ -3,6 +3,7 @@ package org.molgenis.data.mapper.service.impl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
@@ -110,6 +111,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private EntityType geneMetaData;
 
 	private Package package_;
+
+	public MappingServiceImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod

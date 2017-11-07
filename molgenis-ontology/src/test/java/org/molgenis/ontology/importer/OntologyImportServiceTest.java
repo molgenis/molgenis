@@ -2,6 +2,7 @@ package org.molgenis.ontology.importer;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.test.AbstractMockitoTest;
@@ -24,6 +25,11 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 	private DataService dataService;
 
 	private OntologyImportService ontologyImportService;
+
+	public OntologyImportServiceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

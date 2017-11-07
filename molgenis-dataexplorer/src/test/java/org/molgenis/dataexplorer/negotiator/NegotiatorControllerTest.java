@@ -3,6 +3,7 @@ package org.molgenis.dataexplorer.negotiator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -83,6 +84,11 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 
 	@Captor
 	private ArgumentCaptor<HttpEntity<NegotiatorQuery>> queryCaptor;
+
+	public NegotiatorControllerTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

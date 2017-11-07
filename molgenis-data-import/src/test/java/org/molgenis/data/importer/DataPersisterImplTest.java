@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -44,6 +45,11 @@ public class DataPersisterImplTest extends AbstractMockitoTest
 	private EntityType entityType1;
 	@Mock
 	private EntityType entityType2;
+
+	public DataPersisterImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod

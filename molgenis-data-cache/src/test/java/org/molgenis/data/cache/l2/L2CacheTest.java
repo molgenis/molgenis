@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
@@ -62,6 +63,11 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 
 	private List<Entity> testEntities;
 	private EntityType emd;
+
+	public L2CacheTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass()

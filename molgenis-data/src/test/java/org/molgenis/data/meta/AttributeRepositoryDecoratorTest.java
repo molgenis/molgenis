@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -46,6 +47,11 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 	@Mock
 	private RepositoryCollection backend2;
 	private String attributeId = "SDFSADFSDAF";
+
+	public AttributeRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.OngoingStubbing;
 import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -145,6 +146,11 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 
 	private MockMvc mockMvc;
 	private OngoingStubbing<Multimap<Relation, OntologyTerm>> multimapOngoingStubbing;
+
+	public MappingServiceControllerTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeTest()

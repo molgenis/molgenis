@@ -4,6 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -41,6 +42,11 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 
 	@Captor
 	private ArgumentCaptor<Stream<ScheduledJob>> jobStreamCaptor;
+
+	public ScheduledJobRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass()

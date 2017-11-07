@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.plugin.model.Plugin;
@@ -38,6 +39,11 @@ public class PluginPopulatorTest extends AbstractMockitoTest
 	private Repository<Plugin> pluginRepository;
 
 	private PluginPopulator pluginPopulator;
+
+	public PluginPopulatorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

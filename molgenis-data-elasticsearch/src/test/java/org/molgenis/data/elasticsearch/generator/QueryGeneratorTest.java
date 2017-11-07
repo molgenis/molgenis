@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.generator;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -67,6 +68,11 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	AttributeFactory attrFactory;
 
 	private QueryGenerator queryGenerator;
+
+	public QueryGeneratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUp()
