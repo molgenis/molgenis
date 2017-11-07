@@ -27,8 +27,6 @@ import static java.util.stream.StreamSupport.stream;
  */
 public class DynamicEntity implements Entity
 {
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * Entity meta data
 	 */

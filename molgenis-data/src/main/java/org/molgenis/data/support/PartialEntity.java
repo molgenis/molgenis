@@ -16,8 +16,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class PartialEntity implements Entity
 {
-	private static final long serialVersionUID = 1L;
-
 	private final Entity decoratedEntity;
 	private final Fetch fetch;
 	private final EntityManager entityManager;

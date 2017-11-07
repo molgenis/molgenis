@@ -1,177 +1,74 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
-
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.Math.toIntExact;
 
-public class ConstraintViolation
+public class ConstraintViolation implements Serializable
 {
 	private final String message;
-	private Object invalidValue;
-	private Entity entity;
-	private Attribute violatedAttribute;
-	private EntityType entityType;
-	private String importInfo;
-	private Long rownr;
+	private Long rowNr;
 
 	public ConstraintViolation(String message)
 	{
 		this(message, null);
 	}
 
-	public ConstraintViolation(String message, Long rownr)
+	public ConstraintViolation(String message, Long rowNr)
 	{
 		this.message = message;
-		this.rownr = rownr;
-	}
-
-	public ConstraintViolation(String message, Attribute violatedAttribute, Long rownr)
-	{
-		this.message = message;
-		this.violatedAttribute = violatedAttribute;
-		this.rownr = rownr;
-	}
-
-	public ConstraintViolation(String message, Object invalidValue, Entity entity, Attribute violatedAttribute,
-			EntityType entityType, Long rownr)
-	{
-		this.message = message;
-		this.invalidValue = invalidValue;
-		this.entity = entity;
-		this.violatedAttribute = violatedAttribute;
-		this.entityType = entityType;
-		this.rownr = rownr;
+		this.rowNr = rowNr;
 	}
 
 	/**
 	 * Renumber the violation row number from a list of actual row numbers The list of indices is 0-indexed and the
 	 * rownnr are 1-indexed
 	 */
-	public void renumberRowIndex(List<Integer> indices)
+	void renumberRowIndex(List<Integer> indices)
 	{
-		this.rownr = this.rownr != null ? new Long(indices.get(toIntExact(this.rownr - 1))) : null;
+		this.rowNr = this.rowNr != null ? Long.valueOf(indices.get(toIntExact(this.rowNr - 1))) : null;
 	}
 
 	public String getMessage()
 	{
-		if (null != rownr)
+		if (null != rowNr)
 		{
-			return message + " (entity " + rownr + ")";
+			return message + " (entity " + rowNr + ")";
 		}
 
 		return message;
 	}
 
-	public Object getInvalidValue()
+	Long getRowNr()
 	{
-		return invalidValue;
+		return rowNr;
 	}
 
-	public Entity getEntity()
+	void setRowNr(Long rowNr)
 	{
-		return entity;
+		this.rowNr = rowNr;
 	}
 
-	public Attribute getViolatedAttribute()
+	@Override
+	public boolean equals(Object o)
 	{
-		return violatedAttribute;
-	}
-
-	public EntityType getEntityType()
-	{
-		return entityType;
-	}
-
-	public Long getRownr()
-	{
-		return rownr;
-	}
-
-	public void setRownr(Long rownr)
-	{
-		this.rownr = rownr;
-	}
-
-	public String getImportInfo()
-	{
-		return importInfo;
-	}
-
-	public void setImportInfo(String importInfo)
-	{
-		this.importInfo = importInfo;
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ConstraintViolation that = (ConstraintViolation) o;
+		return Objects.equals(message, that.message) && Objects.equals(rowNr, that.rowNr);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((entity == null) ? 0 : entity.hashCode());
-		result = prime * result + ((entityType == null) ? 0 : entityType.hashCode());
-		result = prime * result + ((importInfo == null) ? 0 : importInfo.hashCode());
-		result = prime * result + ((invalidValue == null) ? 0 : invalidValue.hashCode());
-		result = prime * result + ((message == null) ? 0 : message.hashCode());
-		result = prime * result + ((rownr == null) ? 0 : rownr.hashCode());
-		result = prime * result + ((violatedAttribute == null) ? 0 : violatedAttribute.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		ConstraintViolation other = (ConstraintViolation) obj;
-		if (entity == null)
-		{
-			if (other.entity != null) return false;
-		}
-		else if (!entity.equals(other.entity)) return false;
-		if (entityType == null)
-		{
-			if (other.entityType != null) return false;
-		}
-		else if (!entityType.equals(other.entityType)) return false;
-		if (importInfo == null)
-		{
-			if (other.importInfo != null) return false;
-		}
-		else if (!importInfo.equals(other.importInfo)) return false;
-		if (invalidValue == null)
-		{
-			if (other.invalidValue != null) return false;
-		}
-		else if (!invalidValue.equals(other.invalidValue)) return false;
-		if (message == null)
-		{
-			if (other.message != null) return false;
-		}
-		else if (!message.equals(other.message)) return false;
-		if (rownr == null)
-		{
-			if (other.rownr != null) return false;
-		}
-		else if (!rownr.equals(other.rownr)) return false;
-		if (violatedAttribute == null)
-		{
-			if (other.violatedAttribute != null) return false;
-		}
-		else if (!violatedAttribute.equals(other.violatedAttribute)) return false;
-		return true;
+		return Objects.hash(message, rowNr);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "ConstraintViolation [message=" + message + ", invalidValue=" + invalidValue + ", entity=" + entity
-				+ ", violatedAttribute=" + violatedAttribute + ", entityType=" + entityType + ", importInfo="
-				+ importInfo + ", rownr=" + rownr + "]";
+		return "ConstraintViolation{" + "message='" + message + '\'' + ", rowNr=" + rowNr + '}';
 	}
-
 }
