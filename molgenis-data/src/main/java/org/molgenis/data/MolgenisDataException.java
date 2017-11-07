@@ -1,8 +1,7 @@
 package org.molgenis.data;
 
-import org.springframework.dao.DataAccessException;
-
-public class MolgenisDataException extends DataAccessException
+//TODO: Was "DataAccessException" did that have added value
+public class MolgenisDataException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 4738825795930038340L;
 

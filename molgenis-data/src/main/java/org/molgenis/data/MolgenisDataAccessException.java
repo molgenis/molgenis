@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-public class MolgenisDataAccessException extends RuntimeException
+public class MolgenisDataAccessException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 4738825795930038340L;
 
