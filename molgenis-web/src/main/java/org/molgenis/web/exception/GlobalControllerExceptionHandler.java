@@ -57,6 +57,12 @@ public class GlobalControllerExceptionHandler
 		}
 	}
 
+	//TODO: MolgenisDataException
+	//TODO: MolgenisDataAccessException
+	//TODO: MolgenisRuntimeException
+	//TODO: MolgenisValidationException
+	//TODO: Exception -> who wins this, specific FAIR handler or the global one
+
 	private boolean isHtmlRequest(HttpServletRequest httpServletRequest)
 	{
 		try
