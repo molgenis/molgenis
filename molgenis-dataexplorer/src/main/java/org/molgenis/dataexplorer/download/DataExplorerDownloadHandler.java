@@ -89,6 +89,10 @@ public class DataExplorerDownloadHandler
 			excelSheetWriter.add(dataService.findAll(entityTypeId, query));
 			excelSheetWriter.close();
 		}
+		finally
+		{
+			if (excelSheetWriter != null) excelSheetWriter.close();
+		}
 	}
 
 	private long getNumberOfCellsForEntityType(String entityId, Query query)
