@@ -1,6 +1,5 @@
 package org.molgenis.metadata.manager.controller;
 
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.EditorAttributeResponse;
@@ -11,7 +10,6 @@ import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.VuePluginController;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -20,10 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.metadata.manager.controller.MetadataManagerController.URI;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 @Controller
@@ -86,14 +82,5 @@ public class MetadataManagerController extends VuePluginController
 	public EditorAttributeResponse createEditorAttribute()
 	{
 		return metadataManagerService.createEditorAttribute();
-	}
-
-	@ResponseBody
-	@ResponseStatus(BAD_REQUEST)
-	@ExceptionHandler(UnknownEntityException.class)
-	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 }

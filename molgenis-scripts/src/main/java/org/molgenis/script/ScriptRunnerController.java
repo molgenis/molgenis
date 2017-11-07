@@ -6,7 +6,6 @@ import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.jobs.JobsController;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -102,17 +101,5 @@ public class ScriptRunnerController
 			pw.write(result.getOutput());
 			pw.flush();
 		}
-	}
-
-	@ExceptionHandler(UnknownScriptException.class)
-	public void handleUnknownScriptException(UnknownScriptException e, HttpServletResponse response) throws IOException
-	{
-		response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-	}
-
-	@ExceptionHandler(ScriptException.class)
-	public void handleGenerateScriptException(ScriptException e, HttpServletResponse response) throws IOException
-	{
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 	}
 }

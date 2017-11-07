@@ -2,16 +2,12 @@ package org.molgenis.security.account;
 
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.util.CountryCodes;
-import org.molgenis.web.ErrorMessageResponse;
-import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -187,54 +183,6 @@ public class AccountController
 	public void resetPassword(@Valid @ModelAttribute PasswordResetRequest passwordResetRequest)
 	{
 		accountService.resetPassword(passwordResetRequest.getEmail());
-	}
-
-	@ExceptionHandler(MolgenisDataAccessException.class)
-	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-	private void handleMolgenisDataAccessException(MolgenisDataAccessException e)
-	{
-	}
-
-	@ExceptionHandler(CaptchaException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	private void handleCaptchaException(CaptchaException e)
-	{
-	}
-
-	@ExceptionHandler(MolgenisUserException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(UsernameAlreadyExistsException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(EmailAlreadyExistsException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleEmailAlreadyExistsException(EmailAlreadyExistsException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(MolgenisDataException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
 	private User toUser(RegisterRequest request)

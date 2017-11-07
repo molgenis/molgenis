@@ -1,6 +1,8 @@
 package org.molgenis.python;
 
-public class MolgenisPythonException extends RuntimeException
+import org.molgenis.data.MolgenisRuntimeException;
+
+public class MolgenisPythonException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 4675578564750997809L;
 
