@@ -10,8 +10,3 @@ For more about our organisation, see https://molgenis.github.io
 
 ## Installation
 See [The Quick start guide](https://molgenis.gitbooks.io/molgenis/quickstart/guide-quickstart.html).
-
-## Third-party software
-For some modules in MOLGENIS, third-party software is in use. It is important to know that some of these licenses are different than the MOLGENIS license.
-	
-In this section you can find a list of remarks about third-party software in MOLGENIS modules.
