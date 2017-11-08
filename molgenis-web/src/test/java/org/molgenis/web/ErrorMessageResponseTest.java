@@ -1,6 +1,6 @@
-package org.molgenis.util;
+package org.molgenis.web;
 
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

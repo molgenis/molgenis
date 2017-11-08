@@ -29,6 +29,8 @@ import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.security.user.UserService;
+import org.molgenis.web.exception.InternalServerErrorController;
+import org.molgenis.web.exception.NotFoundController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -153,7 +155,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
-		expressionInterceptUrlRegistry
+		expressionInterceptUrlRegistry.antMatchers(NotFoundController.URI, InternalServerErrorController.URI)
+									  .permitAll()
 
 				.antMatchers(MolgenisLoginController.URI)
 				.permitAll()
@@ -257,7 +260,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					}
 				})
 
-				.logoutSuccessHandler((req, res, auth) ->
+									  .logoutSuccessHandler((req, res, auth) ->
 				{
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)

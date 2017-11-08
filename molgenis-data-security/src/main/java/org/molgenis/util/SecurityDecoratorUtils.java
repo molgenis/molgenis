@@ -1,6 +1,6 @@
 package org.molgenis.util;
 
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 
@@ -16,7 +16,7 @@ public class SecurityDecoratorUtils
 		String role = format("ROLE_ENTITY_%s_%s", permission.toString(), entityType.getId());
 		if (!currentUserHasRole(AUTHORITY_SU, ROLE_SYSTEM, role))
 		{
-			throw new MolgenisDataAccessException(
+			throw new MolgenisPermissionException(
 					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
 							entityType.getLabel(), entityType.getId()));
 		}

@@ -1,7 +1,6 @@
 package org.molgenis.data.rest;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -18,32 +17,23 @@ import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
-import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -68,7 +58,8 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -419,7 +410,7 @@ public class RestController
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 			return null;
 		}
-		catch (MolgenisDataAccessException e)
+		catch (MolgenisPermissionException e)
 		{
 			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return null;
@@ -585,7 +576,7 @@ public class RestController
 
 		if (attr.isReadOnly())
 		{
-			throw new MolgenisDataAccessException(
+			throw new MolgenisPermissionException(
 					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' is readonly");
 		}
 
@@ -813,135 +804,6 @@ public class RestController
 		{
 			request.getSession().invalidate();
 		}
-	}
-
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(UnknownTokenException.class)
-	@ResponseStatus(NOT_FOUND)
-	@ResponseBody
-	public ErrorMessageResponse handleUnknownTokenException(UnknownTokenException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(UnknownEntityException.class)
-	@ResponseStatus(NOT_FOUND)
-	@ResponseBody
-	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(UnknownAttributeException.class)
-	@ResponseStatus(NOT_FOUND)
-	@ResponseBody
-	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
-	{
-		LOG.debug("", e);
-
-		List<ErrorMessage> messages = Lists.newArrayList();
-		for (ObjectError error : e.getBindingResult().getAllErrors())
-		{
-			messages.add(new ErrorMessage(error.getDefaultMessage()));
-		}
-
-		return new ErrorMessageResponse(messages);
-	}
-
-	@ExceptionHandler(MolgenisValidationException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisValidationException(MolgenisValidationException e)
-	{
-		LOG.info("", e);
-
-		List<ErrorMessage> messages = Lists.newArrayList();
-		for (ConstraintViolation violation : e.getViolations())
-		{
-			messages.add(new ErrorMessage(violation.getMessage()));
-		}
-
-		return new ErrorMessageResponse(messages);
-	}
-
-	@ExceptionHandler(ConversionException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleConversionException(ConversionException e)
-	{
-		LOG.info("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(MolgenisDataException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(AuthenticationException.class)
-	@ResponseStatus(UNAUTHORIZED)
-	@ResponseBody
-	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
-	{
-		LOG.info("", e);
-		// workaround for https://github.com/molgenis/molgenis/issues/4441
-		String message = e.getMessage();
-		String messagePrefix = "org.springframework.security.core.userdetails.UsernameNotFoundException: ";
-		if (message.startsWith(messagePrefix))
-		{
-			message = message.substring(messagePrefix.length());
-		}
-		return new ErrorMessageResponse(new ErrorMessage(message));
-	}
-
-	@ExceptionHandler(MolgenisDataAccessException.class)
-	@ResponseStatus(UNAUTHORIZED)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
-	{
-		LOG.info("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(MolgenisReferencedEntityException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
 	private void updateInternal(String entityTypeId, String untypedId, Map<String, Object> entityMap)

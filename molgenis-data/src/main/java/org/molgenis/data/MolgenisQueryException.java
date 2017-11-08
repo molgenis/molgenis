@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-public class MolgenisQueryException extends RuntimeException
+public class MolgenisQueryException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;
 

@@ -1,6 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.postgresql.identifier.AttributeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
@@ -59,7 +59,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		return doTranslate(dataAccessException);
 	}
 
-	private MolgenisDataException doTranslate(DataAccessException dataAccessException)
+	private MolgenisDataAccessException doTranslate(DataAccessException dataAccessException)
 	{
 		Throwable cause = dataAccessException.getCause();
 		if (!(cause instanceof PSQLException))
@@ -68,15 +68,15 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 
 		PSQLException pSqlException = (PSQLException) cause;
-		MolgenisDataException molgenisDataException = doTranslate(pSqlException);
+		MolgenisDataAccessException molgenisDataException = doTranslate(pSqlException);
 		if (molgenisDataException == null)
 		{
-			molgenisDataException = new MolgenisDataException(dataAccessException);
+			molgenisDataException = new MolgenisDataAccessException(dataAccessException);
 		}
 		return molgenisDataException;
 	}
 
-	private MolgenisDataException doTranslate(SQLException sqlException)
+	private MolgenisDataAccessException doTranslate(SQLException sqlException)
 	{
 		if (sqlException instanceof BatchUpdateException)
 		{
@@ -89,15 +89,15 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 
 		PSQLException pSqlException = (PSQLException) sqlException;
-		MolgenisDataException molgenisDataException = doTranslate(pSqlException);
+		MolgenisDataAccessException molgenisDataException = doTranslate(pSqlException);
 		if (molgenisDataException == null)
 		{
-			molgenisDataException = new MolgenisDataException(sqlException);
+			molgenisDataException = new MolgenisDataAccessException(sqlException);
 		}
 		return molgenisDataException;
 	}
 
-	private MolgenisDataException doTranslate(PSQLException pSqlException)
+	private MolgenisDataAccessException doTranslate(PSQLException pSqlException)
 	{
 		switch (pSqlException.getSQLState())
 		{
@@ -452,7 +452,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	}
 
 	@Override
-	public MolgenisDataException doTranslate(TransactionException transactionException)
+	public MolgenisDataAccessException doTranslate(TransactionException transactionException)
 	{
 		Throwable cause = transactionException.getCause();
 		if (!(cause instanceof PSQLException))

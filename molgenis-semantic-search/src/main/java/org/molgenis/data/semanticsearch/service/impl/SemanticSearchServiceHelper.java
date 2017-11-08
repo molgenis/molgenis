@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -214,7 +214,7 @@ public class SemanticSearchServiceHelper
 		Entity EntityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
 				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
 
-		if (EntityTypeEntity == null) throw new MolgenisDataAccessException(
+		if (EntityTypeEntity == null) throw new MolgenisPermissionException(
 				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getId());
 
 		List<String> attributeIdentifiers = new ArrayList<>();

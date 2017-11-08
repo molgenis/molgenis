@@ -164,12 +164,12 @@ public class OntologyTermRepository
 
 		if (StringUtils.isEmpty(nodePath1))
 		{
-			throw new MolgenisDataAccessException("The nodePath cannot be null : " + ontologyTerm1.toString());
+			throw new MolgenisPermissionException("The nodePath cannot be null : " + ontologyTerm1.toString());
 		}
 
 		if (StringUtils.isEmpty(nodePath2))
 		{
-			throw new MolgenisDataAccessException("The nodePath cannot be null : " + ontologyTerm2.toString());
+			throw new MolgenisPermissionException("The nodePath cannot be null : " + ontologyTerm2.toString());
 		}
 
 		return calculateNodePathDistance(nodePath1, nodePath2);
