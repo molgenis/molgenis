@@ -21,12 +21,6 @@ public class BeaconServiceImpl implements BeaconService
 	}
 
 	@Override
-	public List<String> listDatasets()
-	{
-		return newArrayList("base_beacon_dataset_one", "base_beacon_dataset_two");
-	}
-
-	@Override
 	public boolean query(String chromosome, Long position, String reference, String allele, String entityTypeID)
 	{
 		/* Use the count() method to determine if a variation exists */
