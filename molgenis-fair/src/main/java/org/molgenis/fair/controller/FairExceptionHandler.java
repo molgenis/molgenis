@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ControllerAdvice
 public class FairExceptionHandler
@@ -40,6 +41,15 @@ public class FairExceptionHandler
 	public Model handleUnknownDistributionException(UnknownDistributionException e)
 	{
 		LOG.warn(e.getMessage(), e);
+		return new LinkedHashModel();
+	}
+
+	@ExceptionHandler(Exception.class)
+	@ResponseBody
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	public Model handleException(Exception e)
+	{
+		LOG.error(e.getMessage(), e);
 		return new LinkedHashModel();
 	}
 }
