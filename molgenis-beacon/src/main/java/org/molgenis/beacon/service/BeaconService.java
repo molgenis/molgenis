@@ -1,14 +1,7 @@
 package org.molgenis.beacon.service;
 
-import java.util.List;
-
 public interface BeaconService
 {
-	/**
-	 * List available datasets
-	 */
-	List<String> listDatasets();
-
 	/**
 	 * Query a table based on the given EntityTypeID and answer the query with "yes" or "no"
 	 *
