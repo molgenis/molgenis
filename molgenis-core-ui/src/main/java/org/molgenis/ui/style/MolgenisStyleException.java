@@ -1,10 +1,10 @@
 package org.molgenis.ui.style;
 
-import org.molgenis.data.MolgenisRuntimeException;
+import org.molgenis.data.MolgenisException;
 
 import java.io.IOException;
 
-public class MolgenisStyleException extends MolgenisRuntimeException
+public class MolgenisStyleException extends MolgenisException
 {
 	public MolgenisStyleException(String s)
 	{
