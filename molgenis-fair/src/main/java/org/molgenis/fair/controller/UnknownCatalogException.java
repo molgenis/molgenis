@@ -2,7 +2,7 @@ package org.molgenis.fair.controller;
 
 import static java.util.Objects.requireNonNull;
 
-class UnknownCatalogException extends RuntimeException
+class UnknownCatalogException extends FairException
 {
 	private static final String MESSAGE_FORMAT = "Catalog with id [%s] does not exist";
 

@@ -44,10 +44,10 @@ public class FairExceptionHandler
 		return new LinkedHashModel();
 	}
 
-	@ExceptionHandler(Exception.class)
+	@ExceptionHandler(FairException.class)
 	@ResponseBody
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	public Model handleException(Exception e)
+	public Model handleFairException(FairException e)
 	{
 		LOG.error(e.getMessage(), e);
 		return new LinkedHashModel();
