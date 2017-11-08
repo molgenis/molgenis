@@ -648,7 +648,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisPermissionException.class)
 	public void aggregateUser() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);

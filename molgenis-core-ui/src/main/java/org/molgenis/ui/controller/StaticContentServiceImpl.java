@@ -1,7 +1,7 @@
 package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
@@ -84,7 +84,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	{
 		if (!this.isCurrentUserCanEdit(pluginId))
 		{
-			throw new MolgenisDataAccessException("No write permissions on static content page");
+			throw new MolgenisPermissionException("No write permissions on static content page");
 		}
 	}
 }

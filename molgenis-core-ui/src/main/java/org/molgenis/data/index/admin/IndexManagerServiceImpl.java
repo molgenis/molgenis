@@ -54,7 +54,7 @@ public class IndexManagerServiceImpl implements IndexManagerService
 		Repository<Entity> repository = dataService.getRepository(entityTypeId);
 		if (!repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 		{
-			throw new MolgenisDataAccessException("Repository [" + entityTypeId + "] is not an indexed repository");
+			throw new MolgenisPermissionException("Repository [" + entityTypeId + "] is not an indexed repository");
 		}
 		indexService.rebuildIndex(repository);
 	}

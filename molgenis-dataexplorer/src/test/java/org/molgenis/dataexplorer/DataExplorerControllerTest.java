@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
@@ -188,7 +188,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisPermissionException.class)
 	public void getAnnotatorModuleFail() throws Exception
 	{
 		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));
@@ -227,7 +227,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		verify(model).addAttribute("viewName", "view-standalone-report-specific-id");
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "EntityType with id \\[id\\] does not exist\\. Did you use the correct URL\\?")
+	@Test(expectedExceptions = MolgenisPermissionException.class, expectedExceptionsMessageRegExp = "EntityType with id \\[id\\] does not exist\\. Did you use the correct URL\\?")
 	public void testViewEntityDetailsByIdEntityTypeNotExists() throws Exception
 	{
 		when(dataService.getEntityType(entityTypeId)).thenReturn(null);

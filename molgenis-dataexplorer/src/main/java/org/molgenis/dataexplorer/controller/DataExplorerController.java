@@ -226,7 +226,7 @@ public class DataExplorerController extends PluginController
 				// self-explanatory
 				if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
-					throw new MolgenisDataAccessException(
+					throw new MolgenisPermissionException(
 							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
 									+ "], this permission is necessary run the annotators.");
 				}
@@ -419,7 +419,7 @@ public class DataExplorerController extends PluginController
 			throws IOException
 	{
 		boolean galaxyEnabled = dataExplorerSettings.getGalaxyExport();
-		if (!galaxyEnabled) throw new MolgenisDataAccessException("Galaxy export disabled");
+		if (!galaxyEnabled) throw new MolgenisPermissionException("Galaxy export disabled");
 
 		DataExplorerDownloadHandler download = new DataExplorerDownloadHandler(dataService, attrMetaFactory);
 
@@ -478,7 +478,7 @@ public class DataExplorerController extends PluginController
 	 *
 	 * @return standalone report view
 	 * @throws Exception                   if an entity name or id is not found
-	 * @throws MolgenisDataAccessException if an EntityType does not exist
+	 * @throws MolgenisPermissionException if an EntityType does not exist
 	 */
 	@GetMapping("/details/{entityTypeId}/{entityId}")
 	public String viewEntityDetailsById(@PathVariable(value = "entityTypeId") String entityTypeId,
@@ -487,7 +487,7 @@ public class DataExplorerController extends PluginController
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new MolgenisDataAccessException(
+			throw new MolgenisPermissionException(
 					"EntityType with id [" + entityTypeId + "] does not exist. Did you use the correct URL?");
 		}
 		Object id = getTypedValue(entityId, entityType.getIdAttribute());
