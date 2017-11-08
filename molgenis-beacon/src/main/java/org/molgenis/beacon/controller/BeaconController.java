@@ -37,7 +37,7 @@ public class BeaconController
 	@GetMapping(value = "/query", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public BeaconResponse query(@RequestParam("chrom") String chromosome, @RequestParam("pos") String position,
-			@RequestParam("allele") String allele, @RequestParam("ref") String reference,
+			@RequestParam("ref") String reference, @RequestParam("alt") String allele,
 			@RequestParam("dataset") String entityTypeID)
 	{
 		boolean exists = beaconService.query(chromosome, Long.valueOf(position), reference, allele, entityTypeID);
