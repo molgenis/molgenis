@@ -240,7 +240,7 @@
                     var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + mappedEntity.identifier;
                     var updatedMappedEntity = {};
                     $.map(mappedEntity, function (val, key) {
-                        if (key !== 'identifier') updatedMappedEntity[key] = val;
+                        updatedMappedEntity[key] = val;
                         if (key === 'validated') updatedMappedEntity[key] = true;
                         if (key === 'inputTerm') {
                             console.log('inputTerm', val)
@@ -293,7 +293,7 @@
                                 else if (key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
                                 else if (key === 'matchTerm') updatedMappedEntity.matchTerm = row.data('ontologyTerm').ontologyTermIRI;
                                 else if (key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').Score;
-                                else if (key !== 'identifier') updatedMappedEntity[key] = val;
+                                else updatedMappedEntity[key] = val;
                             });
                             restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
                         }

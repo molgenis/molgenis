@@ -199,7 +199,8 @@ public class SortaServiceImpl implements SortaService
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
 				new QueryImpl<>(finalQueryRules).pageSize(pageSize))
 																	   .map(ontologyTerm -> addLexicalScoreToMatchedEntity(
-																			   inputEntity, ontologyTerm, ontologyIri));
+																			   inputEntity, ontologyTerm,
+																			   ontologyIri)); // TODO use findAll(ONTOLOGY_TERM, ..., OntologyTerm.class)
 
 		lexicalMatchedOntologyTermEntities.forEach(matchedEntity ->
 		{
@@ -210,7 +211,8 @@ public class SortaServiceImpl implements SortaService
 		});
 	}
 
-	Entity addLexicalScoreToMatchedEntity(Entity inputEntity, Entity ontologyTerm, String ontologyIri)
+	Entity addLexicalScoreToMatchedEntity(Entity inputEntity, Entity ontologyTerm,
+			String ontologyIri) // TODO Change 'Entity ontologyTerm' to 'OntologyTerm ontologyTerm'
 	{
 		double maxNgramScore = 0;
 		double maxNgramIDFScore = 0;
