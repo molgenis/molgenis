@@ -217,7 +217,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 		else
 		{
-			throw new MolgenisDataAccessException(format("Aggregation on entity [%s] not allowed", getName()));
+			throw new MolgenisPermissionException(format("Aggregation on entity [%s] not allowed", getName()));
 		}
 	}
 

@@ -410,7 +410,7 @@ public class RestController
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 			return null;
 		}
-		catch (MolgenisDataAccessException e)
+		catch (MolgenisPermissionException e)
 		{
 			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return null;
@@ -576,7 +576,7 @@ public class RestController
 
 		if (attr.isReadOnly())
 		{
-			throw new MolgenisDataAccessException(
+			throw new MolgenisPermissionException(
 					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' is readonly");
 		}
 

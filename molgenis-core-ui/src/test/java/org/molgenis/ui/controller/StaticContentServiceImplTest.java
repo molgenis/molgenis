@@ -1,7 +1,7 @@
 package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -79,7 +79,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permissions on static content page")
+	@Test(expectedExceptions = MolgenisPermissionException.class, expectedExceptionsMessageRegExp = "No write permissions on static content page")
 	public void checkPermissions_withoutPermissions()
 	{
 		this.setSecurityContextNonSuperUser(false);

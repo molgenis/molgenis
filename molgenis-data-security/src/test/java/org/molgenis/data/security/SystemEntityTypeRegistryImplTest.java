@@ -2,7 +2,7 @@ package org.molgenis.data.security;
 
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
@@ -64,7 +64,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		assertEquals(systemEntityTypeRegistry.getSystemEntityType(entityTypeId), systemEntityType);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisPermissionException.class)
 	public void testGetSystemEntityTypeNotPermitted()
 	{
 		String entityTypeId = "entityType";
@@ -144,7 +144,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		assertNull(systemEntityTypeRegistry.getSystemAttribute("attr"));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisPermissionException.class)
 	public void testGetSystemAttributeNotPermitted()
 	{
 		String entityTypeId = "entityType";

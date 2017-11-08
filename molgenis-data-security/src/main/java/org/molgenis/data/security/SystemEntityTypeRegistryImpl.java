@@ -1,7 +1,7 @@
 package org.molgenis.data.security;
 
 import com.google.common.collect.Maps;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
@@ -99,7 +99,7 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	{
 		if (!isReadAllowed(systemEntityType))
 		{
-			throw new MolgenisDataAccessException(
+			throw new MolgenisPermissionException(
 					format("No read permission on entity type '%s' with id '%s'", systemEntityType.getLabel(),
 							systemEntityType.getId()));
 		}

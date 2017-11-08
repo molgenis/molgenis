@@ -5,7 +5,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Explanation;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 
 import java.util.*;
@@ -140,7 +140,7 @@ public class ExplainServiceHelper
 		{
 			return matcher.group(1);
 		}
-		throw new MolgenisDataAccessException("Failed to find matched word in : " + description);
+		throw new MolgenisPermissionException("Failed to find matched word in : " + description);
 	}
 
 	Set<String> splitIntoTerms(String description)

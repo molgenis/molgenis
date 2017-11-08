@@ -703,7 +703,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void molgenisDataAccessException() throws Exception
 	{
 		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
-			   .thenThrow(new MolgenisDataAccessException());
+			   .thenThrow(new MolgenisPermissionException());
 		mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID))
 			   .andExpect(MockMvcResultMatchers.status().isUnauthorized());
 	}

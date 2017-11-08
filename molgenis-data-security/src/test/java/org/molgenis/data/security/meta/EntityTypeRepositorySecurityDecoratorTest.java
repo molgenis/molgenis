@@ -608,7 +608,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisPermissionException.class)
 	public void aggregateUser() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
@@ -637,7 +637,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity type \\[entity\\] with id \\[entity\\]")
+	@Test(expectedExceptions = MolgenisPermissionException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity type \\[entity\\] with id \\[entity\\]")
 	public void deleteUserNotAllowed()
 	{
 		delete();

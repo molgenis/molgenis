@@ -245,7 +245,7 @@ public class ImportWizardController extends AbstractWizardController
 			}
 			else
 			{
-				if (value != null) throw new MolgenisDataAccessException(
+				if (value != null) throw new MolgenisPermissionException(
 						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
 			}
 		});

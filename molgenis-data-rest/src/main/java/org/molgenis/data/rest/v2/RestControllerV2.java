@@ -80,9 +80,9 @@ public class RestControllerV2
 		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityTypeId + "'");
 	}
 
-	static MolgenisDataAccessException createNoReadPermissionOnEntityException(String entityTypeId)
+	static MolgenisPermissionException createNoReadPermissionOnEntityException(String entityTypeId)
 	{
-		return new MolgenisDataAccessException("No read permission on entity " + entityTypeId);
+		return new MolgenisPermissionException("No read permission on entity " + entityTypeId);
 	}
 
 	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
@@ -101,10 +101,10 @@ public class RestControllerV2
 				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityTypeId + "'");
 	}
 
-	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
+	static MolgenisPermissionException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
 			String attributeName)
 	{
-		return new MolgenisDataAccessException(
+		return new MolgenisPermissionException(
 				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityTypeId + "' is readonly");
 	}
 
