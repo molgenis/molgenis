@@ -1,5 +1,6 @@
 package org.molgenis.web.exception;
 
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice
@@ -36,6 +38,23 @@ public class GlobalControllerExceptionHandler
 		{
 			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(NotFoundController.ERROR_MESSAGE);
 			return new ResponseEntity<>(errorMessageResponse, NOT_FOUND);
+		}
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler
+	public Object handleUnknownEntityTypeException(UnknownEntityTypeException e, HandlerMethod handlerMethod)
+	{
+		LOG.warn("", e);
+		if (isHtmlRequest(handlerMethod))
+		{
+			return "forward:" + NotFoundController.URI;
+		}
+		else
+		{
+			//FIXME: handle cases where the key does not exist in the resourceBundle
+			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage());
+			return new ResponseEntity<>(errorMessageResponse, BAD_REQUEST);
 		}
 	}
 
