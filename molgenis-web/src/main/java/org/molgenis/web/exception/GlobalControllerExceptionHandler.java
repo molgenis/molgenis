@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice
@@ -37,23 +36,6 @@ public class GlobalControllerExceptionHandler
 		{
 			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(NotFoundController.ERROR_MESSAGE);
 			return new ResponseEntity<>(errorMessageResponse, NOT_FOUND);
-		}
-	}
-
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ExceptionHandler
-	public Object handleException(Exception e, HandlerMethod handlerMethod)
-	{
-		LOG.error("", e);
-		if (isHtmlRequest(handlerMethod))
-		{
-			return "forward:" + InternalServerErrorController.URI;
-		}
-		else
-		{
-			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(
-					InternalServerErrorController.ERROR_MESSAGE);
-			return new ResponseEntity<>(errorMessageResponse, INTERNAL_SERVER_ERROR);
 		}
 	}
 
