@@ -1,24 +1,21 @@
 package org.molgenis.fair.controller;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.fair.controller.FairController.BASE_URI;
 import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**
  * Serves metadata for the molgenis FAIR DataPoint.
@@ -27,14 +24,12 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @RequestMapping(BASE_URI)
 public class FairController
 {
-	private static final Logger LOG = LoggerFactory.getLogger(FairController.class);
-
 	static final String BASE_URI = "/fdp";
 
 	private final DataService dataService;
 	private final EntityModelWriter entityModelWriter;
 
-	public FairController(DataService dataService, EntityModelWriter entityModelWriter)
+	FairController(DataService dataService, EntityModelWriter entityModelWriter)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityModelWriter = requireNonNull(entityModelWriter);
@@ -64,7 +59,7 @@ public class FairController
 		Entity subjectEntity = dataService.findOneById("fdp_Catalog", catalogID);
 		if (subjectEntity == null)
 		{
-			throw new UnknownEntityException(format("Catalog with id [%s] does not exist", catalogID));
+			throw new UnknownCatalogException(catalogID);
 		}
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
@@ -88,17 +83,5 @@ public class FairController
 		String subjectIRI = getBaseUri().pathSegment(catalogID, datasetID, distributionID).toUriString();
 		Entity subjectEntity = dataService.findOneById("fdp_Distribution", distributionID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
-	}
-
-	//Keep this specific handler next to the global exception handler because it has a very specific RDF response
-	//TODO: will this still work with a global exception handler
-	@ExceptionHandler(UnknownEntityException.class)
-	@ResponseBody
-	@ResponseStatus(BAD_REQUEST)
-	public Model handleUnknownEntityException(UnknownEntityException e)
-	{
-		LOG.warn(e.getMessage(), e);
-		Model emptyModel = new LinkedHashModel();
-		return emptyModel;
 	}
 }
