@@ -5,8 +5,6 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,8 +22,6 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 @Component
 public class I18nPopulator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(I18nPopulator.class);
-
 	private final DataService dataService;
 	private final LanguageFactory languageFactory;
 	private final List<PropertiesMessageSource> localizationMessageSources;

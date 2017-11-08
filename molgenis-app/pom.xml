@@ -94,11 +94,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-pathways</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-plugin</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -145,11 +140,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-charts</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-rest</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -180,11 +170,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-model-registry</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-ontology</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -201,11 +186,6 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-questionnaires</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-catalogue</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -1,6 +1,7 @@
 package org.molgenis.data.validation;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
@@ -35,6 +36,11 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest
 
 	private EntityType intRangeMinMeta;
 	private EntityType intRangeMaxMeta;
+
+	public EntityAttributesValidatorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -345,10 +351,9 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest
 				entity)).thenReturn(expressionResults);
 		Set<ConstraintViolation> constraintViolations = entityAttributesValidator.validate(entity, entityType);
 		Set<ConstraintViolation> expectedConstraintViolations = newHashSet(new ConstraintViolation(
-				"Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression1",
-				null, entity, attr1, entityType, null), new ConstraintViolation(
-				"Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2",
-				emptyList().toString(), entity, attr2, entityType, null));
+						"Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression1"),
+				new ConstraintViolation(
+						"Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2"));
 		assertEquals(newHashSet(constraintViolations), expectedConstraintViolations);
 	}
 

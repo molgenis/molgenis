@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
@@ -71,6 +72,11 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 	private String attributeId = "SDFSADFSDAF";
 	@Captor
 	private ArgumentCaptor<Consumer<List<Attribute>>> consumerCaptor;
+
+	public AttributeRepositorySecurityDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

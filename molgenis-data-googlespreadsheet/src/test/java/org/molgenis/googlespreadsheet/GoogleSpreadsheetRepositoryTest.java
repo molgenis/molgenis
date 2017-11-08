@@ -5,6 +5,7 @@ import com.google.gdata.data.IFeed;
 import com.google.gdata.data.TextConstruct;
 import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -36,6 +37,11 @@ public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 	private SpreadsheetService spreadsheetService;
 	private ListFeed listFeed;
 	private CellFeed cellFeed;
+
+	public GoogleSpreadsheetRepositoryTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUp() throws IOException, ServiceException

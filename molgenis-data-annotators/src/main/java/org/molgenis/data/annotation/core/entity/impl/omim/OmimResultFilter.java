@@ -6,7 +6,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -20,14 +19,11 @@ import static org.molgenis.data.annotation.core.entity.impl.omim.OmimAnnotator.*
 public class OmimResultFilter implements ResultFilter
 {
 	private EntityTypeFactory entityTypeFactory;
-	private AttributeFactory attributeFactory;
 	private OmimAnnotator omimAnnotator;
 
-	public OmimResultFilter(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
-			OmimAnnotator omimAnnotator)
+	public OmimResultFilter(EntityTypeFactory entityTypeFactory, OmimAnnotator omimAnnotator)
 	{
 		this.entityTypeFactory = entityTypeFactory;
-		this.attributeFactory = attributeFactory;
 		this.omimAnnotator = omimAnnotator;
 	}
 

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
@@ -77,6 +78,11 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private EntityType entityType3;
 	@Mock
 	private EntityType entityType4;
+
+	public EntityTypeRepositorySecurityDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

@@ -15,7 +15,6 @@ import static org.molgenis.util.EntityUtils.getTypedValue;
 public abstract class DefaultSettingsEntityType extends SystemEntityType
 {
 	public static final String ATTR_ID = "id";
-	private final String id;
 
 	@Autowired
 	private DataService dataService;
@@ -32,7 +31,6 @@ public abstract class DefaultSettingsEntityType extends SystemEntityType
 	public DefaultSettingsEntityType(String id)
 	{
 		super(id, PACKAGE_SETTINGS);
-		this.id = id;
 	}
 
 	@Override

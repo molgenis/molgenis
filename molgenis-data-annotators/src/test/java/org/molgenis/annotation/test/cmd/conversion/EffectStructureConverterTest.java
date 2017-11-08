@@ -1,6 +1,7 @@
 package org.molgenis.annotation.test.cmd.conversion;
 
 import com.google.common.collect.Iterables;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.utils.EffectStructureConverter;
@@ -64,6 +65,11 @@ public class EffectStructureConverterTest extends AbstractMolgenisSpringTest
 	public ArrayList<Entity> entities;
 	private Entity variant1;
 	private Entity variant2;
+
+	public EffectStructureConverterTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass()

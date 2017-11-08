@@ -16,7 +16,6 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,9 +58,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private IdGenerator idGenerator;
-
-	@Autowired
-	private UserService userService;
 
 	@Autowired
 	private MappingProjectMetaData mappingProjectMeta;
@@ -160,7 +156,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(OWNER, "flup");
 		when(dataService.findAll(MAPPING_PROJECT, q)).thenReturn(Stream.of(mappingProjectEntity));
-		when(userService.getUser("flup")).thenReturn(owner);
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
 				asList(mappingTarget1, mappingTarget2));
 		List<MappingProject> result = mappingProjectRepositoryImpl.getMappingProjects(q);
@@ -174,7 +169,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(OWNER, "flup");
 		when(dataService.findAll(MAPPING_PROJECT)).thenReturn(Stream.of(mappingProjectEntity));
-		when(userService.getUser("flup")).thenReturn(owner);
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
 				asList(mappingTarget1, mappingTarget2));
 		List<MappingProject> result = mappingProjectRepositoryImpl.getAllMappingProjects();
@@ -215,12 +209,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public UserService molgenisUserService()
-		{
-			return mock(UserService.class);
-		}
-
-		@Bean
 		public IdGenerator idGenerator()
 		{
 			return mock(IdGenerator.class);
@@ -229,8 +217,8 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public MappingProjectRepositoryImpl mappingProjectRepositoryImpl()
 		{
-			return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), molgenisUserService(),
-					idGenerator(), mappingProjectMeta);
+			return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), idGenerator(),
+					mappingProjectMeta);
 		}
 
 	}

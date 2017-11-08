@@ -258,7 +258,6 @@ public class DataExplorerController extends PluginController
 	{
 		boolean modAggregates = dataExplorerSettings.getModAggregates();
 		boolean modAnnotators = dataExplorerSettings.getModAnnotators();
-		boolean modCharts = dataExplorerSettings.getModCharts();
 		boolean modData = dataExplorerSettings.getModData();
 		boolean modReports = dataExplorerSettings.getModReports();
 
@@ -297,10 +296,6 @@ public class DataExplorerController extends PluginController
 					if (modAggregates)
 					{
 						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
-					}
-					if (modCharts)
-					{
-						modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
 					}
 					if (modAnnotators && pluginPermission == WRITE)
 					{

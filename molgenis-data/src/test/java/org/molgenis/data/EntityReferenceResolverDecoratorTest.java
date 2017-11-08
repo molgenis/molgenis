@@ -3,6 +3,7 @@ package org.molgenis.data;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -35,6 +36,11 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
 	@Captor
 	ArgumentCaptor<Stream<Entity>> streamArgumentCaptor;
+
+	public EntityReferenceResolverDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

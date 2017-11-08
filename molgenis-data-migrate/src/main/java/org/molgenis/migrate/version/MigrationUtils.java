@@ -1,8 +1,5 @@
 package org.molgenis.migrate.version;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.util.Properties;
 
@@ -13,8 +10,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class MigrationUtils
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
-
 	public static final String VERSION_KEY = "molgenis.version";
 	public static final String DB_KEY = "db_uri";
 	public static final String MOLGENIS_HOME_KEY = "molgenis.home";

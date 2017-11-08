@@ -46,7 +46,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	{
 		try (ValidationResource validationResource = new ValidationResource())
 		{
-			entity = validate(Stream.of(entity), validationResource, ValidationMode.UPDATE).findFirst().get();
+			validate(entity, validationResource, ValidationMode.UPDATE);
 		}
 		delegate().update(entity);
 	}
@@ -66,7 +66,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	{
 		try (ValidationResource validationResource = new ValidationResource())
 		{
-			entity = validate(Stream.of(entity), validationResource, ValidationMode.ADD).findFirst().get();
+			validate(entity, validationResource, ValidationMode.ADD);
 		}
 		delegate().add(entity);
 	}
@@ -120,47 +120,57 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		// prepare validation
 		initValidation(validationResource, validationMode);
 
-		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT);
-		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
-		boolean validateReadonly = !getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT);
+		ValidationProfile validationProfile = new ValidationProfile().invoke();
 
 		// add validation operation to stream
 		return entities.filter(entity ->
 		{
-			validationResource.incrementRow();
-
-			validateEntityValueTypes(entity, validationResource);
-
-			// other validation steps might not be able to handle invalid data types, stop here
-			if (validationResource.hasViolations())
-			{
-				throw new MolgenisValidationException(validationResource.getViolations());
-			}
-
-			if (validateRequired)
-			{
-				validateEntityValueRequired(entity, validationResource);
-			}
-
-			if (validateUniqueness)
-			{
-				validateEntityValueUniqueness(entity, validationResource, validationMode);
-			}
-
-			validateEntityValueReferences(entity, validationResource);
-
-			if (validateReadonly && validationMode == ValidationMode.UPDATE)
-			{
-				validateEntityValueReadOnly(entity, validationResource);
-			}
-
-			if (validationResource.hasViolations())
-			{
-				throw new MolgenisValidationException(validationResource.getViolations());
-			}
+			validate(entity, validationResource, validationMode, validationProfile);
 
 			return true;
 		});
+	}
+
+	private void validate(Entity entity, ValidationResource validationResource, ValidationMode validationMode)
+	{
+		initValidation(validationResource, validationMode);
+		validate(entity, validationResource, validationMode, new ValidationProfile().invoke());
+	}
+
+	private void validate(Entity entity, ValidationResource validationResource, ValidationMode validationMode,
+			ValidationProfile validationProfile)
+	{
+		validationResource.incrementRow();
+
+		validateEntityValueTypes(entity, validationResource);
+
+		// other validation steps might not be able to handle invalid data types, stop here
+		if (validationResource.hasViolations())
+		{
+			throw new MolgenisValidationException(validationResource.getViolations());
+		}
+
+		if (validationProfile.isValidateRequired())
+		{
+			validateEntityValueRequired(entity, validationResource);
+		}
+
+		if (validationProfile.isValidateUniqueness())
+		{
+			validateEntityValueUniqueness(entity, validationResource, validationMode);
+		}
+
+		validateEntityValueReferences(entity, validationResource);
+
+		if (validationProfile.isValidateReadonly() && validationMode == ValidationMode.UPDATE)
+		{
+			validateEntityValueReadOnly(entity, validationResource);
+		}
+
+		if (validationResource.hasViolations())
+		{
+			throw new MolgenisValidationException(validationResource.getViolations());
+		}
 	}
 
 	private void initValidation(ValidationResource validationResource, ValidationMode validationMode)
@@ -310,7 +320,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			{
 				ConstraintViolation constraintViolation = new ConstraintViolation(
 						format("The attribute '%s' of entity '%s' can not be null.", nonNillableAttr.getName(),
-								getName()), nonNillableAttr, Integer.valueOf(validationResource.getRow()).longValue());
+								getName()), (long) validationResource.getRow());
 				validationResource.addViolation(constraintViolation);
 			}
 		});
@@ -348,7 +358,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 				{
 					ConstraintViolation constraintViolation = new ConstraintViolation(
 							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
-									uniqueAttr.getName(), getName()), uniqueAttr, (long) validationResource.getRow());
+									uniqueAttr.getName(), getName()), (long) validationResource.getRow());
 					validationResource.addViolation(constraintViolation);
 				}
 				else
@@ -393,7 +403,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",
 								DataConverter.toString(refEntity.getIdValue()), refAttr.getName(), getName());
 
-						ConstraintViolation constraintViolation = new ConstraintViolation(message, refAttr,
+						ConstraintViolation constraintViolation = new ConstraintViolation(message,
 								(long) validationResource.getRow());
 						validationResource.addViolation(constraintViolation);
 					}
@@ -612,6 +622,36 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 					}
 				}
 			}
+		}
+	}
+
+	private class ValidationProfile
+	{
+		private boolean validateRequired;
+		private boolean validateUniqueness;
+		private boolean validateReadonly;
+
+		boolean isValidateRequired()
+		{
+			return validateRequired;
+		}
+
+		boolean isValidateUniqueness()
+		{
+			return validateUniqueness;
+		}
+
+		boolean isValidateReadonly()
+		{
+			return validateReadonly;
+		}
+
+		public ValidationProfile invoke()
+		{
+			validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT);
+			validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
+			validateReadonly = !getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT);
+			return this;
 		}
 	}
 }

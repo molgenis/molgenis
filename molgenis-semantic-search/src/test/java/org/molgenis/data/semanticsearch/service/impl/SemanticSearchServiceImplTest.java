@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.lucene.search.Explanation;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -91,6 +92,11 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	private List<OntologyTerm> ontologyTerms;
 
 	private Attribute attribute;
+
+	public SemanticSearchServiceImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass()

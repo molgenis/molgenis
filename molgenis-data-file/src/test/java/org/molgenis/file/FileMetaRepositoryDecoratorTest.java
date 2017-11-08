@@ -2,6 +2,7 @@ package org.molgenis.file;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
@@ -27,6 +28,11 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	private FileStore fileStore;
 
 	private FileMetaRepositoryDecorator fileMetaRepositoryDecorator;
+
+	public FileMetaRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

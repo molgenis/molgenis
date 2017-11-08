@@ -1,6 +1,7 @@
 package org.molgenis.data.i18n;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
@@ -26,6 +27,11 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	private LanguageService languageService;
 
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
+
+	public LanguageRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

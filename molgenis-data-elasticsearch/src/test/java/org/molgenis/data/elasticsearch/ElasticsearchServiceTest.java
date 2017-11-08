@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.client.ClientFacade;
@@ -32,6 +33,11 @@ public class ElasticsearchServiceTest extends AbstractMockitoTest
 
 	@Mock
 	private EntityType entityType;
+
+	public ElasticsearchServiceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

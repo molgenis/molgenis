@@ -3,6 +3,7 @@ package org.molgenis.data.jobs;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -92,6 +93,11 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 	@Captor
 	private ArgumentCaptor<Runnable> jobCaptor;
+
+	public JobExecutorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass()

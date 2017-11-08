@@ -3,6 +3,7 @@ package org.molgenis.data.i18n;
 import com.beust.jcommander.internal.Maps;
 import com.google.common.collect.Sets;
 import org.mockito.*;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -61,6 +62,11 @@ public class LocalizationServiceTest extends AbstractMolgenisSpringTest
 
 	@Captor
 	private ArgumentCaptor<Stream<L10nString>> deleteCaptor;
+
+	public LocalizationServiceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUp() throws Exception

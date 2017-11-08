@@ -34,8 +34,6 @@ public class SemanticSearchServiceHelper
 
 	private final OntologyService ontologyService;
 
-	private final Stemmer stemmer = new Stemmer();
-
 	public final static int MAX_NUM_TAGS = 3;
 
 	private final static char SPACE_CHAR = ' ';

@@ -19,8 +19,6 @@ import static org.molgenis.data.support.ExpressionEvaluatorFactory.createExpress
  */
 public class EntityWithComputedAttributes implements Entity
 {
-	private static final long serialVersionUID = 1L;
-
 	private final Entity decoratedEntity;
 	private final Map<String, ExpressionEvaluator> expressionEvaluators;
 

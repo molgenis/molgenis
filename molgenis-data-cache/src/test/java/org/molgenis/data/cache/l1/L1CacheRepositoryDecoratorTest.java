@@ -5,6 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -82,6 +83,11 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 
 	@Captor
 	private ArgumentCaptor<Stream<EntityKey>> entityKeysCaptor;
+
+	public L1CacheRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

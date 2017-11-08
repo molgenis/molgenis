@@ -1,6 +1,7 @@
 package org.molgenis.data.security;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
@@ -27,6 +28,11 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 	private PermissionService permissionService;
 
 	private SystemEntityTypeRegistryImpl systemEntityTypeRegistry;
+
+	public SystemEntityTypeRegistryImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

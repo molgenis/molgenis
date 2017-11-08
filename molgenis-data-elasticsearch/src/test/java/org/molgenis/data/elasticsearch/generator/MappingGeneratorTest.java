@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 import org.molgenis.data.elasticsearch.generator.model.MappingType;
@@ -28,6 +29,11 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	private DocumentIdGenerator documentIdGenerator;
 
 	private MappingGenerator mappingGenerator;
+
+	public MappingGeneratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

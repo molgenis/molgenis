@@ -5,7 +5,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -22,14 +21,11 @@ import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.HP
 public class HpoResultFilter implements ResultFilter
 {
 	private EntityTypeFactory entityTypeFactory;
-	private AttributeFactory attributeFactory;
 	private HPOAnnotator hpoAnnotator;
 
-	public HpoResultFilter(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
-			HPOAnnotator hpoAnnotator)
+	public HpoResultFilter(EntityTypeFactory entityTypeFactory, HPOAnnotator hpoAnnotator)
 	{
 		this.entityTypeFactory = entityTypeFactory;
-		this.attributeFactory = attributeFactory;
 		this.hpoAnnotator = hpoAnnotator;
 	}
 

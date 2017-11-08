@@ -20,7 +20,8 @@ import java.util.List;
 
 public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator implements EffectCreatingAnnotator
 {
-	private final String name;
+	@SuppressWarnings("unused")
+	private final String name; // for debug purposes
 	private VcfAttributes vcfAttributes;
 	private EffectsMetaData effectsMetaData;
 	private AnnotatorInfo info;

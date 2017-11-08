@@ -5,7 +5,6 @@ import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.system.core.FreemarkerTemplate;
-import org.molgenis.file.FileStore;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.PluginController;
@@ -41,15 +40,13 @@ public class AppsController extends PluginController
 	private static final String VIEW_NAME = "view-apps";
 
 	private final DataService dataService;
-	private final FileStore fileStore;
 	private final PermissionService permissionService;
 
-	public AppsController(DataService dataService, FileStore fileStore, PermissionService permissionService)
+	public AppsController(DataService dataService, PermissionService permissionService)
 	{
 		super(URI);
 
 		this.dataService = requireNonNull(dataService);
-		this.fileStore = requireNonNull(fileStore);
 		this.permissionService = requireNonNull(permissionService);
 	}
 

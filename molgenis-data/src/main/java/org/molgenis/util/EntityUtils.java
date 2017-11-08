@@ -218,25 +218,27 @@ public class EntityUtils
 	{
 		if (entityType == null && otherEntityType != null) return false;
 		if (entityType != null && otherEntityType == null) return false;
-		if (!entityType.getId().equals(otherEntityType.getId())) return false;
+		if (!(entityType != null && entityType.getId().equals(otherEntityType.getId()))) return false;
 		if (!Objects.equals(entityType.getLabel(), otherEntityType.getLabel())) return false;
 		if (!Objects.equals(entityType.getDescription(), otherEntityType.getDescription())) return false;
 		if (entityType.isAbstract() != otherEntityType.isAbstract()) return false;
 
-		//NB Thsi is at such a low level that we do not know the default backend
+		//NB This is at such a low level that we do not know the default backend
 		// so we don't check if the other one is the default if the backend is null.
 		String backend = entityType.getBackend();
 		String otherBackend = otherEntityType.getBackend();
-		if (backend == null && otherBackend != null) return false;
-		else if (backend != null && otherBackend == null) return false;
-		else if (backend != null && !backend.equals(otherBackend)) return false;
+		if ((backend == null && otherBackend != null) || (backend != null && otherBackend == null) || (backend != null
+				&& !backend.equals(otherBackend)))
+		{
+			return false;
+		}
 
 		// compare package identifiers
-		Package package_ = entityType.getPackage();
+		Package pack = entityType.getPackage();
 		Package otherPackage = otherEntityType.getPackage();
-		if (package_ == null && otherPackage != null) return false;
-		if (package_ != null && otherPackage == null) return false;
-		if (package_ != null && !package_.getIdValue().equals(otherPackage.getIdValue()))
+		if (pack == null && otherPackage != null) return false;
+		if (pack != null && otherPackage == null) return false;
+		if (pack != null && !pack.getIdValue().equals(otherPackage.getIdValue()))
 		{
 			return false;
 		}
@@ -246,7 +248,7 @@ public class EntityUtils
 		Attribute otherOwnIdAttribute = otherEntityType.getOwnIdAttribute();
 		if (ownIdAttribute == null && otherOwnIdAttribute != null) return false;
 		if (ownIdAttribute != null && otherOwnIdAttribute == null) return false;
-		if (ownIdAttribute != null && otherOwnIdAttribute != null && !Objects.equals(ownIdAttribute.getIdentifier(),
+		if (ownIdAttribute != null && !Objects.equals(ownIdAttribute.getIdentifier(),
 				otherOwnIdAttribute.getIdentifier())) return false;
 
 		// compare label attribute identifier (identifier might be null if id attribute hasn't been persisted yet)
@@ -254,8 +256,8 @@ public class EntityUtils
 		Attribute otherOwnLabelAttribute = otherEntityType.getOwnLabelAttribute();
 		if (ownLabelAttribute == null && otherOwnLabelAttribute != null) return false;
 		if (ownLabelAttribute != null && otherOwnLabelAttribute == null) return false;
-		if (ownLabelAttribute != null && otherOwnLabelAttribute != null && !Objects.equals(
-				ownLabelAttribute.getIdentifier(), otherOwnLabelAttribute.getIdentifier())) return false;
+		if (ownLabelAttribute != null && !Objects.equals(ownLabelAttribute.getIdentifier(),
+				otherOwnLabelAttribute.getIdentifier())) return false;
 
 		// compare lookup attribute identifiers
 		List<Attribute> lookupAttrs = newArrayList(entityType.getOwnLookupAttributes());
@@ -275,9 +277,7 @@ public class EntityUtils
 		EntityType otherExtendsEntityType = otherEntityType.getExtends();
 		if (extendsEntityType == null && otherExtendsEntityType != null) return false;
 		if (extendsEntityType != null && otherExtendsEntityType == null) return false;
-		if (extendsEntityType != null && otherExtendsEntityType != null && !extendsEntityType.getId()
-																							 .equals(otherExtendsEntityType
-																									 .getId()))
+		if (extendsEntityType != null && !extendsEntityType.getId().equals(otherExtendsEntityType.getId()))
 			return false;
 
 		// compare attributes

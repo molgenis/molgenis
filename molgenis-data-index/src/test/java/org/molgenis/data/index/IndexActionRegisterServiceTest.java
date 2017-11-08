@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
@@ -52,6 +53,11 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 	private MetaDataService metadataService;
 	@Captor
 	private ArgumentCaptor<Stream<IndexAction>> indexActionStreamCaptor;
+
+	public IndexActionRegisterServiceTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

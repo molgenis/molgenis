@@ -48,7 +48,7 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 			EntityType sourceEntityType)
 	{
 		String mapAlgorithm = null;
-		if (sourceAttributes.size() > 0)
+		if (!sourceAttributes.isEmpty())
 		{
 			Attribute firstSourceAttribute = sourceAttributes.get(0);
 

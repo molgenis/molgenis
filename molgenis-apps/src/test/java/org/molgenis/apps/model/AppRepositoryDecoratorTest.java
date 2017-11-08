@@ -2,6 +2,7 @@ package org.molgenis.apps.model;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.Repository;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileStore;
@@ -31,6 +32,11 @@ public class AppRepositoryDecoratorTest extends AbstractMockitoTest
 	private FileStore fileStore;
 
 	private AppRepositoryDecorator appRepositoryDecorator;
+
+	public AppRepositoryDecoratorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

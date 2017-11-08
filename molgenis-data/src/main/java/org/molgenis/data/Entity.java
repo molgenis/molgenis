@@ -2,7 +2,6 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.model.EntityType;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -11,7 +10,7 @@ import java.time.LocalDate;
  * ‘tuple’, ‘record’, ‘row’, ‘hashmap’. Optionally Entity can provide a unique ‘id’ for updates. Optionally Entity can
  * provide a human readable label for lookups
  */
-public interface Entity extends Serializable
+public interface Entity
 {
 	/**
 	 * Returns entity meta data

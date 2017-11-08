@@ -24,19 +24,17 @@ public class EntityTypeMapper
 	private final AttributeReferenceMapper attributeReferenceMapper;
 	private final PackageMapper packageMapper;
 	private final TagMapper tagMapper;
-	private final EntityTypeReferenceMapper entityTypeReferenceMapper;
 	private final EntityTypeParentMapper entityTypeParentMapper;
 
 	public EntityTypeMapper(EntityTypeFactory entityTypeFactory, AttributeMapper attributeMapper,
 			AttributeReferenceMapper attributeReferenceMapper, PackageMapper packageMapper, TagMapper tagMapper,
-			EntityTypeReferenceMapper entityTypeReferenceMapper, EntityTypeParentMapper entityTypeParentMapper)
+			EntityTypeParentMapper entityTypeParentMapper)
 	{
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeMapper = requireNonNull(attributeMapper);
 		this.attributeReferenceMapper = requireNonNull(attributeReferenceMapper);
 		this.packageMapper = requireNonNull(packageMapper);
 		this.tagMapper = requireNonNull(tagMapper);
-		this.entityTypeReferenceMapper = requireNonNull(entityTypeReferenceMapper);
 		this.entityTypeParentMapper = requireNonNull(entityTypeParentMapper);
 	}
 
@@ -52,11 +50,10 @@ public class EntityTypeMapper
 		EditorPackageIdentifier package_ = packageMapper.toEditorPackage(entityType.getPackage());
 		EditorEntityTypeParent entityTypeParent = entityTypeParentMapper.toEditorEntityTypeParent(
 				entityType.getExtends());
-		//		ImmutableList<EditorEntityTypeIdentifier> entityTypeChildren = entityTypeReferenceMapper
-		//				.toEditorEntityTypeIdentifiers(entityType.getExtendedBy());
 		ImmutableList<EditorAttribute> attributes = attributeMapper.toEditorAttributes(
 				entityType.getOwnAllAttributes());
-		ImmutableList<EditorAttributeIdentifier> editorReferringAttributes = attributeReferenceMapper.toEditorAttributeIdentifiers(referringAttributes);
+		ImmutableList<EditorAttributeIdentifier> editorReferringAttributes = attributeReferenceMapper.toEditorAttributeIdentifiers(
+				referringAttributes);
 		ImmutableList<EditorTagIdentifier> tags = tagMapper.toEditorTags(entityType.getTags());
 		EditorAttributeIdentifier idAttribute = attributeReferenceMapper.toEditorAttributeIdentifier(
 				entityType.getIdAttribute());
@@ -66,7 +63,8 @@ public class EntityTypeMapper
 				entityType.getLookupAttributes());
 
 		return EditorEntityType.create(id, label, i18nLabel, description, i18nDescription, abstract_, backend, package_,
-				entityTypeParent, attributes, editorReferringAttributes, tags, idAttribute, labelAttribute, lookupAttributes);
+				entityTypeParent, attributes, editorReferringAttributes, tags, idAttribute, labelAttribute,
+				lookupAttributes);
 	}
 
 	public EditorEntityType createEditorEntityType()
@@ -113,7 +111,8 @@ public class EntityTypeMapper
 	private ImmutableMap<String, String> toI18nDescription(EntityType entityType)
 	{
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
-		getLanguageCodes().forEach(languageCode -> {
+		getLanguageCodes().forEach(languageCode ->
+		{
 			// entityType.getDescription cannot be used, since it returns the description in the default language if not available
 			String description = entityType.getString(
 					getI18nAttributeName(EntityTypeMetadata.DESCRIPTION, languageCode));
@@ -128,7 +127,8 @@ public class EntityTypeMapper
 	private ImmutableMap<String, String> toI18nLabel(EntityType entityType)
 	{
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
-		getLanguageCodes().forEach(languageCode -> {
+		getLanguageCodes().forEach(languageCode ->
+		{
 			// entityType.getLabel cannot be used, since it returns the description in the default language if not available
 			String label = entityType.getString(getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode));
 			if (label != null)

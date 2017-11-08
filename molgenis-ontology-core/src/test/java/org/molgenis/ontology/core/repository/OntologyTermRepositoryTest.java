@@ -1,6 +1,7 @@
 package org.molgenis.ontology.core.repository;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -51,6 +52,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 	private OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
 
 	private Entity ontologyTermEntity;
+
+	public OntologyTermRepositoryTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeTest
 	public void beforeTest()

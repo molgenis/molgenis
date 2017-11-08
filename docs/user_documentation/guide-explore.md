@@ -430,28 +430,6 @@ You now get a table representing the amount of samples in both biobanks per type
 Finally, select "patientid" in the third dropdown, the distinct attribute. 
 The table will update to show you how many patients with at least one sample of a specific type are available in a biobank.
 
-# Charts
-For the chart capabilities of MOLGENIS we use the [Highcharts](http://www.highcharts.com "Highcharts") library.
-
-MOLGENIS currently offers two types of plots for your data, the scatter plot and the box plot.
-
-![Dataexplorer charts](../images/dataexplorer/charts.png?raw=true, "dataexplorer/charts")
-
-## scatter plot [Scatter_plot](https://en.wikipedia.org/wiki/Scatter_plot "Scatter plot")
-![Dataexplorer charts create scatterplot](../images/dataexplorer/create scatter plot.png?raw=true, "dataexplorer/scatterplot")
-
-For the scatterplot, 2 attributes are selected to make the plot. Optionally, a third attribute can be selected to split the dots in groups, using different shapes and colours per group. You can also provide a title for your plot.
-
-![Dataexplorer charts scatterplot](../images/dataexplorer/scatter plot.png?raw=true, "dataexplorer/scatterplot")
-
-## box plot [Box_plot](https://en.wikipedia.org/wiki/Box_plot "Box plot")
-
-![Dataexplorer aggregate create box plot](../images/dataexplorer/create box plot.png?raw=true, "dataexplorer/createboxplot")
-
-For the box plot, 1 attribute (feature) is to be selected to make the plot. Optionally, a second attribute can be selected to split the dots in groups. You can also provide a title for your plot.
-
-![Dataexplorer charts box plot](../images/dataexplorer/boxplot.png?raw=true, "dataexplorer/boxplot")
-
 # Reports
 The reports functionality is made for overriding the default instance view or to add an instances tab in the Data-explorer. Overriding the views or adding a tab is possible by creating a new `FreemarkerTemplate` entity with the right name convention. This short tutorial will show you how to achieve this.
 
@@ -528,31 +506,3 @@ Value:
 	![Entities report settings](../images/reports/entities-report-correct-settings.png?raw=true, "Entities report settings")
 4. Refresh the page and repeat step 1.
 5. The result:![Custom entities report](../images/reports/custom-entities-report.png?raw=true, "Custom entities report")
-
-
-# Model registry
-The model registry is a module that can display the entire meta data model of a data set. This means that you do not look at the actual data, but you can see how the data is modelled. This is useful for detecting errors in your model, or if you want to base your own model on something that already exists.
-
-![Model registry screen 1](../images/model_registry_screen1.png?raw=true, "model registry screen 1")
-
-The following paragraphs will explain how the model registry works, but it is more fun to learn how it works with some actual models. So for this part, you can go to [The BioMedBridges](https://molgenis08.target.rug.nl/menu/main/standardsregistry) website, and navigate to the model registry module. You do not even have to log in!
-
-Now that we have some actual models on our screen, let's get started by finding some models. I know! Why don't we search for the EMX model? You should be familiar with it since you probably imported your own data already. In the main model registry screen, search for EMX. You should get one model back, namely emx (Entity Model eXtensible). As you can see, there are a few links mentioned as well. These are *Tags*, if you do not know the term, I suggest you look at the [Upload guide](guide-upload) again. The label beneath the Tags tells you why this model was returned for your search.
-
-This part is not telling us much about the content of the EMX model yet, so let's see what it holds! Click the *View Model Details* button to get to the details page.
-
-![Model registry screen 2](../images/model_registry_screen2.png?raw=true, "model registry screen 2")
-
-Here, you can see a tree on the left and a large middle section containing all the meta data. You can also view an UML diagram of your entire package, and even print out a document containing the overview of your model.
-
-**The tree**  
-The tree is a simplified overview of all the tables, or entities, inside a package. Clicking on the Molgenis Field Types entity for example, will take you to the detailed description of that entity. You can also expand an entity, to see all its attributes. Clicking an attribute will take you to the description of that attribute.
-
-**The details**  
-The details for every entity and attribute is an overview of data types, constraints, default values, and descriptions. 
-
-**UML**
-Navigate to the UML tab to see a UML representation of your model. You can zoom in and out using the + and - buttons. You can also drag around the different boxes to rearrange the diagram.
-
-**Printing**
-You can print your model to review it on paper, by pressing the print button at the top right of the screen.

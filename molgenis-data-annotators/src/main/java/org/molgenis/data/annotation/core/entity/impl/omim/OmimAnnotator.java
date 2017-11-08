@@ -134,7 +134,7 @@ public class OmimAnnotator implements AnnotatorConfig
 				attributes);
 
 		EntityAnnotator entityAnnotator = new AbstractAnnotator(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
-				new OmimResultFilter(entityTypeFactory, attributeFactory, this), dataService, resources,
+				new OmimResultFilter(entityTypeFactory, this), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings))
 		{
 			@Override

@@ -115,7 +115,7 @@ public class SortaJobProcessor
 				}
 			});
 			// Add the rest
-			if (entitiesToAdd.size() != 0)
+			if (!entitiesToAdd.isEmpty())
 			{
 				dataService.add(resultRepositoryName, entitiesToAdd.stream());
 			}

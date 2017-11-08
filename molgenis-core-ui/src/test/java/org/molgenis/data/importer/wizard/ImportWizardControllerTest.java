@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.quality.Strictness;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.config.GroupAuthorityTestConfig;
@@ -108,6 +109,11 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private ImportService importService;
 	private Instant date;
 	private EntityType entityType;
+
+	public ImportWizardControllerTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod

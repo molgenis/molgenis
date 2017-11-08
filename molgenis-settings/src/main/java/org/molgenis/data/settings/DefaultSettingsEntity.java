@@ -24,8 +24,6 @@ import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
  */
 public abstract class DefaultSettingsEntity extends StaticEntity implements Entity
 {
-	private static final long serialVersionUID = 1L;
-
 	private final String entityId;
 	private final String entityTypeId;
 
