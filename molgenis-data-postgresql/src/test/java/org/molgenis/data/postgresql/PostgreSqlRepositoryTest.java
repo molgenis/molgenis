@@ -1,21 +1,33 @@
 package org.molgenis.data.postgresql;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -199,4 +211,57 @@ public class PostgreSqlRepositoryTest
 		postgreSqlRepo.update(Stream.of(entity0, entity1));
 	}
 
+	@SuppressWarnings("ConstantConditions")
+	@Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "PostgreSqlRepository.add\\(\\) failed: entity was null")
+	public void testAddEntityNull()
+	{
+		Entity entity = null;
+		postgreSqlRepo.add(entity);
+	}
+
+	@DataProvider(name = "provideValidMrefIds")
+	public Object[][] provideValidMrefIds() throws SQLException
+	{
+		ResultSet stringRow = mock(ResultSet.class);
+		doReturn("idValue").when(stringRow).getString(1);
+		doReturn("refValue").when(stringRow).getString(3);
+
+		ResultSet intRow = mock(ResultSet.class);
+		doReturn(1).when(intRow).getInt(1);
+		doReturn(2).when(intRow).getInt(3);
+
+		ResultSet longRow = mock(ResultSet.class);
+		doReturn(1L).when(longRow).getLong(1);
+		doReturn(2L).when(longRow).getLong(3);
+
+		return new Object[][] { { STRING, STRING, stringRow, ImmutableMap.of("idValue", ImmutableList.of("refValue")) },
+				{ INT, INT, intRow, ImmutableMap.of(1, ImmutableList.of(2)) },
+				{ LONG, LONG, longRow, ImmutableMap.of(1L, ImmutableList.of(2L)) } };
+	}
+
+	@Test(dataProvider = "provideValidMrefIds")
+	public void testMrefIdRowCallbackHandlerString(AttributeType idType, AttributeType refType, ResultSet row,
+			Map<Object, List<Object>> result) throws SQLException
+	{
+		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
+		RowCallbackHandler mrefIdRowCallbackHandler = postgreSqlRepo.getJunctionTableRowCallbackHandler(idType, refType,
+				mrefIDs);
+		mrefIdRowCallbackHandler.processRow(row);
+
+		assertEquals(mrefIDs.asMap(), result);
+	}
+
+	@DataProvider(name = "provideInvalidMrefIds")
+	public Object[][] provideInvalidMrefIds() throws SQLException
+	{
+		return new Object[][] { { XREF, STRING }, { INT, MREF } };
+	}
+
+	@Test(dataProvider = "provideInvalidMrefIds", expectedExceptions = UnexpectedEnumException.class)
+	public void testMrefIdRowCallbackHandlerInvalidType(AttributeType idType, AttributeType refType) throws SQLException
+	{
+		RowCallbackHandler mrefIdRowCallbackHandler = postgreSqlRepo.getJunctionTableRowCallbackHandler(idType, refType,
+				ArrayListMultimap.create());
+		mrefIdRowCallbackHandler.processRow(mock(ResultSet.class));
+	}
 }

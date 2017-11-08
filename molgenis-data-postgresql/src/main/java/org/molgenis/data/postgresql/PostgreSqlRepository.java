@@ -18,10 +18,7 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.*;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -348,7 +345,18 @@ class PostgreSqlRepository extends AbstractRepository
 		LOG.trace("SQL: {}", junctionTableSelect);
 
 		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
-		jdbcTemplate.query(junctionTableSelect, row ->
+		jdbcTemplate.query(junctionTableSelect,
+				getJunctionTableRowCallbackHandler(idAttributeDataType, refIdDataType, mrefIDs), ids.toArray());
+
+		if (LOG.isTraceEnabled()) LOG.trace("Selected {} ID values for MREF attribute {} in {}",
+				mrefIDs.values().stream().collect(counting()), mrefAttr.getName(), stopwatch);
+		return mrefIDs;
+	}
+
+	RowCallbackHandler getJunctionTableRowCallbackHandler(AttributeType idAttributeDataType,
+			AttributeType refIdDataType, Multimap<Object, Object> mrefIDs)
+	{
+		return row ->
 		{
 			Object id;
 			switch (idAttributeDataType)
@@ -365,7 +373,7 @@ class PostgreSqlRepository extends AbstractRepository
 					id = row.getLong(1);
 					break;
 				default:
-					throw new RuntimeException(format("Unexpected id attribute type [%s]", idAttributeDataType));
+					throw new UnexpectedEnumException(idAttributeDataType);
 			}
 
 			Object refId;
@@ -386,11 +394,7 @@ class PostgreSqlRepository extends AbstractRepository
 					throw new UnexpectedEnumException(refIdDataType);
 			}
 			mrefIDs.put(id, refId);
-		}, ids.toArray());
-
-		if (LOG.isTraceEnabled()) LOG.trace("Selected {} ID values for MREF attribute {} in {}",
-				mrefIDs.values().stream().collect(counting()), mrefAttr.getName(), stopwatch);
-		return mrefIDs;
+		};
 	}
 
 	private BatchingQueryResult<Entity> findAllBatching(Query<Entity> q)
