@@ -115,7 +115,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + package_.getId() + "]");
+			throw new UnknownEntityException(dataService.getEntityType(PACKAGE), package_.getId());
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();

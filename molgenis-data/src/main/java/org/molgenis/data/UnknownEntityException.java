@@ -1,26 +1,48 @@
 package org.molgenis.data;
 
-public class UnknownEntityException extends MolgenisDataException
+import org.molgenis.data.meta.model.EntityType;
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import java.util.Locale;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.util.LocalizedExceptionUtils.getLocalizedBundleMessage;
+
+public class UnknownEntityException extends MolgenisRuntimeException
 {
-	private static final long serialVersionUID = 5202731000953612564L;
+	private static final String BUNDLE_ID = "data";
+	private static final String BUNDLE_MESSAGE_KEY = "unknown_entity_message";
 
-	public UnknownEntityException()
+	private static final String MESSAGE_FORMAT = "id:%s typeId:%s";
+
+	private final EntityType entityType;
+	private final Object entityId;
+
+	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
+		this.entityType = requireNonNull(entityType);
+		this.entityId = requireNonNull(entityId);
 	}
 
-	public UnknownEntityException(String msg)
+	@Override
+	public String getMessage()
 	{
-		super(msg);
+		return format(MESSAGE_FORMAT, entityType.getId(), entityId.toString());
 	}
 
-	public UnknownEntityException(Throwable t)
+	@Override
+	public String getLocalizedMessage()
 	{
-		super(t);
+		return getLocalizedMessage(LocaleContextHolder.getLocale());
 	}
 
-	public UnknownEntityException(String msg, Throwable t)
+	private String getLocalizedMessage(Locale locale)
 	{
-		super(msg, t);
+		String messageFormat = getLocalizedBundleMessage(BUNDLE_ID, locale, BUNDLE_MESSAGE_KEY);
+		String language = LocaleContextHolder.getLocale().getLanguage();
+		return format(messageFormat, entityId.toString(), entityType.getLabel(language));
 	}
 
 }
+

@@ -713,16 +713,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	/**
-	 * createUnknownEntityException
-	 */
-	@Test
-	public void testCreateEntitiesExceptions3() throws Exception
-	{
-		this.testCreateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
-	}
-
-	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
 	 */
 	@SuppressWarnings("unchecked")
@@ -807,17 +797,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				"Number of entities cannot be more than 1000.");
 	}
 
-	/**
-	 * createUnknownEntityException
-	 */
-	@Test
-	public void testUpdateEntitiesExceptions3() throws Exception
-	{
-		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
-
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testUpdateEntitiesSpecificAttribute() throws Exception
@@ -850,16 +829,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				this.createMaxPlusOneEntitiesAsTestContent(), "Number of entities cannot be more than 1000.");
-	}
-
-	/**
-	 * createUnknownEntityException
-	 */
-	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
-	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity2", "email", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
 	}
 
 	/**
@@ -925,8 +894,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
 	{
-		when(dataService.getEntityType("MyEntityType")).thenThrow(
-				new UnknownEntityException("Unknown entity [MyEntityType]"));
+		when(dataService.getEntityType("MyEntityType")).thenThrow(new UnknownEntityTypeException("MyEntityType"));
 
 		String expectedContent =
 				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Unknown entity [MyEntityType]\"\n"
