@@ -416,6 +416,21 @@ $.when($,
             $('#observationset-search').focus();
         }
 
+        function sendVirtualPageView (ga, location) {
+          /* ga() is the google analytics library operations que function */
+          if(window.hasTrackingId) {
+            // default tracker
+            ga('set', 'page', location);
+            ga('send', 'pageview')
+          }
+
+          if(window.hasMolgenisTrackingId) {
+            // molgenis tracker
+            ga('molgenisTracker.set', 'page', location);
+            ga('molgenisTracker.send', 'pageview')
+          }
+        }
+
         function pushState() {
             // shorten URL by removing attributes with null or undefined values
             var cleanState = {};
@@ -447,6 +462,8 @@ $.when($,
             if (filter) history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState)
                 + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
+
+            $(document).trigger('dataexplorer.uri.change');
         }
 
         /**
@@ -456,6 +473,12 @@ $.when($,
 
             var googleSearchField = $("#observationset-search")
             var entityTypeDropdown = $('#dataset-select');
+
+            if(typeof ga !== 'undefined') {
+              $(document).on('dataexplorer.uri.change', function () {
+                sendVirtualPageView(ga, $(location).attr('href'))
+              })
+            }
 
             // lazy load tab contents
             $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e) {
