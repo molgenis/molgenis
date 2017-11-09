@@ -18,6 +18,10 @@ $.when($,
         self.getSearchQuery = getSearchQuery
         self.getnToken = getnToken;
 
+        self.moduleEvents = {
+            DATA_EXPLORER_URI_CHANGE : 'dataexplorer.uri.change'
+        }
+
         var restApi = new molgenis.RestClient();
         var selectedEntityMetaData = null;
         var attributeFilters = {};
@@ -463,7 +467,7 @@ $.when($,
                 + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
 
-            $(document).trigger('dataexplorer.uri.change');
+            $(document).trigger(self.moduleEvents.DATA_EXPLORER_URI_CHANGE);
         }
 
         /**
@@ -474,10 +478,11 @@ $.when($,
             var googleSearchField = $("#observationset-search")
             var entityTypeDropdown = $('#dataset-select');
 
-            if(typeof ga !== 'undefined') {
-              $(document).on('dataexplorer.uri.change', function () {
-                sendVirtualPageView(ga, $(location).attr('href'))
-              })
+            $(document).off(self.moduleEvents.DATA_EXPLORER_URI_CHANGE)
+            if(window.ga && (window.hasTrackingId || window.hasMolgenisTrackingId) ) {
+                $(document).on(self.moduleEvents.DATA_EXPLORER_URI_CHANGE, function () {
+                    sendVirtualPageView(ga, $(location).attr('href'))
+                })
             }
 
             // lazy load tab contents
