@@ -4,8 +4,8 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.Locale;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.util.LocalizedExceptionUtils.LOCALE_SYSTEM;
 import static org.molgenis.util.LocalizedExceptionUtils.getLocalizedBundleMessage;
 
 public class UnknownEntityTypeException extends MolgenisRuntimeException
@@ -23,20 +23,15 @@ public class UnknownEntityTypeException extends MolgenisRuntimeException
 	@Override
 	public String getMessage()
 	{
-		return getLocalizedMessage(LOCALE_SYSTEM);
+		return format("id:%s", entityTypeId);
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
-		return getLocalizedMessage(LocaleContextHolder.getLocale());
-	}
-
-	private String getLocalizedMessage(Locale locale)
-	{
+		Locale locale = LocaleContextHolder.getLocale();
 		String messageFormat = getLocalizedBundleMessage(BUNDLE_ID, locale, MESSAGE_KEY);
 		return String.format(messageFormat, entityTypeId);
 	}
-
 }
 

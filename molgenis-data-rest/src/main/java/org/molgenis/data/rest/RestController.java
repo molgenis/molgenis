@@ -120,7 +120,7 @@ public class RestController
 			dataService.getRepository(entityTypeId);
 			return true;
 		}
-		catch (UnknownEntityException e)
+		catch (UnknownEntityTypeException e)
 		{
 			return false;
 		}
@@ -221,13 +221,13 @@ public class RestController
 		EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + untypedId + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
@@ -250,7 +250,7 @@ public class RestController
 
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + untypedId + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
@@ -503,7 +503,8 @@ public class RestController
 	{
 		if (entityMap == null)
 		{
-			throw new UnknownEntityException("Missing entity in body");
+			// FIXME throw new Undefined/MissingEntityException
+			throw new MolgenisRuntimeException("Missing entity in body");
 		}
 
 		createInternal(entityTypeId, entityMap, response);
@@ -556,7 +557,7 @@ public class RestController
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
@@ -564,7 +565,7 @@ public class RestController
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " with id " + id + " not found");
+			throw new UnknownEntityException(entityType, id);
 		}
 
 		Attribute attr = entityType.getAttribute(attributeName);
@@ -818,7 +819,7 @@ public class RestController
 		Entity existing = dataService.findOneById(entityTypeId, id, new Fetch().field(meta.getIdAttribute().getName()));
 		if (existing == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " with id " + id + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		Entity entity = this.restService.toEntity(meta, entityMap);
@@ -889,7 +890,7 @@ public class RestController
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + id + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		String attrHref = Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(),

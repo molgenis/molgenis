@@ -7,8 +7,6 @@ public class LocalizedExceptionUtils
 {
 	private static final String BUNDLE_EXCEPTION = "exception";
 
-	public static final Locale LOCALE_SYSTEM = new Locale("system");
-
 	private LocalizedExceptionUtils()
 	{
 	}

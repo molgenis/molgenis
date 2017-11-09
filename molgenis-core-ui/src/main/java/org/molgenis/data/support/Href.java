@@ -1,11 +1,15 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.*;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisRuntimeException;
 import org.springframework.web.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Href
 {
@@ -34,16 +38,8 @@ public class Href
 	public static String concatAttributeHref(String baseUri, String qualifiedEntityName, Object entityIdValue,
 			String attributeName)
 	{
-		try
-		{
-			return String.format(baseUri + "/%s/%s/%s", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
-					UriUtils.encodePathSegment(DataConverter.toString(entityIdValue), "UTF-8"),
-					UriUtils.encodePathSegment(attributeName, "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new UnknownAttributeException(attributeName);
-		}
+		return String.format(baseUri + "/%s/%s/%s", encodePathSegment(qualifiedEntityName),
+				encodePathSegment(DataConverter.toString(entityIdValue)), encodePathSegment(attributeName));
 	}
 
 	/**
@@ -51,15 +47,8 @@ public class Href
 	 */
 	public static String concatMetaAttributeHref(String baseUri, String entityParentName, String attributeName)
 	{
-		try
-		{
-			return String.format(baseUri + "/%s/meta/%s", UriUtils.encodePathSegment(entityParentName, "UTF-8"),
-					UriUtils.encodePathSegment(attributeName, "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new UnknownAttributeException(attributeName);
-		}
+		return String.format(baseUri + "/%s/meta/%s", encodePathSegment(entityParentName),
+				encodePathSegment(attributeName));
 	}
 
 	public static String concatEntityHref(Entity entity)
@@ -77,15 +66,8 @@ public class Href
 			qualifiedEntityName = "";
 		}
 
-		try
-		{
-			return String.format(baseUri + "/%s/%s", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
-					UriUtils.encodePathSegment(DataConverter.toString(entityIdValue), "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new UnknownEntityException(qualifiedEntityName);
-		}
+		return String.format(baseUri + "/%s/%s", encodePathSegment(qualifiedEntityName),
+				encodePathSegment(DataConverter.toString(entityIdValue)));
 	}
 
 	/**
@@ -93,26 +75,12 @@ public class Href
 	 */
 	public static String concatMetaEntityHref(String baseUri, String qualifiedEntityName)
 	{
-		try
-		{
-			return String.format(baseUri + "/%s/meta", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new UnknownEntityException(qualifiedEntityName);
-		}
+		return String.format(baseUri + "/%s/meta", encodePathSegment(qualifiedEntityName));
 	}
 
 	public static String concatMetaEntityHrefV2(String baseUri, String qualifiedEntityName)
 	{
-		try
-		{
-			return String.format(baseUri + "/%s", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new UnknownEntityException(qualifiedEntityName);
-		}
+		return String.format(baseUri + "/%s", encodePathSegment(qualifiedEntityName));
 	}
 
 	/**
@@ -121,30 +89,26 @@ public class Href
 	public static String concatEntityCollectionHref(String baseUri, String qualifiedEntityName,
 			String qualifiedIdAttributeName, List<String> entitiesIds)
 	{
-		try
-		{
-			String ids;
-			ids = entitiesIds.stream().map(Href::encodeIdToRSQL).collect(Collectors.joining(","));
-			return String.format(baseUri + "/%s?q=%s=in=(%s)", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
-					UriUtils.encodePathSegment(qualifiedIdAttributeName, "UTF-8"), ids);
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new MolgenisDataException(
-					"The creation of the entity collection href has failed. Entity: " + qualifiedEntityName
-							+ " Attribute: " + qualifiedIdAttributeName);
-		}
+		String ids;
+		ids = entitiesIds.stream().map(Href::encodeIdToRSQL).collect(Collectors.joining(","));
+		return String.format(baseUri + "/%s?q=%s=in=(%s)", encodePathSegment(qualifiedEntityName),
+				encodePathSegment(qualifiedIdAttributeName), ids);
 	}
 
 	private static String encodeIdToRSQL(String id)
 	{
+		return '"' + encodePathSegment(id) + '"';
+	}
+
+	private static String encodePathSegment(String pathSegment)
+	{
 		try
 		{
-			return '"' + UriUtils.encodePathSegment(id, "UTF-8") + '"';
+			return UriUtils.encodePathSegment(pathSegment, UTF_8.name());
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			return "";
+			throw new MolgenisRuntimeException(e);
 		}
 	}
 }

@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -135,7 +136,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Entity entity = findEntity(tag.getSubject());
 		if (entity == null)
 		{
-			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getId() + "]");
+			throw new UnknownEntityTypeException(tag.getSubject().getId());
 		}
 		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.copyOf(
 				getTagsForEntity(tag.getSubject()));
@@ -166,7 +167,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + p.getId() + "]");
+			throw new UnknownEntityException(dataService.getEntityType(PACKAGE), p.getId());
 		}
 
 		List<SemanticTag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();

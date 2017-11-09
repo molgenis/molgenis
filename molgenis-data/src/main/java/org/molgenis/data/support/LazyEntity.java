@@ -170,9 +170,7 @@ public class LazyEntity implements Entity
 			entity = dataService.findOneById(entityType.getId(), id);
 			if (entity == null)
 			{
-				throw new UnknownEntityException(
-						"entity [" + entityType.getId() + "] with " + entityType.getIdAttribute().getName() + " ["
-								+ id.toString() + "] does not exist");
+				throw new UnknownEntityException(entityType, id);
 			}
 		}
 		return entity;
