@@ -19,6 +19,12 @@
 "bootbox.min.js"]>
 
 <@header css js/>
+
+<script>
+    window.hasTrackingId = ${hasTrackingId?c}
+    window.hasMolgenisTrackingId = ${hasMolgenisTrackingId?c}
+</script>
+
 <div class="row">
     <div class="col-md-12">
         <div id="entity-class" class="well well-sm">
