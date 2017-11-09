@@ -19,7 +19,7 @@ $.when($,
         self.getnToken = getnToken;
 
         self.moduleEvents = {
-            DATA_EXPLORER_URI_CHANGE: 'dataexplorer.uri.change'
+            DATAEXPLORER_URI_CHANGE: 'dataexplorer.uri.change'
         }
 
         var restApi = new molgenis.RestClient();
@@ -467,7 +467,7 @@ $.when($,
                 + '&filter=' + molgenis.rsql.encodeRsqlValue(filter));
             else history.pushState(state, '', molgenis.getContextUrl() + '?' + $.param(cleanState));
 
-            $(document).trigger(self.moduleEvents.DATA_EXPLORER_URI_CHANGE);
+            $(document).trigger(self.moduleEvents.DATAEXPLORER_URI_CHANGE);
         }
 
         /**
@@ -478,9 +478,9 @@ $.when($,
             var googleSearchField = $("#observationset-search")
             var entityTypeDropdown = $('#dataset-select');
 
-            $(document).off(self.moduleEvents.DATA_EXPLORER_URI_CHANGE)
+            $(document).off(self.moduleEvents.DATAEXPLORER_URI_CHANGE)
             if(window.ga && (window.hasTrackingId || window.hasMolgenisTrackingId) ) {
-                $(document).on(self.moduleEvents.DATA_EXPLORER_URI_CHANGE, function () {
+                $(document).on(self.moduleEvents.DATAEXPLORER_URI_CHANGE, function () {
                     sendVirtualPageView(ga, $(location).attr('href'))
                 })
             }
