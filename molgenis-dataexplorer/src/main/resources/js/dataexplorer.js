@@ -19,7 +19,7 @@ $.when($,
         self.getnToken = getnToken;
 
         self.moduleEvents = {
-            DATA_EXPLORER_URI_CHANGE : 'dataexplorer.uri.change'
+            DATA_EXPLORER_URI_CHANGE: 'dataexplorer.uri.change'
         }
 
         var restApi = new molgenis.RestClient();
