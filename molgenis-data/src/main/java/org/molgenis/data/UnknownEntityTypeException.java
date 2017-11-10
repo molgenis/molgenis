@@ -2,9 +2,6 @@ package org.molgenis.data;
 
 import org.molgenis.util.LocalizedRuntimeException;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -28,9 +25,9 @@ public class UnknownEntityTypeException extends LocalizedRuntimeException
 	}
 
 	@Override
-	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
+	protected String createLocalizedMessage(String format)
 	{
-		return format(resourceBundle.getString("unknown_entity_type"), entityTypeId);
+		return format(format, entityTypeId);
 	}
 }
 

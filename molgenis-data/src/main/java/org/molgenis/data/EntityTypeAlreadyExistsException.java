@@ -2,9 +2,6 @@ package org.molgenis.data;
 
 import org.molgenis.util.LocalizedRuntimeException;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import static java.lang.String.format;
 
 public class EntityTypeAlreadyExistsException extends LocalizedRuntimeException
@@ -27,8 +24,8 @@ public class EntityTypeAlreadyExistsException extends LocalizedRuntimeException
 	}
 
 	@Override
-	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
+	protected String createLocalizedMessage(String format)
 	{
-		return resourceBundle.getString("duplicate_entity_type");
+		return format(format, entityTypeId);
 	}
 }
