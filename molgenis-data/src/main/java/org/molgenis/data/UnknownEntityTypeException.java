@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 public class UnknownEntityTypeException extends LocalizedRuntimeException
 {
 	private static final String BUNDLE_ID = "data";
-	private static final String ERROR_CODE = "D02";
+	private static final String ERROR_CODE = "D01";
 
 	private final String entityTypeId;
 

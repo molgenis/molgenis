@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 public class UnknownEntityException extends LocalizedRuntimeException
 {
 	private static final String BUNDLE_ID = "data";
-	private static final String ERROR_CODE = "D01";
+	private static final String ERROR_CODE = "D02";
 
 	private final EntityType entityType;
 	private final Object entityId;
