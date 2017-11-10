@@ -26,6 +26,7 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * Each transaction is given a unique transaction id.
  */
+@SuppressWarnings("squid:S1948") // The transactionmanager will never be serialized
 public class PostgreSqlTransactionManager extends DataSourceTransactionManager implements TransactionManager
 {
 	private static final long serialVersionUID = 1L;
@@ -45,9 +46,8 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 	}
 
 	@Override
-	public void addTransactionListener(TransactionListener transactionListener)
+	public synchronized void addTransactionListener(TransactionListener transactionListener)
 	{
-		//FIXME: make concurrent using ReeentrantReadWriteLock.
 		transactionListeners.add(transactionListener);
 	}
 
@@ -199,7 +199,7 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 				return molgenisDataAccessException;
 			}
 		}
-		throw new RuntimeException(
+		throw new IllegalArgumentException(
 				format("Unexpected exception class [%s]", transactionException.getClass().getSimpleName()),
 				transactionException);
 	}

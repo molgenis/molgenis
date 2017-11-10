@@ -12,6 +12,37 @@
     <artifactId>molgenis-searchall</artifactId>
     <name>searchall</name>
 
+    <profiles>
+        <profile>
+            <id>skip-js-compile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <version>2.5</version>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>target</directory>
+                                    <includes>
+                                        <include>classes/*</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>classes/js</exclude>
+                                        <exclude>classes/css</exclude>
+                                        <exclude>classes/index.html</exclude>
+                                    </excludes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -29,6 +60,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <nodeVersion>${node.version}</nodeVersion>
                             <yarnVersion>${yarn.version}</yarnVersion>
                         </configuration>
@@ -40,6 +72,7 @@
                             <goal>yarn</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <arguments>--frozen-lockfile</arguments>
                             <failOnError>true</failOnError>
                         </configuration>
@@ -51,6 +84,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <arguments>run build</arguments>
                             <failOnError>true</failOnError>
                         </configuration>
@@ -62,6 +96,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <arguments>test</arguments>
                             <!-- Do not stop the build on JS test failure -->
                             <failOnError>true</failOnError>

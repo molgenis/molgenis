@@ -16,8 +16,8 @@ public class SortaJobExecutionMetaData extends SystemEntityType
 	public static final String SIMPLE_NAME = "SortaJobExecution";
 	public static final String SORTA_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public final static String ONTOLOGY_IRI = "ontologyIri";
-	public final static String NAME = "name";
+	public static final String ONTOLOGY_IRI = "ontologyIri";
+	public static final String NAME = "name";
 	public final static String DELETE_URL = "deleteUrl";
 	public final static String SOURCE_ENTITY = "sourceEntity";
 	public final static String RESULT_ENTITY = "resultEntity";

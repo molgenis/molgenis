@@ -25,6 +25,7 @@
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <nodeVersion>v5.12.0</nodeVersion>
                             <npmVersion>3.8.6</npmVersion>
                         </configuration>
@@ -35,6 +36,7 @@
                             <goal>npm</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <arguments>prune</arguments>
                         </configuration>
                     </execution>
@@ -43,6 +45,9 @@
                         <goals>
                             <goal>npm</goal>
                         </goals>
+                        <configuration>
+                            <skip>${skip.js}</skip>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>update package.json version</id>
@@ -50,6 +55,7 @@
                             <goal>gulp</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <arguments>update-version</arguments>
                         </configuration>
                     </execution>
@@ -60,6 +66,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <arguments>test</arguments>
                         </configuration>
                     </execution>
@@ -148,6 +155,38 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>skip-js-compile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <version>2.5</version>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>target</directory>
+                                    <includes>
+                                        <include>classes/*</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>classes/js</exclude>
+                                        <exclude>classes/css</exclude>
+                                        <exclude>classes/index.html</exclude>
+                                    </excludes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <webpack.production>true</webpack.production>
+            </properties>
+        </profile>
+
         <profile>
             <id>production</id>
             <properties>

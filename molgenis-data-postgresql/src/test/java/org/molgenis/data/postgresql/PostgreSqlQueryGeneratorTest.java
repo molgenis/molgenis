@@ -484,6 +484,11 @@ public class PostgreSqlQueryGeneratorTest
 		dataList.add(new Object[] { new QueryImpl<>().in("attr", asList("ref0", "ref1")),
 				"SELECT DISTINCT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"attr_filter1\" ON (this.\"idAttr\" = \"attr_filter1\".\"refAttr\") WHERE \"attr_filter1\".\"refIdAttr\" IN (?,?)",
 				asList("ref0", "ref1") });
+		Query<Entity> sortQuery = new QueryImpl<>();
+		sortQuery.sort(new Sort("attr"));
+		dataList.add(new Object[] { sortQuery,
+				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"attr\" ASC",
+				emptyList() });
 		return dataList.iterator();
 	}
 

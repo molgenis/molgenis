@@ -4,7 +4,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.ui.menu.MenuReaderServiceImpl;
-import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.style.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Configuration
-@Import({ JobsController.class, MenuManagerServiceImpl.class, StyleSheetFactory.class, StyleSheetMetadata.class })
+@Import({ JobsController.class, StyleSheetFactory.class, StyleSheetMetadata.class })
 public class ViewTestConfig
 {
 	@Autowired
