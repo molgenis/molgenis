@@ -2,6 +2,7 @@ package org.molgenis.security.user;
 
 import org.molgenis.data.MolgenisRuntimeException;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class MolgenisUserException extends MolgenisRuntimeException
 {
 
