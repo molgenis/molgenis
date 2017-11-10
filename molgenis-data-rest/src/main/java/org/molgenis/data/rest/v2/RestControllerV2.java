@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
@@ -75,19 +76,9 @@ public class RestControllerV2
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	static MolgenisPermissionException createNoReadPermissionOnEntityException(String entityTypeId)
-	{
-		return new MolgenisPermissionException("No read permission on entity " + entityTypeId);
-	}
-
 	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
 	{
 		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
-	}
-
-	static DuplicateEntityException createDuplicateEntityException(String entityTypeId)
-	{
-		return new DuplicateEntityException("Operation failed. Duplicate entity: '" + entityTypeId + "'");
 	}
 
 	static UnknownAttributeException createUnknownAttributeException(String entityTypeId, String attributeName)
@@ -362,12 +353,18 @@ public class RestControllerV2
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(),
 				request.getNewEntityName());
-		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
+		if (dataService.hasRepository(newFullName))
+		{
+			throw new EntityTypeAlreadyExistsException(newFullName);
+		}
 
 		// Permission
 		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
 				Permission.READ);
-		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
+		if (!readPermission)
+		{
+			throw new EntityTypePermissionDeniedException(repositoryToCopyFrom.getEntityType(), Permission.READ);
+		}
 
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())

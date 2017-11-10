@@ -1,48 +1,42 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.model.EntityType;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.molgenis.util.LocalizedRuntimeException;
 
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.util.LocalizedExceptionUtils.getLocalizedBundleMessage;
 
-public class UnknownEntityException extends MolgenisRuntimeException
+@SuppressWarnings("squid:S1948")
+public class UnknownEntityException extends LocalizedRuntimeException
 {
 	private static final String BUNDLE_ID = "data";
-	private static final String BUNDLE_MESSAGE_KEY = "unknown_entity_message";
-
-	private static final String MESSAGE_FORMAT = "id:%s typeId:%s";
+	private static final String ERROR_CODE = "D01";
 
 	private final EntityType entityType;
 	private final Object entityId;
 
 	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
+		super(BUNDLE_ID, ERROR_CODE);
 		this.entityType = requireNonNull(entityType);
 		this.entityId = requireNonNull(entityId);
 	}
 
 	@Override
-	public String getMessage()
+	protected String createMessage()
 	{
-		return format(MESSAGE_FORMAT, entityType.getId(), entityId.toString());
+		return format("type:%s id:%s", entityType.getId(), entityId.toString());
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
 	{
-		return getLocalizedMessage(LocaleContextHolder.getLocale());
+		String format = resourceBundle.getString("unknown_entity_message");
+		String language = locale.getLanguage();
+		return format(format, entityId.toString(), entityType.getLabel(language));
 	}
-
-	private String getLocalizedMessage(Locale locale)
-	{
-		String messageFormat = getLocalizedBundleMessage(BUNDLE_ID, locale, BUNDLE_MESSAGE_KEY);
-		String language = LocaleContextHolder.getLocale().getLanguage();
-		return format(messageFormat, entityId.toString(), entityType.getLabel(language));
-	}
-
 }
 
