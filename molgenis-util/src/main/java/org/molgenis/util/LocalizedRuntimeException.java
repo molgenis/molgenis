@@ -50,7 +50,6 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	 *
 	 * @return error code, never <tt>null</tt>
 	 */
-	@SuppressWarnings("unused")
 	public String getErrorCode()
 	{
 		return errorCode;
@@ -59,26 +58,25 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	/**
 	 * Implement {@link #createMessage()} to change behavior of this method.
 	 *
-	 * @return exception message (e.g. to log), never null
+	 * @return exception message (e.g. to log), never <tt>null</tt>
 	 */
 	@Override
 	public final String getMessage()
 	{
-		return "code: " + getErrorCode() + " " + createMessage();
+		return createMessage();
 	}
 
 	/**
 	 * Implement {@link #createLocalizedMessage(String)} to change behavior of this method.
 	 *
-	 * @return localized exception message (e.g. to display to the user), never null
+	 * @return localized exception message (e.g. to display to the user), never <tt>null</tt>
 	 */
 	@Override
 	public final String getLocalizedMessage()
 	{
 		ResourceBundle resourceBundle = getResourceBundle();
 		String format = resourceBundle.getString(getErrorCode());
-
-		return createLocalizedMessage(format) + ' ' + '(' + getErrorCode() + ')';
+		return createLocalizedMessage(format);
 	}
 
 	protected ResourceBundle getResourceBundle()

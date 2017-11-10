@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,8 +20,13 @@ public class ExceptionHandlerUtils
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ExceptionHandlerUtils.class);
 
-	public static Object handleTypedException(Exception e, boolean isHtmlRequest, String forwardUri, String message,
-			HttpStatus code)
+	public static Object handleTypedException(boolean isHtmlRequest, String forwardUri, String message, HttpStatus code)
+	{
+		return handleTypedException(isHtmlRequest, forwardUri, message, code, null);
+	}
+
+	public static Object handleTypedException(boolean isHtmlRequest, String forwardUri, String message, HttpStatus code,
+			@Nullable String errorCode)
 	{
 		if (isHtmlRequest)
 		{
@@ -28,7 +34,7 @@ public class ExceptionHandlerUtils
 		}
 		else
 		{
-			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(message);
+			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(message, errorCode);
 			return new ResponseEntity<>(errorMessageResponse, code);
 		}
 	}

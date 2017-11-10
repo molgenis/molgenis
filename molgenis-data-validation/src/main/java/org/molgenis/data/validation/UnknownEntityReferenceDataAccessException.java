@@ -12,7 +12,6 @@ public class UnknownEntityReferenceDataAccessException extends MolgenisDataAcces
 
 	public UnknownEntityReferenceDataAccessException(String entityTypeId, String attributeName, String valueAsString)
 	{
-
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
 		this.valueAsString = requireNonNull(valueAsString);

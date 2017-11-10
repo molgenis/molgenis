@@ -23,7 +23,7 @@ public class FallbackExceptionHandler
 	public Object handleException(Exception e, HandlerMethod handlerMethod)
 	{
 		LOG.error("", e);
-		return handleTypedException(e, isHtmlRequest(handlerMethod), InternalServerErrorController.URI,
+		return handleTypedException(isHtmlRequest(handlerMethod), InternalServerErrorController.URI,
 				InternalServerErrorController.ERROR_MESSAGE, INTERNAL_SERVER_ERROR);
 	}
 }
