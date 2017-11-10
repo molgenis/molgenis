@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.NAME;
+import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.ID;
 
 /**
  * Entity representation of a dynamic decorator
@@ -21,19 +21,19 @@ public class DynamicDecorator extends StaticEntity
 		super(entityType);
 	}
 
-	public DynamicDecorator(String name, EntityType entityType)
+	public DynamicDecorator(String id, EntityType entityType)
 	{
 		super(entityType);
-		setName(name);
+		setId(id);
 	}
 
-	public void setName(String name)
+	public void setId(String name)
 	{
-		set(NAME, name);
+		set(ID, name);
 	}
 
-	public String getName()
+	public String getId()
 	{
-		return getString(NAME);
+		return getString(ID);
 	}
 }

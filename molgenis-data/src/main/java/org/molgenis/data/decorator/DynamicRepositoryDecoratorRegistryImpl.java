@@ -66,7 +66,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 
 		for (DynamicDecorator decorator : decorators)
 		{
-			DynamicRepositoryDecoratorFactory factory = factories.get(decorator.getName());
+			DynamicRepositoryDecoratorFactory factory = factories.get(decorator.getId());
 			if (factory != null)
 			{
 				repository = factory.createDecoratedRepository(repository);
