@@ -4,7 +4,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.LocalizedRuntimeException;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -13,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 public class UnknownEntityException extends LocalizedRuntimeException
 {
 	private static final String BUNDLE_ID = "data";
-	private static final String ERROR_CODE = "D01";
+	private static final String ERROR_CODE = "D02";
 
 	private final EntityType entityType;
 	private final Object entityId;
@@ -32,11 +31,10 @@ public class UnknownEntityException extends LocalizedRuntimeException
 	}
 
 	@Override
-	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
+	protected String createLocalizedMessage(String format)
 	{
-		String format = resourceBundle.getString("unknown_entity");
-		String language = locale.getLanguage();
-		return format(format, entityId.toString(), entityType.getLabel(language));
+		Locale locale = getLocale();
+		return format(format, entityId.toString(), entityType.getLabel(locale.getLanguage()));
 	}
 }
 

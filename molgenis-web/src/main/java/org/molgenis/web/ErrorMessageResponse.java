@@ -51,14 +51,14 @@ public class ErrorMessageResponse
 		private static final String DEFAULT_ERROR_MESSAGE = "Unknown error";
 
 		private final String message;
-		private final Integer code;
+		private final String code;
 
 		public ErrorMessage(String message)
 		{
 			this(message, null);
 		}
 
-		public ErrorMessage(String message, Integer code)
+		public ErrorMessage(String message, String code)
 		{
 			this.message = message != null ? message : DEFAULT_ERROR_MESSAGE;
 			this.code = code;
@@ -69,7 +69,7 @@ public class ErrorMessageResponse
 			return message;
 		}
 
-		public Integer getCode()
+		public String getCode()
 		{
 			return code;
 		}
