@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class MolgenisRuntimeException extends RuntimeException
 {
 	private static final long serialVersionUID = 4738825795930038340L;
@@ -22,5 +23,4 @@ public class MolgenisRuntimeException extends RuntimeException
 	{
 		super(msg, t);
 	}
-
 }

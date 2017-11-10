@@ -1,6 +1,6 @@
 package org.molgenis.metadata.manager.service;
 
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -89,7 +89,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(actual, expected);
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "Unknown EntityType \\[unknownId\\]")
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "Unknown EntityType \\[unknownId\\]")
 	public void testGetNonExistingEditorEntityType()
 	{
 		metadataManagerService.getEditorEntityType("unknownId");

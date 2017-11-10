@@ -2,7 +2,7 @@ package org.molgenis.fair.controller;
 
 import static java.util.Objects.requireNonNull;
 
-public class UnknownDistributionException extends RuntimeException
+public class UnknownDistributionException extends FairException
 {
 	private static final String MESSAGE_FORMAT = "Distribution with id [%s] does not exist";
 

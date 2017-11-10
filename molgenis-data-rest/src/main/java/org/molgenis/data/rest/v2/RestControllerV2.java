@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
@@ -75,24 +76,9 @@ public class RestControllerV2
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	static UnknownEntityException createUnknownEntityException(String entityTypeId)
-	{
-		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityTypeId + "'");
-	}
-
-	static MolgenisPermissionException createNoReadPermissionOnEntityException(String entityTypeId)
-	{
-		return new MolgenisPermissionException("No read permission on entity " + entityTypeId);
-	}
-
 	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
 	{
 		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
-	}
-
-	static DuplicateEntityException createDuplicateEntityException(String entityTypeId)
-	{
-		return new DuplicateEntityException("Operation failed. Duplicate entity: '" + entityTypeId + "'");
 	}
 
 	static UnknownAttributeException createUnknownAttributeException(String entityTypeId, String attributeName)
@@ -118,9 +104,10 @@ public class RestControllerV2
 		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
 	}
 
-	static UnknownEntityException createUnknownEntityExceptionNotValidId(Object id)
+	static MolgenisRuntimeException createUnknownEntityExceptionNotValidId(Object id)
 	{
-		return new UnknownEntityException(
+		// FIXME throw new EntityUpdateException or something like that
+		return new MolgenisRuntimeException(
 				"The entity you are trying to update [" + id.toString() + "] does not exist.");
 	}
 
@@ -192,7 +179,7 @@ public class RestControllerV2
 		Entity entity = dataService.findOneById(entityTypeId, id, fetch);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " [" + untypedId + "] not found");
+			throw new UnknownEntityException(entityType, id);
 		}
 
 		return createEntityResponse(entity, fetch, true);
@@ -290,7 +277,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -353,7 +340,10 @@ public class RestControllerV2
 			@RequestBody @Valid CopyEntityRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		// No repo
-		if (!dataService.hasRepository(entityTypeId)) throw createUnknownEntityException(entityTypeId);
+		if (!dataService.hasRepository(entityTypeId))
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityTypeId);
 
@@ -363,12 +353,18 @@ public class RestControllerV2
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(),
 				request.getNewEntityName());
-		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
+		if (dataService.hasRepository(newFullName))
+		{
+			throw new EntityTypeAlreadyExistsException(newFullName);
+		}
 
 		// Permission
 		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
 				Permission.READ);
-		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
+		if (!readPermission)
+		{
+			throw new EntityTypePermissionDeniedException(repositoryToCopyFrom.getEntityType(), Permission.READ);
+		}
 
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
@@ -408,7 +404,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -446,7 +442,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -523,8 +519,7 @@ public class RestControllerV2
 	 * Get the localization resource strings for a specific language and namespace.
 	 * Will *not* provide fallback values if the specified language is not available.
 	 */
-	@GetMapping(value = "/i18n/{namespace}/{language}", produces = APPLICATION_JSON_VALUE
-			+ ";charset=UTF-8")
+	@GetMapping(value = "/i18n/{namespace}/{language}", produces = APPLICATION_JSON_VALUE + ";charset=UTF-8")
 	@ResponseBody
 	public Map<String, String> getL10nStrings(@PathVariable String namespace, @PathVariable String language)
 	{
@@ -534,8 +529,7 @@ public class RestControllerV2
 	/**
 	 * Get a properties file to put on your classpath.
 	 */
-	@GetMapping(value = "/i18n/{namespace}_{language}.properties", produces = TEXT_PLAIN_VALUE
-			+ ";charset=UTF-8 ")
+	@GetMapping(value = "/i18n/{namespace}_{language}.properties", produces = TEXT_PLAIN_VALUE + ";charset=UTF-8 ")
 	@ResponseBody
 	public String getL10nProperties(@PathVariable String namespace, @PathVariable String language) throws IOException
 	{
@@ -590,7 +584,7 @@ public class RestControllerV2
 		EntityType entity = dataService.getEntityType(entityTypeId);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		Attribute attribute = entity.getAttribute(attributeName);
@@ -607,6 +601,10 @@ public class RestControllerV2
 			EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());

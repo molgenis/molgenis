@@ -6,7 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
@@ -75,7 +75,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 			if (csvReader == null)
 			{
-				throw new UnknownEntityException(format("Unknown entity [%s]", repositoryName));
+				throw new UnknownEntityTypeException(repositoryName);
 			}
 
 			colNamesMap = toColNamesMap(csvReader.readNext());

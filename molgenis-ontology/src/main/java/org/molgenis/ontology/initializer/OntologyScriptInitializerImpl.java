@@ -21,6 +21,7 @@ import java.util.Arrays;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.script.ScriptMetaData.SCRIPT;
 import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
+import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
 
 @Service
 public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
@@ -51,10 +52,13 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 			long count = dataService.count(SCRIPT, new QueryImpl<>().eq(ScriptMetaData.NAME, ROC_CURVE_SCRIPT_NAME));
 			if (count == 0)
 			{
-				Entity scriptType = dataService.findOne(ScriptTypeMetaData.SCRIPT_TYPE,
+				Entity scriptType = dataService.findOne(SCRIPT_TYPE,
 						new QueryImpl<>().eq(ScriptTypeMetaData.NAME, "R"));
 
-				if (scriptType == null) throw new UnknownEntityException("ScriptType R does not exist!");
+				if (scriptType == null)
+				{
+					throw new UnknownEntityException(dataService.getEntityType(SCRIPT_TYPE), "R");
+				}
 
 				String scriptContent;
 				try

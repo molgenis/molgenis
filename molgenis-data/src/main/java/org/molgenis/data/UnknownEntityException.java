@@ -1,26 +1,42 @@
 package org.molgenis.data;
 
-public class UnknownEntityException extends MolgenisDataException
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.LocalizedRuntimeException;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
+@SuppressWarnings("squid:S1948")
+public class UnknownEntityException extends LocalizedRuntimeException
 {
-	private static final long serialVersionUID = 5202731000953612564L;
+	private static final String BUNDLE_ID = "data";
+	private static final String ERROR_CODE = "D01";
 
-	public UnknownEntityException()
+	private final EntityType entityType;
+	private final Object entityId;
+
+	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
+		super(BUNDLE_ID, ERROR_CODE);
+		this.entityType = requireNonNull(entityType);
+		this.entityId = requireNonNull(entityId);
 	}
 
-	public UnknownEntityException(String msg)
+	@Override
+	protected String createMessage()
 	{
-		super(msg);
+		return format("type:%s id:%s", entityType.getId(), entityId.toString());
 	}
 
-	public UnknownEntityException(Throwable t)
+	@Override
+	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
 	{
-		super(t);
+		String format = resourceBundle.getString("unknown_entity");
+		String language = locale.getLanguage();
+		return format(format, entityId.toString(), entityType.getLabel(language));
 	}
-
-	public UnknownEntityException(String msg, Throwable t)
-	{
-		super(msg, t);
-	}
-
 }
+

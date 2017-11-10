@@ -5,9 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -211,15 +211,17 @@ public class SemanticSearchServiceHelper
 	 */
 	public List<String> getAttributeIdentifiers(EntityType sourceEntityType)
 	{
-		Entity EntityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
-				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
+		EntityType entityType = dataService.findOne(ENTITY_TYPE_META_DATA,
+				new QueryImpl<EntityType>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()), EntityType.class);
 
-		if (EntityTypeEntity == null) throw new MolgenisPermissionException(
-				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getId());
+		if (entityType == null)
+		{
+			throw new UnknownEntityTypeException(sourceEntityType.getId());
+		}
 
 		List<String> attributeIdentifiers = new ArrayList<>();
 
-		recursivelyCollectAttributeIdentifiers(EntityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES),
+		recursivelyCollectAttributeIdentifiers(entityType.getEntities(EntityTypeMetadata.ATTRIBUTES),
 				attributeIdentifiers);
 
 		return attributeIdentifiers;
