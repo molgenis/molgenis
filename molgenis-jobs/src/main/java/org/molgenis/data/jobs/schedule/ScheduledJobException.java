@@ -1,5 +1,6 @@
 package org.molgenis.data.jobs.schedule;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class ScheduledJobException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;

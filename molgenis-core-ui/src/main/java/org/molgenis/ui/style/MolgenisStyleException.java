@@ -4,6 +4,7 @@ import org.molgenis.data.MolgenisException;
 
 import java.io.IOException;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class MolgenisStyleException extends MolgenisException
 {
 	public MolgenisStyleException(String s)

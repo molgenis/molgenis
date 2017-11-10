@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class MolgenisInvalidFormatException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 1L;

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class UiAnnotationException extends AnnotationException
 {
 	public UiAnnotationException(AnnotationException ae)
@@ -24,10 +25,9 @@ public class UiAnnotationException extends AnnotationException
 		}
 		else
 		{
-			message += " entity with [" + concatAttributeNameValue(getFailedEntity().getEntityType().getIdAttribute())
-					+ ", " + getRequiredAttributes().stream()
-													.map(this::concatAttributeNameValue)
-													.collect(Collectors.joining(", ")) + "]";
+			message += " entity with [" + concatAttributeNameValue(getFailedEntity().getEntityType().getIdAttribute()) + ", " + getRequiredAttributes().stream()
+																																					   .map(this::concatAttributeNameValue)
+																																					   .collect(Collectors.joining(", ")) + "]";
 		}
 
 		message += " Cause: " + super.getCause();

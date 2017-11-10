@@ -3,7 +3,7 @@ package org.molgenis.data;
 import org.springframework.dao.DataAccessException;
 
 //Deprecated Exception that is used in the postgresException translation
-@Deprecated
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class MolgenisDataAccessException extends DataAccessException
 {
 	public MolgenisDataAccessException()

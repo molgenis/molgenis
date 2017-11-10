@@ -1,5 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class FileIngestException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
