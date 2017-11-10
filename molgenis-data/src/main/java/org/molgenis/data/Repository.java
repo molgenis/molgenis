@@ -149,7 +149,6 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	 * @param id    entity id
 	 * @param fetch fetch defining which attributes to retrieve
 	 * @return entity or null
-	 * @throws MolgenisPermissionException if access to entity with the given id is not allowed
 	 */
 	E findOneById(Object id, Fetch fetch);
 
@@ -167,7 +166,6 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	 * @param ids   entity ids
 	 * @param fetch fetch defining which attributes to retrieve
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
-	 * @throws MolgenisPermissionException if access to an entity one of the given IDs is not allowed
 	 */
 	Stream<E> findAll(Stream<Object> ids, Fetch fetch);
 

@@ -2,6 +2,7 @@ package org.molgenis.web.exception;
 
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -17,8 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -70,7 +70,22 @@ public class GlobalControllerExceptionHandler
 		}
 		else
 		{
-			//FIXME: handle cases where the key does not exist in the resourceBundle
+			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage());
+			return new ResponseEntity<>(errorMessageResponse, BAD_REQUEST);
+		}
+	}
+
+	@ResponseStatus(FORBIDDEN)
+	@ExceptionHandler
+	public Object handlePermissionDeniedException(EntityTypePermissionDeniedException e, HandlerMethod handlerMethod)
+	{
+		LOG.warn("", e);
+		if (isHtmlRequest(handlerMethod))
+		{
+			return "forward:" + NotFoundController.URI;
+		}
+		else
+		{
 			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage());
 			return new ResponseEntity<>(errorMessageResponse, BAD_REQUEST);
 		}

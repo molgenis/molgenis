@@ -84,4 +84,6 @@ public class FairController
 		Entity subjectEntity = dataService.findOneById("fdp_Distribution", distributionID);
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
+
+	// TODO add Exception eception handler that retrows FairException
 }

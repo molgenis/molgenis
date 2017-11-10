@@ -22,5 +22,4 @@ public class MolgenisRuntimeException extends RuntimeException
 	{
 		super(msg, t);
 	}
-
 }
