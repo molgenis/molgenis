@@ -1,6 +1,5 @@
 package org.molgenis.util;
 
-import org.molgenis.data.MolgenisRuntimeException;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.Locale;
@@ -8,7 +7,10 @@ import java.util.ResourceBundle;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class LocalizedRuntimeException extends MolgenisRuntimeException
+/**
+ * Root exception for all exceptions displayed to user.
+ */
+public abstract class LocalizedRuntimeException extends RuntimeException
 {
 	private static final String BUNDLE_ID_PREFIX = "exception";
 
@@ -42,6 +44,7 @@ public abstract class LocalizedRuntimeException extends MolgenisRuntimeException
 	 *
 	 * @return error code, never <tt>null</tt>
 	 */
+	@SuppressWarnings("unused")
 	public String getErrorCode()
 	{
 		return errorCode;
