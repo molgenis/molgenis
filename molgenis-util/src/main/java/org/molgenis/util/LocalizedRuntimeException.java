@@ -23,6 +23,13 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 		this.errorCode = requireNonNull(errorCode);
 	}
 
+	protected LocalizedRuntimeException(String bundleId, String errorCode, Throwable cause)
+	{
+		super(cause);
+		this.bundleId = requireNonNull(bundleId);
+		this.errorCode = requireNonNull(errorCode);
+	}
+
 	/**
 	 * Create exception message returned by {@link #getMessage()}.
 	 *
@@ -33,11 +40,10 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	/**
 	 * Create localized exception message returned by {@link #getLocalizedMessage()}.
 	 *
-	 * @param resourceBundle resource bundle containing exception messages
-	 * @param locale         locale for which to generate message
+	 * @param messageFormat
 	 * @return localized exception message
 	 */
-	protected abstract String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale);
+	protected abstract String createLocalizedMessage(String messageFormat);
 
 	/**
 	 * Returns an error code that differs for each child class (e.g. D34)
@@ -62,23 +68,26 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	}
 
 	/**
-	 * Implement {@link #createLocalizedMessage(ResourceBundle, Locale)} to change behavior of this method.
+	 * Implement {@link #createLocalizedMessage(String)} to change behavior of this method.
 	 *
 	 * @return localized exception message (e.g. to display to the user), never null
 	 */
 	@Override
 	public final String getLocalizedMessage()
 	{
-		return createLocalizedMessage(getResourceBundle(), getLocale()) + ' ' + '(' + getErrorCode() + ')';
+		ResourceBundle resourceBundle = getResourceBundle();
+		String format = resourceBundle.getString(getErrorCode());
+
+		return createLocalizedMessage(format) + ' ' + '(' + getErrorCode() + ')';
 	}
 
-	private ResourceBundle getResourceBundle()
+	protected ResourceBundle getResourceBundle()
 	{
 		String baseName = BUNDLE_ID_PREFIX + '_' + bundleId;
 		return ResourceBundle.getBundle(baseName, getLocale());
 	}
 
-	private Locale getLocale()
+	protected Locale getLocale()
 	{
 		return LocaleContextHolder.getLocale();
 	}

@@ -34,12 +34,13 @@ public class EntityTypePermissionDeniedException extends LocalizedRuntimeExcepti
 	}
 
 	@Override
-	public String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
+	public String createLocalizedMessage(String format)
 	{
-		String messageFormat = resourceBundle.getString("entity_type_permission_denied");
+		ResourceBundle resourceBundle = getResourceBundle();
+		Locale locale = getLocale();
 		String permissionMessage = resourceBundle.getString(getPermissionKey(permission));
 		String language = locale.getLanguage();
-		return format(messageFormat, permissionMessage, entityType.getLabel(language));
+		return format(format, permissionMessage, entityType.getLabel(language));
 	}
 
 	private static String getPermissionKey(Permission permission)

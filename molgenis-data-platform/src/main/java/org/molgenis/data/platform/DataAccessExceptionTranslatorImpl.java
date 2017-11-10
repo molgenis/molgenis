@@ -5,9 +5,6 @@ import org.molgenis.util.LocalizedRuntimeException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 @Component
 public class DataAccessExceptionTranslatorImpl implements DataAccessExceptionTranslator
 {
@@ -38,7 +35,7 @@ public class DataAccessExceptionTranslatorImpl implements DataAccessExceptionTra
 			}
 
 			@Override
-			protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
+			protected String createLocalizedMessage(String format)
 			{
 				return molgenisDataAccessException.getMessage();
 			}
