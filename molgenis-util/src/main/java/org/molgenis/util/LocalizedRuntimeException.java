@@ -77,6 +77,7 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	{
 		ResourceBundle resourceBundle = getResourceBundle();
 		String format = resourceBundle.getString(getErrorCode());
+
 		return createLocalizedMessage(format) + ' ' + '(' + getErrorCode() + ')';
 	}
 
