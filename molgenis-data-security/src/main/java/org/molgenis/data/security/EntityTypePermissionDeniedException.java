@@ -11,7 +11,6 @@ import java.util.ResourceBundle;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
 public class EntityTypePermissionDeniedException extends LocalizedRuntimeException
 {
 	private static final String BUNDLE_ID = "data_security";

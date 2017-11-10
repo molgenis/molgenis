@@ -30,7 +30,7 @@ public class GlobalControllerExceptionHandler
 	public Object handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest httpServletRequest)
 	{
 		LOG.info("", e);
-		return handleTypedException(e, isHtmlRequest(httpServletRequest), NotFoundController.URI,
+		return handleTypedException(isHtmlRequest(httpServletRequest), NotFoundController.URI,
 				e.getLocalizedMessage(), NOT_FOUND);
 	}
 
@@ -38,26 +38,26 @@ public class GlobalControllerExceptionHandler
 	@ExceptionHandler
 	public Object handleUnknownEntityException(UnknownEntityException e, HandlerMethod handlerMethod)
 	{
-		LOG.info("", e);
-		return handleTypedException(e, isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
-				BAD_REQUEST);
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
 	}
 
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
 	public Object handleUnknownEntityTypeException(UnknownEntityTypeException e, HandlerMethod handlerMethod)
 	{
-		LOG.info("", e);
-		return handleTypedException(e, isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
-				BAD_REQUEST);
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
 	}
 
 	@ResponseStatus(FORBIDDEN)
 	@ExceptionHandler
 	public Object handlePermissionDeniedException(EntityTypePermissionDeniedException e, HandlerMethod handlerMethod)
 	{
-		LOG.info("", e);
-		return handleTypedException(e, isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
-				BAD_REQUEST);
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
 	}
 }

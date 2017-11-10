@@ -7,6 +7,7 @@ import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.UnknownEntityReferenceDataAccessException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
@@ -318,6 +319,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 		String value = m.group(1);
 
+		String entityTypeName = getEntityTypeName(tableName);
+
 		String constraintViolationMessageTemplate;
 		String attrName;
 		if (detailMessage.contains("still referenced from"))
@@ -332,11 +335,11 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		{
 			// ERROR: insert or update on table "x" violates foreign key constraint "y"
 			// Detail: Key (k)=(v) is not present in table "z".
-			constraintViolationMessageTemplate = "Unknown xref value '%s' for attribute '%s' of entity '%s'.";
 			attrName = getAttributeName(tableName, colName);
+			throw new UnknownEntityReferenceDataAccessException(entityTypeName, attrName, value);
 		}
 		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format(constraintViolationMessageTemplate, value, attrName, getEntityTypeName(tableName)), null);
+				format(constraintViolationMessageTemplate, value, attrName, entityTypeName), null);
 		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 

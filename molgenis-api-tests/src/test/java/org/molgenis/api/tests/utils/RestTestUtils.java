@@ -10,11 +10,11 @@ import org.molgenis.auth.GroupMetaData;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -215,10 +215,10 @@ public class RestTestUtils
 		try
 		{
 			jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(
-					new FileReader(Resources.getResource(RestTestUtils.class, fileName).getFile()));
+					new InputStreamReader(RestTestUtils.class.getResourceAsStream(fileName), Charset.forName("UTF-8")));
 
 		}
-		catch (ParseException | FileNotFoundException e)
+		catch (ParseException e)
 		{
 			LOG.error("Unable to readJsonFile(" + fileName + ")");
 			LOG.error(e.getMessage());

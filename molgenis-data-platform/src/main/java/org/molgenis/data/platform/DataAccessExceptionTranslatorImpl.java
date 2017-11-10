@@ -1,7 +1,8 @@
 package org.molgenis.data.platform;
 
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.util.LocalizedRuntimeException;
+import org.molgenis.data.validation.UnknownEntityReferenceDataAccessException;
+import org.molgenis.data.validation.UnknownEntityReferenceException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
@@ -23,22 +24,16 @@ public class DataAccessExceptionTranslatorImpl implements DataAccessExceptionTra
 		}
 	}
 
-	private LocalizedRuntimeException translate(MolgenisDataAccessException molgenisDataAccessException)
+	private RuntimeException translate(MolgenisDataAccessException molgenisDataAccessException)
 	{
-		// TODO handle exceptions
-		return new LocalizedRuntimeException("to", "do")
+		if (molgenisDataAccessException instanceof UnknownEntityReferenceDataAccessException)
 		{
-			@Override
-			protected String createMessage()
-			{
-				return molgenisDataAccessException.getMessage();
-			}
-
-			@Override
-			protected String createLocalizedMessage(String format)
-			{
-				return molgenisDataAccessException.getMessage();
-			}
-		};
+			UnknownEntityReferenceDataAccessException e = (UnknownEntityReferenceDataAccessException) molgenisDataAccessException;
+			throw new UnknownEntityReferenceException(e.getEntityTypeId(), e.getAttributeName(), e.getValueAsString());
+		}
+		else
+		{
+			return molgenisDataAccessException;
+		}
 	}
 }

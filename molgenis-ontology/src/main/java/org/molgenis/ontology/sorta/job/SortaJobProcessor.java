@@ -7,8 +7,8 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.controller.SortaServiceController;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.sorta.controller.SortaController;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
@@ -95,7 +95,7 @@ public class SortaJobProcessor
 				}
 				else
 				{
-					resultEntity.set(MatchingTaskContentMetaData.SCORE, 0);
+					resultEntity.set(MatchingTaskContentMetaData.SCORE, 0.0);
 				}
 
 				// Add entity in batch
@@ -120,7 +120,7 @@ public class SortaJobProcessor
 				dataService.add(resultRepositoryName, entitiesToAdd.stream());
 			}
 			progress.progress(counter.get(), "Processed " + counter + " input terms.");
-			progress.setResultUrl(menuReaderService.getMenu().findMenuItemPath(SortaServiceController.ID) + "/result/"
+			progress.setResultUrl(menuReaderService.getMenu().findMenuItemPath(SortaController.ID) + "/result/"
 					+ resultRepositoryName);
 		});
 	}

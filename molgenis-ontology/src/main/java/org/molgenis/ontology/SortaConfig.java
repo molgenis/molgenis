@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SortaConfiguration
+public class SortaConfig
 {
 	@Autowired
 	private DataService dataService;
@@ -43,7 +43,7 @@ public class SortaConfiguration
 		return new InformationContentService(dataService);
 	}
 
-	public SortaConfiguration()
+	public SortaConfig()
 	{
 		System.setProperty("jdk.xml.entityExpansionLimit", "1280000");
 	}
