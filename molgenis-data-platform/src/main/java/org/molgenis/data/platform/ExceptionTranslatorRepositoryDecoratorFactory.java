@@ -1,9 +1,7 @@
-package org.molgenis.file;
+package org.molgenis.data.platform;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.platform.DataAccessExceptionTranslator;
-import org.molgenis.data.platform.ExceptionTranslatorRepositoryDecorator;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
