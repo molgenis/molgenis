@@ -1,5 +1,6 @@
 package org.molgenis.web;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +44,12 @@ public class ErrorMessageResponse
 
 	public static ErrorMessageResponse create(String errorMessage)
 	{
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(errorMessage));
+		return create(errorMessage, null);
+	}
+
+	public static ErrorMessageResponse create(String errorMessage, @Nullable String errorCode)
+	{
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(errorMessage, errorCode));
 	}
 
 	public static class ErrorMessage
