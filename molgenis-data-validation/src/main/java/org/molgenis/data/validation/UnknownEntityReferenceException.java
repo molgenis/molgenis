@@ -2,9 +2,6 @@ package org.molgenis.data.validation;
 
 import org.molgenis.util.LocalizedRuntimeException;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -32,8 +29,8 @@ public class UnknownEntityReferenceException extends LocalizedRuntimeException
 	}
 
 	@Override
-	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
+	protected String createLocalizedMessage(String messageFormat)
 	{
-		return format(resourceBundle.getString(ERROR_CODE), valueAsString, attributeName, entityTypeId);
+		return format(messageFormat, valueAsString, attributeName, entityTypeId);
 	}
 }
