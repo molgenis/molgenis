@@ -58,7 +58,7 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	@Override
 	public final String getMessage()
 	{
-		return createMessage() + ' ' + getErrorCodeMessage();
+		return "code: " + getErrorCode() + " " + createMessage();
 	}
 
 	/**
@@ -69,7 +69,7 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	@Override
 	public final String getLocalizedMessage()
 	{
-		return createLocalizedMessage(getResourceBundle(), getLocale()) + ' ' + getErrorCodeMessage();
+		return createLocalizedMessage(getResourceBundle(), getLocale()) + ' ' + '(' + getErrorCode() + ')';
 	}
 
 	private ResourceBundle getResourceBundle()
@@ -81,13 +81,5 @@ public abstract class LocalizedRuntimeException extends RuntimeException
 	private Locale getLocale()
 	{
 		return LocaleContextHolder.getLocale();
-	}
-
-	/**
-	 * Returns message part for the error code
-	 */
-	private String getErrorCodeMessage()
-	{
-		return '(' + errorCode + ')';
 	}
 }
