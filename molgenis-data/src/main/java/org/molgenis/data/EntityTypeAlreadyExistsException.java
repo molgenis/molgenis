@@ -29,6 +29,6 @@ public class EntityTypeAlreadyExistsException extends LocalizedRuntimeException
 	@Override
 	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
 	{
-		return resourceBundle.getString("duplicate_entity_type_message");
+		return resourceBundle.getString("duplicate_entity_type");
 	}
 }

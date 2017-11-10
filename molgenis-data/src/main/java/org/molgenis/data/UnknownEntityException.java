@@ -34,7 +34,7 @@ public class UnknownEntityException extends LocalizedRuntimeException
 	@Override
 	protected String createLocalizedMessage(ResourceBundle resourceBundle, Locale locale)
 	{
-		String format = resourceBundle.getString("unknown_entity_message");
+		String format = resourceBundle.getString("unknown_entity");
 		String language = locale.getLanguage();
 		return format(format, entityId.toString(), entityType.getLabel(language));
 	}
