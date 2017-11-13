@@ -8,7 +8,10 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class ReferencedEntityException extends MolgenisDataAccessException implements ErrorCoded
+/**
+ * Thrown when deleting data that is still referenced by other data.
+ */
+public class EntityReferenceConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
 {
 	private static final String ERROR_CODE = "V02";
 
@@ -16,7 +19,8 @@ public class ReferencedEntityException extends MolgenisDataAccessException imple
 	private final String attributeName;
 	private final String valueAsString;
 
-	public ReferencedEntityException(String entityTypeId, String attributeName, String valueAsString, Throwable cause)
+	public EntityReferenceConstraintViolationException(String entityTypeId, String attributeName, String valueAsString,
+			Throwable cause)
 	{
 		super(cause);
 		this.entityTypeId = requireNonNull(entityTypeId);

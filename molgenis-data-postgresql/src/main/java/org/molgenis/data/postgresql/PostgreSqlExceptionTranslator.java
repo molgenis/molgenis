@@ -5,10 +5,7 @@ import org.molgenis.data.postgresql.identifier.AttributeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.molgenis.data.transaction.TransactionExceptionTranslator;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.data.validation.ReferencedEntityException;
-import org.molgenis.data.validation.UnknownEntityReferenceException;
+import org.molgenis.data.validation.*;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
@@ -31,8 +28,6 @@ import java.util.regex.Pattern;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
 import static org.molgenis.data.meta.AttributeType.*;
 
 /**
@@ -131,7 +126,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateReadonlyViolation(PSQLException pSqlException)
+	MolgenisDataAccessException translateReadonlyViolation(PSQLException pSqlException)
 	{
 		Matcher matcher = Pattern.compile(
 				"Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
@@ -145,10 +140,10 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		String colName = matcher.group(1);
 		String tableName = matcher.group(2);
 		String id = matcher.group(3);
-		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("Updating read-only attribute '%s' of entity '%s' with id '%s' is not allowed.",
-						getAttributeName(tableName, colName), getEntityTypeName(tableName), id));
-		return new MolgenisValidationException(singleton(constraintViolation));
+
+		String attributeName = getAttributeName(tableName, colName);
+		String entityTypeName = getEntityTypeName(tableName);
+		return new ReadOnlyConstraintViolationException(entityTypeName, attributeName, id, pSqlException);
 	}
 
 	/**
@@ -157,7 +152,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateDependentObjectsStillExist(PSQLException pSqlException)
+	MolgenisDataAccessException translateDependentObjectsStillExist(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String detail = serverErrorMessage.getDetail();
@@ -183,23 +178,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 
-		Set<ConstraintViolation> constraintViolations = entityTypeDependencyMap.entrySet().stream().map(entry ->
-		{
-			String message;
-			if (entry.getValue().size() == 1)
-			{
-				message = format("Cannot delete entity '%s' because entity '%s' depends on it.", entry.getKey(),
-						entry.getValue().iterator().next());
-			}
-			else
-			{
-				message = format("Cannot delete entity '%s' because entities '%s' depend on it.", entry.getKey(),
-						entry.getValue().stream().collect(joining(", ")));
-			}
-			return new ConstraintViolation(message, null);
-		}).collect(toCollection(LinkedHashSet::new));
-
-		return new MolgenisValidationException(constraintViolations);
+		return new EntityTypeReferenceConstraintViolationException(entityTypeDependencyMap, pSqlException);
 	}
 
 	/**
@@ -208,7 +187,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	static MolgenisValidationException translateInvalidIntegerException(PSQLException pSqlException)
+	static MolgenisDataAccessException translateInvalidIntegerException(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String message = serverErrorMessage.getMessage();
@@ -245,9 +224,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 		String value = matcher.group(2);
 
-		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("Value [%s] of this entity attribute is not of type [%s].", value, type), null);
-		return new MolgenisValidationException(singleton(constraintViolation));
+		return new DataTypeConstraintViolationException(value, type, pSqlException);
 	}
 
 	/**
@@ -256,7 +233,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateNotNullViolation(PSQLException pSqlException)
+	MolgenisDataAccessException translateNotNullViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -272,10 +249,10 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			EntityTypeDescription entityTypeDescription = entityTypeRegistry.getEntityTypeDescription(tableName);
 			entityTypeDescription.getAttributeDescriptionMap().get(columnName);
 
-			ConstraintViolation constraintViolation = new ConstraintViolation(
-					format("The attribute '%s' of entity '%s' can not be null.",
-							getAttributeName(tableName, columnName), getEntityTypeName(tableName)), null);
-			return new MolgenisValidationException(singleton(constraintViolation));
+			String attributeName = getAttributeName(tableName, columnName);
+			String entityTypeName = getEntityTypeName(tableName);
+
+			return new NotNullConstraintViolationException(entityTypeName, attributeName, pSqlException);
 		}
 		else
 		{
@@ -288,10 +265,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			}
 			String columnName = matcher.group(1);
 
-			ConstraintViolation constraintViolation = new ConstraintViolation(
-					format("The attribute '%s' of entity '%s' contains null values.",
-							getAttributeName(tableName, columnName), getEntityTypeName(tableName)), null);
-			return new MolgenisValidationException(singleton(constraintViolation));
+			String attributeName = getAttributeName(tableName, columnName);
+			String entityTypeName = getEntityTypeName(tableName);
+			return new NotNullConstraintCreationException(entityTypeName, attributeName, pSqlException);
 		}
 	}
 
@@ -330,7 +306,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 			String refTableName = getRefTableFromForeignKeyPsqlException(pSqlException);
 			attrName = getAttributeName(refTableName, colName);
-			return new ReferencedEntityException(entityTypeName, attrName, value, pSqlException);
+			return new EntityReferenceConstraintViolationException(entityTypeName, attrName, value, pSqlException);
 		}
 		else
 		{
@@ -338,7 +314,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			// Detail: Key (k)=(v) is not present in table "z".
 
 			attrName = getAttributeName(tableName, colName);
-			return new UnknownEntityReferenceException(entityTypeName, attrName, value, pSqlException);
+			return new EntityReferenceUnknownConstraintViolationException(entityTypeName, attrName, value,
+					pSqlException);
 		}
 	}
 
@@ -362,7 +339,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateUniqueKeyViolation(PSQLException pSqlException)
+	MolgenisDataAccessException translateUniqueKeyViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -380,9 +357,10 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 				String columnName = columnNames[0];
 				String value = matcher.group(2);
 
-				constraintViolation = new ConstraintViolation(
-						format("Duplicate value '%s' for unique attribute '%s' from entity '%s'.", value,
-								getAttributeName(tableName, columnName), getEntityTypeName(tableName)), null);
+				final String entityTypeName = getEntityTypeName(tableName);
+				final String attributeName = getAttributeName(tableName, columnName);
+
+				return new UniqueConstraintViolationException(entityTypeName, attributeName, value, pSqlException);
 			}
 			else
 			{
@@ -391,11 +369,11 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 				String idValue = values[0];
 				String value = values[1];
 
-				constraintViolation = new ConstraintViolation(
-						format("Duplicate list value '%s' for attribute '%s' from entity '%s' with id '%s'.", value,
-								getAttributeName(tableName, columnName), getEntityTypeName(tableName), idValue), null);
+				final String attributeName = getAttributeName(tableName, columnName);
+				final String entityTypeName = getEntityTypeName(tableName);
+				return new UniqueReferenceConstraintViolationException(entityTypeName, attributeName, value, idValue,
+						pSqlException);
 			}
-			return new MolgenisValidationException(singleton(constraintViolation));
 		}
 		else
 		{
@@ -407,10 +385,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 				String columnName = matcher.group(1);
 				String value = matcher.group(2);
 
-				ConstraintViolation constraintViolation = new ConstraintViolation(
-						format("The attribute '%s' of entity '%s' contains duplicate value '%s'.",
-								getAttributeName(tableName, columnName), getEntityTypeName(tableName), value), null);
-				return new MolgenisValidationException(singleton(constraintViolation));
+				final String attributeName = getAttributeName(tableName, columnName);
+				final String entityTypeName = getEntityTypeName(tableName);
+				return new UniqueConstraintCreationException(entityTypeName, attributeName, value, pSqlException);
 			}
 			else
 			{
@@ -426,17 +403,12 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateCheckConstraintViolation(PSQLException pSqlException)
+	MolgenisDataAccessException translateCheckConstraintViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
-		String constraintName = serverErrorMessage.getConstraint();
-		// constraint name: <tableName>_<columnName>_chk
-		String columnName = constraintName.substring(tableName.length() + 1, constraintName.length() - 4);
-		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("Unknown enum value for attribute '%s' of entity '%s'.", getAttributeName(tableName, columnName),
-						getEntityTypeName(tableName)), null);
-		return new MolgenisValidationException(singleton(constraintViolation));
+		String entityTypeName = getEntityTypeName(tableName);
+		return new EnumConstraintModificationException(entityTypeName, pSqlException);
 	}
 
 	/**

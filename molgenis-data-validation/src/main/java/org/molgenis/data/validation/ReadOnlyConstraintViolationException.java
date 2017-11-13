@@ -8,15 +8,15 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownEntityReferenceException extends MolgenisDataAccessException implements ErrorCoded
+public class ReadOnlyConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
 {
-	private static final String ERROR_CODE = "V01";
+	private static final String ERROR_CODE = "V02";
 
 	private final String entityTypeId;
 	private final String attributeName;
 	private final String valueAsString;
 
-	public UnknownEntityReferenceException(String entityTypeId, String attributeName, String valueAsString,
+	public ReadOnlyConstraintViolationException(String entityTypeId, String attributeName, String valueAsString,
 			Throwable cause)
 	{
 		super(cause);
