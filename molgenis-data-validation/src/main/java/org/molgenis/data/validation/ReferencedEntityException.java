@@ -3,21 +3,19 @@ package org.molgenis.data.validation;
 import org.molgenis.data.ErrorCoded;
 import org.molgenis.data.MolgenisDataAccessException;
 
-import java.text.MessageFormat;
-
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownEntityReferenceException extends MolgenisDataAccessException implements ErrorCoded
+public class ReferencedEntityException extends MolgenisDataAccessException implements ErrorCoded
 {
-	private static final String ERROR_CODE = "V01";
+	private static final String ERROR_CODE = "V02";
 
 	private final String entityTypeId;
 	private final String attributeName;
 	private final String valueAsString;
 
-	public UnknownEntityReferenceException(String entityTypeId, String attributeName, String valueAsString,
-			Throwable cause)
+	public ReferencedEntityException(String entityTypeId, String attributeName, String valueAsString, Throwable cause)
 	{
 		super(cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
@@ -28,14 +26,14 @@ public class UnknownEntityReferenceException extends MolgenisDataAccessException
 	@Override
 	public String getMessage()
 	{
-		return String.format("type:%s attribute:%s value: %s", entityTypeId, attributeName, valueAsString);
+		return "type:" + entityTypeId + " attribute:" + attributeName + " value:" + valueAsString;
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
 		String format = getLanguageService().getBundle().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, attributeName, entityTypeId);
+		return format(format, valueAsString, attributeName, entityTypeId);
 	}
 
 	@Override

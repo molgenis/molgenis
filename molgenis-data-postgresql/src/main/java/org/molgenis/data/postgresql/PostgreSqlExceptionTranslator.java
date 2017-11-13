@@ -7,7 +7,8 @@ import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.data.validation.UnknownEntityReferenceDataAccessException;
+import org.molgenis.data.validation.ReferencedEntityException;
+import org.molgenis.data.validation.UnknownEntityReferenceException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
@@ -300,7 +301,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateForeignKeyViolation(PSQLException pSqlException)
+	MolgenisDataAccessException translateForeignKeyViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -321,26 +322,24 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 		String entityTypeName = getEntityTypeName(tableName);
 
-		String constraintViolationMessageTemplate;
 		String attrName;
 		if (detailMessage.contains("still referenced from"))
 		{
 			// ERROR: update or delete on table "x" violates foreign key constraint "y" on table "z"
 			// Detail: Key (k)=(v) is still referenced from table "x".
-			constraintViolationMessageTemplate = "Value '%s' for attribute '%s' is referenced by entity '%s'.";
+
 			String refTableName = getRefTableFromForeignKeyPsqlException(pSqlException);
 			attrName = getAttributeName(refTableName, colName);
+			return new ReferencedEntityException(entityTypeName, attrName, value, pSqlException);
 		}
 		else
 		{
 			// ERROR: insert or update on table "x" violates foreign key constraint "y"
 			// Detail: Key (k)=(v) is not present in table "z".
+
 			attrName = getAttributeName(tableName, colName);
-			throw new UnknownEntityReferenceDataAccessException(entityTypeName, attrName, value);
+			return new UnknownEntityReferenceException(entityTypeName, attrName, value, pSqlException);
 		}
-		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format(constraintViolationMessageTemplate, value, attrName, entityTypeName), null);
-		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 
 	private String getRefTableFromForeignKeyPsqlException(PSQLException pSqlException)

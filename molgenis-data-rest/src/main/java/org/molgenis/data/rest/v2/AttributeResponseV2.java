@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -48,7 +48,7 @@ class AttributeResponseV2
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			PermissionService permissionService, DataService dataService, LanguageServiceImpl languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);

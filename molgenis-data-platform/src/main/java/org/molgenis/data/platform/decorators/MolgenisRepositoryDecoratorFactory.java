@@ -14,7 +14,6 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.platform.ExceptionTranslatorRepositoryDecoratorFactory;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
@@ -46,7 +45,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
 	private final DefaultValueReferenceValidator defaultValueReferenceValidator;
-	private final ExceptionTranslatorRepositoryDecoratorFactory exceptionTranslatorRepositoryDecoratorFactory;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
@@ -56,8 +54,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			L3Cache l3Cache, PlatformTransactionManager transactionManager, QueryValidator queryValidator,
-			DefaultValueReferenceValidator defaultValueReferenceValidator,
-			ExceptionTranslatorRepositoryDecoratorFactory exceptionTranslatorRepositoryDecoratorFactory)
+			DefaultValueReferenceValidator defaultValueReferenceValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -76,8 +73,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
 		this.defaultValueReferenceValidator = requireNonNull(defaultValueReferenceValidator);
-		this.exceptionTranslatorRepositoryDecoratorFactory = requireNonNull(
-				exceptionTranslatorRepositoryDecoratorFactory);
 	}
 
 	@Override
@@ -134,10 +129,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 0. query validation decorator
 		decoratedRepository = new QueryValidationRepositoryDecorator<>(decoratedRepository, queryValidator);
-
-		// -1 exception decorator
-		decoratedRepository = exceptionTranslatorRepositoryDecoratorFactory.createDecoratedRepository(
-				decoratedRepository);
 
 		return decoratedRepository;
 	}

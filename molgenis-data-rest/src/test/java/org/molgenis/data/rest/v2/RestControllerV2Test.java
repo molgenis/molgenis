@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -61,7 +61,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.i18n.LanguageService.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.LanguageServiceImpl.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
@@ -101,7 +101,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private LanguageService languageService;
+	private LanguageServiceImpl languageService;
 
 	@Autowired
 	private RestControllerV2 restControllerV2;
@@ -1104,9 +1104,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public LanguageService languageService()
+		public LanguageServiceImpl languageService()
 		{
-			return mock(LanguageService.class);
+			return mock(LanguageServiceImpl.class);
 		}
 
 		@Bean

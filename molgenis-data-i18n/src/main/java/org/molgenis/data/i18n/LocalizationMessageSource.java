@@ -76,7 +76,7 @@ public class LocalizationMessageSource extends AbstractMessageSource
 		}
 		if (result == null)
 		{
-			result = localizationService.getMessage(namespace, code, LanguageService.DEFAULT_LANGUAGE_CODE);
+			result = localizationService.getMessage(namespace, code, LanguageServiceImpl.DEFAULT_LANGUAGE_CODE);
 		}
 		return result;
 	}

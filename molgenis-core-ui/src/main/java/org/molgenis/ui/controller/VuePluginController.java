@@ -1,6 +1,6 @@
 package org.molgenis.ui.controller;
 
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -12,11 +12,11 @@ import static java.util.Objects.requireNonNull;
 public abstract class VuePluginController extends PluginController
 {
 	protected MenuReaderService menuReaderService;
-	private LanguageService languageService;
+	private LanguageServiceImpl languageService;
 	private AppSettings appSettings;
 	private UserAccountService userAccountService;
 
-	public VuePluginController(String uri,MenuReaderService menuReaderService, LanguageService languageService,
+	public VuePluginController(String uri, MenuReaderService menuReaderService, LanguageServiceImpl languageService,
 			AppSettings appSettings, UserAccountService userAccountService)
 	{
 		super(uri);

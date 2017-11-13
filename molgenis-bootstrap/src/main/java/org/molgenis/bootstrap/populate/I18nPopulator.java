@@ -1,7 +1,7 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.i18n.model.LanguageFactory;
@@ -52,8 +52,8 @@ public class I18nPopulator
 	 */
 	public void populateLanguages()
 	{
-		dataService.add(LANGUAGE,
-				languageFactory.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME,
+		dataService.add(LANGUAGE, languageFactory.create(LanguageServiceImpl.DEFAULT_LANGUAGE_CODE,
+				LanguageServiceImpl.DEFAULT_LANGUAGE_NAME,
 						true));
 		dataService.add(LANGUAGE,
 				languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));

@@ -7,8 +7,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
-
 /**
  * This {@link org.springframework.context.MessageSource} reads localization messages from properties files on the classpath.
  * <p>
@@ -48,10 +46,12 @@ public class PropertiesMessageSource extends ReloadableResourceBundleMessageSour
 	 */
 	public Set<String> getMessageIDs()
 	{
-		return getLanguageCodes().flatMap(
-				(languageCode) -> getMergedProperties(new Locale(languageCode)).getProperties().keySet().stream())
-								 .map(Object::toString)
-								 .collect(Collectors.toSet());
+		return LanguageService.getLanguageCodes()
+							  .flatMap((languageCode) -> getMergedProperties(new Locale(languageCode)).getProperties()
+																									  .keySet()
+																									  .stream())
+							  .map(Object::toString)
+							  .collect(Collectors.toSet());
 	}
 
 	/**

@@ -3,6 +3,8 @@ package org.molgenis.web.exception;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
+import org.molgenis.data.validation.ReferencedEntityException;
+import org.molgenis.data.validation.UnknownEntityReferenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -52,12 +54,30 @@ public class GlobalControllerExceptionHandler
 				BAD_REQUEST, e.getErrorCode());
 	}
 
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler
+	public Object handleUnknownEntityReferenceException(UnknownEntityReferenceException e, HandlerMethod handlerMethod)
+	{
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler
+	public Object handleReferencedEntityException(ReferencedEntityException e, HandlerMethod handlerMethod)
+	{
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
+	}
+
 	@ResponseStatus(FORBIDDEN)
 	@ExceptionHandler
 	public Object handlePermissionDeniedException(EntityTypePermissionDeniedException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
-				BAD_REQUEST, e.getErrorCode());
+				FORBIDDEN, e.getErrorCode()); // FIXME NotFoundController.URI is not what we want here (?)
 	}
 }

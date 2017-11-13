@@ -1,7 +1,7 @@
 package org.molgenis.searchall.service;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -27,9 +27,9 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 public class SearchAllService
 {
 	private final DataService dataService;
-	private final LanguageService languageService;
+	private final LanguageServiceImpl languageService;
 
-	public SearchAllService(DataService dataService, LanguageService languageService)
+	public SearchAllService(DataService dataService, LanguageServiceImpl languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.languageService = requireNonNull(languageService);
