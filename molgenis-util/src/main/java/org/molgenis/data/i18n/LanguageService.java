@@ -27,4 +27,6 @@ public interface LanguageService
 	}
 
 	MessageSourceResourceBundle getBundle();
+
+	String getCurrentUserLanguageCode();
 }

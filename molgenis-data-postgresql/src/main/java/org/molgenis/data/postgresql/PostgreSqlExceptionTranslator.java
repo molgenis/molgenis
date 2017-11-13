@@ -7,8 +7,8 @@ import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.data.validation.ReferencedEntityDataAccessException;
-import org.molgenis.data.validation.UnknownEntityReferenceDataAccessException;
+import org.molgenis.data.validation.ReferencedEntityException;
+import org.molgenis.data.validation.UnknownEntityReferenceException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
@@ -330,7 +330,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 			String refTableName = getRefTableFromForeignKeyPsqlException(pSqlException);
 			attrName = getAttributeName(refTableName, colName);
-			return new ReferencedEntityDataAccessException(entityTypeName, attrName, value); // TODO add cause
+			return new ReferencedEntityException(entityTypeName, attrName, value, pSqlException); // TODO add cause
 		}
 		else
 		{
@@ -338,7 +338,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			// Detail: Key (k)=(v) is not present in table "z".
 
 			attrName = getAttributeName(tableName, colName);
-			return new UnknownEntityReferenceDataAccessException(entityTypeName, attrName, value); // TODO add cause
+			return new UnknownEntityReferenceException(entityTypeName, attrName, value,
+					pSqlException); // TODO add cause
 		}
 	}
 

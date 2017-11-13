@@ -1,36 +1,44 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.util.LocalizedRuntimeException;
+import org.molgenis.data.CodedException;
+import org.molgenis.data.MolgenisDataAccessException;
 
-import static java.lang.String.format;
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class ReferencedEntityException extends LocalizedRuntimeException
+public class ReferencedEntityException extends MolgenisDataAccessException implements CodedException
 {
-	private static final String BUNDLE_ID = "data_validation";
 	private static final String ERROR_CODE = "V02";
 
 	private final String entityTypeId;
 	private final String attributeName;
 	private final String valueAsString;
 
-	public ReferencedEntityException(String entityTypeId, String attributeName, String valueAsString)
+	public ReferencedEntityException(String entityTypeId, String attributeName, String valueAsString, Throwable cause)
 	{
-		super(BUNDLE_ID, ERROR_CODE);
+		super(cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
 		this.valueAsString = requireNonNull(valueAsString);
 	}
 
 	@Override
-	protected String createMessage()
+	public String getMessage()
 	{
 		return "type:" + entityTypeId + " attribute:" + attributeName + " value:" + valueAsString;
 	}
 
 	@Override
-	protected String createLocalizedMessage(String messageFormat)
+	public String getLocalizedMessage()
 	{
-		return format(messageFormat, valueAsString, attributeName, entityTypeId);
+		String format = getLanguageService().getBundle().getString(ERROR_CODE);
+		return format(format, valueAsString, attributeName, entityTypeId);
+	}
+
+	@Override
+	public String getErrorCode()
+	{
+		return ERROR_CODE;
 	}
 }

@@ -72,6 +72,7 @@ public class LanguageServiceImpl implements LanguageService
 	/**
 	 * Get the language code of the current user, returns the app default if not set
 	 */
+	@Override
 	public String getCurrentUserLanguageCode()
 	{
 		String currentUserName = SecurityUtils.getCurrentUsername();

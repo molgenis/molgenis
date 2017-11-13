@@ -1,31 +1,31 @@
 package org.molgenis.data;
 
-import org.molgenis.util.LocalizedRuntimeException;
+import static java.text.MessageFormat.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-import static java.lang.String.format;
-
-public class EntityTypeAlreadyExistsException extends LocalizedRuntimeException
+public class EntityTypeAlreadyExistsException extends CodedRuntimeException
 {
-	private static final String BUNDLE_ID = "data";
 	private static final String ERROR_CODE = "D03";
 
 	private final String entityTypeId;
 
 	public EntityTypeAlreadyExistsException(String entityTypeId)
 	{
-		super(BUNDLE_ID, ERROR_CODE);
-		this.entityTypeId = entityTypeId;
+		super(ERROR_CODE);
+		this.entityTypeId = requireNonNull(entityTypeId);
 	}
 
 	@Override
-	protected String createMessage()
+	public String getMessage()
 	{
-		return format("id:%s", entityTypeId);
+		return String.format("id:%s", entityTypeId);
 	}
 
 	@Override
-	protected String createLocalizedMessage(String format)
+	public String getLocalizedMessage()
 	{
+		String format = getLanguageService().getBundle().getString(ERROR_CODE);
 		return format(format, entityTypeId);
 	}
 }

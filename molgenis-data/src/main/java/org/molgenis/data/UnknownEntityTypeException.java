@@ -1,10 +1,10 @@
 package org.molgenis.data;
 
-import static java.lang.String.format;
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownEntityTypeException extends RuntimeException implements CodedException
+public class UnknownEntityTypeException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "D01";
 
@@ -12,6 +12,7 @@ public class UnknownEntityTypeException extends RuntimeException implements Code
 
 	public UnknownEntityTypeException(String entityTypeId)
 	{
+		super(ERROR_CODE);
 		this.entityTypeId = requireNonNull(entityTypeId);
 	}
 
@@ -26,12 +27,6 @@ public class UnknownEntityTypeException extends RuntimeException implements Code
 	{
 		String format = getLanguageService().getBundle().getString(ERROR_CODE);
 		return format(format, entityTypeId);
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
 	}
 }
 

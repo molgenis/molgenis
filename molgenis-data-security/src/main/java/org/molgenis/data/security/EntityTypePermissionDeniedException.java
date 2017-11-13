@@ -1,19 +1,16 @@
 package org.molgenis.data.security;
 
+import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
-import org.molgenis.util.LocalizedRuntimeException;
 import org.molgenis.util.UnexpectedEnumException;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
-import static java.lang.String.format;
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class EntityTypePermissionDeniedException extends LocalizedRuntimeException
+public class EntityTypePermissionDeniedException extends CodedRuntimeException
 {
-	private static final String BUNDLE_ID = "data_security";
 	private static final String ERROR_CODE = "S01";
 
 	private final transient EntityType entityType;
@@ -21,24 +18,23 @@ public class EntityTypePermissionDeniedException extends LocalizedRuntimeExcepti
 
 	public EntityTypePermissionDeniedException(EntityType entityType, Permission permission)
 	{
-		super(BUNDLE_ID, ERROR_CODE);
+		super(ERROR_CODE);
 		this.entityType = requireNonNull(entityType);
 		this.permission = requireNonNull(permission);
 	}
 
 	@Override
-	public String createMessage()
+	public String getMessage()
 	{
 		return format("id:%s permission:%s", entityType.getId(), permission.name());
 	}
 
 	@Override
-	public String createLocalizedMessage(String format)
+	public String getLocalizedMessage()
 	{
-		ResourceBundle resourceBundle = getResourceBundle();
-		Locale locale = getLocale();
-		String permissionMessage = resourceBundle.getString(getPermissionKey(permission));
-		String language = locale.getLanguage();
+		String format = getLanguageService().getBundle().getString(ERROR_CODE);
+		String permissionMessage = getLanguageService().getBundle().getString(getPermissionKey(permission));
+		String language = getLanguageService().getCurrentUserLanguageCode();
 		return format(format, permissionMessage, entityType.getLabel(language));
 	}
 
