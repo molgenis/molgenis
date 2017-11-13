@@ -40,8 +40,10 @@ public class UniqueReferenceConstraintViolationException extends MolgenisDataAcc
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, entityTypeId, attributeName, entityIdAsString, valueAsString);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, entityTypeId, attributeName,
+										   entityIdAsString, valueAsString))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.ErrorCoded;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.i18n.LanguageServiceHolder;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -11,6 +10,7 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown when deleting entity types that are still referenced by other entity types.
@@ -49,8 +49,10 @@ public class EntityTypeReferenceConstraintViolationException extends MolgenisDat
 																.stream()
 																.flatMap(Collection::stream)
 																.collect(joining(","));
-			return MessageFormat.format(LanguageServiceHolder.getLanguageService().getString(ERROR_CODE),
-					entityTypesAsString, entityTypeDependeniesAsString);
+			return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+									   .map(format -> MessageFormat.format(format, entityTypesAsString,
+											   entityTypeDependeniesAsString))
+									   .orElse(super.getLocalizedMessage());
 		}
 		catch (Exception e)
 		{

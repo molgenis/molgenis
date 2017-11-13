@@ -34,8 +34,9 @@ public class DataTypeConstraintViolationException extends MolgenisDataAccessExce
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, type);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, valueAsString, type))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override

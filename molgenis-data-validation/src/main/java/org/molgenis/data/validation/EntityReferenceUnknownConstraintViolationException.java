@@ -21,8 +21,7 @@ public class EntityReferenceUnknownConstraintViolationException extends Molgenis
 	private final String valueAsString;
 
 	public EntityReferenceUnknownConstraintViolationException(String entityTypeId, String attributeName,
-			String valueAsString,
-			Throwable cause)
+			String valueAsString, Throwable cause)
 	{
 		super(cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
@@ -39,8 +38,10 @@ public class EntityReferenceUnknownConstraintViolationException extends Molgenis
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, attributeName, entityTypeId);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, valueAsString, attributeName,
+										   entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override

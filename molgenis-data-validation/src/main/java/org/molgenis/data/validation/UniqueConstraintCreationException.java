@@ -37,8 +37,10 @@ public class UniqueConstraintCreationException extends MolgenisDataAccessExcepti
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, entityTypeId, attributeName, valueAsString);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, entityTypeId, attributeName,
+										   valueAsString))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override

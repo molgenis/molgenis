@@ -31,8 +31,9 @@ public class NotNullConstraintViolationException extends MolgenisDataAccessExcep
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, attributeName, entityTypeId);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, attributeName, entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override

@@ -32,8 +32,9 @@ public class EnumConstraintModificationException extends MolgenisDataAccessExcep
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, entityTypeId);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override
