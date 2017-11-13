@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -90,12 +90,12 @@ public class RestController
 	private final UserAccountService userAccountService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
-	private final LanguageService languageService;
+	private final LanguageServiceImpl languageService;
 
 	public RestController(AuthenticationSettings authenticationSettings, DataService dataService,
 			TokenService tokenService, AuthenticationManager authenticationManager, PermissionService permissionService,
 			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService,
-			LanguageService languageService)
+			LanguageServiceImpl languageService)
 	{
 		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.dataService = requireNonNull(dataService);

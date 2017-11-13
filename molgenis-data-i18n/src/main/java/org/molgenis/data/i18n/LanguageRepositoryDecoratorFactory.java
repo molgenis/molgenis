@@ -12,9 +12,9 @@ import static java.util.Objects.requireNonNull;
 public class LanguageRepositoryDecoratorFactory
 		extends AbstractSystemRepositoryDecoratorFactory<Language, LanguageMetadata>
 {
-	private final LanguageService languageService;
+	private final LanguageServiceImpl languageService;
 
-	public LanguageRepositoryDecoratorFactory(LanguageMetadata languageMetadata, LanguageService languageService)
+	public LanguageRepositoryDecoratorFactory(LanguageMetadata languageMetadata, LanguageServiceImpl languageService)
 	{
 		super(languageMetadata);
 		this.languageService = requireNonNull(languageService);

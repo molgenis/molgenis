@@ -25,7 +25,7 @@ import static org.testng.Assert.assertEquals;
 
 public class LanguageServiceTest
 {
-	private LanguageService languageService;
+	private LanguageServiceImpl languageService;
 	private LocalizationService localizationService;
 	private DataService dataServiceMock;
 	private AppSettings appSettingsMock;
@@ -41,7 +41,7 @@ public class LanguageServiceTest
 		when(dataServiceMock.query(USER)).thenReturn(queryMock);
 		when(queryMock.eq(any(), any())).thenReturn(queryMock);
 		appSettingsMock = mock(AppSettings.class);
-		languageService = new LanguageService(dataServiceMock, appSettingsMock, localizationService);
+		languageService = new LanguageServiceImpl(dataServiceMock, appSettingsMock, localizationService);
 	}
 
 	@Test

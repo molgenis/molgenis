@@ -3,7 +3,7 @@ package org.molgenis.questionnaires;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
@@ -37,11 +37,11 @@ public class QuestionnairePluginController extends PluginController
 
 	private final DataService dataService;
 	private final ThankYouTextService thankYouTextService;
-	private final LanguageService languageService;
+	private final LanguageServiceImpl languageService;
 	private final EntityManager entityManager;
 
 	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
-			LanguageService languageService, EntityManager entityManager)
+			LanguageServiceImpl languageService, EntityManager entityManager)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);

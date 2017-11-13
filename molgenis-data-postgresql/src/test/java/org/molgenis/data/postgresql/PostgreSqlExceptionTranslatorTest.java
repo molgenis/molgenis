@@ -152,61 +152,61 @@ public class PostgreSqlExceptionTranslatorTest
 		postgreSqlExceptionTranslator.translateNotNullViolation(new PSQLException(serverErrorMessage));
 	}
 
-	@Test
-	public void translateNotNullViolationNoDoubleQuotes()
-	{
-		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
-		when(serverErrorMessage.getSQLState()).thenReturn("23502");
-		when(serverErrorMessage.getTable()).thenReturn("myTable");
-		when(serverErrorMessage.getMessage()).thenReturn("null value in column myColumn violates not-null constraint");
-		//noinspection ThrowableResultOfMethodCallIgnored
-		MolgenisValidationException e = postgreSqlExceptionTranslator.translateNotNullViolation(
-				new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "The attribute 'myAttr' of entity 'myEntity' can not be null.");
-	}
-
-	@Test
-	public void translateForeignKeyViolation()
-	{
-		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
-		when(serverErrorMessage.getSQLState()).thenReturn("23503");
-		when(serverErrorMessage.getTable()).thenReturn("myTable");
-		when(serverErrorMessage.getDetail()).thenReturn("... (myColumn) ... (myValue) ...");
-		//noinspection ThrowableResultOfMethodCallIgnored
-		MolgenisValidationException e = postgreSqlExceptionTranslator.translateForeignKeyViolation(
-				new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Unknown xref value 'myValue' for attribute 'myAttr' of entity 'myEntity'.");
-	}
-
-	@Test
-	public void translateForeignKeyViolationNotPresent()
-	{
-		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
-		when(serverErrorMessage.getSQLState()).thenReturn("23503");
-		when(serverErrorMessage.getTable()).thenReturn("myTable");
-		when(serverErrorMessage.getDetail()).thenReturn("Key (myColumn)=(myValue) is not present in table \"myTable\"");
-		//noinspection ThrowableResultOfMethodCallIgnored
-		MolgenisValidationException e = postgreSqlExceptionTranslator.translateForeignKeyViolation(
-				new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Unknown xref value 'myValue' for attribute 'myAttr' of entity 'myEntity'.");
-	}
-
-	@Test
-	public void translateForeignKeyViolationStillReferenced()
-	{
-
-		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
-		when(serverErrorMessage.getSQLState()).thenReturn("23503");
-		when(serverErrorMessage.getTable()).thenReturn("myTable");
-		when(serverErrorMessage.getMessage()).thenReturn(
-				"update or delete on table \"myDependentTable\" violates foreign key constraint \"myTable_myAttr_fkey\" on table \"myTable\"");
-		when(serverErrorMessage.getDetail()).thenReturn(
-				"Key (myColumn)=(myValue) is still referenced from table \"myTable\"");
-		//noinspection ThrowableResultOfMethodCallIgnored
-		MolgenisValidationException e = postgreSqlExceptionTranslator.translateForeignKeyViolation(
-				new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Value 'myValue' for attribute 'myAttr' is referenced by entity 'myEntity'.");
-	}
+	//	@Test
+	//	public void translateNotNullViolationNoDoubleQuotes()
+	//	{
+	//		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+	//		when(serverErrorMessage.getSQLState()).thenReturn("23502");
+	//		when(serverErrorMessage.getTable()).thenReturn("myTable");
+	//		when(serverErrorMessage.getMessage()).thenReturn("null value in column myColumn violates not-null constraint");
+	//		//noinspection ThrowableResultOfMethodCallIgnored
+	//		MolgenisValidationException e = postgreSqlExceptionTranslator.translateNotNullViolation(
+	//				new PSQLException(serverErrorMessage));
+	//		assertEquals(e.getMessage(), "The attribute 'myAttr' of entity 'myEntity' can not be null.");
+	//	}
+	//
+	//	@Test
+	//	public void translateForeignKeyViolation()
+	//	{
+	//		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+	//		when(serverErrorMessage.getSQLState()).thenReturn("23503");
+	//		when(serverErrorMessage.getTable()).thenReturn("myTable");
+	//		when(serverErrorMessage.getDetail()).thenReturn("... (myColumn) ... (myValue) ...");
+	//		//noinspection ThrowableResultOfMethodCallIgnored
+	//		MolgenisValidationException e = postgreSqlExceptionTranslator.translateForeignKeyViolation(
+	//				new PSQLException(serverErrorMessage));
+	//		assertEquals(e.getMessage(), "Unknown xref value 'myValue' for attribute 'myAttr' of entity 'myEntity'.");
+	//	}
+	//
+	//	@Test
+	//	public void translateForeignKeyViolationNotPresent()
+	//	{
+	//		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+	//		when(serverErrorMessage.getSQLState()).thenReturn("23503");
+	//		when(serverErrorMessage.getTable()).thenReturn("myTable");
+	//		when(serverErrorMessage.getDetail()).thenReturn("Key (myColumn)=(myValue) is not present in table \"myTable\"");
+	//		//noinspection ThrowableResultOfMethodCallIgnored
+	//		MolgenisValidationException e = postgreSqlExceptionTranslator.translateForeignKeyViolation(
+	//				new PSQLException(serverErrorMessage));
+	//		assertEquals(e.getMessage(), "Unknown xref value 'myValue' for attribute 'myAttr' of entity 'myEntity'.");
+	//	}
+	//
+	//	@Test
+	//	public void translateForeignKeyViolationStillReferenced()
+	//	{
+	//
+	//		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+	//		when(serverErrorMessage.getSQLState()).thenReturn("23503");
+	//		when(serverErrorMessage.getTable()).thenReturn("myTable");
+	//		when(serverErrorMessage.getMessage()).thenReturn(
+	//				"update or delete on table \"myDependentTable\" violates foreign key constraint \"myTable_myAttr_fkey\" on table \"myTable\"");
+	//		when(serverErrorMessage.getDetail()).thenReturn(
+	//				"Key (myColumn)=(myValue) is still referenced from table \"myTable\"");
+	//		//noinspection ThrowableResultOfMethodCallIgnored
+	//		MolgenisValidationException e = postgreSqlExceptionTranslator.translateForeignKeyViolation(
+	//				new PSQLException(serverErrorMessage));
+	//		assertEquals(e.getMessage(), "Value 'myValue' for attribute 'myAttr' is referenced by entity 'myEntity'.");
+	//	}
 
 	@Test(expectedExceptions = RuntimeException.class)
 	public void translateForeignKeyViolationBadMessage()

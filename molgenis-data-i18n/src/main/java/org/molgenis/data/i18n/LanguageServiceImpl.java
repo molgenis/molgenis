@@ -9,7 +9,6 @@ import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
@@ -18,17 +17,8 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 @Service
-public class LanguageService
+public class LanguageServiceImpl implements LanguageService
 {
-	public static final String LANGUAGE_CODE_EN = "en";
-	public static final String LANGUAGE_CODE_NL = "nl";
-	public static final String LANGUAGE_CODE_DE = "de";
-	public static final String LANGUAGE_CODE_ES = "es";
-	public static final String LANGUAGE_CODE_IT = "it";
-	public static final String LANGUAGE_CODE_PT = "pt";
-	public static final String LANGUAGE_CODE_FR = "fr";
-	public static final String LANGUAGE_CODE_XX = "xx";
-
 	public static final String DEFAULT_LANGUAGE_CODE = LANGUAGE_CODE_EN;
 	public static final String DEFAULT_LANGUAGE_NAME = "English";
 
@@ -36,22 +26,12 @@ public class LanguageService
 	private final AppSettings appSettings;
 	private final LocalizationService localizationService;
 
-	public LanguageService(DataService dataService, AppSettings appSettings, LocalizationService localizationService)
+	public LanguageServiceImpl(DataService dataService, AppSettings appSettings,
+			LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.appSettings = requireNonNull(appSettings);
 		this.localizationService = requireNonNull(localizationService);
-	}
-
-	/**
-	 * "en": is default
-	 * "xx": is a placeholder for having your own language
-	 * "nl", "de", "es", "it", "pt", "fr": are extra languages
-	 */
-	public static Stream<String> getLanguageCodes()
-	{
-		return Stream.of(LANGUAGE_CODE_EN, LANGUAGE_CODE_NL, LANGUAGE_CODE_DE, LANGUAGE_CODE_ES, LANGUAGE_CODE_IT,
-				LANGUAGE_CODE_PT, LANGUAGE_CODE_FR, LANGUAGE_CODE_XX);
 	}
 
 	/**
@@ -62,6 +42,7 @@ public class LanguageService
 	 * The ResourceBundle is a Spring {@link MessageSourceResourceBundle} which means that you cannot query its keys.
 	 * Ask the {@link LocalizationService} instead.
 	 */
+	@Override
 	public MessageSourceResourceBundle getBundle()
 	{
 		return getBundle(getCurrentUserLanguageCode());
@@ -128,6 +109,6 @@ public class LanguageService
 
 	public static boolean hasLanguageCode(String code)
 	{
-		return getLanguageCodes().anyMatch(e -> e.equals(code));
+		return LanguageService.getLanguageCodes().anyMatch(e -> e.equals(code));
 	}
 }

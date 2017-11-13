@@ -1,6 +1,6 @@
 package org.molgenis.searchall.controller;
 
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.VuePluginController;
@@ -22,7 +22,7 @@ public class SearchAllPluginController extends VuePluginController
 	public static final String NAVIGATOR = "navigator";
 	public static final String DATAEXPLORER = "dataexplorer";
 
-	public SearchAllPluginController(LanguageService languageService, AppSettings appSettings,
+	public SearchAllPluginController(LanguageServiceImpl languageService, AppSettings appSettings,
 			MenuReaderService menuReaderService, UserAccountService userAccountService)
 	{
 		super(URI, menuReaderService, languageService, appSettings, userAccountService);

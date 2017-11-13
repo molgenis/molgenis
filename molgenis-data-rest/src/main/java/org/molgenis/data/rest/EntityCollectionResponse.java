@@ -1,7 +1,7 @@
 package org.molgenis.data.rest;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.PermissionService;
 
@@ -21,7 +21,7 @@ public class EntityCollectionResponse
 
 	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, String href,
 			EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+			LanguageServiceImpl languageService)
 	{
 		this.href = href;
 		this.meta = meta != null ? new EntityTypeResponse(meta, permissionService, dataService, languageService) : null;

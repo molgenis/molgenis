@@ -2,7 +2,7 @@ package org.molgenis.navigator;
 
 import org.mockito.Mock;
 import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.menu.Menu;
@@ -30,7 +30,7 @@ public class NavigatorControllerTest
 	private MenuReaderService menuReaderService;
 
 	@Mock
-	private LanguageService languageService;
+	private LanguageServiceImpl languageService;
 
 	@Mock
 	private AppSettings appSettings;
