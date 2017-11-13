@@ -5,6 +5,7 @@ import org.molgenis.data.i18n.LanguageServiceHolder;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.text.MessageFormat;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -32,10 +33,18 @@ public class UnknownEntityException extends CodedRuntimeException
 	@Override
 	public String getLocalizedMessage()
 	{
-		LanguageService languageService = LanguageServiceHolder.getLanguageService();
-		String format = languageService.getString(ERROR_CODE);
-		String language = languageService.getCurrentUserLanguageCode();
-		return MessageFormat.format(format, entityId.toString(), entityType.getLabel(language));
+		Optional<LanguageService> languageServiceOptional = LanguageServiceHolder.getLanguageService();
+		if (languageServiceOptional.isPresent())
+		{
+			LanguageService languageService = languageServiceOptional.get();
+			String format = languageService.getString(ERROR_CODE);
+			String language = languageService.getCurrentUserLanguageCode();
+			return MessageFormat.format(format, entityId.toString(), entityType.getLabel(language));
+		}
+		else
+		{
+			return super.getLocalizedMessage();
+		}
 	}
 }
 

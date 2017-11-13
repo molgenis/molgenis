@@ -34,8 +34,10 @@ public class UnknownEntityReferenceException extends MolgenisDataAccessException
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getBundle().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, attributeName, entityTypeId);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, valueAsString, attributeName,
+										   entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override

@@ -3,7 +3,8 @@ package org.molgenis.data.validation;
 import org.molgenis.data.ErrorCoded;
 import org.molgenis.data.MolgenisDataAccessException;
 
-import static java.text.MessageFormat.format;
+import java.text.MessageFormat;
+
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
@@ -32,8 +33,10 @@ public class ReferencedEntityException extends MolgenisDataAccessException imple
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getBundle().getString(ERROR_CODE);
-		return format(format, valueAsString, attributeName, entityTypeId);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .map(format -> MessageFormat.format(format, valueAsString, attributeName,
+										   entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 
 	@Override
