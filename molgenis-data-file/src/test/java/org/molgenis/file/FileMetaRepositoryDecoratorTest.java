@@ -83,7 +83,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(fileStore).delete("id");
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "code: D02 type:fileMetadata id:id")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:fileMetadata id:id")
 	public void testDeleteByIdUnknownId() throws Exception
 	{
 		FileMeta fileMeta = getMockFileMeta("id");

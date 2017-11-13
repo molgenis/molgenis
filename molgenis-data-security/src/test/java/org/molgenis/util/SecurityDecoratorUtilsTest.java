@@ -39,14 +39,14 @@ public class SecurityDecoratorUtilsTest extends AbstractTestNGSpringContextTests
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_ENTITY_COUNT_entityTypeId" })
-	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "code: S01 id:entityTypeId permission:READ")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityTypeId permission:READ")
 	public void testValidatePermissionUserDifferentPermission()
 	{
 		SecurityDecoratorUtils.validatePermission(getMockEntityType(), Permission.READ);
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_ENTITY_COUNT_otherEntityTypeId" })
-	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "code: S01 id:entityTypeId permission:COUNT")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityTypeId permission:COUNT")
 	public void testValidatePermissionUserDifferentEntityType()
 	{
 		SecurityDecoratorUtils.validatePermission(getMockEntityType(), Permission.COUNT);

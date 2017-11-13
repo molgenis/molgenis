@@ -358,7 +358,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(aggregateResult, repositorySecurityDecorator.aggregate(aggregateQuery));
 	}
 
-	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "code: S01 id:entityID permission:COUNT")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityID permission:COUNT")
 	public void aggregateNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);

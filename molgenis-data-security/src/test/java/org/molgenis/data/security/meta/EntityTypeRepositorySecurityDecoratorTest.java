@@ -638,7 +638,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "code: S01 id:entity permission:WRITEMETA")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entity permission:WRITEMETA")
 	public void deleteUserNotAllowed()
 	{
 		delete();
