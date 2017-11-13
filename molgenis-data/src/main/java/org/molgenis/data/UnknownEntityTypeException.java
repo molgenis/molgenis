@@ -1,8 +1,10 @@
 package org.molgenis.data;
 
-import static java.text.MessageFormat.format;
+import org.molgenis.data.i18n.LanguageServiceHolder;
+
+import java.text.MessageFormat;
+
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnknownEntityTypeException extends CodedRuntimeException
 {
@@ -19,14 +21,14 @@ public class UnknownEntityTypeException extends CodedRuntimeException
 	@Override
 	public String getMessage()
 	{
-		return format("id:%s", entityTypeId);
+		return String.format("id:%s", entityTypeId);
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getBundle().getString(ERROR_CODE);
-		return format(format, entityTypeId);
+		String format = LanguageServiceHolder.getLanguageService().getString(ERROR_CODE);
+		return MessageFormat.format(format, entityTypeId);
 	}
 }
 

@@ -26,6 +26,8 @@ public interface LanguageService
 				LANGUAGE_CODE_PT, LANGUAGE_CODE_FR, LANGUAGE_CODE_XX);
 	}
 
+	String getString(String key);
+
 	MessageSourceResourceBundle getBundle();
 
 	String getCurrentUserLanguageCode();

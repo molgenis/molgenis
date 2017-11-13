@@ -1,13 +1,13 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.CodedException;
+import org.molgenis.data.ErrorCoded;
 import org.molgenis.data.MolgenisDataAccessException;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class ReferencedEntityException extends MolgenisDataAccessException implements CodedException
+public class ReferencedEntityException extends MolgenisDataAccessException implements ErrorCoded
 {
 	private static final String ERROR_CODE = "V02";
 

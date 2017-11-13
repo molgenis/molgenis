@@ -34,6 +34,12 @@ public class LanguageServiceImpl implements LanguageService
 		this.localizationService = requireNonNull(localizationService);
 	}
 
+	@Override
+	public String getString(String key)
+	{
+		return getBundle().getString(key);
+	}
+
 	/**
 	 * Creates a localization ResourceBundle for the current user's language.
 	 * <p>

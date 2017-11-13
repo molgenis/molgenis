@@ -1,13 +1,15 @@
 package org.molgenis.data.security;
 
 import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceHolder;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.UnexpectedEnumException;
 
-import static java.text.MessageFormat.format;
+import java.text.MessageFormat;
+
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EntityTypePermissionDeniedException extends CodedRuntimeException
 {
@@ -26,16 +28,17 @@ public class EntityTypePermissionDeniedException extends CodedRuntimeException
 	@Override
 	public String getMessage()
 	{
-		return format("id:%s permission:%s", entityType.getId(), permission.name());
+		return String.format("id:%s permission:%s", entityType.getId(), permission.name());
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getBundle().getString(ERROR_CODE);
-		String permissionMessage = getLanguageService().getBundle().getString(getPermissionKey(permission));
-		String language = getLanguageService().getCurrentUserLanguageCode();
-		return format(format, permissionMessage, entityType.getLabel(language));
+		LanguageService languageService = LanguageServiceHolder.getLanguageService();
+		String format = languageService.getString(ERROR_CODE);
+		String permissionMessage = languageService.getString(getPermissionKey(permission));
+		String language = languageService.getCurrentUserLanguageCode();
+		return MessageFormat.format(format, permissionMessage, entityType.getLabel(language));
 	}
 
 	private static String getPermissionKey(Permission permission)

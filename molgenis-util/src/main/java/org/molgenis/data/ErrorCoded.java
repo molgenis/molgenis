@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-public interface CodedException
+public interface ErrorCoded
 {
 	String getErrorCode();
 }

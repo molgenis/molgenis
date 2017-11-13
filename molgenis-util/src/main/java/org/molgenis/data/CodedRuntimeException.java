@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * {@link RuntimeException} with error code.
  */
-public class CodedRuntimeException extends RuntimeException implements CodedException
+public class CodedRuntimeException extends RuntimeException implements ErrorCoded
 {
 	private final String errorCode;
 

@@ -330,7 +330,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 			String refTableName = getRefTableFromForeignKeyPsqlException(pSqlException);
 			attrName = getAttributeName(refTableName, colName);
-			return new ReferencedEntityException(entityTypeName, attrName, value, pSqlException); // TODO add cause
+			return new ReferencedEntityException(entityTypeName, attrName, value, pSqlException);
 		}
 		else
 		{
@@ -338,8 +338,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			// Detail: Key (k)=(v) is not present in table "z".
 
 			attrName = getAttributeName(tableName, colName);
-			return new UnknownEntityReferenceException(entityTypeName, attrName, value,
-					pSqlException); // TODO add cause
+			return new UnknownEntityReferenceException(entityTypeName, attrName, value, pSqlException);
 		}
 	}
 
