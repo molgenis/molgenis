@@ -3,8 +3,9 @@ package org.molgenis.web.exception;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
-import org.molgenis.data.validation.ReferencedEntityException;
-import org.molgenis.data.validation.UnknownEntityReferenceException;
+import org.molgenis.data.validation.EntityReferenceConstraintViolationException;
+import org.molgenis.data.validation.EntityReferenceUnknownConstraintViolationException;
+import org.molgenis.data.validation.EntityTypeReferenceConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -56,7 +57,8 @@ public class GlobalControllerExceptionHandler
 
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
-	public Object handleUnknownEntityReferenceException(UnknownEntityReferenceException e, HandlerMethod handlerMethod)
+	public Object handleEntityReferenceUnknownConstraintViolationException(
+			EntityReferenceUnknownConstraintViolationException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
@@ -65,7 +67,18 @@ public class GlobalControllerExceptionHandler
 
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
-	public Object handleReferencedEntityException(ReferencedEntityException e, HandlerMethod handlerMethod)
+	public Object handleEntityTypeReferenceUnknownConstraintViolationException(
+			EntityTypeReferenceConstraintViolationException e, HandlerMethod handlerMethod)
+	{
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler
+	public Object handleEntityReferenceConstraintViolationException(EntityReferenceConstraintViolationException e,
+			HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),

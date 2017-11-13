@@ -8,34 +8,31 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownEntityReferenceException extends MolgenisDataAccessException implements ErrorCoded
+public class NotNullConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
 {
-	private static final String ERROR_CODE = "V01";
+	private static final String ERROR_CODE = "V04";
 
 	private final String entityTypeId;
 	private final String attributeName;
-	private final String valueAsString;
 
-	public UnknownEntityReferenceException(String entityTypeId, String attributeName, String valueAsString,
-			Throwable cause)
+	public NotNullConstraintViolationException(String entityTypeId, String attributeName, Throwable cause)
 	{
 		super(cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
-		this.valueAsString = requireNonNull(valueAsString);
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("type:%s attribute:%s value: %s", entityTypeId, attributeName, valueAsString);
+		return String.format("type:%s attribute:%s", entityTypeId, attributeName);
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getBundle().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, attributeName, entityTypeId);
+		String format = getLanguageService().getString(ERROR_CODE);
+		return MessageFormat.format(format, attributeName, entityTypeId);
 	}
 
 	@Override
