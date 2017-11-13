@@ -20,6 +20,24 @@
             </resource>
         </resources>
         <plugins>
+            <!-- Reserve network port for jetty -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <minPortNumber>8080</minPortNumber>
+                            <portNames>
+                                <portName>jetty.http.port</portName>
+                            </portNames>
+                            <randomPort>false</randomPort>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- servlet container -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
