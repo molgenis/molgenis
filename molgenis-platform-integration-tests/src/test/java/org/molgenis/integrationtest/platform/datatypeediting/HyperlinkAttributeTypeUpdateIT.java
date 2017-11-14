@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
@@ -61,39 +61,41 @@ public class HyperlinkAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateI
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "https://www.google.com", BOOL, MolgenisValidationException.class,
+		return new Object[][] { { "https://www.google.com", BOOL, MolgenisDataException.class,
 				"Attribute data type update from [HYPERLINK] to [BOOL] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", INT, MolgenisDataAccessException.class,
+				{ "https://www.google.com", INT, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [INT] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", LONG, MolgenisDataAccessException.class,
+				{ "https://www.google.com", LONG, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [LONG] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", DECIMAL, MolgenisDataAccessException.class,
+				{ "https://www.google.com", DECIMAL, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [DECIMAL] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "molgenis@test.nl", XREF, MolgenisDataAccessException.class,
-						"Unknown xref value 'molgenis@test.nl' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ "molgenis@test.nl", CATEGORICAL, MolgenisDataAccessException.class,
-						"Unknown xref value 'molgenis@test.nl' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ "https://www.google.com", SCRIPT, MolgenisDataAccessException.class,
+				{ "molgenis@test.nl", XREF,
+						org.molgenis.data.validation.EntityReferenceUnknownConstraintViolationException.class,
+						"type:MAINENTITY attribute:mainAttribute value: molgenis@test.nl" },
+				{ "molgenis@test.nl", CATEGORICAL,
+						org.molgenis.data.validation.EntityReferenceUnknownConstraintViolationException.class,
+						"type:MAINENTITY attribute:mainAttribute value: molgenis@test.nl" },
+				{ "https://www.google.com", SCRIPT, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [SCRIPT] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", EMAIL, MolgenisDataAccessException.class,
+				{ "https://www.google.com", EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [EMAIL] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", HTML, MolgenisDataAccessException.class,
+				{ "https://www.google.com", HTML, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [HTML] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", ENUM, MolgenisDataAccessException.class,
+				{ "https://www.google.com", ENUM, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [ENUM] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", DATE, MolgenisDataAccessException.class,
+				{ "https://www.google.com", DATE, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [DATE] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", DATE_TIME, MolgenisDataAccessException.class,
+				{ "https://www.google.com", DATE_TIME, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [DATE_TIME] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", MREF, MolgenisDataAccessException.class,
+				{ "https://www.google.com", MREF, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [MREF] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", CATEGORICAL_MREF, MolgenisDataAccessException.class,
+				{ "https://www.google.com", CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [CATEGORICAL_MREF] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", FILE, MolgenisDataAccessException.class,
+				{ "https://www.google.com", FILE, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [FILE] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", COMPOUND, MolgenisDataAccessException.class,
+				{ "https://www.google.com", COMPOUND, MolgenisDataException.class,
 						"Attribute data type update from [HYPERLINK] to [COMPOUND] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", ONE_TO_MANY, MolgenisDataAccessException.class,
+				{ "https://www.google.com", ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
 	}
 

@@ -1,6 +1,10 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.validation.DataTypeConstraintViolationException;
+import org.molgenis.data.validation.EntityReferenceUnknownConstraintViolationException;
+import org.molgenis.data.validation.EnumConstraintModificationException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
@@ -71,33 +75,28 @@ public class StringAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "not true", BOOL, MolgenisValidationException.class,
-				"Value [not true] of this entity attribute is not of type [BOOL]." },
-				{ "1b", INT, MolgenisValidationException.class,
-						"Value [1b] of this entity attribute is not of type [INT or LONG]." },
-				{ "1234567890b", LONG, MolgenisValidationException.class,
-						"Value [1234567890b] of this entity attribute is not of type [INT or LONG]." },
-				{ "1.123b", DECIMAL, MolgenisValidationException.class,
-						"Value [1.123b] of this entity attribute is not of type [DECIMAL]." },
-				{ "ref123", XREF, MolgenisValidationException.class,
-						"Unknown xref value 'ref123' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ "ref123", CATEGORICAL, MolgenisValidationException.class,
-						"Unknown xref value 'ref123' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ "Test@Test.Test", EMAIL, MolgenisValidationException.class,
+		return new Object[][] {
+				{ "not true", BOOL, DataTypeConstraintViolationException.class, "type:BOOL value:not true" },
+				{ "1b", INT, DataTypeConstraintViolationException.class, "type:INT or LONG value:1b" },
+				{ "1234567890b", LONG, DataTypeConstraintViolationException.class,
+						"type:INT or LONG value:1234567890b" },
+				{ "1.123b", DECIMAL, DataTypeConstraintViolationException.class, "type:DECIMAL value:1.123b" },
+				{ "ref123", XREF, EntityReferenceUnknownConstraintViolationException.class,
+						"type:MAINENTITY attribute:mainAttribute value: ref123" },
+				{ "ref123", CATEGORICAL, EntityReferenceUnknownConstraintViolationException.class,
+						"type:MAINENTITY attribute:mainAttribute value: ref123" },
+				{ "Test@Test.Test", EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [STRING] to [EMAIL] not allowed, allowed types are [BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, ENUM, HTML, INT, LONG, SCRIPT, TEXT, XREF]" },
-				{ "https://www.google.com", HYPERLINK, MolgenisValidationException.class,
+				{ "https://www.google.com", HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [STRING] to [HYPERLINK] not allowed, allowed types are [BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, ENUM, HTML, INT, LONG, SCRIPT, TEXT, XREF]" },
-				{ "enumOption100", ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ "Not a date", DATE, MolgenisValidationException.class,
-						"Value [Not a date] of this entity attribute is not of type [DATE]." },
-				{ "Not a date time", DATE_TIME, MolgenisValidationException.class,
-						"Value [Not a date time] of this entity attribute is not of type [DATE_TIME]." },
-				{ "ref123", MREF, MolgenisValidationException.class,
+				{ "enumOption100", ENUM, EnumConstraintModificationException.class, "type:MAINENTITY" },
+				{ "Not a date", DATE, DataTypeConstraintViolationException.class, "type:DATE value:Not a date" },
+				{ "Not a date time", DATE_TIME, DataTypeConstraintViolationException.class,
+						"type:DATE_TIME value:Not a date time" }, { "ref123", MREF, MolgenisDataException.class,
 						"Attribute data type update from [STRING] to [MREF] not allowed, allowed types are [BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, ENUM, HTML, INT, LONG, SCRIPT, TEXT, XREF]" },
-				{ "ref123", CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ "ref123", CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [STRING] to [CATEGORICAL_MREF] not allowed, allowed types are [BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, ENUM, HTML, INT, LONG, SCRIPT, TEXT, XREF]" },
-				{ "ref123", FILE, MolgenisValidationException.class,
+				{ "ref123", FILE, MolgenisDataException.class,
 						"Attribute data type update from [STRING] to [FILE] not allowed, allowed types are [BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, ENUM, HTML, INT, LONG, SCRIPT, TEXT, XREF]" },
 				{ "ref123", ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
@@ -123,6 +122,7 @@ public class StringAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 		}
 		catch (Exception exception)
 		{
+			System.out.println(exception.getClass());
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}

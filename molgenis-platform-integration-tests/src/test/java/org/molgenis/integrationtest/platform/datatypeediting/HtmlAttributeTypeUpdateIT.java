@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
@@ -62,35 +63,35 @@ public class HtmlAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "<h1>can not compute</h1>", BOOL, MolgenisValidationException.class,
+		return new Object[][] { { "<h1>can not compute</h1>", BOOL, MolgenisDataException.class,
 				"Attribute data type update from [HTML] to [BOOL] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", INT, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", INT, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [INT] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", LONG, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", LONG, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [LONG] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", DECIMAL, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", DECIMAL, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [DECIMAL] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", XREF, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", XREF, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [XREF] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", CATEGORICAL, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", CATEGORICAL, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [CATEGORICAL] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", HYPERLINK, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [HYPERLINK] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", EMAIL, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [EMAIL] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", ENUM, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", ENUM, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [ENUM] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", DATE, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", DATE, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [DATE] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", DATE_TIME, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", DATE_TIME, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [DATE_TIME] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", MREF, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", MREF, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [MREF] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [CATEGORICAL_MREF] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", FILE, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", FILE, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [FILE] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
-				{ "<h1>can not compute</h1>", COMPOUND, MolgenisValidationException.class,
+				{ "<h1>can not compute</h1>", COMPOUND, MolgenisDataException.class,
 						"Attribute data type update from [HTML] to [COMPOUND] not allowed, allowed types are [SCRIPT, STRING, TEXT]" },
 				{ "<h1>can not compute</h1>", ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
@@ -116,6 +117,8 @@ public class HtmlAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 		}
 		catch (Exception exception)
 		{
+			System.out.println(exception.getClass());
+			System.out.println(exception.getMessage());
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}

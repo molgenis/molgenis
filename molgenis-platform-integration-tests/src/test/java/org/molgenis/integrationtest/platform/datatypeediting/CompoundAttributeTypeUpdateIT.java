@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
@@ -57,39 +58,39 @@ public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { null, BOOL, MolgenisValidationException.class,
+		return new Object[][] { { null, BOOL, MolgenisDataException.class,
 				"Attribute data type update from [COMPOUND] to [BOOL] not allowed, allowed types are [STRING]" },
-				{ null, TEXT, MolgenisValidationException.class,
+				{ null, TEXT, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [TEXT] not allowed, allowed types are [STRING]" },
-				{ null, SCRIPT, MolgenisValidationException.class,
+				{ null, SCRIPT, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [SCRIPT] not allowed, allowed types are [STRING]" },
-				{ null, INT, MolgenisValidationException.class,
+				{ null, INT, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [INT] not allowed, allowed types are [STRING]" },
-				{ null, LONG, MolgenisValidationException.class,
+				{ null, LONG, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [LONG] not allowed, allowed types are [STRING]" },
-				{ null, DECIMAL, MolgenisValidationException.class,
+				{ null, DECIMAL, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [DECIMAL] not allowed, allowed types are [STRING]" },
-				{ null, XREF, MolgenisValidationException.class,
+				{ null, XREF, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [XREF] not allowed, allowed types are [STRING]" },
-				{ null, CATEGORICAL, MolgenisValidationException.class,
+				{ null, CATEGORICAL, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [CATEGORICAL] not allowed, allowed types are [STRING]" },
-				{ null, EMAIL, MolgenisValidationException.class,
+				{ null, EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [EMAIL] not allowed, allowed types are [STRING]" },
-				{ null, HYPERLINK, MolgenisValidationException.class,
+				{ null, HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [HYPERLINK] not allowed, allowed types are [STRING]" },
-				{ null, HTML, MolgenisValidationException.class,
+				{ null, HTML, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [HTML] not allowed, allowed types are [STRING]" },
-				{ null, ENUM, MolgenisValidationException.class,
+				{ null, ENUM, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [ENUM] not allowed, allowed types are [STRING]" },
-				{ null, DATE, MolgenisValidationException.class,
+				{ null, DATE, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [DATE] not allowed, allowed types are [STRING]" },
-				{ null, DATE_TIME, MolgenisValidationException.class,
+				{ null, DATE_TIME, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [DATE_TIME] not allowed, allowed types are [STRING]" },
-				{ null, MREF, MolgenisValidationException.class,
+				{ null, MREF, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [MREF] not allowed, allowed types are [STRING]" },
-				{ null, CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ null, CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [CATEGORICAL_MREF] not allowed, allowed types are [STRING]" },
-				{ null, FILE, MolgenisValidationException.class,
+				{ null, FILE, MolgenisDataException.class,
 						"Attribute data type update from [COMPOUND] to [FILE] not allowed, allowed types are [STRING]" },
 				{ null, ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
@@ -115,6 +116,7 @@ public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 		}
 		catch (Exception exception)
 		{
+			System.out.println(exception.getClass());
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}
