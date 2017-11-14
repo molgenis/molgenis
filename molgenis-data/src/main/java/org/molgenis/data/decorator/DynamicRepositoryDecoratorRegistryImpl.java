@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -33,6 +34,12 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	{
 		String factoryId = factory.getName();
 		factories.put(factoryId, factory);
+	}
+
+	@Override
+	public Stream<String> getFactoryIds()
+	{
+		return factories.keySet().stream();
 	}
 
 	@Override
