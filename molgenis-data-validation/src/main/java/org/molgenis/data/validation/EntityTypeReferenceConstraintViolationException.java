@@ -1,8 +1,5 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.ErrorCoded;
-import org.molgenis.data.MolgenisDataAccessException;
-
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Map;
@@ -15,7 +12,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 /**
  * Thrown when deleting entity types that are still referenced by other entity types.
  */
-public class EntityTypeReferenceConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
+public class EntityTypeReferenceConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V10";
 
@@ -23,7 +20,7 @@ public class EntityTypeReferenceConstraintViolationException extends MolgenisDat
 
 	public EntityTypeReferenceConstraintViolationException(Map<String, Set<String>> entityTypeMap, Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.entityTypeMap = requireNonNull(entityTypeMap);
 	}
 
@@ -42,27 +39,13 @@ public class EntityTypeReferenceConstraintViolationException extends MolgenisDat
 	@Override
 	public String getLocalizedMessage()
 	{
-		try
-		{
-			String entityTypesAsString = entityTypeMap.keySet().stream().collect(joining(","));
-			String entityTypeDependeniesAsString = entityTypeMap.values()
-																.stream()
-																.flatMap(Collection::stream)
-																.collect(joining(","));
-			return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-									   .map(format -> MessageFormat.format(format, entityTypesAsString,
-											   entityTypeDependeniesAsString))
-									   .orElse(super.getLocalizedMessage());
-		}
-		catch (Exception e)
-		{
-			throw e;
-		}
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
+		String entityTypesAsString = entityTypeMap.keySet().stream().collect(joining(","));
+		String entityTypeDependeniesAsString = entityTypeMap.values()
+															.stream()
+															.flatMap(Collection::stream)
+															.collect(joining(","));
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypesAsString,
+						entityTypeDependeniesAsString)).orElse(super.getLocalizedMessage());
 	}
 }

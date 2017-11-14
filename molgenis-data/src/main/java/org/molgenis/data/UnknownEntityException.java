@@ -1,16 +1,14 @@
 package org.molgenis.data;
 
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.LanguageServiceHolder;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.text.MessageFormat;
-import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 @SuppressWarnings("squid:S1948")
-public class UnknownEntityException extends CodedRuntimeException
+public class UnknownEntityException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D02";
 
@@ -33,18 +31,12 @@ public class UnknownEntityException extends CodedRuntimeException
 	@Override
 	public String getLocalizedMessage()
 	{
-		Optional<LanguageService> languageServiceOptional = LanguageServiceHolder.getLanguageService();
-		if (languageServiceOptional.isPresent())
+		return getLanguageService().map(languageService ->
 		{
-			LanguageService languageService = languageServiceOptional.get();
 			String format = languageService.getString(ERROR_CODE);
 			String language = languageService.getCurrentUserLanguageCode();
 			return MessageFormat.format(format, entityId.toString(), entityType.getLabel(language));
-		}
-		else
-		{
-			return super.getLocalizedMessage();
-		}
+		}).orElse(super.getLocalizedMessage());
 	}
 }
 

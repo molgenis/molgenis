@@ -1,19 +1,15 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.ErrorCoded;
-import org.molgenis.data.MolgenisDataAccessException;
-
-import java.text.MessageFormat;
-
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown when deleting data that is still referenced by other data.
  */
-public class EntityReferenceConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
+public class EntityReferenceConstraintViolationException extends DataIntegrityViolationException
 {
-	private static final String ERROR_CODE = "V02";
+	private static final String ERROR_CODE = "V11";
 
 	private final String entityTypeId;
 	private final String attributeName;
@@ -22,7 +18,7 @@ public class EntityReferenceConstraintViolationException extends MolgenisDataAcc
 	public EntityReferenceConstraintViolationException(String entityTypeId, String attributeName, String valueAsString,
 			Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
 		this.valueAsString = requireNonNull(valueAsString);
@@ -37,15 +33,8 @@ public class EntityReferenceConstraintViolationException extends MolgenisDataAcc
 	@Override
 	public String getLocalizedMessage()
 	{
-		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .map(format -> MessageFormat.format(format, valueAsString, attributeName,
-										   entityTypeId))
-								   .orElse(super.getLocalizedMessage());
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
+		return getLanguageService().map(
+				languageService -> format(languageService.getString(ERROR_CODE), entityTypeId, attributeName,
+						valueAsString)).orElse(super.getLocalizedMessage());
 	}
 }

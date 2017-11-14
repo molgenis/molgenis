@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownEntityTypeException extends CodedRuntimeException
+public class UnknownEntityTypeException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D01";
 
@@ -26,8 +26,8 @@ public class UnknownEntityTypeException extends CodedRuntimeException
 	@Override
 	public String getLocalizedMessage()
 	{
-		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .map(format -> MessageFormat.format(format, entityTypeId))
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId))
 								   .orElse(super.getLocalizedMessage());
 	}
 }

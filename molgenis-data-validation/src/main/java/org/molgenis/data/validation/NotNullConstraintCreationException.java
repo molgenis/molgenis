@@ -1,8 +1,5 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.ErrorCoded;
-import org.molgenis.data.MolgenisDataAccessException;
-
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
@@ -11,7 +8,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 /**
  * Thrown to indicate that existing data contains <tt>null</tt> values when creating a not-null constraint.
  */
-public class NotNullConstraintCreationException extends MolgenisDataAccessException implements ErrorCoded
+public class NotNullConstraintCreationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V05";
 
@@ -20,7 +17,7 @@ public class NotNullConstraintCreationException extends MolgenisDataAccessExcept
 
 	public NotNullConstraintCreationException(String entityTypeId, String attributeName, Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
 	}
@@ -34,14 +31,8 @@ public class NotNullConstraintCreationException extends MolgenisDataAccessExcept
 	@Override
 	public String getLocalizedMessage()
 	{
-		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .map(format -> MessageFormat.format(format, attributeName, entityTypeId))
-								   .orElse(super.getLocalizedMessage());
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), attributeName,
+						entityTypeId)).orElse(super.getLocalizedMessage());
 	}
 }

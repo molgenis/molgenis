@@ -1,14 +1,11 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.ErrorCoded;
-import org.molgenis.data.MolgenisDataAccessException;
-
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class ReadOnlyConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
+public class ReadOnlyConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V02";
 
@@ -19,7 +16,7 @@ public class ReadOnlyConstraintViolationException extends MolgenisDataAccessExce
 	public ReadOnlyConstraintViolationException(String entityTypeId, String attributeName, String valueAsString,
 			Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
 		this.valueAsString = requireNonNull(valueAsString);
@@ -28,21 +25,14 @@ public class ReadOnlyConstraintViolationException extends MolgenisDataAccessExce
 	@Override
 	public String getMessage()
 	{
-		return String.format("type:%s attribute:%s value: %s", entityTypeId, attributeName, valueAsString);
+		return String.format("type:%s attribute:%s value:%s", entityTypeId, attributeName, valueAsString);
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
-		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .map(format -> MessageFormat.format(format, valueAsString, attributeName,
-										   entityTypeId))
-								   .orElse(super.getLocalizedMessage());
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), valueAsString,
+						attributeName, entityTypeId)).orElse(super.getLocalizedMessage());
 	}
 }

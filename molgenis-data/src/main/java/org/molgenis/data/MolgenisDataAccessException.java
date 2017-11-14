@@ -2,6 +2,10 @@ package org.molgenis.data;
 
 import org.springframework.dao.DataAccessException;
 
+/**
+ * @deprecated see {@link org.molgenis.data.DataAccessException}
+ */
+@Deprecated
 public class MolgenisDataAccessException extends DataAccessException
 {
 	public MolgenisDataAccessException()

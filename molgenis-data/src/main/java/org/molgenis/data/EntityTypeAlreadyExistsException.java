@@ -26,8 +26,8 @@ public class EntityTypeAlreadyExistsException extends CodedRuntimeException
 	@Override
 	public String getLocalizedMessage()
 	{
-		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .map(format -> MessageFormat.format(format, entityTypeId))
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId))
 								   .orElse(super.getLocalizedMessage());
 	}
 }

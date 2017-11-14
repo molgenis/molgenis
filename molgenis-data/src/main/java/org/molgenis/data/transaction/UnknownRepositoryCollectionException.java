@@ -1,14 +1,36 @@
 package org.molgenis.data.transaction;
 
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownDataException;
 
-import static java.lang.String.format;
+import java.text.MessageFormat;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
-public class UnknownRepositoryCollectionException extends MolgenisDataException
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
+
+public class UnknownRepositoryCollectionException extends UnknownDataException
 {
-	public UnknownRepositoryCollectionException(String repoCollectionName)
+	private static final String ERROR_CODE = "D06";
+
+	private final String repositoryCollectionId;
+
+	public UnknownRepositoryCollectionException(String repositoryCollectionId)
 	{
-		super(format("Unknown repository collection [%s]", repoCollectionName));
+		super(ERROR_CODE);
+		this.repositoryCollectionId = requireNonNull(repositoryCollectionId);
+	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("collection:%s", repositoryCollectionId);
+	}
+
+	@Override
+	public String getLocalizedMessage()
+	{
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), repositoryCollectionId))
+								   .orElse(super.getLocalizedMessage());
 	}
 }
+
