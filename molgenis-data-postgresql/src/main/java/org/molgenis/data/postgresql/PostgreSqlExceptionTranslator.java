@@ -9,8 +9,6 @@ import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.validation.*;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionException;
@@ -35,7 +33,6 @@ import static org.molgenis.data.meta.AttributeType.*;
 @Component
 class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator implements TransactionExceptionTranslator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlExceptionTranslator.class);
 	private final EntityTypeRegistry entityTypeRegistry;
 
 	PostgreSqlExceptionTranslator(DataSource dataSource, EntityTypeRegistry entityTypeRegistry)
@@ -125,7 +122,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	DataAccessException translateReadonlyViolation(PSQLException pSqlException)
+	DataIntegrityViolationException translateReadonlyViolation(PSQLException pSqlException)
 	{
 		Matcher matcher = Pattern.compile(
 				"Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
@@ -150,7 +147,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	DataAccessException translateDependentObjectsStillExist(PSQLException pSqlException)
+	DataIntegrityViolationException translateDependentObjectsStillExist(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String detail = serverErrorMessage.getDetail();
@@ -184,7 +181,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	static DataAccessException translateInvalidIntegerException(PSQLException pSqlException)
+	static DataIntegrityViolationException translateInvalidIntegerException(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String message = serverErrorMessage.getMessage();

@@ -6,6 +6,9 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+/**
+ * TODO discuss: split in two exceptions?
+ */
 public class NotNullConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V04";
@@ -31,8 +34,7 @@ public class NotNullConstraintViolationException extends DataIntegrityViolationE
 		this(entityTypeId, attributeName, entityId, null);
 	}
 
-	public NotNullConstraintViolationException(String entityTypeId, String attributeName, @Nullable String entityId,
-			@Nullable Throwable cause)
+	public NotNullConstraintViolationException(String entityTypeId, String attributeName, @Nullable String entityId, @Nullable Throwable cause)
 	{
 		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
@@ -58,9 +60,8 @@ public class NotNullConstraintViolationException extends DataIntegrityViolationE
 		}
 		else
 		{
-			localizedMessage = getLanguageService().map(
-					languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY_UNKNOWN),
-							entityTypeId, attributeName)).orElse(super.getLocalizedMessage());
+			localizedMessage = getLanguageService().map(languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY_UNKNOWN),
+					entityTypeId, attributeName)).orElse(super.getLocalizedMessage());
 		}
 		return localizedMessage;
 	}

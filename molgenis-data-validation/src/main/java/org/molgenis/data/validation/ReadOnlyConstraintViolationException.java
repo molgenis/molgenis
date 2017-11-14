@@ -25,7 +25,7 @@ public class ReadOnlyConstraintViolationException extends DataIntegrityViolation
 	@Override
 	public String getMessage()
 	{
-		return String.format("type:%s attribute:%s value: %s", entityTypeId, attributeName, valueAsString);
+		return String.format("type:%s attribute:%s value:%s", entityTypeId, attributeName, valueAsString);
 	}
 
 	@Override
