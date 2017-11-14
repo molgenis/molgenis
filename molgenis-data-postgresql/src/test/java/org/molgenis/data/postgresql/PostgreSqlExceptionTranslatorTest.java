@@ -375,6 +375,6 @@ public class PostgreSqlExceptionTranslatorTest
 		//noinspection ThrowableResultOfMethodCallIgnored
 		DataAccessException e = PostgreSqlExceptionTranslator.translateUndefinedColumnException(
 				new PSQLException(serverErrorMessage));
-		assertEquals(e.getMessage(), "Undefined column: 7 ERROR: column \"test\" does not exist");
+		assertEquals(e.getMessage(), "unknown error");
 	}
 }
