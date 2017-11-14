@@ -342,8 +342,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		boolean matches = matcher.matches();
 		if (matches)
 		{
-			ConstraintViolation constraintViolation;
-
 			// exception message when adding data that does not match constraint
 			String[] columnNames = matcher.group(1).split(", ");
 			if (columnNames.length == 1)
