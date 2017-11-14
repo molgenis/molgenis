@@ -457,7 +457,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(HREF_UNKNOWN_ENTITY_META + "/attribute"))
 								  .andReturn();
 
-		assertTrue(result.getResolvedException() instanceof UnknownAttributeException);
+		assertTrue(result.getResolvedException() instanceof UnknownEntityTypeException);
 	}
 
 	@Test
