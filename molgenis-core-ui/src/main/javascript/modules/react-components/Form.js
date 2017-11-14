@@ -688,10 +688,13 @@ var Form = React.createClass({
      * @private
      */
     _isValueNotSet(fieldType, value) {
-        if(fieldType === 'CATEGORICAL_MREF' || fieldType === 'MREF') {
+        if(value === undefined) {
+            return true
+        }
+        else if(fieldType === 'CATEGORICAL_MREF' || fieldType === 'MREF') {
             return !value.items || value.items.length === 0
         } else {
-            return value === '' || value === undefined || value === null
+            return value === '' || value === null
         }
     },
     _resolveBoolExpression: function (expression, entityInstance) {
