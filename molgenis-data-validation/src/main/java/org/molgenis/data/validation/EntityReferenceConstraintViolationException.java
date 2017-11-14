@@ -12,7 +12,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
  */
 public class EntityReferenceConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
 {
-	private static final String ERROR_CODE = "V02";
+	private static final String ERROR_CODE = "V11";
 
 	private final String entityTypeId;
 	private final String attributeName;
@@ -37,7 +37,7 @@ public class EntityReferenceConstraintViolationException extends MolgenisDataAcc
 	public String getLocalizedMessage()
 	{
 		String format = getLanguageService().getString(ERROR_CODE);
-		return format(format, valueAsString, attributeName, entityTypeId);
+		return format(format, entityTypeId, attributeName, valueAsString);
 	}
 
 	@Override
