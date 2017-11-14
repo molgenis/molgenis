@@ -1,11 +1,11 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.validation.UniqueConstraintViolationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -37,7 +37,7 @@ public class FileTypeEditingIT extends AbstractTestNGSpringContextTests
 	private MetaDataService metaDataService;
 
 	@WithMockUser(username = "superuser", roles = { "SU" })
-	@Test(expectedExceptions = UniqueConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:sys_md_EntityType attribute:id value:FileEntity")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[FILE\\] to \\[STRING\\] not allowed, allowed types are \\[\\]")
 	public void testNoConversionsAllowed()
 	{
 		EntityType entityType = entityTypeFactory.create("FileEntity").setLabel("File entity");
