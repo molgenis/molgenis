@@ -91,7 +91,7 @@ public class PostgreSqlNameGenerator
 
 	public static String getColumnName(Attribute attr, boolean quotedIdentifier)
 	{
-		String identifier = "x" + generateId(attr, MAX_IDENTIFIER_BYTE_LENGTH);
+		String identifier = generateId(attr, MAX_IDENTIFIER_BYTE_LENGTH);
 		return quotedIdentifier ? getQuotedIdentifier(identifier) : identifier;
 	}
 
