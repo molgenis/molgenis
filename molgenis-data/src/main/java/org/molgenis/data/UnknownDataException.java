@@ -6,6 +6,8 @@ package org.molgenis.data;
  * @see UnknownAttributeException
  * @see UnknownEntityException
  * @see UnknownEntityTypeException
+ * @see UnknownRepositoryException
+ * @see org.molgenis.data.transaction.UnknownRepositoryCollectionException
  */
 public abstract class UnknownDataException extends DataAccessException
 {
