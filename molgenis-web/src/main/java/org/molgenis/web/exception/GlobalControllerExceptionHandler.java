@@ -1,7 +1,6 @@
 package org.molgenis.web.exception;
 
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.validation.DataIntegrityViolationException;
 import org.slf4j.Logger;
@@ -37,16 +36,7 @@ public class GlobalControllerExceptionHandler
 
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
-	public Object handleUnknownEntityException(UnknownEntityException e, HandlerMethod handlerMethod)
-	{
-		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
-				BAD_REQUEST, e.getErrorCode());
-	}
-
-	@ResponseStatus(BAD_REQUEST)
-	@ExceptionHandler
-	public Object handleUnknownEntityTypeException(UnknownEntityTypeException e, HandlerMethod handlerMethod)
+	public Object handleUnknownDataException(UnknownEntityException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),

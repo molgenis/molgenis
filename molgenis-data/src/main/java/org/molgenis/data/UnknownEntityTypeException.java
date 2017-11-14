@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownEntityTypeException extends CodedRuntimeException
+public class UnknownEntityTypeException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D01";
 

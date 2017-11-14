@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 @SuppressWarnings("squid:S1948")
-public class UnknownEntityException extends CodedRuntimeException
+public class UnknownEntityException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D02";
 
