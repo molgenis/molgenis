@@ -408,8 +408,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	static DataAccessException translateUndefinedColumnException(PSQLException pSqlException)
 	{
 		// PSQL exception contains column name, but not the table name so we can't determine the attribute name
-		throw new RuntimeException("Error translating exception",
-				pSqlException); // FIXME return DataAccessException, but not DataIntegrityViolationException
+		return new UnknownDataAccessException(pSqlException);
 	}
 
 	@Override
