@@ -1,6 +1,6 @@
 package org.molgenis.metadata.manager.controller;
 
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.EditorAttributeResponse;
 import org.molgenis.metadata.manager.model.EditorEntityType;
@@ -33,7 +33,7 @@ public class MetadataManagerController extends VuePluginController
 
 	private MetadataManagerService metadataManagerService;
 
-	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService,
+	public MetadataManagerController(MenuReaderService menuReaderService, LanguageServiceImpl languageService,
 			AppSettings appSettings, MetadataManagerService metadataManagerService,
 			UserAccountService userAccountService)
 	{

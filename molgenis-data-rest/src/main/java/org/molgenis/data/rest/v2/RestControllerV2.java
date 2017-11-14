@@ -3,7 +3,7 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
@@ -72,19 +72,13 @@ public class RestControllerV2
 	private final RestService restService;
 	private final PermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
-	private final LanguageService languageService;
+	private final LanguageServiceImpl languageService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
 	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
 	{
 		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
-	}
-
-	static UnknownAttributeException createUnknownAttributeException(String entityTypeId, String attributeName)
-	{
-		return new UnknownAttributeException(
-				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityTypeId + "'");
 	}
 
 	static MolgenisPermissionException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
@@ -112,7 +106,7 @@ public class RestControllerV2
 	}
 
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
-			LanguageService languageService, PermissionSystemService permissionSystemService,
+			LanguageServiceImpl languageService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier, LocalizationService localizationService)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -450,7 +444,7 @@ public class RestControllerV2
 			Attribute attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
-				throw createUnknownAttributeException(entityTypeId, attributeName);
+				throw new UnknownAttributeException(meta, attributeName);
 			}
 
 			if (attr.isReadOnly())

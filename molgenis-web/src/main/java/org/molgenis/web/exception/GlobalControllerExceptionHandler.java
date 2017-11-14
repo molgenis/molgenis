@@ -1,8 +1,8 @@
 package org.molgenis.web.exception;
 
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
+import org.molgenis.data.validation.DataIntegrityViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -30,13 +30,13 @@ public class GlobalControllerExceptionHandler
 	public Object handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest httpServletRequest)
 	{
 		LOG.info("", e);
-		return handleTypedException(isHtmlRequest(httpServletRequest), NotFoundController.URI,
-				e.getLocalizedMessage(), NOT_FOUND);
+		return handleTypedException(isHtmlRequest(httpServletRequest), NotFoundController.URI, e.getLocalizedMessage(),
+				NOT_FOUND);
 	}
 
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
-	public Object handleUnknownEntityException(UnknownEntityException e, HandlerMethod handlerMethod)
+	public Object handleUnknownDataException(UnknownDataException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
@@ -45,7 +45,7 @@ public class GlobalControllerExceptionHandler
 
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
-	public Object handleUnknownEntityTypeException(UnknownEntityTypeException e, HandlerMethod handlerMethod)
+	public Object handleDataIntegrityViolationException(DataIntegrityViolationException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
@@ -58,6 +58,6 @@ public class GlobalControllerExceptionHandler
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
-				BAD_REQUEST, e.getErrorCode());
+				FORBIDDEN, e.getErrorCode()); // FIXME NotFoundController.URI is not what we want here (?)
 	}
 }

@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
@@ -38,7 +38,7 @@ class EntityTypeResponseV2
 	private String languageCode;
 
 	public EntityTypeResponseV2(EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+			LanguageServiceImpl languageService)
 	{
 		this(meta, null, permissionService, dataService, languageService);
 	}
@@ -47,7 +47,7 @@ class EntityTypeResponseV2
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public EntityTypeResponseV2(EntityType meta, Fetch fetch, PermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+			DataService dataService, LanguageServiceImpl languageService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);

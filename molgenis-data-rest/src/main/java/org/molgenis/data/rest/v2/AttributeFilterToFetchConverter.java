@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMetaMetaData;
 
-import static java.lang.String.format;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
@@ -136,8 +135,7 @@ public class AttributeFilterToFetchConverter
 		Attribute attr = entityType.getAttribute(attrName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(
-					format("Unknown attribute [%s] of entity [%s]", attrName, entityType.getId()));
+			throw new UnknownAttributeException(entityType, attrName);
 		}
 		return attr;
 	}

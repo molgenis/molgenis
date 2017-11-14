@@ -1,17 +1,15 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.LocalizedRuntimeException;
 
-import java.util.Locale;
+import java.text.MessageFormat;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 @SuppressWarnings("squid:S1948")
-public class UnknownEntityException extends LocalizedRuntimeException
+public class UnknownEntityException extends UnknownDataException
 {
-	private static final String BUNDLE_ID = "data";
 	private static final String ERROR_CODE = "D02";
 
 	private final EntityType entityType;
@@ -19,22 +17,26 @@ public class UnknownEntityException extends LocalizedRuntimeException
 
 	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
-		super(BUNDLE_ID, ERROR_CODE);
+		super(ERROR_CODE);
 		this.entityType = requireNonNull(entityType);
 		this.entityId = requireNonNull(entityId);
 	}
 
 	@Override
-	protected String createMessage()
+	public String getMessage()
 	{
-		return format("type:%s id:%s", entityType.getId(), entityId.toString());
+		return String.format("type:%s id:%s", entityType.getId(), entityId.toString());
 	}
 
 	@Override
-	protected String createLocalizedMessage(String format)
+	public String getLocalizedMessage()
 	{
-		Locale locale = getLocale();
-		return format(format, entityId.toString(), entityType.getLabel(locale.getLanguage()));
+		return getLanguageService().map(languageService ->
+		{
+			String format = languageService.getString(ERROR_CODE);
+			String language = languageService.getCurrentUserLanguageCode();
+			return MessageFormat.format(format, entityId.toString(), entityType.getLabel(language));
+		}).orElse(super.getLocalizedMessage());
 	}
 }
 

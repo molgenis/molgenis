@@ -307,7 +307,7 @@ public class QueryGenerator
 		else
 		{
 			Attribute attr = entityType.getAttribute(queryField);
-			if (attr == null) throw new UnknownAttributeException(queryField);
+			if (attr == null) throw new UnknownAttributeException(entityType, queryField);
 			// construct query part
 			AttributeType dataType = attr.getDataType();
 			switch (dataType)
@@ -364,7 +364,7 @@ public class QueryGenerator
 		else
 		{
 			Attribute attr = entityType.getAttribute(queryField);
-			if (attr == null) throw new UnknownAttributeException(queryField);
+			if (attr == null) throw new UnknownAttributeException(entityType, queryField);
 			// construct query part
 			AttributeType dataType = attr.getDataType();
 			switch (dataType)
@@ -754,7 +754,7 @@ public class QueryGenerator
 			Attribute attribute = entityTypeAtCurrentDepth.getAttribute(queryRuleFieldTokens[depth]);
 			if (attribute == null)
 			{
-				throw new UnknownAttributeException(format("Unknown attribute [%s]", queryRuleFieldTokens[depth]));
+				throw new UnknownAttributeException(entityTypeAtCurrentDepth, queryRuleFieldTokens[depth]);
 			}
 			attributePath.add(attribute);
 

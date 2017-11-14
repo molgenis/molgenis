@@ -8,7 +8,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+/**
+ * @deprecated use {@link DataIntegrityViolationException} instead.
+ */
+@Deprecated
 public class MolgenisValidationException extends MolgenisDataAccessException
 {
 	private static final long serialVersionUID = 1L;

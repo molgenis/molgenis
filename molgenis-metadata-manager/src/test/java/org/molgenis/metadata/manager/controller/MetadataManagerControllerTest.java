@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.molgenis.auth.User;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.*;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
@@ -45,7 +46,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	private MenuReaderService menuReaderService;
 
 	@Autowired
-	private LanguageService languageService;
+	private LanguageServiceImpl languageService;
 
 	@Autowired
 	private AppSettings appSettings;
@@ -205,7 +206,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		@Bean
 		public LanguageService languageService()
 		{
-			return mock(LanguageService.class);
+			return mock(LanguageServiceImpl.class);
 		}
 
 		@Bean

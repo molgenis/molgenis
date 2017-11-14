@@ -1,33 +1,34 @@
 package org.molgenis.data;
 
-import org.molgenis.util.LocalizedRuntimeException;
+import java.text.MessageFormat;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownEntityTypeException extends LocalizedRuntimeException
+public class UnknownEntityTypeException extends UnknownDataException
 {
-	private static final String BUNDLE_ID = "data";
 	private static final String ERROR_CODE = "D01";
 
 	private final String entityTypeId;
 
 	public UnknownEntityTypeException(String entityTypeId)
 	{
-		super(BUNDLE_ID, ERROR_CODE);
+		super(ERROR_CODE);
 		this.entityTypeId = requireNonNull(entityTypeId);
 	}
 
 	@Override
-	protected String createMessage()
+	public String getMessage()
 	{
-		return format("id:%s", entityTypeId);
+		return String.format("id:%s", entityTypeId);
 	}
 
 	@Override
-	protected String createLocalizedMessage(String format)
+	public String getLocalizedMessage()
 	{
-		return format(format, entityTypeId);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 }
 
