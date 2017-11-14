@@ -571,8 +571,7 @@ public class RestController
 		Attribute attr = entityType.getAttribute(attributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(
-					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' does not exist");
+			throw new UnknownAttributeException(entityType, attributeName);
 		}
 
 		if (attr.isReadOnly())
@@ -869,7 +868,7 @@ public class RestController
 		}
 		else
 		{
-			throw new UnknownAttributeException(attributeName);
+			throw new UnknownAttributeException(meta, attributeName);
 		}
 	}
 
@@ -883,7 +882,7 @@ public class RestController
 		Attribute attr = meta.getAttribute(refAttributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(entityTypeId + " does not have an attribute named " + refAttributeName);
+			throw new UnknownAttributeException(meta, refAttributeName);
 		}
 
 		// Get the entity

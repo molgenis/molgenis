@@ -81,12 +81,6 @@ public class RestControllerV2
 		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
 	}
 
-	static UnknownAttributeException createUnknownAttributeException(String entityTypeId, String attributeName)
-	{
-		return new UnknownAttributeException(
-				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityTypeId + "'");
-	}
-
 	static MolgenisPermissionException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
 			String attributeName)
 	{
@@ -450,7 +444,7 @@ public class RestControllerV2
 			Attribute attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
-				throw createUnknownAttributeException(entityTypeId, attributeName);
+				throw new UnknownAttributeException(meta, attributeName);
 			}
 
 			if (attr.isReadOnly())

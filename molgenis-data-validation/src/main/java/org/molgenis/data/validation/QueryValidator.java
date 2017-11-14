@@ -117,14 +117,7 @@ public class QueryValidator
 
 	private Attribute getQueryRuleAttribute(QueryRule queryRule, EntityType entityType)
 	{
-		try
-		{
-			return QueryUtils.getQueryRuleAttribute(queryRule, entityType);
-		}
-		catch (UnknownAttributeException e)
-		{
-			throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
-		}
+		return QueryUtils.getQueryRuleAttribute(queryRule, entityType);
 	}
 
 	private Object toQueryRuleValue(Object queryRuleValue, Attribute attr)

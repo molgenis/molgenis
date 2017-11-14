@@ -249,7 +249,7 @@ public class MappingServiceController extends PluginController
 		Attribute targetAttr = targetEntityType.getAttribute(targetAttributeName);
 		if (targetAttr == null)
 		{
-			throw new UnknownAttributeException("Unknown attribute [" + targetAttributeName + "]");
+			throw new UnknownAttributeException(targetEntityType, targetAttributeName);
 		}
 
 		String algorithm = mappingServiceRequest.getAlgorithm();
