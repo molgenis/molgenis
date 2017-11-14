@@ -1,13 +1,11 @@
 package org.molgenis.data.importer.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-
 import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 //FIXME: reasonable name, or rewrite code that throws this to actually determine what is going on
-public class NoSuitableImporterFoundException extends CodedRuntimeException
+public class NoSuitableImporterFoundException extends ImporterException
 {
 	private static final String ERROR_CODE = "I03";
 	private final String fileName;

@@ -1,12 +1,10 @@
 package org.molgenis.data.importer.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-
 import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownBackendException extends CodedRuntimeException
+public class UnknownBackendException extends ImporterException
 {
 	private static final String ERROR_CODE = "I02";
 	private final String backendName;

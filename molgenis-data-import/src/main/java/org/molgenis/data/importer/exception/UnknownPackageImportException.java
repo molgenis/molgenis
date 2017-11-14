@@ -1,12 +1,10 @@
 package org.molgenis.data.importer.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-
 import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownPackageImportException extends CodedRuntimeException
+public class UnknownPackageImportException extends ImporterException
 {
 	private static final String ERROR_CODE = "I01";
 
