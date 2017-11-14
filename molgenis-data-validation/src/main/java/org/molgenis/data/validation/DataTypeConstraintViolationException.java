@@ -7,6 +7,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown to indicate that a data value is not of the required type when updating data.
+ * // TODO discuss: extend from TypeMismatchDataAccessException instead of DataIntegrityViolationException
  */
 public class DataTypeConstraintViolationException extends DataIntegrityViolationException
 {

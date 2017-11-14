@@ -1,6 +1,7 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.DataAccessException;
+import org.molgenis.data.UnknownDataAccessException;
 import org.molgenis.data.postgresql.identifier.AttributeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
@@ -10,7 +11,6 @@ import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionException;
@@ -45,9 +45,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	}
 
 	@Override
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex)
+	protected org.springframework.dao.DataAccessException doTranslate(String task, String sql, SQLException ex)
 	{
-		DataAccessException dataAccessException = super.doTranslate(task, sql, ex);
+		org.springframework.dao.DataAccessException dataAccessException = super.doTranslate(task, sql, ex);
 		if (dataAccessException == null)
 		{
 			return doTranslate(ex);
@@ -55,7 +55,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		return doTranslate(dataAccessException);
 	}
 
-	private MolgenisDataAccessException doTranslate(DataAccessException dataAccessException)
+	private DataAccessException doTranslate(org.springframework.dao.DataAccessException dataAccessException)
 	{
 		Throwable cause = dataAccessException.getCause();
 		if (!(cause instanceof PSQLException))
@@ -64,15 +64,15 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 
 		PSQLException pSqlException = (PSQLException) cause;
-		MolgenisDataAccessException molgenisDataException = doTranslate(pSqlException);
+		DataAccessException molgenisDataException = doTranslate(pSqlException);
 		if (molgenisDataException == null)
 		{
-			molgenisDataException = new MolgenisDataAccessException(dataAccessException);
+			molgenisDataException = new UnknownDataAccessException(dataAccessException);
 		}
 		return molgenisDataException;
 	}
 
-	private MolgenisDataAccessException doTranslate(SQLException sqlException)
+	private DataAccessException doTranslate(SQLException sqlException)
 	{
 		if (sqlException instanceof BatchUpdateException)
 		{
@@ -85,15 +85,15 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 
 		PSQLException pSqlException = (PSQLException) sqlException;
-		MolgenisDataAccessException molgenisDataException = doTranslate(pSqlException);
+		DataAccessException molgenisDataException = doTranslate(pSqlException);
 		if (molgenisDataException == null)
 		{
-			molgenisDataException = new MolgenisDataAccessException(sqlException);
+			molgenisDataException = new UnknownDataAccessException(sqlException);
 		}
 		return molgenisDataException;
 	}
 
-	private MolgenisDataAccessException doTranslate(PSQLException pSqlException)
+	private DataAccessException doTranslate(PSQLException pSqlException)
 	{
 		switch (pSqlException.getSQLState())
 		{
@@ -125,7 +125,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisDataAccessException translateReadonlyViolation(PSQLException pSqlException)
+	DataAccessException translateReadonlyViolation(PSQLException pSqlException)
 	{
 		Matcher matcher = Pattern.compile(
 				"Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
@@ -133,7 +133,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		boolean matches = matcher.matches();
 		if (!matches)
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String colName = matcher.group(1);
@@ -151,7 +150,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisDataAccessException translateDependentObjectsStillExist(PSQLException pSqlException)
+	DataAccessException translateDependentObjectsStillExist(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String detail = serverErrorMessage.getDetail();
@@ -173,7 +172,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 		if (entityTypeDependencyMap.isEmpty()) // no matches
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 
@@ -186,7 +184,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	static MolgenisDataAccessException translateInvalidIntegerException(PSQLException pSqlException)
+	static DataAccessException translateInvalidIntegerException(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String message = serverErrorMessage.getMessage();
@@ -232,7 +230,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisDataAccessException translateNotNullViolation(PSQLException pSqlException)
+	DataIntegrityViolationException translateNotNullViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -276,7 +274,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisDataAccessException translateForeignKeyViolation(PSQLException pSqlException)
+	DataIntegrityViolationException translateForeignKeyViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -284,13 +282,11 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		Matcher m = Pattern.compile("\\((.*?)\\)").matcher(detailMessage);
 		if (!m.find())
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String colName = m.group(1);
 		if (!m.find())
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String value = m.group(1);
@@ -326,7 +322,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 										.matcher(serverErrorMessage.getMessage());
 		if (!messageMatcher.matches())
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		return messageMatcher.group(1);
@@ -338,7 +333,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisDataAccessException translateUniqueKeyViolation(PSQLException pSqlException)
+	DataIntegrityViolationException translateUniqueKeyViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -390,7 +385,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			}
 			else
 			{
-				LOG.error("Error translating postgres exception: ", pSqlException);
 				throw new RuntimeException("Error translating exception", pSqlException);
 			}
 		}
@@ -402,7 +396,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisDataAccessException translateCheckConstraintViolation(PSQLException pSqlException)
+	DataIntegrityViolationException translateCheckConstraintViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -416,14 +410,15 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	static MolgenisDataAccessException translateUndefinedColumnException(PSQLException pSqlException)
+	static DataAccessException translateUndefinedColumnException(PSQLException pSqlException)
 	{
 		// PSQL exception contains column name, but not the table name so we can't determine the attribute name
-		throw new RuntimeException("Error translating exception", pSqlException);
+		throw new RuntimeException("Error translating exception",
+				pSqlException); // FIXME return DataAccessException, but not DataIntegrityViolationException
 	}
 
 	@Override
-	public MolgenisDataAccessException doTranslate(TransactionException transactionException)
+	public DataAccessException doTranslate(TransactionException transactionException)
 	{
 		Throwable cause = transactionException.getCause();
 		if (!(cause instanceof PSQLException))
