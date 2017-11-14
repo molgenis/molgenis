@@ -26,7 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 
@@ -417,12 +416,10 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	static MolgenisValidationException translateUndefinedColumnException(PSQLException pSqlException)
+	static MolgenisDataAccessException translateUndefinedColumnException(PSQLException pSqlException)
 	{
-		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
-		String message = serverErrorMessage.getMessage(); // FIXME exposes internal message
-		ConstraintViolation constraintViolation = new ConstraintViolation(message);
-		return new MolgenisValidationException(singleton(constraintViolation));
+		// PSQL exception contains column name, but not the table name so we can't determine the attribute name
+		throw new RuntimeException("Error translating exception", pSqlException);
 	}
 
 	@Override

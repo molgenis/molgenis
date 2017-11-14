@@ -1,8 +1,5 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.ErrorCoded;
-import org.molgenis.data.MolgenisDataAccessException;
-
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
@@ -11,7 +8,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 /**
  * Thrown to indicate that a data value is not of the required type when updating data.
  */
-public class DataTypeConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
+public class DataTypeConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V03";
 
@@ -20,7 +17,7 @@ public class DataTypeConstraintViolationException extends MolgenisDataAccessExce
 
 	public DataTypeConstraintViolationException(String valueAsString, String type, Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.valueAsString = requireNonNull(valueAsString);
 		this.type = requireNonNull(type);
 	}
@@ -36,11 +33,5 @@ public class DataTypeConstraintViolationException extends MolgenisDataAccessExce
 	{
 		String format = getLanguageService().getString(ERROR_CODE);
 		return MessageFormat.format(format, valueAsString, type);
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
 	}
 }

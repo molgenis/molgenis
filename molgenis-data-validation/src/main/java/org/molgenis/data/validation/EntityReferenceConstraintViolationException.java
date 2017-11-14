@@ -1,8 +1,5 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.ErrorCoded;
-import org.molgenis.data.MolgenisDataAccessException;
-
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
@@ -10,7 +7,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 /**
  * Thrown when deleting data that is still referenced by other data.
  */
-public class EntityReferenceConstraintViolationException extends MolgenisDataAccessException implements ErrorCoded
+public class EntityReferenceConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V11";
 
@@ -21,7 +18,7 @@ public class EntityReferenceConstraintViolationException extends MolgenisDataAcc
 	public EntityReferenceConstraintViolationException(String entityTypeId, String attributeName, String valueAsString,
 			Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
 		this.valueAsString = requireNonNull(valueAsString);
@@ -38,11 +35,5 @@ public class EntityReferenceConstraintViolationException extends MolgenisDataAcc
 	{
 		String format = getLanguageService().getString(ERROR_CODE);
 		return format(format, entityTypeId, attributeName, valueAsString);
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
 	}
 }

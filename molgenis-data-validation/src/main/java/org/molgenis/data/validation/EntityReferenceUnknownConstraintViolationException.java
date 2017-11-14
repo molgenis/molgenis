@@ -1,8 +1,5 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.ErrorCoded;
-import org.molgenis.data.MolgenisDataAccessException;
-
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
@@ -11,8 +8,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 /**
  * Thrown when updating data that references unexisting data.
  */
-public class EntityReferenceUnknownConstraintViolationException extends MolgenisDataAccessException
-		implements ErrorCoded
+public class EntityReferenceUnknownConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V01";
 
@@ -24,7 +20,7 @@ public class EntityReferenceUnknownConstraintViolationException extends Molgenis
 			String valueAsString,
 			Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.attributeName = requireNonNull(attributeName);
 		this.valueAsString = requireNonNull(valueAsString);
@@ -41,11 +37,5 @@ public class EntityReferenceUnknownConstraintViolationException extends Molgenis
 	{
 		String format = getLanguageService().getString(ERROR_CODE);
 		return MessageFormat.format(format, valueAsString, attributeName, entityTypeId);
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return ERROR_CODE;
 	}
 }
