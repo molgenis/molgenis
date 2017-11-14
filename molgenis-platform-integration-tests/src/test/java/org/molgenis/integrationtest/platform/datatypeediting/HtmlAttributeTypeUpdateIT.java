@@ -117,8 +117,6 @@ public class HtmlAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 		}
 		catch (Exception exception)
 		{
-			System.out.println(exception.getClass());
-			System.out.println(exception.getMessage());
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}

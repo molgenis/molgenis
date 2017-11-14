@@ -119,7 +119,6 @@ public class XrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 		}
 		catch (Exception exception)
 		{
-			System.out.println(exception.getClass());
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}
