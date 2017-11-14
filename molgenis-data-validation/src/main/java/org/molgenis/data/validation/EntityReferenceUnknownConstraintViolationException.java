@@ -17,8 +17,7 @@ public class EntityReferenceUnknownConstraintViolationException extends DataInte
 	private final String valueAsString;
 
 	public EntityReferenceUnknownConstraintViolationException(String entityTypeId, String attributeName,
-			String valueAsString,
-			Throwable cause)
+			String valueAsString, Throwable cause)
 	{
 		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
@@ -35,7 +34,8 @@ public class EntityReferenceUnknownConstraintViolationException extends DataInte
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, attributeName, entityTypeId);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), valueAsString,
+						attributeName, entityTypeId)).orElse(super.getLocalizedMessage());
 	}
 }

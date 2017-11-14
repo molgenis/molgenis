@@ -1,12 +1,14 @@
 package org.molgenis.data.i18n;
 
+import java.util.Optional;
+
 public class LanguageServiceHolder
 {
 	private static LanguageService LANGUAGE_SERVICE;
 
-	public static LanguageService getLanguageService()
+	public static Optional<LanguageService> getLanguageService()
 	{
-		return LANGUAGE_SERVICE;
+		return Optional.ofNullable(LANGUAGE_SERVICE);
 	}
 
 	public static void setLanguageService(LanguageService languageService)

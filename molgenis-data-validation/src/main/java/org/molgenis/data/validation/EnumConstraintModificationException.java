@@ -29,7 +29,8 @@ public class EnumConstraintModificationException extends DataIntegrityViolationE
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, entityTypeId);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 }

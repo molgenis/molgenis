@@ -34,8 +34,9 @@ public class UniqueConstraintViolationException extends DataIntegrityViolationEx
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, entityTypeId, attributeName, valueAsString);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId,
+						attributeName, valueAsString)).orElse(super.getLocalizedMessage());
 	}
 }
 

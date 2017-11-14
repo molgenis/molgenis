@@ -31,7 +31,8 @@ public class NotNullConstraintCreationException extends DataIntegrityViolationEx
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, attributeName, entityTypeId);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), attributeName,
+						entityTypeId)).orElse(super.getLocalizedMessage());
 	}
 }

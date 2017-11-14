@@ -32,7 +32,9 @@ public class DataTypeConstraintViolationException extends DataIntegrityViolation
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, type);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), valueAsString, type))
+								   .orElse(super.getLocalizedMessage());
+
 	}
 }

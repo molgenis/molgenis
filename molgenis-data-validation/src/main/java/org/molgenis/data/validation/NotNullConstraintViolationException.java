@@ -52,13 +52,15 @@ public class NotNullConstraintViolationException extends DataIntegrityViolationE
 		String localizedMessage;
 		if (entityId != null)
 		{
-			String format = getLanguageService().getString(MESSAGE_ID_ENTITY);
-			localizedMessage = MessageFormat.format(format, entityTypeId, attributeName, entityId);
+			localizedMessage = getLanguageService().map(
+					languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY), entityTypeId,
+							attributeName, entityId)).orElse(super.getLocalizedMessage());
 		}
 		else
 		{
-			String format = getLanguageService().getString(MESSAGE_ID_ENTITY_UNKNOWN);
-			localizedMessage = MessageFormat.format(format, entityTypeId, attributeName);
+			localizedMessage = getLanguageService().map(
+					languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY_UNKNOWN),
+							entityTypeId, attributeName)).orElse(super.getLocalizedMessage());
 		}
 		return localizedMessage;
 	}

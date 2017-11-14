@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.i18n.LanguageServiceHolder;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * TODO discuss: extend from UncategorizedDataAccessException?
@@ -23,6 +23,7 @@ public class UnknownDataAccessException extends DataAccessException
 	@Override
 	public String getLocalizedMessage()
 	{
-		return LanguageServiceHolder.getLanguageService().getString(ERROR_CODE);
+		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
+								   .orElse(super.getLocalizedMessage());
 	}
 }

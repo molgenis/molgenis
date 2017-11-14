@@ -33,7 +33,8 @@ public class EntityReferenceConstraintViolationException extends DataIntegrityVi
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return format(format, entityTypeId, attributeName, valueAsString);
+		return getLanguageService().map(
+				languageService -> format(languageService.getString(ERROR_CODE), entityTypeId, attributeName,
+						valueAsString)).orElse(super.getLocalizedMessage());
 	}
 }

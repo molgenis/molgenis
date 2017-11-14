@@ -1,10 +1,9 @@
 package org.molgenis.data;
 
-import org.molgenis.data.i18n.LanguageServiceHolder;
-
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EntityTypeAlreadyExistsException extends CodedRuntimeException
 {
@@ -27,7 +26,8 @@ public class EntityTypeAlreadyExistsException extends CodedRuntimeException
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = LanguageServiceHolder.getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, entityTypeId);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId))
+								   .orElse(super.getLocalizedMessage());
 	}
 }

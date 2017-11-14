@@ -34,8 +34,9 @@ public class UniqueConstraintCreationException extends DataIntegrityViolationExc
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, entityTypeId, attributeName, valueAsString);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId,
+						attributeName, valueAsString)).orElse(super.getLocalizedMessage());
 	}
 }
 

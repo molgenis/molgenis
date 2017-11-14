@@ -31,7 +31,8 @@ public class ReadOnlyConstraintViolationException extends DataIntegrityViolation
 	@Override
 	public String getLocalizedMessage()
 	{
-		String format = getLanguageService().getString(ERROR_CODE);
-		return MessageFormat.format(format, valueAsString, attributeName, entityTypeId);
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), valueAsString,
+						attributeName, entityTypeId)).orElse(super.getLocalizedMessage());
 	}
 }
