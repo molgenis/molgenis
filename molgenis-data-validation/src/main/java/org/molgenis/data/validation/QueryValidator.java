@@ -20,7 +20,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 
 /**
  * Validates {@link Query queries} based on the {@link EntityType entity type} that will be queried. Converts query
@@ -43,7 +43,7 @@ public class QueryValidator
 	 *
 	 * @param query      query
 	 * @param entityType entity type
-	 * @throws MolgenisValidationException if query is invalid
+	 * @throws AttributeValueConversionFailedException if query is invalid
 	 */
 	public void validate(Query<? extends Entity> query, EntityType entityType)
 	{
@@ -192,10 +192,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Enum.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, value);
 		}
 
 		if (!attr.getEnumOptions().contains(stringValue))
@@ -229,9 +226,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Attribute [%s] value [%s] cannot be converter to type [%s]", attr.getName(), value,
-								Long.class.getSimpleName())));
+				throw new AttributeValueConversionFailedException(attr, value);
 			}
 		}
 		else if (value instanceof Number)
@@ -240,10 +235,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Number.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, value);
 		}
 		return longValue;
 	}
@@ -270,9 +262,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Attribute [%s] value [%s] cannot be converter to type [%s]", attr.getName(), value,
-								Integer.class.getSimpleName())));
+				throw new AttributeValueConversionFailedException(attr, value);
 			}
 		}
 		else if (value instanceof Number)
@@ -281,10 +271,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Number.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, value);
 		}
 		return integerValue;
 	}
@@ -298,9 +285,7 @@ public class QueryValidator
 		}
 		if (!(entity instanceof FileMeta))
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
-							entity.getClass().getSimpleName(), FileMeta.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, paramValue);
 		}
 		return (FileMeta) entity;
 	}
@@ -327,9 +312,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Attribute [%s] value [%s] cannot be converter to type [%s]", attr.getName(), value,
-								Double.class.getSimpleName())));
+				throw new AttributeValueConversionFailedException(attr, value);
 			}
 		}
 		else if (value instanceof Number)
@@ -338,10 +321,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Number.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, value);
 		}
 		return doubleValue;
 	}
@@ -369,16 +349,12 @@ public class QueryValidator
 			}
 			catch (DateTimeParseException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), paramStrValue)));
+				throw new AttributeValueConversionFailedException(attr, value);
 			}
 		}
 		else
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Instant.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, value);
 		}
 		return dateValue;
 	}
@@ -406,16 +382,12 @@ public class QueryValidator
 			}
 			catch (DateTimeParseException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), paramStrValue)));
+				throw new AttributeValueConversionFailedException(attr, value);
 			}
 		}
 		else
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s].", attr.getName(),
-							value.getClass().getSimpleName(), LocalDate.class.getSimpleName(),
-							String.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, value);
 		}
 		return dateValue;
 	}
@@ -478,17 +450,12 @@ public class QueryValidator
 			}
 			else
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Attribute [%s] value [%s] cannot be converter to type [%s]", attr.getName(), value,
-								Boolean.class.getSimpleName())));
+				throw new AttributeValueConversionFailedException(attr, value);
 			}
 		}
 		else
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-							value.getClass().getSimpleName(), String.class.getSimpleName(),
-							Boolean.class.getSimpleName())));
+			throw new AttributeValueConversionFailedException(attr, value);
 		}
 		return booleanValue;
 	}

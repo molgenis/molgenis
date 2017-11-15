@@ -1,8 +1,8 @@
 package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
+import org.molgenis.data.AttributeValueConversionFailedException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityConversionFailedException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeTest;
@@ -138,7 +138,7 @@ public class StringExpressionEvaluatorTest
 		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
 	}
 
-	@Test(expectedExceptions = EntityConversionFailedException.class, expectedExceptionsMessageRegExp = "type:test attribute:id expected:LONG actual:java.lang.String value:Hello World!")
+	@Test(expectedExceptions = AttributeValueConversionFailedException.class, expectedExceptionsMessageRegExp = "type:test attribute:id expected:LONG actual:java.lang.String value:Hello World!")
 	public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails()
 	{
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();

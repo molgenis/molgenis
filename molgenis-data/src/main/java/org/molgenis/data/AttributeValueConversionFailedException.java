@@ -10,14 +10,14 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 /**
  * Thrown on mismatch between value type and attribute type.
  */
-public class EntityConversionFailedException extends CodedRuntimeException
+public class AttributeValueConversionFailedException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "D10";
 
 	private final Attribute attr;
 	private final Object value;
 
-	protected EntityConversionFailedException(Attribute attr, Object value)
+	public AttributeValueConversionFailedException(Attribute attr, Object value)
 	{
 		super(ERROR_CODE);
 		this.attr = requireNonNull(attr);

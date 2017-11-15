@@ -160,6 +160,7 @@ public class QueryValidatorTest
 		}
 		EntityType entityType = when(mock(EntityType.class).getAttribute(attrName)).thenReturn(attr).getMock();
 		when(entityType.toString()).thenReturn(attrType.toString());
+		when(attr.getEntity()).thenReturn(entityType);
 
 		if (refAttrType == null && EnumSet.of(CATEGORICAL, CATEGORICAL_MREF, XREF, MREF).contains(attrType))
 		{
@@ -203,7 +204,8 @@ public class QueryValidatorTest
 		return queries.iterator();
 	}
 
-	@Test(dataProvider = "validateInvalidProvider", expectedExceptions = MolgenisValidationException.class)
+	@Test(dataProvider = "validateInvalidProvider", expectedExceptions = {
+			AttributeValueConversionFailedException.class, MolgenisValidationException.class })
 	public void testValidateInvalid(Query<Entity> query, EntityType entityType)
 	{
 		queryValidator.validate(query, entityType);
