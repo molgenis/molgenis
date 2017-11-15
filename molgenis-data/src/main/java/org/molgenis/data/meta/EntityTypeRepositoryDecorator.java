@@ -4,7 +4,6 @@ import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.transaction.UnknownRepositoryCollectionException;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedHashMap;

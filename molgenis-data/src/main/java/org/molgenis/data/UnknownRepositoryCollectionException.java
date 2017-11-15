@@ -1,6 +1,4 @@
-package org.molgenis.data.transaction;
-
-import org.molgenis.data.UnknownDataException;
+package org.molgenis.data;
 
 import java.text.MessageFormat;
 
