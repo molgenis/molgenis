@@ -1,6 +1,6 @@
 package org.molgenis.data.jobs;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class JobExecutionException extends RuntimeException
 {
 	/**

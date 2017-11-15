@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class MolgenisException extends Exception
 {
 	public MolgenisException(String s)

@@ -2,7 +2,7 @@ package org.molgenis.python;
 
 import org.molgenis.data.MolgenisRuntimeException;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class MolgenisPythonException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 4675578564750997809L;

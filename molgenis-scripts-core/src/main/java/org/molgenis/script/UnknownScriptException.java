@@ -1,6 +1,6 @@
 package org.molgenis.script;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class UnknownScriptException extends ScriptException
 {
 	private static final long serialVersionUID = 4808852834196162476L;
