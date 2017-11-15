@@ -668,6 +668,15 @@ var Form = React.createClass({
                     errorMessage = 'Please enter a valid value.';
                 }
             }
+
+            if(attr.nullableExpression) {
+              entityInstance[attr.name] = value;
+              var isNillable = this._resolveBoolExpression(attr.nullableExpression, entityInstance)
+              var isValueNull = value === '' || value === undefined || value === null
+              if (!isNillable && isValueNull) {
+                errorMessage = 'Field is required, please enter a value';
+              }
+            }
         }
 
         callback({valid: errorMessage === undefined, errorMessage: errorMessage});

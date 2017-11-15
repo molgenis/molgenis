@@ -43,7 +43,7 @@ class PostgreSqlQueryGenerator
 {
 	private static final String UNSPECIFIED_ATTRIBUTE_MSG = "Can't use %s without specifying an attribute";
 
-	final static String ERR_CODE_READONLY_VIOLATION = "23506";
+	static final String ERR_CODE_READONLY_VIOLATION = "23506";
 
 	private PostgreSqlQueryGenerator()
 	{
@@ -425,7 +425,7 @@ class PostgreSqlQueryGenerator
 
 		return "SELECT " + idColName + "," + getJunctionTableOrderColumnName() + "," + refIdColName + " FROM "
 				+ getJunctionTableName(entityType, attr) + " WHERE " + idColName + " in (" + range(0,
-				numOfIds).mapToObj((x) -> "?").collect(joining(", ")) + ") ORDER BY " + idColName + ","
+				numOfIds).mapToObj(x -> "?").collect(joining(", ")) + ") ORDER BY " + idColName + ","
 				+ getJunctionTableOrderColumnName();
 	}
 
@@ -1088,14 +1088,7 @@ class PostgreSqlQueryGenerator
 			for (Sort.Order o : q.getSort())
 			{
 				Attribute attr = entityType.getAttribute(o.getAttr());
-				if (isPersistedInOtherTable(attr))
-				{
-					sortSql.append(", ").append(getColumnName(attr));
-				}
-				else
-				{
-					sortSql.append(", ").append(getColumnName(attr));
-				}
+				sortSql.append(", ").append(getColumnName(attr));
 				if (o.getDirection().equals(Sort.Direction.DESC))
 				{
 					sortSql.append(" DESC");

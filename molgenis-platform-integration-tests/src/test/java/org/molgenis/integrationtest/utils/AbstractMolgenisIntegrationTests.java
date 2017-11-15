@@ -10,11 +10,14 @@ import org.molgenis.integrationtest.utils.config.WebAppITConfig;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @WebAppConfiguration
-@TestPropertySource("/conf/molgenis.properties")
 @ContextConfiguration(classes = AbstractMolgenisIntegrationTests.Config.class)
 public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpringContextTests
 {
@@ -102,5 +104,17 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
 			PostgreSqlTestConfig.class, FileTestConfig.class, DatabaseConfig.class })
 	static class Config
 	{
+		@Bean
+		public static PropertySourcesPlaceholderConfigurer properties()
+		{
+			PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
+			Resource[] resources = new Resource[] { new ClassPathResource("/conf/molgenis.properties") };
+			pspc.setLocations(resources);
+			pspc.setFileEncoding("UTF-8");
+			pspc.setIgnoreUnresolvablePlaceholders(true);
+			pspc.setIgnoreResourceNotFound(true);
+			pspc.setNullValue("@null");
+			return pspc;
+		}
 	}
 }
