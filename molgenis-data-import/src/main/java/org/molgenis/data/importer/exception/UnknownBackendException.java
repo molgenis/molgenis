@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+// FIXME duplicate of UnknownRepositoryCollectionException
 public class UnknownBackendException extends ImporterException
 {
 	private static final String ERROR_CODE = "I02";
