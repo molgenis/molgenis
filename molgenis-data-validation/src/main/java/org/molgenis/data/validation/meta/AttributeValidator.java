@@ -145,14 +145,16 @@ public class AttributeValidator
 		String value = attr.getDefaultValue();
 		if (value != null)
 		{
+			// TODO validate using metadata validation expression
 			if (attr.isUnique())
 			{
-				throw new MolgenisDataException("Unique attribute " + attr.getName() + " cannot have default value");
+				throw new AttributeDefaultNotUniqueConstraintViolationException(attr);
 			}
 
+			// TODO validate using metadata validation expression
 			if (attr.getExpression() != null)
 			{
-				throw new MolgenisDataException("Computed attribute " + attr.getName() + " cannot have default value");
+				throw new AttributeDefaultNotComputedConstraintViolationException(attr);
 			}
 
 			AttributeType fieldType = attr.getDataType();
