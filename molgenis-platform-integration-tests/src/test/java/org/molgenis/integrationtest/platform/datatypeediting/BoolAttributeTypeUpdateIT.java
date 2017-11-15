@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
@@ -58,35 +59,35 @@ public class BoolAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { true, DECIMAL, MolgenisValidationException.class,
+		return new Object[][] { { true, DECIMAL, MolgenisDataException.class,
 				"Attribute data type update from [BOOL] to [DECIMAL] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, LONG, MolgenisValidationException.class,
+				{ true, LONG, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [LONG] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, MREF, MolgenisValidationException.class,
+				{ true, MREF, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [MREF] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, XREF, MolgenisValidationException.class,
+				{ true, XREF, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [XREF] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, CATEGORICAL, MolgenisValidationException.class,
+				{ true, CATEGORICAL, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [CATEGORICAL] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ true, CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [CATEGORICAL_MREF] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, FILE, MolgenisValidationException.class,
+				{ true, FILE, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [FILE] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, COMPOUND, MolgenisValidationException.class,
+				{ true, COMPOUND, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [COMPOUND] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, EMAIL, MolgenisValidationException.class,
+				{ true, EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [EMAIL] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, HTML, MolgenisValidationException.class,
+				{ true, HTML, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [HTML] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, HYPERLINK, MolgenisValidationException.class,
+				{ true, HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [HYPERLINK] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, DATE, MolgenisValidationException.class,
+				{ true, DATE, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [DATE] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, DATE_TIME, MolgenisValidationException.class,
+				{ true, DATE_TIME, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [DATE_TIME] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, ENUM, MolgenisValidationException.class,
+				{ true, ENUM, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [ENUM] not allowed, allowed types are [INT, STRING, TEXT]" },
-				{ true, SCRIPT, MolgenisValidationException.class,
+				{ true, SCRIPT, MolgenisDataException.class,
 						"Attribute data type update from [BOOL] to [SCRIPT] not allowed, allowed types are [INT, STRING, TEXT]" },
 				{ true, ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };

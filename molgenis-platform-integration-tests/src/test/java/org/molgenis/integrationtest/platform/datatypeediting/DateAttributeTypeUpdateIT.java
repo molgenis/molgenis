@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
@@ -66,35 +67,35 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "2016-11-13", BOOL, MolgenisValidationException.class,
+		return new Object[][] { { "2016-11-13", BOOL, MolgenisDataException.class,
 				"Attribute data type update from [DATE] to [BOOL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", INT, MolgenisValidationException.class,
+				{ "2016-11-13", INT, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [INT] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", LONG, MolgenisValidationException.class,
+				{ "2016-11-13", LONG, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [LONG] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", DECIMAL, MolgenisValidationException.class,
+				{ "2016-11-13", DECIMAL, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [DECIMAL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", XREF, MolgenisValidationException.class,
+				{ "2016-11-13", XREF, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [XREF] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", CATEGORICAL, MolgenisValidationException.class,
+				{ "2016-11-13", CATEGORICAL, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [CATEGORICAL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", SCRIPT, MolgenisValidationException.class,
+				{ "2016-11-13", SCRIPT, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [SCRIPT] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", HYPERLINK, MolgenisValidationException.class,
+				{ "2016-11-13", HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [HYPERLINK] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", EMAIL, MolgenisValidationException.class,
+				{ "2016-11-13", EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [EMAIL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", ENUM, MolgenisValidationException.class,
+				{ "2016-11-13", ENUM, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [ENUM] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", HTML, MolgenisValidationException.class,
+				{ "2016-11-13", HTML, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [HTML] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", MREF, MolgenisValidationException.class,
+				{ "2016-11-13", MREF, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [MREF] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ "2016-11-13", CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [CATEGORICAL_MREF] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", FILE, MolgenisValidationException.class,
+				{ "2016-11-13", FILE, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [FILE] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", COMPOUND, MolgenisValidationException.class,
+				{ "2016-11-13", COMPOUND, MolgenisDataException.class,
 						"Attribute data type update from [DATE] to [COMPOUND] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
 				{ "2016-11-13", ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
@@ -121,6 +122,8 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 		}
 		catch (Exception exception)
 		{
+			System.out.println(exception.getClass());
+			System.out.println(exception.getMessage());
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}

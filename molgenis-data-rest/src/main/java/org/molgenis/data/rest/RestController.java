@@ -868,7 +868,7 @@ public class RestController
 		}
 		else
 		{
-			throw new UnknownAttributeException(meta, attributeName);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 	}
 

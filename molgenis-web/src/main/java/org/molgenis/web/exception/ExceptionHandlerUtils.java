@@ -1,11 +1,10 @@
 package org.molgenis.web.exception;
 
 import org.molgenis.web.ErrorMessageResponse;
-import org.molgenis.web.PluginController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.util.matcher.ELRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,12 +12,12 @@ import org.springframework.web.method.HandlerMethod;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class ExceptionHandlerUtils
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ExceptionHandlerUtils.class);
+	private static final RequestMatcher requestMatcher = new ELRequestMatcher(
+			"hasHeader('X-Requested-With','XMLHttpRequest')");
+	public static final String OPTIONS = "OPTIONS";
 
 	public static Object handleTypedException(boolean isHtmlRequest, String forwardUri, String message, HttpStatus code)
 	{
@@ -41,16 +40,7 @@ public class ExceptionHandlerUtils
 
 	public static boolean isHtmlRequest(HttpServletRequest httpServletRequest)
 	{
-		try
-		{
-			URL url = new URL(httpServletRequest.getRequestURL().toString());
-			return url.getPath().startsWith(PluginController.PLUGIN_URI_PREFIX);
-		}
-		catch (MalformedURLException e)
-		{
-			LOG.error("", e);
-			return false;
-		}
+		return !(OPTIONS.equals(httpServletRequest.getMethod()) || requestMatcher.matches(httpServletRequest));
 	}
 
 	public static boolean isHtmlRequest(HandlerMethod handlerMethod)

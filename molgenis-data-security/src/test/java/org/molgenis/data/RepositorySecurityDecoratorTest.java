@@ -4,6 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -56,7 +57,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(repositorySecurityDecorator.add(entities), Integer.valueOf(123));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void addStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
@@ -69,7 +70,7 @@ public class RepositorySecurityDecoratorTest
 		{
 			repositorySecurityDecorator.add(entities);
 		}
-		catch (MolgenisPermissionException e)
+		catch (EntityTypePermissionDeniedException e)
 		{
 			verify(delegateRepository, times(1)).getEntityType();
 			verifyNoMoreInteractions(delegateRepository);
@@ -108,7 +109,7 @@ public class RepositorySecurityDecoratorTest
 		verify(delegateRepository, times(1)).delete(entities);
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void deleteStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
@@ -121,7 +122,7 @@ public class RepositorySecurityDecoratorTest
 		{
 			repositorySecurityDecorator.delete(entities);
 		}
-		catch (MolgenisPermissionException e)
+		catch (EntityTypePermissionDeniedException e)
 		{
 			verify(delegateRepository, times(1)).getEntityType();
 			verifyNoMoreInteractions(delegateRepository);
@@ -146,7 +147,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(entity0));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void updateStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
@@ -159,7 +160,7 @@ public class RepositorySecurityDecoratorTest
 		{
 			repositorySecurityDecorator.update(entities);
 		}
-		catch (MolgenisPermissionException e)
+		catch (EntityTypePermissionDeniedException e)
 		{
 			verify(delegateRepository, times(1)).getEntityType();
 			verifyNoMoreInteractions(delegateRepository);
@@ -185,7 +186,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void findAllStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
@@ -220,7 +221,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void findAllStreamFetchNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
@@ -237,7 +238,7 @@ public class RepositorySecurityDecoratorTest
 		repositorySecurityDecorator.findAll(entityIds, fetch);
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void findAllNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
@@ -267,7 +268,7 @@ public class RepositorySecurityDecoratorTest
 		verify(delegateRepository, times(1)).findOneById(id, fetch);
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void findOneNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
@@ -297,7 +298,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(entities.collect(Collectors.toList()), singletonList(entity0));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void findAllAsStreamNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
@@ -328,7 +329,7 @@ public class RepositorySecurityDecoratorTest
 		verify(delegateRepository).forEachBatched(fetch, consumer, 1000);
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void streamFetchNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
@@ -357,7 +358,7 @@ public class RepositorySecurityDecoratorTest
 		assertEquals(aggregateResult, repositorySecurityDecorator.aggregate(aggregateQuery));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[entity\\] with id \\[entityID\\]")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityID permission:COUNT")
 	public void aggregateNoPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);

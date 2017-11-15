@@ -1,9 +1,6 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -194,13 +191,26 @@ public class QueryValidatorTest
 		EnumSet.of(BOOL, DECIMAL, INT, LONG, DATE, DATE_TIME, ENUM, XREF, MREF, CATEGORICAL, CATEGORICAL_MREF)
 			   .forEach(attrType -> queries.add(
 					   new Object[] { new QueryImpl().eq("attr", new Object()), createEntityType(attrType) }));
-		queries.add(new Object[] { new QueryImpl().eq("unknownAttr", "str"), createEntityType(STRING) });
 		queries.add(new Object[] { new QueryImpl().eq("attr", "str"), createEntityType(COMPOUND) });
+		return queries.iterator();
+	}
+
+	@DataProvider(name = "validateUnknownAttributeProvider")
+	public static Iterator<Object[]> validateUnknownAttributeProvider()
+	{
+		List<Object[]> queries = new ArrayList<>(6);
+		queries.add(new Object[] { new QueryImpl().eq("unknownAttr", "str"), createEntityType(STRING) });
 		return queries.iterator();
 	}
 
 	@Test(dataProvider = "validateInvalidProvider", expectedExceptions = MolgenisValidationException.class)
 	public void testValidateInvalid(Query<Entity> query, EntityType entityType)
+	{
+		queryValidator.validate(query, entityType);
+	}
+
+	@Test(dataProvider = "validateUnknownAttributeProvider", expectedExceptions = UnknownAttributeException.class)
+	public void testValidateUnknownAttribute(Query<Entity> query, EntityType entityType)
 	{
 		queryValidator.validate(query, entityType);
 	}

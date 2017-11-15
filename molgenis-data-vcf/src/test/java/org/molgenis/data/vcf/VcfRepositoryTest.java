@@ -57,7 +57,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6528
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file; nested exception is java.io.IOException: error processing source")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file")
 	public void testGetEntityType() throws IOException
 	{
 		VcfReaderFactory vcfReaderFactory = mock(VcfReaderFactory.class);

@@ -1,6 +1,9 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.validation.EntityReferenceUnknownConstraintViolationException;
+import org.molgenis.data.validation.EnumConstraintModificationException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
@@ -58,33 +61,32 @@ public class LongAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { 2L, XREF, MolgenisValidationException.class,
-				"Unknown xref value '2' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ 2L, CATEGORICAL, MolgenisValidationException.class,
-						"Unknown xref value '2' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ 4L, ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ 1L, DATE, MolgenisValidationException.class,
+		return new Object[][] { { 2L, XREF, EntityReferenceUnknownConstraintViolationException.class,
+				"type:MAINENTITY attribute:mainAttribute value: 2" },
+				{ 2L, CATEGORICAL, EntityReferenceUnknownConstraintViolationException.class,
+						"type:MAINENTITY attribute:mainAttribute value: 2" },
+				{ 4L, ENUM, EnumConstraintModificationException.class, "type:MAINENTITY" },
+				{ 1L, DATE, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [DATE] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, DATE_TIME, MolgenisValidationException.class,
+				{ 1L, DATE_TIME, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [DATE_TIME] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, MREF, MolgenisValidationException.class,
+				{ 1L, MREF, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [MREF] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ 1L, CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [CATEGORICAL_MREF] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, EMAIL, MolgenisValidationException.class,
+				{ 1L, EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [EMAIL] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, HTML, MolgenisValidationException.class,
+				{ 1L, HTML, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [HTML] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, HYPERLINK, MolgenisValidationException.class,
+				{ 1L, HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [HYPERLINK] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, COMPOUND, MolgenisValidationException.class,
+				{ 1L, COMPOUND, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [COMPOUND] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, FILE, MolgenisValidationException.class,
+				{ 1L, FILE, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [FILE] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, BOOL, MolgenisValidationException.class,
+				{ 1L, BOOL, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [BOOL] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
-				{ 1L, SCRIPT, MolgenisValidationException.class,
+				{ 1L, SCRIPT, MolgenisDataException.class,
 						"Attribute data type update from [LONG] to [SCRIPT] not allowed, allowed types are [CATEGORICAL, DECIMAL, ENUM, INT, STRING, TEXT, XREF]" },
 				{ 1L, ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };

@@ -9,10 +9,10 @@ import org.mockito.MockitoSession;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -186,7 +186,7 @@ public class PostgreSqlRepositoryTest
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Cannot update \\[entity\\] with id \\[id1\\] because it does not exist")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:entity id:id1")
 	public void testUpdateEntityDoesNotExist()
 	{
 		Attribute idAttr = mock(Attribute.class);

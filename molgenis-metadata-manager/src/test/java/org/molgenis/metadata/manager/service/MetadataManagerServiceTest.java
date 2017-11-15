@@ -89,7 +89,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(actual, expected);
 	}
 
-	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "Unknown EntityType \\[unknownId\\]")
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:unknownId")
 	public void testGetNonExistingEditorEntityType()
 	{
 		metadataManagerService.getEditorEntityType("unknownId");

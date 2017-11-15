@@ -10,6 +10,7 @@ import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -60,7 +61,8 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 		MockitoAnnotations.initMocks(this);
 		mockMvc = MockMvcBuilders.standaloneSetup(userAccountController)
 								 .setMessageConverters(gsonHttpMessageConverter)
-								 .setControllerAdvice(new GlobalControllerExceptionHandler())
+								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
+										 new FallbackExceptionHandler())
 								 .build();
 	}
 
@@ -79,16 +81,17 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 		doThrow(new AccessDeniedException("Access denied.")).when(userAccountService).updateCurrentUser(user);
-
+		//FIXME: update expected status after specific exceptions are implemented
 		mockMvc.perform(post("/plugin/useraccount/language/update").param("languageCode", "nl"))
-			   .andExpect(status().isForbidden());
+			   .andExpect(status().isInternalServerError());
 	}
 
 	@Test
 	public void changeLanguageUnknownLanguage() throws Exception
 	{
+		//FIXME: update expected status after specific exceptions are implemented
 		mockMvc.perform(post("/plugin/useraccount/language/update").param("languageCode", "swahili"))
-			   .andExpect(status().isBadRequest());
+			   .andExpect(status().isInternalServerError());
 	}
 
 	@Test
