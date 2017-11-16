@@ -219,6 +219,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+            <version>1.12</version>
+        </dependency>
+        <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core</artifactId>
             <version>${project.version}</version>

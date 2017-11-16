@@ -230,6 +230,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.antMatchers("/files/**")
 				.permitAll()
 
+				.antMatchers("/migration/**")
+				.permitAll()
+
 				.antMatchers('/' + PATH_SEGMENT_APPS + "/**")
 				.permitAll()
 
@@ -248,8 +251,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.logout()
 				.deleteCookies("JSESSIONID")
-				.addLogoutHandler((req, res, auth) ->
-				{
+				.addLogoutHandler((req, res, auth) -> {
 					if (req.getSession(false) != null
 							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -257,8 +259,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					}
 				})
 
-				.logoutSuccessHandler((req, res, auth) ->
-				{
+				.logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
