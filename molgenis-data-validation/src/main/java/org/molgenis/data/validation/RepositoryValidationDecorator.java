@@ -4,6 +4,9 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.constraint.AttributeValueConstraint;
+import org.molgenis.data.validation.constraint.AttributeValueConstraintViolation;
+import org.molgenis.data.validation.constraint.ConstraintViolation;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
@@ -12,7 +15,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -147,7 +149,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		// other validation steps might not be able to handle invalid data types, stop here
 		if (validationResource.hasViolations())
 		{
-			throw new MolgenisValidationException(validationResource.getViolations());
+			throw new ValidationException(validationResource.getViolations());
 		}
 
 		if (validationProfile.isValidateRequired())
@@ -169,7 +171,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 		if (validationResource.hasViolations())
 		{
-			throw new MolgenisValidationException(validationResource.getViolations());
+			throw new ValidationException(validationResource.getViolations());
 		}
 	}
 
@@ -318,10 +320,8 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity.getEntities(
 					nonNillableAttr.getName()).iterator().hasNext()))
 			{
-				ConstraintViolation constraintViolation = new ConstraintViolation(
-						format("The attribute '%s' of entity '%s' can not be null.", nonNillableAttr.getName(),
-								getName()), (long) validationResource.getRow());
-				validationResource.addViolation(constraintViolation);
+				validationResource.addViolation(new AttributeValueConstraintViolation(AttributeValueConstraint.NOT_NULL,
+						AttributeValue.create(nonNillableAttr, value)));
 			}
 		});
 	}
@@ -329,7 +329,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	private void validateEntityValueTypes(Entity entity, ValidationResource validationResource)
 	{
 		// entity attributes validation
-		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
+		List<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
 		if (attrViolations != null && !attrViolations.isEmpty())
 		{
 			attrViolations.forEach(validationResource::addViolation);
@@ -356,10 +356,9 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 						validationMode == ValidationMode.UPDATE && existingEntityId != null && !existingEntityId.equals(
 								entity.getIdValue())))
 				{
-					ConstraintViolation constraintViolation = new ConstraintViolation(
-							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
-									uniqueAttr.getName(), getName()), (long) validationResource.getRow());
-					validationResource.addViolation(constraintViolation);
+					validationResource.addViolation(
+							new AttributeValueConstraintViolation(AttributeValueConstraint.UNIQUE,
+									AttributeValue.create(uniqueAttr, attrValue)));
 				}
 				else
 				{
@@ -400,12 +399,9 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 					boolean selfReference = entity.getEntityType().getId().equals(refAttr.getRefEntity().getId());
 					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
 					{
-						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",
-								DataConverter.toString(refEntity.getIdValue()), refAttr.getName(), getName());
-
-						ConstraintViolation constraintViolation = new ConstraintViolation(message,
-								(long) validationResource.getRow());
-						validationResource.addViolation(constraintViolation);
+						validationResource.addViolation(
+								new AttributeValueConstraintViolation(AttributeValueConstraint.ENTITY_REFERENCE,
+										AttributeValue.create(refAttr, entity.get(refAttr.getName()))));
 					}
 				}
 			}
@@ -455,9 +451,9 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 			if (value != null && existingValue != null && !value.equals(existingValue))
 			{
-				validationResource.addViolation(new ConstraintViolation(
-						format("The attribute '%s' of entity '%s' can not be changed it is readonly.",
-								readonlyAttr.getName(), getName()), (long) validationResource.getRow()));
+				validationResource.addViolation(
+						new AttributeValueConstraintViolation(AttributeValueConstraint.READ_ONLY,
+								AttributeValue.create(readonlyAttr, value)));
 			}
 		});
 	}
@@ -475,7 +471,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		private Map<String, HugeMap<Object, Object>> uniqueAttrsValues;
 		private List<Attribute> readonlyAttrs;
 		private boolean selfReferencing;
-		private Set<ConstraintViolation> violations;
+		private List<org.molgenis.data.validation.constraint.ConstraintViolation> violations;
 
 		public ValidationResource()
 		{
@@ -577,18 +573,18 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			return violations != null && !violations.isEmpty();
 		}
 
-		public void addViolation(ConstraintViolation constraintViolation)
+		public void addViolation(org.molgenis.data.validation.constraint.ConstraintViolation constraintViolation)
 		{
 			if (violations == null)
 			{
-				violations = new LinkedHashSet<>();
+				violations = new ArrayList<>();
 			}
 			violations.add(constraintViolation);
 		}
 
-		public Set<ConstraintViolation> getViolations()
+		public List<org.molgenis.data.validation.constraint.ConstraintViolation> getViolations()
 		{
-			return violations != null ? unmodifiableSet(violations) : emptySet();
+			return violations != null ? unmodifiableList(violations) : emptyList();
 		}
 
 		@Override

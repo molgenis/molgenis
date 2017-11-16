@@ -4,8 +4,9 @@ import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.PackageConstraint;
+import org.molgenis.data.validation.constraint.PackageConstraintViolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,10 +38,8 @@ public class PackageValidator
 	{
 		if (MetaUtils.isSystemPackage(package_) && !systemPackageRegistry.containsPackage(package_))
 		{
-			LOG.error(
-					"validatePackageAllowed, the system package registry does not contain package with id {} and label {}",
-					package_.getId(), package_.getLabel());
-			throw new MolgenisValidationException(new ConstraintViolation("Modifying system packages is not allowed"));
+			throw new ValidationException(
+					new PackageConstraintViolation(PackageConstraint.SYSTEM_PACKAGE_READ_ONLY, package_));
 		}
 	}
 

@@ -11,8 +11,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.AttributeUtils;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
 import org.molgenis.util.stream.MultimapCollectors;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -28,6 +27,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.validation.constraint.EntityTypeConstraint.*;
 import static org.molgenis.util.EntityUtils.asStream;
 
 /**
@@ -49,7 +49,7 @@ public class EntityTypeValidator
 	 * Validates entity meta data
 	 *
 	 * @param entityType entity meta data
-	 * @throws MolgenisValidationException if entity meta data is not valid
+	 * @throws ValidationException if entity meta data is not valid
 	 */
 	public void validate(EntityType entityType)
 	{
@@ -75,7 +75,7 @@ public class EntityTypeValidator
 	 * Validate that the entity meta data backend exists
 	 *
 	 * @param entityType entity meta data
-	 * @throws MolgenisValidationException if the entity meta data backend does not exist
+	 * @throws ValidationException if the entity meta data backend does not exist
 	 */
 	private void validateBackend(EntityType entityType)
 	{
@@ -84,7 +84,7 @@ public class EntityTypeValidator
 		RepositoryCollection repoCollection = dataService.getMeta().getBackend(backendName);
 		if (repoCollection == null)
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(format("Unknown backend [%s]", backendName)));
+			throw new ValidationException(new EntityTypeConstraintViolation(BACKEND_EXISTS, entityType));
 		}
 	}
 
@@ -93,7 +93,7 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType    entity meta data
 	 * @param ownAllAttrMap attribute identifier to attribute map
-	 * @throws MolgenisValidationException if one or more lookup attributes are not entity attributes
+	 * @throws ValidationException if one or more lookup attributes are not entity attributes
 	 */
 	private static void validateOwnLookupAttributes(EntityType entityType, Map<String, Attribute> ownAllAttrMap)
 	{
@@ -104,8 +104,7 @@ public class EntityTypeValidator
 			Attribute ownAttr = ownAllAttrMap.get(ownLookupAttr.getIdentifier());
 			if (ownAttr == null)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Lookup attribute [%s] is not part of the entity attributes", ownLookupAttr.getName())));
+				throw new ValidationException(new EntityTypeConstraintViolation(LOOKUP_ATTRIBUTES_EXIST, entityType));
 			}
 		});
 	}
@@ -115,7 +114,7 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType    entity meta data
 	 * @param ownAllAttrMap attribute identifier to attribute map
-	 * @throws MolgenisValidationException if the label attribute is not an entity attribute
+	 * @throws ValidationException if the label attribute is not an entity attribute
 	 */
 	private static void validateOwnLabelAttribute(EntityType entityType, Map<String, Attribute> ownAllAttrMap)
 	{
@@ -127,8 +126,7 @@ public class EntityTypeValidator
 			Attribute ownAttr = ownAllAttrMap.get(ownLabelAttr.getIdentifier());
 			if (ownAttr == null)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Label attribute [%s] is not part of the entity attributes", ownLabelAttr.getName())));
+				throw new ValidationException(new EntityTypeConstraintViolation(LABEL_ATTRIBUTE_EXISTS, entityType));
 			}
 		}
 	}
@@ -138,7 +136,7 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType    entity meta data
 	 * @param ownAllAttrMap attribute identifier to attribute map
-	 * @throws MolgenisValidationException if the ID attribute is not an entity attribute
+	 * @throws ValidationException if the ID attribute is not an entity attribute
 	 */
 	private static void validateOwnIdAttribute(EntityType entityType, Map<String, Attribute> ownAllAttrMap)
 	{
@@ -150,41 +148,32 @@ public class EntityTypeValidator
 			Attribute ownAttr = ownAllAttrMap.get(ownIdAttr.getIdentifier());
 			if (ownAttr == null)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not part of the entity attributes", entityType.getId(),
-								ownIdAttr.getName())));
+				throw new ValidationException(new EntityTypeConstraintViolation(ID_ATTRIBUTE_EXISTS, entityType));
 			}
 
 			// Validate that ID attribute data type is allowed
 			if (!AttributeUtils.isIdAttributeTypeAllowed(ownIdAttr))
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] type [%s] is not allowed", entityType.getId(),
-								ownIdAttr.getName(), ownIdAttr.getDataType().toString())));
+				throw new ValidationException(new EntityTypeConstraintViolation(ID_ATTRIBUTE_TYPE, entityType));
 			}
 
 			// Validate that ID attribute is unique
 			if (!ownIdAttr.isUnique())
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a unique attribute", entityType.getId(),
-								ownIdAttr.getName())));
+				throw new ValidationException(new EntityTypeConstraintViolation(ID_ATTRIBUTE_UNIQUE, entityType));
 			}
 
 			// Validate that ID attribute is not nillable
 			if (ownIdAttr.isNillable())
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getId(),
-								ownIdAttr.getName())));
+				throw new ValidationException(new EntityTypeConstraintViolation(ID_ATTRIBUTE_NOT_NULL, entityType));
 			}
 		}
 		else
 		{
 			if (!entityType.isAbstract() && entityType.getIdAttribute() == null)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] is missing required ID attribute", entityType.getId())));
+				throw new ValidationException(new EntityTypeConstraintViolation(ID_ATTRIBUTE_REQUIRED, entityType));
 			}
 		}
 	}
@@ -196,16 +185,14 @@ public class EntityTypeValidator
 	 * 3) validates that this entity has attributes defined at all
 	 *
 	 * @param entityType entity meta data
-	 * @throws MolgenisValidationException if an attribute is owned by another entity or a parent attribute has the same name
+	 * @throws ValidationException if an attribute is owned by another entity or a parent attribute has the same name
 	 */
 	private static void validateOwnAttributes(EntityType entityType)
 	{
 		// Validate that entity has attributes
 		if (asStream(entityType.getAllAttributes()).collect(toList()).isEmpty())
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] does not contain any attributes. Did you use the correct package+entity name combination in both the entities as well as the attributes sheet?",
-							entityType.getId())));
+			throw new ValidationException(new EntityTypeConstraintViolation(HAS_ATTRIBUTES, entityType));
 		}
 
 		// Validate that entity does not contain multiple attributes with the same name
@@ -215,9 +202,7 @@ public class EntityTypeValidator
 		{
 			if (attrMultiMap.get(attrName).size() > 1)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] contains multiple attributes with name [%s]", entityType.getId(),
-								attrName)));
+				throw new ValidationException(new EntityTypeConstraintViolation(ATTRIBUTES_UNIQUE, entityType));
 			}
 		});
 
@@ -235,9 +220,7 @@ public class EntityTypeValidator
 			{
 				if (extendsAllAttrMap.containsKey(attr.getName()))
 				{
-					throw new MolgenisValidationException(new ConstraintViolation(
-							format("An attribute with name [%s] already exists in entity [%s] or one of its parents",
-									attr.getName(), extendsEntityType.getId())));
+					throw new ValidationException(new EntityTypeConstraintViolation(ATTRIBUTE_IN_PARENT, entityType));
 				}
 			});
 		}
@@ -247,7 +230,7 @@ public class EntityTypeValidator
 	 * Validates if this entityType extends another entityType. If so, checks whether that parent entityType is abstract.
 	 *
 	 * @param entityType entity meta data
-	 * @throws MolgenisValidationException if the entity extends from a non-abstract entity
+	 * @throws ValidationException if the entity extends from a non-abstract entity
 	 */
 	private static void validateExtends(EntityType entityType)
 	{
@@ -256,9 +239,7 @@ public class EntityTypeValidator
 			EntityType extendedEntityType = entityType.getExtends();
 			if (!extendedEntityType.isAbstract())
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("EntityType [%s] is not abstract; EntityType [%s] can't extend it",
-								entityType.getExtends().getId(), entityType.getId())));
+				throw new ValidationException(new EntityTypeConstraintViolation(EXTENDS_NOT_ABSTRACT, entityType));
 			}
 		}
 	}
@@ -269,7 +250,7 @@ public class EntityTypeValidator
 	 * - Validates that the fully qualified name, simple name and package name are consistent with each other
 	 *
 	 * @param entityType entity meta data
-	 * @throws MolgenisValidationException if the entity simple name content is invalid or the fully qualified name, simple name and package name are not consistent
+	 * @throws ValidationException if the entity simple name content is invalid or the fully qualified name, simple name and package name are not consistent
 	 */
 	private static void validateEntityName(EntityType entityType)
 	{
@@ -283,7 +264,7 @@ public class EntityTypeValidator
 			}
 			catch (MolgenisDataException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
+				throw new ValidationException(new EntityTypeConstraintViolation(NAME, entityType));
 			}
 		}
 	}
@@ -294,7 +275,7 @@ public class EntityTypeValidator
 	 * - Validates that the label does not only consist of white space
 	 *
 	 * @param entityType entity meta data
-	 * @throws MolgenisValidationException if the entity label is invalid
+	 * @throws ValidationException if the entity label is invalid
 	 */
 	private static void validateEntityLabel(EntityType entityType)
 	{
@@ -303,13 +284,11 @@ public class EntityTypeValidator
 		{
 			if (label.isEmpty())
 			{
-				throw new MolgenisValidationException(
-						new ConstraintViolation(format("Label of EntityType [%s] is empty", entityType.getId())));
+				throw new ValidationException(new EntityTypeConstraintViolation(LABEL_NOT_EMPTY, entityType));
 			}
 			else if (label.trim().equals(""))
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Label of EntityType [%s] contains only white space", entityType.getId())));
+				throw new ValidationException(new EntityTypeConstraintViolation(LABEL_NOT_WHITESPACE_ONLY, entityType));
 			}
 		}
 	}
@@ -327,9 +306,7 @@ public class EntityTypeValidator
 			if (MetaUtils.isSystemPackage(package_) && !systemEntityTypeRegistry.hasSystemEntityType(
 					entityType.getId()))
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getId(),
-								entityType.getPackage().getId())));
+				throw new ValidationException(new EntityTypeConstraintViolation(PACKAGE_NOT_SYSTEM, entityType));
 			}
 		}
 	}
