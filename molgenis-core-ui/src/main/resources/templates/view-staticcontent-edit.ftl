@@ -33,5 +33,8 @@
 
 <script>
     CKEDITOR.replace('elm1');
+    CKEDITOR.dtd.$removeEmpty['i'] = false;
+    CKEDITOR.dtd.$removeEmpty['span'] = false;
+    CKEDITOR.dtd.$removeEmpty['button'] = false;
 </script>
 <@footer/>
