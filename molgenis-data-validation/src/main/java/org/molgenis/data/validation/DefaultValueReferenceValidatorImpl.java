@@ -7,15 +7,16 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.validation.constraint.DefaultValueReferenceConstraintViolation;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.support.AttributeUtils.getDefaultTypedValue;
+import static org.molgenis.data.validation.constraint.DefaultValueReferenceConstraint.REFERENCE_EXISTS;
 
 @Component
 class DefaultValueReferenceValidatorImpl implements DefaultValueReferenceValidator
@@ -67,10 +68,8 @@ class DefaultValueReferenceValidatorImpl implements DefaultValueReferenceValidat
 		if (defaultValueMultiMap.containsKey(toAttributeDefaultValue(entityId)))
 		{
 			Collection<Attribute> attributes = defaultValueMultiMap.get(toAttributeDefaultValue(entityId));
-			throw new MolgenisValidationException(new ConstraintViolation(
-					String.format("'%s' with id '%s' is referenced as default value by attribute(s): '%s'",
-							entityType.getLabel(), entityId.toString(),
-							attributes.stream().map(Attribute::getName).collect(Collectors.joining(", ")))));
+			throw new ValidationException(
+					new DefaultValueReferenceConstraintViolation(REFERENCE_EXISTS, entityType, entityId, attributes));
 		}
 	}
 
@@ -79,9 +78,7 @@ class DefaultValueReferenceValidatorImpl implements DefaultValueReferenceValidat
 	{
 		if (!getDefaultValueMap(entityType).isEmpty())
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					String.format("'%s' entities are referenced as default value by attributes",
-							entityType.getLabel())));
+			throw new ValidationException(new DefaultValueReferenceConstraintViolation(REFERENCE_EXISTS, entityType));
 		}
 	}
 

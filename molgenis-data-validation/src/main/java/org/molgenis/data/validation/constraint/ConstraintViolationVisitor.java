@@ -11,4 +11,6 @@ public interface ConstraintViolationVisitor
 	void visit(AttributeValueConstraintViolation attributeValueConstraintViolation);
 
 	void visit(PackageConstraintViolation packageConstraintViolation);
+
+	void visit(DefaultValueReferenceConstraintViolation entityConstraintViolation);
 }

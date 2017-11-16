@@ -8,7 +8,11 @@ import org.molgenis.data.meta.model.Tag;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.joining;
 
 public class MessageConstraintViolationVisitor implements ConstraintViolationVisitor
 {
@@ -278,6 +282,42 @@ public class MessageConstraintViolationVisitor implements ConstraintViolationVis
 			default:
 				throw new UnexpectedEnumException(attributeValueConstraintViolation.getConstraint());
 		}
+		constraintViolationMessages.add(ConstraintViolationMessage.create(errorCode, message, localizedMessage));
+	}
+
+	@Override
+	public void visit(DefaultValueReferenceConstraintViolation entityConstraintViolation)
+	{
+		DefaultValueReferenceConstraint entityConstraint = entityConstraintViolation.getConstraint();
+		EntityType entityType = entityConstraintViolation.getEntityType();
+		Optional<Object> entityId = entityConstraintViolation.getEntityId();
+		Optional<Collection<Attribute>> attributes = entityConstraintViolation.getAttributes();
+
+		String message;
+		if (entityId.isPresent() && attributes.isPresent())
+		{
+			message = String.format("constraint:%s type:%s entity:%s attributes:[%s]",
+					entityConstraint.getType().name(), entityType.getId(), entityId.toString(),
+					attributes.get().stream().map(Attribute::getIdentifier).collect(joining(",")));
+		}
+		else
+		{
+			message = String.format("constraint:%s type:%s", entityConstraint.getType().name(), entityType.getId());
+		}
+
+		String errorCode;
+		String localizedMessage;
+		switch (entityConstraint)
+		{
+			case REFERENCE_EXISTS:
+				errorCode = "V__";
+				// TODO '%s' entities are referenced as default value by attributes"
+				localizedMessage = message; // TODO implement (something like: '%s' with id '%s' is referenced as default value by attribute(s): '%s')
+				break;
+			default:
+				throw new UnexpectedEnumException(entityConstraint);
+		}
+
 		constraintViolationMessages.add(ConstraintViolationMessage.create(errorCode, message, localizedMessage));
 	}
 
