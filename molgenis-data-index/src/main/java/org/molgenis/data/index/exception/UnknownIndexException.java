@@ -3,6 +3,7 @@ package org.molgenis.data.index.exception;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
+@Deprecated // FIXME extend from LocalizedRuntimeException
 public class UnknownIndexException extends IndexException
 {
 	private static final long serialVersionUID = 1L;

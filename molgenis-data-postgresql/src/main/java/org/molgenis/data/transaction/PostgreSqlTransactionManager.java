@@ -1,7 +1,7 @@
 package org.molgenis.data.transaction;
 
 import org.apache.commons.logging.LogFactory;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.DataAccessException;
 import org.molgenis.data.populate.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,15 +188,15 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 		super.doResume(molgenisTransaction.getDataSourceTransaction(), suspendedResources);
 	}
 
-	private MolgenisDataException translateTransactionException(TransactionException transactionException)
+	private DataAccessException translateTransactionException(TransactionException transactionException)
 	{
 		for (TransactionExceptionTranslator transactionExceptionTranslator : transactionExceptionTranslatorRegistry.getTransactionExceptionTranslators())
 		{
-			MolgenisDataException molgenisDataException = transactionExceptionTranslator.doTranslate(
+			DataAccessException molgenisDataAccessException = transactionExceptionTranslator.doTranslate(
 					transactionException);
-			if (molgenisDataException != null)
+			if (molgenisDataAccessException != null)
 			{
-				return molgenisDataException;
+				return molgenisDataAccessException;
 			}
 		}
 		throw new IllegalArgumentException(

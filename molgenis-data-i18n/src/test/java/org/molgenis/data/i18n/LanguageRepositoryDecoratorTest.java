@@ -12,8 +12,8 @@ import org.testng.annotations.Test;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_EN;
-import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_NL;
+import static org.molgenis.data.i18n.LanguageServiceImpl.LANGUAGE_CODE_EN;
+import static org.molgenis.data.i18n.LanguageServiceImpl.LANGUAGE_CODE_NL;
 import static org.testng.Assert.assertEquals;
 
 public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
@@ -24,7 +24,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	@Mock
 	private Repository<Language> delegateRepository;
 	@Mock
-	private LanguageService languageService;
+	private LanguageServiceImpl languageService;
 
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
 

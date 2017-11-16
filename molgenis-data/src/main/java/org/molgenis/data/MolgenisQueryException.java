@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
-public class MolgenisQueryException extends RuntimeException
+@Deprecated // FIXME extend from LocalizedRuntimeException
+public class MolgenisQueryException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;
 

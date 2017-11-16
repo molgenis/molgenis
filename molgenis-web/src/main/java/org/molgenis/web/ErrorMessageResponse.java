@@ -1,5 +1,6 @@
-package org.molgenis.util;
+package org.molgenis.web;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,19 +42,29 @@ public class ErrorMessageResponse
 		this.errors.addAll(errorMessages);
 	}
 
+	public static ErrorMessageResponse create(String errorMessage)
+	{
+		return create(errorMessage, null);
+	}
+
+	public static ErrorMessageResponse create(String errorMessage, @Nullable String errorCode)
+	{
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(errorMessage, errorCode));
+	}
+
 	public static class ErrorMessage
 	{
 		private static final String DEFAULT_ERROR_MESSAGE = "Unknown error";
 
 		private final String message;
-		private final Integer code;
+		private final String code;
 
 		public ErrorMessage(String message)
 		{
 			this(message, null);
 		}
 
-		public ErrorMessage(String message, Integer code)
+		public ErrorMessage(String message, String code)
 		{
 			this.message = message != null ? message : DEFAULT_ERROR_MESSAGE;
 			this.code = code;
@@ -64,7 +75,7 @@ public class ErrorMessageResponse
 			return message;
 		}
 
-		public Integer getCode()
+		public String getCode()
 		{
 			return code;
 		}

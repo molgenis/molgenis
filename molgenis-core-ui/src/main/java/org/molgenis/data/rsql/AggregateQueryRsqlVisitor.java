@@ -93,7 +93,7 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 		Attribute attr = entityType.getAttribute(attrTokens[0]);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
+			throw new UnknownAttributeException(entityType, attrName);
 		}
 		EntityType entityTypeAtDepth;
 		for (int i = 1; i < attrTokens.length; ++i)
@@ -102,7 +102,7 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 			attr = entityTypeAtDepth.getAttribute(attrTokens[i]);
 			if (attr == null)
 			{
-				throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
+				throw new UnknownAttributeException(entityTypeAtDepth, attrName);
 			}
 		}
 

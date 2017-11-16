@@ -1,7 +1,7 @@
 package org.molgenis.util;
 
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
@@ -39,14 +39,14 @@ public class SecurityDecoratorUtilsTest extends AbstractTestNGSpringContextTests
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_ENTITY_COUNT_entityTypeId" })
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[READ\\] permission on entity type \\[entityTypeLabel\\] with id \\[entityTypeId\\]")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityTypeId permission:READ")
 	public void testValidatePermissionUserDifferentPermission()
 	{
 		SecurityDecoratorUtils.validatePermission(getMockEntityType(), Permission.READ);
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_ENTITY_COUNT_otherEntityTypeId" })
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[COUNT\\] permission on entity type \\[entityTypeLabel\\] with id \\[entityTypeId\\]")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityTypeId permission:COUNT")
 	public void testValidatePermissionUserDifferentEntityType()
 	{
 		SecurityDecoratorUtils.validatePermission(getMockEntityType(), Permission.COUNT);

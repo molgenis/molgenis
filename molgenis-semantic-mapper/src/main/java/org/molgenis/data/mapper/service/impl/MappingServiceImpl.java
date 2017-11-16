@@ -33,6 +33,7 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
@@ -91,7 +92,7 @@ public class MappingServiceImpl implements MappingService
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
 		{
-			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
+			throw new UnknownEntityException(dataService.getEntityType(MAPPING_PROJECT), mappingProjectId);
 		}
 		String mappingProjectName = mappingProject.getName();
 
@@ -126,7 +127,7 @@ public class MappingServiceImpl implements MappingService
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
 		{
-			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
+			throw new UnknownEntityException(dataService.getEntityType(MAPPING_PROJECT), mappingProjectId);
 		}
 
 		return cloneMappingProject(mappingProject, clonedMappingProjectName);

@@ -13,6 +13,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -608,7 +609,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = MolgenisPermissionException.class)
 	public void aggregateUser() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
@@ -637,7 +638,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity type \\[entity\\] with id \\[entity\\]")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entity permission:WRITEMETA")
 	public void deleteUserNotAllowed()
 	{
 		delete();

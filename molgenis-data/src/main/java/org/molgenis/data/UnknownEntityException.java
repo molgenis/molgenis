@@ -1,26 +1,42 @@
 package org.molgenis.data;
 
-public class UnknownEntityException extends MolgenisDataException
+import org.molgenis.data.meta.model.EntityType;
+
+import java.text.MessageFormat;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
+
+@SuppressWarnings("squid:S1948")
+public class UnknownEntityException extends UnknownDataException
 {
-	private static final long serialVersionUID = 5202731000953612564L;
+	private static final String ERROR_CODE = "D02";
 
-	public UnknownEntityException()
+	private final EntityType entityType;
+	private final Object entityId;
+
+	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
+		super(ERROR_CODE);
+		this.entityType = requireNonNull(entityType);
+		this.entityId = requireNonNull(entityId);
 	}
 
-	public UnknownEntityException(String msg)
+	@Override
+	public String getMessage()
 	{
-		super(msg);
+		return String.format("type:%s id:%s", entityType.getId(), entityId.toString());
 	}
 
-	public UnknownEntityException(Throwable t)
+	@Override
+	public String getLocalizedMessage()
 	{
-		super(t);
+		return getLanguageService().map(languageService ->
+		{
+			String format = languageService.getString(ERROR_CODE);
+			String language = languageService.getCurrentUserLanguageCode();
+			return MessageFormat.format(format, entityId.toString(), entityType.getLabel(language));
+		}).orElse(super.getLocalizedMessage());
 	}
-
-	public UnknownEntityException(String msg, Throwable t)
-	{
-		super(msg, t);
-	}
-
 }
+

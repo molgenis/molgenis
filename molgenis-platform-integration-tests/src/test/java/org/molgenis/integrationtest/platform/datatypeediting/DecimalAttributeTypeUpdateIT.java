@@ -1,6 +1,8 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.validation.EnumConstraintModificationException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
@@ -58,33 +60,32 @@ public class DecimalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { 2L, XREF, MolgenisValidationException.class,
+		return new Object[][] { { 2L, XREF, MolgenisDataException.class,
 				"Attribute data type update from [DECIMAL] to [XREF] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 2.0, CATEGORICAL, MolgenisValidationException.class,
+				{ 2.0, CATEGORICAL, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [CATEGORICAL] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 4.0, ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ 1.0, DATE, MolgenisValidationException.class,
+				{ 4.0, ENUM, EnumConstraintModificationException.class, "type:MAINENTITY" },
+				{ 1.0, DATE, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [DATE] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, DATE_TIME, MolgenisValidationException.class,
+				{ 1.0, DATE_TIME, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [DATE_TIME] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, MREF, MolgenisValidationException.class,
+				{ 1.0, MREF, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [MREF] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ 1.0, CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [CATEGORICAL_MREF] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, EMAIL, MolgenisValidationException.class,
+				{ 1.0, EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [EMAIL] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, HTML, MolgenisValidationException.class,
+				{ 1.0, HTML, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [HTML] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, HYPERLINK, MolgenisValidationException.class,
+				{ 1.0, HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [HYPERLINK] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, COMPOUND, MolgenisValidationException.class,
+				{ 1.0, COMPOUND, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [COMPOUND] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, FILE, MolgenisValidationException.class,
+				{ 1.0, FILE, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [FILE] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, BOOL, MolgenisValidationException.class,
+				{ 1.0, BOOL, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [BOOL] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, SCRIPT, MolgenisValidationException.class,
+				{ 1.0, SCRIPT, MolgenisDataException.class,
 						"Attribute data type update from [DECIMAL] to [SCRIPT] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
 				{ 1.0, ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
@@ -110,6 +111,7 @@ public class DecimalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 		}
 		catch (Exception exception)
 		{
+			System.out.println(exception.getClass());
 			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
 			assertEquals(exception.getMessage(), exceptionMessage);
 		}

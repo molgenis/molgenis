@@ -5,6 +5,7 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.model.*;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.job.IndexJobScheduler;
@@ -20,7 +21,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.EntityReferenceConstraintViolationException;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityListenersService entityListenersService;
 	@Autowired
-	private LanguageService languageService;
+	private LanguageServiceImpl languageService;
 	@Autowired
 	private L10nStringMetaData l10nStringMetaData;
 	@Autowired
@@ -242,8 +243,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		if (dataService.count(LANGUAGE) == 0)
 		{
-			dataService.add(LANGUAGE,
-					languageFactory.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME,
+			dataService.add(LANGUAGE, languageFactory.create(LanguageServiceImpl.DEFAULT_LANGUAGE_CODE,
+					LanguageServiceImpl.DEFAULT_LANGUAGE_NAME,
 							true));
 			dataService.add(LANGUAGE,
 					languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
@@ -402,10 +403,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			});
 			fail("Should throw exception!");
 		}
-		catch (MolgenisValidationException expected)
+		catch (EntityReferenceConstraintViolationException expected)
 		{
-			assertEquals(expected.getMessage(),
-					"Value '2' for attribute 'ref_id_attr' is referenced by entity 'TypeTestDynamic'.");
+			assertEquals(expected.getMessage(), "type:TypeTestDynamic attribute:ref_id_attr value:2");
 		}
 
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
@@ -1067,7 +1067,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(repo.getName(), entityTypeDynamic.getId());
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = UnknownEntityException.class)
+	@Test(singleThreaded = true, expectedExceptions = UnknownEntityTypeException.class)
 	public void testGetUnknownRepository()
 	{
 		dataService.getRepository("bogus");
@@ -1104,7 +1104,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.query("bogus");
 			fail("Should have thrown UnknownEntityException");
 		}
-		catch (UnknownEntityException e)
+		catch (UnknownEntityTypeException e)
 		{
 			// Expected
 		}

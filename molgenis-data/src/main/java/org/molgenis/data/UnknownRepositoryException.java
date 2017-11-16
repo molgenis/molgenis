@@ -1,16 +1,33 @@
 package org.molgenis.data;
 
-import static java.lang.String.format;
+import java.text.MessageFormat;
 
-public class UnknownRepositoryException extends MolgenisDataException
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
+
+public class UnknownRepositoryException extends UnknownDataException
 {
-	public UnknownRepositoryException(String repoName)
+	private static final String ERROR_CODE = "D05";
+
+	private final String repositoryId;
+
+	public UnknownRepositoryException(String repositoryId)
 	{
-		super(format("Unknown repository [%s]", repoName));
+		super(ERROR_CODE);
+		this.repositoryId = requireNonNull(repositoryId);
 	}
 
-	public UnknownRepositoryException(String repoName, String repoCollectionName)
+	@Override
+	public String getMessage()
 	{
-		super(format("Unknown repository [%s] in repository collection [%s]", repoName, repoCollectionName));
+		return String.format("repository:%s", repositoryId);
+	}
+
+	@Override
+	public String getLocalizedMessage()
+	{
+		return getLanguageService().map(
+				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), repositoryId))
+								   .orElse(super.getLocalizedMessage());
 	}
 }

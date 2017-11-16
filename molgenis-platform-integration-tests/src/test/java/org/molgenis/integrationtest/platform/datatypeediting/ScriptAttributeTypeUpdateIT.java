@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
@@ -61,37 +62,37 @@ public class ScriptAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "function log(data){console.log(data)}", BOOL, MolgenisValidationException.class,
+		return new Object[][] { { "function log(data){console.log(data)}", BOOL, MolgenisDataException.class,
 				"Attribute data type update from [SCRIPT] to [BOOL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", INT, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", INT, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [INT] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", LONG, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", LONG, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [LONG] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", DECIMAL, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", DECIMAL, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [DECIMAL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", XREF, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", XREF, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [XREF] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", CATEGORICAL, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", CATEGORICAL, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [CATEGORICAL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", EMAIL, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", EMAIL, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [EMAIL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", HYPERLINK, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", HYPERLINK, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [HYPERLINK] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", HTML, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", HTML, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [HTML] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", ENUM, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", ENUM, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [ENUM] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", DATE, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", DATE, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [DATE] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", DATE_TIME, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", DATE_TIME, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [DATE_TIME] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", MREF, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", MREF, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [MREF] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", CATEGORICAL_MREF, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", CATEGORICAL_MREF, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [CATEGORICAL_MREF] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", FILE, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", FILE, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [FILE] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", COMPOUND, MolgenisValidationException.class,
+				{ "function log(data){console.log(data)}", COMPOUND, MolgenisDataException.class,
 						"Attribute data type update from [SCRIPT] to [COMPOUND] not allowed, allowed types are [STRING, TEXT]" },
 				{ "function log(data){console.log(data)}", ONE_TO_MANY, MolgenisValidationException.class,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };

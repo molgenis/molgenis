@@ -13,6 +13,9 @@ import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
+import org.molgenis.data.importer.exception.IncompatibleSystemMetadataException;
+import org.molgenis.data.importer.exception.UnknownBackendException;
+import org.molgenis.data.importer.exception.UnknownPackageImportException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
@@ -575,7 +578,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						if (dataService.getMeta().getBackend(emxEntityBackend) == null)
 						{
-							throw new MolgenisDataException("Unknown backend '" + emxEntityBackend + '\'');
+							throw new UnknownBackendException(emxEntityBackend);
 						}
 					}
 					else
@@ -590,10 +593,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					Package p = intermediateResults.getPackage(emxEntityPackage);
 					if (p == null)
 					{
-						throw new MolgenisDataException(
-								"Unknown package: '" + emxEntityPackage + "' for entity '" + emxEntityName
-										+ "'. Please specify the package on the " + EMX_PACKAGES
-										+ " sheet and use the fully qualified package and entity names.");
+						throw new UnknownPackageImportException(emxEntityPackage, emxEntityName);
 					}
 					entityType.setPackage(p);
 				}
@@ -861,8 +861,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					if (!isIdAttributeTypeAllowed(attr))
 					{
-						throw new MolgenisDataException("Identifier is of type [" + attr.getDataType()
-								+ "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
+						throw new InvalidIdentifierAttributeTypeException(attr.getDataType());
 					}
 				}
 
@@ -1227,8 +1226,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (!allEntityTypeMap.containsKey(emd.getId())) allEntityTypeMap.put(emd.getId(), emd);
 			else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getId()))) && emd instanceof SystemEntityType)
 			{
-				throw new MolgenisDataException(
-						"SystemEntityType in the database conflicts with the metadata for this import");
+				throw new IncompatibleSystemMetadataException();
 			}
 		});
 	}
