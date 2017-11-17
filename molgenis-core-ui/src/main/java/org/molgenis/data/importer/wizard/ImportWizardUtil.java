@@ -1,5 +1,6 @@
 package org.molgenis.data.importer.wizard;
 
+import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.ui.wizard.Wizard;
 import org.slf4j.Logger;
@@ -42,7 +43,8 @@ public class ImportWizardUtil
 		return dbAction;
 	}
 
-	public static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
+	public static void handleException(CodedRuntimeException e, ImportWizard importWizard, BindingResult result,
+			Logger logger,
 			String entityImportOption)
 	{
 		File file = importWizard.getFile();
@@ -53,7 +55,7 @@ public class ImportWizardUtil
 					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), entityImportOption), e);
 		}
 
-		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getLocalizedMessage()));
 	}
 
 	public static void validateImportWizard(Wizard wizard)

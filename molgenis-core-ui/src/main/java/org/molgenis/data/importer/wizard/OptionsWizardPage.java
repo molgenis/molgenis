@@ -1,9 +1,9 @@
 package org.molgenis.data.importer.wizard;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.ImportService;
@@ -78,7 +78,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 					return null;
 				}
 			}
-			catch (MolgenisDataException e)
+			catch (CodedRuntimeException e)
 			{
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 				return null;
@@ -103,7 +103,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		{
 			return validateInput(importWizard.getFile(), importWizard, result);
 		}
-		catch (Exception e)
+		catch (CodedRuntimeException e)
 		{
 			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 		}
