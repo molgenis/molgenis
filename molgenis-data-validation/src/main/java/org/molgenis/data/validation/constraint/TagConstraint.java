@@ -1,11 +1,6 @@
 package org.molgenis.data.validation.constraint;
 
-public enum TagConstraint implements Constraint
+public enum TagConstraint
 {
-	UNKNOWN_RELATION_IRI;
-
-	public ConstraintType getType()
-	{
-		return ConstraintType.TAG;
-	}
+	UNKNOWN_RELATION_IRI
 }

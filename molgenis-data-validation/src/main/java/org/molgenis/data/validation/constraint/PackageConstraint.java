@@ -1,11 +1,6 @@
 package org.molgenis.data.validation.constraint;
 
-public enum PackageConstraint implements Constraint
+public enum PackageConstraint
 {
-	SYSTEM_PACKAGE_READ_ONLY;
-
-	public ConstraintType getType()
-	{
-		return ConstraintType.PACKAGE;
-	}
+	SYSTEM_PACKAGE_READ_ONLY
 }

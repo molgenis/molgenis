@@ -2,8 +2,8 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.validation.constraint.ConstraintViolation;
-import org.molgenis.data.validation.constraint.ConstraintViolationMessage;
-import org.molgenis.data.validation.constraint.MessageConstraintViolationVisitor;
+import org.molgenis.data.validation.message.ConstraintViolationMessage;
+import org.molgenis.data.validation.message.ValidationExceptionMessageGenerator;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class ValidationException extends CodedRuntimeException
 	private List<ConstraintViolationMessage> createConstraintViolationMessages(
 			List<org.molgenis.data.validation.constraint.ConstraintViolation> constraintViolations)
 	{
-		MessageConstraintViolationVisitor visitor = new MessageConstraintViolationVisitor();
+		ValidationExceptionMessageGenerator visitor = new ValidationExceptionMessageGenerator();
 		constraintViolations.forEach(constraintViolation -> constraintViolation.accept(visitor));
 		return visitor.getConstraintViolationMessages();
 	}

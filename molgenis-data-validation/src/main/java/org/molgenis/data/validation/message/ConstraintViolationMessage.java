@@ -1,4 +1,4 @@
-package org.molgenis.data.validation.constraint;
+package org.molgenis.data.validation.message;
 
 import com.google.auto.value.AutoValue;
 

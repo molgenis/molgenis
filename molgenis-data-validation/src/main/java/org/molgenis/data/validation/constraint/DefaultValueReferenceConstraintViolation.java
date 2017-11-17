@@ -31,7 +31,6 @@ public class DefaultValueReferenceConstraintViolation implements ConstraintViola
 		this.attributes = attributes;
 	}
 
-	@Override
 	public DefaultValueReferenceConstraint getConstraint()
 	{
 		return entityConstraint;

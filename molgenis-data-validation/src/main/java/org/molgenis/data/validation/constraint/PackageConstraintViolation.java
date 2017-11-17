@@ -15,7 +15,6 @@ public final class PackageConstraintViolation implements ConstraintViolation
 		this.aPackage = requireNonNull(aPackage);
 	}
 
-	@Override
 	public PackageConstraint getConstraint()
 	{
 		return packageConstraint;

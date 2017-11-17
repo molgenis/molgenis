@@ -16,7 +16,6 @@ public final class AttributeValueConstraintViolation implements ConstraintViolat
 		this.attributeValue = requireNonNull(attributeValue);
 	}
 
-	@Override
 	public AttributeValueConstraint getConstraint()
 	{
 		return attributeValueConstraint;

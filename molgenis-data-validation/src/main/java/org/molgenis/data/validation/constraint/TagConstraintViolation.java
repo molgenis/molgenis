@@ -15,7 +15,6 @@ public class TagConstraintViolation implements ConstraintViolation
 		this.tag = requireNonNull(tag);
 	}
 
-	@Override
 	public TagConstraint getConstraint()
 	{
 		return tagConstraint;

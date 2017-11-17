@@ -15,7 +15,6 @@ public final class EntityTypeConstraintViolation implements ConstraintViolation
 		this.entityType = requireNonNull(entityType);
 	}
 
-	@Override
 	public EntityTypeConstraint getConstraint()
 	{
 		return entityTypeConstraint;

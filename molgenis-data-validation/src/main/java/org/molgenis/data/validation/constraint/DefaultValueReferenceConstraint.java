@@ -1,11 +1,6 @@
 package org.molgenis.data.validation.constraint;
 
-public enum DefaultValueReferenceConstraint implements Constraint
+public enum DefaultValueReferenceConstraint
 {
-	REFERENCE_EXISTS;
-
-	public ConstraintType getType()
-	{
-		return ConstraintType.ENTITY;
-	}
+	REFERENCE_EXISTS
 }
