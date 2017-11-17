@@ -15,7 +15,6 @@ import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.importer.emx.exception.*;
 import org.molgenis.data.importer.exception.IncompatibleSystemMetadataException;
-import org.molgenis.data.importer.exception.UnknownBackendException;
 import org.molgenis.data.importer.exception.UnknownPackageImportException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.DefaultPackage;
@@ -580,7 +579,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						if (dataService.getMeta().getBackend(emxEntityBackend) == null)
 						{
-							throw new UnknownBackendException(emxEntityBackend);
+							throw new UnknownRepositoryCollectionException(emxEntityBackend);
 						}
 					}
 					else

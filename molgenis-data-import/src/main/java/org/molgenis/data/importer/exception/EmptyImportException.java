@@ -4,7 +4,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EmptyImportException extends ImporterException
 {
-	private static final String ERROR_CODE = "I04";
+	private static final String ERROR_CODE = "I06";
 
 	public EmptyImportException()
 	{
@@ -14,7 +14,7 @@ public class EmptyImportException extends ImporterException
 	@Override
 	public String getMessage()
 	{
-		return String.format("Incompatible SystemEntityMetadata");
+		return "";
 	}
 
 	@Override

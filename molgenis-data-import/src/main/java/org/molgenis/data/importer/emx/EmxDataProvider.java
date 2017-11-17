@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
@@ -143,8 +142,7 @@ class EmxDataProvider implements DataProvider
 							entity.set(attrName, refEntities);
 						}
 						break;
-					case COMPOUND:
-						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+					case COMPOUND://Since this is inside a "atomic attributes" loop this should not be possible
 					default:
 						throw new UnexpectedEnumException(attrType);
 				}
