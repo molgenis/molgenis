@@ -24,21 +24,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.ENABLED_EXPRESSION;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Controller
 @RequestMapping(URI)
@@ -46,7 +47,6 @@ public class NegotiatorController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(NegotiatorController.class);
 	private static final String ID = "directory";
-	@SuppressWarnings("WeakerAccess")
 	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final RestTemplate restTemplate;
@@ -57,7 +57,8 @@ public class NegotiatorController extends PluginController
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
-			QueryRsqlConverter rsqlQueryConverter, LanguageService languageService, JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
+			QueryRsqlConverter rsqlQueryConverter, LanguageService languageService,
+			JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
 	{
 		super(URI);
 		this.restTemplate = requireNonNull(restTemplate);
@@ -75,58 +76,66 @@ public class NegotiatorController extends PluginController
 		return settings != null && permissions.hasPermissionOnPlugin(ID, Permission.READ);
 	}
 
-	@PostMapping("/export")
+	@PostMapping("/validate")
 	@ResponseBody
-	public ExportResponse exportToNegotiator(@RequestBody NegotiatorRequest request)
+	public ExportValidationResponse validateNegotiatorExport(@RequestBody NegotiatorRequest request)
 	{
 		ResourceBundle i18n = languageService.getBundle();
 
-		String redirectUrl = "";
-		String warning = "";
-		boolean success = true;
+		boolean isValidRequest = true;
+		String message = "";
 
 		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
-
-		if (entityConfig != null)
+		if (null != entityConfig)
 		{
-			NegotiatorConfig config = entityConfig.getNegotiatorConfig();
-			LOG.info("NegotiatorRequest\n\n{}\n\nreceived, sending request", request);
+			LOG.info("Validating negotiator request\n\n{}", request);
 
 			List<Entity> collectionEntities = getCollectionEntities(request);
 			List<String> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
 
-			if (disabledCollections.isEmpty())
+			if (!disabledCollections.isEmpty())
 			{
-				List<Collection> collections = collectionEntities.stream()
-																 .map(entity -> getEntityCollection(entityConfig,
-																		 entity))
-																 .collect(toList());
-
-				if (!collections.isEmpty())
-				{
-					HttpEntity<NegotiatorQuery> queryHttpEntity = getNegotiatorQueryHttpEntity(request, config,
-							collections);
-					postQueryToNegotiator(config, queryHttpEntity);
-					redirectUrl = postQueryToNegotiator(config, queryHttpEntity);
-				}
-				else
-				{
-					success = false;
-					warning = i18n.getString("dataexplorer_directory_no_rows");
-				}
+				message = String.format(i18n.getString("dataexplorer_directory_disabled"), disabledCollections.size(),
+						String.join(", ", disabledCollections));
 			}
-			else
+
+			if (collectionEntities.isEmpty() || (collectionEntities.size() == disabledCollections.size()))
 			{
-				success = false;
-				warning = String.format(i18n.getString("dataexplorer_directory_disabled"),
-						String.join(",", disabledCollections));
+				isValidRequest = false;
+				message = i18n.getString("dataexplorer_directory_no_rows");
 			}
 		}
 		else
 		{
 			throw new MolgenisDataException(i18n.getString("dataexplorer_directory_no_config"));
 		}
-		return ExportResponse.create(success, warning, redirectUrl);
+		return ExportValidationResponse.create(isValidRequest, message);
+	}
+
+	@PostMapping("/export")
+	@ResponseBody
+	public String exportToNegotiator(@RequestBody NegotiatorRequest request)
+	{
+		LOG.info("Sending Negotiator request");
+
+		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
+		NegotiatorConfig config = entityConfig.getNegotiatorConfig();
+		String expression = config.getString(ENABLED_EXPRESSION);
+
+		List<Collection> nonDisabledCollectionEntities = getCollectionEntities(request).stream()
+																					   .filter(entity ->
+																							   expression == null
+																									   || evaluateExpressionOnEntity(
+																									   expression,
+																									   entity))
+																					   .map(entity -> getEntityCollection(
+																							   entityConfig, entity))
+																					   .collect(toList());
+
+		HttpEntity<NegotiatorQuery> queryHttpEntity = getNegotiatorQueryHttpEntity(request, config,
+				nonDisabledCollectionEntities);
+
+		return postQueryToNegotiator(config, queryHttpEntity);
 	}
 
 	private Collection getEntityCollection(NegotiatorEntityConfig entityConfig, Entity entity)
@@ -164,23 +173,6 @@ public class NegotiatorController extends PluginController
 		return stringValue;
 	}
 
-	private List<String> getDisabledCollections(List<Entity> collectionEntities, NegotiatorEntityConfig config)
-	{
-		List<String> disabledLabels = new ArrayList<>();
-		String expression = config.getString(NegotiatorEntityConfigMeta.ENABLED_EXPRESSION);
-
-		for (Entity collectionEntity : collectionEntities)
-		{
-			if (expression != null)
-			{
-				Object result = jsMagmaScriptEvaluator.eval(expression, collectionEntity);
-				Boolean enabled = Boolean.valueOf(result.toString());
-				if (!enabled) disabledLabels.add(collectionEntity.getLabelValue().toString());
-			}
-		}
-		return disabledLabels;
-	}
-
 	private String postQueryToNegotiator(NegotiatorConfig config, HttpEntity<NegotiatorQuery> queryHttpEntity)
 	{
 		try
@@ -205,6 +197,20 @@ public class NegotiatorController extends PluginController
 		return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
 	}
 
+	private List<String> getDisabledCollections(List<Entity> entities, NegotiatorEntityConfig config)
+	{
+		String expression = config.getString(ENABLED_EXPRESSION);
+		return entities.stream()
+					   .filter(entity -> !evaluateExpressionOnEntity(expression, entity))
+					   .map(entity -> entity.getLabelValue().toString())
+					   .collect(Collectors.toList());
+	}
+
+	private boolean evaluateExpressionOnEntity(String expression, Entity entity)
+	{
+		return expression == null ? true : Boolean.valueOf(jsMagmaScriptEvaluator.eval(expression, entity).toString());
+	}
+
 	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(NegotiatorRequest request, NegotiatorConfig config,
 			List<Collection> collections)
 	{
@@ -212,7 +218,7 @@ public class NegotiatorController extends PluginController
 				request.getnToken());
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setContentType(APPLICATION_JSON);
 		String username = config.getUsername();
 		String password = config.getPassword();
 		headers.set("Authorization", generateBase64Authentication(username, password));
