@@ -1,5 +1,8 @@
 package org.molgenis.data.rest;
 
+import cz.jirutka.rsql.parser.RSQLParser;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
@@ -750,7 +753,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public RestController restController()
 		{
 			return new RestController(authenticationSettings(), dataService(), tokenService(), authenticationManager(),
-					permissionService(), userAccountService(), new MolgenisRSQL(),
+					permissionService(), userAccountService(), new MolgenisRSQL(new RSQLParser()),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
 							servletUriComponentsBuilderFactory()), languageService());
 		}
