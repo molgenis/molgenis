@@ -100,7 +100,7 @@ class MessageGeneratorAttributeValue
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
-				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString(),
+				attribute.getLabel(), attributeValue.getValue().toString(),
 				attribute.getRangeMin(), attribute.getRangeMax()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
@@ -121,7 +121,7 @@ class MessageGeneratorAttributeValue
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
-				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString(),
+				attribute.getLabel(), attributeValue.getValue().toString(),
 				attribute.getDataType().getMaxLength()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
@@ -149,7 +149,7 @@ class MessageGeneratorAttributeValue
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
-				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString(),
+				attribute.getLabel(), attributeValue.getValue().toString(),
 				attribute.getEnumOptions().stream().collect(Collectors.joining(","))).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
@@ -176,7 +176,7 @@ class MessageGeneratorAttributeValue
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
-				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString()).orElse(
+				attribute.getLabel(), attributeValue.getValue().toString()).orElse(
 				message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
