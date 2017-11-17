@@ -78,12 +78,13 @@ class MessageGeneratorDefaultValueReference
 		String message;
 		if (entityId.isPresent() && attributes.isPresent())
 		{
-			message = String.format("constraint:%s type:%s entity:%s attributes:[%s]", constraint.name(), entityType.getId(), entityId.toString(),
+			message = String.format("constraint:%s entityType:%s entity:%s attributes:[%s]", constraint.name(),
+					entityType.getId(), entityId.toString(),
 					attributes.get().stream().map(Attribute::getIdentifier).collect(joining(",")));
 		}
 		else
 		{
-			message = String.format("constraint:%s type:%s", constraint.name(), entityType.getId());
+			message = String.format("constraint:%s entityType:%s", constraint.name(), entityType.getId());
 		}
 		return message;
 	}
