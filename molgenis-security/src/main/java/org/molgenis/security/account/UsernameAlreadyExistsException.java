@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class UsernameAlreadyExistsException extends Exception
 {
 	private static final long serialVersionUID = 1L;

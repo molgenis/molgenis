@@ -2,14 +2,15 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.TagConstraint;
+import org.molgenis.data.validation.constraint.TagConstraintViolation;
 import org.springframework.stereotype.Component;
-
-import static java.lang.String.format;
 
 /**
  * {@link org.molgenis.data.meta.model.Tag Tag} validator
+ *
+ * TODO change 'validate(Tag tag)' return type from void to Set<TagConstraintViolation>
  */
 @Component
 public class TagValidator
@@ -18,7 +19,7 @@ public class TagValidator
 	 * Validates tag
 	 *
 	 * @param tag tag
-	 * @throws MolgenisValidationException if tag is not valid
+	 * @throws ValidationException if tag is not valid
 	 */
 	@SuppressWarnings("MethodMayBeStatic")
 	public void validate(Tag tag)
@@ -27,8 +28,7 @@ public class TagValidator
 		Relation relation = Relation.forIRI(relationIri);
 		if (relation == null)
 		{
-			throw new MolgenisValidationException(
-					new ConstraintViolation(format("Unknown relation IRI [%s]", relationIri)));
+			throw new ValidationException(new TagConstraintViolation(TagConstraint.UNKNOWN_RELATION_IRI, tag));
 		}
 	}
 }

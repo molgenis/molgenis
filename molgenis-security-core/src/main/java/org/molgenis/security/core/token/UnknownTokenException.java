@@ -5,7 +5,7 @@ import org.springframework.security.core.AuthenticationException;
 /**
  * Exception thrown when an invalid token is encountered
  */
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class UnknownTokenException extends AuthenticationException
 {
 	private static final long serialVersionUID = -9049083620238941432L;

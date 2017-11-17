@@ -7,8 +7,9 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.AttributeConstraint;
+import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -32,7 +32,9 @@ import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMod
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 
 /**
- * Attribute metadata validator
+ * {@link Attribute} validator.
+ *
+ * TODO change 'validate(Attribute attr, ValidationMode validationMode)' return type from void to Set<AttributeConstraintViolation>
  */
 @Component
 public class AttributeValidator
@@ -83,9 +85,8 @@ public class AttributeValidator
 		{
 			if (attr.getParent().getDataType() != COMPOUND)
 			{
-				throw new MolgenisDataException(
-						format("Parent attribute [%s] of attribute [%s] is not of type compound",
-								attr.getParent().getName(), attr.getName()));
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.COMPOUND_PARENT, attr));
 			}
 		}
 	}
@@ -96,11 +97,9 @@ public class AttributeValidator
 
 		if (!childrenIsNullOrEmpty && attr.getDataType() != COMPOUND)
 		{
-			throw new MolgenisDataException(
-					format("Attribute [%s] is not of type COMPOUND and can therefor not have children",
-							attr.getName()));
+			throw new ValidationException(
+					new AttributeConstraintViolation(AttributeConstraint.NON_COMPOUND_CHILDREN, attr));
 		}
-
 	}
 
 	private static void validateAdd(Attribute newAttr)
@@ -119,13 +118,12 @@ public class AttributeValidator
 		AttributeType newDataType = newAttr.getDataType();
 		if (!Objects.equals(currentDataType, newDataType))
 		{
-			validateUpdateDataType(currentDataType, newDataType);
+			validateUpdateDataType(currentAttr, newAttr);
 
 			if (newAttr.isInversedBy())
 			{
-				throw new MolgenisDataException(
-						format("Attribute data type change not allowed for bidirectional attribute [%s]",
-								newAttr.getName()));
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.TYPE_UPDATE_BIDIRECTIONAL, newAttr));
 			}
 		}
 
@@ -145,32 +143,35 @@ public class AttributeValidator
 		String value = attr.getDefaultValue();
 		if (value != null)
 		{
+			// TODO validate using attribute validation expression
 			if (attr.isUnique())
 			{
-				throw new MolgenisDataException("Unique attribute " + attr.getName() + " cannot have default value");
+				throw new AttributeDefaultNotUniqueConstraintViolationException(
+						attr); // TODO throw validation exception
 			}
 
+			// TODO validate using attribute validation expression
 			if (attr.getExpression() != null)
 			{
-				throw new MolgenisDataException("Computed attribute " + attr.getName() + " cannot have default value");
+				throw new AttributeDefaultNotComputedConstraintViolationException(
+						attr); // TODO throw validation exception
 			}
 
 			AttributeType fieldType = attr.getDataType();
 			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
 			{
-				throw new MolgenisDataException(
-						"Default value for attribute [" + attr.getName() + "] exceeds the maximum length for datatype "
-								+ attr.getDataType().name());
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_MAX_LENGTH, attr));
 			}
 
 			if (fieldType == AttributeType.EMAIL)
 			{
-				checkEmail(value);
+				checkEmail(attr);
 			}
 
 			if (fieldType == AttributeType.HYPERLINK)
 			{
-				checkHyperlink(value);
+				checkHyperlink(attr);
 			}
 
 			if (fieldType == AttributeType.ENUM)
@@ -186,8 +187,8 @@ public class AttributeValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Invalid default value [%s] for data type [%s]", value, attr.getDataType())));
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_TYPE, attr));
 			}
 
 			if (validateEntityReferences)
@@ -200,8 +201,9 @@ public class AttributeValidator
 								   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
 								   .count() == 0)
 					{
-						throw new MolgenisValidationException(new ConstraintViolation(
-								format("Default value [%s] refers to an unknown entity", value)));
+						throw new ValidationException(
+								new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_ENTITY_REFERENCE,
+										attr));
 					}
 				}
 				else if (isMultipleReferenceType(attr))
@@ -215,19 +217,21 @@ public class AttributeValidator
 														.collect(toList()))
 								   .count() < Iterables.size(refEntitiesValue))
 					{
-						throw new MolgenisValidationException(new ConstraintViolation(
-								format("Default value [%s] refers to one or more unknown entities", value)));
+						throw new ValidationException(
+								new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_ENTITY_REFERENCE,
+										attr));
 					}
 				}
 			}
 		}
 	}
 
-	private void checkEmail(String value)
+	private void checkEmail(Attribute attribute)
 	{
-		if (!emailValidator.isValid(value, null))
+		if (!emailValidator.isValid(attribute.getDefaultValue(), null))
 		{
-			throw new MolgenisDataException("Default value [" + value + "] is not a valid email address");
+			throw new ValidationException(
+					new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_EMAIL, attribute));
 		}
 	}
 
@@ -239,22 +243,22 @@ public class AttributeValidator
 
 			if (!enumOptions.contains(value))
 			{
-				throw new MolgenisDataException(
-						"Invalid default value [" + value + "] for enum [" + attr.getName() + "] value must be one of "
-								+ enumOptions.toString());
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_ENUM, attr));
 			}
 		}
 	}
 
-	private static void checkHyperlink(String value)
+	private static void checkHyperlink(Attribute attr)
 	{
 		try
 		{
-			new URI(value);
+			new URI(attr.getDefaultValue());
 		}
 		catch (URISyntaxException e)
 		{
-			throw new MolgenisDataException("Default value [" + value + "] is not a valid hyperlink.");
+			throw new ValidationException(
+					new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_HYPERLINK, attr));
 		}
 	}
 
@@ -266,11 +270,12 @@ public class AttributeValidator
 		{
 			try
 			{
-				NameValidator.validateAttributeName(attr.getName());
+				NameValidator.validateAttributeName(
+						attr.getName()); // TODO name validator should return constraint violation
 			}
 			catch (MolgenisDataException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
+				throw new ValidationException(new AttributeConstraintViolation(AttributeConstraint.NAME, attr));
 			}
 		}
 	}
@@ -288,17 +293,16 @@ public class AttributeValidator
 		{
 			if (!isSingleReferenceType(mappedByAttr))
 			{
-				throw new MolgenisDataException(
-						format("Invalid mappedBy attribute [%s] data type [%s].", mappedByAttr.getName(),
-								mappedByAttr.getDataType()));
+				// new AttributeConstraintViolation(attr, AttributeConstraintType.MAPPED_BY_TYPE)
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.MAPPED_BY_TYPE, attr));
 			}
 
 			Attribute refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
 			if (refAttr == null)
 			{
-				throw new MolgenisDataException(
-						format("mappedBy attribute [%s] is not part of entity [%s].", mappedByAttr.getName(),
-								attr.getRefEntity().getId()));
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.MAPPED_BY_REFERENCE, attr));
 			}
 		}
 	}
@@ -323,24 +327,24 @@ public class AttributeValidator
 					String refAttrName = orderClause.getAttr();
 					if (refEntity.getAttribute(refAttrName) == null)
 					{
-						throw new MolgenisDataException(
-								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getId(), refAttrName, attr.getEntityType().getId(), attr.getName(),
-										orderBy.toSortString()));
+						throw new ValidationException(
+								new AttributeConstraintViolation(AttributeConstraint.ORDER_BY_REFERENCE, attr));
 					}
 				}
 			}
 		}
 	}
 
-	private static void validateUpdateDataType(AttributeType currentDataType, AttributeType newDataType)
+	private static void validateUpdateDataType(Attribute currentAttribute, Attribute newAttribute)
 	{
+		AttributeType currentDataType = currentAttribute.getDataType();
+		AttributeType newDataType = newAttribute.getDataType();
+
 		EnumSet<AttributeType> allowedDatatypes = DATA_TYPE_ALLOWED_TRANSITIONS.get(currentDataType);
 		if (!allowedDatatypes.contains(newDataType))
 		{
-			throw new MolgenisDataException(
-					format("Attribute data type update from [%s] to [%s] not allowed, allowed types are %s",
-							currentDataType.toString(), newDataType.toString(), allowedDatatypes.toString()));
+			throw new ValidationException(
+					new AttributeConstraintViolation(AttributeConstraint.TYPE_UPDATE, newAttribute));
 		}
 	}
 

@@ -1,6 +1,6 @@
 package org.molgenis.oneclickimporter.exceptions;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class EmptySheetException extends Exception
 {
 	public EmptySheetException(String s)

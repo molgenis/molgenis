@@ -2,7 +2,7 @@ package org.molgenis.dataexplorer.galaxy;
 
 import java.io.IOException;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class GalaxyDataExportException extends IOException
 {
 	private static final long serialVersionUID = 1L;

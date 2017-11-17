@@ -6,7 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import java.util.List;
 import java.util.Objects;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class AnnotationException extends RuntimeException
 {
 	private final Integer entityNumber;
