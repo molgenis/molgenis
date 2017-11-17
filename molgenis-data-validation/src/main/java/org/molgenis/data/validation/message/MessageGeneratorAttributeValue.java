@@ -2,8 +2,15 @@ package org.molgenis.data.validation.message;
 
 import org.molgenis.data.AttributeValue;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.validation.constraint.AttributeValueConstraint;
 import org.molgenis.data.validation.constraint.AttributeValueConstraintViolation;
 import org.molgenis.util.UnexpectedEnumException;
+
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.text.MessageFormat.format;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 class MessageGeneratorAttributeValue
 {
@@ -13,64 +20,178 @@ class MessageGeneratorAttributeValue
 
 	static ConstraintViolationMessage createMessage(AttributeValueConstraintViolation constraintViolation)
 	{
-		AttributeValue attributeValue = constraintViolation.getAttributeValue();
-		Attribute attribute = attributeValue.getAttribute();
-		String message = String.format("constraint:%s type:%s attribute:%s value:%s",
-				constraintViolation.getConstraint().name(), attribute.getEntity().getId(), attribute.getIdentifier(),
-				attributeValue.toString());
+		ConstraintViolationMessage constraintViolationMessage;
 
-		String errorCode;
-		String localizedMessage;
-		switch (constraintViolation.getConstraint())
+		AttributeValueConstraint constraint = constraintViolation.getConstraint();
+		switch (constraint)
 		{
-
 			case EMAIL:
-				errorCode = "Vab";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageEmail("V70", constraintViolation);
 				break;
 			case ENTITY_REFERENCE:
-				errorCode = "Vbc";
-				localizedMessage = message; // TODO implement (something like: Unknown xref value '%s' for attribute '%s' of entity '%s'.)
+				constraintViolationMessage = createMessageEntityReference("V71", constraintViolation);
 				break;
 			case ENUM:
-				errorCode = "Vcd";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageEnum("V72", constraintViolation);
 				break;
 			case EXPRESSION:
-				errorCode = "Vde";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageExpression("V73", constraintViolation);
 				break;
 			case HYPERLINK:
-				errorCode = "Vef";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageHyperlink("V74", constraintViolation);
 				break;
 			case MAX_LENGTH:
-				errorCode = "Vfg";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageMaxLength("V75", constraintViolation);
 				break;
 			case NOT_NULL:
-				errorCode = "Vgh";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageNotNull("V76", constraintViolation);
 				break;
 			case RANGE:
-				errorCode = "Vhi";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageRange("V77", constraintViolation);
 				break;
 			case READ_ONLY:
-				errorCode = "Vij";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageReadOnly("V78", constraintViolation);
 				break;
 			case TYPE:
-				errorCode = "Vjk";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageType("V79", constraintViolation);
 				break;
 			case UNIQUE:
-				errorCode = "Vkl";
-				localizedMessage = message;
+				constraintViolationMessage = createMessageUnique("V80", constraintViolation);
 				break;
 			default:
-				throw new UnexpectedEnumException(constraintViolation.getConstraint());
+				throw new UnexpectedEnumException(constraint);
 		}
+		return constraintViolationMessage;
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageUnique(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageType(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageReadOnly(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		AttributeValue attributeValue = constraintViolation.getAttributeValue();
+		Attribute attribute = attributeValue.getAttribute();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
+				attribute.getLabel()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageRange(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		AttributeValue attributeValue = constraintViolation.getAttributeValue();
+		Attribute attribute = attributeValue.getAttribute();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
+				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString(),
+				attribute.getRangeMin(), attribute.getRangeMax()).orElse(message);
+		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageNotNull(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageMaxLength(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		AttributeValue attributeValue = constraintViolation.getAttributeValue();
+		Attribute attribute = attributeValue.getAttribute();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
+				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString(),
+				attribute.getDataType().getMaxLength()).orElse(message);
+		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageHyperlink(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageExpression(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageEnum(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		AttributeValue attributeValue = constraintViolation.getAttributeValue();
+		Attribute attribute = attributeValue.getAttribute();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
+				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString(),
+				attribute.getEnumOptions().stream().collect(Collectors.joining(","))).orElse(message);
+		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageEntityReference(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageEmail(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	private static ConstraintViolationMessage createMessage(String errorCode,
+			AttributeValueConstraintViolation constraintViolation)
+	{
+		AttributeValue attributeValue = constraintViolation.getAttributeValue();
+		Attribute attribute = attributeValue.getAttribute();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntityType().getLabel(),
+				attribute.getLabel(), attribute.getDataType().toString(), attributeValue.getValue().toString()).orElse(
+				message);
+		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+	}
+
+	private static String getMessage(AttributeValueConstraintViolation constraintViolation)
+	{
+		AttributeValue attributeValue = constraintViolation.getAttributeValue();
+		Attribute attribute = attributeValue.getAttribute();
+		return String.format("constraint:%s entityType:%s attribute:%s value:%s",
+				constraintViolation.getConstraint().name(), attribute.getEntity().getId(), attribute.getIdentifier(),
+				attributeValue.getValue().toString());
+	}
+
+	private static Optional<String> getLocalizedMessage(String errorCode, Object... arguments)
+	{
+		return getLanguageService().map(languageService -> format(languageService.getString(errorCode), arguments));
 	}
 }
