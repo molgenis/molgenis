@@ -51,16 +51,16 @@ class MessageGeneratorEntityType
 			case HAS_ATTRIBUTES:
 				constraintViolationMessage = createMessageHasAttributes("V48", constraintViolation);
 				break;
-			case ATTRIBUTES_UNIQUE: // TODO entity attribute constraint: Entity [%s] contains multiple attributes with name [%s]
+			case ATTRIBUTES_UNIQUE:
 				constraintViolationMessage = createMessageAttributesUnique("V49", constraintViolation);
 				break;
-			case ATTRIBUTE_IN_PARENT: // TODO entity attribute constraint: An attribute with name [%s] already exists in entity [%s] or one of its parents
+			case ATTRIBUTE_IN_PARENT:
 				constraintViolationMessage = createMessageAttributeInParent("V50", constraintViolation);
 				break;
 			case EXTENDS_NOT_ABSTRACT:
 				constraintViolationMessage = createMessageExtendsNotAbstract("V51", constraintViolation);
 				break;
-			case NAME: // TODO improve message such that NameValidator.validateEntityName messages are returned
+			case NAME:
 				constraintViolationMessage = createMessageName("V52", constraintViolation);
 				break;
 			case LABEL_NOT_EMPTY:
@@ -93,18 +93,18 @@ class MessageGeneratorEntityType
 	private static ConstraintViolationMessage createMessageLookupAttributesExist(String errorCode,
 			EntityTypeConstraintViolation constraintViolation)
 	{
-		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return createMessageEntityTypeLabel(errorCode, constraintViolation);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageLabelAttributeExists(String errorCode,
 			EntityTypeConstraintViolation constraintViolation)
 	{
+		EntityType entityType = constraintViolation.getEntityType();
+
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode,
-				constraintViolation.getEntityType().getLabelAttribute().getLabel()).orElse(message);
+		String localizedMessage = getLocalizedMessage(errorCode, entityType.getLabel(),
+				entityType.getLabelAttribute().getLabel()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
@@ -167,7 +167,8 @@ class MessageGeneratorEntityType
 		EntityType entityType = constraintViolation.getEntityType();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, entityType.getBackend()).orElse(message);
+		String localizedMessage = getLocalizedMessage(errorCode, entityType.getLabel(), entityType.getBackend()).orElse(
+				message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
@@ -182,6 +183,7 @@ class MessageGeneratorEntityType
 	private static ConstraintViolationMessage createMessageAttributesUnique(String errorCode,
 			EntityTypeConstraintViolation constraintViolation)
 	{
+		// TODO entity attribute constraint: Entity [%s] contains multiple attributes with name [%s]
 		return createMessageEntityTypeLabel(errorCode, constraintViolation);
 	}
 
@@ -189,6 +191,7 @@ class MessageGeneratorEntityType
 	private static ConstraintViolationMessage createMessageAttributeInParent(String errorCode,
 			EntityTypeConstraintViolation constraintViolation)
 	{
+		// TODO entity attribute constraint: An attribute with name [%s] already exists in entity [%s] or one of its parents
 		return createMessageEntityTypeLabel(errorCode, constraintViolation);
 	}
 
@@ -208,7 +211,13 @@ class MessageGeneratorEntityType
 	private static ConstraintViolationMessage createMessageName(String errorCode,
 			EntityTypeConstraintViolation constraintViolation)
 	{
-		return createMessageEntityTypeLabel(errorCode, constraintViolation);
+		// TODO improve message such that NameValidator.validateEntityName messages are returned
+		EntityType entityType = constraintViolation.getEntityType();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, entityType.getLabel(), entityType.getId()).orElse(
+				message);
+		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")

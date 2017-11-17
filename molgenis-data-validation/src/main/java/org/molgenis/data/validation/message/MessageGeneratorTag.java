@@ -43,8 +43,8 @@ class MessageGeneratorTag
 		return getLanguageService().map(languageService -> format(languageService.getString(errorCode), arguments));
 	}
 
-	private static ConstraintViolationMessage createMessageUnknownRelationIri(String errorCode,
-			TagConstraintViolation constraintViolation)
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageUnknownRelationIri(String errorCode, TagConstraintViolation constraintViolation)
 	{
 		Tag tag = constraintViolation.getTag();
 

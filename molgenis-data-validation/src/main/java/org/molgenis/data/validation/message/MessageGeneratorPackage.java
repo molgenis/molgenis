@@ -43,6 +43,7 @@ class MessageGeneratorPackage
 		return getLanguageService().map(languageService -> format(languageService.getString(errorCode), arguments));
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageSystemPackageReadOnly(String errorCode,
 			PackageConstraintViolation constraintViolation)
 	{

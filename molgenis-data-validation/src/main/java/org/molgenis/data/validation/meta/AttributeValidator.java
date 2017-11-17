@@ -293,7 +293,6 @@ public class AttributeValidator
 		{
 			if (!isSingleReferenceType(mappedByAttr))
 			{
-				// new AttributeConstraintViolation(attr, AttributeConstraintType.MAPPED_BY_TYPE)
 				throw new ValidationException(
 						new AttributeConstraintViolation(AttributeConstraint.MAPPED_BY_TYPE, attr));
 			}

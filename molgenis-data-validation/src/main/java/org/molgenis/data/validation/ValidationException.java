@@ -13,7 +13,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class ValidationException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "Vxx"; // TODO error code
+	private static final String ERROR_CODE = "V99";
 
 	private final List<ConstraintViolationMessage> constraintViolationMessages;
 
@@ -41,7 +41,7 @@ public class ValidationException extends CodedRuntimeException
 																	   .map(ConstraintViolationMessage::getLocalizedMessage)
 																	   .collect(joining("\n"));
 		return getLanguageService().map(
-				languageService -> languageService.getString(ERROR_CODE) + "\n" + localizedViolationsMessage)
+				languageService -> languageService.getString(ERROR_CODE) + ": " + localizedViolationsMessage)
 								   .orElse(super.getLocalizedMessage());
 	}
 
