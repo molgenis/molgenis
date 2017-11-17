@@ -2,7 +2,7 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,10 +27,10 @@ public class TagValidatorTest
 		tagValidator.validate(tag);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@Test(expectedExceptions = ValidationException.class)
 	public void validateInvalid() throws Exception
 	{
-		Tag tag = mock(Tag.class);
+		Tag tag = when(mock(Tag.class).getId()).thenReturn("id").getMock();
 		when(tag.getRelationIri()).thenReturn("blaat");
 		tagValidator.validate(tag);
 	}

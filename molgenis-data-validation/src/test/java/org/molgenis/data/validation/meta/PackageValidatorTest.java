@@ -3,7 +3,7 @@ package org.molgenis.data.validation.meta;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -45,7 +45,7 @@ public class PackageValidatorTest
 		packageValidator.validate(package_);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Modifying system packages is not allowed")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:SYSTEM_PACKAGE_READ_ONLY package:sys_myPackage")
 	public void testValidateSystemPackageNotInRegistry() throws Exception
 	{
 		Package package_ = when(mock(Package.class).getId()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
