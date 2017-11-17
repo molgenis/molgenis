@@ -32,9 +32,9 @@ import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMod
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 
 /**
- * Attribute attribute validator
- * <p>
- * TODO throw ValidationException with all constraint violations instead of the first one discovered
+ * {@link Attribute} validator.
+ *
+ * TODO change 'validate(Attribute attr, ValidationMode validationMode)' return type from void to Set<AttributeConstraintViolation>
  */
 @Component
 public class AttributeValidator

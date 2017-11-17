@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * {@link org.molgenis.data.meta.model.Tag Tag} validator
+ *
+ * TODO change 'validate(Tag tag)' return type from void to Set<TagConstraintViolation>
  */
 @Component
 public class TagValidator

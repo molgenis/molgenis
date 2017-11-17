@@ -31,7 +31,9 @@ import static org.molgenis.data.validation.constraint.EntityTypeConstraint.*;
 import static org.molgenis.util.EntityUtils.asStream;
 
 /**
- * Entity metadata validator
+ * {@link EntityType} validator.
+ * <p>
+ * TODO change 'validate(EntityType entityType)' return type from void to Set<EntityTypeConstraintViolation>
  */
 @Component
 public class EntityTypeValidator

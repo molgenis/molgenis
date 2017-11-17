@@ -15,6 +15,8 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * {@link Package} validator
+ *
+ * TODO change 'validate(Package aPackage)' return type from void to Set<PackageConstraintViolation>
  */
 @Component
 public class PackageValidator
