@@ -35,7 +35,7 @@ public class AttributeDefaultNotUniqueConstraintViolationException extends DataI
 		{
 			String languageCode = languageService.getCurrentUserLanguageCode();
 			return MessageFormat.format(languageService.getString(ERROR_CODE),
-					attribute.getEntityType().getLabel(languageCode), attribute.getLabel(languageCode));
+					attribute.getEntity().getLabel(languageCode), attribute.getLabel(languageCode));
 		}).orElse(super.getLocalizedMessage());
 	}
 }

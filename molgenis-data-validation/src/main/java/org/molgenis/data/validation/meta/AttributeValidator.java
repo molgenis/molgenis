@@ -185,7 +185,7 @@ public class AttributeValidator
 			{
 				typedValue = EntityUtils.getTypedValue(value, attr, entityManager);
 			}
-			catch (NumberFormatException e)
+			catch (Exception e)
 			{
 				throw new ValidationException(
 						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_TYPE, attr));

@@ -1,10 +1,13 @@
 package org.molgenis.data.validation.meta;
 
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -16,7 +19,6 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.testng.Assert.assertEquals;
 
 public class AttributeValidatorTest
 {
@@ -32,10 +34,10 @@ public class AttributeValidatorTest
 		attributeValidator = new AttributeValidator(dataService, entityManager);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid characters in: \\[invalid.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:NAME entityType:MyEntityType attribute:invalid.name")
 	public void validateAttributeInvalidName()
 	{
-		Attribute attr = makeMockAttribute("invalid.name");
+		Attribute attr = createMockAttribute("invalid.name");
 		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
@@ -44,7 +46,7 @@ public class AttributeValidatorTest
 	{
 		String entityTypeId = "entityTypeId";
 		EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-		Attribute attr = makeMockAttribute("attrName");
+		Attribute attr = createMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
 		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
@@ -54,12 +56,12 @@ public class AttributeValidatorTest
 		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "mappedBy attribute \\[mappedByAttrName\\] is not part of entity \\[entityTypeId\\].")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:MAPPED_BY_REFERENCE entityType:MyEntityType attribute:attrName")
 	public void validateMappedByInvalidEntity()
 	{
 		String entityTypeId = "entityTypeId";
 		EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-		Attribute attr = makeMockAttribute("attrName");
+		Attribute attr = createMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
 		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
@@ -69,12 +71,12 @@ public class AttributeValidatorTest
 		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Invalid mappedBy attribute \\[mappedByAttrName\\] data type \\[STRING\\].")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:MAPPED_BY_TYPE entityType:MyEntityType attribute:attrName")
 	public void validateMappedByInvalidDataType()
 	{
 		String entityTypeId = "entityTypeId";
 		EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-		Attribute attr = makeMockAttribute("attrName");
+		Attribute attr = createMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
 		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
@@ -89,7 +91,7 @@ public class AttributeValidatorTest
 	{
 		String entityTypeId = "entityTypeId";
 		EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-		Attribute attr = makeMockAttribute("attrName");
+		Attribute attr = createMockAttribute("attrName");
 		when(attr.getRefEntity()).thenReturn(refEntity);
 		String mappedByAttrName = "mappedByAttrName";
 		Attribute mappedByAttr = when(mock(Attribute.class).getName()).thenReturn(mappedByAttrName).getMock();
@@ -100,12 +102,12 @@ public class AttributeValidatorTest
 		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Unknown entity \\[entityTypeId\\] attribute \\[fail\\] referred to by entity \\[test\\] attribute \\[attrName\\] sortBy \\[fail,ASC\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ORDER_BY_REFERENCE entityType:MyEntityType attribute:attrName")
 	public void validateOrderByInvalidRefAttribute()
 	{
 		String entityTypeId = "entityTypeId";
 		EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-		Attribute attr = makeMockAttribute("attrName");
+		Attribute attr = createMockAttribute("attrName");
 		EntityType entity = mock(EntityType.class);
 		when(entity.getId()).thenReturn("test");
 		when(attr.getEntityType()).thenReturn(entity);
@@ -119,7 +121,7 @@ public class AttributeValidatorTest
 		attributeValidator.validate(attr, ValidationMode.ADD);
 	}
 
-	@Test(dataProvider = "disallowedTransitionProvider", expectedExceptions = MolgenisDataException.class)
+	@Test(dataProvider = "disallowedTransitionProvider", expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:TYPE_UPDATE entityType:MyEntityType attribute:.+")
 	public void testDisallowedTransition(Attribute currentAttr, Attribute newAttr)
 	{
 		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class)).thenReturn(
@@ -134,75 +136,49 @@ public class AttributeValidatorTest
 				currentAttr);
 	}
 
-	@Test
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_TYPE entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultValueDate()
 	{
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.DATE);
-		try
-		{
-			attributeValidator.validateDefaultValue(attr, true);
-			Assert.fail();
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getCause().getMessage(),
-					"Text 'test' could not be parsed, unparsed text found at index 0");
-		}
+		attributeValidator.validateDefaultValue(attr, true);
 	}
 
 	@Test
 	public void testDefaultValueDateValid()
 	{
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("2016-01-01");
 		when(attr.getDataType()).thenReturn(AttributeType.DATE);
 		attributeValidator.validateDefaultValue(attr, true);
 	}
 
-	@Test
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_TYPE entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultValueDateTime()
 	{
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("test");
-		when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
-		try
-		{
-			attributeValidator.validateDefaultValue(attr, true);
-			Assert.fail();
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getCause().getMessage(),
-					"Text 'test' could not be parsed, unparsed text found at index 0");
-		}
-	}
-
-	@Test
-	public void testDefaultValueDateTimeValid()
-	{
-		Attribute attr = mock(Attribute.class);
-		when(attr.getDefaultValue()).thenReturn("2016-10-10T12:00:10+0000");
 		when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
 		attributeValidator.validateDefaultValue(attr, true);
 	}
 
 	@Test
+	public void testDefaultValueDateTimeValid()
+	{
+		Attribute attr = createMockAttribute("myAttribute");
+		when(attr.getDefaultValue()).thenReturn("2016-10-10T12:00:10+0000");
+		when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
+		attributeValidator.validateDefaultValue(attr, true);
+	}
+
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_HYPERLINK entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultValueHyperlink()
 	{
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("test^");
 		when(attr.getDataType()).thenReturn(AttributeType.HYPERLINK);
-		try
-		{
-			attributeValidator.validateDefaultValue(attr, true);
-			Assert.fail();
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getMessage(), "Default value [test^] is not a valid hyperlink.");
-		}
+		attributeValidator.validateDefaultValue(attr, true);
 	}
 
 	@Test
@@ -214,23 +190,17 @@ public class AttributeValidatorTest
 		attributeValidator.validateDefaultValue(attr, true);
 	}
 
-	@Test
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_ENUM entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultValueEnum()
 	{
 		Attribute attr = mock(Attribute.class);
+		when(attr.getIdentifier()).thenReturn("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getEnumOptions()).thenReturn(asList("a", "b", "c"));
 		when(attr.getDataType()).thenReturn(AttributeType.ENUM);
-		try
-		{
-			attributeValidator.validateDefaultValue(attr, true);
-			Assert.fail();
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getMessage(),
-					"Invalid default value [test] for enum [null] value must be one of [a, b, c]");
-		}
+		EntityType entityType = createMockEntityType("MyEntityType");
+		when(attr.getEntity()).thenReturn(entityType);
+		attributeValidator.validateDefaultValue(attr, true);
 	}
 
 	@Test
@@ -244,20 +214,20 @@ public class AttributeValidatorTest
 
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid default value \\[test\\] for data type \\[INT\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_TYPE entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultValueInt1()
 	{
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.INT);
 		attributeValidator.validateDefaultValue(attr, true);
 		Assert.fail();
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid default value \\[1.0\\] for data type \\[INT\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_TYPE entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultValueInt2()
 	{
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("1.0");
 		when(attr.getDataType()).thenReturn(AttributeType.INT);
 		attributeValidator.validateDefaultValue(attr, true);
@@ -273,10 +243,10 @@ public class AttributeValidatorTest
 		attributeValidator.validateDefaultValue(attr, true);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Invalid default value \\[test\\] for data type \\[LONG\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_TYPE entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultValueLong()
 	{
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.LONG);
 		attributeValidator.validateDefaultValue(attr, true);
@@ -336,7 +306,7 @@ public class AttributeValidatorTest
 		attributeValidator.validateDefaultValue(attr, true);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Default value \\[entityId\\] refers to an unknown entity")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:DEFAULT_VALUE_ENTITY_REFERENCE entityType:MyEntityType attribute:myAttribute")
 	public void testDefaultXrefInvalid()
 	{
 		String refEntityTypeId = "refEntityTypeId";
@@ -349,7 +319,7 @@ public class AttributeValidatorTest
 
 		when(refEntityType.getId()).thenReturn(refEntityTypeId);
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
-		Attribute attr = mock(Attribute.class);
+		Attribute attr = createMockAttribute("myAttribute");
 		when(attr.getDefaultValue()).thenReturn("entityId");
 		when(attr.getDataType()).thenReturn(AttributeType.XREF);
 		when(attr.getRefEntity()).thenReturn(refEntityType);
@@ -363,16 +333,16 @@ public class AttributeValidatorTest
 	@DataProvider(name = "allowedTransitionProvider")
 	private static Object[][] allowedTransitionProvider()
 	{
-		Attribute currentAttr1 = makeMockAttribute("attr1");
-		Attribute currentAttr2 = makeMockAttribute("attr2");
-		Attribute currentAttr3 = makeMockAttribute("attr3");
+		Attribute currentAttr1 = createMockAttribute("attr1");
+		Attribute currentAttr2 = createMockAttribute("attr2");
+		Attribute currentAttr3 = createMockAttribute("attr3");
 		when(currentAttr1.getDataType()).thenReturn(BOOL);
 		when(currentAttr2.getDataType()).thenReturn(CATEGORICAL);
 		when(currentAttr3.getDataType()).thenReturn(COMPOUND);
 
-		Attribute newAttr1 = makeMockAttribute("attr1");
-		Attribute newAttr2 = makeMockAttribute("attr2");
-		Attribute newAttr3 = makeMockAttribute("attr3");
+		Attribute newAttr1 = createMockAttribute("attr1");
+		Attribute newAttr2 = createMockAttribute("attr2");
+		Attribute newAttr3 = createMockAttribute("attr3");
 		when(newAttr1.getDataType()).thenReturn(INT);
 		when(newAttr2.getDataType()).thenReturn(INT);
 		when(newAttr3.getDataType()).thenReturn(INT);
@@ -383,16 +353,16 @@ public class AttributeValidatorTest
 	@DataProvider(name = "disallowedTransitionProvider")
 	private static Object[][] disallowedTransitionProvider()
 	{
-		Attribute currentAttr1 = makeMockAttribute("attr1");
-		Attribute currentAttr2 = makeMockAttribute("attr2");
-		Attribute currentAttr3 = makeMockAttribute("attr3");
+		Attribute currentAttr1 = createMockAttribute("attr1");
+		Attribute currentAttr2 = createMockAttribute("attr2");
+		Attribute currentAttr3 = createMockAttribute("attr3");
 		when(currentAttr1.getDataType()).thenReturn(BOOL);
 		when(currentAttr2.getDataType()).thenReturn(CATEGORICAL);
 		when(currentAttr3.getDataType()).thenReturn(COMPOUND);
 
-		Attribute newAttr1 = makeMockAttribute("attr1");
-		Attribute newAttr2 = makeMockAttribute("attr2");
-		Attribute newAttr3 = makeMockAttribute("attr3");
+		Attribute newAttr1 = createMockAttribute("attr1");
+		Attribute newAttr2 = createMockAttribute("attr2");
+		Attribute newAttr3 = createMockAttribute("attr3");
 		when(newAttr1.getDataType()).thenReturn(ONE_TO_MANY);
 		when(newAttr2.getDataType()).thenReturn(HYPERLINK);
 		when(newAttr3.getDataType()).thenReturn(FILE);
@@ -400,11 +370,22 @@ public class AttributeValidatorTest
 		return new Object[][] { { currentAttr1, newAttr1 }, { currentAttr2, newAttr2 }, { currentAttr3, newAttr3 } };
 	}
 
-	private static Attribute makeMockAttribute(String name)
+	private static Attribute createMockAttribute(String identifier)
 	{
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn("MyEntityType");
+
 		Attribute attr = mock(Attribute.class);
-		when(attr.getName()).thenReturn(name);
-		when(attr.getIdentifier()).thenReturn(name);
+		when(attr.getName()).thenReturn(identifier);
+		when(attr.getIdentifier()).thenReturn(identifier);
+		when(attr.getEntity()).thenReturn(entityType);
 		return attr;
+	}
+
+	private static EntityType createMockEntityType(String id)
+	{
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn(id);
+		return entityType;
 	}
 }
