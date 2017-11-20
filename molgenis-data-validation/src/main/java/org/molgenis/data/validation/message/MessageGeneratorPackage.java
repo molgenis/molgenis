@@ -26,6 +26,9 @@ class MessageGeneratorPackage
 			case SYSTEM_PACKAGE_READ_ONLY:
 				constraintViolationMessage = createMessageSystemPackageReadOnly("V30", constraintViolation);
 				break;
+			case NAME:
+				constraintViolationMessage = createMessageName("V31", constraintViolation);
+				break;
 			default:
 				throw new UnexpectedEnumException(packageConstraint);
 		}
@@ -51,6 +54,17 @@ class MessageGeneratorPackage
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, aPackage.getLabel()).orElse(message);
+		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageName(String errorCode,
+			PackageConstraintViolation constraintViolation)
+	{
+		Package aPackage = constraintViolation.getPackage();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, aPackage.getLabel(), aPackage.getId()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 }
