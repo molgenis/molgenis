@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -33,6 +34,14 @@ public class GlobalControllerExceptionHandler
 		LOG.info("", e);
 		return handleTypedException(isHtmlRequest(httpServletRequest), NotFoundController.URI, e.getLocalizedMessage(),
 				NOT_FOUND);
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public Object handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e)
+	{
+		LOG.info("", e);
+		return handleTypedException(false, NotFoundController.URI, e.getLocalizedMessage(), BAD_REQUEST);
 	}
 
 	@ResponseStatus(BAD_REQUEST)
