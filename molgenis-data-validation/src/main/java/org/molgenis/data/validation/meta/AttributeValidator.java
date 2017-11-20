@@ -33,7 +33,7 @@ import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMod
 
 /**
  * {@link Attribute} validator.
- *
+ * <p>
  * TODO change 'validate(Attribute attr, ValidationMode validationMode)' return type from void to Set<AttributeConstraintViolation>
  */
 @Component
@@ -146,15 +146,15 @@ public class AttributeValidator
 			// TODO validate using attribute validation expression
 			if (attr.isUnique())
 			{
-				throw new AttributeDefaultNotUniqueConstraintViolationException(
-						attr); // TODO throw validation exception
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_NOT_UNIQUE, attr));
 			}
 
 			// TODO validate using attribute validation expression
 			if (attr.getExpression() != null)
 			{
-				throw new AttributeDefaultNotComputedConstraintViolationException(
-						attr); // TODO throw validation exception
+				throw new ValidationException(
+						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_NOT_COMPUTED, attr));
 			}
 
 			AttributeType fieldType = attr.getDataType();

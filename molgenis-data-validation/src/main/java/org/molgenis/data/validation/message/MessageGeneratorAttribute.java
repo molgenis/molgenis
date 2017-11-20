@@ -28,6 +28,12 @@ class MessageGeneratorAttribute
 			case COMPOUND_PARENT:
 				constraintViolationMessage = createMessageCompoundParent("V81", constraintViolation);
 				break;
+			case DEFAULT_VALUE_NOT_UNIQUE:
+				constraintViolationMessage = createMessageDefaultValueNotUnique("V95", constraintViolation);
+				break;
+			case DEFAULT_VALUE_NOT_COMPUTED:
+				constraintViolationMessage = createMessageDefaultValueNotComputed("V96", constraintViolation);
+				break;
 			case DEFAULT_VALUE_EMAIL:
 				constraintViolationMessage = createMessageDefaultValueEmail("V82", constraintViolation);
 				break;
@@ -97,6 +103,20 @@ class MessageGeneratorAttribute
 	}
 
 	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageDefaultValueNotUnique(String errorCode,
+			AttributeConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageDefaultValueNotComputed(String errorCode,
+			AttributeConstraintViolation constraintViolation)
+	{
+		return createMessage(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageDefaultValueEntityReferenceXref(String errorCode,
 			AttributeConstraintViolation constraintViolation)
 	{
@@ -117,8 +137,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attribute.getDefaultValue(),
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				attribute.getDefaultValue(),
 				attribute.getEnumOptions().stream().collect(Collectors.joining(","))).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
@@ -137,9 +157,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attribute.getDefaultValue(), attribute.getDataType().getMaxLength()).orElse(
-				message);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				attribute.getDefaultValue(), attribute.getDataType().getMaxLength()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
@@ -150,8 +169,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attribute.getDefaultValue(), attribute.getDataType().toString()).orElse(message);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				attribute.getDefaultValue(), attribute.getDataType().toString()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
@@ -162,8 +181,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attribute.getDefaultValue(), attribute.getMappedBy().getLabel(),
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				attribute.getDefaultValue(), attribute.getMappedBy().getLabel(),
 				attribute.getRefEntity().getLabel()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
@@ -175,8 +194,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attribute.getDefaultValue(), attribute.getMappedBy().getLabel(),
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				attribute.getDefaultValue(), attribute.getMappedBy().getLabel(),
 				attribute.getMappedBy().getDataType().toString()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
@@ -195,8 +214,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attribute.getDataType().toString()).orElse(message);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				attribute.getDataType().toString()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
@@ -232,8 +251,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel()).orElse(message);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel())
+				.orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
@@ -243,8 +262,8 @@ class MessageGeneratorAttribute
 		Attribute attribute = constraintViolation.getAttribute();
 
 		String message = getMessage(constraintViolation);
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attribute.getDefaultValue()).orElse(message);
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				attribute.getDefaultValue()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
