@@ -5,7 +5,7 @@ import org.molgenis.data.validation.constraint.ConstraintViolation;
 import org.molgenis.data.validation.message.ConstraintViolationMessage;
 import org.molgenis.data.validation.message.ValidationExceptionMessageGenerator;
 
-import java.util.List;
+import java.util.Collection;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
@@ -15,14 +15,14 @@ public class ValidationException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "V99";
 
-	private final List<ConstraintViolationMessage> constraintViolationMessages;
+	private final Collection<ConstraintViolationMessage> constraintViolationMessages;
 
 	public ValidationException(ConstraintViolation constraintViolation)
 	{
 		this(singletonList(constraintViolation));
 	}
 
-	public ValidationException(List<ConstraintViolation> constraintViolations)
+	public ValidationException(Collection<? extends ConstraintViolation> constraintViolations)
 	{
 		super(ERROR_CODE);
 		this.constraintViolationMessages = createConstraintViolationMessages(constraintViolations);
@@ -45,8 +45,8 @@ public class ValidationException extends CodedRuntimeException
 								   .orElse(super.getLocalizedMessage());
 	}
 
-	private List<ConstraintViolationMessage> createConstraintViolationMessages(
-			List<org.molgenis.data.validation.constraint.ConstraintViolation> constraintViolations)
+	private Collection<ConstraintViolationMessage> createConstraintViolationMessages(
+			Collection<? extends org.molgenis.data.validation.constraint.ConstraintViolation> constraintViolations)
 	{
 		ValidationExceptionMessageGenerator visitor = new ValidationExceptionMessageGenerator();
 		constraintViolations.forEach(constraintViolation -> constraintViolation.accept(visitor));

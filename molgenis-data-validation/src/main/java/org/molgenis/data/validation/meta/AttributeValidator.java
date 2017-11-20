@@ -7,8 +7,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeConstraint;
 import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
@@ -17,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
@@ -28,13 +27,12 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.validation.constraint.AttributeConstraint.*;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 
 /**
  * {@link Attribute} validator.
- * <p>
- * TODO change 'validate(Attribute attr, ValidationMode validationMode)' return type from void to Set<AttributeConstraintViolation>
  */
 @Component
 public class AttributeValidator
@@ -48,82 +46,95 @@ public class AttributeValidator
 	private final EntityManager entityManager;
 	private final EmailValidator emailValidator;
 
-	public AttributeValidator(DataService dataService, EntityManager entityManager)
+	AttributeValidator(DataService dataService, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 		this.emailValidator = new EmailValidator();
 	}
 
-	public void validate(Attribute attr, ValidationMode validationMode)
+	public Collection<AttributeConstraintViolation> validate(Attribute attr, ValidationMode validationMode)
 	{
-		validateName(attr);
-		validateDefaultValue(attr, validationMode == ADD || validationMode == UPDATE);
-		validateParent(attr);
-		validateChildren(attr);
+		Set<AttributeConstraintViolation> constraintViolations = new HashSet<>();
+
+		boolean validateDefaultValueEntityReferences = validationMode == ADD || validationMode == UPDATE;
+
+		validateName(attr).forEach(constraintViolations::add);
+		validateDefaultValue(attr, validateDefaultValueEntityReferences).forEach(constraintViolations::add);
+		validateParent(attr).ifPresent(constraintViolations::add);
+		validateChildren(attr).ifPresent(constraintViolations::add);
 
 		switch (validationMode)
 		{
 			case ADD:
 			case ADD_SKIP_ENTITY_VALIDATION:
-				validateAdd(attr);
+				validateAdd(attr).forEach(constraintViolations::add);
 				break;
 			case UPDATE:
 			case UPDATE_SKIP_ENTITY_VALIDATION:
 				Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(),
 						Attribute.class);
-				validateUpdate(attr, currentAttr);
+				validateUpdate(attr, currentAttr).forEach(constraintViolations::add);
 				break;
 			default:
 				throw new UnexpectedEnumException(validationMode);
 		}
+
+		return constraintViolations;
 	}
 
-	private static void validateParent(Attribute attr)
+	private static Optional<AttributeConstraintViolation> validateParent(Attribute attr)
 	{
-		if (attr.getParent() != null)
+		AttributeConstraintViolation constraintViolation;
+		if (attr.getParent() != null && attr.getParent().getDataType() != COMPOUND)
 		{
-			if (attr.getParent().getDataType() != COMPOUND)
-			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.COMPOUND_PARENT, attr));
-			}
+			constraintViolation = new AttributeConstraintViolation(COMPOUND_PARENT, attr);
 		}
+		else
+		{
+			constraintViolation = null;
+		}
+		return Optional.ofNullable(constraintViolation);
 	}
 
-	private static void validateChildren(Attribute attr)
+	private static Optional<AttributeConstraintViolation> validateChildren(Attribute attr)
 	{
-		boolean childrenIsNullOrEmpty = attr.getChildren() == null || Iterables.isEmpty(attr.getChildren());
+		AttributeConstraintViolation constraintViolation;
 
+		boolean childrenIsNullOrEmpty = attr.getChildren() == null || Iterables.isEmpty(attr.getChildren());
 		if (!childrenIsNullOrEmpty && attr.getDataType() != COMPOUND)
 		{
-			throw new ValidationException(
-					new AttributeConstraintViolation(AttributeConstraint.NON_COMPOUND_CHILDREN, attr));
+			constraintViolation = new AttributeConstraintViolation(NON_COMPOUND_CHILDREN, attr);
 		}
+		else
+		{
+			constraintViolation = null;
+		}
+		return Optional.ofNullable(constraintViolation);
 	}
 
-	private static void validateAdd(Attribute newAttr)
+	private static Stream<AttributeConstraintViolation> validateAdd(Attribute newAttr)
 	{
-		// mappedBy
-		validateMappedBy(newAttr, newAttr.getMappedBy());
-
-		// orderBy
-		validateOrderBy(newAttr, newAttr.getOrderBy());
+		List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
+		validateMappedBy(newAttr, newAttr.getMappedBy()).ifPresent(constraintViolations::add);
+		validateOrderBy(newAttr, newAttr.getOrderBy()).forEach(constraintViolations::add);
+		return constraintViolations.stream();
 	}
 
-	private static void validateUpdate(Attribute newAttr, Attribute currentAttr)
+	private static Stream<AttributeConstraintViolation> validateUpdate(Attribute newAttr, Attribute currentAttr)
 	{
+		List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
+
 		// data type
 		AttributeType currentDataType = currentAttr.getDataType();
 		AttributeType newDataType = newAttr.getDataType();
 		if (!Objects.equals(currentDataType, newDataType))
 		{
-			validateUpdateDataType(currentAttr, newAttr);
+			validateUpdateDataType(currentAttr, newAttr).ifPresent(constraintViolations::add);
 
 			if (newAttr.isInversedBy())
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.TYPE_UPDATE_BIDIRECTIONAL, newAttr));
+				constraintViolations.add(new AttributeConstraintViolation(TYPE_UPDATE_BIDIRECTIONAL, newAttr));
 			}
 		}
 
@@ -132,66 +143,69 @@ public class AttributeValidator
 		Sort newOrderBy = newAttr.getOrderBy();
 		if (!Objects.equals(currentOrderBy, newOrderBy))
 		{
-			validateOrderBy(newAttr, newOrderBy);
+			validateOrderBy(newAttr, newOrderBy).forEach(constraintViolations::add);
 		}
 
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
+		return constraintViolations.stream();
 	}
 
-	void validateDefaultValue(Attribute attr, boolean validateEntityReferences)
+	Stream<AttributeConstraintViolation> validateDefaultValue(Attribute attr, boolean validateEntityReferences)
 	{
+
 		String value = attr.getDefaultValue();
 		if (value != null)
 		{
-			// TODO validate using attribute validation expression
+			List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
+
 			if (attr.isUnique())
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_NOT_UNIQUE, attr));
+				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_NOT_UNIQUE, attr));
 			}
 
-			// TODO validate using attribute validation expression
 			if (attr.getExpression() != null)
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_NOT_COMPUTED, attr));
+				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_NOT_COMPUTED, attr));
 			}
 
 			AttributeType fieldType = attr.getDataType();
 			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_MAX_LENGTH, attr));
+				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_MAX_LENGTH, attr));
 			}
 
 			if (fieldType == AttributeType.EMAIL)
 			{
-				checkEmail(attr);
+				validateEmail(attr).ifPresent(constraintViolations::add);
 			}
 
 			if (fieldType == AttributeType.HYPERLINK)
 			{
-				checkHyperlink(attr);
+				validateHyperlink(attr).ifPresent(constraintViolations::add);
 			}
 
 			if (fieldType == AttributeType.ENUM)
 			{
-				checkEnum(attr, value);
+				validateEnum(attr, value).ifPresent(constraintViolations::add);
 			}
 
 			// Get typed value to check if the value is of the right type.
 			Object typedValue;
+			boolean typeValid;
 			try
 			{
 				typedValue = EntityUtils.getTypedValue(value, attr, entityManager);
+				typeValid = true;
+
 			}
 			catch (Exception e)
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_TYPE, attr));
+				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_TYPE, attr));
+				typedValue = null;
+				typeValid = false;
 			}
 
-			if (validateEntityReferences)
+			if (typeValid && validateEntityReferences)
 			{
 				if (isSingleReferenceType(attr))
 				{
@@ -201,9 +215,8 @@ public class AttributeValidator
 								   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
 								   .count() == 0)
 					{
-						throw new ValidationException(
-								new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_ENTITY_REFERENCE,
-										attr));
+						constraintViolations.add(
+								new AttributeConstraintViolation(DEFAULT_VALUE_ENTITY_REFERENCE, attr));
 					}
 				}
 				else if (isMultipleReferenceType(attr))
@@ -217,25 +230,27 @@ public class AttributeValidator
 														.collect(toList()))
 								   .count() < Iterables.size(refEntitiesValue))
 					{
-						throw new ValidationException(
-								new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_ENTITY_REFERENCE,
-										attr));
+						constraintViolations.add(
+								new AttributeConstraintViolation(DEFAULT_VALUE_ENTITY_REFERENCE, attr));
 					}
 				}
 			}
+
+			return constraintViolations.stream();
 		}
+		return Stream.empty();
 	}
 
-	private void checkEmail(Attribute attribute)
+	private Optional<AttributeConstraintViolation> validateEmail(Attribute attribute)
 	{
 		if (!emailValidator.isValid(attribute.getDefaultValue(), null))
 		{
-			throw new ValidationException(
-					new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_EMAIL, attribute));
+			return Optional.of(new AttributeConstraintViolation(DEFAULT_VALUE_EMAIL, attribute));
 		}
+		return Optional.empty();
 	}
 
-	private static void checkEnum(Attribute attr, String value)
+	private static Optional<AttributeConstraintViolation> validateEnum(Attribute attr, String value)
 	{
 		if (value != null)
 		{
@@ -243,13 +258,13 @@ public class AttributeValidator
 
 			if (!enumOptions.contains(value))
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_ENUM, attr));
+				return Optional.of(new AttributeConstraintViolation(DEFAULT_VALUE_ENUM, attr));
 			}
 		}
+		return Optional.empty();
 	}
 
-	private static void checkHyperlink(Attribute attr)
+	private static Optional<AttributeConstraintViolation> validateHyperlink(Attribute attr)
 	{
 		try
 		{
@@ -257,12 +272,13 @@ public class AttributeValidator
 		}
 		catch (URISyntaxException e)
 		{
-			throw new ValidationException(
-					new AttributeConstraintViolation(AttributeConstraint.DEFAULT_VALUE_HYPERLINK, attr));
+
+			return Optional.of(new AttributeConstraintViolation(DEFAULT_VALUE_HYPERLINK, attr));
 		}
+		return Optional.empty();
 	}
 
-	private static void validateName(Attribute attr)
+	private static Stream<AttributeConstraintViolation> validateName(Attribute attr)
 	{
 		// validate entity name (e.g. illegal characters, length)
 		String name = attr.getName();
@@ -275,9 +291,10 @@ public class AttributeValidator
 			}
 			catch (MolgenisDataException e)
 			{
-				throw new ValidationException(new AttributeConstraintViolation(AttributeConstraint.NAME, attr));
+				return Stream.of(new AttributeConstraintViolation(NAME, attr));
 			}
 		}
+		return Stream.empty();
 	}
 
 	/**
@@ -287,23 +304,24 @@ public class AttributeValidator
 	 * @param mappedByAttr mappedBy attribute
 	 * @throws MolgenisDataException if mappedBy is an attribute that is not part of the referenced entity
 	 */
-	private static void validateMappedBy(Attribute attr, Attribute mappedByAttr)
+	private static Optional<AttributeConstraintViolation> validateMappedBy(Attribute attr, Attribute mappedByAttr)
 	{
 		if (mappedByAttr != null)
 		{
 			if (!isSingleReferenceType(mappedByAttr))
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.MAPPED_BY_TYPE, attr));
+				return Optional.of(new AttributeConstraintViolation(MAPPED_BY_TYPE, attr));
 			}
-
-			Attribute refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
-			if (refAttr == null)
+			else
 			{
-				throw new ValidationException(
-						new AttributeConstraintViolation(AttributeConstraint.MAPPED_BY_REFERENCE, attr));
+				Attribute refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
+				if (refAttr == null)
+				{
+					return Optional.of(new AttributeConstraintViolation(MAPPED_BY_REFERENCE, attr));
+				}
 			}
 		}
+		return Optional.empty();
 	}
 
 	/**
@@ -312,29 +330,31 @@ public class AttributeValidator
 	 *
 	 * @param attr    attribute
 	 * @param orderBy orderBy of attribute
-	 * @throws MolgenisDataException if orderBy contains attribute names that do not exist in the referenced entity.
 	 */
-	private static void validateOrderBy(Attribute attr, Sort orderBy)
+	private static Stream<AttributeConstraintViolation> validateOrderBy(Attribute attr, Sort orderBy)
 	{
 		if (orderBy != null)
 		{
 			EntityType refEntity = attr.getRefEntity();
 			if (refEntity != null)
 			{
+				List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
 				for (Sort.Order orderClause : orderBy)
 				{
 					String refAttrName = orderClause.getAttr();
 					if (refEntity.getAttribute(refAttrName) == null)
 					{
-						throw new ValidationException(
-								new AttributeConstraintViolation(AttributeConstraint.ORDER_BY_REFERENCE, attr));
+						constraintViolations.add(new AttributeConstraintViolation(ORDER_BY_REFERENCE, attr));
 					}
 				}
+				return constraintViolations.stream();
 			}
 		}
+		return Stream.empty();
 	}
 
-	private static void validateUpdateDataType(Attribute currentAttribute, Attribute newAttribute)
+	private static Optional<AttributeConstraintViolation> validateUpdateDataType(Attribute currentAttribute,
+			Attribute newAttribute)
 	{
 		AttributeType currentDataType = currentAttribute.getDataType();
 		AttributeType newDataType = newAttribute.getDataType();
@@ -342,8 +362,11 @@ public class AttributeValidator
 		EnumSet<AttributeType> allowedDatatypes = DATA_TYPE_ALLOWED_TRANSITIONS.get(currentDataType);
 		if (!allowedDatatypes.contains(newDataType))
 		{
-			throw new ValidationException(
-					new AttributeConstraintViolation(AttributeConstraint.TYPE_UPDATE, newAttribute));
+			return Optional.of(new AttributeConstraintViolation(TYPE_UPDATE, newAttribute));
+		}
+		else
+		{
+			return Optional.empty();
 		}
 	}
 
