@@ -1,7 +1,7 @@
 package org.molgenis.data.validation;
 
 import org.molgenis.data.CodedRuntimeException;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
+import org.molgenis.data.validation.constraint.ValidationResult;
 import org.molgenis.data.validation.message.ConstraintViolationMessage;
 import org.molgenis.data.validation.message.ValidationExceptionMessageGenerator;
 
@@ -17,12 +17,12 @@ public class ValidationException extends CodedRuntimeException
 
 	private final Collection<ConstraintViolationMessage> constraintViolationMessages;
 
-	public ValidationException(ConstraintViolation constraintViolation)
+	public ValidationException(ValidationResult constraintViolation)
 	{
 		this(singletonList(constraintViolation));
 	}
 
-	public ValidationException(Collection<? extends ConstraintViolation> constraintViolations)
+	public ValidationException(Collection<? extends ValidationResult> constraintViolations)
 	{
 		super(ERROR_CODE);
 		this.constraintViolationMessages = createConstraintViolationMessages(constraintViolations);
@@ -46,7 +46,7 @@ public class ValidationException extends CodedRuntimeException
 	}
 
 	private Collection<ConstraintViolationMessage> createConstraintViolationMessages(
-			Collection<? extends org.molgenis.data.validation.constraint.ConstraintViolation> constraintViolations)
+			Collection<? extends ValidationResult> constraintViolations)
 	{
 		ValidationExceptionMessageGenerator visitor = new ValidationExceptionMessageGenerator();
 		constraintViolations.forEach(constraintViolation -> constraintViolation.accept(visitor));

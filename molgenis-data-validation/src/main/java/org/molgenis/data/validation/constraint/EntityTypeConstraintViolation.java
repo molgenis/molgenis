@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
-public class EntityTypeConstraintViolation implements ConstraintViolation
+public class EntityTypeConstraintViolation implements ValidationResult
 {
 	private final EntityTypeConstraint entityTypeConstraint;
 	private final EntityType entityType;
@@ -22,15 +22,21 @@ public class EntityTypeConstraintViolation implements ConstraintViolation
 		return entityTypeConstraint;
 	}
 
+	@Override
+	public boolean hasConstraintViolations()
+	{
+		return true; // FIXME
+	}
+
 	public EntityType getEntityType()
 	{
 		return entityType;
 	}
 
 	@Override
-	public void accept(ConstraintViolationVisitor constraintViolationVisitor)
+	public void accept(ValidationResultVisitor validationResultVisitor)
 	{
-		constraintViolationVisitor.visit(this);
+		validationResultVisitor.visit(this);
 	}
 
 	@Override

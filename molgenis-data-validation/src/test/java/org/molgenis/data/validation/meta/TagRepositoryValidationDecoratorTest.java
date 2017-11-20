@@ -4,17 +4,17 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.TagConstraintViolation;
+import org.molgenis.data.validation.constraint.TagValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.EnumSet;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.validation.constraint.TagConstraint.UNKNOWN_RELATION_IRI;
 import static org.testng.Assert.assertEquals;
 
 public class TagRepositoryValidationDecoratorTest
@@ -42,7 +42,7 @@ public class TagRepositoryValidationDecoratorTest
 	public void testUpdateValid() throws Exception
 	{
 		Tag tag = mock(Tag.class);
-		doReturn(emptyList()).when(tagValidator).validate(tag);
+		doReturn(TagValidationResult.create(tag)).when(tagValidator).validate(tag);
 		tagRepositoryValidationDecorator.update(tag);
 		verify(tagValidator).validate(tag);
 		verify(delegateRepository).update(tag);
@@ -52,7 +52,7 @@ public class TagRepositoryValidationDecoratorTest
 	public void testUpdateInvalid() throws Exception
 	{
 		Tag tag = mock(Tag.class);
-		doReturn(singletonList(mock(TagConstraintViolation.class))).when(tagValidator).validate(tag);
+		doReturn(TagValidationResult.create(tag, EnumSet.of(UNKNOWN_RELATION_IRI))).when(tagValidator).validate(tag);
 		tagRepositoryValidationDecorator.update(tag);
 	}
 
@@ -60,7 +60,7 @@ public class TagRepositoryValidationDecoratorTest
 	public void testAddValid() throws Exception
 	{
 		Tag tag = mock(Tag.class);
-		doReturn(emptyList()).when(tagValidator).validate(tag);
+		doReturn(TagValidationResult.create(tag)).when(tagValidator).validate(tag);
 		tagRepositoryValidationDecorator.add(tag);
 		verify(tagValidator).validate(tag);
 		verify(delegateRepository).add(tag);
@@ -70,7 +70,7 @@ public class TagRepositoryValidationDecoratorTest
 	public void testAddInValid() throws Exception
 	{
 		Tag tag = mock(Tag.class);
-		doReturn(singletonList(mock(TagConstraintViolation.class))).when(tagValidator).validate(tag);
+		doReturn(TagValidationResult.create(tag, EnumSet.of(UNKNOWN_RELATION_IRI))).when(tagValidator).validate(tag);
 		tagRepositoryValidationDecorator.add(tag);
 	}
 
@@ -79,8 +79,8 @@ public class TagRepositoryValidationDecoratorTest
 	{
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
-		doReturn(emptyList()).when(tagValidator).validate(tag0);
-		doReturn(emptyList()).when(tagValidator).validate(tag1);
+		doReturn(TagValidationResult.create(tag0)).when(tagValidator).validate(tag0);
+		doReturn(TagValidationResult.create(tag0)).when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.update(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -96,8 +96,8 @@ public class TagRepositoryValidationDecoratorTest
 	{
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
-		doReturn(emptyList()).when(tagValidator).validate(tag0);
-		doReturn(singletonList(mock(TagConstraintViolation.class))).when(tagValidator).validate(tag1);
+		doReturn(TagValidationResult.create(tag0)).when(tagValidator).validate(tag0);
+		doReturn(TagValidationResult.create(tag1, EnumSet.of(UNKNOWN_RELATION_IRI))).when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.update(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -110,8 +110,8 @@ public class TagRepositoryValidationDecoratorTest
 	{
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
-		doReturn(emptyList()).when(tagValidator).validate(tag0);
-		doReturn(emptyList()).when(tagValidator).validate(tag1);
+		doReturn(TagValidationResult.create(tag0)).when(tagValidator).validate(tag0);
+		doReturn(TagValidationResult.create(tag1)).when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.add(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -127,8 +127,8 @@ public class TagRepositoryValidationDecoratorTest
 	{
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
-		doReturn(emptyList()).when(tagValidator).validate(tag0);
-		doReturn(singletonList(mock(TagConstraintViolation.class))).when(tagValidator).validate(tag1);
+		doReturn(TagValidationResult.create(tag0)).when(tagValidator).validate(tag0);
+		doReturn(TagValidationResult.create(tag1, EnumSet.of(UNKNOWN_RELATION_IRI))).when(tagValidator).validate(tag1);
 		tagRepositoryValidationDecorator.add(Stream.of(tag0, tag1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);

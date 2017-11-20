@@ -5,9 +5,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
+import org.molgenis.data.validation.constraint.PackageValidationResult;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -108,10 +107,10 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 
 	private void validate(Package aPackage)
 	{
-		Collection<? extends ConstraintViolation> violations = packageValidator.validate(aPackage);
-		if (!violations.isEmpty())
+		PackageValidationResult packageValidationResult = packageValidator.validate(aPackage);
+		if (packageValidationResult.hasConstraintViolations())
 		{
-			throw new ValidationException(violations);
+			throw new ValidationException(packageValidationResult);
 		}
 	}
 }

@@ -6,15 +6,14 @@ import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.validation.constraint.PackageConstraint;
-import org.molgenis.data.validation.constraint.PackageConstraintViolation;
+import org.molgenis.data.validation.constraint.PackageValidationResult;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.EnumSet;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
+import static org.molgenis.data.validation.constraint.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
 
 /**
  * {@link Package} validator
@@ -29,24 +28,28 @@ public class PackageValidator
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 	}
 
-	public Collection<PackageConstraintViolation> validate(Package aPackage)
+	public PackageValidationResult validate(Package aPackage)
 	{
-		List<PackageConstraintViolation> constraintViolations = new ArrayList<>();
-		validatePackageAllowed(aPackage).ifPresent(constraintViolations::add);
-		validatePackageName(aPackage).ifPresent(constraintViolations::add);
-		return constraintViolations;
-	}
+		EnumSet<PackageConstraint> constraintViolations = EnumSet.noneOf(PackageConstraint.class);
 
-	private Optional<PackageConstraintViolation> validatePackageAllowed(Package aPackage)
-	{
-		if (MetaUtils.isSystemPackage(aPackage) && !systemPackageRegistry.containsPackage(aPackage))
+		if (!isValidSystemPackage(aPackage))
 		{
-			return Optional.of(new PackageConstraintViolation(PackageConstraint.SYSTEM_PACKAGE_READ_ONLY, aPackage));
+			constraintViolations.add(SYSTEM_PACKAGE_READ_ONLY);
 		}
-		return Optional.empty();
+		if (!isValidPackageIdentifier(aPackage))
+		{
+			constraintViolations.add(NAME);
+		}
+
+		return PackageValidationResult.create(aPackage, constraintViolations);
 	}
 
-	private static Optional<PackageConstraintViolation> validatePackageName(Package aPackage)
+	private boolean isValidSystemPackage(Package aPackage)
+	{
+		return !MetaUtils.isSystemPackage(aPackage) || systemPackageRegistry.containsPackage(aPackage);
+	}
+
+	private static boolean isValidPackageIdentifier(Package aPackage)
 	{
 		try
 		{
@@ -55,8 +58,8 @@ public class PackageValidator
 		}
 		catch (MolgenisDataException e)
 		{
-			return Optional.of(new PackageConstraintViolation(PackageConstraint.NAME, aPackage));
+			return false;
 		}
-		return Optional.empty();
+		return true;
 	}
 }

@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-public class DefaultValueReferenceConstraintViolation implements ConstraintViolation
+public class DefaultValueReferenceConstraintViolation implements ValidationResult
 {
 	private final DefaultValueReferenceConstraint entityConstraint;
 	private final EntityType entityType;
@@ -36,6 +36,12 @@ public class DefaultValueReferenceConstraintViolation implements ConstraintViola
 		return entityConstraint;
 	}
 
+	@Override
+	public boolean hasConstraintViolations()
+	{
+		return true; // FIXME
+	}
+
 	public EntityType getEntityType()
 	{
 		return entityType;
@@ -52,8 +58,8 @@ public class DefaultValueReferenceConstraintViolation implements ConstraintViola
 	}
 
 	@Override
-	public void accept(ConstraintViolationVisitor constraintViolationVisitor)
+	public void accept(ValidationResultVisitor validationResultVisitor)
 	{
-		constraintViolationVisitor.visit(this);
+		validationResultVisitor.visit(this);
 	}
 }

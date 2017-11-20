@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 
 // TODO introduce AttributeConstraintViolations with Attribute + EnumSet<AttributeConstraint>
 // TODO autovalue?
-public class AttributeConstraintViolation implements ConstraintViolation
+public class AttributeConstraintViolation implements ValidationResult
 {
 	private final AttributeConstraint attributeConstraint;
 	private final Attribute attribute;
@@ -24,15 +24,21 @@ public class AttributeConstraintViolation implements ConstraintViolation
 		return attributeConstraint;
 	}
 
+	@Override
+	public boolean hasConstraintViolations()
+	{
+		return true; // FIXME
+	}
+
 	public Attribute getAttribute()
 	{
 		return attribute;
 	}
 
 	@Override
-	public void accept(ConstraintViolationVisitor constraintViolationVisitor)
+	public void accept(ValidationResultVisitor validationResultVisitor)
 	{
-		constraintViolationVisitor.visit(this);
+		validationResultVisitor.visit(this);
 	}
 
 	@Override

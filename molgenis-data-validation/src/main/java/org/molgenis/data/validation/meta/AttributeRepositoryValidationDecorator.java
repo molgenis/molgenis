@@ -4,7 +4,7 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
+import org.molgenis.data.validation.constraint.ValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 
 import java.util.Collection;
@@ -59,7 +59,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 
 	private void validate(Attribute attribute, ValidationMode validationMode)
 	{
-		Collection<? extends ConstraintViolation> violations = attributeValidator.validate(attribute, validationMode);
+		Collection<? extends ValidationResult> violations = attributeValidator.validate(attribute, validationMode);
 		if (!violations.isEmpty())
 		{
 			throw new ValidationException(violations);

@@ -1,5 +1,7 @@
 package org.molgenis.data.validation;
 
+import org.molgenis.data.validation.constraint.ValidationResult;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
@@ -7,7 +9,7 @@ import java.util.Objects;
 import static java.lang.Math.toIntExact;
 
 /**
- * @deprecated use {@link org.molgenis.data.validation.constraint.ConstraintViolation}
+ * @deprecated use {@link ValidationResult}
  */
 @Deprecated
 public class ConstraintViolation implements Serializable

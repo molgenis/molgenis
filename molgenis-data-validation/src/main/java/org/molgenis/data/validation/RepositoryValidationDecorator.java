@@ -6,7 +6,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.constraint.AttributeValueConstraint;
 import org.molgenis.data.validation.constraint.AttributeValueConstraintViolation;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
+import org.molgenis.data.validation.constraint.ValidationResult;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
@@ -329,7 +329,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	private void validateEntityValueTypes(Entity entity, ValidationResource validationResource)
 	{
 		// entity attributes validation
-		List<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
+		List<ValidationResult> attrViolations = entityAttributesValidator.validate(entity, getEntityType());
 		if (attrViolations != null && !attrViolations.isEmpty())
 		{
 			attrViolations.forEach(validationResource::addViolation);
@@ -471,7 +471,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		private Map<String, HugeMap<Object, Object>> uniqueAttrsValues;
 		private List<Attribute> readonlyAttrs;
 		private boolean selfReferencing;
-		private List<org.molgenis.data.validation.constraint.ConstraintViolation> violations;
+		private List<ValidationResult> violations;
 
 		public ValidationResource()
 		{
@@ -573,7 +573,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			return violations != null && !violations.isEmpty();
 		}
 
-		public void addViolation(org.molgenis.data.validation.constraint.ConstraintViolation constraintViolation)
+		public void addViolation(ValidationResult constraintViolation)
 		{
 			if (violations == null)
 			{
@@ -582,7 +582,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			violations.add(constraintViolation);
 		}
 
-		public List<org.molgenis.data.validation.constraint.ConstraintViolation> getViolations()
+		public List<ValidationResult> getViolations()
 		{
 			return violations != null ? unmodifiableList(violations) : emptyList();
 		}

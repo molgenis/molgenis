@@ -4,7 +4,7 @@ import org.molgenis.data.AttributeValue;
 
 import static java.util.Objects.requireNonNull;
 
-public final class AttributeValueConstraintViolation implements ConstraintViolation
+public final class AttributeValueConstraintViolation implements ValidationResult
 {
 	private final AttributeValueConstraint attributeValueConstraint;
 	private final AttributeValue attributeValue;
@@ -27,8 +27,14 @@ public final class AttributeValueConstraintViolation implements ConstraintViolat
 	}
 
 	@Override
-	public void accept(ConstraintViolationVisitor constraintViolationVisitor)
+	public boolean hasConstraintViolations()
 	{
-		constraintViolationVisitor.visit(this);
+		return true; // FIXME
+	}
+
+	@Override
+	public void accept(ValidationResultVisitor validationResultVisitor)
+	{
+		validationResultVisitor.visit(this);
 	}
 }
