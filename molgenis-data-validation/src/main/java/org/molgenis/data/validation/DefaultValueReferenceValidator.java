@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public interface DefaultValueReferenceValidator
 {
 	/**
-	 * @throws MolgenisValidationException if the given entity is referenced by an Attribute
+	 * @throws ValidationException if the given entity is referenced by an Attribute
 	 */
 	void validateEntityNotReferenced(Entity entity);
 
@@ -24,7 +24,7 @@ public interface DefaultValueReferenceValidator
 	Stream<Entity> validateEntitiesNotReferenced(Stream<Entity> entityStream, EntityType entityType);
 
 	/**
-	 * @throws MolgenisValidationException if the entity with the given id is referenced by an Attribute
+	 * @throws ValidationException if the entity with the given id is referenced by an Attribute
 	 */
 	void validateEntityNotReferencedById(Object entityId, EntityType entityType);
 
@@ -35,7 +35,7 @@ public interface DefaultValueReferenceValidator
 	Stream<Object> validateEntitiesNotReferencedById(Stream<Object> entityIdStream, EntityType entityType);
 
 	/**
-	 * @throws MolgenisValidationException if the given entity is referenced by an Attribute
+	 * @throws ValidationException if the given entity is referenced by an Attribute
 	 */
 	void validateEntityTypeNotReferenced(EntityType entityType);
 }

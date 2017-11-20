@@ -14,9 +14,6 @@ import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
-/**
- * Created by Dennis on 11/24/2016.
- */
 public class TagRepositoryValidationDecoratorTest
 {
 

@@ -2,6 +2,8 @@ package org.molgenis.data.validation.constraint;
 
 import org.molgenis.data.meta.model.Tag;
 
+import java.util.Objects;
+
 import static java.util.Objects.requireNonNull;
 
 public class TagConstraintViolation implements ConstraintViolation
@@ -29,5 +31,20 @@ public class TagConstraintViolation implements ConstraintViolation
 	public void accept(ConstraintViolationVisitor constraintViolationVisitor)
 	{
 		constraintViolationVisitor.visit(this);
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		TagConstraintViolation that = (TagConstraintViolation) o;
+		return tagConstraint == that.tagConstraint && Objects.equals(tag.getId(), that.tag.getId());
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(tagConstraint, tag.getId());
 	}
 }

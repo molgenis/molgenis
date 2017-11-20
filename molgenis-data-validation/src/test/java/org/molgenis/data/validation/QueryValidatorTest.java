@@ -171,6 +171,7 @@ public class QueryValidatorTest
 			Attribute refIdAttr = when(mock(Attribute.class).getDataType()).thenReturn(refAttrType).getMock();
 			EntityType refEntityType = when(mock(EntityType.class).getIdAttribute()).thenReturn(refIdAttr).getMock();
 			when(attr.getRefEntity()).thenReturn(refEntityType);
+			when(refIdAttr.getEntity()).thenReturn(refEntityType);
 		}
 		return entityType;
 	}

@@ -3,8 +3,11 @@ package org.molgenis.data.validation.meta;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.ConstraintViolation;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -23,7 +26,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	@Override
 	public void update(Attribute attr)
 	{
-		attributeValidator.validate(attr, ValidationMode.UPDATE);
+		validate(attr, ValidationMode.UPDATE);
 		delegate().update(attr);
 	}
 
@@ -32,7 +35,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		delegate().update(attrs.filter(attr ->
 		{
-			attributeValidator.validate(attr, ValidationMode.UPDATE);
+			validate(attr, ValidationMode.UPDATE);
 			return true;
 		}));
 	}
@@ -40,7 +43,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	@Override
 	public void add(Attribute attr)
 	{
-		attributeValidator.validate(attr, ValidationMode.ADD);
+		validate(attr, ValidationMode.ADD);
 		delegate().add(attr);
 	}
 
@@ -49,8 +52,17 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		return delegate().add(attrs.filter(attr ->
 		{
-			attributeValidator.validate(attr, ValidationMode.ADD);
+			validate(attr, ValidationMode.ADD);
 			return true;
 		}));
+	}
+
+	private void validate(Attribute attribute, ValidationMode validationMode)
+	{
+		Collection<? extends ConstraintViolation> violations = attributeValidator.validate(attribute, validationMode);
+		if (!violations.isEmpty())
+		{
+			throw new ValidationException(violations);
+		}
 	}
 }

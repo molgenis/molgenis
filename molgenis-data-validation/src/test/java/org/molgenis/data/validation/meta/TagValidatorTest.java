@@ -2,12 +2,16 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.TagConstraintViolation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.validation.constraint.TagConstraint.UNKNOWN_RELATION_IRI;
+import static org.testng.Assert.assertEquals;
 
 public class TagValidatorTest
 {
@@ -24,14 +28,14 @@ public class TagValidatorTest
 	{
 		Tag tag = mock(Tag.class);
 		when(tag.getRelationIri()).thenReturn(Relation.isRealizationOf.getIRI());
-		tagValidator.validate(tag);
+		assertEquals(tagValidator.validate(tag), emptyList());
 	}
 
-	@Test(expectedExceptions = ValidationException.class)
+	@Test
 	public void validateInvalid() throws Exception
 	{
 		Tag tag = when(mock(Tag.class).getId()).thenReturn("id").getMock();
 		when(tag.getRelationIri()).thenReturn("blaat");
-		tagValidator.validate(tag);
+		assertEquals(tagValidator.validate(tag), singletonList(new TagConstraintViolation(UNKNOWN_RELATION_IRI, tag)));
 	}
 }

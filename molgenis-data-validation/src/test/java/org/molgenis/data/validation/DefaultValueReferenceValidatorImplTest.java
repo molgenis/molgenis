@@ -27,6 +27,7 @@ public class DefaultValueReferenceValidatorImplTest
 	{
 		dataService = mock(DataService.class, RETURNS_DEEP_STUBS);
 		entityType = when(mock(EntityType.class).getIdValue()).thenReturn("entityTypeId").getMock();
+		when(entityType.getId()).thenReturn("entityTypeId");
 		when(entityType.getLabel()).thenReturn("My Entity Type");
 		defaultValueReferenceValidator = new DefaultValueReferenceValidatorImpl(dataService);
 	}
@@ -47,7 +48,7 @@ public class DefaultValueReferenceValidatorImplTest
 		defaultValueReferenceValidator.validateEntityNotReferenced(entity);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'My Entity Type' with id 'id' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:REFERENCE_EXISTS entityType:entityTypeId entity:id attributes:\\[myAttribute\\]")
 	public void testValidateEntityNotReferencedValidationException()
 	{
 		Attribute attribute = createMockAttribute(AttributeType.XREF, "id");
@@ -68,7 +69,7 @@ public class DefaultValueReferenceValidatorImplTest
 		defaultValueReferenceValidator.validateEntitiesNotReferenced(Stream.of(entity), entityType).count();
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'My Entity Type' with id 'id1' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:REFERENCE_EXISTS entityType:entityTypeId entity:id1 attributes:\\[myAttribute\\]")
 	public void testValidateEntitiesNotReferencedValidationException()
 	{
 		Attribute attribute = createMockAttribute(AttributeType.MREF, "id0,id1");
@@ -88,7 +89,7 @@ public class DefaultValueReferenceValidatorImplTest
 		defaultValueReferenceValidator.validateEntityNotReferencedById("id", entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'My Entity Type' with id 'id' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:REFERENCE_EXISTS entityType:entityTypeId entity:id attributes:\\[myAttribute\\]")
 	public void testValidateEntityNotReferencedByIdValidationException()
 	{
 		Attribute attribute = createMockAttribute(AttributeType.XREF, "id");
@@ -107,7 +108,7 @@ public class DefaultValueReferenceValidatorImplTest
 		defaultValueReferenceValidator.validateEntitiesNotReferencedById(Stream.of("id2"), entityType).count();
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'My Entity Type' with id 'id1' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:REFERENCE_EXISTS entityType:entityTypeId entity:id1 attributes:\\[myAttribute\\]")
 	public void testValidateEntitiesNotReferencedByIdValidationException()
 	{
 		Attribute attribute = createMockAttribute(AttributeType.MREF, "id0,id1");
@@ -124,7 +125,7 @@ public class DefaultValueReferenceValidatorImplTest
 		defaultValueReferenceValidator.validateEntityTypeNotReferenced(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "'My Entity Type' entities are referenced as default value by attributes")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:REFERENCE_EXISTS entityType:entityTypeId")
 	public void testValidateEntityTypeNotReferencedValidationException()
 	{
 		Attribute attribute = createMockAttribute(AttributeType.MREF, "id0,id1");
@@ -137,10 +138,16 @@ public class DefaultValueReferenceValidatorImplTest
 		Attribute idAttribute = mock(Attribute.class);
 		when(idAttribute.getDataType()).thenReturn(STRING);
 
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn("MyEntityType");
+
 		EntityType refEntityType = mock(EntityType.class);
 		when(refEntityType.getIdAttribute()).thenReturn(idAttribute);
 
 		Attribute attribute = mock(Attribute.class);
+		when(attribute.getEntity()).thenReturn(entityType);
+
+		when(attribute.getIdentifier()).thenReturn("myAttribute");
 		when(attribute.getName()).thenReturn("myAttribute");
 		when(attribute.getDataType()).thenReturn(attributeType);
 		when(attribute.getDefaultValue()).thenReturn(defaultValue);

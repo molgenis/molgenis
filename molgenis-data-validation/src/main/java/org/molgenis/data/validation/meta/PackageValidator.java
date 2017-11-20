@@ -1,52 +1,62 @@
 package org.molgenis.data.validation.meta;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.constraint.PackageConstraint;
 import org.molgenis.data.validation.constraint.PackageConstraintViolation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
 /**
  * {@link Package} validator
- *
- * TODO change 'validate(Package aPackage)' return type from void to Set<PackageConstraintViolation>
  */
 @Component
 public class PackageValidator
 {
 	private final SystemPackageRegistry systemPackageRegistry;
 
-	private final static Logger LOG = LoggerFactory.getLogger(PackageValidator.class);
-
-	public PackageValidator(SystemPackageRegistry systemPackageRegistry)
+	PackageValidator(SystemPackageRegistry systemPackageRegistry)
 	{
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 	}
 
-	public void validate(Package package_)
+	public Collection<PackageConstraintViolation> validate(Package aPackage)
 	{
-		validatePackageAllowed(package_);
-		validatePackageName(package_);
+		List<PackageConstraintViolation> constraintViolations = new ArrayList<>();
+		validatePackageAllowed(aPackage).ifPresent(constraintViolations::add);
+		validatePackageName(aPackage).ifPresent(constraintViolations::add);
+		return constraintViolations;
 	}
 
-	private void validatePackageAllowed(Package package_)
+	private Optional<PackageConstraintViolation> validatePackageAllowed(Package aPackage)
 	{
-		if (MetaUtils.isSystemPackage(package_) && !systemPackageRegistry.containsPackage(package_))
+		if (MetaUtils.isSystemPackage(aPackage) && !systemPackageRegistry.containsPackage(aPackage))
 		{
-			throw new ValidationException(
-					new PackageConstraintViolation(PackageConstraint.SYSTEM_PACKAGE_READ_ONLY, package_));
+			return Optional.of(new PackageConstraintViolation(PackageConstraint.SYSTEM_PACKAGE_READ_ONLY, aPackage));
 		}
+		return Optional.empty();
 	}
 
-	private static void validatePackageName(Package package_)
+	private static Optional<PackageConstraintViolation> validatePackageName(Package aPackage)
 	{
-		NameValidator.validatePackageId(package_.getId());
+		try
+		{
+			// TODO get rid of try-deprecated-exception-catch
+			NameValidator.validatePackageId(aPackage.getId());
+		}
+		catch (MolgenisDataException e)
+		{
+			return Optional.of(new PackageConstraintViolation(PackageConstraint.NAME, aPackage));
+		}
+		return Optional.empty();
 	}
 }
