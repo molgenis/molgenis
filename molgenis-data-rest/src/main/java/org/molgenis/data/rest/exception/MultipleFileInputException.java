@@ -1,10 +1,8 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class MultipleFileInputException extends CodedRuntimeException
+public class MultipleFileInputException extends RestApiException
 {
 	private final static String ERROR_CODE = "R07";
 

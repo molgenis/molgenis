@@ -1,12 +1,10 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-
 import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class LoginMethodDisabledException extends CodedRuntimeException
+public class LoginMethodDisabledException extends RestApiException
 {
 	private final static String ERROR_CODE = "R04";
 

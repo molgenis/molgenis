@@ -1,10 +1,10 @@
 package org.molgenis.security.account;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.data.rest.exception.RestApiException;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class InvalidSortOrderException extends CodedRuntimeException
+public class InvalidSortOrderException extends RestApiException
 {
 	private final static String ERROR_CODE = "R06";
 

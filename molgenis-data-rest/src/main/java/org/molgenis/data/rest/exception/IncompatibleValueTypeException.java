@@ -1,6 +1,5 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.text.MessageFormat;
@@ -8,7 +7,7 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class IncompatibleValueTypeException extends CodedRuntimeException
+public class IncompatibleValueTypeException extends RestApiException
 {
 	private final static String ERROR_CODE = "R01";
 	private Attribute attribute;

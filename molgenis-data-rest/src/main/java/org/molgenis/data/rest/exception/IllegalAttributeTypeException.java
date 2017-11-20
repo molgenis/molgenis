@@ -1,6 +1,5 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.AttributeType;
 
 import java.text.MessageFormat;
@@ -8,7 +7,7 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class IllegalAttributeTypeException extends CodedRuntimeException
+public class IllegalAttributeTypeException extends RestApiException
 {
 	private final static String ERROR_CODE = "R08";
 	private AttributeType attributeType;

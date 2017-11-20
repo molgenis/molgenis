@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -583,12 +584,20 @@ public class RestControllerV2
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
-	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
 	{
 		LOG.info("Invalid method arguments.", exception);
 		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
 				error -> new ErrorMessageResponse.ErrorMessage(error.getDefaultMessage())));
+	}
+
+	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException exception)
+	{
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(exception.getMessage()));
 	}
 
 	private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName)

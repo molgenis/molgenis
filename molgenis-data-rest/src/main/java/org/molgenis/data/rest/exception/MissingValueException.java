@@ -1,13 +1,11 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class MissingValueException extends CodedRuntimeException
+public class MissingValueException extends RestApiException
 {
 	private final static String ERROR_CODE = "R05";
 	private String missing_value;
@@ -16,7 +14,7 @@ public class MissingValueException extends CodedRuntimeException
 	public MissingValueException(String missing_value, String location)
 	{
 		super(ERROR_CODE);
-		this.missing_value = requireNonNull(missing_value);
+		this.missing_value = requireNonNull(missing_value, location);
 		this.location = location;
 	}
 

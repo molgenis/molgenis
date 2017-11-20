@@ -1,13 +1,11 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class InvalidExpandException extends CodedRuntimeException
+public class InvalidExpandException extends RestApiException
 {
 	private final static String ERROR_CODE = "R03";
 	private Object expand;

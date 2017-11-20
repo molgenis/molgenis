@@ -1,6 +1,7 @@
 package org.molgenis.data.rest;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -32,9 +33,11 @@ import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,6 +45,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -67,8 +72,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -810,6 +814,30 @@ public class RestController
 		{
 			request.getSession().invalidate();
 		}
+	}
+
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
+	{
+		LOG.debug("", e);
+		List<ErrorMessageResponse.ErrorMessage> messages = Lists.newArrayList();
+		for (ObjectError error : e.getBindingResult().getAllErrors())
+		{
+			messages.add(new ErrorMessageResponse.ErrorMessage(error.getDefaultMessage()));
+		}
+
+		return new ErrorMessageResponse(messages);
 	}
 
 	private void updateInternal(String entityTypeId, String untypedId, Map<String, Object> entityMap)
