@@ -25,6 +25,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
+import org.molgenis.data.validation.constraint.TagConstraintViolation;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
@@ -305,12 +306,32 @@ public class EmxMetaDataParser implements MetaDataParser
 		metaDataMap.values()
 				   .stream()
 				   .map(EntityType::getPackage)
-				   .filter(Objects::nonNull)
-				   .forEach(package_ -> package_.getTags().forEach(tagValidator::validate));
-		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tagValidator::validate));
+				   .filter(Objects::nonNull).forEach(package_ -> package_.getTags().forEach(tag ->
+		{
+			Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
+			if (!violations.isEmpty())
+			{
+				throw new ValidationException(violations);
+			}
+		}));
+		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tag ->
+		{
+			Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
+			if (!violations.isEmpty())
+			{
+				throw new ValidationException(violations);
+			}
+		}));
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
-			attr.getTags().forEach(tagValidator::validate);
+			attr.getTags().forEach(tag ->
+			{
+				Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
+				if (!violations.isEmpty())
+				{
+					throw new ValidationException(violations);
+				}
+			});
 		}));
 
 		report = generateEntityValidationReport(source, report, metaDataMap);
