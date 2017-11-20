@@ -7,14 +7,16 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
+import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.EnumSet;
+
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.Sort.Direction.ASC;
@@ -43,7 +45,7 @@ public class AttributeValidatorTest
 	{
 		Attribute attr = createMockAttribute("invalid.name");
 		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD),
-				singletonList(new AttributeConstraintViolation(NAME, attr)));
+				AttributeValidationResult.create(attr, EnumSet.of(NAME)));
 	}
 
 	@Test
@@ -58,7 +60,7 @@ public class AttributeValidatorTest
 		when(mappedByAttr.getDataType()).thenReturn(XREF);
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
-		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD), emptySet());
+		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD), AttributeValidationResult.create(attr));
 	}
 
 	@Test
@@ -74,7 +76,7 @@ public class AttributeValidatorTest
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
 		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD),
-				singletonList(new AttributeConstraintViolation(MAPPED_BY_REFERENCE, attr)));
+				AttributeValidationResult.create(attr, EnumSet.of(MAPPED_BY_REFERENCE)));
 	}
 
 	@Test
@@ -90,7 +92,7 @@ public class AttributeValidatorTest
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
 		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD),
-				singletonList(new AttributeConstraintViolation(MAPPED_BY_TYPE, attr)));
+				AttributeValidationResult.create(attr, EnumSet.of(MAPPED_BY_TYPE)));
 	}
 
 	@Test
@@ -106,7 +108,7 @@ public class AttributeValidatorTest
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
 		when(attr.getOrderBy()).thenReturn(new Sort(mappedByAttrName, ASC));
-		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD), emptyList());
+		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD), AttributeValidationResult.create(attr));
 	}
 
 	@Test
@@ -126,7 +128,7 @@ public class AttributeValidatorTest
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
 		when(attr.getOrderBy()).thenReturn(new Sort("fail", ASC));
 		assertEquals(attributeValidator.validate(attr, ValidationMode.ADD),
-				singletonList(new AttributeConstraintViolation(ORDER_BY_REFERENCE, attr)));
+				AttributeValidationResult.create(attr, EnumSet.of(ORDER_BY_REFERENCE)));
 	}
 
 	@Test(dataProvider = "disallowedTransitionProvider")
@@ -135,7 +137,7 @@ public class AttributeValidatorTest
 		when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class)).thenReturn(
 				currentAttr);
 		assertEquals(attributeValidator.validate(newAttr, ValidationMode.UPDATE),
-				singletonList(new AttributeConstraintViolation(TYPE_UPDATE, newAttr)));
+				AttributeValidationResult.create(newAttr, EnumSet.of(TYPE_UPDATE)));
 	}
 
 	@Test(dataProvider = "allowedTransitionProvider")
@@ -152,7 +154,7 @@ public class AttributeValidatorTest
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.DATE);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_TYPE, attr)));
+				EnumSet.of(DEFAULT_VALUE_TYPE));
 	}
 
 	@Test
@@ -171,7 +173,7 @@ public class AttributeValidatorTest
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_TYPE, attr)));
+				EnumSet.of(DEFAULT_VALUE_TYPE));
 	}
 
 	@Test
@@ -190,7 +192,7 @@ public class AttributeValidatorTest
 		when(attr.getDefaultValue()).thenReturn("test^");
 		when(attr.getDataType()).thenReturn(AttributeType.HYPERLINK);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_HYPERLINK, attr)));
+				EnumSet.of(DEFAULT_VALUE_HYPERLINK));
 	}
 
 	@Test
@@ -213,7 +215,7 @@ public class AttributeValidatorTest
 		EntityType entityType = createMockEntityType("MyEntityType");
 		when(attr.getEntity()).thenReturn(entityType);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_ENUM, attr)));
+				EnumSet.of(DEFAULT_VALUE_ENUM));
 	}
 
 	@Test
@@ -234,7 +236,7 @@ public class AttributeValidatorTest
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.INT);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_TYPE, attr)));
+				EnumSet.of(DEFAULT_VALUE_TYPE));
 	}
 
 	@Test
@@ -244,7 +246,7 @@ public class AttributeValidatorTest
 		when(attr.getDefaultValue()).thenReturn("1.0");
 		when(attr.getDataType()).thenReturn(AttributeType.INT);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_TYPE, attr)));
+				EnumSet.of(DEFAULT_VALUE_TYPE));
 	}
 
 	@Test
@@ -263,7 +265,7 @@ public class AttributeValidatorTest
 		when(attr.getDefaultValue()).thenReturn("test");
 		when(attr.getDataType()).thenReturn(AttributeType.LONG);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_TYPE, attr)));
+				EnumSet.of(DEFAULT_VALUE_TYPE));
 	}
 
 	@Test
@@ -342,7 +344,7 @@ public class AttributeValidatorTest
 		Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
 		when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
 		assertEquals(attributeValidator.validateDefaultValue(attr, true).collect(toList()),
-				singletonList(new AttributeConstraintViolation(DEFAULT_VALUE_ENTITY_REFERENCE, attr)));
+				EnumSet.of(DEFAULT_VALUE_ENTITY_REFERENCE));
 	}
 
 	@DataProvider(name = "allowedTransitionProvider")

@@ -35,10 +35,9 @@ public class ValidationExceptionMessageGenerator implements ValidationResultVisi
 	}
 
 	@Override
-	public void visit(AttributeConstraintViolation constraintViolation)
+	public void visit(AttributeValidationResult constraintViolation)
 	{
-		ConstraintViolationMessage violationMessage = MessageGeneratorAttribute.createMessage(constraintViolation);
-		constraintViolationMessages.add(violationMessage);
+		constraintViolationMessages.addAll(MessageGeneratorAttribute.createMessages(constraintViolation));
 	}
 
 	@Override

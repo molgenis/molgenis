@@ -24,7 +24,7 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
+import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.molgenis.data.validation.constraint.TagValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator;
@@ -303,11 +303,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
 			// TODO collect all constraint violations
-			Collection<AttributeConstraintViolation> violations = attributeValidator.validate(attr,
+			final AttributeValidationResult validationResult = attributeValidator.validate(attr,
 					ValidationMode.ADD_SKIP_ENTITY_VALIDATION);
-			if (!violations.isEmpty())
+			if (validationResult.hasConstraintViolations())
 			{
-				throw new ValidationException(violations);
+				throw new ValidationException(validationResult);
 			}
 		}));
 

@@ -4,7 +4,7 @@ public interface ValidationResultVisitor
 {
 	void visit(EntityTypeValidationResult entityTypeConstraintViolation);
 
-	void visit(AttributeConstraintViolation attributeConstraintViolation);
+	void visit(AttributeValidationResult attributeConstraintViolation);
 
 	void visit(TagValidationResult tagValidationResult);
 
