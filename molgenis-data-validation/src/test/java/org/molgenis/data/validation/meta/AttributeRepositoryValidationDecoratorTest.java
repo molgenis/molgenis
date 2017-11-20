@@ -3,13 +3,16 @@ package org.molgenis.data.validation.meta;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
+import static freemarker.template.utility.Collections12.singletonList;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 
 public class AttributeRepositoryValidationDecoratorTest
@@ -38,29 +41,30 @@ public class AttributeRepositoryValidationDecoratorTest
 	public void updateAttributeValid()
 	{
 		Attribute attribute = mock(Attribute.class);
-		doNothing().when(attributeValidator).validate(attribute, ValidationMode.UPDATE);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(attribute);
 		verify(attributeValidator, times(1)).validate(attribute, ValidationMode.UPDATE);
 		verify(delegateRepository, times(1)).update(attribute);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@Test(expectedExceptions = ValidationException.class)
 	public void updateEntityInvalid() throws Exception
 	{
 		Attribute attribute = mock(Attribute.class);
-		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-														.validate(attribute, ValidationMode.UPDATE);
+		doReturn(singletonList(mock(AttributeConstraintViolation.class))).when(attributeValidator)
+																		 .validate(attribute, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(attribute);
 		verify(attributeValidator, times(1)).validate(attribute, ValidationMode.UPDATE);
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test
 	public void updateEntityStreamValid()
 	{
 		Attribute attribute0 = mock(Attribute.class);
 		Attribute attribute1 = mock(Attribute.class);
-		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.UPDATE);
-		doNothing().when(attributeValidator).validate(attribute1, ValidationMode.UPDATE);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute0, ValidationMode.UPDATE);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute1, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
@@ -69,14 +73,15 @@ public class AttributeRepositoryValidationDecoratorTest
 		verify(attributeValidator, times(2)).validate(any(Attribute.class), eq(ValidationMode.UPDATE));
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@SuppressWarnings("ResultOfMethodCallIgnored")
+	@Test(expectedExceptions = ValidationException.class)
 	public void updateEntityStreamInvalid()
 	{
 		Attribute attribute0 = mock(Attribute.class);
 		Attribute attribute1 = mock(Attribute.class);
-		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.UPDATE);
-		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-														.validate(attribute1, ValidationMode.UPDATE);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute0, ValidationMode.UPDATE);
+		doReturn(singletonList(mock(AttributeConstraintViolation.class))).when(attributeValidator)
+																		 .validate(attribute1, ValidationMode.UPDATE);
 		attributeRepoValidationDecorator.update(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
@@ -89,28 +94,29 @@ public class AttributeRepositoryValidationDecoratorTest
 	public void addEntityValid()
 	{
 		Attribute attribute = mock(Attribute.class);
-		doNothing().when(attributeValidator).validate(attribute, ValidationMode.ADD);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(attribute);
 		verify(attributeValidator, times(1)).validate(attribute, ValidationMode.ADD);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@Test(expectedExceptions = ValidationException.class)
 	public void addEntityInvalid()
 	{
 		Attribute attribute = mock(Attribute.class);
-		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-														.validate(attribute, ValidationMode.ADD);
+		doReturn(singletonList(mock(AttributeConstraintViolation.class))).when(attributeValidator)
+																		 .validate(attribute, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(attribute);
 		verify(attributeValidator, times(1)).validate(attribute, ValidationMode.ADD);
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test
 	public void addEntityStreamValid()
 	{
 		Attribute attribute0 = mock(Attribute.class);
 		Attribute attribute1 = mock(Attribute.class);
-		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.ADD);
-		doNothing().when(attributeValidator).validate(attribute1, ValidationMode.ADD);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute0, ValidationMode.ADD);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute1, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
@@ -119,14 +125,15 @@ public class AttributeRepositoryValidationDecoratorTest
 		verify(attributeValidator, times(2)).validate(any(Attribute.class), eq(ValidationMode.ADD));
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@SuppressWarnings("ResultOfMethodCallIgnored")
+	@Test(expectedExceptions = ValidationException.class)
 	public void addEntityStreamInvalid()
 	{
 		Attribute attribute0 = mock(Attribute.class);
 		Attribute attribute1 = mock(Attribute.class);
-		doNothing().when(attributeValidator).validate(attribute0, ValidationMode.ADD);
-		doThrow(mock(MolgenisValidationException.class)).when(attributeValidator)
-														.validate(attribute1, ValidationMode.ADD);
+		doReturn(emptyList()).when(attributeValidator).validate(attribute0, ValidationMode.ADD);
+		doReturn(singletonList(mock(AttributeConstraintViolation.class))).when(attributeValidator)
+																		 .validate(attribute1, ValidationMode.ADD);
 		attributeRepoValidationDecorator.add(Stream.of(attribute0, attribute1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);

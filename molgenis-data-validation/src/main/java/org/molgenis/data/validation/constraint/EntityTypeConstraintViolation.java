@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
-public final class EntityTypeConstraintViolation implements ConstraintViolation
+public class EntityTypeConstraintViolation implements ConstraintViolation
 {
 	private final EntityTypeConstraint entityTypeConstraint;
 	private final EntityType entityType;

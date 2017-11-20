@@ -3,12 +3,15 @@ package org.molgenis.data.validation.meta;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 
 public class EntityTypeRepositoryValidationDecoratorTest
@@ -37,15 +40,16 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	public void updateEntityValid()
 	{
 		EntityType entityType = mock(EntityType.class);
-		doNothing().when(entityTypeValidator).validate(entityType);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType);
 		entityTypeRepoValidationDecorator.update(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@Test(expectedExceptions = ValidationException.class)
 	public void updateEntityInvalid() throws Exception
 	{
 		EntityType entityType = mock(EntityType.class);
-		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType);
+		doReturn(singletonList(mock(EntityTypeConstraintViolation.class))).when(entityTypeValidator)
+																		  .validate(entityType);
 		entityTypeRepoValidationDecorator.update(entityType);
 	}
 
@@ -54,8 +58,8 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
-		doNothing().when(entityTypeValidator).validate(entityType0);
-		doNothing().when(entityTypeValidator).validate(entityType1);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType0);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
@@ -63,13 +67,14 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		captor.getValue().count(); // process all entities in stream
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@Test(expectedExceptions = ValidationException.class)
 	public void updateEntityStreamInvalid()
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
-		doNothing().when(entityTypeValidator).validate(entityType0);
-		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType1);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType0);
+		doReturn(singletonList(mock(EntityTypeConstraintViolation.class))).when(entityTypeValidator)
+																		  .validate(entityType1);
 		entityTypeRepoValidationDecorator.update(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
@@ -81,15 +86,16 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	public void addEntityValid()
 	{
 		EntityType entityType = mock(EntityType.class);
-		doNothing().when(entityTypeValidator).validate(entityType);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType);
 		entityTypeRepoValidationDecorator.add(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@Test(expectedExceptions = ValidationException.class)
 	public void addEntityInvalid()
 	{
 		EntityType entityType = mock(EntityType.class);
-		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType);
+		doReturn(singletonList(mock(EntityTypeConstraintViolation.class))).when(entityTypeValidator)
+																		  .validate(entityType);
 		entityTypeRepoValidationDecorator.add(entityType);
 	}
 
@@ -98,8 +104,8 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
-		doNothing().when(entityTypeValidator).validate(entityType0);
-		doNothing().when(entityTypeValidator).validate(entityType1);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType0);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType1);
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
@@ -107,13 +113,14 @@ public class EntityTypeRepositoryValidationDecoratorTest
 		captor.getValue().count(); // process all entities in stream
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class)
+	@Test(expectedExceptions = ValidationException.class)
 	public void addEntityStreamInvalid()
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
-		doNothing().when(entityTypeValidator).validate(entityType0);
-		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityType1);
+		doReturn(emptyList()).when(entityTypeValidator).validate(entityType0);
+		doReturn(singletonList(mock(EntityTypeConstraintViolation.class))).when(entityTypeValidator)
+																		  .validate(entityType1);
 		entityTypeRepoValidationDecorator.add(Stream.of(entityType0, entityType1));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
