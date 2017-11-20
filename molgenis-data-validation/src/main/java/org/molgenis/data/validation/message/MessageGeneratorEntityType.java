@@ -72,6 +72,9 @@ class MessageGeneratorEntityType
 			case PACKAGE_NOT_SYSTEM:
 				constraintViolationMessage = createMessagePackageNotSystem("V55", constraintViolation);
 				break;
+			case MISSING_ID_ATTR:
+				constraintViolationMessage = createMessageMissingIdAttr("V56", constraintViolation);
+				break;
 			default:
 				throw new UnexpectedEnumException(constraint);
 		}
@@ -113,6 +116,17 @@ class MessageGeneratorEntityType
 			EntityTypeConstraintViolation constraintViolation)
 	{
 		return createMessageIdAttribute(errorCode, constraintViolation);
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private static ConstraintViolationMessage createMessageMissingIdAttr(String errorCode,
+			EntityTypeConstraintViolation constraintViolation)
+	{
+		EntityType entityType = constraintViolation.getEntityType();
+
+		String message = getMessage(constraintViolation);
+		String localizedMessage = getLocalizedMessage(errorCode, entityType.getLabel()).orElse(message);
+		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")

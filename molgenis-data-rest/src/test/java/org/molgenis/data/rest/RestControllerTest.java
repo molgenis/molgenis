@@ -18,9 +18,11 @@ import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
+import org.molgenis.security.account.ChangePasswordException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
@@ -58,7 +60,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 @WebAppConfiguration
@@ -234,8 +235,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 																 .content(String.format("{username: '%s', password: '%s'}", username,
 													  password)).contentType(MediaType.APPLICATION_JSON)).andReturn();
 
-		assertEquals(result.getResolvedException().getMessage(),
-				"Unable to log in because a password reset is required. Sign in to the website to reset your password.");
+		assertTrue(result.getResolvedException() instanceof ChangePasswordException);
 	}
 
 	@Test
@@ -626,7 +626,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 																 .content("{name:Klaas}")
 																 .contentType(MediaType.APPLICATION_JSON)).andReturn();
 
-		assertTrue(result.getResolvedException() instanceof IllegalArgumentException);
+		assertTrue(result.getResolvedException() instanceof ValidationException);
 	}
 
 	@Test

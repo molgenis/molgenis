@@ -4,11 +4,11 @@ import org.molgenis.data.CodedRuntimeException;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class FileAttributeUpdateWithoutFileException extends CodedRuntimeException
+public class MultipleFileInputException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "R02";
+	private final static String ERROR_CODE = "R07";
 
-	public FileAttributeUpdateWithoutFileException()
+	public MultipleFileInputException()
 	{
 		super(ERROR_CODE);
 	}
@@ -16,7 +16,7 @@ public class FileAttributeUpdateWithoutFileException extends CodedRuntimeExcepti
 	@Override
 	public String getMessage()
 	{
-		return String.format("");
+		return "";
 	}
 
 	@Override
@@ -24,7 +24,8 @@ public class FileAttributeUpdateWithoutFileException extends CodedRuntimeExcepti
 	{
 		return getLanguageService().map(languageService ->
 		{
-			return languageService.getString(ERROR_CODE);
+			String format = languageService.getString(ERROR_CODE);
+			return format;
 		}).orElse(super.getLocalizedMessage());
 	}
 }

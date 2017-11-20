@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import org.molgenis.data.DateParseException;
+import org.molgenis.data.DateTimeParseException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
@@ -10,7 +12,6 @@ import org.molgenis.util.UnexpectedEnumException;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +23,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.springframework.util.StringUtils.capitalize;
 
 public class AttributeUtils
@@ -135,10 +137,9 @@ public class AttributeUtils
 		{
 			return parseLocalDate(valueAsString);
 		}
-		catch (DateTimeParseException e)
+		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new RuntimeException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attribute.getName(), valueAsString));
+			throw new DateParseException(attribute, valueAsString);
 		}
 	}
 
@@ -148,10 +149,9 @@ public class AttributeUtils
 		{
 			return parseInstant(valueAsString);
 		}
-		catch (DateTimeParseException e)
+		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new RuntimeException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attribute.getName(), valueAsString));
+			throw new DateTimeParseException(attribute, valueAsString);
 		}
 	}
 

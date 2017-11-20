@@ -1,14 +1,14 @@
-package org.molgenis.data.rest.exception;
+package org.molgenis.security.account;
 
 import org.molgenis.data.CodedRuntimeException;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class FileAttributeUpdateWithoutFileException extends CodedRuntimeException
+public class UnknownUsernamePasswordException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "R02";
+	private final static String ERROR_CODE = "A02";
 
-	public FileAttributeUpdateWithoutFileException()
+	public UnknownUsernamePasswordException()
 	{
 		super(ERROR_CODE);
 	}
@@ -24,7 +24,8 @@ public class FileAttributeUpdateWithoutFileException extends CodedRuntimeExcepti
 	{
 		return getLanguageService().map(languageService ->
 		{
-			return languageService.getString(ERROR_CODE);
+			String format = languageService.getString(ERROR_CODE);
+			return format;
 		}).orElse(super.getLocalizedMessage());
 	}
 }

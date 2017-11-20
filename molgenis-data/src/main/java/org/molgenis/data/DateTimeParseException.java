@@ -1,24 +1,24 @@
 package org.molgenis.data;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class DataTimeParseException extends CodedRuntimeException
+public class DateTimeParseException extends CodedRuntimeException
 {
 	private final static String ERROR_CODE = "D12";
 	private Attribute attribute;
 	private String value;
 
-	public DataTimeParseException(Attribute attribute, String value)
+	public DateTimeParseException(Attribute attribute, String value)
 	{
 		super(ERROR_CODE);
 		this.attribute = attribute;
 		this.value = value;
 	}
+
 	@Override
 	public String getMessage()
 	{

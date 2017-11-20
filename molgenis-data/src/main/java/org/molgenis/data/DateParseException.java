@@ -1,6 +1,5 @@
-package org.molgenis.data.rest.exception;
+package org.molgenis.data;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.text.MessageFormat;
@@ -9,7 +8,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class DateParseException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "R03";
+	private final static String ERROR_CODE = "D11";
 	private Attribute attribute;
 	private String value;
 
@@ -19,6 +18,7 @@ public class DateParseException extends CodedRuntimeException
 		this.attribute = attribute;
 		this.value = value;
 	}
+
 	@Override
 	public String getMessage()
 	{

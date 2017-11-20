@@ -55,6 +55,12 @@ class MessageGeneratorAttributeValue
 			case TYPE:
 				constraintViolationMessage = createMessageType("V79", constraintViolation);
 				break;
+			case DATE:
+				constraintViolationMessage = createMessageType("V79b", constraintViolation);
+				break;
+			case DATETIME:
+				constraintViolationMessage = createMessageType("V79c", constraintViolation);
+				break;
 			case UNIQUE:
 				constraintViolationMessage = createMessageUnique("V80", constraintViolation);
 				break;
