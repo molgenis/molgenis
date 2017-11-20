@@ -104,7 +104,7 @@ class MessageGeneratorEntityType
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, entityType.getLabel(),
-				entityType.getLabelAttribute().getLabel()).orElse(message);
+				entityType.getOwnLabelAttribute().getLabel()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
@@ -120,7 +120,7 @@ class MessageGeneratorEntityType
 			EntityTypeConstraintViolation constraintViolation)
 	{
 		EntityType entityType = constraintViolation.getEntityType();
-		Attribute idAttribute = entityType.getIdAttribute();
+		Attribute idAttribute = entityType.getOwnIdAttribute();
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, entityType.getLabel(), idAttribute.getLabel(),
@@ -149,7 +149,7 @@ class MessageGeneratorEntityType
 
 		String message = getMessage(constraintViolation);
 		String localizedMessage = getLocalizedMessage(errorCode, entityType.getLabel(),
-				entityType.getIdAttribute().getLabel()).orElse(message);
+				entityType.getOwnIdAttribute().getLabel()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 

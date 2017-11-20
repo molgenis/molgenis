@@ -8,7 +8,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -24,7 +24,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class EntityTypeValidatorTest
@@ -83,12 +82,12 @@ public class EntityTypeValidatorTest
 		when(attrQ0.findOne()).thenReturn(null);
 		when(attrQ1.findOne()).thenReturn(null);
 
-		String packageName = "package";
+		String packageName = "MyPackage";
 		Package package_ = when(mock(Package.class).getId()).thenReturn(packageName).getMock();
 		when(entityType.getPackage()).thenReturn(package_);
-		String name = "name";
+		String name = "MyEntityType";
 		String label = "label";
-		when(entityType.getId()).thenReturn(packageName + PACKAGE_SEPARATOR + name);
+		when(entityType.getId()).thenReturn(name);
 		when(entityType.getLabel()).thenReturn(label);
 		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
 		when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
@@ -100,21 +99,21 @@ public class EntityTypeValidatorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label of EntityType \\[package_name\\] is empty")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LABEL_NOT_EMPTY entityType:MyEntityType")
 	public void testValidateLabelIsEmpty()
 	{
 		when(entityType.getLabel()).thenReturn("");
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label of EntityType \\[package_name\\] contains only white space")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LABEL_NOT_WHITESPACE_ONLY entityType:MyEntityType")
 	public void testValidateLabelIsWhiteSpace()
 	{
 		when(entityType.getLabel()).thenReturn("  ");
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[logout\\] is not allowed because it is a reserved keyword.")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:NAME entityType:logout")
 	public void testValidateNameIsReservedKeyword() throws Exception
 	{
 		when(entityType.getId()).thenReturn("logout");
@@ -171,7 +170,7 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType); // should not throw an exception
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "An attribute with name \\[idAttr\\] already exists in entity \\[extendsEntity\\] or one of its parents")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ATTRIBUTE_IN_PARENT entityType:MyEntityType")
 	public void testValidateAttributeOwnedByExtendedEntity()
 	{
 		EntityType extendsEntityType = when(mock(EntityType.class).getId()).thenReturn("extendsEntity").getMock();
@@ -181,35 +180,35 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] ID attribute \\[idAttr\\] is not part of the entity attributes")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_EXISTS entityType:MyEntityType")
 	public void testValidateOwnIdAttributeInAttributes()
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(labelAttr));
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] ID attribute \\[idAttr\\] type \\[XREF\\] is not allowed")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_TYPE entityType:MyEntityType")
 	public void testValidateOwnIdAttributeTypeAllowed()
 	{
 		when(idAttr.getDataType()).thenReturn(XREF);
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] ID attribute \\[idAttr\\] is not a unique attribute")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_UNIQUE entityType:MyEntityType")
 	public void testValidateOwnIdAttributeUnique()
 	{
 		when(idAttr.isUnique()).thenReturn(false);
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] ID attribute \\[idAttr\\] is not a non-nillable attribute")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_NOT_NULL entityType:MyEntityType")
 	public void testValidateOwnIdAttributeNonNillable()
 	{
 		when(idAttr.isNillable()).thenReturn(true);
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] is missing required ID attribute")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_REQUIRED entityType:MyEntityType")
 	public void testValidateOwnIdAttributeNullIdAttributeNull()
 	{
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
@@ -235,14 +234,14 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType); // valid
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[labelAttr\\] is not part of the entity attributes")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LABEL_ATTRIBUTE_EXISTS entityType:MyEntityType")
 	public void testValidateOwnLabelAttributeInAttributes()
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Lookup attribute \\[labelAttr\\] is not part of the entity attributes")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LOOKUP_ATTRIBUTES_EXIST entityType:MyEntityType")
 	public void testValidateOwnLookupAttributesInAttributes()
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
@@ -250,7 +249,7 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Unknown backend \\[invalidBackend\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:BACKEND_EXISTS entityType:MyEntityType")
 	public void testValidateBackend()
 	{
 		when(entityType.getBackend()).thenReturn("invalidBackend");
@@ -268,7 +267,7 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType); // valid
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[concreteEntity\\] is not abstract; EntityType \\[package_name\\] can't extend it")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:EXTENDS_NOT_ABSTRACT entityType:MyEntityType")
 	public void testValidateExtendsFromNonAbstract()
 	{
 		EntityType extendsEntityType = mock(EntityType.class);
@@ -294,7 +293,7 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType); // valid
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Adding entity \\[myEntity\\] to system package \\[sys\\] is not allowed")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:PACKAGE_NOT_SYSTEM entityType:myEntity")
 	public void testValidateSystemPackageInvalid()
 	{
 		String packageName = PACKAGE_SYSTEM;
@@ -309,7 +308,7 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Entity \\[package_name\\] contains multiple attributes with name \\[idAttr\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ATTRIBUTES_UNIQUE entityType:MyEntityType")
 	public void testValidateAttributeWithDuplicateName()
 	{
 		when(entityType.getAllAttributes()).thenReturn(asList(idAttr, idAttr));
