@@ -37,8 +37,8 @@ public class AttributeValueConversionFailedException extends CodedRuntimeExcepti
 		return getLanguageService().map(languageService ->
 		{
 			final String languageCode = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(languageService.getString(ERROR_CODE),
-					attr.getEntityType().getLabel(languageCode), attr.getLabel(languageCode), value.toString(),
+			return MessageFormat.format(languageService.getString(ERROR_CODE), attr.getEntity().getLabel(languageCode),
+					attr.getLabel(languageCode), value.toString(),
 					attr.getDataType().toString());
 		}).orElse(super.getLocalizedMessage());
 	}
