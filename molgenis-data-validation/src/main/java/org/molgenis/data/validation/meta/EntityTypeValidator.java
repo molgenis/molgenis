@@ -11,13 +11,13 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.AttributeUtils;
-import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
+import org.molgenis.data.validation.constraint.EntityTypeConstraint;
+import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.molgenis.util.stream.MultimapCollectors;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -49,15 +49,19 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType entity meta data
 	 */
-	public Collection<EntityTypeConstraintViolation> validate(EntityType entityType)
+	public EntityTypeValidationResult validate(EntityType entityType)
 	{
-		List<EntityTypeConstraintViolation> constraintViolations = new ArrayList<>();
+		EnumSet<EntityTypeConstraint> constraintViolations = EnumSet.noneOf(EntityTypeConstraint.class);
 
-		validateEntityName(entityType).ifPresent(constraintViolations::add);
+		if (!isValidEntityTypeIdentifier(entityType))
+		{
+			constraintViolations.add(NAME);
+		}
+
 		validateEntityLabel(entityType).ifPresent(constraintViolations::add);
 		validatePackage(entityType).ifPresent(constraintViolations::add);
 		validateExtends(entityType).ifPresent(constraintViolations::add);
-		validateOwnAttributes(entityType).forEach(constraintViolations::add);
+		constraintViolations.addAll(validateOwnAttributes(entityType));
 
 		Map<String, Attribute> ownAllAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
 				toMap(Attribute::getIdentifier, Function.identity(), (u, v) -> u, LinkedHashMap::new));
@@ -67,7 +71,7 @@ public class EntityTypeValidator
 		validateOwnLookupAttributes(entityType, ownAllAttrMap).forEach(constraintViolations::add);
 		validateBackend(entityType).ifPresent(constraintViolations::add);
 
-		return constraintViolations;
+		return EntityTypeValidationResult.create(entityType, constraintViolations);
 	}
 
 	/**
@@ -75,14 +79,14 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType entity meta data
 	 */
-	private Optional<EntityTypeConstraintViolation> validateBackend(EntityType entityType)
+	private Optional<EntityTypeConstraint> validateBackend(EntityType entityType)
 	{
 		// Validate backend exists
 		String backendName = entityType.getBackend();
 		RepositoryCollection repoCollection = dataService.getMeta().getBackend(backendName);
 		if (repoCollection == null)
 		{
-			return Optional.of(new EntityTypeConstraintViolation(BACKEND_EXISTS, entityType));
+			return Optional.of(BACKEND_EXISTS);
 		}
 		return Optional.empty();
 	}
@@ -93,10 +97,10 @@ public class EntityTypeValidator
 	 * @param entityType    entity meta data
 	 * @param ownAllAttrMap attribute identifier to attribute map
 	 */
-	private static Stream<EntityTypeConstraintViolation> validateOwnLookupAttributes(EntityType entityType,
+	private static Set<EntityTypeConstraint> validateOwnLookupAttributes(EntityType entityType,
 			Map<String, Attribute> ownAllAttrMap)
 	{
-		List<EntityTypeConstraintViolation> constraintViolations = new ArrayList<>();
+		EnumSet<EntityTypeConstraint> constraintViolations = EnumSet.noneOf(EntityTypeConstraint.class);
 
 		// Validate lookup attributes
 		entityType.getOwnLookupAttributes().forEach(ownLookupAttr ->
@@ -105,11 +109,11 @@ public class EntityTypeValidator
 			Attribute ownAttr = ownAllAttrMap.get(ownLookupAttr.getIdentifier());
 			if (ownAttr == null)
 			{
-				constraintViolations.add(new EntityTypeConstraintViolation(LOOKUP_ATTRIBUTES_EXIST, entityType));
+				constraintViolations.add(LOOKUP_ATTRIBUTES_EXIST);
 			}
 		});
 
-		return constraintViolations.stream();
+		return constraintViolations;
 	}
 
 	/**
@@ -118,7 +122,7 @@ public class EntityTypeValidator
 	 * @param entityType    entity meta data
 	 * @param ownAllAttrMap attribute identifier to attribute map
 	 */
-	private static Stream<EntityTypeConstraintViolation> validateOwnLabelAttribute(EntityType entityType,
+	private static Set<EntityTypeConstraint> validateOwnLabelAttribute(EntityType entityType,
 			Map<String, Attribute> ownAllAttrMap)
 	{
 		// Validate label attribute
@@ -129,10 +133,10 @@ public class EntityTypeValidator
 			Attribute ownAttr = ownAllAttrMap.get(ownLabelAttr.getIdentifier());
 			if (ownAttr == null)
 			{
-				return Stream.of(new EntityTypeConstraintViolation(LABEL_ATTRIBUTE_EXISTS, entityType));
+				return EnumSet.of(LABEL_ATTRIBUTE_EXISTS);
 			}
 		}
-		return Stream.empty();
+		return EnumSet.noneOf(EntityTypeConstraint.class);
 	}
 
 	/**
@@ -141,10 +145,10 @@ public class EntityTypeValidator
 	 * @param entityType    entity meta data
 	 * @param ownAllAttrMap attribute identifier to attribute map
 	 */
-	private static Stream<EntityTypeConstraintViolation> validateOwnIdAttribute(EntityType entityType,
+	private static Set<EntityTypeConstraint> validateOwnIdAttribute(EntityType entityType,
 			Map<String, Attribute> ownAllAttrMap)
 	{
-		List<EntityTypeConstraintViolation> entityTypeConstraintViolations = new ArrayList<>();
+		EnumSet<EntityTypeConstraint> entityTypeConstraintViolations = EnumSet.noneOf(EntityTypeConstraint.class);
 
 		// Validate ID attribute
 		Attribute ownIdAttr = entityType.getOwnIdAttribute();
@@ -154,37 +158,35 @@ public class EntityTypeValidator
 			Attribute ownAttr = ownAllAttrMap.get(ownIdAttr.getIdentifier());
 			if (ownAttr == null)
 			{
-				entityTypeConstraintViolations.add(new EntityTypeConstraintViolation(ID_ATTRIBUTE_EXISTS, entityType));
+				entityTypeConstraintViolations.add(ID_ATTRIBUTE_EXISTS);
 			}
 
 			// Validate that ID attribute data type is allowed
 			if (!AttributeUtils.isIdAttributeTypeAllowed(ownIdAttr))
 			{
-				entityTypeConstraintViolations.add(new EntityTypeConstraintViolation(ID_ATTRIBUTE_TYPE, entityType));
+				entityTypeConstraintViolations.add(ID_ATTRIBUTE_TYPE);
 			}
 
 			// Validate that ID attribute is unique
 			if (!ownIdAttr.isUnique())
 			{
-				entityTypeConstraintViolations.add(new EntityTypeConstraintViolation(ID_ATTRIBUTE_UNIQUE, entityType));
+				entityTypeConstraintViolations.add(ID_ATTRIBUTE_UNIQUE);
 			}
 
 			// Validate that ID attribute is not nillable
 			if (ownIdAttr.isNillable())
 			{
-				entityTypeConstraintViolations.add(
-						new EntityTypeConstraintViolation(ID_ATTRIBUTE_NOT_NULL, entityType));
+				entityTypeConstraintViolations.add(ID_ATTRIBUTE_NOT_NULL);
 			}
 		}
 		else
 		{
 			if (!entityType.isAbstract() && entityType.getIdAttribute() == null)
 			{
-				entityTypeConstraintViolations.add(
-						new EntityTypeConstraintViolation(ID_ATTRIBUTE_REQUIRED, entityType));
+				entityTypeConstraintViolations.add(ID_ATTRIBUTE_REQUIRED);
 			}
 		}
-		return entityTypeConstraintViolations.stream();
+		return entityTypeConstraintViolations;
 	}
 
 	/**
@@ -195,15 +197,15 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType entity meta data
 	 */
-	private static Stream<EntityTypeConstraintViolation> validateOwnAttributes(EntityType entityType)
+	private static Set<EntityTypeConstraint> validateOwnAttributes(EntityType entityType)
 	{
 		// Validate that entity has attributes
 		if (asStream(entityType.getAllAttributes()).collect(toList()).isEmpty())
 		{
-			return Stream.of(new EntityTypeConstraintViolation(HAS_ATTRIBUTES, entityType));
+			return EnumSet.of(HAS_ATTRIBUTES);
 		}
 
-		List<EntityTypeConstraintViolation> constraintViolations = new ArrayList<>();
+		EnumSet<EntityTypeConstraint> constraintViolations = EnumSet.noneOf(EntityTypeConstraint.class);
 
 		// Validate that entity does not contain multiple attributes with the same name
 		Multimap<String, Attribute> attrMultiMap = asStream(entityType.getAllAttributes()).collect(
@@ -212,7 +214,7 @@ public class EntityTypeValidator
 		{
 			if (attrMultiMap.get(attrName).size() > 1)
 			{
-				constraintViolations.add(new EntityTypeConstraintViolation(ATTRIBUTES_UNIQUE, entityType));
+				constraintViolations.add(ATTRIBUTES_UNIQUE);
 			}
 		});
 
@@ -230,12 +232,12 @@ public class EntityTypeValidator
 			{
 				if (extendsAllAttrMap.containsKey(attr.getName()))
 				{
-					constraintViolations.add(new EntityTypeConstraintViolation(ATTRIBUTE_IN_PARENT, entityType));
+					constraintViolations.add(ATTRIBUTE_IN_PARENT);
 				}
 			});
 		}
 
-		return constraintViolations.stream();
+		return constraintViolations;
 	}
 
 	/**
@@ -243,14 +245,14 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType entity meta data
 	 */
-	private static Optional<EntityTypeConstraintViolation> validateExtends(EntityType entityType)
+	private static Optional<EntityTypeConstraint> validateExtends(EntityType entityType)
 	{
 		if (entityType.getExtends() != null)
 		{
 			EntityType extendedEntityType = entityType.getExtends();
 			if (!extendedEntityType.isAbstract())
 			{
-				return Optional.of(new EntityTypeConstraintViolation(EXTENDS_NOT_ABSTRACT, entityType));
+				return Optional.of(EXTENDS_NOT_ABSTRACT);
 			}
 		}
 		return Optional.empty();
@@ -263,7 +265,7 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType entity meta data
 	 */
-	private static Optional<EntityTypeConstraintViolation> validateEntityName(EntityType entityType)
+	private static boolean isValidEntityTypeIdentifier(EntityType entityType)
 	{
 		// validate entity name (e.g. illegal characters, length)
 		String name = entityType.getId();
@@ -275,10 +277,10 @@ public class EntityTypeValidator
 			}
 			catch (MolgenisDataException e)
 			{
-				return Optional.of(new EntityTypeConstraintViolation(NAME, entityType));
+				return false;
 			}
 		}
-		return Optional.empty();
+		return true;
 	}
 
 	/**
@@ -288,18 +290,18 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType entity meta data
 	 */
-	private static Optional<EntityTypeConstraintViolation> validateEntityLabel(EntityType entityType)
+	private static Optional<EntityTypeConstraint> validateEntityLabel(EntityType entityType)
 	{
 		String label = entityType.getLabel();
 		if (label != null)
 		{
 			if (label.isEmpty())
 			{
-				return Optional.of(new EntityTypeConstraintViolation(LABEL_NOT_EMPTY, entityType));
+				return Optional.of(LABEL_NOT_EMPTY);
 			}
 			else if (label.trim().equals(""))
 			{
-				return Optional.of(new EntityTypeConstraintViolation(LABEL_NOT_WHITESPACE_ONLY, entityType));
+				return Optional.of(LABEL_NOT_WHITESPACE_ONLY);
 			}
 		}
 		return Optional.empty();
@@ -310,13 +312,13 @@ public class EntityTypeValidator
 	 *
 	 * @param entityType entity type
 	 */
-	private Optional<EntityTypeConstraintViolation> validatePackage(EntityType entityType)
+	private Optional<EntityTypeConstraint> validatePackage(EntityType entityType)
 	{
 		Package aPackage = entityType.getPackage();
 		if (aPackage != null && MetaUtils.isSystemPackage(aPackage) && !systemEntityTypeRegistry.hasSystemEntityType(
 				entityType.getId()))
 		{
-			return Optional.of(new EntityTypeConstraintViolation(PACKAGE_NOT_SYSTEM, entityType));
+			return Optional.of(PACKAGE_NOT_SYSTEM);
 		}
 		return Optional.empty();
 	}

@@ -9,9 +9,11 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.validation.constraint.EntityTypeConstraint;
-import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
+import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.EnumSet;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
@@ -106,15 +108,15 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getLabel()).thenReturn("");
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.LABEL_NOT_EMPTY, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.LABEL_NOT_EMPTY)));
 	}
 
 	@Test
 	public void testValidateLabelIsWhiteSpace()
 	{
 		when(entityType.getLabel()).thenReturn("  ");
-		assertEquals(entityTypeValidator.validate(entityType), singletonList(
-				new EntityTypeConstraintViolation(EntityTypeConstraint.LABEL_NOT_WHITESPACE_ONLY, entityType)));
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType,
+				EnumSet.of(EntityTypeConstraint.LABEL_NOT_WHITESPACE_ONLY)));
 	}
 
 	@Test
@@ -122,7 +124,7 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getId()).thenReturn("logout");
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.NAME, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.NAME)));
 	}
 
 	@Test
@@ -139,7 +141,7 @@ public class EntityTypeValidatorTest
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(CHILDREN, idAttr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
-		assertEquals(entityTypeValidator.validate(entityType), emptyList());
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType));
 	}
 
 	@Test
@@ -162,7 +164,7 @@ public class EntityTypeValidatorTest
 		Query<EntityType> entityQ0 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attrParent)).thenReturn(entityQ0);
 		when(entityQ0.findOne()).thenReturn(entityType);
-		assertEquals(entityTypeValidator.validate(entityType), emptyList());
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType));
 	}
 
 	@Test
@@ -172,7 +174,7 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
-		assertEquals(entityTypeValidator.validate(entityType), emptyList());
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType));
 	}
 
 	@Test
@@ -183,7 +185,7 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ATTRIBUTE_IN_PARENT, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.ATTRIBUTE_IN_PARENT)));
 	}
 
 	@Test
@@ -191,7 +193,7 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(labelAttr));
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_EXISTS, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.ID_ATTRIBUTE_EXISTS)));
 	}
 
 	@Test
@@ -199,7 +201,7 @@ public class EntityTypeValidatorTest
 	{
 		when(idAttr.getDataType()).thenReturn(XREF);
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_TYPE, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.ID_ATTRIBUTE_TYPE)));
 	}
 
 	@Test
@@ -207,15 +209,15 @@ public class EntityTypeValidatorTest
 	{
 		when(idAttr.isUnique()).thenReturn(false);
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_UNIQUE, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.ID_ATTRIBUTE_UNIQUE)));
 	}
 
 	@Test
 	public void testValidateOwnIdAttributeNonNillable()
 	{
 		when(idAttr.isNillable()).thenReturn(true);
-		assertEquals(entityTypeValidator.validate(entityType), singletonList(
-				new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_NOT_NULL, entityType)));
+		assertEquals(entityTypeValidator.validate(entityType),
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.ID_ATTRIBUTE_NOT_NULL)));
 	}
 
 	@Test
@@ -223,8 +225,8 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
 		when(entityType.getIdAttribute()).thenReturn(null);
-		assertEquals(entityTypeValidator.validate(entityType), singletonList(
-				new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_REQUIRED, entityType)));
+		assertEquals(entityTypeValidator.validate(entityType),
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.ID_ATTRIBUTE_REQUIRED)));
 	}
 
 	@Test
@@ -233,7 +235,7 @@ public class EntityTypeValidatorTest
 		when(entityType.isAbstract()).thenReturn(true);
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
 		when(entityType.getIdAttribute()).thenReturn(null);
-		assertEquals(entityTypeValidator.validate(entityType), emptyList());
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType));
 	}
 
 	@Test
@@ -242,7 +244,7 @@ public class EntityTypeValidatorTest
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
 		Attribute parentIdAttr = mock(Attribute.class);
 		when(entityType.getIdAttribute()).thenReturn(parentIdAttr);
-		assertEquals(entityTypeValidator.validate(entityType), emptyList());
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType));
 	}
 
 	@Test
@@ -250,8 +252,8 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getOwnLookupAttributes()).thenReturn(singletonList(idAttr));
-		assertEquals(entityTypeValidator.validate(entityType), singletonList(
-				new EntityTypeConstraintViolation(EntityTypeConstraint.LABEL_ATTRIBUTE_EXISTS, entityType)));
+		assertEquals(entityTypeValidator.validate(entityType),
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.LABEL_ATTRIBUTE_EXISTS)));
 	}
 
 	@Test
@@ -259,8 +261,8 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getOwnLabelAttribute()).thenReturn(null);
-		assertEquals(entityTypeValidator.validate(entityType), singletonList(
-				new EntityTypeConstraintViolation(EntityTypeConstraint.LOOKUP_ATTRIBUTES_EXIST, entityType)));
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType,
+				EnumSet.of(EntityTypeConstraint.LOOKUP_ATTRIBUTES_EXIST)));
 	}
 
 	@Test
@@ -268,7 +270,7 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getBackend()).thenReturn("invalidBackend");
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.BACKEND_EXISTS, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.BACKEND_EXISTS)));
 	}
 
 	@Test
@@ -279,7 +281,7 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
-		assertEquals(entityTypeValidator.validate(entityType), emptyList());
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType));
 	}
 
 	@Test
@@ -290,31 +292,29 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.isAbstract()).thenReturn(false);
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
-		assertEquals(entityTypeValidator.validate(entityType), singletonList(
-				new EntityTypeConstraintViolation(EntityTypeConstraint.EXTENDS_NOT_ABSTRACT, entityType)));
+		assertEquals(entityTypeValidator.validate(entityType),
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.EXTENDS_NOT_ABSTRACT)));
 	}
 
 	@Test
 	public void testValidateSystemPackageValid()
 	{
-		String packageName = PACKAGE_SYSTEM;
 		Package rootSystemPackage = mock(Package.class);
-		when(rootSystemPackage.getId()).thenReturn(packageName);
+		when(rootSystemPackage.getId()).thenReturn(PACKAGE_SYSTEM);
 
 		String entityTypeId = "entity";
 		when(entityType.getId()).thenReturn(entityTypeId);
 		when(entityType.getPackage()).thenReturn(rootSystemPackage);
 
 		when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(true);
-		assertEquals(entityTypeValidator.validate(entityType), emptyList());
+		assertEquals(entityTypeValidator.validate(entityType), EntityTypeValidationResult.create(entityType));
 	}
 
 	@Test
 	public void testValidateSystemPackageInvalid()
 	{
-		String packageName = PACKAGE_SYSTEM;
 		Package rootSystemPackage = mock(Package.class);
-		when(rootSystemPackage.getId()).thenReturn(packageName);
+		when(rootSystemPackage.getId()).thenReturn(PACKAGE_SYSTEM);
 
 		String entityTypeId = "myEntity";
 		when(entityType.getId()).thenReturn(entityTypeId);
@@ -322,7 +322,7 @@ public class EntityTypeValidatorTest
 
 		when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(false);
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.PACKAGE_NOT_SYSTEM, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.PACKAGE_NOT_SYSTEM)));
 	}
 
 	@Test
@@ -330,6 +330,6 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getAllAttributes()).thenReturn(asList(idAttr, idAttr));
 		assertEquals(entityTypeValidator.validate(entityType),
-				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ATTRIBUTES_UNIQUE, entityType)));
+				EntityTypeValidationResult.create(entityType, EnumSet.of(EntityTypeConstraint.ATTRIBUTES_UNIQUE)));
 	}
 }

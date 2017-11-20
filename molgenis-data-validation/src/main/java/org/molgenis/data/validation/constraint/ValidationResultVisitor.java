@@ -2,7 +2,7 @@ package org.molgenis.data.validation.constraint;
 
 public interface ValidationResultVisitor
 {
-	void visit(EntityTypeConstraintViolation entityTypeConstraintViolation);
+	void visit(EntityTypeValidationResult entityTypeConstraintViolation);
 
 	void visit(AttributeConstraintViolation attributeConstraintViolation);
 
