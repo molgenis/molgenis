@@ -8,7 +8,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.constraint.EntityTypeConstraint;
+import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,6 +26,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.testng.Assert.assertEquals;
 
 public class EntityTypeValidatorTest
 {
@@ -99,25 +101,28 @@ public class EntityTypeValidatorTest
 		when(entityType.getBackend()).thenReturn(backendName);
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LABEL_NOT_EMPTY entityType:MyEntityType")
+	@Test
 	public void testValidateLabelIsEmpty()
 	{
 		when(entityType.getLabel()).thenReturn("");
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.LABEL_NOT_EMPTY, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LABEL_NOT_WHITESPACE_ONLY entityType:MyEntityType")
+	@Test
 	public void testValidateLabelIsWhiteSpace()
 	{
 		when(entityType.getLabel()).thenReturn("  ");
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType), singletonList(
+				new EntityTypeConstraintViolation(EntityTypeConstraint.LABEL_NOT_WHITESPACE_ONLY, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:NAME entityType:logout")
+	@Test
 	public void testValidateNameIsReservedKeyword() throws Exception
 	{
 		when(entityType.getId()).thenReturn("logout");
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.NAME, entityType)));
 	}
 
 	@Test
@@ -134,7 +139,7 @@ public class EntityTypeValidatorTest
 		when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(attrQ);
 		when(attrQ.eq(CHILDREN, idAttr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
-		entityTypeValidator.validate(entityType); // should not throw an exception
+		assertEquals(entityTypeValidator.validate(entityType), emptyList());
 	}
 
 	@Test
@@ -157,7 +162,7 @@ public class EntityTypeValidatorTest
 		Query<EntityType> entityQ0 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attrParent)).thenReturn(entityQ0);
 		when(entityQ0.findOne()).thenReturn(entityType);
-		entityTypeValidator.validate(entityType); // should not throw an exception
+		assertEquals(entityTypeValidator.validate(entityType), emptyList());
 	}
 
 	@Test
@@ -167,53 +172,59 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
-		entityTypeValidator.validate(entityType); // should not throw an exception
+		assertEquals(entityTypeValidator.validate(entityType), emptyList());
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ATTRIBUTE_IN_PARENT entityType:MyEntityType")
+	@Test
 	public void testValidateAttributeOwnedByExtendedEntity()
 	{
 		EntityType extendsEntityType = when(mock(EntityType.class).getId()).thenReturn("extendsEntity").getMock();
 		when(extendsEntityType.getAllAttributes()).thenReturn(singletonList(idAttr));
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ATTRIBUTE_IN_PARENT, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_EXISTS entityType:MyEntityType")
+	@Test
 	public void testValidateOwnIdAttributeInAttributes()
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(labelAttr));
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_EXISTS, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_TYPE entityType:MyEntityType")
+	@Test
 	public void testValidateOwnIdAttributeTypeAllowed()
 	{
 		when(idAttr.getDataType()).thenReturn(XREF);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_TYPE, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_UNIQUE entityType:MyEntityType")
+	@Test
 	public void testValidateOwnIdAttributeUnique()
 	{
 		when(idAttr.isUnique()).thenReturn(false);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_UNIQUE, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_NOT_NULL entityType:MyEntityType")
+	@Test
 	public void testValidateOwnIdAttributeNonNillable()
 	{
 		when(idAttr.isNillable()).thenReturn(true);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType), singletonList(
+				new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_NOT_NULL, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ID_ATTRIBUTE_REQUIRED entityType:MyEntityType")
+	@Test
 	public void testValidateOwnIdAttributeNullIdAttributeNull()
 	{
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
 		when(entityType.getIdAttribute()).thenReturn(null);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType), singletonList(
+				new EntityTypeConstraintViolation(EntityTypeConstraint.ID_ATTRIBUTE_REQUIRED, entityType)));
 	}
 
 	@Test
@@ -222,7 +233,7 @@ public class EntityTypeValidatorTest
 		when(entityType.isAbstract()).thenReturn(true);
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
 		when(entityType.getIdAttribute()).thenReturn(null);
-		entityTypeValidator.validate(entityType); // valid
+		assertEquals(entityTypeValidator.validate(entityType), emptyList());
 	}
 
 	@Test
@@ -231,29 +242,33 @@ public class EntityTypeValidatorTest
 		when(entityType.getOwnIdAttribute()).thenReturn(null);
 		Attribute parentIdAttr = mock(Attribute.class);
 		when(entityType.getIdAttribute()).thenReturn(parentIdAttr);
-		entityTypeValidator.validate(entityType); // valid
+		assertEquals(entityTypeValidator.validate(entityType), emptyList());
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LABEL_ATTRIBUTE_EXISTS entityType:MyEntityType")
+	@Test
 	public void testValidateOwnLabelAttributeInAttributes()
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
-		entityTypeValidator.validate(entityType);
+		when(entityType.getOwnLookupAttributes()).thenReturn(singletonList(idAttr));
+		assertEquals(entityTypeValidator.validate(entityType), singletonList(
+				new EntityTypeConstraintViolation(EntityTypeConstraint.LABEL_ATTRIBUTE_EXISTS, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:LOOKUP_ATTRIBUTES_EXIST entityType:MyEntityType")
+	@Test
 	public void testValidateOwnLookupAttributesInAttributes()
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getOwnLabelAttribute()).thenReturn(null);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType), singletonList(
+				new EntityTypeConstraintViolation(EntityTypeConstraint.LOOKUP_ATTRIBUTES_EXIST, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:BACKEND_EXISTS entityType:MyEntityType")
+	@Test
 	public void testValidateBackend()
 	{
 		when(entityType.getBackend()).thenReturn("invalidBackend");
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.BACKEND_EXISTS, entityType)));
 	}
 
 	@Test
@@ -264,10 +279,10 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.isAbstract()).thenReturn(true);
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
-		entityTypeValidator.validate(entityType); // valid
+		assertEquals(entityTypeValidator.validate(entityType), emptyList());
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:EXTENDS_NOT_ABSTRACT entityType:MyEntityType")
+	@Test
 	public void testValidateExtendsFromNonAbstract()
 	{
 		EntityType extendsEntityType = mock(EntityType.class);
@@ -275,7 +290,8 @@ public class EntityTypeValidatorTest
 		when(extendsEntityType.isAbstract()).thenReturn(false);
 		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
 		when(entityType.getExtends()).thenReturn(extendsEntityType);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType), singletonList(
+				new EntityTypeConstraintViolation(EntityTypeConstraint.EXTENDS_NOT_ABSTRACT, entityType)));
 	}
 
 	@Test
@@ -290,10 +306,10 @@ public class EntityTypeValidatorTest
 		when(entityType.getPackage()).thenReturn(rootSystemPackage);
 
 		when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(true);
-		entityTypeValidator.validate(entityType); // valid
+		assertEquals(entityTypeValidator.validate(entityType), emptyList());
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:PACKAGE_NOT_SYSTEM entityType:myEntity")
+	@Test
 	public void testValidateSystemPackageInvalid()
 	{
 		String packageName = PACKAGE_SYSTEM;
@@ -305,13 +321,15 @@ public class EntityTypeValidatorTest
 		when(entityType.getPackage()).thenReturn(rootSystemPackage);
 
 		when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(false);
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.PACKAGE_NOT_SYSTEM, entityType)));
 	}
 
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:ATTRIBUTES_UNIQUE entityType:MyEntityType")
+	@Test
 	public void testValidateAttributeWithDuplicateName()
 	{
 		when(entityType.getAllAttributes()).thenReturn(asList(idAttr, idAttr));
-		entityTypeValidator.validate(entityType);
+		assertEquals(entityTypeValidator.validate(entityType),
+				singletonList(new EntityTypeConstraintViolation(EntityTypeConstraint.ATTRIBUTES_UNIQUE, entityType)));
 	}
 }

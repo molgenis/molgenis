@@ -25,6 +25,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
+import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
 import org.molgenis.data.validation.constraint.TagConstraintViolation;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
@@ -290,7 +291,15 @@ public class EmxMetaDataParser implements MetaDataParser
 	private EntitiesValidationReport buildValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)
 	{
-		metaDataMap.values().forEach(entityTypeValidator::validate);
+		metaDataMap.values().forEach(entityType ->
+		{
+			// TODO collect all constraint violations
+			Collection<EntityTypeConstraintViolation> violations = entityTypeValidator.validate(entityType);
+			if (!violations.isEmpty())
+			{
+				throw new ValidationException(violations);
+			}
+		});
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
 			// TODO collect all constraint violations
@@ -306,14 +315,15 @@ public class EmxMetaDataParser implements MetaDataParser
 		metaDataMap.values()
 				   .stream()
 				   .map(EntityType::getPackage)
-				   .filter(Objects::nonNull).forEach(package_ -> package_.getTags().forEach(tag ->
-		{
-			Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
-			if (!violations.isEmpty())
-			{
-				throw new ValidationException(violations);
-			}
-		}));
+				   .filter(Objects::nonNull)
+				   .forEach(package_ -> package_.getTags().forEach(tag ->
+				   {
+					   Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
+					   if (!violations.isEmpty())
+					   {
+						   throw new ValidationException(violations);
+					   }
+				   }));
 		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tag ->
 		{
 			Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
