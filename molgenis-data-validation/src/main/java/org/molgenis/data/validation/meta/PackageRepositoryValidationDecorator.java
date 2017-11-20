@@ -92,7 +92,7 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(packageValidator::validate);
+		iterator().forEachRemaining(this::validate);
 		super.deleteAll();
 	}
 

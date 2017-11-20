@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 
 // TODO introduce AttributeConstraintViolations with Attribute + EnumSet<AttributeConstraint>
 // TODO autovalue?
-public final class AttributeConstraintViolation implements ConstraintViolation
+public class AttributeConstraintViolation implements ConstraintViolation
 {
 	private final AttributeConstraint attributeConstraint;
 	private final Attribute attribute;

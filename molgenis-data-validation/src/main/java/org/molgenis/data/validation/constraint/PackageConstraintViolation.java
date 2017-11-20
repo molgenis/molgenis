@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
-public final class PackageConstraintViolation implements ConstraintViolation
+public class PackageConstraintViolation implements ConstraintViolation
 {
 	private final PackageConstraint packageConstraint;
 	private final Package aPackage;
