@@ -1,10 +1,8 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.DataTypeConstraintViolationException;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
@@ -69,13 +67,19 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 		Entity entity1 = dataService.findOneById("REFERENCEENTITY", "1");
 		Entity entity2 = dataService.findOneById("REFERENCEENTITY", "molgenis@test.org");
 		return new Object[][] { { entity1, BOOL, "V94" }, { entity1, TEXT, "V94" }, { entity1, SCRIPT, "V94" },
-				{ entity2, INT, "V94" },
-				{ entity2, LONG, "V94"  }, { entity1, DECIMAL, "V94" },
 				{ entity1, EMAIL, "V94" }, { entity1, HYPERLINK, "V94" }, { entity1, HTML, "V94" },
 				{ entity1, ENUM, "V94" }, { entity1, DATE, "V94" }, { entity1, DATE_TIME, "V94" },
 				{ entity1, MREF, "V94" }, { entity1, CATEGORICAL_MREF, "V94" }, { entity1, FILE, "V94" },
-				{ entity1, COMPOUND, "V94" }, { entity1, ONE_TO_MANY, "V94" }
+				{ entity1, COMPOUND, "V94" }, { entity1, ONE_TO_MANY, "V94" }, { entity1, DECIMAL, "V94" }
 		};
+	}
+
+	@DataProvider(name = "invalidValueTestCases")
+	public Object[][] invalidValueTestCases()
+	{
+		Entity entity1 = dataService.findOneById("REFERENCEENTITY", "1");
+		Entity entity2 = dataService.findOneById("REFERENCEENTITY", "molgenis@test.org");
+		return new Object[][] { { entity2, INT, "V03" }, { entity2, LONG, "V03" } };
 	}
 
 	/**
@@ -97,9 +101,32 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 		catch (ValidationException exception)
 		{
 			//match on error code only since the message has no parameters
-			List<String> messageList = exception.getValidationMessages().map(message -> message.getErrorCode()).collect(
-					Collectors.toList());
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
 			assertTrue(messageList.contains(errorCode));
+		}
+	}
+
+	/**
+	 * Invalid conversion cases for CATEGORICAL to:
+	 * BOOL, TEXT, SCRIPT INT, LONG, DECIMAL, EMAIL, HYPERLINK, HTML, ENUM, DATE, DATE_TIME, MREF, CATEGORICAL_MREF, FILE, COMPOUND, ONE_TO_MANY
+	 *
+	 * @param valueToConvert  The value that will be converted
+	 * @param typeToConvertTo The type to convert to
+	 * @param errorCode       The expected errorCode
+	 */
+	@Test(dataProvider = "invalidValueTestCases")
+	public void testInvalidValue(Entity valueToConvert, AttributeType typeToConvertTo, String errorCode)
+	{
+		try
+		{
+			testTypeConversion(valueToConvert, typeToConvertTo);
+			fail("Conversion should have failed");
+		}
+		catch (DataTypeConstraintViolationException exception)
+		{
+			assertEquals(exception.getErrorCode(), errorCode);
 		}
 	}
 }
