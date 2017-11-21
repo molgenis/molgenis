@@ -3,7 +3,7 @@ package org.molgenis.data.validation.message;
 import org.molgenis.data.AttributeValue;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.validation.constraint.AttributeValueConstraint;
-import org.molgenis.data.validation.constraint.AttributeValueConstraintViolation;
+import org.molgenis.data.validation.constraint.AttributeValueValidationResult;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.Optional;
@@ -18,7 +18,7 @@ class MessageGeneratorAttributeValue
 	{
 	}
 
-	static ConstraintViolationMessage createMessage(AttributeValueConstraintViolation constraintViolation)
+	static ConstraintViolationMessage createMessage(AttributeValueValidationResult constraintViolation)
 	{
 		ConstraintViolationMessage constraintViolationMessage;
 
@@ -66,21 +66,21 @@ class MessageGeneratorAttributeValue
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageUnique(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		return createMessage(errorCode, constraintViolation);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageType(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		return createMessage(errorCode, constraintViolation);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageReadOnly(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		AttributeValue attributeValue = constraintViolation.getAttributeValue();
 		Attribute attribute = attributeValue.getAttribute();
@@ -93,7 +93,7 @@ class MessageGeneratorAttributeValue
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageRange(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		AttributeValue attributeValue = constraintViolation.getAttributeValue();
 		Attribute attribute = attributeValue.getAttribute();
@@ -107,14 +107,14 @@ class MessageGeneratorAttributeValue
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageNotNull(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		return createMessage(errorCode, constraintViolation);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageMaxLength(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		AttributeValue attributeValue = constraintViolation.getAttributeValue();
 		Attribute attribute = attributeValue.getAttribute();
@@ -128,21 +128,21 @@ class MessageGeneratorAttributeValue
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageHyperlink(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		return createMessage(errorCode, constraintViolation);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageExpression(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		return createMessage(errorCode, constraintViolation);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageEnum(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		AttributeValue attributeValue = constraintViolation.getAttributeValue();
 		Attribute attribute = attributeValue.getAttribute();
@@ -156,20 +156,20 @@ class MessageGeneratorAttributeValue
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageEntityReference(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		return createMessage(errorCode, constraintViolation);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static ConstraintViolationMessage createMessageEmail(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		return createMessage(errorCode, constraintViolation);
 	}
 
 	private static ConstraintViolationMessage createMessage(String errorCode,
-			AttributeValueConstraintViolation constraintViolation)
+			AttributeValueValidationResult constraintViolation)
 	{
 		AttributeValue attributeValue = constraintViolation.getAttributeValue();
 		Attribute attribute = attributeValue.getAttribute();
@@ -181,7 +181,7 @@ class MessageGeneratorAttributeValue
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
-	private static String getMessage(AttributeValueConstraintViolation constraintViolation)
+	private static String getMessage(AttributeValueValidationResult constraintViolation)
 	{
 		AttributeValue attributeValue = constraintViolation.getAttributeValue();
 		Attribute attribute = attributeValue.getAttribute();

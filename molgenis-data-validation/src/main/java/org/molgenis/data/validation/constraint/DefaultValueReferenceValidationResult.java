@@ -9,20 +9,21 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-public class DefaultValueReferenceConstraintViolation implements ValidationResult
+// TODO refactor this class to be similar to PackageValidationResult, AttributeValidationResult, EntityTypeValidationResult
+public class DefaultValueReferenceValidationResult implements ValidationResult
 {
 	private final DefaultValueReferenceConstraint entityConstraint;
 	private final EntityType entityType;
 	private final Object entityId;
 	private final Collection<Attribute> attributes;
 
-	public DefaultValueReferenceConstraintViolation(DefaultValueReferenceConstraint entityConstraint,
+	public DefaultValueReferenceValidationResult(DefaultValueReferenceConstraint entityConstraint,
 			EntityType entityType)
 	{
 		this(entityConstraint, entityType, null, null);
 	}
 
-	public DefaultValueReferenceConstraintViolation(DefaultValueReferenceConstraint entityConstraint,
+	public DefaultValueReferenceValidationResult(DefaultValueReferenceConstraint entityConstraint,
 			EntityType entityType, @Nullable Object entityId, @Nullable Collection<Attribute> attributes)
 	{
 		this.entityConstraint = requireNonNull(entityConstraint);
@@ -39,7 +40,7 @@ public class DefaultValueReferenceConstraintViolation implements ValidationResul
 	@Override
 	public boolean hasConstraintViolations()
 	{
-		return true; // FIXME
+		return true;
 	}
 
 	public EntityType getEntityType()

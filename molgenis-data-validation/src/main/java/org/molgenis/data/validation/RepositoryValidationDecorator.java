@@ -5,7 +5,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.constraint.AttributeValueConstraint;
-import org.molgenis.data.validation.constraint.AttributeValueConstraintViolation;
+import org.molgenis.data.validation.constraint.AttributeValueValidationResult;
 import org.molgenis.data.validation.constraint.ValidationResult;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
@@ -320,7 +320,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity.getEntities(
 					nonNillableAttr.getName()).iterator().hasNext()))
 			{
-				validationResource.addViolation(new AttributeValueConstraintViolation(AttributeValueConstraint.NOT_NULL,
+				validationResource.addViolation(new AttributeValueValidationResult(AttributeValueConstraint.NOT_NULL,
 						AttributeValue.create(nonNillableAttr, value)));
 			}
 		});
@@ -356,8 +356,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 						validationMode == ValidationMode.UPDATE && existingEntityId != null && !existingEntityId.equals(
 								entity.getIdValue())))
 				{
-					validationResource.addViolation(
-							new AttributeValueConstraintViolation(AttributeValueConstraint.UNIQUE,
+					validationResource.addViolation(new AttributeValueValidationResult(AttributeValueConstraint.UNIQUE,
 									AttributeValue.create(uniqueAttr, attrValue)));
 				}
 				else
@@ -400,7 +399,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
 					{
 						validationResource.addViolation(
-								new AttributeValueConstraintViolation(AttributeValueConstraint.ENTITY_REFERENCE,
+								new AttributeValueValidationResult(AttributeValueConstraint.ENTITY_REFERENCE,
 										AttributeValue.create(refAttr, entity.get(refAttr.getName()))));
 					}
 				}
@@ -451,8 +450,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 
 			if (value != null && existingValue != null && !value.equals(existingValue))
 			{
-				validationResource.addViolation(
-						new AttributeValueConstraintViolation(AttributeValueConstraint.READ_ONLY,
+				validationResource.addViolation(new AttributeValueValidationResult(AttributeValueConstraint.READ_ONLY,
 								AttributeValue.create(readonlyAttr, value)));
 			}
 		});

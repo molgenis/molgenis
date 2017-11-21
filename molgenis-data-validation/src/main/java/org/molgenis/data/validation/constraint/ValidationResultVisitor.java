@@ -8,9 +8,9 @@ public interface ValidationResultVisitor
 
 	void visit(TagValidationResult tagValidationResult);
 
-	void visit(AttributeValueConstraintViolation attributeValueConstraintViolation);
+	void visit(AttributeValueValidationResult attributeValueConstraintViolation);
 
 	void visit(PackageValidationResult packageValidationResult);
 
-	void visit(DefaultValueReferenceConstraintViolation entityConstraintViolation);
+	void visit(DefaultValueReferenceValidationResult entityConstraintViolation);
 }
