@@ -3,6 +3,7 @@ package org.molgenis.data.validation;
 import org.molgenis.data.CodedRuntimeException;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
@@ -12,7 +13,7 @@ public class ValidationException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "V99";
 
-	private final Collection<ValidationMessage> constraintViolationMessages;
+	private final Collection<ValidationMessage> validationMessages;
 
 	public ValidationException(ValidationResult constraintViolation)
 	{
@@ -22,24 +23,29 @@ public class ValidationException extends CodedRuntimeException
 	public ValidationException(Collection<? extends ValidationResult> constraintViolations)
 	{
 		super(ERROR_CODE);
-		this.constraintViolationMessages = createConstraintViolationMessages(constraintViolations);
+		this.validationMessages = createConstraintViolationMessages(constraintViolations);
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return constraintViolationMessages.stream().map(ValidationMessage::getMessage).collect(joining("\n"));
+		return validationMessages.stream().map(ValidationMessage::getMessage).collect(joining("\n"));
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
-		String localizedViolationsMessage = constraintViolationMessages.stream()
-																	   .map(ValidationMessage::getLocalizedMessage)
-																	   .collect(joining("\n"));
+		String localizedViolationsMessage = validationMessages.stream()
+															  .map(ValidationMessage::getLocalizedMessage)
+															  .collect(joining("\n"));
 		return getLanguageService().map(
 				languageService -> languageService.getString(ERROR_CODE) + ": " + localizedViolationsMessage)
 								   .orElse(super.getLocalizedMessage());
+	}
+
+	public Stream<ValidationMessage> getValidationMessages()
+	{
+		return validationMessages.stream();
 	}
 
 	private Collection<ValidationMessage> createConstraintViolationMessages(
