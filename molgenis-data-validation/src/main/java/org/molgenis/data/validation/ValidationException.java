@@ -29,7 +29,7 @@ public class ValidationException extends CodedRuntimeException
 	@Override
 	public String getMessage()
 	{
-		return validationMessages.stream().map(ValidationMessage::getMessage).collect(joining("\n"));
+		return validationMessages.stream().map(ValidationMessage::getMessage).collect(joining(","));
 	}
 
 	@Override
