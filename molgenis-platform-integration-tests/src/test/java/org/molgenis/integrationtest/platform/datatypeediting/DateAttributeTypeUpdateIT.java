@@ -3,15 +3,12 @@ package org.molgenis.integrationtest.platform.datatypeediting;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.time.ZoneId.systemDefault;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -114,19 +111,21 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param exceptionMessage The expected exception message
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(boolean valueToConvert, AttributeType typeToConvertTo, String errorCode)
+	public void testInvalidConversions(Object valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
+			String exceptionMessage) throws ParseException
 	{
 		try
 		{
+			valueToConvert = parseLocalDate(valueToConvert.toString());
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (ValidationException exception)
+		catch (Exception exception)
 		{
-			//match on error code only since the message has no parameters
-			List<String> messageList = exception.getValidationMessages().map(message -> message.getErrorCode()).collect(
-					Collectors.toList());
-			assertTrue(messageList.contains(errorCode));
+			System.out.println(exception.getClass());
+			System.out.println(exception.getMessage());
+			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
+			assertEquals(exception.getMessage(), exceptionMessage);
 		}
 	}
 }
