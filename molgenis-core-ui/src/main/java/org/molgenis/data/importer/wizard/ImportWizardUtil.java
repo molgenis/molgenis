@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
-public class ImportWizardUtil
+class ImportWizardUtil
 {
 	private ImportWizardUtil()
 	{
 
 	}
 
-	public static DatabaseAction toDatabaseAction(String actionStr)
+	static DatabaseAction toDatabaseAction(String actionStr)
 	{
 		// convert input to database action
 		DatabaseAction dbAction;
@@ -45,7 +45,7 @@ public class ImportWizardUtil
 		return dbAction;
 	}
 
-	public static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
+	static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
 			String entityImportOption)
 	{
 		File file = importWizard.getFile();
@@ -71,7 +71,7 @@ public class ImportWizardUtil
 		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + message));
 	}
 
-	public static void validateImportWizard(Wizard wizard)
+	static void validateImportWizard(Wizard wizard)
 	{
 		if (!(wizard instanceof ImportWizard))
 		{
