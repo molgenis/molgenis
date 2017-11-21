@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.data.validation.data;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.impl.EmailValidator;
@@ -8,8 +8,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.data.AttributeValueConstraint;
-import org.molgenis.data.validation.data.AttributeValueValidationResult;
+import org.molgenis.data.validation.ValidationResult;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;

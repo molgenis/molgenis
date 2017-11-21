@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.data.validation.data;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;

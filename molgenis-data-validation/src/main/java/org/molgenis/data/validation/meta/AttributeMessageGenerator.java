@@ -19,7 +19,7 @@ public class AttributeMessageGenerator
 	{
 	}
 
-	public static Collection<? extends ValidationMessage> createMessages(
+	public static Collection<ValidationMessage> createMessages(
 			AttributeValidationResult attributeValidationResult)
 	{
 		Attribute attribute = attributeValidationResult.getAttribute();
