@@ -4,9 +4,8 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
+import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -61,10 +60,10 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 
 	private void validate(EntityType entityType)
 	{
-		Collection<? extends ConstraintViolation> violations = entityTypeValidator.validate(entityType);
-		if (!violations.isEmpty())
+		EntityTypeValidationResult validationResult = entityTypeValidator.validate(entityType);
+		if (validationResult.hasConstraintViolations())
 		{
-			throw new ValidationException(violations);
+			throw new ValidationException(validationResult);
 		}
 	}
 }

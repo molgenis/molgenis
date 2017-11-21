@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Visitor that creates {@link ConstraintViolationMessage} for each {@link ConstraintViolation} to use in {@link org.molgenis.data.validation.ValidationException}.
+ * Visitor that creates {@link ConstraintViolationMessage} for each {@link ValidationResult} to use in {@link org.molgenis.data.validation.ValidationException}.
  */
-public class ValidationExceptionMessageGenerator implements ConstraintViolationVisitor
+public class ValidationExceptionMessageGenerator implements ValidationResultVisitor
 {
 	private List<ConstraintViolationMessage> constraintViolationMessages;
 
@@ -23,31 +23,27 @@ public class ValidationExceptionMessageGenerator implements ConstraintViolationV
 	}
 
 	@Override
-	public void visit(PackageConstraintViolation constraintViolation)
+	public void visit(PackageValidationResult packageValidationResult)
 	{
-		ConstraintViolationMessage violationMessage = MessageGeneratorPackage.createMessage(constraintViolation);
-		constraintViolationMessages.add(violationMessage);
+		constraintViolationMessages.addAll(MessageGeneratorPackage.createMessages(packageValidationResult));
 	}
 
 	@Override
-	public void visit(EntityTypeConstraintViolation constraintViolation)
+	public void visit(EntityTypeValidationResult constraintViolation)
 	{
-		ConstraintViolationMessage violationMessage = MessageGeneratorEntityType.createMessage(constraintViolation);
-		constraintViolationMessages.add(violationMessage);
+		constraintViolationMessages.addAll(MessageGeneratorEntityType.createMessages(constraintViolation));
 	}
 
 	@Override
-	public void visit(AttributeConstraintViolation constraintViolation)
+	public void visit(AttributeValidationResult constraintViolation)
 	{
-		ConstraintViolationMessage violationMessage = MessageGeneratorAttribute.createMessage(constraintViolation);
-		constraintViolationMessages.add(violationMessage);
+		constraintViolationMessages.addAll(MessageGeneratorAttribute.createMessages(constraintViolation));
 	}
 
 	@Override
-	public void visit(TagConstraintViolation constraintViolation)
+	public void visit(TagValidationResult tagValidationResult)
 	{
-		ConstraintViolationMessage violationMessage = MessageGeneratorTag.createMessage(constraintViolation);
-		constraintViolationMessages.add(violationMessage);
+		constraintViolationMessages.addAll(MessageGeneratorTag.createMessages(tagValidationResult));
 	}
 
 	@Override

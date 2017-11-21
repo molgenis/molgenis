@@ -2,16 +2,17 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.validation.constraint.PackageConstraint;
-import org.molgenis.data.validation.constraint.PackageConstraintViolation;
+import org.molgenis.data.validation.constraint.PackageValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import java.util.EnumSet;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
+import static org.molgenis.data.validation.constraint.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
 import static org.testng.Assert.assertEquals;
 
 public class PackageValidatorTest
@@ -35,7 +36,7 @@ public class PackageValidatorTest
 	{
 		Package package_ = when(mock(Package.class).getId()).thenReturn("myPackage").getMock();
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
-		assertEquals(packageValidator.validate(package_), emptyList());
+		assertEquals(packageValidator.validate(package_), PackageValidationResult.create(package_));
 	}
 
 	@Test
@@ -45,7 +46,7 @@ public class PackageValidatorTest
 		when(package_.getParent()).thenReturn(systemPackage);
 		when(package_.getRootPackage()).thenReturn(systemPackage);
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(true);
-		assertEquals(packageValidator.validate(package_), emptyList());
+		assertEquals(packageValidator.validate(package_), PackageValidationResult.create(package_));
 	}
 
 	@Test
@@ -56,7 +57,7 @@ public class PackageValidatorTest
 		when(package_.getRootPackage()).thenReturn(systemPackage);
 		when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
 		assertEquals(packageValidator.validate(package_),
-				singletonList(new PackageConstraintViolation(PackageConstraint.SYSTEM_PACKAGE_READ_ONLY, package_)));
+				PackageValidationResult.create(package_, EnumSet.of(SYSTEM_PACKAGE_READ_ONLY)));
 	}
 
 	@Test
@@ -65,8 +66,7 @@ public class PackageValidatorTest
 		Package package_ = when(mock(Package.class).getId()).thenReturn("0package").getMock();
 		when(package_.getParent()).thenReturn(testPackage);
 		when(package_.getRootPackage()).thenReturn(testPackage);
-		assertEquals(packageValidator.validate(package_),
-				singletonList(new PackageConstraintViolation(PackageConstraint.NAME, package_)));
+		assertEquals(packageValidator.validate(package_), PackageValidationResult.create(package_, EnumSet.of(NAME)));
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class PackageValidatorTest
 		Package package_ = when(mock(Package.class).getId()).thenReturn("test_myPackage").getMock();
 		when(package_.getParent()).thenReturn(testPackage);
 		when(package_.getRootPackage()).thenReturn(testPackage);
-		assertEquals(packageValidator.validate(package_), emptyList());
+		assertEquals(packageValidator.validate(package_), PackageValidationResult.create(package_));
 	}
 
 	@Test
@@ -83,6 +83,6 @@ public class PackageValidatorTest
 	{
 		Package package_ = when(mock(Package.class).getId()).thenReturn("myPackage").getMock();
 		when(package_.getParent()).thenReturn(null);
-		assertEquals(packageValidator.validate(package_), emptyList());
+		assertEquals(packageValidator.validate(package_), PackageValidationResult.create(package_));
 	}
 }

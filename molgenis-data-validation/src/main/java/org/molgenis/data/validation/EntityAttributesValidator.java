@@ -10,7 +10,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.constraint.AttributeValueConstraint;
 import org.molgenis.data.validation.constraint.AttributeValueConstraintViolation;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
+import org.molgenis.data.validation.constraint.ValidationResult;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
@@ -44,9 +44,9 @@ public class EntityAttributesValidator
 		this.expressionValidator = requireNonNull(expressionValidator);
 	}
 
-	public List<ConstraintViolation> validate(Entity entity, EntityType meta)
+	public List<ValidationResult> validate(Entity entity, EntityType meta)
 	{
-		List<ConstraintViolation> violations = checkNullableExpressions(entity, meta);
+		List<ValidationResult> violations = checkNullableExpressions(entity, meta);
 		violations.addAll(checkValidationExpressions(entity, meta));
 
 		for (Attribute attr : meta.getAtomicAttributes())
@@ -187,7 +187,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private List<ConstraintViolation> checkNullableExpressions(Entity entity, EntityType entityType)
+	private List<ValidationResult> checkNullableExpressions(Entity entity, EntityType entityType)
 	{
 		List<String> nullableExpressions = new ArrayList<>();
 		List<Attribute> expressionAttributes = new ArrayList<>();
@@ -202,7 +202,7 @@ public class EntityAttributesValidator
 			}
 		}
 
-		List<ConstraintViolation> violations = new ArrayList<>();
+		List<ValidationResult> violations = new ArrayList<>();
 
 		if (!nullableExpressions.isEmpty())
 		{

@@ -4,9 +4,8 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
+import org.molgenis.data.validation.constraint.TagValidationResult;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -60,10 +59,10 @@ public class TagRepositoryValidationDecorator extends AbstractRepositoryDecorato
 
 	private void validate(Tag tag)
 	{
-		Collection<? extends ConstraintViolation> violations = tagValidator.validate(tag);
-		if (!violations.isEmpty())
+		TagValidationResult tagValidationResult = tagValidator.validate(tag);
+		if (tagValidationResult.hasConstraintViolations())
 		{
-			throw new ValidationException(violations);
+			throw new ValidationException(tagValidationResult);
 		}
 	}
 }

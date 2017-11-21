@@ -2,13 +2,17 @@ package org.molgenis.data.validation.message;
 
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.constraint.PackageConstraint;
-import org.molgenis.data.validation.constraint.PackageConstraintViolation;
+import org.molgenis.data.validation.constraint.PackageValidationResult;
 import org.molgenis.util.UnexpectedEnumException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.text.MessageFormat.format;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
+import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
+import static org.molgenis.data.validation.constraint.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
 
 class MessageGeneratorPackage
 {
@@ -16,18 +20,26 @@ class MessageGeneratorPackage
 	{
 	}
 
-	static ConstraintViolationMessage createMessage(PackageConstraintViolation constraintViolation)
+	static List<ConstraintViolationMessage> createMessages(PackageValidationResult constraintViolation)
+	{
+		Package aPackage = constraintViolation.getPackage();
+		return constraintViolation.getConstraintViolations()
+								  .stream()
+								  .map(packageConstraint -> createMessage(aPackage, packageConstraint))
+								  .collect(toList());
+	}
+
+	private static ConstraintViolationMessage createMessage(Package aPackage, PackageConstraint packageConstraint)
 	{
 		ConstraintViolationMessage constraintViolationMessage;
 
-		PackageConstraint packageConstraint = constraintViolation.getConstraint();
 		switch (packageConstraint)
 		{
 			case SYSTEM_PACKAGE_READ_ONLY:
-				constraintViolationMessage = createMessageSystemPackageReadOnly("V30", constraintViolation);
+				constraintViolationMessage = createMessageSystemPackageReadOnly("V30", aPackage);
 				break;
 			case NAME:
-				constraintViolationMessage = createMessageName("V31", constraintViolation);
+				constraintViolationMessage = createMessageName("V31", aPackage);
 				break;
 			default:
 				throw new UnexpectedEnumException(packageConstraint);
@@ -35,10 +47,9 @@ class MessageGeneratorPackage
 		return constraintViolationMessage;
 	}
 
-	private static String getMessage(PackageConstraintViolation constraintViolation)
+	private static String getMessage(Package aPackage, PackageConstraint packageConstraint)
 	{
-		return String.format("constraint:%s package:%s", constraintViolation.getConstraint().name(),
-				constraintViolation.getPackage().getId());
+		return String.format("constraint:%s package:%s", packageConstraint.name(), aPackage.getId());
 	}
 
 	private static Optional<String> getLocalizedMessage(String errorCode, Object... arguments)
@@ -47,23 +58,17 @@ class MessageGeneratorPackage
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageSystemPackageReadOnly(String errorCode,
-			PackageConstraintViolation constraintViolation)
+	private static ConstraintViolationMessage createMessageSystemPackageReadOnly(String errorCode, Package aPackage)
 	{
-		Package aPackage = constraintViolation.getPackage();
-
-		String message = getMessage(constraintViolation);
+		String message = getMessage(aPackage, SYSTEM_PACKAGE_READ_ONLY);
 		String localizedMessage = getLocalizedMessage(errorCode, aPackage.getLabel()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageName(String errorCode,
-			PackageConstraintViolation constraintViolation)
+	private static ConstraintViolationMessage createMessageName(String errorCode, Package aPackage)
 	{
-		Package aPackage = constraintViolation.getPackage();
-
-		String message = getMessage(constraintViolation);
+		String message = getMessage(aPackage, NAME);
 		String localizedMessage = getLocalizedMessage(errorCode, aPackage.getLabel(), aPackage.getId()).orElse(message);
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}

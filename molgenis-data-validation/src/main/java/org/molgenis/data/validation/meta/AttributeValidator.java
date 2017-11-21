@@ -7,7 +7,8 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
+import org.molgenis.data.validation.constraint.AttributeConstraint;
+import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
@@ -53,9 +54,9 @@ public class AttributeValidator
 		this.emailValidator = new EmailValidator();
 	}
 
-	public Collection<AttributeConstraintViolation> validate(Attribute attr, ValidationMode validationMode)
+	public AttributeValidationResult validate(Attribute attr, ValidationMode validationMode)
 	{
-		Set<AttributeConstraintViolation> constraintViolations = new HashSet<>();
+		EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
 
 		boolean validateDefaultValueEntityReferences = validationMode == ADD || validationMode == UPDATE;
 
@@ -80,15 +81,15 @@ public class AttributeValidator
 				throw new UnexpectedEnumException(validationMode);
 		}
 
-		return constraintViolations;
+		return AttributeValidationResult.create(attr, constraintViolations);
 	}
 
-	private static Optional<AttributeConstraintViolation> validateParent(Attribute attr)
+	private static Optional<AttributeConstraint> validateParent(Attribute attr)
 	{
-		AttributeConstraintViolation constraintViolation;
+		AttributeConstraint constraintViolation;
 		if (attr.getParent() != null && attr.getParent().getDataType() != COMPOUND)
 		{
-			constraintViolation = new AttributeConstraintViolation(COMPOUND_PARENT, attr);
+			constraintViolation = COMPOUND_PARENT;
 		}
 		else
 		{
@@ -97,14 +98,14 @@ public class AttributeValidator
 		return Optional.ofNullable(constraintViolation);
 	}
 
-	private static Optional<AttributeConstraintViolation> validateChildren(Attribute attr)
+	private static Optional<AttributeConstraint> validateChildren(Attribute attr)
 	{
-		AttributeConstraintViolation constraintViolation;
+		AttributeConstraint constraintViolation;
 
 		boolean childrenIsNullOrEmpty = attr.getChildren() == null || Iterables.isEmpty(attr.getChildren());
 		if (!childrenIsNullOrEmpty && attr.getDataType() != COMPOUND)
 		{
-			constraintViolation = new AttributeConstraintViolation(NON_COMPOUND_CHILDREN, attr);
+			constraintViolation = NON_COMPOUND_CHILDREN;
 		}
 		else
 		{
@@ -113,17 +114,17 @@ public class AttributeValidator
 		return Optional.ofNullable(constraintViolation);
 	}
 
-	private static Stream<AttributeConstraintViolation> validateAdd(Attribute newAttr)
+	private static Stream<AttributeConstraint> validateAdd(Attribute newAttr)
 	{
-		List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
+		List<AttributeConstraint> constraintViolations = new ArrayList<>();
 		validateMappedBy(newAttr, newAttr.getMappedBy()).ifPresent(constraintViolations::add);
 		validateOrderBy(newAttr, newAttr.getOrderBy()).forEach(constraintViolations::add);
 		return constraintViolations.stream();
 	}
 
-	private static Stream<AttributeConstraintViolation> validateUpdate(Attribute newAttr, Attribute currentAttr)
+	private static Stream<AttributeConstraint> validateUpdate(Attribute newAttr, Attribute currentAttr)
 	{
-		List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
+		EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
 
 		// data type
 		AttributeType currentDataType = currentAttr.getDataType();
@@ -134,7 +135,7 @@ public class AttributeValidator
 
 			if (newAttr.isInversedBy())
 			{
-				constraintViolations.add(new AttributeConstraintViolation(TYPE_UPDATE_BIDIRECTIONAL, newAttr));
+				constraintViolations.add(TYPE_UPDATE_BIDIRECTIONAL);
 			}
 		}
 
@@ -150,28 +151,28 @@ public class AttributeValidator
 		return constraintViolations.stream();
 	}
 
-	Stream<AttributeConstraintViolation> validateDefaultValue(Attribute attr, boolean validateEntityReferences)
+	Stream<AttributeConstraint> validateDefaultValue(Attribute attr, boolean validateEntityReferences)
 	{
 
 		String value = attr.getDefaultValue();
 		if (value != null)
 		{
-			List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
+			EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
 
 			if (attr.isUnique())
 			{
-				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_NOT_UNIQUE, attr));
+				constraintViolations.add(DEFAULT_VALUE_NOT_UNIQUE);
 			}
 
 			if (attr.getExpression() != null)
 			{
-				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_NOT_COMPUTED, attr));
+				constraintViolations.add(DEFAULT_VALUE_NOT_COMPUTED);
 			}
 
 			AttributeType fieldType = attr.getDataType();
 			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
 			{
-				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_MAX_LENGTH, attr));
+				constraintViolations.add(DEFAULT_VALUE_MAX_LENGTH);
 			}
 
 			if (fieldType == AttributeType.EMAIL)
@@ -200,7 +201,7 @@ public class AttributeValidator
 			}
 			catch (Exception e)
 			{
-				constraintViolations.add(new AttributeConstraintViolation(DEFAULT_VALUE_TYPE, attr));
+				constraintViolations.add(DEFAULT_VALUE_TYPE);
 				typedValue = null;
 				typeValid = false;
 			}
@@ -215,8 +216,7 @@ public class AttributeValidator
 								   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
 								   .count() == 0)
 					{
-						constraintViolations.add(
-								new AttributeConstraintViolation(DEFAULT_VALUE_ENTITY_REFERENCE, attr));
+						constraintViolations.add(DEFAULT_VALUE_ENTITY_REFERENCE);
 					}
 				}
 				else if (isMultipleReferenceType(attr))
@@ -230,8 +230,7 @@ public class AttributeValidator
 														.collect(toList()))
 								   .count() < Iterables.size(refEntitiesValue))
 					{
-						constraintViolations.add(
-								new AttributeConstraintViolation(DEFAULT_VALUE_ENTITY_REFERENCE, attr));
+						constraintViolations.add(DEFAULT_VALUE_ENTITY_REFERENCE);
 					}
 				}
 			}
@@ -241,16 +240,16 @@ public class AttributeValidator
 		return Stream.empty();
 	}
 
-	private Optional<AttributeConstraintViolation> validateEmail(Attribute attribute)
+	private Optional<AttributeConstraint> validateEmail(Attribute attribute)
 	{
 		if (!emailValidator.isValid(attribute.getDefaultValue(), null))
 		{
-			return Optional.of(new AttributeConstraintViolation(DEFAULT_VALUE_EMAIL, attribute));
+			return Optional.of(DEFAULT_VALUE_EMAIL);
 		}
 		return Optional.empty();
 	}
 
-	private static Optional<AttributeConstraintViolation> validateEnum(Attribute attr, String value)
+	private static Optional<AttributeConstraint> validateEnum(Attribute attr, String value)
 	{
 		if (value != null)
 		{
@@ -258,13 +257,13 @@ public class AttributeValidator
 
 			if (!enumOptions.contains(value))
 			{
-				return Optional.of(new AttributeConstraintViolation(DEFAULT_VALUE_ENUM, attr));
+				return Optional.of(DEFAULT_VALUE_ENUM);
 			}
 		}
 		return Optional.empty();
 	}
 
-	private static Optional<AttributeConstraintViolation> validateHyperlink(Attribute attr)
+	private static Optional<AttributeConstraint> validateHyperlink(Attribute attr)
 	{
 		try
 		{
@@ -273,12 +272,12 @@ public class AttributeValidator
 		catch (URISyntaxException e)
 		{
 
-			return Optional.of(new AttributeConstraintViolation(DEFAULT_VALUE_HYPERLINK, attr));
+			return Optional.of(DEFAULT_VALUE_HYPERLINK);
 		}
 		return Optional.empty();
 	}
 
-	private static Stream<AttributeConstraintViolation> validateName(Attribute attr)
+	private static Stream<AttributeConstraint> validateName(Attribute attr)
 	{
 		// validate entity name (e.g. illegal characters, length)
 		String name = attr.getName();
@@ -291,7 +290,7 @@ public class AttributeValidator
 			}
 			catch (MolgenisDataException e)
 			{
-				return Stream.of(new AttributeConstraintViolation(NAME, attr));
+				return Stream.of(NAME);
 			}
 		}
 		return Stream.empty();
@@ -304,20 +303,20 @@ public class AttributeValidator
 	 * @param mappedByAttr mappedBy attribute
 	 * @throws MolgenisDataException if mappedBy is an attribute that is not part of the referenced entity
 	 */
-	private static Optional<AttributeConstraintViolation> validateMappedBy(Attribute attr, Attribute mappedByAttr)
+	private static Optional<AttributeConstraint> validateMappedBy(Attribute attr, Attribute mappedByAttr)
 	{
 		if (mappedByAttr != null)
 		{
 			if (!isSingleReferenceType(mappedByAttr))
 			{
-				return Optional.of(new AttributeConstraintViolation(MAPPED_BY_TYPE, attr));
+				return Optional.of(MAPPED_BY_TYPE);
 			}
 			else
 			{
 				Attribute refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
 				if (refAttr == null)
 				{
-					return Optional.of(new AttributeConstraintViolation(MAPPED_BY_REFERENCE, attr));
+					return Optional.of(MAPPED_BY_REFERENCE);
 				}
 			}
 		}
@@ -331,20 +330,20 @@ public class AttributeValidator
 	 * @param attr    attribute
 	 * @param orderBy orderBy of attribute
 	 */
-	private static Stream<AttributeConstraintViolation> validateOrderBy(Attribute attr, Sort orderBy)
+	private static Stream<AttributeConstraint> validateOrderBy(Attribute attr, Sort orderBy)
 	{
 		if (orderBy != null)
 		{
 			EntityType refEntity = attr.getRefEntity();
 			if (refEntity != null)
 			{
-				List<AttributeConstraintViolation> constraintViolations = new ArrayList<>();
+				EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
 				for (Sort.Order orderClause : orderBy)
 				{
 					String refAttrName = orderClause.getAttr();
 					if (refEntity.getAttribute(refAttrName) == null)
 					{
-						constraintViolations.add(new AttributeConstraintViolation(ORDER_BY_REFERENCE, attr));
+						constraintViolations.add(ORDER_BY_REFERENCE);
 					}
 				}
 				return constraintViolations.stream();
@@ -353,7 +352,7 @@ public class AttributeValidator
 		return Stream.empty();
 	}
 
-	private static Optional<AttributeConstraintViolation> validateUpdateDataType(Attribute currentAttribute,
+	private static Optional<AttributeConstraint> validateUpdateDataType(Attribute currentAttribute,
 			Attribute newAttribute)
 	{
 		AttributeType currentDataType = currentAttribute.getDataType();
@@ -362,7 +361,7 @@ public class AttributeValidator
 		EnumSet<AttributeType> allowedDatatypes = DATA_TYPE_ALLOWED_TRANSITIONS.get(currentDataType);
 		if (!allowedDatatypes.contains(newDataType))
 		{
-			return Optional.of(new AttributeConstraintViolation(TYPE_UPDATE, newAttribute));
+			return Optional.of(TYPE_UPDATE);
 		}
 		else
 		{

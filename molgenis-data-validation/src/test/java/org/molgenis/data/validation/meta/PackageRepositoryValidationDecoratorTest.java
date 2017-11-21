@@ -4,16 +4,17 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.PackageConstraintViolation;
+import org.molgenis.data.validation.constraint.PackageValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.EnumSet;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
 import static org.testng.Assert.assertEquals;
 
 public class PackageRepositoryValidationDecoratorTest
@@ -36,7 +37,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testAddValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.add(package_);
 		verify(delegateRepository).add(package_);
 	}
@@ -45,7 +46,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testAddInvalid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.add(package_);
 	}
 
@@ -53,7 +54,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testAddStreamValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.add(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -67,7 +68,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testAddStreamInvalid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.add(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -79,7 +80,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testUpdateValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.update(package_);
 		verify(packageValidator).validate(package_);
 		verify(delegateRepository).update(package_);
@@ -89,7 +90,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testUpdateInvalid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.update(package_);
 	}
 
@@ -97,7 +98,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testUpdateStreamValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.update(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -111,7 +112,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testUpdateStreamInvalid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.update(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -123,7 +124,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.delete(package_);
 		verify(packageValidator).validate(package_);
 		verify(delegateRepository).delete(package_);
@@ -133,7 +134,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteInvalid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.delete(package_);
 	}
 
@@ -141,7 +142,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteStreamValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.delete(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -155,7 +156,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteStreamInvalid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.delete(Stream.of(package_));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -167,7 +168,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteByIdValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		Object id = mock(Object.class);
 		when(delegateRepository.findOneById(id)).thenReturn(package_);
 		packageRepositoryValidationDecorator.deleteById(id);
@@ -181,7 +182,7 @@ public class PackageRepositoryValidationDecoratorTest
 		Package package_ = mock(Package.class);
 		Object id = mock(Object.class);
 		when(delegateRepository.findOneById(id)).thenReturn(package_);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.deleteById(id);
 	}
 
@@ -189,7 +190,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteAllValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		when(delegateRepository.iterator()).thenReturn(singletonList(package_).iterator());
 		packageRepositoryValidationDecorator.deleteAll();
 		verify(packageValidator).validate(package_);
@@ -201,7 +202,7 @@ public class PackageRepositoryValidationDecoratorTest
 	{
 		Package package_ = mock(Package.class);
 		when(delegateRepository.iterator()).thenReturn(singletonList(package_).iterator());
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.deleteAll();
 	}
 
@@ -210,7 +211,7 @@ public class PackageRepositoryValidationDecoratorTest
 	public void testDeleteAllStreamValid() throws Exception
 	{
 		Package package_ = mock(Package.class);
-		doReturn(emptyList()).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_)).when(packageValidator).validate(package_);
 		Object id = mock(Object.class);
 		when(delegateRepository.findOneById(id)).thenReturn(package_);
 		packageRepositoryValidationDecorator.deleteAll(Stream.of(id));
@@ -228,7 +229,7 @@ public class PackageRepositoryValidationDecoratorTest
 		Package package_ = mock(Package.class);
 		Object id = mock(Object.class);
 		when(delegateRepository.findOneById(id)).thenReturn(package_);
-		doReturn(singletonList(mock(PackageConstraintViolation.class))).when(packageValidator).validate(package_);
+		doReturn(PackageValidationResult.create(package_, EnumSet.of(NAME))).when(packageValidator).validate(package_);
 		packageRepositoryValidationDecorator.deleteAll(Stream.of(id));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> packageIdCaptor = ArgumentCaptor.forClass(Stream.class);

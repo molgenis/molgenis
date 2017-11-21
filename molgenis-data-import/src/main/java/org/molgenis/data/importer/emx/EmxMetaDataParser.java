@@ -24,9 +24,9 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
-import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
-import org.molgenis.data.validation.constraint.TagConstraintViolation;
+import org.molgenis.data.validation.constraint.AttributeValidationResult;
+import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
+import org.molgenis.data.validation.constraint.TagValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
@@ -295,20 +295,20 @@ public class EmxMetaDataParser implements MetaDataParser
 		metaDataMap.values().forEach(entityType ->
 		{
 			// TODO collect all constraint violations
-			Collection<EntityTypeConstraintViolation> violations = entityTypeValidator.validate(entityType);
-			if (!violations.isEmpty())
+			EntityTypeValidationResult validationResult = entityTypeValidator.validate(entityType);
+			if (validationResult.hasConstraintViolations())
 			{
-				throw new ValidationException(violations);
+				throw new ValidationException(validationResult);
 			}
 		});
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
 			// TODO collect all constraint violations
-			Collection<AttributeConstraintViolation> violations = attributeValidator.validate(attr,
+			final AttributeValidationResult validationResult = attributeValidator.validate(attr,
 					ValidationMode.ADD_SKIP_ENTITY_VALIDATION);
-			if (!violations.isEmpty())
+			if (validationResult.hasConstraintViolations())
 			{
-				throw new ValidationException(violations);
+				throw new ValidationException(validationResult);
 			}
 		}));
 
@@ -319,28 +319,28 @@ public class EmxMetaDataParser implements MetaDataParser
 				   .filter(Objects::nonNull)
 				   .forEach(package_ -> package_.getTags().forEach(tag ->
 				   {
-					   Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
-					   if (!violations.isEmpty())
+					   TagValidationResult tagValidationResult = tagValidator.validate(tag);
+					   if (tagValidationResult.hasConstraintViolations())
 					   {
-						   throw new ValidationException(violations);
+						   throw new ValidationException(tagValidationResult);
 					   }
 				   }));
 		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tag ->
 		{
-			Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
-			if (!violations.isEmpty())
+			TagValidationResult tagValidationResult = tagValidator.validate(tag);
+			if (tagValidationResult.hasConstraintViolations())
 			{
-				throw new ValidationException(violations);
+				throw new ValidationException(tagValidationResult);
 			}
 		}));
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
 			attr.getTags().forEach(tag ->
 			{
-				Collection<TagConstraintViolation> violations = tagValidator.validate(tag);
-				if (!violations.isEmpty())
+				TagValidationResult tagValidationResult = tagValidator.validate(tag);
+				if (tagValidationResult.hasConstraintViolations())
 				{
-					throw new ValidationException(violations);
+					throw new ValidationException(tagValidationResult);
 				}
 			});
 		}));
