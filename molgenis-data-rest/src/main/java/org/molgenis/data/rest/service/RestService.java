@@ -10,7 +10,7 @@ import org.molgenis.data.rest.exception.FileAttributeUpdateWithoutFileException;
 import org.molgenis.data.rest.exception.IllegalAttributeTypeException;
 import org.molgenis.data.rest.exception.IncompatibleValueTypeException;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeConstraintViolation;
+import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -509,9 +510,9 @@ public class RestService
 					updateMappedByEntitiesOneToMany(entity, existingEntity, mappedByAttr);
 					break;
 				default:
-					AttributeConstraintViolation constraint = new AttributeConstraintViolation(MAPPED_BY_TYPE,
-							mappedByAttr);
-					throw new ValidationException(constraint);
+					AttributeValidationResult attributeValidationResult = AttributeValidationResult.create(mappedByAttr,
+							Collections.singleton(MAPPED_BY_TYPE));
+					throw new ValidationException(attributeValidationResult);
 			}
 		});
 	}

@@ -23,8 +23,7 @@ import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.ConstraintViolation;
-import org.molgenis.data.validation.constraint.EntityTypeConstraintViolation;
+import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.molgenis.security.account.ChangePasswordException;
 import org.molgenis.security.account.InvalidSortOrderException;
 import org.molgenis.security.account.UnknownUsernamePasswordException;
@@ -845,8 +844,9 @@ public class RestController
 		EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta.getIdAttribute() == null)
 		{
-			ConstraintViolation constraintViolation = new EntityTypeConstraintViolation(MISSING_ID_ATTR, meta);
-			throw new ValidationException(constraintViolation);
+			EntityTypeValidationResult validationResult = EntityTypeValidationResult.create(meta,
+					Collections.singleton(MISSING_ID_ATTR));
+			throw new ValidationException(validationResult);
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
