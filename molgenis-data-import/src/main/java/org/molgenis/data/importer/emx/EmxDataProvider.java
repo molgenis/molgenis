@@ -143,6 +143,7 @@ class EmxDataProvider implements DataProvider
 						}
 						break;
 					case COMPOUND://Since this is inside a "atomic attributes" loop this should not be possible
+						throw new IllegalStateException("COMPOUND should never occur inside a 'atomic' loop");
 					default:
 						throw new UnexpectedEnumException(attrType);
 				}
