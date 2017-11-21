@@ -4,7 +4,6 @@ import com.google.common.collect.Iterables;
 import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.EntityUtils;
