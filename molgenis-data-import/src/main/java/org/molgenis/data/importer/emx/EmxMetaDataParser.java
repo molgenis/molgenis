@@ -25,10 +25,10 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.constraint.AttributeValidationResult;
+import org.molgenis.data.validation.constraint.CompositeValidationResult;
 import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.molgenis.data.validation.constraint.TagValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator;
-import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.TagValidator;
 import org.molgenis.util.EntityUtils;
@@ -58,6 +58,7 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isStringType;
+import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
 /**
@@ -291,24 +292,16 @@ public class EmxMetaDataParser implements MetaDataParser
 	private EntitiesValidationReport buildValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityType> metaDataMap)
 	{
+		CompositeValidationResult compositeValidationResult = new CompositeValidationResult();
 		metaDataMap.values().forEach(entityType ->
 		{
-			// TODO collect all constraint violations
 			EntityTypeValidationResult validationResult = entityTypeValidator.validate(entityType);
-			if (validationResult.hasConstraintViolations())
-			{
-				throw new ValidationException(validationResult);
-			}
+			compositeValidationResult.addValidationResult(validationResult);
 		});
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
-			// TODO collect all constraint violations
-			final AttributeValidationResult validationResult = attributeValidator.validate(attr,
-					ValidationMode.ADD_SKIP_ENTITY_VALIDATION);
-			if (validationResult.hasConstraintViolations())
-			{
-				throw new ValidationException(validationResult);
-			}
+			AttributeValidationResult validationResult = attributeValidator.validate(attr, ADD_SKIP_ENTITY_VALIDATION);
+			compositeValidationResult.addValidationResult(validationResult);
 		}));
 
 		// validate package/entity/attribute tags
@@ -319,31 +312,26 @@ public class EmxMetaDataParser implements MetaDataParser
 				   .forEach(package_ -> package_.getTags().forEach(tag ->
 				   {
 					   TagValidationResult tagValidationResult = tagValidator.validate(tag);
-					   if (tagValidationResult.hasConstraintViolations())
-					   {
-						   throw new ValidationException(tagValidationResult);
-					   }
+					   compositeValidationResult.addValidationResult(tagValidationResult);
 				   }));
 		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tag ->
 		{
 			TagValidationResult tagValidationResult = tagValidator.validate(tag);
-			if (tagValidationResult.hasConstraintViolations())
-			{
-				throw new ValidationException(tagValidationResult);
-			}
+			compositeValidationResult.addValidationResult(tagValidationResult);
 		}));
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
 			attr.getTags().forEach(tag ->
 			{
 				TagValidationResult tagValidationResult = tagValidator.validate(tag);
-				if (tagValidationResult.hasConstraintViolations())
-				{
-					throw new ValidationException(tagValidationResult);
-				}
+				compositeValidationResult.addValidationResult(tagValidationResult);
 			});
 		}));
 
+		if (compositeValidationResult.hasConstraintViolations())
+		{
+			throw new ValidationException(compositeValidationResult);
+		}
 		report = generateEntityValidationReport(source, report, metaDataMap);
 
 		// Add entities without data
