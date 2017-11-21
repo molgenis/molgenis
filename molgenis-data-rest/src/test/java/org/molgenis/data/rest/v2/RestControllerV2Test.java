@@ -884,7 +884,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		throw result.getResolvedException();
 	}
 
-	//FIXME how to test thiw better?
+	//FIXME how to test this better?
 	@Test(expectedExceptions = MethodArgumentNotValidException.class)
 	public void testDeleteEntityCollectionExceptionNoEntitiesToDelete() throws Exception
 	{
@@ -894,7 +894,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		throw result.getResolvedException();
 	}
 
-	//FIXME how to test thiw better?
+	//FIXME how to test this better?
 	@Test(expectedExceptions = HttpMessageNotReadableException.class)
 	public void testDeleteEntityCollectionExceptionInvalidRequestBody() throws Exception
 	{
