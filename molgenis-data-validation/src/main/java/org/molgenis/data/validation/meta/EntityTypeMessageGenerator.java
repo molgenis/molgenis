@@ -19,7 +19,7 @@ public class EntityTypeMessageGenerator
 	{
 	}
 
-	public static Collection<? extends ValidationMessage> createMessages(
+	public static Collection<ValidationMessage> createMessages(
 			EntityTypeValidationResult entityTypeValidationResult)
 	{
 		EntityType entityType = entityTypeValidationResult.getEntityType();

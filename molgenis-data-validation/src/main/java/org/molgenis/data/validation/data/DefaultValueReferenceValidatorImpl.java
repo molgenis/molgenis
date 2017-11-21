@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.data.validation.data;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.validation.data.DefaultValueReferenceValidationResult;
+import org.molgenis.data.validation.ValidationException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;

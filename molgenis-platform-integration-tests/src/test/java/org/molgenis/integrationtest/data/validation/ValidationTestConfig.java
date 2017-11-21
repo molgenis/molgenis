@@ -1,8 +1,8 @@
 package org.molgenis.integrationtest.data.validation;
 
-import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.QueryValidator;
+import org.molgenis.data.validation.data.EntityAttributesValidator;
+import org.molgenis.data.validation.data.ExpressionValidator;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.PackageValidator;
