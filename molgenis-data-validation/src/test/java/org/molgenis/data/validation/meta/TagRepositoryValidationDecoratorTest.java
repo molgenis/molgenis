@@ -4,7 +4,6 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.TagValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,7 +13,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.validation.constraint.TagConstraint.UNKNOWN_RELATION_IRI;
+import static org.molgenis.data.validation.meta.TagConstraint.UNKNOWN_RELATION_IRI;
 import static org.testng.Assert.assertEquals;
 
 public class TagRepositoryValidationDecoratorTest

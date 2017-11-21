@@ -1,8 +1,7 @@
-package org.molgenis.data.validation.message;
+package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.validation.constraint.PackageConstraint;
-import org.molgenis.data.validation.constraint.PackageValidationResult;
+import org.molgenis.data.validation.ValidationMessage;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.List;
@@ -11,16 +10,16 @@ import java.util.Optional;
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
-import static org.molgenis.data.validation.constraint.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
+import static org.molgenis.data.validation.meta.PackageConstraint.NAME;
+import static org.molgenis.data.validation.meta.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
 
-class MessageGeneratorPackage
+public class PackageMessageGenerator
 {
-	private MessageGeneratorPackage()
+	private PackageMessageGenerator()
 	{
 	}
 
-	static List<ConstraintViolationMessage> createMessages(PackageValidationResult constraintViolation)
+	public static List<ValidationMessage> createMessages(PackageValidationResult constraintViolation)
 	{
 		Package aPackage = constraintViolation.getPackage();
 		return constraintViolation.getConstraintViolations()
@@ -29,9 +28,9 @@ class MessageGeneratorPackage
 								  .collect(toList());
 	}
 
-	private static ConstraintViolationMessage createMessage(Package aPackage, PackageConstraint packageConstraint)
+	private static ValidationMessage createMessage(Package aPackage, PackageConstraint packageConstraint)
 	{
-		ConstraintViolationMessage constraintViolationMessage;
+		ValidationMessage constraintViolationMessage;
 
 		switch (packageConstraint)
 		{
@@ -58,18 +57,18 @@ class MessageGeneratorPackage
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageSystemPackageReadOnly(String errorCode, Package aPackage)
+	private static ValidationMessage createMessageSystemPackageReadOnly(String errorCode, Package aPackage)
 	{
 		String message = getMessage(aPackage, SYSTEM_PACKAGE_READ_ONLY);
 		String localizedMessage = getLocalizedMessage(errorCode, aPackage.getLabel()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageName(String errorCode, Package aPackage)
+	private static ValidationMessage createMessageName(String errorCode, Package aPackage)
 	{
 		String message = getMessage(aPackage, NAME);
 		String localizedMessage = getLocalizedMessage(errorCode, aPackage.getLabel(), aPackage.getId()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 }

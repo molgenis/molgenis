@@ -4,9 +4,8 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.constraint.AttributeValueConstraint;
-import org.molgenis.data.validation.constraint.AttributeValueValidationResult;
-import org.molgenis.data.validation.constraint.ValidationResult;
+import org.molgenis.data.validation.data.AttributeValueConstraint;
+import org.molgenis.data.validation.data.AttributeValueValidationResult;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 

@@ -1,6 +1,8 @@
-package org.molgenis.data.validation.constraint;
+package org.molgenis.data.validation.data;
 
 import org.molgenis.data.AttributeValue;
+import org.molgenis.data.validation.ValidationResult;
+import org.molgenis.data.validation.ValidationResultVisitor;
 
 import static java.util.Objects.requireNonNull;
 

@@ -4,7 +4,6 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -12,7 +11,7 @@ import java.util.EnumSet;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.validation.constraint.EntityTypeConstraint.NAME;
+import static org.molgenis.data.validation.meta.EntityTypeConstraint.NAME;
 
 public class EntityTypeRepositoryValidationDecoratorTest
 {

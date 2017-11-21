@@ -8,9 +8,8 @@ import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.constraint.AttributeValueConstraint;
-import org.molgenis.data.validation.constraint.AttributeValueValidationResult;
-import org.molgenis.data.validation.constraint.ValidationResult;
+import org.molgenis.data.validation.data.AttributeValueConstraint;
+import org.molgenis.data.validation.data.AttributeValueValidationResult;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
@@ -24,8 +23,8 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.validation.constraint.AttributeValueConstraint.NOT_NULL;
-import static org.molgenis.data.validation.constraint.AttributeValueConstraint.RANGE;
+import static org.molgenis.data.validation.data.AttributeValueConstraint.NOT_NULL;
+import static org.molgenis.data.validation.data.AttributeValueConstraint.RANGE;
 
 /**
  * <p>

@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
- * Thrown to indicate that existing data contains <tt>null</tt> values when creating a not-null constraintdeprec.
+ * Thrown to indicate that existing data contains <tt>null</tt> values when creating a not-null constraint.
  */
 public class NotNullConstraintCreationException extends DataIntegrityViolationException
 {

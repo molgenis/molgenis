@@ -1,4 +1,4 @@
-package org.molgenis.data.validation.constraint;
+package org.molgenis.data.validation;
 
 import java.util.ArrayList;
 import java.util.Collection;

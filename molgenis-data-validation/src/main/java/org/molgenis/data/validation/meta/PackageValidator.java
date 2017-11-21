@@ -5,15 +5,13 @@ import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.validation.constraint.PackageConstraint;
-import org.molgenis.data.validation.constraint.PackageValidationResult;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
-import static org.molgenis.data.validation.constraint.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
+import static org.molgenis.data.validation.meta.PackageConstraint.NAME;
+import static org.molgenis.data.validation.meta.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
 
 /**
  * {@link Package} validator

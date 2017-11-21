@@ -7,8 +7,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.constraint.AttributeConstraint;
-import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
@@ -28,7 +26,7 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
-import static org.molgenis.data.validation.constraint.AttributeConstraint.*;
+import static org.molgenis.data.validation.meta.AttributeConstraint.*;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 

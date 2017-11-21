@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
- * Thrown to indicate that data values are not unique when creating a unique constraintdeprec.
+ * Thrown to indicate that data values are not unique when creating a unique constraint.
  */
 public class UniqueConstraintCreationException extends DataIntegrityViolationException
 {

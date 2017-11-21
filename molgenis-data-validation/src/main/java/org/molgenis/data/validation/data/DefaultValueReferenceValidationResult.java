@@ -1,7 +1,9 @@
-package org.molgenis.data.validation.constraint;
+package org.molgenis.data.validation.data;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.ValidationResult;
+import org.molgenis.data.validation.ValidationResultVisitor;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

@@ -11,8 +11,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.AttributeUtils;
-import org.molgenis.data.validation.constraint.EntityTypeConstraint;
-import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.molgenis.util.stream.MultimapCollectors;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +24,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.validation.constraint.EntityTypeConstraint.*;
+import static org.molgenis.data.validation.meta.EntityTypeConstraint.*;
 import static org.molgenis.util.EntityUtils.asStream;
 
 /**

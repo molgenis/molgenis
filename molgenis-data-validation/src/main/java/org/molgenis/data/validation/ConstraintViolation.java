@@ -1,7 +1,5 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.validation.constraint.ValidationResult;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;

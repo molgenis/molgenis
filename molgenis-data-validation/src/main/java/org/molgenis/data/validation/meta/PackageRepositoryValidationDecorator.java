@@ -5,7 +5,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.PackageValidationResult;
 
 import java.util.stream.Stream;
 

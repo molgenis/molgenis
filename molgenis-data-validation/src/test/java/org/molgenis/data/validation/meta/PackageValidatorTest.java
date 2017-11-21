@@ -2,7 +2,6 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.validation.constraint.PackageValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -11,8 +10,8 @@ import java.util.EnumSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
-import static org.molgenis.data.validation.constraint.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
+import static org.molgenis.data.validation.meta.PackageConstraint.NAME;
+import static org.molgenis.data.validation.meta.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
 import static org.testng.Assert.assertEquals;
 
 public class PackageValidatorTest
