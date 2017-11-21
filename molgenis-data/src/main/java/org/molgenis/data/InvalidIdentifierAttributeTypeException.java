@@ -11,7 +11,7 @@ public class InvalidIdentifierAttributeTypeException extends CodedRuntimeExcepti
 	private static final String ERROR_CODE = "D09";
 	private final AttributeType type;
 
-	public InvalidIdentifierAttributeTypeException(AttributeType type, String name, String emxEntityName)
+	public InvalidIdentifierAttributeTypeException(AttributeType type)
 	{
 		super(ERROR_CODE);
 		this.type = type;

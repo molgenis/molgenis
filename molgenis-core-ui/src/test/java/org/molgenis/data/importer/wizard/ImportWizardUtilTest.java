@@ -1,6 +1,7 @@
 package org.molgenis.data.importer.wizard;
 
 import org.mockito.Mock;
+import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.slf4j.Logger;
 import org.springframework.validation.BindingResult;
@@ -12,7 +13,7 @@ import static org.mockito.Mockito.*;
 public class ImportWizardUtilTest extends AbstractMockitoTest
 {
 	@Mock
-	private Exception exception;
+	private CodedRuntimeException exception;
 	@Mock
 	private ImportWizard importWizard;
 	@Mock

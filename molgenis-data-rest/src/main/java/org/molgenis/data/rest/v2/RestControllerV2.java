@@ -20,7 +20,7 @@ import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeValueConstraintViolation;
+import org.molgenis.data.validation.data.AttributeValueValidationResult;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -59,7 +59,7 @@ import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
-import static org.molgenis.data.validation.constraint.AttributeValueConstraint.READ_ONLY;
+import static org.molgenis.data.validation.data.AttributeValueConstraint.READ_ONLY;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -85,30 +85,30 @@ public class RestControllerV2
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	static RepositoryCollectionCapabilityException createNoWriteCapabilitiesOnEntityException(String entityTypeId,
-			RepositoryCapability capability)
+	private static RepositoryCollectionCapabilityException createNoWriteCapabilitiesOnEntityException(
+			String entityTypeId, RepositoryCapability capability)
 	{
 		return new RepositoryCollectionCapabilityException(entityTypeId, capability);
 	}
 
-	static ValidationException createUpdateReadOnlyAttributeException(AttributeValue attributeValue)
+	private static ValidationException createUpdateReadOnlyAttributeException(AttributeValue attributeValue)
 	{
-		AttributeValueConstraintViolation constraintViolation = new AttributeValueConstraintViolation(READ_ONLY,
+		AttributeValueValidationResult constraintViolation = new AttributeValueValidationResult(READ_ONLY,
 				attributeValue);
 		return new ValidationException(constraintViolation);
 	}
 
-	static MissingIdentifierException createMolgenisDataExceptionUnknownIdentifier(int count)
+	private static MissingIdentifierException createMolgenisDataExceptionUnknownIdentifier(int count)
 	{
 		return new MissingIdentifierException(count);
 	}
 
-	static IdentifierAndValueException createMolgenisDataExceptionIdentifierAndValue()
+	private static IdentifierAndValueException createMolgenisDataExceptionIdentifierAndValue()
 	{
 		return new IdentifierAndValueException();
 	}
 
-	static UnknownEntityTypeException createUnknownEntityExceptionNotValidId(Object id)
+	private static UnknownEntityTypeException createUnknownEntityExceptionNotValidId(Object id)
 	{
 		return new UnknownEntityTypeException(id.toString());
 	}
