@@ -14,6 +14,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.rest.exception.IdentifierAndValueException;
 import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
@@ -963,10 +964,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
 	{
 		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
-				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}}").contentType(APPLICATION_JSON));
+				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}").contentType(APPLICATION_JSON));
 
 		MvcResult result = resultActions.andReturn();
-		assertTrue(result.getResolvedException() instanceof MissingIdentifierException);
+		assertTrue(result.getResolvedException() instanceof IdentifierAndValueException);
 	}
 
 	/**
