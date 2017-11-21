@@ -53,7 +53,7 @@ public class ImportWizardUtil
 					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), entityImportOption), e);
 		}
 
-		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getLocalizedMessage()));
 	}
 
 	public static void validateImportWizard(Wizard wizard)
