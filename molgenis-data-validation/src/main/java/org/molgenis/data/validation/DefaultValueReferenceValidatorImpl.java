@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.validation.constraint.DefaultValueReferenceConstraintViolation;
+import org.molgenis.data.validation.constraint.DefaultValueReferenceValidationResult;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -69,7 +69,7 @@ class DefaultValueReferenceValidatorImpl implements DefaultValueReferenceValidat
 		{
 			Collection<Attribute> attributes = defaultValueMultiMap.get(toAttributeDefaultValue(entityId));
 			throw new ValidationException(
-					new DefaultValueReferenceConstraintViolation(REFERENCE_EXISTS, entityType, entityId, attributes));
+					new DefaultValueReferenceValidationResult(REFERENCE_EXISTS, entityType, entityId, attributes));
 		}
 	}
 
@@ -78,7 +78,7 @@ class DefaultValueReferenceValidatorImpl implements DefaultValueReferenceValidat
 	{
 		if (!getDefaultValueMap(entityType).isEmpty())
 		{
-			throw new ValidationException(new DefaultValueReferenceConstraintViolation(REFERENCE_EXISTS, entityType));
+			throw new ValidationException(new DefaultValueReferenceValidationResult(REFERENCE_EXISTS, entityType));
 		}
 	}
 

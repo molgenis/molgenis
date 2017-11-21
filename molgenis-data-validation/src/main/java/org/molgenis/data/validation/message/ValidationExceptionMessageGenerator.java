@@ -29,15 +29,15 @@ public class ValidationExceptionMessageGenerator implements ValidationResultVisi
 	}
 
 	@Override
-	public void visit(EntityTypeValidationResult constraintViolation)
+	public void visit(EntityTypeValidationResult entityTypeValidationResult)
 	{
-		constraintViolationMessages.addAll(MessageGeneratorEntityType.createMessages(constraintViolation));
+		constraintViolationMessages.addAll(MessageGeneratorEntityType.createMessages(entityTypeValidationResult));
 	}
 
 	@Override
-	public void visit(AttributeValidationResult constraintViolation)
+	public void visit(AttributeValidationResult attributeValidationResult)
 	{
-		constraintViolationMessages.addAll(MessageGeneratorAttribute.createMessages(constraintViolation));
+		constraintViolationMessages.addAll(MessageGeneratorAttribute.createMessages(attributeValidationResult));
 	}
 
 	@Override
@@ -47,17 +47,18 @@ public class ValidationExceptionMessageGenerator implements ValidationResultVisi
 	}
 
 	@Override
-	public void visit(AttributeValueConstraintViolation constraintViolation)
+	public void visit(AttributeValueValidationResult attributeValueValidationResult)
 	{
-		ConstraintViolationMessage violationMessage = MessageGeneratorAttributeValue.createMessage(constraintViolation);
+		ConstraintViolationMessage violationMessage = MessageGeneratorAttributeValue.createMessage(
+				attributeValueValidationResult);
 		constraintViolationMessages.add(violationMessage);
 	}
 
 	@Override
-	public void visit(DefaultValueReferenceConstraintViolation constraintViolation)
+	public void visit(DefaultValueReferenceValidationResult defaultValueReferenceValidationResult)
 	{
 		ConstraintViolationMessage violationMessage = MessageGeneratorDefaultValueReference.createMessage(
-				constraintViolation);
+				defaultValueReferenceValidationResult);
 		constraintViolationMessages.add(violationMessage);
 	}
 }

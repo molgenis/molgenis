@@ -3,7 +3,7 @@ package org.molgenis.data.validation.message;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.constraint.DefaultValueReferenceConstraint;
-import org.molgenis.data.validation.constraint.DefaultValueReferenceConstraintViolation;
+import org.molgenis.data.validation.constraint.DefaultValueReferenceValidationResult;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.Collection;
@@ -20,7 +20,7 @@ class MessageGeneratorDefaultValueReference
 	{
 	}
 
-	static ConstraintViolationMessage createMessage(DefaultValueReferenceConstraintViolation constraintViolation)
+	static ConstraintViolationMessage createMessage(DefaultValueReferenceValidationResult constraintViolation)
 	{
 		ConstraintViolationMessage constraintViolationMessage;
 
@@ -44,7 +44,7 @@ class MessageGeneratorDefaultValueReference
 	}
 
 	private static ConstraintViolationMessage createMessageReferenceExists(String errorCode,
-			DefaultValueReferenceConstraintViolation constraintViolation)
+			DefaultValueReferenceValidationResult constraintViolation)
 	{
 
 		String message = getMessage(constraintViolation);
@@ -68,7 +68,7 @@ class MessageGeneratorDefaultValueReference
 		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
 	}
 
-	private static String getMessage(DefaultValueReferenceConstraintViolation constraintViolation)
+	private static String getMessage(DefaultValueReferenceValidationResult constraintViolation)
 	{
 		DefaultValueReferenceConstraint constraint = constraintViolation.getConstraint();
 		EntityType entityType = constraintViolation.getEntityType();

@@ -4,12 +4,13 @@ import org.molgenis.data.AttributeValue;
 
 import static java.util.Objects.requireNonNull;
 
-public final class AttributeValueConstraintViolation implements ValidationResult
+// TODO refactor this class to be similar to PackageValidationResult, AttributeValidationResult, EntityTypeValidationResult
+public final class AttributeValueValidationResult implements ValidationResult
 {
 	private final AttributeValueConstraint attributeValueConstraint;
 	private final AttributeValue attributeValue;
 
-	public AttributeValueConstraintViolation(AttributeValueConstraint attributeValueConstraint,
+	public AttributeValueValidationResult(AttributeValueConstraint attributeValueConstraint,
 			AttributeValue attributeValue)
 	{
 		this.attributeValueConstraint = requireNonNull(attributeValueConstraint);
@@ -29,7 +30,7 @@ public final class AttributeValueConstraintViolation implements ValidationResult
 	@Override
 	public boolean hasConstraintViolations()
 	{
-		return true; // FIXME
+		return true;
 	}
 
 	@Override
