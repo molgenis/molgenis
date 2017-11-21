@@ -20,6 +20,10 @@ public class ValidationException extends CodedRuntimeException
 		this(singletonList(constraintViolation));
 	}
 
+	/**
+	 * @deprecated use {@link #ValidationException(ValidationResult)} with {@link CompositeValidationResult}
+	 */
+	@Deprecated
 	public ValidationException(Collection<? extends ValidationResult> constraintViolations)
 	{
 		super(ERROR_CODE);

@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.data.validation.data;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -6,6 +6,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.ValidationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
