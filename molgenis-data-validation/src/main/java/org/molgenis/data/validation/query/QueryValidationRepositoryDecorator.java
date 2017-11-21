@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.data.validation.query;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;

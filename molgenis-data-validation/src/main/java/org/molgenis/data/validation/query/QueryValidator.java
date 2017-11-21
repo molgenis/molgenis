@@ -1,9 +1,11 @@
-package org.molgenis.data.validation;
+package org.molgenis.data.validation.query;
 
 import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.util.UnexpectedEnumException;

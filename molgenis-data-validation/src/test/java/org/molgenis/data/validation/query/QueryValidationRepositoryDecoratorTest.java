@@ -1,9 +1,10 @@
-package org.molgenis.data.validation;
+package org.molgenis.data.validation.query;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
