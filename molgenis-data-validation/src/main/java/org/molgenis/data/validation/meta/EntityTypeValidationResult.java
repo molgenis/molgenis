@@ -1,7 +1,9 @@
-package org.molgenis.data.validation.constraint;
+package org.molgenis.data.validation.meta;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.ValidationResult;
+import org.molgenis.data.validation.ValidationResultVisitor;
 
 import java.util.EnumSet;
 import java.util.Set;

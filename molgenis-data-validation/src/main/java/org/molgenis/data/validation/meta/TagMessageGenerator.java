@@ -1,8 +1,7 @@
-package org.molgenis.data.validation.message;
+package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.validation.constraint.TagConstraint;
-import org.molgenis.data.validation.constraint.TagValidationResult;
+import org.molgenis.data.validation.ValidationMessage;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.List;
@@ -11,15 +10,15 @@ import java.util.Optional;
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-import static org.molgenis.data.validation.constraint.TagConstraint.UNKNOWN_RELATION_IRI;
+import static org.molgenis.data.validation.meta.TagConstraint.UNKNOWN_RELATION_IRI;
 
-class MessageGeneratorTag
+public class TagMessageGenerator
 {
-	private MessageGeneratorTag()
+	private TagMessageGenerator()
 	{
 	}
 
-	static List<ConstraintViolationMessage> createMessages(TagValidationResult tagValidationResult)
+	public static List<ValidationMessage> createMessages(TagValidationResult tagValidationResult)
 	{
 		Tag tag = tagValidationResult.getTag();
 		return tagValidationResult.getConstraintViolations()
@@ -28,9 +27,9 @@ class MessageGeneratorTag
 								  .collect(toList());
 	}
 
-	static ConstraintViolationMessage createMessage(Tag tag, TagConstraint tagConstraint)
+	static ValidationMessage createMessage(Tag tag, TagConstraint tagConstraint)
 	{
-		ConstraintViolationMessage constraintViolationMessage;
+		ValidationMessage constraintViolationMessage;
 
 		switch (tagConstraint)
 		{
@@ -54,10 +53,10 @@ class MessageGeneratorTag
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageUnknownRelationIri(String errorCode, Tag tag)
+	private static ValidationMessage createMessageUnknownRelationIri(String errorCode, Tag tag)
 	{
 		String message = getMessage(tag, UNKNOWN_RELATION_IRI);
 		String localizedMessage = getLocalizedMessage(errorCode, tag.getLabel(), tag.getRelationIri()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 }

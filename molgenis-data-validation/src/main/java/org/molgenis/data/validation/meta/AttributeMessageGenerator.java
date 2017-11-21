@@ -1,9 +1,8 @@
-package org.molgenis.data.validation.message;
+package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.validation.constraint.AttributeConstraint;
-import org.molgenis.data.validation.constraint.AttributeValidationResult;
+import org.molgenis.data.validation.ValidationMessage;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.Collection;
@@ -14,13 +13,13 @@ import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-class MessageGeneratorAttribute
+public class AttributeMessageGenerator
 {
-	private MessageGeneratorAttribute()
+	private AttributeMessageGenerator()
 	{
 	}
 
-	public static Collection<? extends ConstraintViolationMessage> createMessages(
+	public static Collection<? extends ValidationMessage> createMessages(
 			AttributeValidationResult attributeValidationResult)
 	{
 		Attribute attribute = attributeValidationResult.getAttribute();
@@ -30,9 +29,9 @@ class MessageGeneratorAttribute
 										.collect(toList());
 	}
 
-	static ConstraintViolationMessage createMessage(Attribute attribute, AttributeConstraint attributeConstraint)
+	static ValidationMessage createMessage(Attribute attribute, AttributeConstraint attributeConstraint)
 	{
-		ConstraintViolationMessage constraintViolationMessage;
+		ValidationMessage constraintViolationMessage;
 
 		switch (attributeConstraint)
 		{
@@ -98,152 +97,152 @@ class MessageGeneratorAttribute
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageCompoundParent(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageCompoundParent(String errorCode, Attribute attribute)
 	{
 		return createMessageDefaultValue(errorCode, attribute, AttributeConstraint.COMPOUND_PARENT);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueEmail(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageDefaultValueEmail(String errorCode, Attribute attribute)
 	{
 		return createMessageDefaultValue(errorCode, attribute, AttributeConstraint.DEFAULT_VALUE_EMAIL);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueNotUnique(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageDefaultValueNotUnique(String errorCode, Attribute attribute)
 	{
 		return createMessageDefaultValue(errorCode, attribute, AttributeConstraint.DEFAULT_VALUE_NOT_UNIQUE);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueNotComputed(String errorCode,
+	private static ValidationMessage createMessageDefaultValueNotComputed(String errorCode,
 			Attribute attribute)
 	{
 		return createMessageDefaultValue(errorCode, attribute, AttributeConstraint.DEFAULT_VALUE_NOT_COMPUTED);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueEntityReferenceXref(String errorCode,
+	private static ValidationMessage createMessageDefaultValueEntityReferenceXref(String errorCode,
 			Attribute attribute)
 	{
 		return createMessageDefaultValue(errorCode, attribute, AttributeConstraint.DEFAULT_VALUE_ENTITY_REFERENCE);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueEntityReferenceMref(String errorCode,
+	private static ValidationMessage createMessageDefaultValueEntityReferenceMref(String errorCode,
 			Attribute attribute)
 	{
 		return createMessageDefaultValue(errorCode, attribute, AttributeConstraint.DEFAULT_VALUE_ENTITY_REFERENCE);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueEnum(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageDefaultValueEnum(String errorCode, Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.DEFAULT_VALUE_ENUM);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
 				attribute.getDefaultValue(),
 				attribute.getEnumOptions().stream().collect(Collectors.joining(","))).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueHyperlink(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageDefaultValueHyperlink(String errorCode, Attribute attribute)
 	{
 		return createMessageDefaultValue(errorCode, attribute, AttributeConstraint.DEFAULT_VALUE_HYPERLINK);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueMaxLength(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageDefaultValueMaxLength(String errorCode, Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.DEFAULT_VALUE_MAX_LENGTH);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
 				attribute.getDefaultValue(), attribute.getDataType().getMaxLength()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageDefaultValueType(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageDefaultValueType(String errorCode, Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.DEFAULT_VALUE_TYPE);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
 				attribute.getDefaultValue(), attribute.getDataType().toString()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageMappedByReference(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageMappedByReference(String errorCode, Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.MAPPED_BY_REFERENCE);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
 				attribute.getDefaultValue(), attribute.getMappedBy().getLabel(),
 				attribute.getRefEntity().getLabel()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageMappedByType(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageMappedByType(String errorCode, Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.MAPPED_BY_TYPE);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
 				attribute.getDefaultValue(), attribute.getMappedBy().getLabel(),
 				attribute.getMappedBy().getDataType().toString()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageName(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageName(String errorCode, Attribute attribute)
 	{
 		return createMessage(errorCode, attribute, AttributeConstraint.NAME);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageNonCompoundChildren(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageNonCompoundChildren(String errorCode, Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.NON_COMPOUND_CHILDREN);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
 				attribute.getDataType().toString()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageOrderByReference(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageOrderByReference(String errorCode, Attribute attribute)
 	{
 		return createMessage(errorCode, attribute, AttributeConstraint.ORDER_BY_REFERENCE);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageTypeUpdateBidirectional(String errorCode,
+	private static ValidationMessage createMessageTypeUpdateBidirectional(String errorCode,
 			Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.TYPE_UPDATE_BIDIRECTIONAL);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getLabel()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static ConstraintViolationMessage createMessageTypeUpdate(String errorCode, Attribute attribute)
+	private static ValidationMessage createMessageTypeUpdate(String errorCode, Attribute attribute)
 	{
 		String message = getMessage(attribute, AttributeConstraint.TYPE_UPDATE);
 		String localizedMessage = getLocalizedMessage(errorCode).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
-	private static ConstraintViolationMessage createMessage(String errorCode, Attribute attribute,
+	private static ValidationMessage createMessage(String errorCode, Attribute attribute,
 			AttributeConstraint attributeConstraint)
 	{
 		String message = getMessage(attribute, attributeConstraint);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel())
 				.orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
-	private static ConstraintViolationMessage createMessageDefaultValue(String errorCode, Attribute attribute,
+	private static ValidationMessage createMessageDefaultValue(String errorCode, Attribute attribute,
 			AttributeConstraint attributeConstraint)
 	{
 		String message = getMessage(attribute, attributeConstraint);
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
 				attribute.getDefaultValue()).orElse(message);
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	private static String getMessage(Attribute attribute, AttributeConstraint attributeConstraint)

@@ -4,7 +4,6 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.TagValidationResult;
 
 import java.util.stream.Stream;
 

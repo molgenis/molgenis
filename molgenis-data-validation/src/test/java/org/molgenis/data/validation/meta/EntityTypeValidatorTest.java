@@ -8,8 +8,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.validation.constraint.EntityTypeConstraint;
-import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

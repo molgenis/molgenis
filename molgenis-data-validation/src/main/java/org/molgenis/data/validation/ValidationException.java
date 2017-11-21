@@ -1,9 +1,6 @@
 package org.molgenis.data.validation;
 
 import org.molgenis.data.CodedRuntimeException;
-import org.molgenis.data.validation.constraint.ValidationResult;
-import org.molgenis.data.validation.message.ConstraintViolationMessage;
-import org.molgenis.data.validation.message.ValidationExceptionMessageGenerator;
 
 import java.util.Collection;
 
@@ -15,7 +12,7 @@ public class ValidationException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "V99";
 
-	private final Collection<ConstraintViolationMessage> constraintViolationMessages;
+	private final Collection<ValidationMessage> constraintViolationMessages;
 
 	public ValidationException(ValidationResult constraintViolation)
 	{
@@ -31,25 +28,25 @@ public class ValidationException extends CodedRuntimeException
 	@Override
 	public String getMessage()
 	{
-		return constraintViolationMessages.stream().map(ConstraintViolationMessage::getMessage).collect(joining("\n"));
+		return constraintViolationMessages.stream().map(ValidationMessage::getMessage).collect(joining("\n"));
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
 		String localizedViolationsMessage = constraintViolationMessages.stream()
-																	   .map(ConstraintViolationMessage::getLocalizedMessage)
+																	   .map(ValidationMessage::getLocalizedMessage)
 																	   .collect(joining("\n"));
 		return getLanguageService().map(
 				languageService -> languageService.getString(ERROR_CODE) + ": " + localizedViolationsMessage)
 								   .orElse(super.getLocalizedMessage());
 	}
 
-	private Collection<ConstraintViolationMessage> createConstraintViolationMessages(
+	private Collection<ValidationMessage> createConstraintViolationMessages(
 			Collection<? extends ValidationResult> constraintViolations)
 	{
-		ValidationExceptionMessageGenerator visitor = new ValidationExceptionMessageGenerator();
+		ValidationMessageGenerator visitor = new ValidationMessageGenerator();
 		constraintViolations.forEach(constraintViolation -> constraintViolation.accept(visitor));
-		return visitor.getConstraintViolationMessages();
+		return visitor.getValidationMessages();
 	}
 }

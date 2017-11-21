@@ -1,9 +1,8 @@
-package org.molgenis.data.validation.message;
+package org.molgenis.data.validation.data;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.constraint.DefaultValueReferenceConstraint;
-import org.molgenis.data.validation.constraint.DefaultValueReferenceValidationResult;
+import org.molgenis.data.validation.ValidationMessage;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.Collection;
@@ -14,15 +13,15 @@ import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-class MessageGeneratorDefaultValueReference
+public class DefaultValueReferenceMessageGenerator
 {
-	private MessageGeneratorDefaultValueReference()
+	private DefaultValueReferenceMessageGenerator()
 	{
 	}
 
-	static ConstraintViolationMessage createMessage(DefaultValueReferenceValidationResult constraintViolation)
+	public static ValidationMessage createMessage(DefaultValueReferenceValidationResult constraintViolation)
 	{
-		ConstraintViolationMessage constraintViolationMessage;
+		ValidationMessage constraintViolationMessage;
 
 		DefaultValueReferenceConstraint defaultValueReferenceConstraint = constraintViolation.getConstraint();
 		switch (defaultValueReferenceConstraint)
@@ -43,7 +42,7 @@ class MessageGeneratorDefaultValueReference
 		return constraintViolationMessage;
 	}
 
-	private static ConstraintViolationMessage createMessageReferenceExists(String errorCode,
+	private static ValidationMessage createMessageReferenceExists(String errorCode,
 			DefaultValueReferenceValidationResult constraintViolation)
 	{
 
@@ -65,7 +64,7 @@ class MessageGeneratorDefaultValueReference
 			localizedMessage = getLocalizedMessage(errorCode, constraintViolation.getEntityType().getLabel()).orElse(
 					message);
 		}
-		return ConstraintViolationMessage.create(errorCode, message, localizedMessage);
+		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
 
 	private static String getMessage(DefaultValueReferenceValidationResult constraintViolation)

@@ -1,4 +1,4 @@
-package org.molgenis.data.validation.constraint;
+package org.molgenis.data.validation.meta;
 
 public enum PackageConstraint
 {

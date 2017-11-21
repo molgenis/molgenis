@@ -23,14 +23,9 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.validation.CompositeValidationResult;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeValidationResult;
-import org.molgenis.data.validation.constraint.CompositeValidationResult;
-import org.molgenis.data.validation.constraint.EntityTypeValidationResult;
-import org.molgenis.data.validation.constraint.TagValidationResult;
-import org.molgenis.data.validation.meta.AttributeValidator;
-import org.molgenis.data.validation.meta.EntityTypeValidator;
-import org.molgenis.data.validation.meta.TagValidator;
+import org.molgenis.data.validation.meta.*;
 import org.molgenis.util.EntityUtils;
 
 import java.util.*;

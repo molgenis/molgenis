@@ -4,7 +4,6 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 
 import java.util.stream.Stream;

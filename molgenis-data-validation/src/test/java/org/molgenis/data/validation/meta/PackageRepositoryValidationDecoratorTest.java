@@ -4,7 +4,6 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.PackageValidationResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,7 +13,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.validation.constraint.PackageConstraint.NAME;
+import static org.molgenis.data.validation.meta.PackageConstraint.NAME;
 import static org.testng.Assert.assertEquals;
 
 public class PackageRepositoryValidationDecoratorTest

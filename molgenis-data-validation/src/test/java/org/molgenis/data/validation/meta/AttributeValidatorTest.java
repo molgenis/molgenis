@@ -7,7 +7,6 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.validation.constraint.AttributeConstraint.*;
+import static org.molgenis.data.validation.meta.AttributeConstraint.*;
 import static org.testng.Assert.assertEquals;
 
 // TODO check return value of attr validator in all tests

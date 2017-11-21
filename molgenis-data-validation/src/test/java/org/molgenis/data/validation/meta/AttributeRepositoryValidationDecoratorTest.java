@@ -5,7 +5,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ValidationException;
-import org.molgenis.data.validation.constraint.AttributeValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -14,7 +13,7 @@ import java.util.EnumSet;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.validation.constraint.AttributeConstraint.NAME;
+import static org.molgenis.data.validation.meta.AttributeConstraint.NAME;
 
 public class AttributeRepositoryValidationDecoratorTest
 {
