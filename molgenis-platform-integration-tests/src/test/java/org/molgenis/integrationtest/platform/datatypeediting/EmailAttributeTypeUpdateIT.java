@@ -4,9 +4,13 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.EntityReferenceUnknownConstraintViolationException;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
@@ -107,19 +111,19 @@ public class EmailAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param exceptionMessage The expected exception message
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage)
+	public void testInvalidConversion(boolean valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException exception)
 		{
-			System.out.println(exception.getClass());
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages().map(message -> message.getErrorCode()).collect(
+					Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }

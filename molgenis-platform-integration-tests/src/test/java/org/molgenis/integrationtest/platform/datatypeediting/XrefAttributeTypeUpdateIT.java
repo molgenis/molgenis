@@ -5,9 +5,13 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.DataTypeConstraintViolationException;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
@@ -105,22 +109,21 @@ public class XrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode   The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(Entity valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage)
+	public void testInvalidConversion(boolean valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException exception)
 		{
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages().map(message -> message.getErrorCode()).collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }
