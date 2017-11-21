@@ -12,16 +12,16 @@ import java.util.List;
 /**
  * Visitor that creates {@link ValidationMessage validation messages} for each {@link ValidationResult} to use in {@link org.molgenis.data.validation.ValidationException}.
  */
-public class ValidationMessageGenerator implements ValidationResultVisitor
+class ValidationMessageGenerator implements ValidationResultVisitor
 {
 	private List<ValidationMessage> validationMessages;
 
-	public ValidationMessageGenerator()
+	ValidationMessageGenerator()
 	{
 		validationMessages = new ArrayList<>();
 	}
 
-	public List<ValidationMessage> getValidationMessages()
+	List<ValidationMessage> getValidationMessages()
 	{
 		return validationMessages;
 	}
