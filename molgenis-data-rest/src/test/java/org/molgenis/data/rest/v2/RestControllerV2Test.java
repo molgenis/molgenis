@@ -19,6 +19,7 @@ import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
@@ -38,6 +39,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -46,6 +48,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -74,7 +77,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerV2Config.class, GsonConfig.class })
@@ -595,7 +597,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		verify(repoCopier).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:unknown")
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -603,16 +605,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
-		MvcResult result = mockMvc.perform(post("/api/v2/copy/unknown").content(content).contentType(APPLICATION_JSON))
-								  .andReturn();
-
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "id:unknown");
+		MvcResult mvcResult = mockMvc.perform(
+				post("/api/v2/copy/unknown").content(content).contentType(APPLICATION_JSON)).andReturn();
 
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		throw mvcResult.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = EntityTypeAlreadyExistsException.class, expectedExceptionsMessageRegExp = "id:org_molgenis_blah_duplicateEntity")
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -623,16 +623,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "id:org_molgenis_blah_duplicateEntity");
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityTypeId permission:READ")
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
+		EntityType entityType = mock(EntityType.class);
+		when(repositoryToCopy.getEntityType()).thenReturn(entityType);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
@@ -642,14 +643,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		//FIXME: id: null????
-		assertEquals(message, "id:null permission:READ");
-
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = RepositoryCollectionCapabilityException.class, expectedExceptionsMessageRegExp = "collection:entity capability:WRITABLE")
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -665,10 +663,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "collection:entity capability:WRITABLE");
-
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+
+		throw result.getResolvedException();
 	}
 
 	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
@@ -682,6 +679,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
 
 		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn("entityTypeId");
 		when(repositoryToCopy.getEntityType()).thenReturn(entityType);
 		when(entityType.getPackage()).thenReturn(pack);
 
@@ -724,7 +722,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	 * createMolgenisDataExceptionUnknownIdentifier
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Check if this exception is not swallowed by the system")
 	public void testCreateEntitiesSystemException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
@@ -734,8 +732,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Check if this exception is not swallowed by the system");
+		throw result.getResolvedException();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -750,7 +747,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Check if this exception is not swallowed by the system")
 	public void testUpdateEntitiesMolgenisDataException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
@@ -760,12 +757,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Check if this exception is not swallowed by the system");
+		throw result.getResolvedException();
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Message \\(entity 5\\)")
 	public void testUpdateEntitiesMolgenisValidationException() throws Exception
 	{
 		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5L)));
@@ -775,8 +771,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Message (entity 5)");
+		throw result.getResolvedException();
 	}
 
 	/**
@@ -858,7 +853,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Cannot delete entities because type \\[MyEntityType\\] is abstract.")
 	public void testDeleteEntityCollectionExceptionAbstractEntity() throws Exception
 	{
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
@@ -871,11 +866,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
 									   .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Cannot delete entities because type [MyEntityType] is abstract.");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:MyEntityType")
 	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
 	{
 		when(dataService.getEntityType("MyEntityType")).thenThrow(new UnknownEntityTypeException("MyEntityType"));
@@ -887,36 +881,27 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
 									   .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "id:MyEntityType");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	//FIXME how to test thiw better?
+	@Test(expectedExceptions = MethodArgumentNotValidException.class)
 	public void testDeleteEntityCollectionExceptionNoEntitiesToDelete() throws Exception
 	{
-		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
-				+ "      \"message\": \"Please provide at least one entity in the entityIds property.\"\n" + "    }\n"
-				+ "  ]\n" + "}";
 		MvcResult result = this.mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[]}")).andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message,
-				"Validation failed for argument at index 1 in method: public void org.molgenis.data.rest.v2.RestControllerV2.deleteEntityCollection(java.lang.String,org.molgenis.data.rest.v2.EntityCollectionDeleteRequestV2), with 1 error(s): [Field error in object 'entityCollectionDeleteRequestV2' on field 'entityIds': rejected value [[]]; codes [NotEmpty.entityCollectionDeleteRequestV2.entityIds,NotEmpty.entityIds,NotEmpty.java.util.List,NotEmpty]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [entityCollectionDeleteRequestV2.entityIds,entityIds]; arguments []; default message [entityIds]]; default message [Please provide at least one entity in the entityIds property.]] ");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	//FIXME how to test thiw better?
+	@Test(expectedExceptions = HttpMessageNotReadableException.class)
 	public void testDeleteEntityCollectionExceptionInvalidRequestBody() throws Exception
 	{
-		String expectedContent =
-				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Invalid request body.\"\n" + "    }\n"
-						+ "  ]\n" + "}";
 		MvcResult result = this.mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("invalid")).andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message,
-				"Could not read JSON: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1; nested exception is com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1");
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -960,38 +945,38 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	/**
 	 * createMolgenisDataExceptionIdentifierAndValue
 	 */
-	@Test
+	@Test(expectedExceptions = IdentifierAndValueException.class, expectedExceptionsMessageRegExp = "")
 	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
-				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}").contentType(APPLICATION_JSON));
+		MvcResult result = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
+				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}").contentType(APPLICATION_JSON))
+								  .andReturn();
 
-		MvcResult result = resultActions.andReturn();
-		assertTrue(result.getResolvedException() instanceof IdentifierAndValueException);
+		throw result.getResolvedException();
 	}
 
 	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
 	 */
-	@Test
+	@Test(expectedExceptions = MissingIdentifierException.class, expectedExceptionsMessageRegExp = "index:0")
 	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
-				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}").contentType(APPLICATION_JSON));
-		MvcResult result = resultActions.andReturn();
-		assertTrue(result.getResolvedException() instanceof MissingIdentifierException);
+		MvcResult result = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
+				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}").contentType(APPLICATION_JSON))
+								  .andReturn();
+		throw result.getResolvedException();
 	}
 
 	/**
 	 * createUnknownEntityExceptionNotValidId
 	 */
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:4")
 	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
-				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}").contentType(APPLICATION_JSON));
-		MvcResult result = resultActions.andReturn();
-		assertTrue(result.getResolvedException() instanceof UnknownEntityTypeException);
+		MvcResult result = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
+				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}").contentType(APPLICATION_JSON))
+								  .andReturn();
+		throw result.getResolvedException();
 	}
 
 	private void testCreateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception

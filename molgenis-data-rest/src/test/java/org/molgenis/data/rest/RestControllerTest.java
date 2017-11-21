@@ -60,7 +60,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.testng.Assert.assertTrue;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerConfig.class, GsonConfig.class })
@@ -213,7 +212,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 								 .build();
 	}
 
-	@Test
+	@Test(expectedExceptions = ChangePasswordException.class, expectedExceptionsMessageRegExp = "")
 	public void loginPasswordReset() throws Exception
 	{
 		String username = "henk";
@@ -234,8 +233,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/login")
 																 .content(String.format("{username: '%s', password: '%s'}", username,
 													  password)).contentType(MediaType.APPLICATION_JSON)).andReturn();
-
-		assertTrue(result.getResolvedException() instanceof ChangePasswordException);
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -450,14 +448,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 											   .string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:unknown")
 	public void retrieveAttributeUnknownEntity() throws Exception
 	{
 		String HREF_UNKNOWN_ENTITY_META = RestController.BASE_URI + "/unknown/meta";
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(HREF_UNKNOWN_ENTITY_META + "/attribute"))
 								  .andReturn();
-
-		assertTrue(result.getResolvedException() instanceof UnknownEntityTypeException);
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -474,13 +471,14 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 											   .string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownAttributeException.class, expectedExceptionsMessageRegExp = "type:entityId attribute:name")
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repo = Mockito.mock(Repository.class);
 
 		EntityType entityType = Mockito.mock(EntityType.class);
+		Mockito.when(entityType.getId()).thenReturn("entityId");
 		Mockito.when(entityType.getAttribute("name")).thenReturn(null);
 		Attribute idAttr = Mockito.when(Mockito.mock(Attribute.class).getDataType())
 								  .thenReturn(AttributeType.STRING)
@@ -490,15 +488,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
 		Mockito.when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID + "/name")).andReturn();
-		assertTrue(result.getResolvedException() instanceof UnknownAttributeException);
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:Person id:p1")
 	public void retrieveEntityAttributeUnknownEntity() throws Exception
 	{
 		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenReturn(null);
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID + "/name")).andReturn();
-		assertTrue(result.getResolvedException() instanceof UnknownEntityException);
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -596,7 +594,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.any(Entity.class));
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "")
 	public void updateInternalRepoNotUpdateable() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -609,10 +607,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 																 .content("{name:Klaas}")
 																 .contentType(MediaType.APPLICATION_JSON)).andReturn();
 
-		assertTrue(result.getResolvedException() instanceof MolgenisDataException);
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:MISSING_ID_ATTR entityType:null")
 	public void updateInternalRepoIdAttributeIsNull() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -626,10 +624,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 																 .content("{name:Klaas}")
 																 .contentType(MediaType.APPLICATION_JSON)).andReturn();
 
-		assertTrue(result.getResolvedException() instanceof ValidationException);
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:Person id:p1")
 	public void updateInternalRepoExistingIsNull() throws Exception
 	{
 		Mockito.when(dataService.findOneById(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.eq(ENTITY_UNTYPED_ID),
@@ -639,7 +637,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 																 .content("{name:Klaas}")
 																 .contentType(MediaType.APPLICATION_JSON)).andReturn();
 
-		assertTrue(result.getResolvedException() instanceof UnknownEntityException);
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -653,34 +651,34 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.any(Entity.class));
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:unknownentity")
 	public void updateAttribute_unknownEntity() throws Exception
 	{
 		MvcResult result = mockMvc.perform(
 				MockMvcRequestBuilders.post(RestController.BASE_URI + "/unknownentity/" + ENTITY_UNTYPED_ID + "/name")
 									  .param("_method", "PUT")
 									  .content("Klaas").contentType(MediaType.APPLICATION_JSON)).andReturn();
-		assertTrue(result.getResolvedException() instanceof UnknownEntityTypeException);
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:Person id:666")
 	public void updateAttribute_unknownEntityId() throws Exception
 	{
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(HREF_ENTITY + "/666" + "/name")
 																 .param("_method", "PUT")
 																 .content("Klaas")
 																 .contentType(MediaType.APPLICATION_JSON)).andReturn();
-		assertTrue(result.getResolvedException() instanceof UnknownEntityException);
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownAttributeException.class, expectedExceptionsMessageRegExp = "type:Person attribute:unknownattribute")
 	public void updateAttribute_unknownAttribute() throws Exception
 	{
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(HREF_ENTITY_ID + "/unknownattribute")
 																 .param("_method", "PUT")
 																 .content("Klaas")
 																 .contentType(MediaType.APPLICATION_JSON)).andReturn();
-		assertTrue(result.getResolvedException() instanceof UnknownAttributeException);
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -707,23 +705,22 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.any(Entity.class));
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:bogus")
 	public void handleUnknownEntityException() throws Exception
 	{
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(RestController.BASE_URI + "/bogus/1"))
 								  .andReturn();
-
-		assertTrue(result.getResolvedException() instanceof UnknownEntityTypeException);
+		throw result.getResolvedException();
 	}
 
-	@Test
+	//FIXME: message is null???
+	@Test(expectedExceptions = MolgenisPermissionException.class)
 	public void molgenisDataAccessException() throws Exception
 	{
 		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
 			   .thenThrow(new MolgenisPermissionException());
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID)).andReturn();
-
-		assertTrue(result.getResolvedException() instanceof MolgenisPermissionException);
+		throw result.getResolvedException();
 	}
 
 	@Test
