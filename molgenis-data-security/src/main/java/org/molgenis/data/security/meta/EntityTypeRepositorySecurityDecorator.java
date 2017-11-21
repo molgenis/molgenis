@@ -363,8 +363,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		//FIXME: should only be possible to update system entities during bootstrap!
 		if (isSystem && !currentUserIsSystem())
 		{
-			throw new MolgenisDataException(
-					format("Updating system entity meta data [%s] is not allowed", entityType.getLabel()));
+			throw new EditSystemEntityTypeException("UPDATE", entityType);
 		}
 	}
 
@@ -376,8 +375,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityTypeId);
 		if (isSystem)
 		{
-			throw new MolgenisDataException(
-					format("Deleting system entity meta data [%s] is not allowed", entityTypeId));
+			throw new EditSystemEntityTypeException("DELETE", entityType);
 		}
 	}
 
