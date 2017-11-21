@@ -28,7 +28,7 @@ public class ImportWizardUtilTest extends AbstractMockitoTest
 	@Test
 	public void testHandleException() throws Exception
 	{
-		Exception exception = mock(Exception.class);
+		CodedRuntimeException exception = mock(CodedRuntimeException.class);
 		when(exception.getLocalizedMessage()).thenReturn("Localized message");
 		when(logger.isWarnEnabled()).thenReturn(true);
 
@@ -58,7 +58,7 @@ public class ImportWizardUtilTest extends AbstractMockitoTest
 	@Test
 	public void testHandleExceptionWarnLoggerDisabled() throws Exception
 	{
-		Exception exception = mock(Exception.class);
+		CodedRuntimeException exception = mock(CodedRuntimeException.class);
 		when(exception.getLocalizedMessage()).thenReturn("Localized message");
 		when(logger.isWarnEnabled()).thenReturn(false);
 
