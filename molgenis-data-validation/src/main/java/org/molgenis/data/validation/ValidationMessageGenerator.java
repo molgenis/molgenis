@@ -65,4 +65,10 @@ class ValidationMessageGenerator implements ValidationResultVisitor
 				defaultValueReferenceValidationResult);
 		validationMessages.add(violationMessage);
 	}
+
+	@Override
+	public void visit(AttributeUpdateValidationResult attributeUpdateValidationResult)
+	{
+		throw new UnsupportedOperationException("FIXME implement"); // FIXME implement
+	}
 }

@@ -2,10 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.validation.data.AttributeValueValidationResult;
 import org.molgenis.data.validation.data.DefaultValueReferenceValidationResult;
-import org.molgenis.data.validation.meta.AttributeValidationResult;
-import org.molgenis.data.validation.meta.EntityTypeValidationResult;
-import org.molgenis.data.validation.meta.PackageValidationResult;
-import org.molgenis.data.validation.meta.TagValidationResult;
+import org.molgenis.data.validation.meta.*;
 
 public interface ValidationResultVisitor
 {
@@ -20,4 +17,6 @@ public interface ValidationResultVisitor
 	void visit(PackageValidationResult packageValidationResult);
 
 	void visit(DefaultValueReferenceValidationResult entityConstraintViolation);
+
+	void visit(AttributeUpdateValidationResult attributeUpdateValidationResult);
 }
