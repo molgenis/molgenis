@@ -1,14 +1,14 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
@@ -58,41 +58,41 @@ public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { null, BOOL, MolgenisDataException.class,
+		return new Object[][] { { null, BOOL,
 				"Attribute data type update from [COMPOUND] to [BOOL] not allowed, allowed types are [STRING]" },
-				{ null, TEXT, MolgenisDataException.class,
+				{ null, TEXT,
 						"Attribute data type update from [COMPOUND] to [TEXT] not allowed, allowed types are [STRING]" },
-				{ null, SCRIPT, MolgenisDataException.class,
+				{ null, SCRIPT,
 						"Attribute data type update from [COMPOUND] to [SCRIPT] not allowed, allowed types are [STRING]" },
-				{ null, INT, MolgenisDataException.class,
+				{ null, INT,
 						"Attribute data type update from [COMPOUND] to [INT] not allowed, allowed types are [STRING]" },
-				{ null, LONG, MolgenisDataException.class,
+				{ null, LONG,
 						"Attribute data type update from [COMPOUND] to [LONG] not allowed, allowed types are [STRING]" },
-				{ null, DECIMAL, MolgenisDataException.class,
+				{ null, DECIMAL,
 						"Attribute data type update from [COMPOUND] to [DECIMAL] not allowed, allowed types are [STRING]" },
-				{ null, XREF, MolgenisDataException.class,
+				{ null, XREF,
 						"Attribute data type update from [COMPOUND] to [XREF] not allowed, allowed types are [STRING]" },
-				{ null, CATEGORICAL, MolgenisDataException.class,
+				{ null, CATEGORICAL,
 						"Attribute data type update from [COMPOUND] to [CATEGORICAL] not allowed, allowed types are [STRING]" },
-				{ null, EMAIL, MolgenisDataException.class,
+				{ null, EMAIL,
 						"Attribute data type update from [COMPOUND] to [EMAIL] not allowed, allowed types are [STRING]" },
-				{ null, HYPERLINK, MolgenisDataException.class,
+				{ null, HYPERLINK,
 						"Attribute data type update from [COMPOUND] to [HYPERLINK] not allowed, allowed types are [STRING]" },
-				{ null, HTML, MolgenisDataException.class,
+				{ null, HTML,
 						"Attribute data type update from [COMPOUND] to [HTML] not allowed, allowed types are [STRING]" },
-				{ null, ENUM, MolgenisDataException.class,
+				{ null, ENUM,
 						"Attribute data type update from [COMPOUND] to [ENUM] not allowed, allowed types are [STRING]" },
-				{ null, DATE, MolgenisDataException.class,
+				{ null, DATE,
 						"Attribute data type update from [COMPOUND] to [DATE] not allowed, allowed types are [STRING]" },
-				{ null, DATE_TIME, MolgenisDataException.class,
+				{ null, DATE_TIME,
 						"Attribute data type update from [COMPOUND] to [DATE_TIME] not allowed, allowed types are [STRING]" },
-				{ null, MREF, MolgenisDataException.class,
+				{ null, MREF,
 						"Attribute data type update from [COMPOUND] to [MREF] not allowed, allowed types are [STRING]" },
-				{ null, CATEGORICAL_MREF, MolgenisDataException.class,
+				{ null, CATEGORICAL_MREF,
 						"Attribute data type update from [COMPOUND] to [CATEGORICAL_MREF] not allowed, allowed types are [STRING]" },
-				{ null, FILE, MolgenisDataException.class,
+				{ null, FILE,
 						"Attribute data type update from [COMPOUND] to [FILE] not allowed, allowed types are [STRING]" },
-				{ null, ONE_TO_MANY, MolgenisValidationException.class,
+				{ null, ONE_TO_MANY,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
 	}
 
@@ -102,11 +102,10 @@ public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
 	 * @param exceptionMessage The expected exception message
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
+	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo,
 			String exceptionMessage)
 	{
 		try
@@ -114,11 +113,9 @@ public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException e)
 		{
-			System.out.println(exception.getClass());
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			assertEquals(e.getMessage(), exceptionMessage);
 		}
 	}
 }

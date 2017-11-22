@@ -1,7 +1,7 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
@@ -14,7 +14,8 @@ import java.time.format.DateTimeFormatter;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class DateTimeAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
@@ -73,37 +74,37 @@ public class DateTimeAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "2016-11-13T20:20:20+0100", BOOL, MolgenisDataException.class,
+		return new Object[][] { { "2016-11-13T20:20:20+0100", BOOL,
 				"Attribute data type update from [DATE_TIME] to [BOOL] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", INT, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", INT,
 						"Attribute data type update from [DATE_TIME] to [INT] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", LONG, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", LONG,
 						"Attribute data type update from [DATE_TIME] to [LONG] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", DECIMAL, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", DECIMAL,
 						"Attribute data type update from [DATE_TIME] to [DECIMAL] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", XREF, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", XREF,
 						"Attribute data type update from [DATE_TIME] to [XREF] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", CATEGORICAL, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", CATEGORICAL,
 						"Attribute data type update from [DATE_TIME] to [CATEGORICAL] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", SCRIPT, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", SCRIPT,
 						"Attribute data type update from [DATE_TIME] to [SCRIPT] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", HYPERLINK, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", HYPERLINK,
 						"Attribute data type update from [DATE_TIME] to [HYPERLINK] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", EMAIL, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", EMAIL,
 						"Attribute data type update from [DATE_TIME] to [EMAIL] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", ENUM, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", ENUM,
 						"Attribute data type update from [DATE_TIME] to [ENUM] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", HTML, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", HTML,
 						"Attribute data type update from [DATE_TIME] to [HTML] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", MREF, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", MREF,
 						"Attribute data type update from [DATE_TIME] to [MREF] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", CATEGORICAL_MREF, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", CATEGORICAL_MREF,
 						"Attribute data type update from [DATE_TIME] to [CATEGORICAL_MREF] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", FILE, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", FILE,
 						"Attribute data type update from [DATE_TIME] to [FILE] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", COMPOUND, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", COMPOUND,
 						"Attribute data type update from [DATE_TIME] to [COMPOUND] not allowed, allowed types are [DATE, STRING, TEXT]" },
-				{ "2016-11-13T20:20:20+0100", ONE_TO_MANY, MolgenisDataException.class,
+				{ "2016-11-13T20:20:20+0100", ONE_TO_MANY,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
 	}
 
@@ -113,12 +114,11 @@ public class DateTimeAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
 	 * @param exceptionMessage The expected exception message
 	 */
-	// FIXME @Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversions(Object valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage) throws ParseException
+	@Test(dataProvider = "invalidConversionTestCases")
+	public void testInvalidConversions(Object valueToConvert, AttributeType typeToConvertTo, String exceptionMessage)
+			throws ParseException
 	{
 		try
 		{
@@ -126,10 +126,9 @@ public class DateTimeAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException e)
 		{
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			assertEquals(e.getMessage(), exceptionMessage);
 		}
 	}
 }
