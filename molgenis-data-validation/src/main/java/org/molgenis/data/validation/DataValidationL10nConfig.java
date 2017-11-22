@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DataValidationL10nConfig
 {
-	public static final String NAMESPACE = "data_validation";
+	private static final String NAMESPACE = "data_validation";
 
 	@Bean
 	public PropertiesMessageSource dataValidationMessageSource()

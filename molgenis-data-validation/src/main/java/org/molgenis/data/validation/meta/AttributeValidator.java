@@ -4,11 +4,8 @@ import com.google.common.collect.Iterables;
 import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
@@ -16,9 +13,9 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -28,11 +25,12 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.validation.meta.AttributeConstraint.*;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 
 /**
- * Attribute metadata validator
+ * {@link Attribute} validator.
  */
 @Component
 public class AttributeValidator
@@ -46,86 +44,95 @@ public class AttributeValidator
 	private final EntityManager entityManager;
 	private final EmailValidator emailValidator;
 
-	public AttributeValidator(DataService dataService, EntityManager entityManager)
+	AttributeValidator(DataService dataService, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 		this.emailValidator = new EmailValidator();
 	}
 
-	public void validate(Attribute attr, ValidationMode validationMode)
+	public AttributeValidationResult validate(Attribute attr, ValidationMode validationMode)
 	{
-		validateName(attr);
-		validateDefaultValue(attr, validationMode == ADD || validationMode == UPDATE);
-		validateParent(attr);
-		validateChildren(attr);
+		EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
+
+		boolean validateDefaultValueEntityReferences = validationMode == ADD || validationMode == UPDATE;
+
+		validateName(attr).forEach(constraintViolations::add);
+		validateDefaultValue(attr, validateDefaultValueEntityReferences).forEach(constraintViolations::add);
+		validateParent(attr).ifPresent(constraintViolations::add);
+		validateChildren(attr).ifPresent(constraintViolations::add);
 
 		switch (validationMode)
 		{
 			case ADD:
 			case ADD_SKIP_ENTITY_VALIDATION:
-				validateAdd(attr);
+				validateAdd(attr).forEach(constraintViolations::add);
 				break;
 			case UPDATE:
 			case UPDATE_SKIP_ENTITY_VALIDATION:
 				Attribute currentAttr = dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(),
 						Attribute.class);
-				validateUpdate(attr, currentAttr);
+				validateUpdate(attr, currentAttr).forEach(constraintViolations::add);
 				break;
 			default:
 				throw new UnexpectedEnumException(validationMode);
 		}
+
+		return AttributeValidationResult.create(attr, constraintViolations);
 	}
 
-	private static void validateParent(Attribute attr)
+	private static Optional<AttributeConstraint> validateParent(Attribute attr)
 	{
-		if (attr.getParent() != null)
+		AttributeConstraint constraintViolation;
+		if (attr.getParent() != null && attr.getParent().getDataType() != COMPOUND)
 		{
-			if (attr.getParent().getDataType() != COMPOUND)
-			{
-				throw new MolgenisDataException(
-						format("Parent attribute [%s] of attribute [%s] is not of type compound",
-								attr.getParent().getName(), attr.getName()));
-			}
+			constraintViolation = COMPOUND_PARENT;
 		}
+		else
+		{
+			constraintViolation = null;
+		}
+		return Optional.ofNullable(constraintViolation);
 	}
 
-	private static void validateChildren(Attribute attr)
+	private static Optional<AttributeConstraint> validateChildren(Attribute attr)
 	{
-		boolean childrenIsNullOrEmpty = attr.getChildren() == null || Iterables.isEmpty(attr.getChildren());
+		AttributeConstraint constraintViolation;
 
+		boolean childrenIsNullOrEmpty = attr.getChildren() == null || Iterables.isEmpty(attr.getChildren());
 		if (!childrenIsNullOrEmpty && attr.getDataType() != COMPOUND)
 		{
-			throw new MolgenisDataException(
-					format("Attribute [%s] is not of type COMPOUND and can therefor not have children",
-							attr.getName()));
+			constraintViolation = NON_COMPOUND_CHILDREN;
 		}
-
+		else
+		{
+			constraintViolation = null;
+		}
+		return Optional.ofNullable(constraintViolation);
 	}
 
-	private static void validateAdd(Attribute newAttr)
+	private static Stream<AttributeConstraint> validateAdd(Attribute newAttr)
 	{
-		// mappedBy
-		validateMappedBy(newAttr, newAttr.getMappedBy());
-
-		// orderBy
-		validateOrderBy(newAttr, newAttr.getOrderBy());
+		List<AttributeConstraint> constraintViolations = new ArrayList<>();
+		validateMappedBy(newAttr, newAttr.getMappedBy()).ifPresent(constraintViolations::add);
+		validateOrderBy(newAttr, newAttr.getOrderBy()).forEach(constraintViolations::add);
+		return constraintViolations.stream();
 	}
 
-	private static void validateUpdate(Attribute newAttr, Attribute currentAttr)
+	private static Stream<AttributeConstraint> validateUpdate(Attribute newAttr, Attribute currentAttr)
 	{
+		EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
+
 		// data type
 		AttributeType currentDataType = currentAttr.getDataType();
 		AttributeType newDataType = newAttr.getDataType();
 		if (!Objects.equals(currentDataType, newDataType))
 		{
-			validateUpdateDataType(currentDataType, newDataType);
+			validateUpdateDataType(currentAttr, newAttr).ifPresent(constraintViolations::add);
 
 			if (newAttr.isInversedBy())
 			{
-				throw new MolgenisDataException(
-						format("Attribute data type change not allowed for bidirectional attribute [%s]",
-								newAttr.getName()));
+				constraintViolations.add(TYPE_UPDATE_BIDIRECTIONAL);
 			}
 		}
 
@@ -134,63 +141,69 @@ public class AttributeValidator
 		Sort newOrderBy = newAttr.getOrderBy();
 		if (!Objects.equals(currentOrderBy, newOrderBy))
 		{
-			validateOrderBy(newAttr, newOrderBy);
+			validateOrderBy(newAttr, newOrderBy).forEach(constraintViolations::add);
 		}
 
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
+		return constraintViolations.stream();
 	}
 
-	void validateDefaultValue(Attribute attr, boolean validateEntityReferences)
+	Stream<AttributeConstraint> validateDefaultValue(Attribute attr, boolean validateEntityReferences)
 	{
+
 		String value = attr.getDefaultValue();
 		if (value != null)
 		{
+			EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
+
 			if (attr.isUnique())
 			{
-				throw new MolgenisDataException("Unique attribute " + attr.getName() + " cannot have default value");
+				constraintViolations.add(DEFAULT_VALUE_NOT_UNIQUE);
 			}
 
 			if (attr.getExpression() != null)
 			{
-				throw new MolgenisDataException("Computed attribute " + attr.getName() + " cannot have default value");
+				constraintViolations.add(DEFAULT_VALUE_NOT_COMPUTED);
 			}
 
 			AttributeType fieldType = attr.getDataType();
 			if (fieldType.getMaxLength() != null && value.length() > fieldType.getMaxLength())
 			{
-				throw new MolgenisDataException(
-						"Default value for attribute [" + attr.getName() + "] exceeds the maximum length for datatype "
-								+ attr.getDataType().name());
+				constraintViolations.add(DEFAULT_VALUE_MAX_LENGTH);
 			}
 
 			if (fieldType == AttributeType.EMAIL)
 			{
-				checkEmail(value);
+				validateEmail(attr).ifPresent(constraintViolations::add);
 			}
 
 			if (fieldType == AttributeType.HYPERLINK)
 			{
-				checkHyperlink(value);
+				validateHyperlink(attr).ifPresent(constraintViolations::add);
 			}
 
 			if (fieldType == AttributeType.ENUM)
 			{
-				checkEnum(attr, value);
+				validateEnum(attr, value).ifPresent(constraintViolations::add);
 			}
 
 			// Get typed value to check if the value is of the right type.
 			Object typedValue;
+			boolean typeValid;
 			try
 			{
 				typedValue = EntityUtils.getTypedValue(value, attr, entityManager);
+				typeValid = true;
+
 			}
-			catch (NumberFormatException e)
+			catch (Exception e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Invalid default value [%s] for data type [%s]", value, attr.getDataType())));
+				constraintViolations.add(DEFAULT_VALUE_TYPE);
+				typedValue = null;
+				typeValid = false;
 			}
 
-			if (validateEntityReferences)
+			if (typeValid && validateEntityReferences)
 			{
 				if (isSingleReferenceType(attr))
 				{
@@ -200,8 +213,7 @@ public class AttributeValidator
 								   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
 								   .count() == 0)
 					{
-						throw new MolgenisValidationException(new ConstraintViolation(
-								format("Default value [%s] refers to an unknown entity", value)));
+						constraintViolations.add(DEFAULT_VALUE_ENTITY_REFERENCE);
 					}
 				}
 				else if (isMultipleReferenceType(attr))
@@ -215,23 +227,26 @@ public class AttributeValidator
 														.collect(toList()))
 								   .count() < Iterables.size(refEntitiesValue))
 					{
-						throw new MolgenisValidationException(new ConstraintViolation(
-								format("Default value [%s] refers to one or more unknown entities", value)));
+						constraintViolations.add(DEFAULT_VALUE_ENTITY_REFERENCE);
 					}
 				}
 			}
+
+			return constraintViolations.stream();
 		}
+		return Stream.empty();
 	}
 
-	private void checkEmail(String value)
+	private Optional<AttributeConstraint> validateEmail(Attribute attribute)
 	{
-		if (!emailValidator.isValid(value, null))
+		if (!emailValidator.isValid(attribute.getDefaultValue(), null))
 		{
-			throw new MolgenisDataException("Default value [" + value + "] is not a valid email address");
+			return Optional.of(DEFAULT_VALUE_EMAIL);
 		}
+		return Optional.empty();
 	}
 
-	private static void checkEnum(Attribute attr, String value)
+	private static Optional<AttributeConstraint> validateEnum(Attribute attr, String value)
 	{
 		if (value != null)
 		{
@@ -239,26 +254,27 @@ public class AttributeValidator
 
 			if (!enumOptions.contains(value))
 			{
-				throw new MolgenisDataException(
-						"Invalid default value [" + value + "] for enum [" + attr.getName() + "] value must be one of "
-								+ enumOptions.toString());
+				return Optional.of(DEFAULT_VALUE_ENUM);
 			}
 		}
+		return Optional.empty();
 	}
 
-	private static void checkHyperlink(String value)
+	private static Optional<AttributeConstraint> validateHyperlink(Attribute attr)
 	{
 		try
 		{
-			new URI(value);
+			new URI(attr.getDefaultValue());
 		}
 		catch (URISyntaxException e)
 		{
-			throw new MolgenisDataException("Default value [" + value + "] is not a valid hyperlink.");
+
+			return Optional.of(DEFAULT_VALUE_HYPERLINK);
 		}
+		return Optional.empty();
 	}
 
-	private static void validateName(Attribute attr)
+	private static Stream<AttributeConstraint> validateName(Attribute attr)
 	{
 		// validate entity name (e.g. illegal characters, length)
 		String name = attr.getName();
@@ -266,13 +282,15 @@ public class AttributeValidator
 		{
 			try
 			{
-				NameValidator.validateAttributeName(attr.getName());
+				NameValidator.validateAttributeName(
+						attr.getName()); // TODO name validator should return constraint violation
 			}
 			catch (MolgenisDataException e)
 			{
-				throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
+				return Stream.of(NAME);
 			}
 		}
+		return Stream.empty();
 	}
 
 	/**
@@ -282,25 +300,24 @@ public class AttributeValidator
 	 * @param mappedByAttr mappedBy attribute
 	 * @throws MolgenisDataException if mappedBy is an attribute that is not part of the referenced entity
 	 */
-	private static void validateMappedBy(Attribute attr, Attribute mappedByAttr)
+	private static Optional<AttributeConstraint> validateMappedBy(Attribute attr, Attribute mappedByAttr)
 	{
 		if (mappedByAttr != null)
 		{
 			if (!isSingleReferenceType(mappedByAttr))
 			{
-				throw new MolgenisDataException(
-						format("Invalid mappedBy attribute [%s] data type [%s].", mappedByAttr.getName(),
-								mappedByAttr.getDataType()));
+				return Optional.of(MAPPED_BY_TYPE);
 			}
-
-			Attribute refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
-			if (refAttr == null)
+			else
 			{
-				throw new MolgenisDataException(
-						format("mappedBy attribute [%s] is not part of entity [%s].", mappedByAttr.getName(),
-								attr.getRefEntity().getId()));
+				Attribute refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
+				if (refAttr == null)
+				{
+					return Optional.of(MAPPED_BY_REFERENCE);
+				}
 			}
 		}
+		return Optional.empty();
 	}
 
 	/**
@@ -309,38 +326,43 @@ public class AttributeValidator
 	 *
 	 * @param attr    attribute
 	 * @param orderBy orderBy of attribute
-	 * @throws MolgenisDataException if orderBy contains attribute names that do not exist in the referenced entity.
 	 */
-	private static void validateOrderBy(Attribute attr, Sort orderBy)
+	private static Stream<AttributeConstraint> validateOrderBy(Attribute attr, Sort orderBy)
 	{
 		if (orderBy != null)
 		{
 			EntityType refEntity = attr.getRefEntity();
 			if (refEntity != null)
 			{
+				EnumSet<AttributeConstraint> constraintViolations = EnumSet.noneOf(AttributeConstraint.class);
 				for (Sort.Order orderClause : orderBy)
 				{
 					String refAttrName = orderClause.getAttr();
 					if (refEntity.getAttribute(refAttrName) == null)
 					{
-						throw new MolgenisDataException(
-								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getId(), refAttrName, attr.getEntityType().getId(), attr.getName(),
-										orderBy.toSortString()));
+						constraintViolations.add(ORDER_BY_REFERENCE);
 					}
 				}
+				return constraintViolations.stream();
 			}
 		}
+		return Stream.empty();
 	}
 
-	private static void validateUpdateDataType(AttributeType currentDataType, AttributeType newDataType)
+	private static Optional<AttributeConstraint> validateUpdateDataType(Attribute currentAttribute,
+			Attribute newAttribute)
 	{
+		AttributeType currentDataType = currentAttribute.getDataType();
+		AttributeType newDataType = newAttribute.getDataType();
+
 		EnumSet<AttributeType> allowedDatatypes = DATA_TYPE_ALLOWED_TRANSITIONS.get(currentDataType);
 		if (!allowedDatatypes.contains(newDataType))
 		{
-			throw new MolgenisDataException(
-					format("Attribute data type update from [%s] to [%s] not allowed, allowed types are %s",
-							currentDataType.toString(), newDataType.toString(), allowedDatatypes.toString()));
+			return Optional.of(TYPE_UPDATE);
+		}
+		else
+		{
+			return Optional.empty();
 		}
 	}
 

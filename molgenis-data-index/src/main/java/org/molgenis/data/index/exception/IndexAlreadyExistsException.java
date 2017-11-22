@@ -1,6 +1,6 @@
 package org.molgenis.data.index.exception;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class IndexAlreadyExistsException extends IndexException
 {
 	private static final long serialVersionUID = 1L;

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class UiAnnotationException extends AnnotationException
 {
 	public UiAnnotationException(AnnotationException ae)

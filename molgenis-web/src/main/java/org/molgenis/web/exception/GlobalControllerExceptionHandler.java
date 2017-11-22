@@ -3,10 +3,12 @@ package org.molgenis.web.exception;
 import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.validation.DataIntegrityViolationException;
+import org.molgenis.data.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -35,6 +37,14 @@ public class GlobalControllerExceptionHandler
 	}
 
 	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public Object handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e)
+	{
+		LOG.info("", e);
+		return handleTypedException(false, NotFoundController.URI, e.getLocalizedMessage(), BAD_REQUEST);
+	}
+
+	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
 	public Object handleUnknownDataException(UnknownDataException e, HandlerMethod handlerMethod)
 	{
@@ -46,6 +56,15 @@ public class GlobalControllerExceptionHandler
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler
 	public Object handleDataIntegrityViolationException(DataIntegrityViolationException e, HandlerMethod handlerMethod)
+	{
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler
+	public Object handleValidationException(ValidationException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),

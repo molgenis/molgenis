@@ -3,6 +3,9 @@ package org.molgenis.data.validation.meta;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.validation.CompositeValidationResult;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.ValidationResult;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 
 import java.util.stream.Stream;
@@ -12,18 +15,20 @@ import static java.util.Objects.requireNonNull;
 public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDecorator<Attribute>
 {
 	private final AttributeValidator attributeValidator;
+	private final AttributeUpdateValidator attributeUpdateValidator;
 
 	public AttributeRepositoryValidationDecorator(Repository<Attribute> delegateRepository,
-			AttributeValidator attributeValidator)
+			AttributeValidator attributeValidator, AttributeUpdateValidator attributeUpdateValidator)
 	{
 		super(delegateRepository);
 		this.attributeValidator = requireNonNull(attributeValidator);
+		this.attributeUpdateValidator = requireNonNull(attributeUpdateValidator);
 	}
 
 	@Override
 	public void update(Attribute attr)
 	{
-		attributeValidator.validate(attr, ValidationMode.UPDATE);
+		validate(attr, ValidationMode.UPDATE);
 		delegate().update(attr);
 	}
 
@@ -32,7 +37,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		delegate().update(attrs.filter(attr ->
 		{
-			attributeValidator.validate(attr, ValidationMode.UPDATE);
+			validate(attr, ValidationMode.UPDATE);
 			return true;
 		}));
 	}
@@ -40,7 +45,7 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	@Override
 	public void add(Attribute attr)
 	{
-		attributeValidator.validate(attr, ValidationMode.ADD);
+		validate(attr, ValidationMode.ADD);
 		delegate().add(attr);
 	}
 
@@ -49,8 +54,28 @@ public class AttributeRepositoryValidationDecorator extends AbstractRepositoryDe
 	{
 		return delegate().add(attrs.filter(attr ->
 		{
-			attributeValidator.validate(attr, ValidationMode.ADD);
+			validate(attr, ValidationMode.ADD);
 			return true;
 		}));
+	}
+
+	private void validate(Attribute attribute, ValidationMode validationMode)
+	{
+		ValidationResult validationResult = attributeValidator.validate(attribute, validationMode);
+		if (validationMode == ValidationMode.UPDATE)
+		{
+			Attribute existingAttribute = findOneById(attribute.getIdentifier());
+			AttributeUpdateValidationResult attributeUpdateValidationResult = attributeUpdateValidator.validate(
+					existingAttribute, attribute);
+
+			CompositeValidationResult compositeValidationResult = new CompositeValidationResult();
+			compositeValidationResult.addValidationResult(validationResult);
+			compositeValidationResult.addValidationResult(attributeUpdateValidationResult);
+		}
+
+		if (validationResult.hasConstraintViolations())
+		{
+			throw new ValidationException(validationResult);
+		}
 	}
 }

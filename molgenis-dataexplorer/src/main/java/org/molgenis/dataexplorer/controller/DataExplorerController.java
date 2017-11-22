@@ -11,6 +11,7 @@ import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
@@ -106,6 +107,9 @@ public class DataExplorerController extends PluginController
 	@Autowired
 	private MenuReaderService menuReaderService;
 
+	@Autowired
+	private AppSettings appSettings;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -160,6 +164,9 @@ public class DataExplorerController extends PluginController
 		model.addAttribute("isAdmin", currentUserIsSu);
 		boolean navigatorAvailable = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) != null;
 		model.addAttribute("showNavigatorLink", dataExplorerSettings.isShowNavigatorLink() && navigatorAvailable);
+
+		model.addAttribute("hasTrackingId", null != appSettings.getGoogleAnalyticsTrackingId());
+		model.addAttribute("hasMolgenisTrackingId", null != appSettings.getGoogleAnalyticsTrackingIdMolgenis());
 
 		return "view-dataexplorer";
 	}

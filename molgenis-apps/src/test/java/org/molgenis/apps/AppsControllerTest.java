@@ -41,7 +41,6 @@ import static org.molgenis.apps.model.AppMetaData.APP;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { GsonConfig.class, AppsControllerTest.Config.class })
@@ -196,16 +195,16 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		verify(dataService).update(APP, app);
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
 	public void testActivateAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
 		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/activate")).andReturn();
 
-		assertEquals(result.getResolvedException().getMessage(), "Unknown app 'id'");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already activated")
 	public void testActivateAppAlreadyActivated() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
@@ -213,7 +212,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
 		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/activate")).andReturn();
 
-		assertEquals(result.getResolvedException().getMessage(), "App 'name' already activated");
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -226,16 +225,16 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		verify(dataService).update(APP, app);
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
 	public void testDeactivateAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
 		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andReturn();
 
-		assertEquals(result.getResolvedException().getMessage(), "Unknown app 'id'");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already deactivated")
 	public void testDeActivateAppAlreadyDeactivated() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
@@ -243,7 +242,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
 		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andReturn();
 
-		assertEquals(result.getResolvedException().getMessage(), "App 'name' already deactivated");
+		throw result.getResolvedException();
 	}
 
 	@Configuration

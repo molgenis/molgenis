@@ -24,7 +24,7 @@ import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionManager;
-import org.molgenis.data.validation.ExpressionValidator;
+import org.molgenis.data.validation.data.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.integrationtest.script.ScriptTestConfig;
 import org.molgenis.ontology.core.config.OntologyConfig;

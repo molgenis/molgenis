@@ -2,11 +2,11 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
+import java.util.EnumSet;
+
+import static org.molgenis.data.validation.meta.TagConstraint.UNKNOWN_RELATION_IRI;
 
 /**
  * {@link org.molgenis.data.meta.model.Tag Tag} validator
@@ -18,17 +18,25 @@ public class TagValidator
 	 * Validates tag
 	 *
 	 * @param tag tag
-	 * @throws MolgenisValidationException if tag is not valid
+	 * @return constraint violation collection or empty collection if tag is valid
 	 */
 	@SuppressWarnings("MethodMayBeStatic")
-	public void validate(Tag tag)
+	public TagValidationResult validate(Tag tag)
+	{
+		EnumSet<TagConstraint> constraintViolations = EnumSet.noneOf(TagConstraint.class);
+
+		if (!isValidRelationIri(tag))
+		{
+			constraintViolations.add(UNKNOWN_RELATION_IRI);
+		}
+
+		return TagValidationResult.create(tag, constraintViolations);
+	}
+
+	private static boolean isValidRelationIri(Tag tag)
 	{
 		String relationIri = tag.getRelationIri();
 		Relation relation = Relation.forIRI(relationIri);
-		if (relation == null)
-		{
-			throw new MolgenisValidationException(
-					new ConstraintViolation(format("Unknown relation IRI [%s]", relationIri)));
-		}
+		return relation != null;
 	}
 }

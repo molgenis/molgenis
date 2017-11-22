@@ -1,6 +1,7 @@
 package org.molgenis.data.rest;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -12,28 +13,39 @@ import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.exception.InvalidExpandException;
+import org.molgenis.data.rest.exception.LoginMethodDisabledException;
+import org.molgenis.data.rest.exception.MissingValueException;
+import org.molgenis.data.rest.exception.MultipleFileInputException;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.meta.EntityTypeValidationResult;
+import org.molgenis.security.account.ChangePasswordException;
+import org.molgenis.security.account.InvalidSortOrderException;
+import org.molgenis.security.account.UnknownUsernamePasswordException;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -54,12 +66,12 @@ import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
+import static org.molgenis.data.validation.meta.EntityTypeConstraint.MISSING_ID_ATTR;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -385,7 +397,7 @@ public class RestController
 							order = Sort.Direction.DESC;
 							break;
 						default:
-							throw new RuntimeException("unknown sort order");
+							throw new InvalidSortOrderException();
 					}
 				}
 				q.sort().on(sortAttribute, order);
@@ -405,10 +417,10 @@ public class RestController
 
 			entities = () -> dataService.findAll(entityTypeId, q).iterator();
 		}
-		catch (ConversionFailedException | RSQLParserException | UnknownAttributeException | IllegalArgumentException | UnsupportedOperationException | UnknownEntityException e)
+		catch (ConversionFailedException | RSQLParserException | IllegalArgumentException | UnsupportedOperationException e)
 		{
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-			return null;
+			//FIXME: how to handle those
+			throw new MolgenisDataException(e);
 		}
 		catch (MolgenisPermissionException e)
 		{
@@ -489,7 +501,7 @@ public class RestController
 			List<MultipartFile> files = entry.getValue();
 			if (files != null && files.size() > 1)
 			{
-				throw new IllegalArgumentException("Multiple file input not supported");
+				throw new MultipleFileInputException();
 			}
 			paramMap.put(param, files != null && !files.isEmpty() ? files.get(0) : null);
 		}
@@ -503,8 +515,7 @@ public class RestController
 	{
 		if (entityMap == null)
 		{
-			// FIXME throw new Undefined/MissingEntityException
-			throw new MolgenisRuntimeException("Missing entity in body");
+			throw new MissingValueException("entity", "body");
 		}
 
 		createInternal(entityTypeId, entityMap, response);
@@ -740,12 +751,11 @@ public class RestController
 	{
 		if (login == null)
 		{
-			throw new HttpMessageNotReadableException("Missing login");
+			throw new MissingValueException("login", "request");
 		}
 		if (isUser2fa())
 		{
-			throw new BadCredentialsException(
-					"Login using /api/v1/login is disabled, two factor authentication is enabled");
+			throw new LoginMethodDisabledException();
 		}
 
 		return runAsSystem(() ->
@@ -759,7 +769,7 @@ public class RestController
 			Authentication authentication = authenticationManager.authenticate(authToken);
 			if (!authentication.isAuthenticated())
 			{
-				throw new BadCredentialsException("Unknown username or password");
+				throw new UnknownUsernamePasswordException();
 			}
 
 			User user = dataService.findOne(USER,
@@ -767,8 +777,7 @@ public class RestController
 
 			if (user.isChangePassword())
 			{
-				throw new BadCredentialsException(
-						"Unable to log in because a password reset is required. Sign in to the website to reset your password.");
+				throw new ChangePasswordException();
 			}
 
 			// User authenticated, log the user in
@@ -794,7 +803,7 @@ public class RestController
 		String token = TokenExtractor.getToken(request);
 		if (token == null)
 		{
-			throw new HttpMessageNotReadableException("Missing token in header");
+			throw new MissingValueException("token", "header");
 		}
 
 		tokenService.removeToken(token);
@@ -806,12 +815,38 @@ public class RestController
 		}
 	}
 
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
+	{
+		LOG.debug("", e);
+		List<ErrorMessageResponse.ErrorMessage> messages = Lists.newArrayList();
+		for (ObjectError error : e.getBindingResult().getAllErrors())
+		{
+			messages.add(new ErrorMessageResponse.ErrorMessage(error.getDefaultMessage()));
+		}
+
+		return new ErrorMessageResponse(messages);
+	}
+
 	private void updateInternal(String entityTypeId, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta.getIdAttribute() == null)
 		{
-			throw new IllegalArgumentException(entityTypeId + " does not have an id attribute");
+			EntityTypeValidationResult validationResult = EntityTypeValidationResult.create(meta,
+					Collections.singleton(MISSING_ID_ATTR));
+			throw new ValidationException(validationResult);
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
@@ -988,9 +1023,9 @@ public class RestController
 	private Map<String, Object> getEntityAsMap(Entity entity, EntityType meta, Set<String> attributesSet,
 			Map<String, Set<String>> attributeExpandsSet)
 	{
-		if (null == entity) throw new IllegalArgumentException("entity is null");
+		if (null == entity) throw new RuntimeException("entity");
 
-		if (null == meta) throw new IllegalArgumentException("meta is null");
+		if (null == meta) throw new RuntimeException("entityType");
 
 		Map<String, Object> entityMap = new LinkedHashMap<>();
 		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getId(), entity.getIdValue()));
@@ -1107,7 +1142,7 @@ public class RestController
 			{
 				// validate
 				Matcher matcher = PATTERN_EXPANDS.matcher(expand);
-				if (!matcher.matches()) throw new MolgenisDataException("invalid expand value: " + expand);
+				if (!matcher.matches()) throw new InvalidExpandException(expand);
 
 				// for partial expands, create set
 				expand = matcher.group(1);

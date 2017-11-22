@@ -1,10 +1,7 @@
 package org.molgenis.util;
 
 import com.google.common.collect.Iterables;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -12,7 +9,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.EntityTypeUtils;
 
-import java.time.format.DateTimeParseException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +21,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 
 public class EntityUtils
 {
@@ -90,20 +87,19 @@ public class EntityUtils
 				{
 					return parseLocalDate(valueStr);
 				}
-				catch (DateTimeParseException e)
+				catch (java.time.format.DateTimeParseException e)
 				{
-					throw new MolgenisDataException(
-							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), valueStr), e);
+					throw new DateParseException(attr, valueStr);
 				}
 			case DATE_TIME:
 				try
 				{
 					return parseInstant(valueStr);
 				}
-				catch (DateTimeParseException e)
+				catch (java.time.format.DateTimeParseException e)
 				{
-					throw new MolgenisDataException(
-							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), valueStr), e);
+
+					throw new DateTimeParseException(attr, valueStr);
 				}
 			case DECIMAL:
 				return Double.valueOf(valueStr);

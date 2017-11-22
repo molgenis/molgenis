@@ -672,14 +672,30 @@ var Form = React.createClass({
             if(attr.nullableExpression) {
               entityInstance[attr.name] = value;
               var isNillable = this._resolveBoolExpression(attr.nullableExpression, entityInstance)
-              var isValueNull = value === '' || value === undefined || value === null
-              if (!isNillable && isValueNull) {
+                if (!isNillable && this._isValueNotSet(type, value)) {
                 errorMessage = 'Field is required, please enter a value';
               }
             }
         }
 
         callback({valid: errorMessage === undefined, errorMessage: errorMessage});
+    },
+    /**
+     * Returns true if the field value has not been set, the definition of 'being set' depends on the type of field.
+     * @param {string} fieldType type of field, one of {DECIMAL. MREF, CATEGORICAL_MREF, ...}
+     * @param {*} value current field value
+     * @returns {boolean}
+     * @private
+     */
+    _isValueNotSet(fieldType, value) {
+        if (value === undefined) {
+            return true
+        }
+        else if (fieldType === 'CATEGORICAL_MREF' || fieldType === 'MREF') {
+            return !value.items || value.items.length === 0
+        } else {
+            return value === '' || value === null
+        }
     },
     _resolveBoolExpression: function (expression, entityInstance) {
         //TODO make evalScript work with entities

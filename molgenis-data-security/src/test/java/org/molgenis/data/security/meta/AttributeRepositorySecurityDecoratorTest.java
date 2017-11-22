@@ -670,7 +670,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		verify(delegateRepository).delete(attr);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity attribute \\[attrName\\] is not allowed")
+	@Test(expectedExceptions = EditSystemAttributeException.class, expectedExceptionsMessageRegExp = "operation:DELETE attr:attrName")
 	public void deleteSystemAttribute()
 	{
 		String attrName = "attrName";
@@ -695,7 +695,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Updating system entity attribute \\[attributeName\\] is not allowed")
+			EditSystemAttributeException.class }, expectedExceptionsMessageRegExp = "operation:UPDATE attr:attributeName")
 	public void updateSystemEntity()
 	{
 		Attribute currentAttribute = mock(Attribute.class);

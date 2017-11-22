@@ -6,7 +6,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 /**
  * This exception is used to determine in the {@link TwoFactorAuthenticationController} what message should be thrown
  */
-@Deprecated // FIXME extend from LocalizedRuntimeException
+@Deprecated // FIXME extend from CodedRuntimeException
 public class InvalidVerificationCodeException extends InternalAuthenticationServiceException
 {
 	public InvalidVerificationCodeException(String message)

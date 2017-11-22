@@ -1,15 +1,15 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.DataTypeConstraintViolationException;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class EnumAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
@@ -60,38 +60,37 @@ public class EnumAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	public Object[][] invalidConversionTestCases()
 	{
 		return new Object[][] { { "2b", INT, DataTypeConstraintViolationException.class, "type:INT or LONG value:2b" },
-				{ "2b", LONG, DataTypeConstraintViolationException.class, "type:INT or LONG value:2b" },
-				{ "1", DECIMAL, MolgenisDataException.class,
-						"Attribute data type update from [ENUM] to [DECIMAL] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", XREF, MolgenisDataException.class,
+				{ "2b", LONG, "type:INT or LONG value:2b" }, { "1", DECIMAL,
+				"Attribute data type update from [ENUM] to [DECIMAL] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
+				{ "1", XREF,
 						"Attribute data type update from [ENUM] to [XREF] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", CATEGORICAL, MolgenisDataException.class,
+				{ "1", CATEGORICAL,
 						"Attribute data type update from [ENUM] to [CATEGORICAL] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", DATE, MolgenisDataException.class,
+				{ "1", DATE,
 						"Attribute data type update from [ENUM] to [DATE] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", DATE_TIME, MolgenisDataException.class,
+				{ "1", DATE_TIME,
 						"Attribute data type update from [ENUM] to [DATE_TIME] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", MREF, MolgenisDataException.class,
+				{ "1", MREF,
 						"Attribute data type update from [ENUM] to [MREF] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", CATEGORICAL_MREF, MolgenisDataException.class,
+				{ "1", CATEGORICAL_MREF,
 						"Attribute data type update from [ENUM] to [CATEGORICAL_MREF] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", EMAIL, MolgenisDataException.class,
+				{ "1", EMAIL,
 						"Attribute data type update from [ENUM] to [EMAIL] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", HTML, MolgenisDataException.class,
+				{ "1", HTML,
 						"Attribute data type update from [ENUM] to [HTML] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", HYPERLINK, MolgenisDataException.class,
+				{ "1", HYPERLINK,
 						"Attribute data type update from [ENUM] to [HYPERLINK] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", COMPOUND, MolgenisDataException.class,
+				{ "1", COMPOUND,
 						"Attribute data type update from [ENUM] to [COMPOUND] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", FILE, MolgenisDataException.class,
+				{ "1", FILE,
 						"Attribute data type update from [ENUM] to [FILE] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", BOOL, MolgenisDataException.class,
+				{ "1", BOOL,
 						"Attribute data type update from [ENUM] to [BOOL] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1b", STRING, MolgenisValidationException.class,
+				{ "1b", STRING,
 						"Invalid [enum] value [1b] for attribute [mainAttribute] of entity [null] with type [MAINENTITY]. Value must be one of [1, 2b, abc]" },
-				{ "1", SCRIPT, MolgenisDataException.class,
+				{ "1", SCRIPT,
 						"Attribute data type update from [ENUM] to [SCRIPT] not allowed, allowed types are [INT, LONG, STRING, TEXT]" },
-				{ "1", ONE_TO_MANY, MolgenisValidationException.class,
+				{ "1", ONE_TO_MANY,
 						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
 	}
 
@@ -101,23 +100,19 @@ public class EnumAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
 	 * @param exceptionMessage The expected exception message
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage)
+	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, String exceptionMessage)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException e)
 		{
-			System.out.println(exception.getClass());
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			assertEquals(e.getMessage(), exceptionMessage);
 		}
 	}
 }
