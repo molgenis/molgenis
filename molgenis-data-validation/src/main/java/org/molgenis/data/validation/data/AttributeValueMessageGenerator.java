@@ -181,8 +181,8 @@ public class AttributeValueMessageGenerator
 
 		String message = getMessage(constraintViolation);
 		String valueString = attributeValue.getValue() != null ? attributeValue.getValue().toString() : "NULL";
-		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), valueString).orElse(
+		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(), attribute.getLabel(),
+				valueString).orElse(
 				message);
 		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}

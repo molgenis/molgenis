@@ -70,8 +70,7 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 				{ entity1, EMAIL, "V94" }, { entity1, HYPERLINK, "V94" }, { entity1, HTML, "V94" },
 				{ entity1, ENUM, "V94" }, { entity1, DATE, "V94" }, { entity1, DATE_TIME, "V94" },
 				{ entity1, MREF, "V94" }, { entity1, CATEGORICAL_MREF, "V94" }, { entity1, FILE, "V94" },
-				{ entity1, COMPOUND, "V94" }, { entity1, ONE_TO_MANY, "V94" }, { entity1, DECIMAL, "V94" }
-		};
+				{ entity1, COMPOUND, "V94" }, { entity1, ONE_TO_MANY, "V94" }, { entity1, DECIMAL, "V94" } };
 	}
 
 	@DataProvider(name = "invalidValueTestCases")
