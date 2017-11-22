@@ -193,7 +193,7 @@ public class AttributeValueMessageGenerator
 		Attribute attribute = attributeValue.getAttribute();
 		String valueString = attributeValue.getValue() != null ? attributeValue.getValue().toString() : "NULL";
 		return String.format("constraint:%s entityType:%s attribute:%s value:%s",
-				constraintViolation.getConstraint().name(), attribute.getEntity().getId(), attribute.getIdentifier(),
+				constraintViolation.getConstraint().name(), attribute.getEntity().getId(), attribute.getName(),
 				valueString);
 	}
 

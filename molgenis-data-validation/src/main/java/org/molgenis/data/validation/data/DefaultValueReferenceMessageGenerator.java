@@ -79,7 +79,7 @@ public class DefaultValueReferenceMessageGenerator
 		{
 			message = String.format("constraint:%s entityType:%s entity:%s attributes:[%s]", constraint.name(),
 					entityType.getId(), entityId.get().toString(),
-					attributes.get().stream().map(Attribute::getIdentifier).collect(joining(",")));
+					attributes.get().stream().map(Attribute::getName).collect(joining(",")));
 		}
 		else
 		{

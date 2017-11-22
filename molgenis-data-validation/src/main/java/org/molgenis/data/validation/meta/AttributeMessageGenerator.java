@@ -248,7 +248,7 @@ public class AttributeMessageGenerator
 	private static String getMessage(Attribute attribute, AttributeConstraint attributeConstraint)
 	{
 		return String.format("constraint:%s entityType:%s attribute:%s", attributeConstraint.name(),
-				attribute.getEntity().getId(), attribute.getIdentifier());
+				attribute.getEntity().getId(), attribute.getName());
 	}
 
 	private static Optional<String> getLocalizedMessage(String errorCode, Object... arguments)
