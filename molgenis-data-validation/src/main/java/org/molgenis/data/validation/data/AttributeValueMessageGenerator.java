@@ -54,6 +54,12 @@ public class AttributeValueMessageGenerator
 			case TYPE:
 				constraintViolationMessage = createMessageType("V79", constraintViolation);
 				break;
+			case DATE:
+				constraintViolationMessage = createMessageType("V79b", constraintViolation);
+				break;
+			case DATETIME:
+				constraintViolationMessage = createMessageType("V79c", constraintViolation);
+				break;
 			case UNIQUE:
 				constraintViolationMessage = createMessageUnique("V80", constraintViolation);
 				break;
@@ -174,8 +180,9 @@ public class AttributeValueMessageGenerator
 		Attribute attribute = attributeValue.getAttribute();
 
 		String message = getMessage(constraintViolation);
+		String valueString = attributeValue.getValue() != null ? attributeValue.getValue().toString() : "NULL";
 		String localizedMessage = getLocalizedMessage(errorCode, attribute.getEntity().getLabel(),
-				attribute.getLabel(), attributeValue.getValue().toString()).orElse(
+				attribute.getLabel(), valueString).orElse(
 				message);
 		return ValidationMessage.create(errorCode, message, localizedMessage);
 	}
@@ -184,9 +191,10 @@ public class AttributeValueMessageGenerator
 	{
 		AttributeValue attributeValue = constraintViolation.getAttributeValue();
 		Attribute attribute = attributeValue.getAttribute();
+		String valueString = attributeValue.getValue() != null ? attributeValue.getValue().toString() : "NULL";
 		return String.format("constraint:%s entityType:%s attribute:%s value:%s",
 				constraintViolation.getConstraint().name(), attribute.getEntity().getId(), attribute.getIdentifier(),
-				attributeValue.getValue().toString());
+				valueString);
 	}
 
 	private static Optional<String> getLocalizedMessage(String errorCode, Object... arguments)

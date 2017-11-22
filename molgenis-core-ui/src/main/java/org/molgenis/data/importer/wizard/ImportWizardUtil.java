@@ -1,5 +1,6 @@
 package org.molgenis.data.importer.wizard;
 
+import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.ValidationMessage;
@@ -45,7 +46,8 @@ class ImportWizardUtil
 		return dbAction;
 	}
 
-	static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
+	public static void handleException(CodedRuntimeException e, ImportWizard importWizard, BindingResult result,
+			Logger logger,
 			String entityImportOption)
 	{
 		File file = importWizard.getFile();

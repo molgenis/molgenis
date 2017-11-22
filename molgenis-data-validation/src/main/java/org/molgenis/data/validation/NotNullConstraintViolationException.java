@@ -34,7 +34,8 @@ public class NotNullConstraintViolationException extends DataIntegrityViolationE
 		this(entityTypeId, attributeName, entityId, null);
 	}
 
-	public NotNullConstraintViolationException(String entityTypeId, String attributeName, @Nullable String entityId, @Nullable Throwable cause)
+	public NotNullConstraintViolationException(String entityTypeId, String attributeName, @Nullable String entityId,
+			@Nullable Throwable cause)
 	{
 		super(ERROR_CODE, cause);
 		this.entityTypeId = requireNonNull(entityTypeId);
@@ -60,8 +61,9 @@ public class NotNullConstraintViolationException extends DataIntegrityViolationE
 		}
 		else
 		{
-			localizedMessage = getLanguageService().map(languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY_UNKNOWN),
-					entityTypeId, attributeName)).orElse(super.getLocalizedMessage());
+			localizedMessage = getLanguageService().map(
+					languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY_UNKNOWN),
+							entityTypeId, attributeName)).orElse(super.getLocalizedMessage());
 		}
 		return localizedMessage;
 	}

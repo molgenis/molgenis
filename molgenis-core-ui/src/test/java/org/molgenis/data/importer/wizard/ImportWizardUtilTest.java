@@ -1,6 +1,7 @@
 package org.molgenis.data.importer.wizard;
 
 import org.mockito.Mock;
+import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.ValidationMessage;
 import org.molgenis.test.AbstractMockitoTest;
@@ -16,6 +17,8 @@ import static org.mockito.Mockito.*;
 public class ImportWizardUtilTest extends AbstractMockitoTest
 {
 	@Mock
+	private CodedRuntimeException exception;
+	@Mock
 	private ImportWizard importWizard;
 	@Mock
 	private BindingResult bindingResult;
@@ -25,7 +28,7 @@ public class ImportWizardUtilTest extends AbstractMockitoTest
 	@Test
 	public void testHandleException() throws Exception
 	{
-		Exception exception = mock(Exception.class);
+		CodedRuntimeException exception = mock(CodedRuntimeException.class);
 		when(exception.getLocalizedMessage()).thenReturn("Localized message");
 		when(logger.isWarnEnabled()).thenReturn(true);
 
@@ -55,7 +58,7 @@ public class ImportWizardUtilTest extends AbstractMockitoTest
 	@Test
 	public void testHandleExceptionWarnLoggerDisabled() throws Exception
 	{
-		Exception exception = mock(Exception.class);
+		CodedRuntimeException exception = mock(CodedRuntimeException.class);
 		when(exception.getLocalizedMessage()).thenReturn("Localized message");
 		when(logger.isWarnEnabled()).thenReturn(false);
 

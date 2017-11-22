@@ -298,8 +298,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		Attribute systemAttr = systemEntityTypeRegistry.getSystemAttribute(attrIdentifier);
 		if (systemAttr != null && !EntityUtils.equals(attr, systemAttr))
 		{
-			throw new MolgenisDataException(
-					format("Updating system entity attribute [%s] is not allowed", attr.getName()));
+			throw new EditSystemAttributeException("UPDATE", attr);
 		}
 	}
 
@@ -313,8 +312,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		String attrIdentifier = attr.getIdentifier();
 		if (systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier))
 		{
-			throw new MolgenisDataException(
-					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
+			throw new EditSystemAttributeException("DELETE", attr);
 		}
 	}
 

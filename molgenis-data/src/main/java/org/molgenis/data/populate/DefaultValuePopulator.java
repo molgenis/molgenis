@@ -1,5 +1,6 @@
 package org.molgenis.data.populate;
 
+import org.molgenis.data.DateTimeParseException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static java.lang.Boolean.FALSE;
@@ -21,7 +21,8 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.util.EntityUtils.asStream;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 
 /**
  * Populate entity values for attributes with default values
@@ -119,10 +120,9 @@ public class DefaultValuePopulator
 		{
 			return parseLocalDate(valueAsString);
 		}
-		catch (DateTimeParseException e)
+		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new RuntimeException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), valueAsString));
+			throw new DateTimeParseException(attr, valueAsString);
 		}
 	}
 
@@ -132,10 +132,9 @@ public class DefaultValuePopulator
 		{
 			return parseInstant(valueAsString);
 		}
-		catch (DateTimeParseException e)
+		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new RuntimeException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), valueAsString));
+			throw new DateTimeParseException(attr, valueAsString);
 		}
 	}
 

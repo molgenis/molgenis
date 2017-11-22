@@ -1,25 +1,26 @@
 package org.molgenis.data.importer.exception;
 
+import org.molgenis.data.CodedRuntimeException;
+
 import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-// FIXME duplicate of UnknownRepositoryCollectionException
-public class UnknownBackendException extends ImporterException
+public class UnknownActionException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "I02";
-	private final String backendName;
+	private static final String ERROR_CODE = "I05";
+	private final String action;
 
-	public UnknownBackendException(String backendName)
+	public UnknownActionException(String action)
 	{
 		super(ERROR_CODE);
-		this.backendName = backendName;
+		this.action = action;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("name:%s", backendName);
+		return String.format("action:%s", action);
 	}
 
 	@Override
@@ -28,7 +29,7 @@ public class UnknownBackendException extends ImporterException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, backendName);
+			return MessageFormat.format(format, action);
 		}).orElse(super.getLocalizedMessage());
 	}
 }
