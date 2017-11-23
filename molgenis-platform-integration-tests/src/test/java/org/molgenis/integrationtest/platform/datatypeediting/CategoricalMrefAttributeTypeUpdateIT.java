@@ -8,12 +8,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class CategoricalMrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
@@ -70,64 +70,49 @@ public class CategoricalMrefAttributeTypeUpdateIT extends AbstractAttributeTypeU
 	public Object[][] invalidConversionTestCases()
 	{
 		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
-		return new Object[][] { { entities, BOOL,
-				"Attribute data type update from [CATEGORICAL_MREF] to [BOOL] not allowed, allowed types are [MREF]" },
-				{ entities, STRING,
-						"Attribute data type update from [CATEGORICAL_MREF] to [STRING] not allowed, allowed types are [MREF]" },
-				{ entities, TEXT,
-						"Attribute data type update from [CATEGORICAL_MREF] to [TEXT] not allowed, allowed types are [MREF]" },
-				{ entities, SCRIPT,
-						"Attribute data type update from [CATEGORICAL_MREF] to [SCRIPT] not allowed, allowed types are [MREF]" },
-				{ entities, INT,
-						"Attribute data type update from [CATEGORICAL_MREF] to [INT] not allowed, allowed types are [MREF]" },
-				{ entities, LONG,
-						"Attribute data type update from [CATEGORICAL_MREF] to [LONG] not allowed, allowed types are [MREF]" },
-				{ entities, DECIMAL,
-						"Attribute data type update from [CATEGORICAL_MREF] to [DECIMAL] not allowed, allowed types are [MREF]" },
-				{ entities, XREF,
-						"Attribute data type update from [CATEGORICAL_MREF] to [XREF] not allowed, allowed types are [MREF]" },
-				{ entities, CATEGORICAL,
-						"Attribute data type update from [CATEGORICAL_MREF] to [CATEGORICAL] not allowed, allowed types are [MREF]" },
-				{ entities, EMAIL,
-						"Attribute data type update from [CATEGORICAL_MREF] to [EMAIL] not allowed, allowed types are [MREF]" },
-				{ entities, HYPERLINK,
-						"Attribute data type update from [CATEGORICAL_MREF] to [HYPERLINK] not allowed, allowed types are [MREF]" },
-				{ entities, HTML,
-						"Attribute data type update from [CATEGORICAL_MREF] to [HTML] not allowed, allowed types are [MREF]" },
-				{ entities, ENUM,
-						"Attribute data type update from [CATEGORICAL_MREF] to [ENUM] not allowed, allowed types are [MREF]" },
-				{ entities, DATE,
-						"Attribute data type update from [CATEGORICAL_MREF] to [DATE] not allowed, allowed types are [MREF]" },
-				{ entities, DATE_TIME,
-						"Attribute data type update from [CATEGORICAL_MREF] to [DATE_TIME] not allowed, allowed types are [MREF]" },
-				{ entities, FILE,
-						"Attribute data type update from [CATEGORICAL_MREF] to [FILE] not allowed, allowed types are [MREF]" },
-				{ entities, COMPOUND,
-						"Attribute data type update from [CATEGORICAL_MREF] to [COMPOUND] not allowed, allowed types are [MREF]" },
-				{ entities, ONE_TO_MANY,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { entities, BOOL, "V94" },
+				{ entities, STRING, "V94" },
+				{ entities, TEXT, "V94" },
+				{ entities, SCRIPT, "V94" },
+				{ entities, INT, "V94" },
+				{ entities, LONG, "V94" },
+				{ entities, DECIMAL, "V94" },
+				{ entities, XREF, "V94" },
+				{ entities, CATEGORICAL, "V94" },
+				{ entities, EMAIL, "V94" },
+				{ entities, HYPERLINK, "V94" },
+				{ entities, HTML, "V94" },
+				{ entities, ENUM, "V94" },
+				{ entities, DATE, "V94" },
+				{ entities, DATE_TIME, "V94" },
+				{ entities, FILE, "V94" },
+				{ entities, COMPOUND, "V94" },
+				{ entities, ONE_TO_MANY, "V94" } };
 	}
 
 	/**
-	 * Invalid conversion cases for CATEGORICAL_MREF to:
-	 * BOOL, STRING, TEXT, SCRIPT INT, LONG, DECIMAL, XREF, CATEGORICAL, EMAIL, HYPERLINK, HTML, ENUM, DATE, DATE_TIME, FILE, COMPOUND, ONE_TO_MANY
+	 * Invalid conversion cases for CATEGORICAL to:
+	 * BOOL, TEXT, SCRIPT INT, LONG, DECIMAL, EMAIL, HYPERLINK, HTML, ENUM, DATE, DATE_TIME, MREF, MREF, FILE, COMPOUND, ONE_TO_MANY
 	 *
-	 * @param valueToConvert   The value that will be converted
-	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionMessage The expected exception message
+	 * @param valueToConvert  The value that will be converted
+	 * @param typeToConvertTo The type to convert to
+	 * @param errorCode       The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(List<Object> valueToConvert, AttributeType typeToConvertTo,
-			String exceptionMessage)
+	public void testInvalidConversion(List<Entity> valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (ValidationException e)
+		catch (ValidationException exception)
 		{
-			assertEquals(e.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }

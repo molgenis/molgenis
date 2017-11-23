@@ -6,9 +6,11 @@ import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class ScriptAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
@@ -62,40 +64,23 @@ public class ScriptAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "function log(data){console.log(data)}", BOOL,
-				"Attribute data type update from [SCRIPT] to [BOOL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", INT,
-						"Attribute data type update from [SCRIPT] to [INT] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", LONG,
-						"Attribute data type update from [SCRIPT] to [LONG] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", DECIMAL,
-						"Attribute data type update from [SCRIPT] to [DECIMAL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", XREF,
-						"Attribute data type update from [SCRIPT] to [XREF] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", CATEGORICAL,
-						"Attribute data type update from [SCRIPT] to [CATEGORICAL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", EMAIL,
-						"Attribute data type update from [SCRIPT] to [EMAIL] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", HYPERLINK,
-						"Attribute data type update from [SCRIPT] to [HYPERLINK] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", HTML,
-						"Attribute data type update from [SCRIPT] to [HTML] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", ENUM,
-						"Attribute data type update from [SCRIPT] to [ENUM] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", DATE,
-						"Attribute data type update from [SCRIPT] to [DATE] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", DATE_TIME,
-						"Attribute data type update from [SCRIPT] to [DATE_TIME] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", MREF,
-						"Attribute data type update from [SCRIPT] to [MREF] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", CATEGORICAL_MREF,
-						"Attribute data type update from [SCRIPT] to [CATEGORICAL_MREF] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", FILE,
-						"Attribute data type update from [SCRIPT] to [FILE] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", COMPOUND,
-						"Attribute data type update from [SCRIPT] to [COMPOUND] not allowed, allowed types are [STRING, TEXT]" },
-				{ "function log(data){console.log(data)}", ONE_TO_MANY,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { "function log(data){console.log(data)}", BOOL, "V94" },
+				{ "function log(data){console.log(data)}", INT, "V94" },
+				{ "function log(data){console.log(data)}", LONG, "V94" },
+				{ "function log(data){console.log(data)}", DECIMAL, "V94" },
+				{ "function log(data){console.log(data)}", XREF, "V94" },
+				{ "function log(data){console.log(data)}", CATEGORICAL, "V94" },
+				{ "function log(data){console.log(data)}", EMAIL, "V94" },
+				{ "function log(data){console.log(data)}", HYPERLINK, "V94" },
+				{ "function log(data){console.log(data)}", HTML, "V94" },
+				{ "function log(data){console.log(data)}", ENUM, "V94" },
+				{ "function log(data){console.log(data)}", DATE, "V94" },
+				{ "function log(data){console.log(data)}", DATE_TIME, "V94" },
+				{ "function log(data){console.log(data)}", MREF, "V94" },
+				{ "function log(data){console.log(data)}", CATEGORICAL_MREF, "V94" },
+				{ "function log(data){console.log(data)}", FILE, "V94" },
+				{ "function log(data){console.log(data)}", COMPOUND, "V94" },
+				{ "function log(data){console.log(data)}", ONE_TO_MANY, "V94" } };
 	}
 
 	/**
@@ -104,19 +89,23 @@ public class ScriptAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode       The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, String exceptionMessage)
+	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (ValidationException e)
+		catch (ValidationException exception)
 		{
-			assertEquals(e.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }

@@ -37,7 +37,7 @@ public class FileTypeEditingIT extends AbstractTestNGSpringContextTests
 	private MetaDataService metaDataService;
 
 	@WithMockUser(username = "superuser", roles = { "SU" })
-	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[FILE\\] to \\[STRING\\] not allowed, allowed types are \\[\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:TYPE_UPDATE entityType:FileEntity attribute:fileRef")
 	public void testNoConversionsAllowed()
 	{
 		EntityType entityType = entityTypeFactory.create("FileEntity").setLabel("File entity");

@@ -1,14 +1,17 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.validation.EntityReferenceUnknownConstraintViolationException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class IntAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
@@ -60,27 +63,14 @@ public class IntAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { 10, XREF, "type:MAINENTITY attribute:mainAttribute value: 10" },
-				{ 10, CATEGORICAL, "type:MAINENTITY attribute:mainAttribute value: 10" }, { 10, EMAIL,
-				"Attribute data type update from [INT] to [EMAIL] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, HYPERLINK,
-						"Attribute data type update from [INT] to [HYPERLINK] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, HTML,
-						"Attribute data type update from [INT] to [HTML] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, ENUM, "type:MAINENTITY" }, { 10, DATE,
-				"Attribute data type update from [INT] to [DATE] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, DATE_TIME,
-						"Attribute data type update from [INT] to [DATE_TIME] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, MREF,
-						"Attribute data type update from [INT] to [MREF] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, CATEGORICAL_MREF,
-						"Attribute data type update from [INT] to [CATEGORICAL_MREF] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, FILE,
-						"Attribute data type update from [INT] to [FILE] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				{ 10, COMPOUND,
-						"Attribute data type update from [INT] to [COMPOUND] not allowed, allowed types are [BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF]" },
-				new Object[] { 10, ONE_TO_MANY,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { 10, EMAIL, "V94" },
+				{ 10, HYPERLINK, "V94" },
+				{ 10, HTML, "V94" }, { 10, DATE, "V94" },
+				{ 10, DATE_TIME, "V94" },
+				{ 10, MREF, "V94" },
+				{ 10, CATEGORICAL_MREF, "V94" },
+				{ 10, FILE, "V94" },
+				{ 10, COMPOUND, "V94" }, { 10, ONE_TO_MANY, "V94" } };
 	}
 
 	/**
@@ -89,20 +79,48 @@ public class IntAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode       The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversions(int valueToConvert, AttributeType typeToConvertTo, String exceptionMessage)
+	public void testInvalidConversions(int valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (ValidationException e)
+		catch (ValidationException exception)
 		{
-			assertEquals(e.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
+
+	@DataProvider(name = "invalidForeignKeyTestCases")
+	public Object[][] invalidForeignKeyTestCases()
+	{
+		return new Object[][] { { 10, XREF, EntityReferenceUnknownConstraintViolationException.class,
+				"type:MAINENTITY attribute:mainAttribute value: 10" },
+				{ 10, CATEGORICAL, EntityReferenceUnknownConstraintViolationException.class,
+						"type:MAINENTITY attribute:mainAttribute value: 10" } };
+	}
+
+	@Test(dataProvider = "invalidForeignKeyTestCases")
+	public void testInvalidForeignKey(int valueToConvert, AttributeType typeToConvertTo, Class expected, String message)
+	{
+		try
+		{
+			testTypeConversion(valueToConvert, typeToConvertTo);
+			fail("Conversion should have failed");
+		}
+		catch (Exception exception)
+		{
+			assertTrue(exception.getClass().isAssignableFrom(expected));
+			assertEquals(exception.getMessage(), message);
+		}
+	}
+
 }

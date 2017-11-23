@@ -65,7 +65,6 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 	public Object[][] invalidConversionTestCases()
 	{
 		Entity entity1 = dataService.findOneById("REFERENCEENTITY", "1");
-		Entity entity2 = dataService.findOneById("REFERENCEENTITY", "molgenis@test.org");
 		return new Object[][] { { entity1, BOOL, "V94" }, { entity1, TEXT, "V94" }, { entity1, SCRIPT, "V94" },
 				{ entity1, EMAIL, "V94" }, { entity1, HYPERLINK, "V94" }, { entity1, HTML, "V94" },
 				{ entity1, ENUM, "V94" }, { entity1, DATE, "V94" }, { entity1, DATE_TIME, "V94" },
@@ -76,19 +75,10 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 	@DataProvider(name = "invalidValueTestCases")
 	public Object[][] invalidValueTestCases()
 	{
-		Entity entity1 = dataService.findOneById("REFERENCEENTITY", "1");
 		Entity entity2 = dataService.findOneById("REFERENCEENTITY", "molgenis@test.org");
 		return new Object[][] { { entity2, INT, "V03" }, { entity2, LONG, "V03" } };
 	}
 
-	/**
-	 * Invalid conversion cases for CATEGORICAL to:
-	 * BOOL, TEXT, SCRIPT INT, LONG, DECIMAL, EMAIL, HYPERLINK, HTML, ENUM, DATE, DATE_TIME, MREF, CATEGORICAL_MREF, FILE, COMPOUND, ONE_TO_MANY
-	 *
-	 * @param valueToConvert   The value that will be converted
-	 * @param typeToConvertTo  The type to convert to
-	 * @param errorCode   The expected errorCode
-	 */
 	@Test(dataProvider = "invalidConversionTestCases")
 	public void testInvalidConversion(Entity valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
@@ -107,14 +97,6 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 		}
 	}
 
-	/**
-	 * Invalid conversion cases for CATEGORICAL to:
-	 * BOOL, TEXT, SCRIPT INT, LONG, DECIMAL, EMAIL, HYPERLINK, HTML, ENUM, DATE, DATE_TIME, MREF, CATEGORICAL_MREF, FILE, COMPOUND, ONE_TO_MANY
-	 *
-	 * @param valueToConvert  The value that will be converted
-	 * @param typeToConvertTo The type to convert to
-	 * @param errorCode       The expected errorCode
-	 */
 	@Test(dataProvider = "invalidValueTestCases")
 	public void testInvalidValue(Entity valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{

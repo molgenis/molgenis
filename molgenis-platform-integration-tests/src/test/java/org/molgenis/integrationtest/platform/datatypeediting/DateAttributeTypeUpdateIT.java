@@ -8,12 +8,13 @@ import org.testng.annotations.*;
 
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.time.ZoneId.systemDefault;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
@@ -67,38 +68,22 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "2016-11-13", BOOL,
-				"Attribute data type update from [DATE] to [BOOL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", INT,
-						"Attribute data type update from [DATE] to [INT] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", LONG,
-						"Attribute data type update from [DATE] to [LONG] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", DECIMAL,
-						"Attribute data type update from [DATE] to [DECIMAL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", XREF,
-						"Attribute data type update from [DATE] to [XREF] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", CATEGORICAL,
-						"Attribute data type update from [DATE] to [CATEGORICAL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", SCRIPT,
-						"Attribute data type update from [DATE] to [SCRIPT] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", HYPERLINK,
-						"Attribute data type update from [DATE] to [HYPERLINK] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", EMAIL,
-						"Attribute data type update from [DATE] to [EMAIL] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", ENUM,
-						"Attribute data type update from [DATE] to [ENUM] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", HTML,
-						"Attribute data type update from [DATE] to [HTML] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", MREF,
-						"Attribute data type update from [DATE] to [MREF] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", CATEGORICAL_MREF,
-						"Attribute data type update from [DATE] to [CATEGORICAL_MREF] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", FILE,
-						"Attribute data type update from [DATE] to [FILE] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", COMPOUND,
-						"Attribute data type update from [DATE] to [COMPOUND] not allowed, allowed types are [DATE_TIME, STRING, TEXT]" },
-				{ "2016-11-13", ONE_TO_MANY,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { "2016-11-13", BOOL, "V94" },
+				{ "2016-11-13", INT, "V94" },
+				{ "2016-11-13", LONG, "V94" },
+				{ "2016-11-13", DECIMAL, "V94" },
+				{ "2016-11-13", XREF, "V94" },
+				{ "2016-11-13", CATEGORICAL, "V94" },
+				{ "2016-11-13", SCRIPT, "V94" },
+				{ "2016-11-13", HYPERLINK, "V94" },
+				{ "2016-11-13", EMAIL, "V94" },
+				{ "2016-11-13", ENUM, "V94" },
+				{ "2016-11-13", HTML, "V94" },
+				{ "2016-11-13", MREF, "V94" },
+				{ "2016-11-13", CATEGORICAL_MREF, "V94" },
+				{ "2016-11-13", FILE, "V94" },
+				{ "2016-11-13", COMPOUND, "V94" },
+				{ "2016-11-13", ONE_TO_MANY, "V94" } };
 	}
 
 	/**
@@ -107,10 +92,10 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversions(Object valueToConvert, AttributeType typeToConvertTo, String exceptionMessage)
+	public void testInvalidConversions(Object valueToConvert, AttributeType typeToConvertTo, String errorCode)
 			throws ParseException
 	{
 		try
@@ -119,9 +104,13 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (ValidationException e)
+		catch (ValidationException exception)
 		{
-			assertEquals(e.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }
