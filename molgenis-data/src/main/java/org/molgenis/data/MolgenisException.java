@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-@Deprecated // FIXME extend from CodedRuntimeException
+@Deprecated // FIXME implement ErrorCoded + refactor uses + rename to CodedException
 public class MolgenisException extends Exception
 {
 	public MolgenisException(String s)
