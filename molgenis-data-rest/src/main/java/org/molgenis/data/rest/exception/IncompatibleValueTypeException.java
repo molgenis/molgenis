@@ -7,6 +7,9 @@ import java.text.MessageFormat;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+/**
+ * thrown if a conversion form one attribute type to another was attempted but there was a value that was not suitable for the new type
+ */
 public class IncompatibleValueTypeException extends RestApiException
 {
 	private final static String ERROR_CODE = "R01";

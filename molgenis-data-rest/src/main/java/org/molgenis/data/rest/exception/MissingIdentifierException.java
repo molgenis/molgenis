@@ -4,6 +4,9 @@ import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+/**
+ * Exception thrown when an operation on a entity was attempted without specifying the identifier for the entity
+ */
 public class MissingIdentifierException extends RestApiException
 {
 	private final static String ERROR_CODE = "R09";
