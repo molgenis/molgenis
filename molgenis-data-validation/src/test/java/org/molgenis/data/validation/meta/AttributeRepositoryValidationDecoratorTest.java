@@ -20,6 +20,7 @@ public class AttributeRepositoryValidationDecoratorTest
 	private AttributeRepositoryValidationDecorator attributeRepoValidationDecorator;
 	private Repository<Attribute> delegateRepository;
 	private AttributeValidator attributeValidator;
+	private AttributeUpdateValidator attributeUpdateValidator;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -27,14 +28,15 @@ public class AttributeRepositoryValidationDecoratorTest
 	{
 		delegateRepository = mock(Repository.class);
 		attributeValidator = mock(AttributeValidator.class);
+		attributeUpdateValidator = mock(AttributeUpdateValidator.class);
 		attributeRepoValidationDecorator = new AttributeRepositoryValidationDecorator(delegateRepository,
-				attributeValidator);
+				attributeValidator, attributeUpdateValidator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void attributeRepositoryValidationDecorator()
 	{
-		new AttributeRepositoryValidationDecorator(null, null);
+		new AttributeRepositoryValidationDecorator(null, null, null);
 	}
 
 	@Test

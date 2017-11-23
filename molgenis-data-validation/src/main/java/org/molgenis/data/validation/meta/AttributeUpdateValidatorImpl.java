@@ -2,6 +2,7 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -10,6 +11,7 @@ import java.util.Set;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
 
+@Component
 public class AttributeUpdateValidatorImpl implements AttributeUpdateValidator
 {
 	@Override
@@ -99,9 +101,6 @@ public class AttributeUpdateValidatorImpl implements AttributeUpdateValidator
 		EnumSet<AttributeType> referenceTypes = EnumSet.of(XREF, CATEGORICAL);
 
 		// Every type that is listed as a valid ID attribute type is allowed to be converted to an XREF and CATEGORICAL
-		DATA_TYPE_ALLOWED_TRANSITIONS.keySet()
-									 .stream()
-									 .filter(allowedIdAttributeTypes::contains)
-									 .forEach(type -> DATA_TYPE_ALLOWED_TRANSITIONS.get(type).addAll(referenceTypes));
+		DATA_TYPE_ALLOWED_TRANSITIONS.keySet().stream().filter(allowedIdAttributeTypes::contains).forEach(type -> DATA_TYPE_ALLOWED_TRANSITIONS.get(type).addAll(referenceTypes));
 	}
 }
