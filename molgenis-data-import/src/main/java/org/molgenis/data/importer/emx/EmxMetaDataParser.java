@@ -306,24 +306,14 @@ public class EmxMetaDataParser implements MetaDataParser
 				   .stream()
 				   .map(EntityType::getPackage)
 				   .filter(Objects::nonNull)
-				   .forEach(package_ -> package_.getTags().forEach(tag ->
-				   {
-					   TagValidationResult tagValidationResult = tagValidator.validate(tag);
-					   compositeValidationResult.addValidationResult(tagValidationResult);
-				   }));
-		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tag ->
-		{
-			TagValidationResult tagValidationResult = tagValidator.validate(tag);
-			compositeValidationResult.addValidationResult(tagValidationResult);
-		}));
-		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
-		{
-			attr.getTags().forEach(tag ->
-			{
-				TagValidationResult tagValidationResult = tagValidator.validate(tag);
-				compositeValidationResult.addValidationResult(tagValidationResult);
-			});
-		}));
+				   .forEach(package_ -> validateTags(package_.getTags(), compositeValidationResult));
+
+		metaDataMap.values().forEach(entityType -> validateTags(entityType.getTags(), compositeValidationResult));
+		metaDataMap.values()
+				   .stream()
+				   .map(EntityType::getAllAttributes)
+				   .forEach(attributes -> attributes.forEach(
+						   attr -> validateTags(attr.getTags(), compositeValidationResult)));
 
 		if (compositeValidationResult.hasConstraintViolations())
 		{
@@ -337,6 +327,15 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (!report.getSheetsImportable().containsKey(entityTypeId)) report.addEntity(entityTypeId, true);
 		}
 		return report;
+	}
+
+	private void validateTags(Iterable<Tag> tags, CompositeValidationResult compositeValidationResult)
+	{
+		tags.forEach(tag ->
+		{
+			TagValidationResult tagValidationResult = tagValidator.validate(tag);
+			compositeValidationResult.addValidationResult(tagValidationResult);
+		});
 	}
 
 	/**
