@@ -60,6 +60,16 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>npm test</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <arguments>test</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>webpack build</id>
                         <goals>
                             <goal>npm</goal>
