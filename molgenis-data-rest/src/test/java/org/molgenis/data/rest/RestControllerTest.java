@@ -6,7 +6,7 @@ import org.mockito.Mockito;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.LanguageServiceImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -818,9 +818,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public LanguageServiceImpl languageService()
+		public LanguageService languageService()
 		{
-			return Mockito.mock(LanguageServiceImpl.class);
+			return Mockito.mock(LanguageService.class);
 		}
 
 		@Bean

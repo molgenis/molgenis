@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
-import org.molgenis.data.i18n.LanguageServiceImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -44,7 +44,7 @@ public class AttributeResponse
 	private String validationExpression;
 
 	public AttributeResponse(String entityParentName, EntityType entityType, Attribute attr,
-			PermissionService permissionService, DataService dataService, LanguageServiceImpl languageService)
+			PermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		this(entityParentName, entityType, attr, null, null, permissionService, dataService, languageService);
 	}
@@ -55,7 +55,7 @@ public class AttributeResponse
 	 */
 	public AttributeResponse(final String entityParentName, EntityType entityType, Attribute attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService, LanguageServiceImpl languageService)
+			PermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);

@@ -3,6 +3,7 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
@@ -81,7 +82,7 @@ public class RestControllerV2
 	private final RestService restService;
 	private final PermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
-	private final LanguageServiceImpl languageService;
+	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 

@@ -94,7 +94,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityListenersService entityListenersService;
 	@Autowired
-	private LanguageServiceImpl languageService;
+	private LanguageService languageService;
 	@Autowired
 	private L10nStringMetaData l10nStringMetaData;
 	@Autowired

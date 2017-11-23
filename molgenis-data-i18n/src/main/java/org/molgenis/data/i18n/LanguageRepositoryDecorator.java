@@ -12,9 +12,9 @@ import static java.util.Objects.requireNonNull;
 
 public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Language>
 {
-	private final LanguageServiceImpl languageService;
+	private final LanguageService languageService;
 
-	public LanguageRepositoryDecorator(Repository<Language> delegateRepository, LanguageServiceImpl languageService)
+	public LanguageRepositoryDecorator(Repository<Language> delegateRepository, LanguageService languageService)
 	{
 		super(delegateRepository);
 		this.languageService = requireNonNull(languageService);
@@ -55,7 +55,7 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 	public void add(Language language)
 	{
 
-		if (!languageService.hasLanguageCode(language.getCode()))
+		if (!LanguageService.hasLanguageCode(language.getCode()))
 		{
 			throw new MolgenisDataException("Adding languages is not allowed");
 		}

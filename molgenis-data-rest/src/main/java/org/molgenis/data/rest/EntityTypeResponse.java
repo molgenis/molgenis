@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.i18n.LanguageServiceImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.Href;
@@ -35,7 +35,7 @@ public class EntityTypeResponse
 	private final Boolean writable;
 
 	public EntityTypeResponse(EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageServiceImpl languageService)
+			LanguageService languageService)
 	{
 		this(meta, null, null, permissionService, dataService, languageService);
 	}
@@ -45,7 +45,7 @@ public class EntityTypeResponse
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService, LanguageServiceImpl languageService)
+			PermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);

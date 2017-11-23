@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
@@ -108,7 +109,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private LanguageServiceImpl languageService;
+	private LanguageService languageService;
 
 	@Autowired
 	private RestControllerV2 restControllerV2;

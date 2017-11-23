@@ -1,7 +1,7 @@
 package org.molgenis.searchall.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageServiceImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
@@ -45,13 +45,13 @@ public class SearchAllServiceTest
 	private Attribute attr4;
 	private Attribute attr5;
 
-	private LanguageServiceImpl languageService;
+	private LanguageService languageService;
 
 	@BeforeClass
 	public void setUp()
 	{
 		dataService = mock(DataService.class);
-		languageService = mock(LanguageServiceImpl.class);
+		languageService = mock(LanguageService.class);
 		searchAllService = new SearchAllService(dataService, languageService);
 
 		when(languageService.getCurrentUserLanguageCode()).thenReturn("en");
