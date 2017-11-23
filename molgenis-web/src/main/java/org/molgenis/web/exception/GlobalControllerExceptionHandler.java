@@ -32,7 +32,8 @@ public class GlobalControllerExceptionHandler
 	public Object handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest httpServletRequest)
 	{
 		LOG.info("", e);
-		return handleTypedException(isHtmlRequest(httpServletRequest), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(httpServletRequest), BadRequestController.URI,
+				e.getLocalizedMessage(),
 				NOT_FOUND);
 	}
 
@@ -41,7 +42,7 @@ public class GlobalControllerExceptionHandler
 	public Object handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e)
 	{
 		LOG.info("", e);
-		return handleTypedException(false, NotFoundController.URI, e.getLocalizedMessage(), BAD_REQUEST);
+		return handleTypedException(false, BadRequestController.URI, e.getLocalizedMessage(), BAD_REQUEST);
 	}
 
 	@ResponseStatus(BAD_REQUEST)
@@ -49,7 +50,7 @@ public class GlobalControllerExceptionHandler
 	public Object handleUnknownDataException(UnknownDataException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				BAD_REQUEST, e.getErrorCode());
 	}
 
@@ -58,7 +59,7 @@ public class GlobalControllerExceptionHandler
 	public Object handleDataIntegrityViolationException(DataIntegrityViolationException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				BAD_REQUEST, e.getErrorCode());
 	}
 
@@ -67,7 +68,7 @@ public class GlobalControllerExceptionHandler
 	public Object handleValidationException(ValidationException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				BAD_REQUEST, e.getErrorCode());
 	}
 
@@ -76,7 +77,7 @@ public class GlobalControllerExceptionHandler
 	public Object handlePermissionDeniedException(EntityTypePermissionDeniedException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				FORBIDDEN, e.getErrorCode()); // FIXME NotFoundController.URI is not what we want here (?)
 	}
 }

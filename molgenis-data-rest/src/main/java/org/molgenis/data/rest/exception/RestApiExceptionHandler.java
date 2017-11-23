@@ -1,6 +1,6 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.web.exception.NotFoundController;
+import org.molgenis.web.exception.BadRequestController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,7 +20,7 @@ public class RestApiExceptionHandler
 	public Object handleRestApiException(RestApiException e)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(false, NotFoundController.URI, e.getLocalizedMessage(), BAD_REQUEST,
+		return handleTypedException(false, BadRequestController.URI, e.getLocalizedMessage(), BAD_REQUEST,
 				e.getErrorCode());
 	}
 }

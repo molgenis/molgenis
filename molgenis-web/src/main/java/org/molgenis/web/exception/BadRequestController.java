@@ -4,12 +4,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static org.molgenis.web.exception.NotFoundController.URI;
+import static org.molgenis.web.exception.BadRequestController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(value = URI)
-public class NotFoundController
+public class BadRequestController
 {
 	public static final String ERROR_MESSAGE = "The page you’re looking for can't be found.";
 
