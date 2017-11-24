@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,7 @@ import static java.util.Objects.requireNonNull;
 public class EntityModelWriter
 {
 	private static final String KEYWORD = "http://www.w3.org/ns/dcat#keyword";
+	private final IRI rdfTypePredicate;
 
 	private final SimpleValueFactory valueFactory;
 	private final TagService<LabeledResource, LabeledResource> tagService;
@@ -46,6 +48,7 @@ public class EntityModelWriter
 	{
 		this.valueFactory = requireNonNull(valueFactory);
 		this.tagService = requireNonNull(tagService);
+		this.rdfTypePredicate = valueFactory.createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 	}
 
 	private void setNamespacePrefixes(Model model)
@@ -61,15 +64,35 @@ public class EntityModelWriter
 		model.setNamespace("ldp", "http://www.w3.org/ns/ldp#");
 		model.setNamespace("foaf", "http://xmlns.com/foaf/0.1/");
 		model.setNamespace("orcid", "http://orcid.org/");
+		model.setNamespace("r3d", "http://www.re3data.org/schema/3-0#");
+		model.setNamespace("sio", "http://semanticscience.org/resource/");
 	}
 
 	public Model createRdfModel(String subjectIRI, Entity objectEntity)
 	{
-		Resource subject = valueFactory.createIRI(subjectIRI);
+		Model model = createEmptyModel();
+		addEntityToModel(subjectIRI, objectEntity, model);
+		return model;
+	}
+
+	public Model createEmptyModel()
+	{
 		Model model = new LinkedHashModel();
 		setNamespacePrefixes(model);
-		EntityType entityType = objectEntity.getEntityType();
+		return model;
+	}
 
+	public void addEntityToModel(String subjectIRI, Entity objectEntity, Model model)
+	{
+		Resource subject = valueFactory.createIRI(subjectIRI);
+		EntityType entityType = objectEntity.getEntityType();
+		addStatementsForAttributeTags(objectEntity, model, subject, entityType);
+		addStatementsForEntityTags(model, subject, entityType);
+	}
+
+	private void addStatementsForAttributeTags(Entity objectEntity, Model model, Resource subject,
+			EntityType entityType)
+	{
 		for (Attribute objectAttribute : entityType.getAtomicAttributes())
 		{
 			Object value = objectEntity.get(objectAttribute.getName());
@@ -77,14 +100,25 @@ public class EntityModelWriter
 			{
 				continue;
 			}
-			for (LabeledResource tag : tagService.getTagsForAttribute(entityType, objectAttribute)
-												 .get(Relation.isAssociatedWith))
+			for (LabeledResource tag : tagService.getTagsForAttribute(entityType, objectAttribute).get(Relation.isAssociatedWith))
 			{
 				IRI predicate = valueFactory.createIRI(tag.getIri());
 				addRelationForAttribute(model, subject, predicate, objectEntity, objectAttribute);
 			}
 		}
-		return model;
+	}
+
+	void addStatementsForEntityTags(Model model, Resource subject, EntityType entityType)
+	{
+		for (SemanticTag<EntityType, LabeledResource, LabeledResource> tag : tagService.getTagsForEntity(entityType))
+		{
+			if (tag.getRelation() == Relation.isAssociatedWith)
+			{
+				LabeledResource object = tag.getObject();
+				model.add(subject, rdfTypePredicate, valueFactory.createIRI(object.getIri()));
+			}
+
+		}
 	}
 
 	private void addRelationForAttribute(Model model, Resource subject, IRI predicate, Entity objectEntity,
