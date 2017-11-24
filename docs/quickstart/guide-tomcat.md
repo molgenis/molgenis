@@ -79,5 +79,7 @@ If you open up a web browser and navigate to where your apache-tomcat applicatio
 
 Congratulations! You now have your MOLGENIS application up and running. Remember the admin.password you set in the molgenis-server.properties file? Use that password to login as the admin user. The next section will take you through the different modules MOLGENIS has to offer.
 
-**Proxying with apache httpd**
-When using a proxy in front of tomcat, make sure you use the [AJP protocols](http://httpd.apache.org/docs/2.4/mod/mod_proxy_ajp.html).
+**Deployment**
+In general, we have no constraints when it comes to deploying MOLGENIS. We do want to mention that you **must** deploy it as the root app, and that we already included the jdbc postgres driver.
+
+When using a proxy in front of tomcat, we use [AJP protocols](http://httpd.apache.org/docs/2.4/mod/mod_proxy_ajp.html). But you are free to use what you like e.g. nginx, or jBoss.
