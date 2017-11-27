@@ -1,0 +1,61 @@
+package org.molgenis.beacon.controller.model;
+
+import com.google.auto.value.AutoValue;
+import org.molgenis.gson.AutoGson;
+
+import java.util.Map;
+
+/**
+ * Organization owning a beacon.
+ */
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_BeaconOrganization.class)
+public abstract class BeaconOrganization
+{
+	/**
+	 * Unique identifier of the organization.
+	 */
+	public abstract String getId();
+
+	/**
+	 * Name of the organization.
+	 */
+	public abstract String getName();
+
+	/**
+	 * Description of the organization.
+	 */
+	public abstract String getDescription();
+
+	/**
+	 * Address of the organization.
+	 */
+	public abstract String getAddress();
+
+	/**
+	 * URL of the website of the organization (RFC 3986 format).
+	 */
+	public abstract String getWelcomeUrl();
+
+	/**
+	 * URL with the contact for the beacon operator/maintainer, e.g. link to
+	 * a contact form (RFC 3986 format) or an email (RFC 2368 format).
+	 */
+	public abstract String getContactUrl();
+
+	/**
+	 * URL to the logo (PNG/JPG format) of the organization (RFC 3986 format).
+	 */
+	public abstract String getLogoUrl();
+
+	/**
+	 * Additional structured metadata, key-value pairs.
+	 */
+	public abstract Map<String, String> getInfo();
+
+	public static BeaconOrganization create(String id, String name, String description, String address,
+			String welcomeUrl, String contactUrl, String logoUrl, Map<String, String> info)
+	{
+		return new AutoValue_BeaconOrganization(id, name, description, address, welcomeUrl, contactUrl, logoUrl, info);
+	}
+}
