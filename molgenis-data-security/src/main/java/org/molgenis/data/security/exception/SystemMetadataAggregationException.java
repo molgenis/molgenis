@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class SystemMetadataAggregationException extends CodedRuntimeException
@@ -15,7 +16,7 @@ public class SystemMetadataAggregationException extends CodedRuntimeException
 	public SystemMetadataAggregationException(EntityType entityType)
 	{
 		super(ERROR_CODE);
-		this.entityType = entityType;
+		this.entityType = requireNonNull(entityType);
 	}
 
 	@Override
@@ -32,6 +33,6 @@ public class SystemMetadataAggregationException extends CodedRuntimeException
 			String format = languageService.getString(ERROR_CODE);
 			String language = languageService.getCurrentUserLanguageCode();
 			return MessageFormat.format(format, entityType.getLabel(language));
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

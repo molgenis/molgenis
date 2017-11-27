@@ -5,7 +5,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
@@ -14,6 +13,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.rsql.QueryRsql;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.exception.MissingConfigException;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
@@ -133,7 +133,7 @@ public class NegotiatorControllerTest
 		assertEquals(actual, expected);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No Config")
+	@Test(expectedExceptions = MissingConfigException.class, expectedExceptionsMessageRegExp = "No Config")
 	public void testValidateNegotiatorExportNoConfig()
 	{
 		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",
