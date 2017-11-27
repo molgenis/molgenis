@@ -16,6 +16,7 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
+import org.molgenis.dataexplorer.exception.FunctionalityDisabledException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
@@ -198,7 +199,7 @@ public class DataExplorerController extends PluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityTypeId,
 			Model model)
 	{
-		EntityType selectedEntityType;
+		EntityType selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
 		Map<String, GenomeBrowserTrack> entityTracks;
 		switch (moduleId)
 		{
@@ -219,7 +220,6 @@ public class DataExplorerController extends PluginController
 				break;
 			case MOD_ENTITIESREPORT:
 				//TODO: figure out if we need to know pos and chrom attrs here
-				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
@@ -233,9 +233,7 @@ public class DataExplorerController extends PluginController
 				// self-explanatory
 				if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
-					throw new MolgenisPermissionException(
-							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
-									+ "], this permission is necessary run the annotators.");
+					throw new EntityTypePermissionException(Permission.WRITEMETA, selectedEntityType);
 				}
 				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
 						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
@@ -421,7 +419,7 @@ public class DataExplorerController extends PluginController
 			throws IOException
 	{
 		boolean galaxyEnabled = dataExplorerSettings.getGalaxyExport();
-		if (!galaxyEnabled) throw new MolgenisPermissionException("Galaxy export disabled");
+		if (!galaxyEnabled) throw new FunctionalityDisabledException("Galaxy export");
 
 		DataExplorerDownloadHandler download = new DataExplorerDownloadHandler(dataService, attrMetaFactory);
 
@@ -480,7 +478,7 @@ public class DataExplorerController extends PluginController
 	 *
 	 * @return standalone report view
 	 * @throws Exception                   if an entity name or id is not found
-	 * @throws MolgenisPermissionException if an EntityType does not exist
+	 * @throws UnknownEntityTypeException if an EntityType does not exist
 	 */
 	@GetMapping("/details/{entityTypeId}/{entityId}")
 	public String viewEntityDetailsById(@PathVariable(value = "entityTypeId") String entityTypeId,
@@ -489,8 +487,7 @@ public class DataExplorerController extends PluginController
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new MolgenisPermissionException(
-					"EntityType with id [" + entityTypeId + "] does not exist. Did you use the correct URL?");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		Object id = getTypedValue(entityId, entityType.getIdAttribute());
 

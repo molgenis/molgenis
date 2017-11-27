@@ -12,6 +12,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.exception.SystemMetadataAggregationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -654,7 +655,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = SystemMetadataAggregationException.class)
 	public void aggregateUser() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);

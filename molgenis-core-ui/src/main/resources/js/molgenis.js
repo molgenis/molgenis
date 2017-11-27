@@ -64,7 +64,7 @@
             if (i > 0)
                 items.push('<br/>');
             var message = '<span>' + alert.message;
-            if (alert.code) message += +'(' + alert.code + ')';
+            if (alert.code) message += ' (' + alert.code + ')';
             message += '</span>';
             items.push(message)
         });
