@@ -15,6 +15,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
+import org.molgenis.dataexplorer.exception.ExcelMaxSizeExceededException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -117,7 +118,7 @@ public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest
 		verifyNoMoreInteractions(refEntity1, refEntity2, attribute1, attribute2);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Total number of cells for this download exceeds the maximum of 500000 for .xlsx downloads, please use .csv instead")
+	@Test(expectedExceptions = ExcelMaxSizeExceededException.class, expectedExceptionsMessageRegExp = "size:500000")
 	public void testWriteToExcelTooManyCells() throws Exception
 	{
 		when(dataService.count("sys_set_thousandgenomes", query)).thenReturn(2500001L);

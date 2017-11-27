@@ -133,7 +133,7 @@ public class NegotiatorControllerTest
 		assertEquals(actual, expected);
 	}
 
-	@Test(expectedExceptions = MissingConfigException.class, expectedExceptionsMessageRegExp = "No Config")
+	@Test(expectedExceptions = MissingConfigException.class, expectedExceptionsMessageRegExp = "config:Negotiator")
 	public void testValidateNegotiatorExportNoConfig()
 	{
 		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",

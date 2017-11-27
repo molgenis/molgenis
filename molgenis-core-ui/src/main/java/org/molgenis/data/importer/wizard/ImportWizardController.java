@@ -247,6 +247,10 @@ public class ImportWizardController extends AbstractWizardController
 			else
 			{
 				EntityType entityType = dataService.getEntityType(entityClassId);
+				if (entityType == null)
+				{
+					throw new UnknownEntityTypeException(entityClassId);
+				}
 				if (value != null) throw new WriteEntityTypePermissionsException(entityType);
 			}
 		});

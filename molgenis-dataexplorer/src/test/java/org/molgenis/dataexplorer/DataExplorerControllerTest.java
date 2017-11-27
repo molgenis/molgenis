@@ -105,6 +105,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
+	private MetaDataService metaDataService;
 
 	public DataExplorerControllerTest()
 	{
@@ -138,6 +139,9 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
+		metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
@@ -151,6 +155,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+		when(metaDataService.getEntityType("test1")).thenReturn(entityType);
 
 		controller.init(selectedEntityname, selectedEntityId, model);
 
@@ -160,9 +165,6 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void initSortEntitiesByLabel()
 	{
-		MetaDataService metaDataService = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(metaDataService);
-
 		EntityType entity1 = mock(EntityType.class);
 		when(entity1.getId()).thenReturn("1");
 		when(entity1.getLabel()).thenReturn("zzz");
@@ -222,6 +224,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void getAnnotatorModuleSuccess() throws Exception
 	{
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypeById("yes")).thenReturn(entityType);
+
 		assertEquals("view-dataexplorer-mod-" + DataExplorerController.MOD_ANNOTATORS,
 				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
 	}
@@ -229,6 +235,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test(expectedExceptions = EntityTypePermissionException.class)
 	public void getAnnotatorModuleFail() throws Exception
 	{
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypeById("no")).thenReturn(entityType);
+
 		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));
 	}
 
@@ -265,7 +275,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		verify(model).addAttribute("viewName", "view-standalone-report-specific-id");
 	}
 
-	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "EntityType with id \\[id\\] does not exist\\. Did you use the correct URL\\?")
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:id")
 	public void testViewEntityDetailsByIdEntityTypeNotExists() throws Exception
 	{
 		when(dataService.getEntityType(entityTypeId)).thenReturn(null);
