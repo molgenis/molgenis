@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class FunctionalityDisabledException extends CodedRuntimeException
@@ -14,7 +15,12 @@ public class FunctionalityDisabledException extends CodedRuntimeException
 	public FunctionalityDisabledException(String functionality)
 	{
 		super(ERROR_CODE);
-		this.functionality = functionality;
+		this.functionality = requireNonNull(functionality);
+	}
+
+	public String getFunctionality()
+	{
+		return functionality;
 	}
 
 	@Override
@@ -31,6 +37,6 @@ public class FunctionalityDisabledException extends CodedRuntimeException
 			String format = languageService.getString(ERROR_CODE);
 			String language = languageService.getCurrentUserLanguageCode();
 			return MessageFormat.format(format, functionality);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

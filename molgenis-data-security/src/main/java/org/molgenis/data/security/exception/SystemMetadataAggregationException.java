@@ -19,6 +19,11 @@ public class SystemMetadataAggregationException extends CodedRuntimeException
 		this.entityType = requireNonNull(entityType);
 	}
 
+	public EntityType getEntityType()
+	{
+		return entityType;
+	}
+
 	@Override
 	public String getMessage()
 	{

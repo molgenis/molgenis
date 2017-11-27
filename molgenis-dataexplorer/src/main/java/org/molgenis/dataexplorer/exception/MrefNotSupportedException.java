@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MrefNotSupportedException extends CodedRuntimeException
@@ -14,7 +15,12 @@ public class MrefNotSupportedException extends CodedRuntimeException
 	public MrefNotSupportedException(String subject)
 	{
 		super(ERROR_CODE);
-		this.subject = subject;
+		this.subject = requireNonNull(subject);
+	}
+
+	public String getSubject()
+	{
+		return subject;
 	}
 
 	@Override
@@ -30,6 +36,6 @@ public class MrefNotSupportedException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, subject);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

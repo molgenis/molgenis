@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class NodePathException extends CodedRuntimeException
@@ -14,7 +15,12 @@ public class NodePathException extends CodedRuntimeException
 	public NodePathException(String ontologyTerm)
 	{
 		super(ERROR_CODE);
-		this.ontologyTerm = ontologyTerm;
+		this.ontologyTerm = requireNonNull(ontologyTerm);
+	}
+
+	public String getOntologyTerm()
+	{
+		return ontologyTerm;
 	}
 
 	@Override
@@ -29,8 +35,7 @@ public class NodePathException extends CodedRuntimeException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
 			return MessageFormat.format(format, ontologyTerm);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

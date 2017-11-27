@@ -5,6 +5,7 @@ import org.molgenis.security.core.Permission;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EntityTypePermissionException extends CodedRuntimeException
@@ -16,8 +17,18 @@ public class EntityTypePermissionException extends CodedRuntimeException
 	public EntityTypePermissionException(Permission permission, EntityType entityType)
 	{
 		super(ERROR_CODE);
-		this.permission = permission;
-		this.entityType = entityType;
+		this.permission = requireNonNull(permission);
+		this.entityType = requireNonNull(entityType);
+	}
+
+	public Permission getPermission()
+	{
+		return permission;
+	}
+
+	public EntityType getEntityType()
+	{
+		return entityType;
 	}
 
 	@Override
@@ -34,6 +45,6 @@ public class EntityTypePermissionException extends CodedRuntimeException
 			String format = languageService.getString(ERROR_CODE);
 			String language = languageService.getCurrentUserLanguageCode();
 			return MessageFormat.format(format, permission.name(), entityType.getLabel(language));
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

@@ -21,6 +21,16 @@ public class EditSystemAttributeException extends CodedRuntimeException
 		this.attr = requireNonNull(attr);
 	}
 
+	public String getOperation()
+	{
+		return operation;
+	}
+
+	public Attribute getAttr()
+	{
+		return attr;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -34,6 +44,6 @@ public class EditSystemAttributeException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, operation, attr.getLabel());
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

@@ -24,6 +24,16 @@ public class EntityTypePermissionDeniedException extends CodedRuntimeException
 		this.permission = requireNonNull(permission);
 	}
 
+	public EntityType getEntityType()
+	{
+		return entityType;
+	}
+
+	public Permission getPermission()
+	{
+		return permission;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -39,7 +49,7 @@ public class EntityTypePermissionDeniedException extends CodedRuntimeException
 			String permissionMessage = languageService.getString(getPermissionKey(permission));
 			String language = languageService.getCurrentUserLanguageCode();
 			return MessageFormat.format(format, permissionMessage, entityType.getLabel(language));
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 
 	private static String getPermissionKey(Permission permission)

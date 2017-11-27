@@ -44,7 +44,7 @@ public class ValidationException extends CodedRuntimeException
 															  .collect(joining("\n"));
 		return getLanguageService().map(
 				languageService -> languageService.getString(ERROR_CODE) + ": " + localizedViolationsMessage)
-								   .orElse(super.getLocalizedMessage());
+								   .orElseGet(super::getLocalizedMessage);
 	}
 
 	public Stream<ValidationMessage> getValidationMessages()

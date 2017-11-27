@@ -13,6 +13,11 @@ public class UnknownDatasetException extends FairException
 		this.datasetId = requireNonNull(datasetId);
 	}
 
+	public String getDatasetId()
+	{
+		return datasetId;
+	}
+
 	@Override
 	public String getMessage()
 	{

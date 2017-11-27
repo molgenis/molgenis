@@ -32,6 +32,25 @@ public class AttributeValueConversionFailedException extends CodedRuntimeExcepti
 		super(ERROR_CODE);
 		this.attr = requireNonNull(attr);
 		this.value = requireNonNull(value);
+	}
+
+	public Attribute getAttr()
+	{
+		return attr;
+	}
+
+	public Object getValue()
+	{
+		return value;
+	}
+
+	public Optional<Exception> getException()
+	{
+		return exception;
+	}
+
+	public void setException(Optional<Exception> exception)
+	{
 		this.exception = exception;
 	}
 
@@ -52,6 +71,6 @@ public class AttributeValueConversionFailedException extends CodedRuntimeExcepti
 			return MessageFormat.format(languageService.getString(ERROR_CODE), attr.getEntity().getLabel(languageCode),
 					attr.getLabel(languageCode), value.toString(),
 					attr.getDataType().toString());
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class TermNotFoundException extends CodedRuntimeException
@@ -14,7 +15,12 @@ public class TermNotFoundException extends CodedRuntimeException
 	public TermNotFoundException(String description)
 	{
 		super(ERROR_CODE);
-		this.description = description;
+		this.description = requireNonNull(description);
+	}
+
+	public String getDescription()
+	{
+		return description;
 	}
 
 	@Override
@@ -30,6 +36,6 @@ public class TermNotFoundException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, description);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

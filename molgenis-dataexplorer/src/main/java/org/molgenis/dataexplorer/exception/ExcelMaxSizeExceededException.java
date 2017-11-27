@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class ExcelMaxSizeExceededException extends CodedRuntimeException
@@ -14,7 +15,12 @@ public class ExcelMaxSizeExceededException extends CodedRuntimeException
 	public ExcelMaxSizeExceededException(long size)
 	{
 		super(ERROR_CODE);
-		this.size = size;
+		this.size = requireNonNull(size);
+	}
+
+	public long getSize()
+	{
+		return size;
 	}
 
 	@Override
@@ -30,6 +36,6 @@ public class ExcelMaxSizeExceededException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, size);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

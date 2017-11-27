@@ -4,6 +4,7 @@ import org.molgenis.data.meta.AttributeType;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class InvalidIdentifierAttributeTypeException extends CodedRuntimeException
@@ -14,7 +15,12 @@ public class InvalidIdentifierAttributeTypeException extends CodedRuntimeExcepti
 	public InvalidIdentifierAttributeTypeException(AttributeType type)
 	{
 		super(ERROR_CODE);
-		this.type = type;
+		this.type = requireNonNull(type);
+	}
+
+	public AttributeType getType()
+	{
+		return type;
 	}
 
 	@Override
@@ -30,6 +36,6 @@ public class InvalidIdentifierAttributeTypeException extends CodedRuntimeExcepti
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, type.name());
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }
