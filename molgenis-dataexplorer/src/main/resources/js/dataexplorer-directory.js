@@ -96,23 +96,40 @@ $.when($,
                 }
               })
             } else {
-              bootbox.confirm({
-                title: 'There are disabled collections',
-                message: response.message,
-                buttons: {
-                  confirm: {
-                    label: i18n.dataexplorer_directory_export_dialog_yes
-                  },
-                  cancel: {
-                    label: i18n.dataexplorer_directory_export_dialog_no
-                  }
-                },
-                callback: function (result) {
-                  if (result) {
-                    sendNegotiatorRequest(request)
-                  }
-                }
-              })
+                var negotiatorModal = $('#negotiator-modal')
+
+                // on show modal; fill the template and add event listeners
+                negotiatorModal.on('show.bs.modal', function (event) {
+                    var modal = $(this)
+                    modal.find('#negotiator-message').text(response.message)
+
+                    var enabledList = modal.find('#enabled-collections-list')
+                    var disabledList = modal.find('#disabled-collections-list')
+
+                    $.each(response.enabledCollections, function (index, label) {
+                        enabledList.append($('<li>').text(label))
+                    })
+
+                    $.each(response.disabledCollections, function (index, label) {
+                        disabledList.append($('<li>').text(label))
+                    })
+
+                    modal.find('#negotiator-apply-btn').click(function() {
+                        sendNegotiatorRequest(request)
+                    })
+                })
+
+                // on hide modal; clear the template and remove the event listeners
+                negotiatorModal.on('hidden.bs.modal', function (event) {
+                    var modal = $(this)
+                    modal.find('#enabled-collections-list').empty();
+                    modal.find('#disabled-collections-list').empty();
+                    modal.find('#negotiator-apply-btn').off('click');
+                    negotiatorModal.off('show.bs.modal')
+                    negotiatorModal.off('hidden.bs.modal')
+                })
+
+                negotiatorModal.modal('show')
             }
           } else {
             molgenis.createAlert([{message: response.message}], 'warning')
