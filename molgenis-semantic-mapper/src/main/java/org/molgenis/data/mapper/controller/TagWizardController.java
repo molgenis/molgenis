@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisRuntimeException;
 import org.molgenis.data.mapper.data.request.AddTagRequest;
 import org.molgenis.data.mapper.data.request.AutoTagRequest;
 import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
@@ -93,8 +92,7 @@ public class TagWizardController extends PluginController
 
 		if (StringUtils.isEmpty(target))
 		{
-			// FIXME throw new Missing/UndefinedEntityException (see FIXME in RestController)
-			throw new MolgenisRuntimeException("There are no entities available!");
+			throw new IllegalStateException("There are no entities available!");
 		}
 
 		List<Ontology> ontologies = ontologyService.getOntologies();

@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
+import org.molgenis.data.mapper.exception.ValueConversionException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
@@ -114,14 +115,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity);
 				derivedValue = convert(result, targetAttribute);
 			}
-			catch (RuntimeException e)
+			catch (ValueConversionException e)
 			{
 				if (e.getMessage() == null)
 				{
 					return algorithmResult.errorMessage(
 							"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
 				}
-				return algorithmResult.errorMessage(e.getMessage());
+				return algorithmResult.errorMessage(e.getLocalizedMessage());
 			}
 			return algorithmResult.value(derivedValue);
 		}).collect(toList());
@@ -216,7 +217,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				convertedValue = convertToLong(value);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalStateException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -235,8 +236,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		catch (NumberFormatException e)
 		{
 			LOG.debug("", e);
-			throw new AlgorithmException(
-					format("'%s' can't be converted to type '%s'", value.toString(), DATE.toString()));
+			throw new ValueConversionException(value, DATE);
 		}
 	}
 
@@ -249,8 +249,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		catch (NumberFormatException e)
 		{
 			LOG.debug("", e);
-			throw new AlgorithmException(
-					format("'%s' can't be converted to type '%s'", value.toString(), DATE_TIME.toString()));
+			throw new ValueConversionException(value, DATE_TIME);
 		}
 	}
 
@@ -263,8 +262,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		catch (NumberFormatException e)
 		{
 			LOG.debug("", e);
-			throw new AlgorithmException(
-					format("'%s' can't be converted to type '%s'", value.toString(), DECIMAL.toString()));
+			throw new ValueConversionException(value, DECIMAL);
 		}
 	}
 
@@ -275,18 +273,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			convertedValue = value != null ? toIntExact(round(parseDouble(value.toString()))) : null;
 		}
-		catch (NumberFormatException e)
+		catch (NumberFormatException | ArithmeticException e)
 		{
 			LOG.debug("", e);
-			throw new AlgorithmException(
-					format("'%s' can't be converted to type '%s'", value.toString(), INT.toString()));
-		}
-		catch (ArithmeticException e)
-		{
-			LOG.debug("", e);
-			throw new AlgorithmException(
-					format("'%s' is larger than the maximum allowed value for type '%s'", value.toString(),
-							INT.toString()));
+			throw new ValueConversionException(value, INT);
 		}
 		return convertedValue;
 	}
@@ -301,8 +291,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		catch (NumberFormatException e)
 		{
 			LOG.debug("", e);
-			throw new AlgorithmException(
-					format("'%s' can't be converted to type '%s'", value.toString(), LONG.toString()));
+			throw new ValueConversionException(value, LONG);
 		}
 		return convertedValue;
 	}
