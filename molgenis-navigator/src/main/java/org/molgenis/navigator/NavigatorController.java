@@ -1,6 +1,6 @@
 package org.molgenis.navigator;
 
-import org.molgenis.data.i18n.LanguageServiceImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.VuePluginController;
@@ -19,7 +19,7 @@ public class NavigatorController extends VuePluginController
 	public static final String ID = "navigator";
 	public static final String URI = PLUGIN_URI_PREFIX + ID;
 
-	public NavigatorController(MenuReaderService menuReaderService, LanguageServiceImpl languageService,
+	public NavigatorController(MenuReaderService menuReaderService, LanguageService languageService,
 			AppSettings appSettings, UserAccountService userAccountService)
 	{
 		super(URI, menuReaderService, languageService, appSettings, userAccountService);

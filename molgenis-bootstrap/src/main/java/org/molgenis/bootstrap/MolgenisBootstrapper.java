@@ -2,8 +2,8 @@ package org.molgenis.bootstrap;
 
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LanguageServiceHolder;
-import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -108,7 +108,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		bootstrapThemePopulator.populate();
 		LOG.debug("Populated bootstrap themes");
 
-		LanguageServiceHolder.setLanguageService(event.getApplicationContext().getBean(LanguageServiceImpl.class));
+		LanguageServiceHolder.setLanguageService(event.getApplicationContext().getBean(LanguageService.class));
 
 		LOG.info("Bootstrapping application completed");
 	}

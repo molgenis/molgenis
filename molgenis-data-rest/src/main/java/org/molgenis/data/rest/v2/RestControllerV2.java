@@ -3,30 +3,38 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.rest.exception.IdentifierAndValueException;
+import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.data.AttributeValueValidationResult;
+import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,6 +49,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.transform;
 import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
@@ -51,6 +60,7 @@ import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.data.validation.data.AttributeValueConstraint.READ_ONLY;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -72,37 +82,36 @@ public class RestControllerV2
 	private final RestService restService;
 	private final PermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
-	private final LanguageServiceImpl languageService;
+	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
+	private static RepositoryCollectionCapabilityException createNoWriteCapabilitiesOnEntityException(
+			String entityTypeId, RepositoryCapability capability)
 	{
-		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
+		return new RepositoryCollectionCapabilityException(entityTypeId, capability);
 	}
 
-	static MolgenisPermissionException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
-			String attributeName)
+	private static ValidationException createUpdateReadOnlyAttributeException(AttributeValue attributeValue)
 	{
-		return new MolgenisPermissionException(
-				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityTypeId + "' is readonly");
+		AttributeValueValidationResult constraintViolation = new AttributeValueValidationResult(READ_ONLY,
+				attributeValue);
+		return new ValidationException(constraintViolation);
 	}
 
-	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
+	private static MissingIdentifierException createMolgenisDataExceptionUnknownIdentifier(int count)
 	{
-		return new MolgenisDataException("Operation failed. Unknown identifier on index " + count);
+		return new MissingIdentifierException(count);
 	}
 
-	static MolgenisDataException createMolgenisDataExceptionIdentifierAndValue()
+	private static IdentifierAndValueException createMolgenisDataExceptionIdentifierAndValue()
 	{
-		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
+		return new IdentifierAndValueException();
 	}
 
-	static MolgenisRuntimeException createUnknownEntityExceptionNotValidId(Object id)
+	private static UnknownEntityTypeException createUnknownEntityExceptionNotValidId(Object id)
 	{
-		// FIXME throw new EntityUpdateException or something like that
-		return new MolgenisRuntimeException(
-				"The entity you are trying to update [" + id.toString() + "] does not exist.");
+		return new UnknownEntityTypeException(id.toString());
 	}
 
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
@@ -363,7 +372,8 @@ public class RestControllerV2
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
 												  .contains(RepositoryCapability.WRITABLE);
-		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityTypeId);
+		if (!writableCapabilities)
+			throw createNoWriteCapabilitiesOnEntityException(entityTypeId, RepositoryCapability.WRITABLE);
 
 		// Copy
 		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
@@ -449,7 +459,7 @@ public class RestControllerV2
 
 			if (attr.isReadOnly())
 			{
-				throw createMolgenisDataAccessExceptionReadOnlyAttribute(entityTypeId, attributeName);
+				throw createUpdateReadOnlyAttributeException(AttributeValue.create(attr, ""));
 			}
 
 			final List<Entity> entities = request.getEntities()
@@ -571,6 +581,24 @@ public class RestControllerV2
 			throw createMolgenisDataExceptionUnknownIdentifier(count);
 		}
 		return id;
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
+	{
+		LOG.info("Invalid method arguments.", exception);
+		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
+				error -> new ErrorMessageResponse.ErrorMessage(error.getDefaultMessage())));
+	}
+
+	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException exception)
+	{
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(exception.getMessage()));
 	}
 
 	private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName)

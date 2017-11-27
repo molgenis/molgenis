@@ -1,14 +1,16 @@
 package org.molgenis.data.rest.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.rest.exception.FileAttributeUpdateWithoutFileException;
+import org.molgenis.data.rest.exception.IllegalAttributeTypeException;
+import org.molgenis.data.rest.exception.IncompatibleValueTypeException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.meta.AttributeValidationResult;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
@@ -24,7 +26,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,10 +40,11 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.validation.meta.AttributeConstraint.MAPPED_BY_TYPE;
 import static org.molgenis.file.model.FileMetaMetaData.FILENAME;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 
 @Service
 public class RestService
@@ -156,7 +159,7 @@ public class RestService
 				value = convertLong(attr, paramValue);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -179,10 +182,8 @@ public class RestService
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								Number.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName(), Number.class.getSimpleName() });
 			}
 		}
 		else
@@ -208,10 +209,8 @@ public class RestService
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								Number.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName(), Number.class.getSimpleName() });
 			}
 		}
 		else
@@ -246,15 +245,13 @@ public class RestService
 					}
 					else
 					{
-						throw new MolgenisDataException("Cannot update entity with file attribute without passing file,"
-								+ " while changing the name of the existing file attribute");
+						throw new FileAttributeUpdateWithoutFileException();
 					}
 				}
 				else
 				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
-									paramValue.getClass().getSimpleName(), MultipartFile.class.getSimpleName()));
+					throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+							new String[] { MultipartFile.class.getSimpleName() });
 				}
 			}
 			else
@@ -308,10 +305,8 @@ public class RestService
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								Number.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName(), Number.class.getSimpleName() });
 			}
 		}
 		else
@@ -322,6 +317,7 @@ public class RestService
 	}
 
 	private static Instant convertDateTime(Attribute attr, Object paramValue)
+			throws java.time.format.DateTimeParseException
 	{
 		Instant value;
 		if (paramValue != null)
@@ -337,18 +333,15 @@ public class RestService
 				{
 					value = parseInstant(paramStrValue);
 				}
-				catch (DateTimeParseException e)
+				catch (java.time.format.DateTimeParseException e)
 				{
-					throw new MolgenisDataException(
-							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), paramStrValue));
+					throw new DateTimeParseException(attr, paramStrValue);
 				}
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								Instant.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName(), Instant.class.getSimpleName() });
 			}
 		}
 		else
@@ -374,18 +367,15 @@ public class RestService
 				{
 					value = parseLocalDate(paramStrValue);
 				}
-				catch (DateTimeParseException e)
+				catch (java.time.format.DateTimeParseException e)
 				{
-					throw new MolgenisDataException(
-							format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), paramStrValue));
+					throw new DateParseException(attr, paramStrValue);
 				}
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								LocalDate.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName(), LocalDate.class.getSimpleName() });
 			}
 		}
 		else
@@ -411,10 +401,8 @@ public class RestService
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								List.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName(), List.class.getSimpleName() });
 			}
 
 			EntityType mrefEntity = attr.getRefEntity();
@@ -457,9 +445,8 @@ public class RestService
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName() });
 			}
 		}
 		else
@@ -484,10 +471,8 @@ public class RestService
 			}
 			else
 			{
-				throw new MolgenisDataException(
-						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
-								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
-								Boolean.class.getSimpleName()));
+				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+						new String[] { String.class.getSimpleName(), Boolean.class.getSimpleName() });
 			}
 		}
 		else
@@ -525,9 +510,9 @@ public class RestService
 					updateMappedByEntitiesOneToMany(entity, existingEntity, mappedByAttr);
 					break;
 				default:
-					throw new RuntimeException(
-							format("Attribute [%s] of type [%s] can't be mapped by another attribute",
-									mappedByAttr.getName(), type.toString()));
+					AttributeValidationResult attributeValidationResult = AttributeValidationResult.create(mappedByAttr,
+							Collections.singleton(MAPPED_BY_TYPE));
+					throw new ValidationException(attributeValidationResult);
 			}
 		});
 	}
@@ -542,13 +527,6 @@ public class RestService
 	private void updateMappedByEntitiesOneToMany(@Nonnull Entity entity, @Nullable Entity existingEntity,
 			@Nonnull Attribute attr)
 	{
-		if (attr.getDataType() != ONE_TO_MANY || !attr.isMappedBy())
-		{
-			throw new IllegalArgumentException(
-					format("Attribute [%s] is not of type [%s] or not mapped by another attribute", attr.getName(),
-							attr.getDataType().toString()));
-		}
-
 		// update ref entities of created/updated entity
 		Attribute refAttr = attr.getMappedBy();
 		Stream<Entity> stream = stream(entity.getEntities(attr.getName()).spliterator(), false);

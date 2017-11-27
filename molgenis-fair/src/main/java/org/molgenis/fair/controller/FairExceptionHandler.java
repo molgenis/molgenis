@@ -22,7 +22,7 @@ public class FairExceptionHandler
 	@ResponseStatus(BAD_REQUEST)
 	public Model handleUnknownCatalogException(UnknownCatalogException e)
 	{
-		LOG.warn(e.getMessage(), e);
+		LOG.info(e.getMessage(), e);
 		return new LinkedHashModel();
 	}
 
@@ -31,7 +31,7 @@ public class FairExceptionHandler
 	@ResponseStatus(BAD_REQUEST)
 	public Model handleUnknownDatasetException(UnknownDatasetException e)
 	{
-		LOG.warn(e.getMessage(), e);
+		LOG.info(e.getMessage(), e);
 		return new LinkedHashModel();
 	}
 
@@ -40,7 +40,7 @@ public class FairExceptionHandler
 	@ResponseStatus(BAD_REQUEST)
 	public Model handleUnknownDistributionException(UnknownDistributionException e)
 	{
-		LOG.warn(e.getMessage(), e);
+		LOG.info(e.getMessage(), e);
 		return new LinkedHashModel();
 	}
 

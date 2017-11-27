@@ -24,7 +24,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	@Mock
 	private Repository<Language> delegateRepository;
 	@Mock
-	private LanguageServiceImpl languageService;
+	private LanguageService languageService;
 
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
 

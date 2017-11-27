@@ -645,7 +645,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity meta data \\[entity\\] is not allowed")
+	@Test(expectedExceptions = EditSystemEntityTypeException.class, expectedExceptionsMessageRegExp = "operation:DELETE entityType:entity")
 	public void deleteSystemEntityType()
 	{
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);
@@ -701,7 +701,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating system entity meta data \\[entity\\] is not allowed")
+	@Test(expectedExceptions = EditSystemEntityTypeException.class, expectedExceptionsMessageRegExp = "operation:UPDATE entityType:entity")
 	public void updateSystemEntityType()
 	{
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);

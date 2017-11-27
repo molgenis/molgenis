@@ -3,10 +3,12 @@ package org.molgenis.web.exception;
 import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.validation.DataIntegrityViolationException;
+import org.molgenis.data.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -30,8 +32,17 @@ public class GlobalControllerExceptionHandler
 	public Object handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest httpServletRequest)
 	{
 		LOG.info("", e);
-		return handleTypedException(isHtmlRequest(httpServletRequest), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(httpServletRequest), BadRequestController.URI,
+				e.getLocalizedMessage(),
 				NOT_FOUND);
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public Object handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e)
+	{
+		LOG.info("", e);
+		return handleTypedException(false, BadRequestController.URI, e.getLocalizedMessage(), BAD_REQUEST);
 	}
 
 	@ResponseStatus(BAD_REQUEST)
@@ -39,7 +50,7 @@ public class GlobalControllerExceptionHandler
 	public Object handleUnknownDataException(UnknownDataException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				BAD_REQUEST, e.getErrorCode());
 	}
 
@@ -48,7 +59,16 @@ public class GlobalControllerExceptionHandler
 	public Object handleDataIntegrityViolationException(DataIntegrityViolationException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
+				BAD_REQUEST, e.getErrorCode());
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler
+	public Object handleValidationException(ValidationException e, HandlerMethod handlerMethod)
+	{
+		LOG.info(e.getErrorCode(), e);
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				BAD_REQUEST, e.getErrorCode());
 	}
 
@@ -57,7 +77,7 @@ public class GlobalControllerExceptionHandler
 	public Object handlePermissionDeniedException(EntityTypePermissionDeniedException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return handleTypedException(isHtmlRequest(handlerMethod), NotFoundController.URI, e.getLocalizedMessage(),
+		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				FORBIDDEN, e.getErrorCode()); // FIXME NotFoundController.URI is not what we want here (?)
 	}
 }

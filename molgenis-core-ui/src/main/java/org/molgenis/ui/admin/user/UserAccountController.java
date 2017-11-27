@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageServiceImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
@@ -98,7 +98,7 @@ public class UserAccountController extends PluginController
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateUserLanguage(@RequestParam("languageCode") String languageCode)
 	{
-		if (!LanguageServiceImpl.hasLanguageCode(languageCode))
+		if (!LanguageService.hasLanguageCode(languageCode))
 		{
 			throw new MolgenisUserException(format("Unknown language code ''{0}''", languageCode));
 		}

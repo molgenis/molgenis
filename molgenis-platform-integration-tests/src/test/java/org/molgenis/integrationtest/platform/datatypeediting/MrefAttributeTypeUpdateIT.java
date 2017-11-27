@@ -1,14 +1,14 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
@@ -71,42 +71,24 @@ public class MrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	public Object[][] invalidConversionTestCases()
 	{
 		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
-		return new Object[][] { { entities, BOOL, MolgenisDataException.class,
-				"Attribute data type update from [MREF] to [BOOL] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, STRING, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [STRING] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, TEXT, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [TEXT] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, SCRIPT, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [SCRIPT] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, INT, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [INT] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, LONG, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [LONG] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, DECIMAL, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [DECIMAL] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, XREF, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [XREF] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, CATEGORICAL, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [CATEGORICAL] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, EMAIL, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [EMAIL] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, HYPERLINK, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [HYPERLINK] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, HTML, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [HTML] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, ENUM, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [ENUM] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, DATE, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [DATE] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, DATE_TIME, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [DATE_TIME] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, FILE, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [FILE] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, COMPOUND, MolgenisDataException.class,
-						"Attribute data type update from [MREF] to [COMPOUND] not allowed, allowed types are [CATEGORICAL_MREF]" },
-				{ entities, ONE_TO_MANY, MolgenisValidationException.class,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { entities, BOOL, "V94" },
+				{ entities, STRING, "V94" },
+				{ entities, TEXT, "V94" },
+				{ entities, SCRIPT, "V94" },
+				{ entities, INT, "V94" },
+				{ entities, LONG, "V94" },
+				{ entities, DECIMAL, "V94" },
+				{ entities, XREF, "V94" },
+				{ entities, CATEGORICAL, "V94" },
+				{ entities, EMAIL, "V94" },
+				{ entities, HYPERLINK, "V94" },
+				{ entities, HTML, "V94" },
+				{ entities, ENUM, "V94" },
+				{ entities, DATE, "V94" },
+				{ entities, DATE_TIME, "V94" },
+				{ entities, FILE, "V94" },
+				{ entities, COMPOUND, "V94" },
+				{ entities, ONE_TO_MANY, "V94" } };
 	}
 
 	/**
@@ -115,22 +97,23 @@ public class MrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode       The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(List<Object> valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage)
+	public void testInvalidConversion(List<Object> valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException exception)
 		{
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }

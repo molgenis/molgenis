@@ -188,6 +188,41 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	}
 
 	@Test
+	public void initTrackingIdPresent()
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId = "selectedEntityId";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		when(appSettings.getGoogleAnalyticsTrackingId()).thenReturn("id");
+		when(appSettings.getGoogleAnalyticsTrackingIdMolgenis()).thenReturn("id");
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model).addAttribute("hasTrackingId", true);
+		verify(model).addAttribute("hasMolgenisTrackingId", true);
+	}
+
+	@Test
+	public void initTrackingIdNotPresent()
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId = "selectedEntityId";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model).addAttribute("hasTrackingId", false);
+		verify(model).addAttribute("hasMolgenisTrackingId", false);
+	}
+
+	@Test
 	public void getAnnotatorModuleSuccess() throws Exception
 	{
 		assertEquals("view-dataexplorer-mod-" + DataExplorerController.MOD_ANNOTATORS,

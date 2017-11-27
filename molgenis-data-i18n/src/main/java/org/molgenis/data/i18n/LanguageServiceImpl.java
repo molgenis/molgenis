@@ -113,9 +113,4 @@ public class LanguageServiceImpl implements LanguageService
 			return languageCode;
 		});
 	}
-
-	public static boolean hasLanguageCode(String code)
-	{
-		return LanguageService.getLanguageCodes().anyMatch(e -> e.equals(code));
-	}
 }

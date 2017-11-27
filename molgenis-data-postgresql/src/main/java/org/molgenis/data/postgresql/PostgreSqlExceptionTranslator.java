@@ -120,7 +120,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	DataIntegrityViolationException translateReadonlyViolation(PSQLException pSqlException)
 	{
@@ -145,7 +145,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	DataIntegrityViolationException translateDependentObjectsStillExist(PSQLException pSqlException)
 	{
@@ -179,7 +179,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	static DataIntegrityViolationException translateInvalidIntegerException(PSQLException pSqlException)
 	{
@@ -225,7 +225,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	DataIntegrityViolationException translateNotNullViolation(PSQLException pSqlException)
 	{
@@ -269,7 +269,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	DataIntegrityViolationException translateForeignKeyViolation(PSQLException pSqlException)
 	{
@@ -328,7 +328,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	DataIntegrityViolationException translateUniqueKeyViolation(PSQLException pSqlException)
 	{
@@ -389,7 +389,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	DataIntegrityViolationException translateCheckConstraintViolation(PSQLException pSqlException)
 	{
@@ -403,7 +403,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * Package private for testability
 	 *
 	 * @param pSqlException PostgreSQL exception
-	 * @return translated validation exception
+	 * @return DataIntegrityViolationException
 	 */
 	static DataAccessException translateUndefinedColumnException(PSQLException pSqlException)
 	{

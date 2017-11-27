@@ -46,7 +46,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	private MenuReaderService menuReaderService;
 
 	@Autowired
-	private LanguageServiceImpl languageService;
+	private LanguageService languageService;
 
 	@Autowired
 	private AppSettings appSettings;

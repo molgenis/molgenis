@@ -10,9 +10,9 @@ public class UnknownPackageException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D07";
 
-	private final Object packageId;
+	private final String packageId;
 
-	public UnknownPackageException(Object packageId)
+	public UnknownPackageException(String packageId)
 	{
 		super(ERROR_CODE);
 		this.packageId = requireNonNull(packageId);
@@ -21,7 +21,7 @@ public class UnknownPackageException extends UnknownDataException
 	@Override
 	public String getMessage()
 	{
-		return String.format("id:%s", packageId.toString());
+		return String.format("id:%s", packageId);
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class UnknownPackageException extends UnknownDataException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, packageId.toString());
+			return MessageFormat.format(format, packageId);
 		}).orElse(super.getLocalizedMessage());
 	}
 }

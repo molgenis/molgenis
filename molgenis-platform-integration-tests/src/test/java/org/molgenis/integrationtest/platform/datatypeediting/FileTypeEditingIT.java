@@ -1,11 +1,11 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -37,14 +37,17 @@ public class FileTypeEditingIT extends AbstractTestNGSpringContextTests
 	private MetaDataService metaDataService;
 
 	@WithMockUser(username = "superuser", roles = { "SU" })
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[FILE\\] to \\[STRING\\] not allowed, allowed types are \\[\\]")
+	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:TYPE_UPDATE entityType:FileEntity attribute:fileRef")
 	public void testNoConversionsAllowed()
 	{
 		EntityType entityType = entityTypeFactory.create("FileEntity").setLabel("File entity");
 		entityType.setBackend("PostgreSQL");
 
 		entityType.addAttribute(attributeFactory.create().setName("id").setIdAttribute(true), ROLE_ID);
-		entityType.addAttribute(attributeFactory.create().setName("fileRef").setDataType(FILE).setRefEntity(dataService.getEntityType(FILE_META)));
+		entityType.addAttribute(attributeFactory.create()
+												.setName("fileRef")
+												.setDataType(FILE)
+												.setRefEntity(dataService.getEntityType(FILE_META)));
 
 		metaDataService.addEntityType(entityType);
 

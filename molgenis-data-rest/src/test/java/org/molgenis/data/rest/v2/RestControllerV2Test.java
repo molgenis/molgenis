@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
@@ -14,9 +15,12 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.rest.exception.IdentifierAndValueException;
+import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
@@ -36,6 +40,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -44,6 +49,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -103,7 +109,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private LanguageServiceImpl languageService;
+	private LanguageService languageService;
 
 	@Autowired
 	private RestControllerV2 restControllerV2;
@@ -592,7 +598,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		verify(repoCopier).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:unknown")
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -600,16 +606,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
-		MvcResult result = mockMvc.perform(post("/api/v2/copy/unknown").content(content).contentType(APPLICATION_JSON))
-								  .andReturn();
-
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "id:unknown");
+		MvcResult mvcResult = mockMvc.perform(
+				post("/api/v2/copy/unknown").content(content).contentType(APPLICATION_JSON)).andReturn();
 
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		throw mvcResult.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = EntityTypeAlreadyExistsException.class, expectedExceptionsMessageRegExp = "id:org_molgenis_blah_duplicateEntity")
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -620,16 +624,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "id:org_molgenis_blah_duplicateEntity");
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entityTypeId permission:READ")
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
+		EntityType entityType = mock(EntityType.class);
+		when(repositoryToCopy.getEntityType()).thenReturn(entityType);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
@@ -639,14 +644,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		//FIXME: id: null????
-		assertEquals(message, "id:null permission:READ");
-
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = RepositoryCollectionCapabilityException.class, expectedExceptionsMessageRegExp = "collection:entity capability:WRITABLE")
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
 		@SuppressWarnings("unchecked")
@@ -662,10 +664,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "No write capabilities for entity entity");
-
 		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+
+		throw result.getResolvedException();
 	}
 
 	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
@@ -679,6 +680,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
 
 		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn("entityTypeId");
 		when(repositoryToCopy.getEntityType()).thenReturn(entityType);
 		when(entityType.getPackage()).thenReturn(pack);
 
@@ -704,7 +706,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testCreateEntitiesExceptions1() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity", "{entities:[]}",
-				"Validation failed for argument at index 1 in method: public org.molgenis.data.rest.v2.EntityCollectionBatchCreateResponseBodyV2 org.molgenis.data.rest.v2.RestControllerV2.createEntities(java.lang.String,org.molgenis.data.rest.v2.EntityCollectionBatchRequestV2,javax.servlet.http.HttpServletResponse) throws java.lang.Exception, with 1 error(s): [Field error in object 'entityCollectionBatchRequestV2' on field 'entities': rejected value [[]]; codes [NotEmpty.entityCollectionBatchRequestV2.entities,NotEmpty.entities,NotEmpty.java.util.List,NotEmpty]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [entityCollectionBatchRequestV2.entities,entities]; arguments []; default message [entities]]; default message [Please provide at least one entity in the entities property.]] ");
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -714,14 +716,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testCreateEntitiesExceptions2() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				"Validation failed for argument at index 1 in method: public org.molgenis.data.rest.v2.EntityCollectionBatchCreateResponseBodyV2 org.molgenis.data.rest.v2.RestControllerV2.createEntities(java.lang.String,org.molgenis.data.rest.v2.EntityCollectionBatchRequestV2,javax.servlet.http.HttpServletResponse) throws java.lang.Exception, with 1 error(s): [Field error in object 'entityCollectionBatchRequestV2' on field 'entities': rejected value [[{email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}]]; codes [Size.entityCollectionBatchRequestV2.entities,Size.entities,Size.java.util.List,Size]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [entityCollectionBatchRequestV2.entities,entities]; arguments []; default message [entities],1000,0]; default message [Number of entities cannot be more than 1000.]] ");
+				"Number of entities cannot be more than 1000.");
 	}
 
 	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Check if this exception is not swallowed by the system")
 	public void testCreateEntitiesSystemException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
@@ -731,8 +733,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Check if this exception is not swallowed by the system");
+		throw result.getResolvedException();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -747,7 +748,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Check if this exception is not swallowed by the system")
 	public void testUpdateEntitiesMolgenisDataException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
@@ -757,12 +758,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Check if this exception is not swallowed by the system");
+		throw result.getResolvedException();
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Message \\(entity 5\\)")
 	public void testUpdateEntitiesMolgenisValidationException() throws Exception
 	{
 		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5L)));
@@ -772,8 +772,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		MvcResult result = mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 								  .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Message (entity 5)");
+		throw result.getResolvedException();
 	}
 
 	/**
@@ -783,7 +782,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesExceptions1() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity", "{entities:[]}",
-				"Validation failed for argument at index 1 in method: public synchronized void org.molgenis.data.rest.v2.RestControllerV2.updateEntities(java.lang.String,org.molgenis.data.rest.v2.EntityCollectionBatchRequestV2,javax.servlet.http.HttpServletResponse) throws java.lang.Exception, with 1 error(s): [Field error in object 'entityCollectionBatchRequestV2' on field 'entities': rejected value [[]]; codes [NotEmpty.entityCollectionBatchRequestV2.entities,NotEmpty.entities,NotEmpty.java.util.List,NotEmpty]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [entityCollectionBatchRequestV2.entities,entities]; arguments []; default message [entities]]; default message [Please provide at least one entity in the entities property.]] ");
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -793,7 +792,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesExceptions2() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				"Validation failed for argument at index 1 in method: public synchronized void org.molgenis.data.rest.v2.RestControllerV2.updateEntities(java.lang.String,org.molgenis.data.rest.v2.EntityCollectionBatchRequestV2,javax.servlet.http.HttpServletResponse) throws java.lang.Exception, with 1 error(s): [Field error in object 'entityCollectionBatchRequestV2' on field 'entities': rejected value [[{email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}, {email=test@email.com}]]; codes [Size.entityCollectionBatchRequestV2.entities,Size.entities,Size.java.util.List,Size]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [entityCollectionBatchRequestV2.entities,entities]; arguments []; default message [entities],1000,0]; default message [Number of entities cannot be more than 1000.]] ");
+				"Number of entities cannot be more than 1000.");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -830,16 +829,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				this.createMaxPlusOneEntitiesAsTestContent(), "Number of entities cannot be more than 1000.");
 	}
 
-	/**
-	 * createMolgenisDataAccessExceptionReadOnlyAttribute
-	 */
-	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions5() throws Exception
-	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
-				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal").getMessage());
-	}
-
 	@DataProvider(name = "testDeleteEntityCollection")
 	public static Iterator<Object[]> testDeleteEntityCollectionProvider() throws ParseException
 	{
@@ -865,7 +854,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Cannot delete entities because type \\[MyEntityType\\] is abstract.")
 	public void testDeleteEntityCollectionExceptionAbstractEntity() throws Exception
 	{
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
@@ -878,11 +867,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
 									   .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "Cannot delete entities because type [MyEntityType] is abstract.");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:MyEntityType")
 	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
 	{
 		when(dataService.getEntityType("MyEntityType")).thenThrow(new UnknownEntityTypeException("MyEntityType"));
@@ -894,36 +882,27 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
 									   .andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message, "id:MyEntityType");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	//FIXME how to test this better?
+	@Test(expectedExceptions = MethodArgumentNotValidException.class)
 	public void testDeleteEntityCollectionExceptionNoEntitiesToDelete() throws Exception
 	{
-		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
-				+ "      \"message\": \"Please provide at least one entity in the entityIds property.\"\n" + "    }\n"
-				+ "  ]\n" + "}";
 		MvcResult result = this.mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[]}")).andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message,
-				"Validation failed for argument at index 1 in method: public void org.molgenis.data.rest.v2.RestControllerV2.deleteEntityCollection(java.lang.String,org.molgenis.data.rest.v2.EntityCollectionDeleteRequestV2), with 1 error(s): [Field error in object 'entityCollectionDeleteRequestV2' on field 'entityIds': rejected value [[]]; codes [NotEmpty.entityCollectionDeleteRequestV2.entityIds,NotEmpty.entityIds,NotEmpty.java.util.List,NotEmpty]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [entityCollectionDeleteRequestV2.entityIds,entityIds]; arguments []; default message [entityIds]]; default message [Please provide at least one entity in the entityIds property.]] ");
+		throw result.getResolvedException();
 	}
 
-	@Test
+	//FIXME how to test this better?
+	@Test(expectedExceptions = HttpMessageNotReadableException.class)
 	public void testDeleteEntityCollectionExceptionInvalidRequestBody() throws Exception
 	{
-		String expectedContent =
-				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Invalid request body.\"\n" + "    }\n"
-						+ "  ]\n" + "}";
 		MvcResult result = this.mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("invalid")).andReturn();
 
-		String message = result.getResolvedException().getMessage();
-		assertEquals(message,
-				"Could not read JSON: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1; nested exception is com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1");
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -967,68 +946,65 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	/**
 	 * createMolgenisDataExceptionIdentifierAndValue
 	 */
-	@Test
+	@Test(expectedExceptions = IdentifierAndValueException.class, expectedExceptionsMessageRegExp = "")
 	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue().getMessage());
+		MvcResult result = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
+				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}").contentType(APPLICATION_JSON))
+								  .andReturn();
+
+		throw result.getResolvedException();
 	}
 
 	/**
 	 * createMolgenisDataExceptionUnknownIdentifier
 	 */
-	@Test
+	@Test(expectedExceptions = MissingIdentifierException.class, expectedExceptionsMessageRegExp = "index:0")
 	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0).getMessage());
+		MvcResult result = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
+				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}").contentType(APPLICATION_JSON))
+								  .andReturn();
+		throw result.getResolvedException();
 	}
 
 	/**
 	 * createUnknownEntityExceptionNotValidId
 	 */
-	@Test
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:4")
 	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}",
-				RestControllerV2.createUnknownEntityExceptionNotValidId("4").getMessage());
+		MvcResult result = mockMvc.perform(put(RestControllerV2.BASE_URI + "/entity/email").content(
+				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}").contentType(APPLICATION_JSON))
+								  .andReturn();
+		throw result.getResolvedException();
 	}
 
 	private void testCreateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception
 	{
-		MvcResult result = mockMvc.perform(
-				post(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON))
-								  .andReturn();
+		ResultActions resultActions = mockMvc.perform(
+				post(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
 
-		assertEquals(result.getResolvedException().getMessage(), message);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void testUpdateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception
 	{
-		MvcResult result = mockMvc.perform(
-				put(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON))
-								  .andReturn();
+		ResultActions resultActions = mockMvc.perform(
+				put(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
 
-		assertEquals(result.getResolvedException().getMessage(), message);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityTypeId, String attributeName,
 			String content, String message) throws Exception
 	{
-		try
-		{
-			ResultActions resultActions = mockMvc.perform(
-					put(RestControllerV2.BASE_URI + "/" + entityTypeId + "/" + attributeName).content(content)
-																							 .contentType(
-																									 APPLICATION_JSON));
-		}
-		catch (MolgenisRuntimeException e)
-		{
-			assertEquals(message, e.getMessage());
-		}
+		ResultActions resultActions = mockMvc.perform(
+				put(RestControllerV2.BASE_URI + "/" + entityTypeId + "/" + attributeName).content(content)
+																						 .contentType(
+																								 APPLICATION_JSON));
+
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void assertEqualsErrorMessage(ResultActions resultActions, String message)
@@ -1036,7 +1012,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		MvcResult result = resultActions.andReturn();
 		String contentAsString = result.getResponse().getContentAsString();
-		System.out.println("content!" + contentAsString);
 		Gson gson = new Gson();
 		ResponseErrors errors = gson.fromJson(contentAsString, ResponseErrors.class);
 		assertEquals(errors.getErrors().get(0).getMessage(), message);

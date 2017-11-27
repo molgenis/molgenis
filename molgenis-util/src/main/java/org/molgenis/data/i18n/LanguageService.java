@@ -30,5 +30,12 @@ public interface LanguageService
 
 	MessageSourceResourceBundle getBundle();
 
+	MessageSourceResourceBundle getBundle(String languageCode);
+
 	String getCurrentUserLanguageCode();
+
+	static boolean hasLanguageCode(String code)
+	{
+		return getLanguageCodes().anyMatch(languageCode -> languageCode.equals(code));
+	}
 }

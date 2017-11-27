@@ -2,7 +2,6 @@ package org.molgenis.ui;
 
 import com.google.gson.Gson;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
@@ -37,7 +36,7 @@ public class MolgenisInterceptorTest
 		themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
 		appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
 		authenticationSettings = mock(AuthenticationSettings.class);
-		languageService = mock(LanguageServiceImpl.class);
+		languageService = mock(LanguageService.class);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)

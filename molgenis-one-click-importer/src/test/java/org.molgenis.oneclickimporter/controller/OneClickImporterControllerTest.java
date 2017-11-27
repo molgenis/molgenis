@@ -4,7 +4,7 @@ import com.google.common.io.Resources;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageServiceImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.AppSettings;
@@ -56,7 +56,7 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 	private MenuReaderService menuReaderService;
 
 	@Mock
-	private LanguageServiceImpl languageService;
+	private LanguageService languageService;
 
 	@Mock
 	private AppSettings appSettings;

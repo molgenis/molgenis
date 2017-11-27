@@ -72,7 +72,19 @@ public class JobExecutor
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		JobExecution jobExecution = createJobExecution(scheduledJob);
 		Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
-		runJob(jobExecution, molgenisJob);
+
+		try
+		{
+			runJob(jobExecution, molgenisJob);
+		}
+		catch (Exception ex)
+		{
+			LOG.error("Error creating job for JobExecution.", ex);
+			jobExecution.setStatus(JobExecution.Status.FAILED);
+			jobExecution.setProgressMessage(ex.getMessage());
+			dataService.update(jobExecution.getEntityType().getId(), jobExecution);
+			throw ex;
+		}
 	}
 
 	private JobExecution createJobExecution(ScheduledJob scheduledJob)

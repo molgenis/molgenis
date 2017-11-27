@@ -2,9 +2,9 @@ package org.molgenis.data.rest.service;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DateParseException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -200,7 +200,7 @@ public class RestServiceTest
 		assertEquals(result, storedFileMeta);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to parse attribute \\[dateAttr\\] value \\[invalidDate\\] as date. Valid date format is \\[YYYY-MM-DD\\].")
+	@Test(expectedExceptions = DateParseException.class, expectedExceptionsMessageRegExp = "attribute:dateAttr value:invalidDate")
 	public void toEntityDateStringValueInvalid()
 	{
 		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
