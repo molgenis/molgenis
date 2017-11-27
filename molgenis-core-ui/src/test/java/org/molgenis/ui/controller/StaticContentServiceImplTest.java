@@ -1,7 +1,7 @@
 package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisPermissionException;
+import org.molgenis.data.EntityTypePermissionException;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -79,7 +79,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		assertFalse(this.staticContentService.isCurrentUserCanEdit(pluginId));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class, expectedExceptionsMessageRegExp = "No write permissions on static content page")
+	@Test(expectedExceptions = EntityTypePermissionException.class, expectedExceptionsMessageRegExp = "No write permissions on static content page")
 	public void checkPermissions_withoutPermissions()
 	{
 		this.setSecurityContextNonSuperUser(false);
@@ -155,13 +155,20 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentFactory staticContentFactory()
 		{
-			return new StaticContentFactory(mock(StaticContentMeta.class), mock(EntityPopulator.class));
+			return new StaticContentFactory(staticContentMeta(), mock(EntityPopulator.class));
+		}
+
+		@Bean
+		public StaticContentMeta staticContentMeta()
+		{
+			return mock(StaticContentMeta.class);
 		}
 
 		@Bean
 		public StaticContentService staticContentService()
 		{
-			return new StaticContentServiceImpl(dataService(), staticContentFactory(), permissionService());
+			return new StaticContentServiceImpl(dataService(), staticContentFactory(), permissionService(),
+					staticContentMeta());
 		}
 
 		@Bean

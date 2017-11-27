@@ -259,7 +259,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		verify(dataService, times(2)).update(eq(GROUP_AUTHORITY), any(GroupAuthority.class));
 	}
 
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionException.class)
 	public void addGroupEntityClassPermissionsTestNoPermission()
 	{
 		User user = mock(User.class);
