@@ -32,6 +32,7 @@ public class AttributeValueConversionFailedException extends CodedRuntimeExcepti
 		super(ERROR_CODE);
 		this.attr = requireNonNull(attr);
 		this.value = requireNonNull(value);
+		this.exception = Optional.empty();
 	}
 
 	public Attribute getAttr()
