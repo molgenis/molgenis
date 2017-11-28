@@ -1,22 +1,37 @@
 package org.molgenis.beacon.controller;
 
 import org.mockito.Mock;
+import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
+import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
+import org.molgenis.util.GsonConfig;
+import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
-public class BeaconControllerTest
+@ContextConfiguration(classes = { GsonConfig.class })
+public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 {
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
 	private MockMvc mockMvc;
 
 	@Mock
@@ -29,20 +44,70 @@ public class BeaconControllerTest
 	private void beforeMethod()
 	{
 		initMocks(this);
-		BeaconController beaconController = new BeaconController(beaconInfoService, beaconQueryService);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(beaconController).build();
+		BeaconController beaconController = new BeaconController(beaconInfoService, beaconQueryService);
+		mockMvc = MockMvcBuilders.standaloneSetup(beaconController)
+								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
+								 .build();
 	}
 
 	@Test
-	public void testQuery() throws Exception
+	public void getAllBeaconsTest() throws Exception
 	{
-		mockMvc.perform(get("/beacon/query").param("chrom", "1")
-											.param("pos", "1000")
-											.param("ref", "A")
-											.param("alt", "G")
-											.param("dataset", "test")).andExpect(status().isOk());
+		mockMvc.perform(get("/beacon/list")).andExpect(status().isOk());
+		verify(beaconInfoService).getAvailableBeacons();
+	}
 
-		verify(beaconQueryService).query("1", 1000L, "A", "G", "test");
+	@Test
+	public void infoTest() throws Exception
+	{
+		mockMvc.perform(get("/beacon/{beaconId}", "beaconA")).andExpect(status().isOk());
+		verify(beaconInfoService).info("beaconA");
+	}
+
+	@Test
+	public void getQueryTest() throws Exception
+	{
+		BeaconAlleleRequest request = BeaconAlleleRequest.create("1", 100L, "A", "T");
+		BeaconAlleleResponse response = BeaconAlleleResponse.create("beaconA", true, null, request);
+
+		when(beaconQueryService.query("1", 100L, "A", "T", "beaconA")).thenReturn(response);
+
+		mockMvc.perform(get("/beacon/{beaconId}/query", "beaconA").param("referenceName", "1")
+																  .param("start", "100")
+																  .param("referenceBases", "A")
+																  .param("alternateBases", "T"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(getBeaconAlleleResponseAsJson()));
+
+		verify(beaconQueryService, times(1)).query("1", 100L, "A", "T", "beaconA");
+	}
+
+	@Test
+	public void testPostQuery() throws Exception
+	{
+		BeaconAlleleRequest request = BeaconAlleleRequest.create("1", 100L, "A", "T");
+		BeaconAlleleResponse response = BeaconAlleleResponse.create("beaconA", true, null, request);
+
+		when(beaconQueryService.query("beaconA", request)).thenReturn(response);
+
+		mockMvc.perform(post("/beacon/{beaconId}/query", "beaconA").content(getBeaconAlleleRequestJson())
+																   .contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(getBeaconAlleleResponseAsJson()));
+
+		verify(beaconQueryService, times(1)).query("beaconA", request);
+	}
+
+	private String getBeaconAlleleResponseAsJson()
+	{
+		return "{\"beaconId\":\"beaconA\",\"exists\":true,\"alleleRequest\":{\"referenceName\":\"1\",\"start\":100,\"referenceBases\":\"A\",\"alternateBases\":\"T\"}}";
+	}
+
+	private String getBeaconAlleleRequestJson()
+	{
+		return "{\"referenceName\":\"1\",\"start\":\"100\",\"referenceBases\":\"A\",\"alternateBases\":\"T\"}";
 	}
 }

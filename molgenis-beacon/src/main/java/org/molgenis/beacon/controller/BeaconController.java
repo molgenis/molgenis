@@ -29,22 +29,22 @@ public class BeaconController
 		this.beaconQueryService = requireNonNull(beaconQueryService);
 	}
 
-	@GetMapping(value = "/list", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@GetMapping(value = "/list", produces = APPLICATION_JSON_VALUE)
 	public List<Beacon> getAllBeacons()
 	{
 		return beaconInfoService.getAvailableBeacons();
 	}
 
-	@GetMapping(value = "/{beaconId}", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@GetMapping(value = "/{beaconId}", produces = APPLICATION_JSON_VALUE)
 	public Beacon info(@PathVariable("beaconId") final String beaconId)
 	{
 		return beaconInfoService.info(beaconId);
 	}
 
-	@GetMapping(value = "/{beaconId}/query", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@GetMapping(value = "/{beaconId}/query", produces = APPLICATION_JSON_VALUE)
 	public BeaconAlleleResponse query(@RequestParam("referenceName") String referenceName,
 			@RequestParam("start") Long start, @RequestParam("referenceBases") String referenceBases,
 			@RequestParam("alternateBases") String alternateBases, @PathVariable("beaconId") final String beaconId)
@@ -52,9 +52,10 @@ public class BeaconController
 		return beaconQueryService.query(referenceName, start, referenceBases, alternateBases, beaconId);
 	}
 
-	@PostMapping(value = "/{beaconId}/query", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public BeaconAlleleResponse query(@PathVariable("beaconId") final String beaconId, BeaconAlleleRequest request)
+	@PostMapping(value = "/{beaconId}/query", produces = APPLICATION_JSON_VALUE)
+	public BeaconAlleleResponse query(@PathVariable("beaconId") final String beaconId,
+			@RequestBody BeaconAlleleRequest request)
 	{
 		return beaconQueryService.query(beaconId, request);
 	}

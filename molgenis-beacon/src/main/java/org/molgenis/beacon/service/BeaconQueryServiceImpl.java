@@ -42,7 +42,8 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 		}
 		catch (Exception e)
 		{
-			return BeaconAlleleResponse.create(beaconId, null, BeaconError.create(e.hashCode(), e.getMessage()),
+			// FIXME What should the error code be?
+			return BeaconAlleleResponse.create(beaconId, null, BeaconError.create(1, e.getMessage()),
 					BeaconAlleleRequest.create(referenceName, start, referenceBases, alternateBases));
 		}
 	}
