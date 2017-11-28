@@ -1,12 +1,11 @@
 package org.molgenis.script;
 
 import com.google.common.collect.Maps;
+import org.molgenis.script.core.exception.UnknownScriptTypeException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Map;
-
-import static java.lang.String.format;
 
 /**
  * Register script types.
@@ -38,7 +37,7 @@ public class ScriptRunnerFactory
 		ScriptRunner scriptRunner = scriptRunners.get(type);
 		if (scriptRunner == null)
 		{
-			throw new ScriptException(format("Unknown script type [%s]", type));
+			throw new UnknownScriptTypeException(type);
 		}
 
 		return scriptRunner;

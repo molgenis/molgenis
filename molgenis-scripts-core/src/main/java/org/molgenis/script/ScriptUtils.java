@@ -3,6 +3,7 @@ package org.molgenis.script;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.molgenis.script.core.exception.InvalidParameterException;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -29,8 +30,7 @@ public class ScriptUtils
 		}
 		catch (TemplateException | IOException e)
 		{
-			throw new GenerateScriptException(
-					"Error processing parameters for script [" + script.getName() + "]. " + e.getMessage());
+			throw new InvalidParameterException(script.getName(), e);
 		}
 		return stringWriter.toString();
 	}

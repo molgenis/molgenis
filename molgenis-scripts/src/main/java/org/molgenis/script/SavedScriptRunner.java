@@ -2,10 +2,12 @@ package org.molgenis.script;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.script.core.exception.MissingParameterException;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.UUID;
 
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.text.MessageFormat.format;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.script.ScriptMetaData.SCRIPT;
 
@@ -39,15 +42,17 @@ public class SavedScriptRunner
 	private final FileStore fileStore;
 	private final TokenService tokenService;
 	private final FileMetaFactory fileMetaFactory;
+	private final ScriptMetaData scriptMetadata;
 
 	public SavedScriptRunner(ScriptRunnerFactory scriptRunnerFactory, DataService dataService, FileStore fileStore,
-			TokenService tokenService, FileMetaFactory fileMetaFactory)
+			TokenService tokenService, FileMetaFactory fileMetaFactory, ScriptMetaData scriptMetadata)
 	{
-		this.scriptRunnerFactory = scriptRunnerFactory;
-		this.dataService = dataService;
-		this.fileStore = fileStore;
-		this.tokenService = tokenService;
-		this.fileMetaFactory = fileMetaFactory;
+		this.scriptRunnerFactory = requireNonNull(scriptRunnerFactory);
+		this.dataService = requireNonNull(dataService);
+		this.fileStore = requireNonNull(fileStore);
+		this.tokenService = requireNonNull(tokenService);
+		this.fileMetaFactory = requireNonNull(fileMetaFactory);
+		this.scriptMetadata = requireNonNull(scriptMetadata);
 	}
 
 	/**
@@ -56,8 +61,8 @@ public class SavedScriptRunner
 	 * @param scriptName name of the script to run
 	 * @param parameters parameters for the script
 	 * @return ScriptResult
-	 * @throws UnknownScriptException  if scriptName is unknown
-	 * @throws GenerateScriptException , if parameter is missing
+	 * @throws UnknownEntityException    if scriptName is unknown
+	 * @throws MissingParameterException , if parameter is missing
 	 */
 	public ScriptResult runScript(String scriptName, Map<String, Object> parameters)
 	{
@@ -66,7 +71,7 @@ public class SavedScriptRunner
 
 		if (script == null)
 		{
-			throw new UnknownScriptException("Unknown script [" + scriptName + "]");
+			throw new UnknownEntityException(scriptMetadata, scriptName);
 		}
 
 		if (script.getParameters() != null)
@@ -75,7 +80,7 @@ public class SavedScriptRunner
 			{
 				if (!parameters.containsKey(param.getName()))
 				{
-					throw new GenerateScriptException("Missing parameter [" + param + "]");
+					throw new MissingParameterException(param.getName());
 				}
 			}
 		}
