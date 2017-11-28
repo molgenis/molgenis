@@ -3,6 +3,7 @@ package org.molgenis.data.importer.wizard;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.wizard.exception.EntityTypePermissionsException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.Href;
@@ -245,8 +246,12 @@ public class ImportWizardController extends AbstractWizardController
 			}
 			else
 			{
-				if (value != null) throw new MolgenisDataAccessException(
-						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
+				EntityType entityType = dataService.getEntityType(entityClassId);
+				if (entityType == null)
+				{
+					throw new UnknownEntityTypeException(entityClassId);
+				}
+				if (value != null) throw new EntityTypePermissionsException(entityType, WRITE);
 			}
 		});
 	}

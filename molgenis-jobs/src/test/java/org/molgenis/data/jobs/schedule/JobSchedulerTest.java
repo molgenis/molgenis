@@ -10,6 +10,7 @@ import org.molgenis.data.jobs.model.ScheduledJob;
 import org.molgenis.data.jobs.model.ScheduledJobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobMetadata;
 import org.molgenis.data.jobs.model.ScheduledJobType;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,8 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = UnknownEntityException.class)
 	public void runNowUnknownEntity()
 	{
+		EntityType scheduledJobEntityType = mock(EntityType.class);
+		when(dataService.getEntityType(SCHEDULED_JOB)).thenReturn(scheduledJobEntityType);
 		when(dataService.findOneById(SCHEDULED_JOB, id)).thenReturn(null);
 		jobScheduler.runNow(id);
 	}

@@ -33,12 +33,10 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -61,8 +59,8 @@ import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
 import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
-import static org.molgenis.data.meta.NameValidator.validateEntityName;
 import static org.molgenis.data.support.Href.concatEntityHref;
+import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.MediaType.*;
@@ -251,7 +249,7 @@ public class MappingServiceController extends PluginController
 		Attribute targetAttr = targetEntityType.getAttribute(targetAttributeName);
 		if (targetAttr == null)
 		{
-			throw new UnknownAttributeException("Unknown attribute [" + targetAttributeName + "]");
+			throw new UnknownAttributeException(targetEntityType, targetAttributeName);
 		}
 
 		String algorithm = mappingServiceRequest.getAlgorithm();
@@ -927,16 +925,6 @@ public class MappingServiceController extends PluginController
 				Iterables.transform(algorithmEvaluations, AlgorithmEvaluation::getValue));
 
 		return ImmutableMap.of("results", calculatedValues, "totalCount", Iterables.size(sourceRepo));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
 	/**

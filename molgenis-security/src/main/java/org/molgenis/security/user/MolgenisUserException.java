@@ -1,6 +1,9 @@
 package org.molgenis.security.user;
 
-public class MolgenisUserException extends RuntimeException
+import org.molgenis.data.MolgenisRuntimeException;
+
+@Deprecated // FIXME extend from CodedRuntimeException
+public class MolgenisUserException extends MolgenisRuntimeException
 {
 
 	private static final long serialVersionUID = -8400330400566838323L;

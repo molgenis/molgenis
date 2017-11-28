@@ -2,11 +2,9 @@ package org.molgenis.data.importer.wizard;
 
 import com.google.common.collect.Lists;
 import org.molgenis.auth.Group;
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.exception.UnknownActionException;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,7 +73,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 			{
 				// convert input to database action
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
-				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
+				if (entityDbAction == null) throw new UnknownActionException(entityImportOption);
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 						importWizard.getFile());
@@ -95,7 +92,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				}
 
 			}
-			catch (RuntimeException | IOException e)
+			catch (CodedRuntimeException e)
 			{
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}

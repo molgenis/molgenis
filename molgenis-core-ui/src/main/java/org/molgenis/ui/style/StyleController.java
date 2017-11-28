@@ -1,22 +1,20 @@
 package org.molgenis.ui.style;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_3;
 import static org.molgenis.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_4;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Controller
 public class StyleController
@@ -53,14 +51,6 @@ public class StyleController
 		}
 
 		return new ResponseEntity(HttpStatus.OK);
-	}
-
-	@ResponseBody
-	@ResponseStatus(NOT_FOUND)
-	@ExceptionHandler({ MolgenisStyleException.class, IOException.class })
-	public ErrorMessageResponse handleStyleException(Exception e)
-	{
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
 }

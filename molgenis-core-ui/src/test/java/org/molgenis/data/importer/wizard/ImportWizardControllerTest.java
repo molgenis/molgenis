@@ -12,6 +12,7 @@ import org.molgenis.data.config.GroupTestConfig;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.importer.config.ImportTestConfig;
 import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
+import org.molgenis.data.importer.wizard.exception.EntityTypePermissionsException;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -196,6 +197,12 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(dataService.getEntityTypeIds()).thenReturn(
 				Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
+		when(dataService.getEntityType("entity1")).thenReturn(entityType);
+		when(dataService.getEntityType("entity2")).thenReturn(entityType);
+		when(dataService.getEntityType("entity3")).thenReturn(entityType);
+		when(dataService.getEntityType("entity4")).thenReturn(entityType);
+		when(dataService.getEntityType("entity5")).thenReturn(entityType);
+
 		Authentication authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		GrantedAuthority grantedAuthority1 = new SimpleGrantedAuthority(authority1.getRole());
@@ -259,7 +266,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		verify(dataService, times(2)).update(eq(GROUP_AUTHORITY), any(GroupAuthority.class));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = EntityTypePermissionsException.class)
 	public void addGroupEntityClassPermissionsTestNoPermission()
 	{
 		User user = mock(User.class);

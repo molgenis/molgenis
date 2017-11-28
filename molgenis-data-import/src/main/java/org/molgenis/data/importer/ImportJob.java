@@ -69,7 +69,7 @@ public class ImportJob implements Runnable
 		catch (Exception e)
 		{
 			LOG.info("Import failed.", e);
-			importRunService.failImportRun(importRunId, e.getMessage());
+			importRunService.failImportRun(importRunId, e.getLocalizedMessage());
 		}
 	}
 

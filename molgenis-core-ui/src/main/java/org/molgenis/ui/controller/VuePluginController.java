@@ -16,7 +16,7 @@ public abstract class VuePluginController extends PluginController
 	private AppSettings appSettings;
 	private UserAccountService userAccountService;
 
-	public VuePluginController(String uri,MenuReaderService menuReaderService, LanguageService languageService,
+	public VuePluginController(String uri, MenuReaderService menuReaderService, LanguageService languageService,
 			AppSettings appSettings, UserAccountService userAccountService)
 	{
 		super(uri);

@@ -18,15 +18,11 @@ import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.CountryCodes;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +32,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -260,33 +255,5 @@ public class UserAccountController extends PluginController
 		Map<String, List<String>> recoveryCodes = new HashMap<>();
 		recoveryCodes.put("recoveryCodes", recoveryCodesList);
 		return recoveryCodes;
-	}
-
-	@ExceptionHandler(MolgenisUserException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	private ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(AccessDeniedException.class)
-	@ResponseStatus(value = HttpStatus.FORBIDDEN)
-	@ResponseBody
-	private ErrorMessageResponse handleAccessDeniedException(AccessDeniedException e)
-	{
-		LOG.warn("Access denied", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	@ResponseBody
-	private ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 }

@@ -1,10 +1,13 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
@@ -57,42 +60,24 @@ public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { null, BOOL, MolgenisValidationException.class,
-				"Attribute data type update from [COMPOUND] to [BOOL] not allowed, allowed types are [STRING]" },
-				{ null, TEXT, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [TEXT] not allowed, allowed types are [STRING]" },
-				{ null, SCRIPT, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [SCRIPT] not allowed, allowed types are [STRING]" },
-				{ null, INT, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [INT] not allowed, allowed types are [STRING]" },
-				{ null, LONG, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [LONG] not allowed, allowed types are [STRING]" },
-				{ null, DECIMAL, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [DECIMAL] not allowed, allowed types are [STRING]" },
-				{ null, XREF, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [XREF] not allowed, allowed types are [STRING]" },
-				{ null, CATEGORICAL, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [CATEGORICAL] not allowed, allowed types are [STRING]" },
-				{ null, EMAIL, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [EMAIL] not allowed, allowed types are [STRING]" },
-				{ null, HYPERLINK, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [HYPERLINK] not allowed, allowed types are [STRING]" },
-				{ null, HTML, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [HTML] not allowed, allowed types are [STRING]" },
-				{ null, ENUM, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [ENUM] not allowed, allowed types are [STRING]" },
-				{ null, DATE, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [DATE] not allowed, allowed types are [STRING]" },
-				{ null, DATE_TIME, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [DATE_TIME] not allowed, allowed types are [STRING]" },
-				{ null, MREF, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [MREF] not allowed, allowed types are [STRING]" },
-				{ null, CATEGORICAL_MREF, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [CATEGORICAL_MREF] not allowed, allowed types are [STRING]" },
-				{ null, FILE, MolgenisValidationException.class,
-						"Attribute data type update from [COMPOUND] to [FILE] not allowed, allowed types are [STRING]" },
-				{ null, ONE_TO_MANY, MolgenisValidationException.class,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { null, BOOL, "V94" },
+				{ null, TEXT, "V94" },
+				{ null, SCRIPT, "V94" },
+				{ null, INT, "V94" },
+				{ null, LONG, "V94" },
+				{ null, DECIMAL, "V94" },
+				{ null, XREF, "V94" },
+				{ null, CATEGORICAL, "V94" },
+				{ null, EMAIL, "V94" },
+				{ null, HYPERLINK, "V94" },
+				{ null, HTML, "V94" },
+				{ null, ENUM, "V94" },
+				{ null, DATE, "V94" },
+				{ null, DATE_TIME, "V94" },
+				{ null, MREF, "V94" },
+				{ null, CATEGORICAL_MREF, "V94" },
+				{ null, FILE, "V94" },
+				{ null, ONE_TO_MANY, "V94" } };
 	}
 
 	/**
@@ -101,22 +86,23 @@ public class CompoundAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode       The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage)
+	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException exception)
 		{
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }

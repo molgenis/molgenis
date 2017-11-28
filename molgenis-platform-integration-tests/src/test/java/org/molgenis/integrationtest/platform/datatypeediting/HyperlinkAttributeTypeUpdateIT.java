@@ -1,10 +1,13 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
@@ -60,40 +63,21 @@ public class HyperlinkAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateI
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { "https://www.google.com", BOOL, MolgenisValidationException.class,
-				"Attribute data type update from [HYPERLINK] to [BOOL] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", INT, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [INT] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", LONG, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [LONG] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", DECIMAL, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [DECIMAL] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "molgenis@test.nl", XREF, MolgenisValidationException.class,
-						"Unknown xref value 'molgenis@test.nl' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ "molgenis@test.nl", CATEGORICAL, MolgenisValidationException.class,
-						"Unknown xref value 'molgenis@test.nl' for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ "https://www.google.com", SCRIPT, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [SCRIPT] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", EMAIL, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [EMAIL] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", HTML, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [HTML] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", ENUM, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [ENUM] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", DATE, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [DATE] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", DATE_TIME, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [DATE_TIME] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", MREF, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [MREF] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", CATEGORICAL_MREF, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [CATEGORICAL_MREF] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", FILE, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [FILE] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", COMPOUND, MolgenisValidationException.class,
-						"Attribute data type update from [HYPERLINK] to [COMPOUND] not allowed, allowed types are [CATEGORICAL, STRING, TEXT, XREF]" },
-				{ "https://www.google.com", ONE_TO_MANY, MolgenisValidationException.class,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { "https://www.google.com", BOOL, "V94" },
+				{ "https://www.google.com", INT, "V94" },
+				{ "https://www.google.com", LONG, "V94" },
+				{ "https://www.google.com", DECIMAL, "V94" },
+				{ "https://www.google.com", SCRIPT, "V94" },
+				{ "https://www.google.com", EMAIL, "V94" },
+				{ "https://www.google.com", HTML, "V94" },
+				{ "https://www.google.com", ENUM, "V94" },
+				{ "https://www.google.com", DATE, "V94" },
+				{ "https://www.google.com", DATE_TIME, "V94" },
+				{ "https://www.google.com", MREF, "V94" },
+				{ "https://www.google.com", CATEGORICAL_MREF, "V94" },
+				{ "https://www.google.com", FILE, "V94" },
+				{ "https://www.google.com", COMPOUND, "V94" },
+				{ "https://www.google.com", ONE_TO_MANY, "V94" } };
 	}
 
 	/**
@@ -102,22 +86,23 @@ public class HyperlinkAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateI
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode       The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage)
+	public void testInvalidConversion(String valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException exception)
 		{
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
 		}
 	}
 }

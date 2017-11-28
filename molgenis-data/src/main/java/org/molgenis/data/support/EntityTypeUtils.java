@@ -8,6 +8,10 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -354,6 +358,14 @@ public class EntityTypeUtils
 			}
 		}
 		return false;
+	}
+
+	public static List<AttributeType> getSimpleAttributeTypes()
+	{
+		return Arrays.asList(AttributeType.values())
+					 .stream()
+					 .filter(attrType -> !isReferenceType(attrType))
+					 .collect(Collectors.toList());
 	}
 
 	public static boolean isSystemEntity(EntityType entityType)

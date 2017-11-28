@@ -7,6 +7,7 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.exception.SystemMetadataAggregationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -18,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
@@ -227,7 +227,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		}
 		else
 		{
-			throw new MolgenisDataAccessException(format("Aggregation on entity [%s] not allowed", getName()));
+			throw new SystemMetadataAggregationException(this.getEntityType());
 		}
 	}
 
@@ -363,8 +363,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		//FIXME: should only be possible to update system entities during bootstrap!
 		if (isSystem && !currentUserIsSystem())
 		{
-			throw new MolgenisDataException(
-					format("Updating system entity meta data [%s] is not allowed", entityType.getLabel()));
+			throw new EditSystemEntityTypeException("UPDATE", entityType);
 		}
 	}
 
@@ -376,8 +375,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityTypeId);
 		if (isSystem)
 		{
-			throw new MolgenisDataException(
-					format("Deleting system entity meta data [%s] is not allowed", entityTypeId));
+			throw new EditSystemEntityTypeException("DELETE", entityType);
 		}
 	}
 
@@ -386,8 +384,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		EntityType entityType = findOneById(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException(
-					format("Unknown entity meta data [%s] with id [%s]", getName(), entityTypeId.toString()));
+			throw new UnknownEntityTypeException(entityTypeId.toString());
 		}
 		validateDeleteAllowed(entityType);
 	}

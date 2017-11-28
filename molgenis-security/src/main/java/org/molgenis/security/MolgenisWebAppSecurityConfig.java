@@ -29,6 +29,8 @@ import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.security.user.UserService;
+import org.molgenis.web.exception.BadRequestController;
+import org.molgenis.web.exception.InternalServerErrorController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -153,102 +155,103 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
-		expressionInterceptUrlRegistry
+		expressionInterceptUrlRegistry.antMatchers(BadRequestController.URI, InternalServerErrorController.URI)
+									  .permitAll()
 
-				.antMatchers(MolgenisLoginController.URI)
-				.permitAll()
+									  .antMatchers(MolgenisLoginController.URI)
+									  .permitAll()
 
-				.antMatchers(TwoFactorAuthenticationController.URI + "/**")
-				.permitAll()
+									  .antMatchers(TwoFactorAuthenticationController.URI + "/**")
+									  .permitAll()
 
-				.antMatchers(GOOGLE_AUTHENTICATION_URL)
-				.permitAll()
+									  .antMatchers(GOOGLE_AUTHENTICATION_URL)
+									  .permitAll()
 
-				.antMatchers("/logo/**")
-				.permitAll()
+									  .antMatchers("/logo/**")
+									  .permitAll()
 
-				.antMatchers("/molgenis.py")
-				.permitAll()
+									  .antMatchers("/molgenis.py")
+									  .permitAll()
 
-				.antMatchers("/molgenis.R")
-				.permitAll()
+									  .antMatchers("/molgenis.R")
+									  .permitAll()
 
-				.antMatchers(AccountController.CHANGE_PASSWORD_URI)
-				.authenticated()
+									  .antMatchers(AccountController.CHANGE_PASSWORD_URI)
+									  .authenticated()
 
-				.antMatchers("/account/**")
-				.permitAll()
+									  .antMatchers("/account/**")
+									  .permitAll()
 
-				.antMatchers(PATTERN_SWAGGER)
-				.permitAll()
+									  .antMatchers(PATTERN_SWAGGER)
+									  .permitAll()
 
-				.antMatchers(PATTERN_CSS)
-				.permitAll()
+									  .antMatchers(PATTERN_CSS)
+									  .permitAll()
 
-				.antMatchers(PATTERN_IMG)
-				.permitAll()
+									  .antMatchers(PATTERN_IMG)
+									  .permitAll()
 
-				.antMatchers(PATTERN_JS)
-				.permitAll()
+									  .antMatchers(PATTERN_JS)
+									  .permitAll()
 
-				.antMatchers(PATTERN_FONTS)
-				.permitAll()
+									  .antMatchers(PATTERN_FONTS)
+									  .permitAll()
 
-				.antMatchers("/html/**")
-				.permitAll()
+									  .antMatchers("/html/**")
+									  .permitAll()
 
-				.antMatchers("/plugin/void/**")
-				.permitAll()
+									  .antMatchers("/plugin/void/**")
+									  .permitAll()
 
-				.antMatchers("/api/**")
-				.permitAll()
+									  .antMatchers("/api/**")
+									  .permitAll()
 
-				.antMatchers("/webjars/**")
-				.permitAll()
+									  .antMatchers("/webjars/**")
+									  .permitAll()
 
-				.antMatchers("/search")
-				.permitAll()
+									  .antMatchers("/search")
+									  .permitAll()
 
-				.antMatchers("/captcha")
-				.permitAll()
+									  .antMatchers("/captcha")
+									  .permitAll()
 
-				.antMatchers("/dataindexerstatus")
-				.authenticated()
+									  .antMatchers("/dataindexerstatus")
+									  .authenticated()
 
-				.antMatchers("/permission/**/read/**")
-				.permitAll()
+									  .antMatchers("/permission/**/read/**")
+									  .permitAll()
 
-				.antMatchers("/permission/**/write/**")
-				.permitAll()
+									  .antMatchers("/permission/**/write/**")
+									  .permitAll()
 
-				.antMatchers("/scripts/**/run")
-				.authenticated()
+									  .antMatchers("/scripts/**/run")
+									  .authenticated()
 
-				.antMatchers("/scripts/**/start")
-				.authenticated()
+									  .antMatchers("/scripts/**/start")
+									  .authenticated()
 
-				.antMatchers("/files/**")
-				.permitAll()
+									  .antMatchers("/files/**")
+									  .permitAll()
 
-				.antMatchers('/' + PATH_SEGMENT_APPS + "/**")
-				.permitAll()
+									  .antMatchers('/' + PATH_SEGMENT_APPS + "/**")
+									  .permitAll()
 
-				.anyRequest()
-				.denyAll()
-				.and()
+									  .anyRequest()
+									  .denyAll()
+									  .and()
 
-				.httpBasic()
-				.authenticationEntryPoint(authenticationEntryPoint())
-				.and()
+									  .httpBasic()
+									  .authenticationEntryPoint(authenticationEntryPoint())
+									  .and()
 
-				.formLogin()
-				.loginPage(MolgenisLoginController.URI)
-				.failureUrl(MolgenisLoginController.URI + "?error")
-				.and()
+									  .formLogin()
+									  .loginPage(MolgenisLoginController.URI)
+									  .failureUrl(MolgenisLoginController.URI + "?error")
+									  .and()
 
-				.logout()
-				.deleteCookies("JSESSIONID")
-				.addLogoutHandler((req, res, auth) ->
+									  .logout()
+									  .deleteCookies("JSESSIONID")
+									  .addLogoutHandler((req, res, auth) ->
 				{
 					if (req.getSession(false) != null
 							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
@@ -257,7 +260,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					}
 				})
 
-				.logoutSuccessHandler((req, res, auth) ->
+									  .logoutSuccessHandler((req, res, auth) ->
 				{
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
@@ -268,10 +271,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
 					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
 				})
-				.and()
+									  .and()
 
-				.csrf()
-				.disable();
+									  .csrf()
+									  .disable();
 
 	}
 

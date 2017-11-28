@@ -1,25 +1,39 @@
 package org.molgenis.data;
 
-public class UnknownAttributeException extends MolgenisDataException
+import org.molgenis.data.meta.model.EntityType;
+
+import java.text.MessageFormat;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
+
+public class UnknownAttributeException extends UnknownDataException
 {
-	private static final long serialVersionUID = 1L;
+	private static final String ERROR_CODE = "D04";
+	private final EntityType entityType;
+	private final String attributeName;
 
-	public UnknownAttributeException()
+	public UnknownAttributeException(EntityType entityType, String attributeName)
 	{
+		super(ERROR_CODE);
+		this.entityType = requireNonNull(entityType);
+		this.attributeName = requireNonNull(attributeName);
 	}
 
-	public UnknownAttributeException(String message)
+	@Override
+	public String getMessage()
 	{
-		super(message);
+		return "type:" + entityType.getId() + " attribute:" + attributeName;
 	}
 
-	public UnknownAttributeException(Throwable cause)
+	@Override
+	public String getLocalizedMessage()
 	{
-		super(cause);
-	}
-
-	public UnknownAttributeException(String message, Throwable cause)
-	{
-		super(message, cause);
+		return getLanguageService().map(languageService ->
+		{
+			String languageCode = languageService.getCurrentUserLanguageCode();
+			return MessageFormat.format(languageService.getString(ERROR_CODE), entityType.getLabel(languageCode),
+					attributeName);
+		}).orElse(super.getLocalizedMessage());
 	}
 }

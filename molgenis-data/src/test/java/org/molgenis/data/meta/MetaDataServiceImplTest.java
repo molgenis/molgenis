@@ -98,7 +98,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		assertNull(metaDataServiceImpl.getRepository(entityTypeId));
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class)
+	@Test(expectedExceptions = UnknownEntityTypeException.class)
 	public void getRepositoryUnknownEntity()
 	{
 		metaDataServiceImpl.getRepository("unknownEntity");
@@ -134,7 +134,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		assertNull(metaDataServiceImpl.getRepository(entityTypeId, Package.class));
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class)
+	@Test(expectedExceptions = UnknownEntityTypeException.class)
 	public void getRepositoryTypedUnknownEntity()
 	{
 		metaDataServiceImpl.getRepository("unknownEntity", Package.class);
@@ -745,7 +745,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class)
+	@Test(expectedExceptions = UnknownEntityTypeException.class)
 	public void updateEntityTypeEntityDoesNotExist()
 	{
 		String entityTypeId = "entity";

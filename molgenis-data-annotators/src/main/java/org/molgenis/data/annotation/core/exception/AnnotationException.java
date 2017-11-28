@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import java.util.List;
 import java.util.Objects;
 
+@Deprecated // FIXME extend from CodedRuntimeException
 public class AnnotationException extends RuntimeException
 {
 	private final Integer entityNumber;
@@ -13,8 +14,7 @@ public class AnnotationException extends RuntimeException
 	private final String annotatorName;
 	private final List<Attribute> requiredAttributes;
 
-	public AnnotationException(Entity failedEntity, int lineNumber, List<Attribute> requiredAttributes,
-			String annotatorName, Throwable cause)
+	public AnnotationException(Entity failedEntity, int lineNumber, List<Attribute> requiredAttributes, String annotatorName, Throwable cause)
 	{
 		super(cause);
 		this.failedEntity = failedEntity;

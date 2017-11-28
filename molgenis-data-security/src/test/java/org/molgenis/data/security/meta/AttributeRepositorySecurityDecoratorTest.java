@@ -12,6 +12,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.exception.SystemMetadataAggregationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -89,6 +90,8 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		when(metadataService.getBackend(concreteEntityType1)).thenReturn(backend1);
 		when(metadataService.getBackend(concreteEntityType2)).thenReturn(backend2);
 		when(attribute.getIdentifier()).thenReturn(attributeId);
+
+		when(delegateRepository.getEntityType()).thenReturn(concreteEntityType1);
 		repo = new AttributeRepositorySecurityDecorator(delegateRepository, systemEntityTypeRegistry,
 				permissionService);
 	}
@@ -654,7 +657,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = SystemMetadataAggregationException.class)
 	public void aggregateUser() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
@@ -670,7 +673,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 		verify(delegateRepository).delete(attr);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity attribute \\[attrName\\] is not allowed")
+	@Test(expectedExceptions = EditSystemAttributeException.class, expectedExceptionsMessageRegExp = "operation:DELETE attr:attrName")
 	public void deleteSystemAttribute()
 	{
 		String attrName = "attrName";
@@ -695,7 +698,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
 	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Updating system entity attribute \\[attributeName\\] is not allowed")
+			EditSystemAttributeException.class }, expectedExceptionsMessageRegExp = "operation:UPDATE attr:attributeName")
 	public void updateSystemEntity()
 	{
 		Attribute currentAttribute = mock(Attribute.class);

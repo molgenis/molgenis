@@ -6,6 +6,10 @@ import java.util.Objects;
 
 import static java.lang.Math.toIntExact;
 
+/**
+ * @deprecated use {@link ValidationResult}
+ */
+@Deprecated
 public class ConstraintViolation implements Serializable
 {
 	private final String message;

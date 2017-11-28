@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.core.exception;
 
+@Deprecated // FIXME extend from CodedRuntimeException
 public class UnresolvedAnnotatorDependencyException extends RuntimeException
 {
 	public UnresolvedAnnotatorDependencyException()

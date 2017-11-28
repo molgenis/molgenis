@@ -672,7 +672,7 @@ var Form = React.createClass({
             if(attr.nullableExpression) {
               entityInstance[attr.name] = value;
               var isNillable = this._resolveBoolExpression(attr.nullableExpression, entityInstance)
-              if (!isNillable && this._isValueNotSet(type, value)) {
+                if (!isNillable && this._isValueNotSet(type, value)) {
                 errorMessage = 'Field is required, please enter a value';
               }
             }
@@ -688,10 +688,10 @@ var Form = React.createClass({
      * @private
      */
     _isValueNotSet(fieldType, value) {
-        if(value === undefined) {
+        if (value === undefined) {
             return true
         }
-        else if(fieldType === 'CATEGORICAL_MREF' || fieldType === 'MREF') {
+        else if (fieldType === 'CATEGORICAL_MREF' || fieldType === 'MREF') {
             return !value.items || value.items.length === 0
         } else {
             return value === '' || value === null

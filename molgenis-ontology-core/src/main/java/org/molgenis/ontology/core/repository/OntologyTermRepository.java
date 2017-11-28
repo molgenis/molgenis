@@ -4,8 +4,12 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.importer.wizard.exception.NodePathException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -164,12 +168,12 @@ public class OntologyTermRepository
 
 		if (StringUtils.isEmpty(nodePath1))
 		{
-			throw new MolgenisDataAccessException("The nodePath cannot be null : " + ontologyTerm1.toString());
+			throw new NodePathException(ontologyTerm1.toString());
 		}
 
 		if (StringUtils.isEmpty(nodePath2))
 		{
-			throw new MolgenisDataAccessException("The nodePath cannot be null : " + ontologyTerm2.toString());
+			throw new NodePathException(ontologyTerm2.toString());
 		}
 
 		return calculateNodePathDistance(nodePath1, nodePath2);

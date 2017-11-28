@@ -13,6 +13,8 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.exception.SystemMetadataAggregationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -96,6 +98,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType3.getLabel()).thenReturn(entityTypeId1);
 		when(entityType4.getId()).thenReturn(entityTypeId4);
 		when(entityType4.getLabel()).thenReturn(entityTypeId1);
+
+		when(delegateRepository.getEntityType()).thenReturn(entityType1);
+
 		repo = new EntityTypeRepositorySecurityDecorator(delegateRepository, systemEntityTypeRegistry,
 				permissionService, dataService);
 	}
@@ -608,7 +613,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = SystemMetadataAggregationException.class)
 	public void aggregateUser() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
@@ -637,14 +642,14 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity type \\[entity\\] with id \\[entity\\]")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:entity permission:WRITEMETA")
 	public void deleteUserNotAllowed()
 	{
 		delete();
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity meta data \\[entity\\] is not allowed")
+	@Test(expectedExceptions = EditSystemEntityTypeException.class, expectedExceptionsMessageRegExp = "operation:DELETE entityType:entity")
 	public void deleteSystemEntityType()
 	{
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);
@@ -700,7 +705,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating system entity meta data \\[entity\\] is not allowed")
+	@Test(expectedExceptions = EditSystemEntityTypeException.class, expectedExceptionsMessageRegExp = "operation:UPDATE entityType:entity")
 	public void updateSystemEntityType()
 	{
 		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);

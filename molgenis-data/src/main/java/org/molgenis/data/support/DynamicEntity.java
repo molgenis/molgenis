@@ -204,7 +204,7 @@ public class DynamicEntity implements Entity
 		Attribute attr = entityType.getAttribute(attrName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
+			throw new UnknownAttributeException(entityType, attrName);
 		}
 
 		AttributeType dataType = attr.getDataType();

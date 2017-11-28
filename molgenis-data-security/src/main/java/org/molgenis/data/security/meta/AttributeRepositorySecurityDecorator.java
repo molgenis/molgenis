@@ -1,10 +1,14 @@
 package org.molgenis.data.security.meta;
 
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.exception.SystemMetadataAggregationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -16,7 +20,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.Permission.COUNT;
@@ -217,7 +220,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 		else
 		{
-			throw new MolgenisDataAccessException(format("Aggregation on entity [%s] not allowed", getName()));
+			throw new SystemMetadataAggregationException(getEntityType());
 		}
 	}
 
@@ -298,8 +301,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		Attribute systemAttr = systemEntityTypeRegistry.getSystemAttribute(attrIdentifier);
 		if (systemAttr != null && !EntityUtils.equals(attr, systemAttr))
 		{
-			throw new MolgenisDataException(
-					format("Updating system entity attribute [%s] is not allowed", attr.getName()));
+			throw new EditSystemAttributeException("UPDATE", attr);
 		}
 	}
 
@@ -313,8 +315,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		String attrIdentifier = attr.getIdentifier();
 		if (systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier))
 		{
-			throw new MolgenisDataException(
-					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
+			throw new EditSystemAttributeException("DELETE", attr);
 		}
 	}
 

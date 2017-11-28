@@ -1,8 +1,11 @@
 package org.molgenis.ui.style;
 
+import org.molgenis.data.MolgenisException;
+
 import java.io.IOException;
 
-public class MolgenisStyleException extends Exception
+@Deprecated // FIXME extend from CodedRuntimeException
+public class MolgenisStyleException extends MolgenisException
 {
 	public MolgenisStyleException(String s)
 	{

@@ -1,29 +1,25 @@
 package org.molgenis.data.i18n;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.exception.AddLanguageException;
+import org.molgenis.data.i18n.exception.DeleteLanguageException;
 import org.molgenis.data.i18n.model.Language;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
-
 public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Language>
 {
-	private final LanguageService languageService;
-
-	public LanguageRepositoryDecorator(Repository<Language> delegateRepository, LanguageService languageService)
+	public LanguageRepositoryDecorator(Repository<Language> delegateRepository)
 	{
 		super(delegateRepository);
-		this.languageService = requireNonNull(languageService);
 	}
 
 	@Override
 	public void delete(Language language)
 	{
-		throw new MolgenisDataException("Deleting languages is not allowed");
+		throw new DeleteLanguageException();
 	}
 
 	@Override
@@ -55,9 +51,9 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 	public void add(Language language)
 	{
 
-		if (!languageService.hasLanguageCode(language.getCode()))
+		if (!LanguageService.hasLanguageCode(language.getCode()))
 		{
-			throw new MolgenisDataException("Adding languages is not allowed");
+			throw new AddLanguageException();
 		}
 		else
 		{

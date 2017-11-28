@@ -1,6 +1,6 @@
 package org.molgenis.oneclickimporter.service;
 
-import org.molgenis.data.meta.NameValidator;
+import org.molgenis.data.validation.meta.NameValidator;
 
 /**
  * Service that offers methods to:

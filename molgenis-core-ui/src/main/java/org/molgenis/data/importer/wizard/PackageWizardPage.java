@@ -1,11 +1,9 @@
 package org.molgenis.data.importer.wizard;
 
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.*;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.exception.UnknownActionException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +65,7 @@ public class PackageWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null)
 				{
-					throw new IOException("unknown database action: " + entityImportOption);
+					throw new UnknownActionException(entityImportOption);
 				}
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
@@ -108,7 +105,7 @@ public class PackageWizardPage extends AbstractWizardPage
 				}
 
 			}
-			catch (RuntimeException | IOException e)
+			catch (CodedRuntimeException e)
 			{
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}

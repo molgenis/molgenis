@@ -2,8 +2,9 @@ package org.molgenis.data.i18n;
 
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.exception.AddLanguageException;
+import org.molgenis.data.i18n.exception.DeleteLanguageException;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -12,15 +13,12 @@ import org.testng.annotations.Test;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_EN;
-import static org.molgenis.data.i18n.LanguageService.LANGUAGE_CODE_NL;
+import static org.molgenis.data.i18n.LanguageServiceImpl.LANGUAGE_CODE_EN;
+import static org.molgenis.data.i18n.LanguageServiceImpl.LANGUAGE_CODE_NL;
 import static org.testng.Assert.assertEquals;
 
 public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 {
-	private static final String MESSAGE_ADD_NOT_ALLOWED = "Adding languages is not allowed";
-	private static final String MESSAGE_DELETE_NOT_ALLOWED = "Deleting languages is not allowed";
-
 	@Mock
 	private Repository<Language> delegateRepository;
 	@Mock
@@ -36,7 +34,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		languageRepositoryDecorator = new LanguageRepositoryDecorator(delegateRepository, languageService);
+		languageRepositoryDecorator = new LanguageRepositoryDecorator(delegateRepository);
 	}
 
 	@Test
@@ -47,7 +45,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(language);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
+	@Test(expectedExceptions = AddLanguageException.class)
 	public void testAddUnknownLanguage()
 	{
 		Language language = getMockLanguage("unknownLanguage");
@@ -65,7 +63,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(language1);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
+	@Test(expectedExceptions = AddLanguageException.class)
 	public void testAddStreamUnknownLanguage()
 	{
 		Language language = mock(Language.class);
@@ -73,13 +71,13 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		languageRepositoryDecorator.add(Stream.of(language));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
+	@Test(expectedExceptions = DeleteLanguageException.class)
 	public void testDelete()
 	{
 		languageRepositoryDecorator.delete(getMockLanguage(LANGUAGE_CODE_NL));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
+	@Test(expectedExceptions = DeleteLanguageException.class)
 	public void testDeleteById()
 	{
 		Language language = getMockLanguage(LANGUAGE_CODE_NL);
@@ -87,7 +85,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		languageRepositoryDecorator.deleteById(LANGUAGE_CODE_NL);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
+	@Test(expectedExceptions = DeleteLanguageException.class)
 	public void testDeleteStream()
 	{
 		languageRepositoryDecorator.delete(Stream.of(getMockLanguage(LANGUAGE_CODE_NL)));

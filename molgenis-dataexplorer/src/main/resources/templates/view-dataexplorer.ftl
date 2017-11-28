@@ -22,7 +22,7 @@
 
 <script>
     window.hasTrackingId = ${hasTrackingId?c}
-    window.hasMolgenisTrackingId = ${hasMolgenisTrackingId?c}
+            window.hasMolgenisTrackingId = ${hasMolgenisTrackingId?c}
 </script>
 
 <div class="row">

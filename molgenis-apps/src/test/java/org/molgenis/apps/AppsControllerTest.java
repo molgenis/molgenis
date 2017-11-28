@@ -14,15 +14,21 @@ import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.Iterator;
@@ -37,7 +43,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = { GsonConfig.class })
+@ContextConfiguration(classes = { GsonConfig.class, AppsControllerTest.Config.class })
 public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 {
 	@Mock
@@ -51,6 +57,9 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
+	@Autowired
+	private Config.TestExceptionHandler testExceptionHandler;
+
 	public AppsControllerTest()
 	{
 		super(Strictness.WARN);
@@ -62,6 +71,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		AppsController appsController = new AppsController(dataService, permissionService);
 		mockMvc = MockMvcBuilders.standaloneSetup(appsController)
 								 .setMessageConverters(gsonHttpMessageConverter)
+								 .setControllerAdvice(testExceptionHandler)
 								 .build();
 	}
 
@@ -185,24 +195,24 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		verify(dataService).update(APP, app);
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
 	public void testActivateAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
-		mockMvc.perform(post(AppsController.URI + "/id/activate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
+		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/activate")).andReturn();
+
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already activated")
 	public void testActivateAppAlreadyActivated() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		mockMvc.perform(post(AppsController.URI + "/id/activate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already activated\"}]}"));
+		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/activate")).andReturn();
+
+		throw result.getResolvedException();
 	}
 
 	@Test
@@ -215,23 +225,39 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		verify(dataService).update(APP, app);
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
 	public void testDeactivateAppUnknownApp() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
-		mockMvc.perform(post(AppsController.URI + "/id/deactivate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
+		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andReturn();
+
+		throw result.getResolvedException();
 	}
 
-	@Test
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already deactivated")
 	public void testDeActivateAppAlreadyDeactivated() throws Exception
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		mockMvc.perform(post(AppsController.URI + "/id/deactivate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already deactivated\"}]}"));
+		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andReturn();
+
+		throw result.getResolvedException();
+	}
+
+	@Configuration
+	public static class Config extends WebMvcConfigurerAdapter
+	{
+		@ControllerAdvice
+		class TestExceptionHandler
+		{
+			@org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+			@ResponseBody
+			public String handleNestedServletException(Exception e, HttpServletRequest httpServletRequest)
+					throws Exception
+			{
+				return e.getMessage();
+			}
+		}
 	}
 }
