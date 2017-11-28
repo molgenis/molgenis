@@ -37,7 +37,7 @@ public class JsMagmaScriptExecutor
 		EntityType entityType = entityTypeFactory.create("entity");
 		parameters.keySet().forEach(key -> entityType.addAttribute(attributeFactory.create().setName(key)));
 		Entity entity = new DynamicEntity(entityType);
-		parameters.forEach((key, value) -> entity.set(key, value));
+		parameters.forEach(entity::set);
 		return jsMagmaScriptEvaluator.eval(jsScript, entity);
 	}
 }

@@ -1,13 +1,13 @@
 package org.molgenis.script.core.exception;
 
-public class ScriptGenerationException extends ScriptException
+abstract class ScriptGenerationException extends ScriptException
 {
-	public ScriptGenerationException(String errorCode)
+	ScriptGenerationException(String errorCode)
 	{
 		super(errorCode);
 	}
 
-	public ScriptGenerationException(String errorCode, Throwable cause)
+	ScriptGenerationException(String errorCode, Throwable cause)
 	{
 		super(errorCode, cause);
 	}
