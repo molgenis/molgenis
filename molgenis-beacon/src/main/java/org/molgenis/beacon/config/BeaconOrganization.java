@@ -1,5 +1,6 @@
 package org.molgenis.beacon.config;
 
+import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -63,5 +64,11 @@ public class BeaconOrganization extends StaticEntity
 	public String getLogoUrl()
 	{
 		return getString(LOGO_URL);
+	}
+
+	public BeaconOrganizationResponse toBeaconOrganizationResponse()
+	{
+		return BeaconOrganizationResponse.create(getId(), getName(), getDescription(), getAddress(), getWelcomeUrl(),
+				getContactUrl(), getLogoUrl());
 	}
 }

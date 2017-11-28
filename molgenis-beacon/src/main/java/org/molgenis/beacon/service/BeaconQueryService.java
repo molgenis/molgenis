@@ -15,7 +15,7 @@ public interface BeaconQueryService
 	BeaconAlleleResponse query(String beaconId, BeaconAlleleRequest request);
 
 	/**
-	 * Query a Beacon with chromosome, start position, reference allele and alternative allele.
+	 * Query a BeaconResponse with chromosome, start position, reference allele and alternative allele.
 	 * A beacon searches through the {@link EntityType}s that it references
 	 *
 	 * @return A {@link BeaconAlleleResponse}

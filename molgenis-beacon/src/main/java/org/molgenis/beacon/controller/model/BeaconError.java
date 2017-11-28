@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
 /**
- * Beacon-specific error representing an unexpected problem.
+ * BeaconResponse-specific error representing an unexpected problem.
  */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconError.class)

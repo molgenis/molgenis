@@ -1,6 +1,7 @@
 package org.molgenis.beacon.service;
 
 import org.molgenis.beacon.config.Beacon;
+import org.molgenis.beacon.controller.model.BeaconResponse;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ public interface BeaconInfoService
 	 *
 	 * @return A list of beacons
 	 */
-	List<Beacon> getAvailableBeacons();
+	List<BeaconResponse> getAvailableBeacons();
 
 	/**
 	 * Fetch information on a specific beacon
@@ -19,5 +20,5 @@ public interface BeaconInfoService
 	 * @param beaconId
 	 * @return A {@link Beacon}
 	 */
-	Beacon info(String beaconId);
+	BeaconResponse info(String beaconId);
 }

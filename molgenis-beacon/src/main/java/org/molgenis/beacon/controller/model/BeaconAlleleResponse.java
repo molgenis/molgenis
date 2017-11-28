@@ -7,7 +7,7 @@ import org.molgenis.gson.AutoGson;
 import javax.annotation.Nullable;
 
 /**
- * Beacon's response to a query for information about a specific allele.
+ * BeaconResponse's response to a query for information about a specific allele.
  */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconAlleleResponse.class)
@@ -29,7 +29,7 @@ public abstract class BeaconAlleleResponse
 	public abstract Boolean getExists();
 
 	/**
-	 * Beacon-specific error.
+	 * BeaconResponse-specific error.
 	 * <p>
 	 * This should be non-null in exceptional situations only, in which case
 	 * `exists` has to be null.

@@ -1,15 +1,17 @@
 package org.molgenis.beacon.config;
 
 import org.molgenis.data.meta.SystemEntityType;
+import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.beacon.config.BeaconPackage.PACKAGE_BEACON;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 
+@Component
 public class BeaconOrganizationMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "BeaconOrganization";
+	private static final String SIMPLE_NAME = "BeaconOrganizationResponse";
 
 	public static final String ID = "id";
 	public static final String NAME = "name";
@@ -30,7 +32,7 @@ public class BeaconOrganizationMetadata extends SystemEntityType
 	@Override
 	protected void init()
 	{
-		setLabel("Beacon organization");
+		setLabel("BeaconResponse organization");
 		setPackage(beaconPackage);
 		setDescription("Organization owning a beacon");
 		addAttribute(ID, ROLE_ID).setDataType(STRING)

@@ -1,11 +1,16 @@
 package org.molgenis.beacon.config;
 
+import org.molgenis.beacon.controller.model.BeaconDataset;
+import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
+import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.beacon.config.BeaconMetadata.*;
 
 public class Beacon extends StaticEntity
@@ -67,5 +72,20 @@ public class Beacon extends StaticEntity
 	public Iterable<EntityType> getDataSets()
 	{
 		return getEntities(DATA_SETS, EntityType.class);
+	}
+
+	public BeaconResponse toBeaconResponse()
+	{
+		BeaconOrganizationResponse organization = getOrganization().toBeaconOrganizationResponse();
+		return BeaconResponse.create(getId(), getName(), getApiVersion(), organization, getDescription(), getVersion(),
+				getWelcomeUrl(), entityTypeToBeaconDataset());
+	}
+
+	private List<BeaconDataset> entityTypeToBeaconDataset()
+	{
+		List<BeaconDataset> beaconDatasets = newArrayList();
+		getDataSets().forEach(dataset -> beaconDatasets.add(
+				BeaconDataset.create(dataset.getId(), dataset.getLabel(), dataset.getDescription())));
+		return beaconDatasets;
 	}
 }

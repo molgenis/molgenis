@@ -1,8 +1,8 @@
 package org.molgenis.beacon.controller;
 
-import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
+import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.springframework.stereotype.Controller;
@@ -31,14 +31,14 @@ public class BeaconController
 
 	@ResponseBody
 	@GetMapping(value = "/list", produces = APPLICATION_JSON_VALUE)
-	public List<Beacon> getAllBeacons()
+	public List<BeaconResponse> getAllBeacons()
 	{
 		return beaconInfoService.getAvailableBeacons();
 	}
 
 	@ResponseBody
 	@GetMapping(value = "/{beaconId}", produces = APPLICATION_JSON_VALUE)
-	public Beacon info(@PathVariable("beaconId") final String beaconId)
+	public BeaconResponse info(@PathVariable("beaconId") final String beaconId)
 	{
 		return beaconInfoService.info(beaconId);
 	}

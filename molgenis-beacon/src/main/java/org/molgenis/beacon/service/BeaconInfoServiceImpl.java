@@ -1,6 +1,7 @@
 package org.molgenis.beacon.service;
 
 import org.molgenis.beacon.config.Beacon;
+import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.data.DataService;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +22,14 @@ public class BeaconInfoServiceImpl implements BeaconInfoService
 	}
 
 	@Override
-	public List<Beacon> getAvailableBeacons()
+	public List<BeaconResponse> getAvailableBeacons()
 	{
-		return dataService.findAll(BEACON, Beacon.class).collect(Collectors.toList());
+		return dataService.findAll(BEACON, Beacon.class).map(Beacon::toBeaconResponse).collect(Collectors.toList());
 	}
 
 	@Override
-	public Beacon info(String beaconId)
+	public BeaconResponse info(String beaconId)
 	{
-		return dataService.findOneById(BEACON, beaconId, Beacon.class);
+		return dataService.findOneById(BEACON, beaconId, Beacon.class).toBeaconResponse();
 	}
 }
