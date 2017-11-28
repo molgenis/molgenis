@@ -3,8 +3,12 @@ package org.molgenis.beacon.controller.model;
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
+/**
+ * A Beacon
+ */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconResponse.class)
 public abstract class BeaconResponse
@@ -27,21 +31,25 @@ public abstract class BeaconResponse
 	/**
 	 * Organization owning the beacon.
 	 */
+	@Nullable
 	public abstract BeaconOrganizationResponse getOrganization();
 
 	/**
 	 * Description of the beacon.
 	 */
+	@Nullable
 	public abstract String getDescription();
 
 	/**
 	 * Version of the beacon.
 	 */
+	@Nullable
 	public abstract String getVersion();
 
 	/**
 	 * URL to the welcome page for this beacon (RFC 3986 format).
 	 */
+	@Nullable
 	public abstract String getWelcomeUrl();
 
 	/**

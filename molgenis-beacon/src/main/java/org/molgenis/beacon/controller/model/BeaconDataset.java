@@ -3,6 +3,8 @@ package org.molgenis.beacon.controller.model;
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
+import javax.annotation.Nullable;
+
 /**
  * Dataset of a beacon.
  */
@@ -23,6 +25,7 @@ public abstract class BeaconDataset
 	/**
 	 * Description of the dataset.
 	 */
+	@Nullable
 	public abstract String getDescription();
 
 	public static BeaconDataset create(String id, String name, String description)
