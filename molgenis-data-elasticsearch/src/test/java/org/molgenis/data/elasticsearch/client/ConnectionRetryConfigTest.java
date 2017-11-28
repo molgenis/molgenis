@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.client;
 
 import org.elasticsearch.client.Client;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.index.exception.IndexInternalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -42,7 +42,7 @@ public class ConnectionRetryConfigTest extends AbstractTestNGSpringContextTests
 		{
 			RetryCallback<Client, RuntimeException> fail = c ->
 			{
-				throw new MolgenisDataException();
+				throw new IndexInternalException("");
 			};
 			return retryTemplate.execute(fail);
 		});
@@ -83,10 +83,10 @@ public class ConnectionRetryConfigTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testRetryPolicyMolgenisDataException()
+	public void testRetryPolicyIndexInternalException()
 	{
 		RetryContext context = retryPolicy.open(null);
-		retryPolicy.registerThrowable(context, new MolgenisDataException("Failed to connect"));
+		retryPolicy.registerThrowable(context, new IndexInternalException("Failed to connect"));
 		assertTrue(retryPolicy.canRetry(context));
 	}
 }

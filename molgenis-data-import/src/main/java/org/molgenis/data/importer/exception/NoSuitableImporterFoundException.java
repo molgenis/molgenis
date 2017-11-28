@@ -2,6 +2,7 @@ package org.molgenis.data.importer.exception;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 //FIXME: reasonable name, or rewrite code that throws this to actually determine what is going on
@@ -13,7 +14,12 @@ public class NoSuitableImporterFoundException extends ImporterException
 	public NoSuitableImporterFoundException(String fileName)
 	{
 		super(ERROR_CODE);
-		this.fileName = fileName;
+		this.fileName = requireNonNull(fileName);
+	}
+
+	public String getFileName()
+	{
+		return fileName;
 	}
 
 	@Override
@@ -29,6 +35,6 @@ public class NoSuitableImporterFoundException extends ImporterException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, fileName);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

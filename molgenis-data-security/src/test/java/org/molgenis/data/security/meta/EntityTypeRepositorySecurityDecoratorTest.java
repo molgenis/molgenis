@@ -14,6 +14,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.exception.SystemMetadataAggregationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -97,6 +98,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType3.getLabel()).thenReturn(entityTypeId1);
 		when(entityType4.getId()).thenReturn(entityTypeId4);
 		when(entityType4.getLabel()).thenReturn(entityTypeId1);
+
+		when(delegateRepository.getEntityType()).thenReturn(entityType1);
+
 		repo = new EntityTypeRepositorySecurityDecorator(delegateRepository, systemEntityTypeRegistry,
 				permissionService, dataService);
 	}
@@ -609,7 +613,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisPermissionException.class)
+	@Test(expectedExceptions = SystemMetadataAggregationException.class)
 	public void aggregateUser() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);

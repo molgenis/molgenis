@@ -23,6 +23,8 @@ import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.ValidationResult;
+import org.molgenis.data.validation.data.AttributeValueValidationResult;
 import org.molgenis.data.validation.meta.EntityTypeValidationResult;
 import org.molgenis.security.account.ChangePasswordException;
 import org.molgenis.security.account.InvalidSortOrderException;
@@ -66,6 +68,7 @@ import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
+import static org.molgenis.data.validation.data.AttributeValueConstraint.READ_ONLY;
 import static org.molgenis.data.validation.meta.EntityTypeConstraint.MISSING_ID_ATTR;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
@@ -422,11 +425,6 @@ public class RestController
 			//FIXME: how to handle those
 			throw new MolgenisDataException(e);
 		}
-		catch (MolgenisPermissionException e)
-		{
-			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-			return null;
-		}
 
 		// Check attribute names
 		Iterable<String> attributesIterable = Iterables.transform(meta.getAtomicAttributes(),
@@ -587,8 +585,9 @@ public class RestController
 
 		if (attr.isReadOnly())
 		{
-			throw new MolgenisPermissionException(
-					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' is readonly");
+			ValidationResult result = new AttributeValueValidationResult(READ_ONLY,
+					AttributeValue.create(attr, paramValue));
+			throw new ValidationException(result);
 		}
 
 		Object value = this.restService.toEntityValue(attr, paramValue, id);

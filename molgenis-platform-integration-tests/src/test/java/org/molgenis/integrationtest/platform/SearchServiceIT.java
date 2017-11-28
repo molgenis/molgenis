@@ -3,7 +3,7 @@ package org.molgenis.integrationtest.platform;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.data.index.exception.UnknownIndexInternalException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
@@ -63,14 +63,14 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		{
 			searchService.deleteIndex(entityTypeDynamic);
 		}
-		catch (UnknownIndexException e)
+		catch (UnknownIndexInternalException e)
 		{ // silently ignore
 		}
 		try
 		{
 			searchService.deleteIndex(refEntityTypeDynamic);
 		}
-		catch (UnknownIndexException e)
+		catch (UnknownIndexInternalException e)
 		{ // silently ignore
 		}
 		searchService.refreshIndex();
@@ -234,7 +234,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(entityTypeDynamic), 0);
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = UnknownIndexException.class)
+	@Test(singleThreaded = true, expectedExceptions = UnknownIndexInternalException.class)
 	public void testDeleteAll()
 	{
 		createAndIndexEntities(5);

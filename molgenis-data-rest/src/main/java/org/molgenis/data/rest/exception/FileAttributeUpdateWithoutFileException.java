@@ -26,6 +26,6 @@ public class FileAttributeUpdateWithoutFileException extends RestApiException
 		return getLanguageService().map(languageService ->
 		{
 			return languageService.getString(ERROR_CODE);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

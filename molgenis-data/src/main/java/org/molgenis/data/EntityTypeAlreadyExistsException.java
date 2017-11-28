@@ -17,6 +17,11 @@ public class EntityTypeAlreadyExistsException extends CodedRuntimeException
 		this.entityTypeId = requireNonNull(entityTypeId);
 	}
 
+	public String getEntityTypeId()
+	{
+		return entityTypeId;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -28,6 +33,6 @@ public class EntityTypeAlreadyExistsException extends CodedRuntimeException
 	{
 		return getLanguageService().map(
 				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId))
-								   .orElse(super.getLocalizedMessage());
+								   .orElseGet(super::getLocalizedMessage);
 	}
 }

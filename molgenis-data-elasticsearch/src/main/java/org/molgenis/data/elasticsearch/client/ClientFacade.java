@@ -32,14 +32,13 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.sort.SortBuilder;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.client.model.SearchHits;
 import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.exception.IndexAlreadyExistsException;
-import org.molgenis.data.index.exception.IndexException;
-import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.data.index.exception.IndexInternalException;
+import org.molgenis.data.index.exception.UnknownIndexInternalException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +86,9 @@ public class ClientFacade implements Closeable
 		this.bulkProcessorFactory = new BulkProcessorFactory();
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public void createIndex(Index index, IndexSettings indexSettings, Stream<Mapping> mappingStream)
 	{
 		if (LOG.isTraceEnabled())
@@ -103,13 +105,12 @@ public class ClientFacade implements Closeable
 		}
 		catch (ResourceAlreadyExistsException e)
 		{
-			LOG.debug("", e);
 			throw new IndexAlreadyExistsException(index.getName());
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error creating index '%s'.", index.getName()));
+			throw new IndexInternalException(format("Error creating index '%s'.", index.getName()));
 		}
 
 		// 'acknowledged' indicates whether the index was successfully created in the cluster before the request timeout
@@ -168,7 +169,7 @@ public class ClientFacade implements Closeable
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error determining index(es) '%s' existence.", toString(indexes)));
+			throw new IndexInternalException(format("Error determining index(es) '%s' existence.", toString(indexes)));
 		}
 
 		boolean exists = indicesExistsResponse.isExists();
@@ -179,6 +180,9 @@ public class ClientFacade implements Closeable
 		return exists;
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public void deleteIndex(Index index)
 	{
 		deleteIndexes(singletonList(index));
@@ -202,17 +206,17 @@ public class ClientFacade implements Closeable
 		catch (ResourceNotFoundException e)
 		{
 			LOG.debug("", e);
-			throw new UnknownIndexException(toString(indexes));
+			throw new UnknownIndexInternalException(indexNames);
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error deleting index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error deleting index(es) '%s'.", toString(indexes)));
 		}
 
 		if (!deleteIndexResponse.isAcknowledged())
 		{
-			throw new IndexException(format("Error deleting index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error deleting index(es) '%s'.", toString(indexes)));
 		}
 		if (LOG.isDebugEnabled())
 		{
@@ -222,7 +226,14 @@ public class ClientFacade implements Closeable
 
 	public void refreshIndexes()
 	{
-		refreshIndexes(singletonList(Index.create("_all")));
+		try
+		{
+			refreshIndexes(singletonList(Index.create("_all")));
+		}
+		catch (UnknownIndexInternalException e)
+		{
+			throw new IllegalStateException(e);
+		}
 	}
 
 	private void refreshIndexes(List<Index> indexes)
@@ -243,19 +254,19 @@ public class ClientFacade implements Closeable
 		catch (ResourceNotFoundException e)
 		{
 			LOG.debug("", e);
-			throw new UnknownIndexException(toIndexNames(indexes));
+			throw new UnknownIndexInternalException(toIndexNames(indexes));
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error refreshing index(es) '%s'.", toString(indexes)));
 		}
 
 		if (refreshResponse.getFailedShards() > 0)
 		{
 			LOG.error(stream(refreshResponse.getShardFailures()).map(ShardOperationFailedException::toString)
 																.collect(joining("\n")));
-			throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error refreshing index(es) '%s'.", toString(indexes)));
 		}
 
 		if (LOG.isDebugEnabled())
@@ -264,6 +275,9 @@ public class ClientFacade implements Closeable
 		}
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public long getCount(Index index)
 	{
 		return getCount(singletonList(index));
@@ -274,6 +288,9 @@ public class ClientFacade implements Closeable
 		return getCount(null, indexes);
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public long getCount(QueryBuilder query, Index index)
 	{
 		return getCount(query, singletonList(index));
@@ -303,23 +320,23 @@ public class ClientFacade implements Closeable
 		catch (ResourceNotFoundException e)
 		{
 			LOG.error("", e);
-			throw new UnknownIndexException(toIndexNames(indexes));
+			throw new UnknownIndexInternalException(toIndexNames(indexes));
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
 		}
 
 		if (searchResponse.getFailedShards() > 0)
 		{
 			LOG.error(
 					stream(searchResponse.getShardFailures()).map(ShardSearchFailure::toString).collect(joining("\n")));
-			throw new IndexException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
 		}
 		if (searchResponse.isTimedOut())
 		{
-			throw new IndexException(format("Timeout while counting docs in index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Timeout while counting docs in index(es) '%s'.", toString(indexes)));
 		}
 
 		long totalHits = searchResponse.getHits().getTotalHits();
@@ -339,11 +356,17 @@ public class ClientFacade implements Closeable
 		return totalHits;
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public SearchHits search(QueryBuilder query, int from, int size, List<Index> indexes)
 	{
 		return search(query, from, size, null, indexes);
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public SearchHits search(QueryBuilder query, int from, int size, Sort sort, Index index)
 	{
 		return search(query, from, size, sort, singletonList(index));
@@ -382,24 +405,24 @@ public class ClientFacade implements Closeable
 		catch (ResourceNotFoundException e)
 		{
 			LOG.error("", e);
-			throw new UnknownIndexException(toIndexNames(indexes));
+			throw new UnknownIndexInternalException(toIndexNames(indexes));
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(
+			throw new IndexInternalException(
 					format("Error searching docs in index(es) '%s' with query '%s'.", toString(indexes), query));
 		}
 		if (searchResponse.getFailedShards() > 0)
 		{
 			LOG.error(
 					stream(searchResponse.getShardFailures()).map(ShardSearchFailure::toString).collect(joining("\n")));
-			throw new IndexException(
+			throw new IndexInternalException(
 					format("Error searching docs in index(es) '%s' with query '%s'.", toString(indexes), query));
 		}
 		if (searchResponse.isTimedOut())
 		{
-			throw new IndexException(
+			throw new IndexInternalException(
 					format("Timeout searching counting docs in index(es) '%s'  with query '%s'.", toString(indexes),
 							query));
 		}
@@ -459,6 +482,9 @@ public class ClientFacade implements Closeable
 		return SearchHits.create(searchHits.getTotalHits(), searchHitList);
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public Aggregations aggregate(List<AggregationBuilder> aggregations, QueryBuilder query, Index index)
 	{
 		return aggregate(aggregations, query, singletonList(index));
@@ -489,22 +515,22 @@ public class ClientFacade implements Closeable
 		catch (ResourceNotFoundException e)
 		{
 			LOG.error("", e);
-			throw new UnknownIndexException(toIndexNames(indexes));
+			throw new UnknownIndexInternalException(toIndexNames(indexes));
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
 		}
 		if (searchResponse.getFailedShards() > 0)
 		{
 			LOG.error(
 					stream(searchResponse.getShardFailures()).map(ShardSearchFailure::toString).collect(joining("\n")));
-			throw new IndexException(format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
 		}
 		if (searchResponse.isTimedOut())
 		{
-			throw new IndexException(format("Timeout aggregating docs in index(es) '%s'.", toString(indexes)));
+			throw new IndexInternalException(format("Timeout aggregating docs in index(es) '%s'.", toString(indexes)));
 		}
 
 		if (LOG.isDebugEnabled())
@@ -543,7 +569,7 @@ public class ClientFacade implements Closeable
 		catch (ElasticsearchException e)
 		{
 			LOG.error("", e);
-			throw new IndexException(
+			throw new IndexInternalException(
 					format("Error explaining doc with id '%s' in index '%s' for query '%s'.", searchHit.getId(),
 							searchHit.getIndex(), query));
 		}
@@ -556,6 +582,9 @@ public class ClientFacade implements Closeable
 		return explainResponse.getExplanation();
 	}
 
+	/**
+	 * @throws UnknownIndexInternalException
+	 */
 	public void index(Index index, Document document)
 	{
 		if (LOG.isTraceEnabled())
@@ -580,12 +609,13 @@ public class ClientFacade implements Closeable
 		catch (ResourceNotFoundException e)
 		{
 			LOG.error("", e);
-			throw new UnknownIndexException(index.getName());
+			throw new UnknownIndexInternalException(new String[] { index.getName()});
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.debug("", e);
-			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
+			throw new IndexInternalException(
+					format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 
 		//TODO: Is it good enough if at least one shard succeeds? Shouldn't we at least log something if failures > 0?
@@ -594,7 +624,8 @@ public class ClientFacade implements Closeable
 			LOG.error(Arrays.stream(indexResponse.getShardInfo().getFailures())
 							//FIXME: logs Object.toString()
 							.map(ReplicationResponse.ShardInfo.Failure::toString).collect(joining("\n")));
-			throw new IndexException(format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
+			throw new IndexInternalException(
+					format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 
 		if (LOG.isDebugEnabled())
@@ -603,6 +634,9 @@ public class ClientFacade implements Closeable
 		}
 	}
 
+	/**
+	 * @throws IndexInternalException UnknownIndexInternalException
+	 */
 	public void deleteById(Index index, Document document)
 	{
 		if (LOG.isTraceEnabled())
@@ -612,10 +646,7 @@ public class ClientFacade implements Closeable
 
 		String indexName = index.getName();
 		String documentId = document.getId();
-		DeleteRequestBuilder deleteRequest = client.prepareDelete()
-												   .setIndex(indexName)
-												   .setType(indexName)
-												   .setId(documentId);
+		DeleteRequestBuilder deleteRequest = client.prepareDelete().setIndex(indexName).setType(indexName).setId(documentId);
 
 		DeleteResponse deleteResponse;
 		try
@@ -625,20 +656,20 @@ public class ClientFacade implements Closeable
 		catch (ResourceNotFoundException e)
 		{
 			LOG.error("", e);
-			throw new UnknownIndexException(index.getName());
+			throw new UnknownIndexInternalException(new String[] { index.getName()});
 		}
 		catch (ElasticsearchException e)
 		{
 			LOG.debug("", e);
-			throw new IndexException(format("Error deleting doc with id '%s' in index '%s'.", documentId, indexName));
+			throw new IndexInternalException(
+					format("Error deleting doc with id '%s' in index '%s'.", documentId, indexName));
 		}
 
 		//TODO: Check why not check shardinfo?
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Deleted doc with id '{}' in index '{}' and status '{}'", documentId, indexName,
-					deleteResponse.getResult());
+			LOG.debug("Deleted doc with id '{}' in index '{}' and status '{}'", documentId, indexName, deleteResponse.getResult());
 		}
 	}
 
@@ -673,7 +704,8 @@ public class ClientFacade implements Closeable
 				XContentBuilder source = documentAction.getDocument().getContent();
 				if (source == null)
 				{
-					throw new IndexException(format("Document action is missing document source '%s'", documentAction));
+					throw new IndexInternalException(
+							format("Document action is missing document source '%s'", documentAction));
 				}
 				docWriteRequest = Requests.indexRequest(indexName)
 										  .type(indexName)
@@ -697,7 +729,7 @@ public class ClientFacade implements Closeable
 			boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			if (!isCompleted)
 			{
-				throw new MolgenisDataException("Failed to complete bulk request within the given time");
+				throw new IndexInternalException("Failed to complete bulk request within the given time");
 			}
 		}
 		catch (InterruptedException e)

@@ -713,16 +713,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		throw result.getResolvedException();
 	}
 
-	//FIXME: message is null???
-	@Test(expectedExceptions = MolgenisPermissionException.class)
-	public void molgenisDataAccessException() throws Exception
-	{
-		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
-			   .thenThrow(new MolgenisPermissionException());
-		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(HREF_ENTITY_ID)).andReturn();
-		throw result.getResolvedException();
-	}
-
 	@Test
 	public void retrieveEntityCollectionCsv() throws Exception
 	{
