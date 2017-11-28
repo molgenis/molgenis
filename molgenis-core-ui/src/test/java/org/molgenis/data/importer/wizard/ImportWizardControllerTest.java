@@ -12,7 +12,7 @@ import org.molgenis.data.config.GroupTestConfig;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.importer.config.ImportTestConfig;
 import org.molgenis.data.importer.wizard.ImportWizardControllerTest.Config;
-import org.molgenis.data.importer.wizard.exception.WriteEntityTypePermissionsException;
+import org.molgenis.data.importer.wizard.exception.EntityTypePermissionsException;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -266,7 +266,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		verify(dataService, times(2)).update(eq(GROUP_AUTHORITY), any(GroupAuthority.class));
 	}
 
-	@Test(expectedExceptions = WriteEntityTypePermissionsException.class)
+	@Test(expectedExceptions = EntityTypePermissionsException.class)
 	public void addGroupEntityClassPermissionsTestNoPermission()
 	{
 		User user = mock(User.class);

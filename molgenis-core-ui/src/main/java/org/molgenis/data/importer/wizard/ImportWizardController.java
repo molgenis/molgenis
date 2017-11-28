@@ -3,7 +3,7 @@ package org.molgenis.data.importer.wizard;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.importer.wizard.exception.WriteEntityTypePermissionsException;
+import org.molgenis.data.importer.wizard.exception.EntityTypePermissionsException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.Href;
@@ -251,7 +251,7 @@ public class ImportWizardController extends AbstractWizardController
 				{
 					throw new UnknownEntityTypeException(entityClassId);
 				}
-				if (value != null) throw new WriteEntityTypePermissionsException(entityType);
+				if (value != null) throw new EntityTypePermissionsException(entityType, WRITE);
 			}
 		});
 	}
