@@ -1,8 +1,11 @@
 package org.molgenis.beacon.controller;
 
+import com.google.common.collect.Lists;
 import org.mockito.Mock;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
+import org.molgenis.beacon.controller.model.BeaconDataset;
+import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.util.GsonConfig;
@@ -17,6 +20,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -54,14 +60,34 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getAllBeaconsTest() throws Exception
 	{
-		mockMvc.perform(get("/beacon/list")).andExpect(status().isOk());
+		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		BeaconResponse beaconResponse = BeaconResponse.create("beaconA", "beacon A", "0.3.0", null, "", "", "",
+				beaconDatasets);
+
+		when(beaconInfoService.getAvailableBeacons()).thenReturn(Lists.newArrayList(beaconResponse));
+
+		mockMvc.perform(get("/beacon/list"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(getBeaconResponseListAsJson()));
+
 		verify(beaconInfoService).getAvailableBeacons();
 	}
 
 	@Test
 	public void infoTest() throws Exception
 	{
-		mockMvc.perform(get("/beacon/{beaconId}", "beaconA")).andExpect(status().isOk());
+		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		BeaconResponse beaconResponse = BeaconResponse.create("beaconA", "beacon A", "0.3.0", null, "", "", "",
+				beaconDatasets);
+
+		when(beaconInfoService.info("beaconA")).thenReturn(beaconResponse);
+
+		mockMvc.perform(get("/beacon/{beaconId}", "beaconA"))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().string(getBeaconResponseAsJson()));
+
 		verify(beaconInfoService).info("beaconA");
 	}
 
@@ -99,6 +125,16 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 			   .andExpect(content().string(getBeaconAlleleResponseAsJson()));
 
 		verify(beaconQueryService, times(1)).query("beaconA", request);
+	}
+
+	private String getBeaconResponseListAsJson()
+	{
+		return "[" + getBeaconResponseAsJson() + "]";
+	}
+
+	private String getBeaconResponseAsJson()
+	{
+		return "{\"id\":\"beaconA\",\"name\":\"beacon A\",\"apiVersion\":\"0.3.0\",\"description\":\"\",\"version\":\"\",\"welcomeUrl\":\"\",\"datasets\":[{\"id\":\"dataset\",\"name\":\"DATA\",\"description\":\"\"}]}";
 	}
 
 	private String getBeaconAlleleResponseAsJson()

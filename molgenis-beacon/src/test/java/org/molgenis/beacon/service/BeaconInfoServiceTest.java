@@ -3,7 +3,6 @@ package org.molgenis.beacon.service;
 import org.mockito.Mock;
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconDataset;
-import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.data.DataService;
 import org.testng.annotations.BeforeMethod;
@@ -36,11 +35,9 @@ public class BeaconInfoServiceTest
 	@Test
 	public void getAvailableBeaconsTest()
 	{
-		BeaconOrganizationResponse beaconOrganizationResponse = BeaconOrganizationResponse.create("organization", "org",
-				"", "", "", "", "");
-		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "", ""));
-		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0",
-				beaconOrganizationResponse, "", "", "", beaconDatasets);
+		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "",
+				beaconDatasets);
 
 		Beacon beacon = mock(Beacon.class);
 		when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
@@ -54,11 +51,9 @@ public class BeaconInfoServiceTest
 	@Test
 	public void infoTest()
 	{
-		BeaconOrganizationResponse beaconOrganizationResponse = BeaconOrganizationResponse.create("organization", "org",
-				"", "", "", "", "");
-		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "", ""));
-		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0",
-				beaconOrganizationResponse, "", "", "", beaconDatasets);
+		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "",
+				beaconDatasets);
 
 		Beacon beacon = mock(Beacon.class);
 		when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
