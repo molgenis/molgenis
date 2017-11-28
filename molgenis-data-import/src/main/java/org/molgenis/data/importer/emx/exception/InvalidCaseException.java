@@ -1,15 +1,12 @@
 package org.molgenis.data.importer.emx.exception;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidCaseException extends EmxException
 {
-	private final static String ERROR_CODE = "E04";
-	private String attributeName;
-	private String sheetName;
-	private String emxAttrName;
+	private static final String ERROR_CODE = "E04";
+	private final String attributeName;
+	private final String sheetName;
+	private final String emxAttrName;
 
 	public InvalidCaseException(String attributeName, String sheetName, String emxAttrName)
 	{
@@ -26,13 +23,8 @@ public class InvalidCaseException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attributeName, sheetName, emxAttrName);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { attributeName, sheetName, emxAttrName };
 	}
-
 }

@@ -1,11 +1,14 @@
 package org.molgenis.data;
 
+import java.text.MessageFormat;
+
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * {@link RuntimeException} with error code.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public abstract class CodedRuntimeException extends RuntimeException implements ErrorCoded
 {
 	private final String errorCode;
@@ -30,9 +33,17 @@ public abstract class CodedRuntimeException extends RuntimeException implements 
 	@Override
 	public String getLocalizedMessage()
 	{
-		return getLanguageService().map(languageService -> languageService.getMessageFormat(errorCode))
-								   .map(format -> format.format(getLocalizedMessageArguments()))
-								   .orElseGet(super::getLocalizedMessage);
+		try
+		{
+			return getLanguageService().map(languageService -> languageService.getMessageFormat(errorCode))
+									   .map(format -> format.format(getLocalizedMessageArguments()))
+									   .orElseGet(super::getLocalizedMessage);
+		}
+		catch (RuntimeException ex)
+		{
+			return MessageFormat.format("FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE {0}.%nFallback message: {1}",
+					errorCode, super.getLocalizedMessage());
+		}
 	}
 
 	/**

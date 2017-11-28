@@ -2,15 +2,12 @@ package org.molgenis.data.semanticsearch.explain.service.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class TermNotFoundException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "Q01";
-	private String description;
+	private final String description;
 
 	public TermNotFoundException(String description)
 	{
@@ -30,12 +27,8 @@ public class TermNotFoundException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, description);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { description };
 	}
 }

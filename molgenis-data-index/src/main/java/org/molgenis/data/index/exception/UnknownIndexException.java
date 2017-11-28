@@ -3,15 +3,12 @@ package org.molgenis.data.index.exception;
 import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnknownIndexException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "IDX02";
-	private EntityType entityType;
+	private static final String ERROR_CODE = "IDX02";
+	private final EntityType entityType;
 
 	public UnknownIndexException(EntityType entityType)
 	{
@@ -26,12 +23,8 @@ public class UnknownIndexException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, entityType);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { entityType };
 	}
 }

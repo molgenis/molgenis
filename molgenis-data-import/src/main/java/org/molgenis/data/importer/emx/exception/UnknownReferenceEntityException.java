@@ -2,23 +2,17 @@ package org.molgenis.data.importer.emx.exception;
 
 import org.molgenis.data.meta.model.Attribute;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownReferenceEntityException extends EmxException
 {
-	private final static String ERROR_CODE = "E12";
-	private String attributeAttribute;
-	private Attribute attribute;
-	private String refEntityName;
-	private int rowIndex;
+	private static final String ERROR_CODE = "E12";
+	private final Attribute attribute;
+	private final String refEntityName;
+	private final int rowIndex;
 
-	public UnknownReferenceEntityException(String attributeAttribute, Attribute attribute, String refEntityName,
-			int rowIndex)
+	public UnknownReferenceEntityException(Attribute attribute, String refEntityName, int rowIndex)
 	{
 		super(ERROR_CODE);
-		this.attributeAttribute = attributeAttribute;
 		this.attribute = attribute;
 		this.refEntityName = refEntityName;
 		this.rowIndex = rowIndex;
@@ -32,12 +26,8 @@ public class UnknownReferenceEntityException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, refEntityName, attribute.getName(), rowIndex);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { refEntityName, attribute.getName(), rowIndex };
 	}
 }

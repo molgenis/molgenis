@@ -1,9 +1,6 @@
 package org.molgenis.data.importer.emx.exception;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidAttributeValueException extends EmxException
 {
 	private final static String ERROR_CODE = "E13";
@@ -32,12 +29,8 @@ public class InvalidAttributeValueException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attribute, value, sheetName, String.join(",", allowedTypes), rowIndex);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { attribute, value, sheetName, String.join(",", allowedTypes), rowIndex };
 	}
 }

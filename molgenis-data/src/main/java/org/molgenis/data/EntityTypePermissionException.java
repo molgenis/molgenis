@@ -3,16 +3,13 @@ package org.molgenis.data;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EntityTypePermissionException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "D14";
-	private Permission permission;
-	private EntityType entityType;
+	private final Permission permission;
+	private final EntityType entityType;
 
 	public EntityTypePermissionException(Permission permission, EntityType entityType)
 	{
@@ -38,13 +35,8 @@ public class EntityTypePermissionException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(format, permission.name(), entityType.getLabel(language));
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { permission.name(), entityType };
 	}
 }

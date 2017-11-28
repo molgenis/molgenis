@@ -1,29 +1,27 @@
 package org.molgenis.data.rest.exception;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Exception to be thrown if a vlue expected in the request was missing
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MissingValueException extends RestApiException
 {
-	private final static String ERROR_CODE = "R05";
-	private String missing_value;
-	private String location;
+	private static final String ERROR_CODE = "R05";
+	private final String missingValue;
+	private final String location;
 
-	public MissingValueException(String missing_value, String location)
+	public MissingValueException(String missingValue, String location)
 	{
 		super(ERROR_CODE);
-		this.missing_value = requireNonNull(missing_value, location);
+		this.missingValue = requireNonNull(missingValue);
 		this.location = requireNonNull(location);
 	}
 
-	public String getMissing_value()
+	public String getMissingValue()
 	{
-		return missing_value;
+		return missingValue;
 	}
 
 	public String getLocation()
@@ -34,16 +32,12 @@ public class MissingValueException extends RestApiException
 	@Override
 	public String getMessage()
 	{
-		return String.format("missing:%s", "location:%s", missing_value, location);
+		return String.format("missing:%s location:%s", missingValue, location);
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, missing_value, location);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { missingValue, location };
 	}
 }

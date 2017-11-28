@@ -2,15 +2,12 @@ package org.molgenis.data.importer.wizard.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class NodePathException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "O01";
-	private String ontologyTerm;
+	private final String ontologyTerm;
 
 	public NodePathException(String ontologyTerm)
 	{
@@ -30,12 +27,8 @@ public class NodePathException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, ontologyTerm);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { ontologyTerm };
 	}
 }

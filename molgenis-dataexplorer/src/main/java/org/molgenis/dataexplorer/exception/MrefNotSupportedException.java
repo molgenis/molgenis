@@ -2,15 +2,12 @@ package org.molgenis.dataexplorer.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MrefNotSupportedException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "G03";
-	private String subject;
+	private final String subject;
 
 	public MrefNotSupportedException(String subject)
 	{
@@ -30,12 +27,8 @@ public class MrefNotSupportedException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, subject);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { subject };
 	}
 }

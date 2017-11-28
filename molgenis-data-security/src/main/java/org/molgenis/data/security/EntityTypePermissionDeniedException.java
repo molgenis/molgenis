@@ -52,6 +52,12 @@ public class EntityTypePermissionDeniedException extends CodedRuntimeException
 		}).orElseGet(super::getLocalizedMessage);
 	}
 
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		throw new UnsupportedOperationException();
+	}
+
 	private static String getPermissionKey(Permission permission)
 	{
 		String messageKeyPostfix;

@@ -1145,7 +1145,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						refEntityType = dataService.getEntityType(refEntityName);
 						if (refEntityType == null)
 						{
-							throw new UnknownReferenceEntityException("refEntity", attribute, refEntityName,
+							throw new UnknownReferenceEntityException(attribute, refEntityName,
 									rowIndex);
 						}
 					}
