@@ -76,9 +76,18 @@ public class Beacon extends StaticEntity
 
 	public BeaconResponse toBeaconResponse()
 	{
-		BeaconOrganizationResponse organization = getOrganization().toBeaconOrganizationResponse();
-		return BeaconResponse.create(getId(), getName(), getApiVersion(), organization, getDescription(), getVersion(),
-				getWelcomeUrl(), entityTypeToBeaconDataset());
+		BeaconOrganizationResponse beaconOrganizationResponse;
+		if (getOrganization() == null)
+		{
+			beaconOrganizationResponse = null;
+		}
+		else
+		{
+			beaconOrganizationResponse = getOrganization().toBeaconOrganizationResponse();
+		}
+
+		return BeaconResponse.create(getId(), getName(), getApiVersion(), beaconOrganizationResponse, getDescription(),
+				getVersion(), getWelcomeUrl(), entityTypeToBeaconDataset());
 	}
 
 	private List<BeaconDataset> entityTypeToBeaconDataset()
