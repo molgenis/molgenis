@@ -1,11 +1,13 @@
 package org.molgenis.beacon.controller;
 
-import org.molgenis.beacon.controller.model.Beacon;
-import org.molgenis.beacon.controller.model.request.BeaconAlleleRequest;
-import org.molgenis.beacon.controller.model.response.BeaconAlleleResponse;
+import org.molgenis.beacon.config.Beacon;
+import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
+import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
 import org.molgenis.beacon.service.BeaconService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.beacon.controller.BeaconController.URI;
@@ -34,9 +36,12 @@ public class BeaconController
 
 	@GetMapping(value = "/query", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public BeaconAlleleResponse query(@RequestParam("chrom") String chromosome, @RequestParam("pos") String position,
-			@RequestParam("ref") String reference, @RequestParam("alt") String allele,
-			@RequestParam("dataset") String entityTypeID)
+	public BeaconAlleleResponse query(@RequestParam("referenceName") String referenceName,
+			@RequestParam("start") Long start, @RequestParam("referenceBases") String referenceBases,
+			@RequestParam("alternateBases") String alternateBases,
+			@RequestParam(value = "assemblyId", required = false) String assemblyId,
+			@RequestParam(value = "datasetIds", required = false) List<String> datasetIds,
+			@RequestParam(value = "includeDatasetResponses", required = false) Boolean includeDatasetResponses)
 	{
 		// TODO create an allele response
 		return null;

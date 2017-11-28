@@ -1,15 +1,16 @@
-package org.molgenis.beacon.controller.model.request;
+package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * Query for information about a specific allele.
  */
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_BeaconAlleleRequest.class)
+@AutoGson(autoValueClass = org.molgenis.beacon.controller.AutoValue_BeaconAlleleRequest.class)
 public abstract class BeaconAlleleRequest
 {
 	/**
@@ -45,6 +46,7 @@ public abstract class BeaconAlleleRequest
 	/**
 	 * Assembly identifier (GRC notation, e.g. `GRCh37`).
 	 */
+	@Nullable
 	public abstract String getAssemblyId();
 
 	/**
@@ -52,6 +54,7 @@ public abstract class BeaconAlleleRequest
 	 * <p>
 	 * If this field is null/not specified, all datasets should be queried.
 	 */
+	@Nullable
 	public abstract List<String> getDatasetIds();
 
 	/**
@@ -61,12 +64,13 @@ public abstract class BeaconAlleleRequest
 	 * <p>
 	 * If null (not specified), the default value of false is assumed.
 	 */
-	public abstract boolean getIncludeDatasetResponses();
+	@Nullable
+	public abstract Boolean getIncludeDatasetResponses();
 
 	public static BeaconAlleleRequest create(String referenceName, Long start, String referenceBases,
 			String alternateBases, String assemblyId, List<String> datasetIds, boolean includeDatasetResponses)
 	{
-		return new AutoValue_BeaconAlleleRequest(referenceName, start, referenceBases, alternateBases, assemblyId,
+		return new org.molgenis.beacon.controller.AutoValue_BeaconAlleleRequest(referenceName, start, referenceBases, alternateBases, assemblyId,
 				datasetIds, includeDatasetResponses);
 	}
 }

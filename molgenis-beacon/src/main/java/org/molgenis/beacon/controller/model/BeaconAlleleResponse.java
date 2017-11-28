@@ -1,9 +1,9 @@
-package org.molgenis.beacon.controller.model.response;
+package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.beacon.controller.model.Beacon;
+import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconError;
-import org.molgenis.beacon.controller.model.request.BeaconAlleleRequest;
+import org.molgenis.beacon.controller.model.response.AutoValue_BeaconAlleleResponse;
 import org.molgenis.gson.AutoGson;
 
 import javax.annotation.Nullable;
