@@ -1,5 +1,7 @@
 package org.molgenis.data.i18n;
 
+import org.apache.commons.lang3.text.ExtendedMessageFormat;
+import org.apache.commons.lang3.text.FormatFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
@@ -8,7 +10,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.UserMetaData.USER;
@@ -25,13 +29,15 @@ public class LanguageServiceImpl implements LanguageService
 	private final DataService dataService;
 	private final AppSettings appSettings;
 	private final LocalizationService localizationService;
+	private final Map<String, FormatFactory> messageFormatRegistry;
 
 	public LanguageServiceImpl(DataService dataService, AppSettings appSettings,
-			LocalizationService localizationService)
+			LocalizationService localizationService, Map<String, FormatFactory> messageFormatRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.appSettings = requireNonNull(appSettings);
 		this.localizationService = requireNonNull(localizationService);
+		this.messageFormatRegistry = requireNonNull(messageFormatRegistry);
 	}
 
 	@Override
@@ -73,6 +79,17 @@ public class LanguageServiceImpl implements LanguageService
 	private MessageSource getMessageSource(String namespace)
 	{
 		return new LocalizationMessageSource(localizationService, namespace, appSettings);
+	}
+
+	@Override
+	public MessageFormat getMessageFormat(String key)
+	{
+		return new ExtendedMessageFormat(getString(key), getCurrentUserLocale(), messageFormatRegistry);
+	}
+
+	private Locale getCurrentUserLocale()
+	{
+		return Locale.forLanguageTag(getCurrentUserLanguageCode());
 	}
 
 	/**
