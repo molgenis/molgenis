@@ -2,6 +2,9 @@ package org.molgenis.beacon.service;
 
 import org.mockito.Mock;
 import org.molgenis.beacon.config.Beacon;
+import org.molgenis.beacon.controller.model.BeaconDataset;
+import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
+import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.data.DataService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,19 +36,35 @@ public class BeaconInfoServiceTest
 	@Test
 	public void getAvailableBeaconsTest()
 	{
+		BeaconOrganizationResponse beaconOrganizationResponse = BeaconOrganizationResponse.create("organization", "org",
+				"", "", "", "", "");
+		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "", ""));
+		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0",
+				beaconOrganizationResponse, "", "", "", beaconDatasets);
+
 		Beacon beacon = mock(Beacon.class);
+		when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
+
 		when(dataService.findAll(BEACON, Beacon.class)).thenReturn(Stream.of(beacon));
 
-		List<Beacon> expectedBeaconList = newArrayList(beacon);
+		List<BeaconResponse> expectedBeaconList = newArrayList(beaconResponse);
 		assertEquals(beaconInfoService.getAvailableBeacons(), expectedBeaconList);
 	}
 
 	@Test
 	public void infoTest()
 	{
+		BeaconOrganizationResponse beaconOrganizationResponse = BeaconOrganizationResponse.create("organization", "org",
+				"", "", "", "", "");
+		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "", ""));
+		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0",
+				beaconOrganizationResponse, "", "", "", beaconDatasets);
+
 		Beacon beacon = mock(Beacon.class);
+		when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
+
 		when(dataService.findOneById(BEACON, "beacon", Beacon.class)).thenReturn(beacon);
 
-		assertEquals(beaconInfoService.info("beacon"), beacon);
+		assertEquals(beaconInfoService.info("beacon"), beaconResponse);
 	}
 }
