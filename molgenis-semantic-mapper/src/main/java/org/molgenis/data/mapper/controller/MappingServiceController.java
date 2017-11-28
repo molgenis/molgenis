@@ -578,29 +578,22 @@ public class MappingServiceController extends PluginController
 		label = trim(label);
 		packageId = trim(packageId);
 
-		try
+		validateEntityName(targetEntityTypeId);
+		if (mappingService.getMappingProject(mappingProjectId) == null)
 		{
-			validateEntityName(targetEntityTypeId);
-			if (mappingService.getMappingProject(mappingProjectId) == null)
-			{
-				throw new UnknownMappingProjectException(mappingProjectId);
-			}
-			if (packageId != null)
-			{
-				Package pack = dataService.getMeta().getPackage(packageId);
-				if (pack == null)
-				{
-					throw new UnknownPackageException(packageId);
-				}
-				if (isSystemPackage(pack))
-				{
-					throw new IllegalTargetPackageException(packageId);
-				}
-			}
+			throw new UnknownMappingProjectException(mappingProjectId);
 		}
-		catch (CodedRuntimeException cre)
+		if (packageId != null)
 		{
-			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(cre.getLocalizedMessage());
+			Package pack = dataService.getMeta().getPackage(packageId);
+			if (pack == null)
+			{
+				throw new UnknownPackageException(packageId);
+			}
+			if (isSystemPackage(pack))
+			{
+				throw new IllegalTargetPackageException(packageId);
+			}
 		}
 
 		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,

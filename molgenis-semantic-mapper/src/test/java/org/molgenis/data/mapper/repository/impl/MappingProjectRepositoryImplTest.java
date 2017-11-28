@@ -3,8 +3,13 @@ package org.molgenis.data.mapper.repository.impl;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.mapper.config.MapperTestConfig;
+import org.molgenis.data.mapper.exception.DuplicateMappingProjectException;
+import org.molgenis.data.mapper.exception.UnknownMappingProjectException;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
@@ -33,7 +38,8 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = MappingProjectRepositoryImplTest.Config.class)
 public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
@@ -128,19 +134,12 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		assertNull(mappingTarget2.getIdentifier());
 	}
 
-	@Test
+	@Test(expectedExceptions = DuplicateMappingProjectException.class, expectedExceptionsMessageRegExp = "id:mappingProjectID")
 	public void testAddWithIdentifier()
 	{
 		MappingProject mappingProject = new MappingProject("My first mapping project", owner);
 		mappingProject.setIdentifier("mappingProjectID");
-		try
-		{
-			mappingProjectRepositoryImpl.add(mappingProject);
-		}
-		catch (MolgenisDataException mde)
-		{
-			assertEquals(mde.getMessage(), "MappingProject already exists");
-		}
+		mappingProjectRepositoryImpl.add(mappingProject);
 	}
 
 	@Test
@@ -176,20 +175,12 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		assertEquals(result, singletonList(mappingProject));
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownMappingProjectException.class, expectedExceptionsMessageRegExp = "id:mappingProjectID")
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");
 		when(dataService.findOneById(TAG, "mappingProjectID")).thenReturn(null);
-		try
-		{
-			mappingProjectRepositoryImpl.update(mappingProject);
-			fail("Expected exception");
-		}
-		catch (MolgenisDataException expected)
-		{
-			assertEquals(expected.getMessage(), "MappingProject does not exist");
-		}
+		mappingProjectRepositoryImpl.update(mappingProject);
 	}
 
 	@Configuration

@@ -2,32 +2,29 @@ package org.molgenis.data.mapper.controller;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.mockito.stubbing.OngoingStubbing;
 import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.jobs.JobExecutor;
+import org.molgenis.data.mapper.exception.IllegalTargetPackageException;
+import org.molgenis.data.mapper.exception.UnknownMappingProjectException;
 import org.molgenis.data.mapper.job.MappingJobExecution;
 import org.molgenis.data.mapper.job.MappingJobExecutionFactory;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.security.user.UserService;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -43,9 +40,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
+import org.springframework.web.util.NestedServletException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -78,25 +77,16 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private MappingServiceController controller = new MappingServiceController();
 
 	@Mock
-	private UserService userService;
-
-	@Mock
 	private MappingJobExecutionFactory mappingJobExecutionFactory;
 
 	@Mock
 	private MappingService mappingService;
 
 	@Mock
-	private AlgorithmService algorithmService;
-
-	@Mock
 	private DataService dataService;
 
 	@Mock
 	private OntologyTagService ontologyTagService;
-
-	@Mock
-	private SemanticSearchService semanticSearchService;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
@@ -106,12 +96,6 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private Model model;
-
-	@Mock
-	private MappingTarget mappingTarget;
-
-	@Mock
-	private EntityType targetEntityType;
 
 	@Mock
 	private EntityType target1;
@@ -142,10 +126,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private static final String ID = "mappingservice";
 	private Attribute ageAttr;
 	private Attribute dobAttr;
-	private Attribute heightAttr;
 
 	private MockMvc mockMvc;
-	private OngoingStubbing<Multimap<Relation, OntologyTerm>> multimapOngoingStubbing;
 
 	public MappingServiceControllerTest()
 	{
@@ -218,7 +200,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		heightAttr = attrMetaFactory.create().setName("height").setDataType(INT);
+		Attribute heightAttr = attrMetaFactory.create().setName("height").setDataType(INT);
 		hop.addAttribute(heightAttr);
 
 		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf")
@@ -371,50 +353,57 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(actual3, "");
 	}
 
-	@Test
-	public void testScheduleMappingJobUnknownMappingProjectId() throws Exception
+	@Test(expectedExceptions = UnknownMappingProjectException.class, expectedExceptionsMessageRegExp = "id:mappingProjectId")
+	public void testScheduleMappingJobUnknownMappingProjectId() throws Throwable
 	{
-		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-										  .param("targetEntityTypeId", "targetEntityTypeId")
-										  .param("label", "label")
-										  .param("package", "package")
-										  .accept("text/plain"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType("text/plain"))
-			   .andExpect(content().string("No mapping project found with ID mappingProjectId"));
+		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+															   .param("targetEntityTypeId", "targetEntityTypeId")
+															   .param("label", "label")
+															   .param("package", "package")
+															   .accept("text/plain");
+		performExceptionalRequest(post);
 	}
 
-	@Test
-	public void testScheduleMappingJobUnknownPackage() throws Exception
+	@Test(expectedExceptions = UnknownPackageException.class, expectedExceptionsMessageRegExp = "id:sys")
+	public void testScheduleMappingJobUnknownPackage() throws Throwable
 	{
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
-		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-										  .param("targetEntityTypeId", "targetEntityTypeId")
-										  .param("label", "label")
-										  .param("package", "sys")
-										  .accept("text/plain"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType("text/plain"))
-			   .andExpect(content().string("No package found with ID sys"));
+		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+															   .param("targetEntityTypeId", "targetEntityTypeId")
+															   .param("label", "label")
+															   .param("package", "sys")
+															   .accept("text/plain");
+		performExceptionalRequest(post);
 	}
 
-	@Test
-	public void testScheduleMappingJobSystemPackage() throws Exception
+	@Test(expectedExceptions = IllegalTargetPackageException.class, expectedExceptionsMessageRegExp = "id:sys")
+	public void testScheduleMappingJobSystemPackage() throws Throwable
 	{
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 		Package systemPackage = mock(Package.class);
 		when(systemPackage.getId()).thenReturn("sys");
 		when(metaDataService.getPackage("sys")).thenReturn(systemPackage);
 
-		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-										  .param("targetEntityTypeId", "targetEntityTypeId")
-										  .param("label", "label")
-										  .param("package", "sys")
-										  .accept("text/plain"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType("text/plain"))
-			   .andExpect(content().string("Package [sys] is a system package."));
+		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+															   .param("targetEntityTypeId", "targetEntityTypeId")
+															   .param("label", "label")
+															   .param("package", "sys")
+															   .accept("text/plain");
+
+		performExceptionalRequest(post);
+	}
+
+	private void performExceptionalRequest(MockHttpServletRequestBuilder post) throws Throwable
+	{
+		try
+		{
+			mockMvc.perform(post);
+		}
+		catch (NestedServletException exception)
+		{
+			throw exception.getCause();
+		}
 	}
 
 	@Test

@@ -10,6 +10,9 @@ import org.molgenis.data.*;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.mapper.exception.IncompatibleDataTypeException;
+import org.molgenis.data.mapper.exception.IncompatibleReferenceException;
+import org.molgenis.data.mapper.exception.MissingAttributeException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -492,7 +495,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		verifyNoMoreInteractions(progress);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Target repository does not contain the following attribute: COUNTRY_1")
+	@Test(expectedExceptions = MissingAttributeException.class, expectedExceptionsMessageRegExp = "name:COUNTRY_1")
 	public void testIncompatibleMetaDataUnknownAttribute()
 	{
 		String targetRepositoryName = "targetRepository";
@@ -520,9 +523,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingService.applyMappings("TestRun", targetRepositoryName, false, "packageId", "label", progress);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
-			"attribute COUNTRY in the mapping target is type INT while attribute "
-					+ "COUNTRY in the target repository is type STRING. Please make sure the types are the same")
+	@Test(expectedExceptions = IncompatibleDataTypeException.class, expectedExceptionsMessageRegExp = "name:COUNTRY type:INT, targetName:COUNTRY targetType:STRING")
 	public void testIncompatibleMetaDataDifferentType()
 	{
 		String targetRepositoryName = "target_repository";
@@ -550,10 +551,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingService.applyMappings("TestRun", targetRepositoryName, false, "packageId", "label", progress);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
-			"In the mapping target, attribute COUNTRY of type XREF has "
-					+ "reference entity mapping_target_ref while in the target repository attribute COUNTRY of type XREF has reference entity target_repository_ref. "
-					+ "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository")
+	@Test(expectedExceptions = IncompatibleReferenceException.class, expectedExceptionsMessageRegExp = "name:COUNTRY type:XREF ref:mapping_target_ref, targetName:COUNTRY, targetType:XREF, targetRef:target_repository_ref")
 	public void testIncompatibleMetaDataDifferentRefEntity()
 	{
 		String targetRepositoryName = "target_repository";
