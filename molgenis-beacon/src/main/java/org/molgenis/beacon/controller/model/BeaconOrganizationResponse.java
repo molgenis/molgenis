@@ -7,7 +7,7 @@ import org.molgenis.gson.AutoGson;
  * Organization owning a beacon.
  */
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_BeaconOrganization.class)
+@AutoGson(autoValueClass = AutoValue_BeaconOrganizationResponse.class)
 public abstract class BeaconOrganizationResponse
 {
 	/**
@@ -49,6 +49,6 @@ public abstract class BeaconOrganizationResponse
 	public static BeaconOrganizationResponse create(String id, String name, String description, String address,
 			String welcomeUrl, String contactUrl, String logoUrl)
 	{
-		return new AutoValue_BeaconOrganization(id, name, description, address, welcomeUrl, contactUrl, logoUrl);
+		return new AutoValue_BeaconOrganizationResponse(id, name, description, address, welcomeUrl, contactUrl, logoUrl);
 	}
 }

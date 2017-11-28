@@ -6,7 +6,7 @@ import org.molgenis.gson.AutoGson;
 import java.util.List;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_Beacon.class)
+@AutoGson(autoValueClass = AutoValue_BeaconResponse.class)
 public abstract class BeaconResponse
 {
 	/**
@@ -53,6 +53,6 @@ public abstract class BeaconResponse
 	public static BeaconResponse create(String id, String name, String apiVersion, BeaconOrganizationResponse organization,
 			String description, String version, String welcomeUrl, List<BeaconDataset> datasets)
 	{
-		return new AutoValue_Beacon(id, name, apiVersion, organization, description, version, welcomeUrl, datasets);
+		return new AutoValue_BeaconResponse(id, name, apiVersion, organization, description, version, welcomeUrl, datasets);
 	}
 }
