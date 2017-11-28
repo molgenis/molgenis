@@ -2,12 +2,9 @@ package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.beacon.config.Beacon;
-import org.molgenis.beacon.controller.model.BeaconError;
-import org.molgenis.beacon.controller.model.response.AutoValue_BeaconAlleleResponse;
 import org.molgenis.gson.AutoGson;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * Beacon's response to a query for information about a specific allele.
@@ -28,7 +25,8 @@ public abstract class BeaconAlleleResponse
 	 * This should be non-null, unless there was an error, in which case
 	 * `error` has to be non-null.
 	 */
-	public abstract boolean getExists();
+	@Nullable
+	public abstract Boolean getExists();
 
 	/**
 	 * Beacon-specific error.
@@ -44,16 +42,9 @@ public abstract class BeaconAlleleResponse
 	 */
 	public abstract BeaconAlleleRequest getAlleleRequest();
 
-	/**
-	 * Indicator of whether the given allele was observed in individual datasets.
-	 * <p>
-	 * This should be non-null if `includeDatasetResponses` in the corresponding {@link BeaconAlleleRequest} is true, and null otherwise.
-	 */
-	public abstract List<BeaconDatasetAlleleResponse> getDatasetAlleleResponses();
-
-	public static BeaconAlleleResponse create(String beaconId, boolean exists, BeaconError error,
-			BeaconAlleleRequest alleleRequest, List<BeaconDatasetAlleleResponse> datasetAlleleResponses)
+	public static BeaconAlleleResponse create(String beaconId, Boolean exists, BeaconError error,
+			BeaconAlleleRequest alleleRequest)
 	{
-		return new AutoValue_BeaconAlleleResponse(beaconId, exists, error, alleleRequest, datasetAlleleResponses);
+		return new AutoValue_BeaconAlleleResponse(beaconId, exists, error, alleleRequest);
 	}
 }

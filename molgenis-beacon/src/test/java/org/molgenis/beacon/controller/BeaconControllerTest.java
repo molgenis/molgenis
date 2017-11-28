@@ -1,7 +1,8 @@
 package org.molgenis.beacon.controller;
 
 import org.mockito.Mock;
-import org.molgenis.beacon.service.BeaconService;
+import org.molgenis.beacon.service.BeaconInfoService;
+import org.molgenis.beacon.service.BeaconQueryService;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -19,13 +20,16 @@ public class BeaconControllerTest
 	private MockMvc mockMvc;
 
 	@Mock
-	private BeaconService beaconService;
+	private BeaconInfoService beaconInfoService;
+
+	@Mock
+	private BeaconQueryService beaconQueryService;
 
 	@BeforeMethod
 	private void beforeMethod()
 	{
 		initMocks(this);
-		BeaconController beaconController = new BeaconController(beaconService);
+		BeaconController beaconController = new BeaconController(beaconInfoService, beaconQueryService);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(beaconController).build();
 	}
@@ -39,6 +43,6 @@ public class BeaconControllerTest
 											.param("alt", "G")
 											.param("dataset", "test")).andExpect(status().isOk());
 
-		verify(beaconService).query("1", 1000L, "A", "G", "test");
+		verify(beaconQueryService).query("1", 1000L, "A", "G", "test");
 	}
 }

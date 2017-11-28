@@ -3,7 +3,8 @@ package org.molgenis.beacon.controller;
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
-import org.molgenis.beacon.service.BeaconService;
+import org.molgenis.beacon.service.BeaconInfoService;
+import org.molgenis.beacon.service.BeaconQueryService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,40 +20,42 @@ public class BeaconController
 {
 	static final String URI = "/beacon";
 
-	private BeaconService beaconService;
+	private BeaconInfoService beaconInfoService;
+	private BeaconQueryService beaconQueryService;
 
-	BeaconController(BeaconService beaconService)
+	BeaconController(BeaconInfoService beaconInfoService, BeaconQueryService beaconQueryService)
 	{
-		this.beaconService = requireNonNull(beaconService);
+		this.beaconInfoService = requireNonNull(beaconInfoService);
+		this.beaconQueryService = requireNonNull(beaconQueryService);
 	}
 
-	@GetMapping(value = "/{beacon}/", produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/list", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Beacon info()
+	public List<Beacon> getAllBeacons()
 	{
-		// TODO query beacon service for info on this beacon
-		return null;
+		return beaconInfoService.getAvailableBeacons();
 	}
 
-	@GetMapping(value = "/query", produces = APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/{beaconId}", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Beacon info(@PathVariable("beaconId") final String beaconId)
+	{
+		return beaconInfoService.info(beaconId);
+	}
+
+	@GetMapping(value = "/{beaconId}/query", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public BeaconAlleleResponse query(@RequestParam("referenceName") String referenceName,
 			@RequestParam("start") Long start, @RequestParam("referenceBases") String referenceBases,
-			@RequestParam("alternateBases") String alternateBases,
-			@RequestParam(value = "assemblyId", required = false) String assemblyId,
-			@RequestParam(value = "datasetIds", required = false) List<String> datasetIds,
-			@RequestParam(value = "includeDatasetResponses", required = false) Boolean includeDatasetResponses)
+			@RequestParam("alternateBases") String alternateBases, @PathVariable("beaconId") final String beaconId)
 	{
-		// TODO create an allele response
-		return null;
+		return beaconQueryService.query(referenceName, start, referenceBases, alternateBases, beaconId);
 	}
 
-	@PostMapping(value = "/query", produces = APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{beaconId}/query", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public BeaconAlleleResponse query(BeaconAlleleRequest request)
+	public BeaconAlleleResponse query(@PathVariable("beaconId") final String beaconId, BeaconAlleleRequest request)
 	{
-		System.out.println("request = " + request);
-		// TODO Do the same thing as the GET query
-		return null;
+		return beaconQueryService.query(beaconId, request);
 	}
 }
