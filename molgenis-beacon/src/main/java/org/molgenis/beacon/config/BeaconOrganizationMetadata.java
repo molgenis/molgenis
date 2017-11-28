@@ -7,11 +7,13 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.beacon.config.BeaconPackage.PACKAGE_BEACON;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class BeaconOrganizationMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "BeaconOrganizationResponse";
+	private static final String SIMPLE_NAME = "BeaconOrganization";
+	public static final String BEACON_ORGANIZATION = PACKAGE_BEACON + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String NAME = "name";
@@ -32,7 +34,7 @@ public class BeaconOrganizationMetadata extends SystemEntityType
 	@Override
 	protected void init()
 	{
-		setLabel("BeaconResponse organization");
+		setLabel("Beacon organization");
 		setPackage(beaconPackage);
 		setDescription("Organization owning a beacon");
 		addAttribute(ID, ROLE_ID).setDataType(STRING)

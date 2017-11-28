@@ -13,7 +13,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 @Component
 public class BeaconMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "BeaconResponse";
+	private static final String SIMPLE_NAME = "Beacon";
 	public static final String BEACON = PACKAGE_BEACON + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
@@ -41,16 +41,16 @@ public class BeaconMetadata extends SystemEntityType
 	@Override
 	protected void init()
 	{
-		setLabel("BeaconResponse");
+		setLabel("Beacon");
 		setPackage(beaconPackage);
-		setDescription("A BeaconResponse based on ga4gh beacon API. See https://github.com/ga4gh for more information");
+		setDescription("A Beacon based on ga4gh beacon API. See https://github.com/ga4gh for more information");
 		addAttribute(ID, ROLE_ID).setDataType(STRING)
 								 .setNillable(false)
-								 .setLabel("BeaconResponse identifier")
+								 .setLabel("Beacon identifier")
 								 .setDescription("Unique identifier of the beacon");
 		addAttribute(NAME).setDataType(STRING)
 						  .setNillable(false)
-						  .setLabel("BeaconResponse name")
+						  .setLabel("Beacon name")
 						  .setDescription("Name of the beacon");
 		addAttribute(API_VERSION).setDataType(STRING)
 								 .setNillable(false)
@@ -60,15 +60,15 @@ public class BeaconMetadata extends SystemEntityType
 		addAttribute(BEACON_ORGANIZATION).setDataType(XREF)
 										 .setRefEntity(beaconOrganizationMetadata)
 										 .setNillable(true)
-										 .setLabel("BeaconResponse organization")
+										 .setLabel("Beacon organization")
 										 .setDescription("Organization owning the beacon");
 		addAttribute(DESCRIPTION).setDataType(TEXT)
 								 .setNillable(true)
-								 .setLabel("BeaconResponse description")
+								 .setLabel("Beacon description")
 								 .setDescription(" Description of the beacon");
 		addAttribute(VERSION).setDataType(STRING)
 							 .setNillable(true)
-							 .setLabel("BeaconResponse version")
+							 .setLabel("Beacon version")
 							 .setDescription(" Version of the beacon");
 		addAttribute(WELCOME_URL).setDataType(STRING)
 								 .setNillable(true)
@@ -77,7 +77,7 @@ public class BeaconMetadata extends SystemEntityType
 		addAttribute(DATA_SETS).setDataType(MREF)
 							   .setRefEntity(entityTypeMetadata)
 							   .setNillable(false)
-							   .setLabel("BeaconResponse datasets")
+							   .setLabel("Beacon datasets")
 							   .setDescription("Data sets served by the beacon");
 	}
 }
