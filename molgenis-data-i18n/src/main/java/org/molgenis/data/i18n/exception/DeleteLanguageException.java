@@ -6,7 +6,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class DeleteLanguageException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "L01";
+	private final static String ERROR_CODE = "L02";
 
 	public DeleteLanguageException()
 	{
