@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.client;
 
 import com.google.common.collect.ImmutableMap;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.index.exception.IndexInternalException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.RetryPolicy;
@@ -35,7 +35,7 @@ public class ConnectionRetryConfig
 		TimeoutRetryPolicy timeoutRetryPolicy = new TimeoutRetryPolicy();
 		timeoutRetryPolicy.setTimeout(MAX_CONNECTION_TIMEOUT.toMillis());
 		ExceptionClassifierRetryPolicy exceptionClassifierRetryPolicy = new ExceptionClassifierRetryPolicy();
-		exceptionClassifierRetryPolicy.setPolicyMap(ImmutableMap.of(MolgenisDataException.class, timeoutRetryPolicy));
+		exceptionClassifierRetryPolicy.setPolicyMap(ImmutableMap.of(IndexInternalException.class, timeoutRetryPolicy));
 		return exceptionClassifierRetryPolicy;
 	}
 

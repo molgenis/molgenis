@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.client;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.index.exception.IndexInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryContext;
@@ -50,7 +50,7 @@ class ClientFactory
 	 * Tries to create a Client connecting to cluster on the given adresses.
 	 *
 	 * @throws InterruptedException if this thread gets interrupted while trying to connect
-	 * @throws MolgenisDataException if maximum number of retries is exceeded
+	 * @throws IndexInternalException if maximum number of retries is exceeded
 	 */
 	Client createClient() throws InterruptedException
 	{
@@ -74,7 +74,7 @@ class ClientFactory
 			result.close();
 			LOG.error("Failed to connect to Elasticsearch cluster '{}' on {}. Retry count = {}", clusterName,
 					inetAddresses, retryContext.getRetryCount());
-			throw new MolgenisDataException(
+			throw new IndexInternalException(
 					String.format("Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
 							clusterName, inetAddresses));
 		}

@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class IndexAlreadyExistsException extends CodedRuntimeException
@@ -14,12 +15,7 @@ public class IndexAlreadyExistsException extends CodedRuntimeException
 	public IndexAlreadyExistsException(String indexName)
 	{
 		super(ERROR_CODE);
-		this.indexName = indexName;
-	}
-
-	public String getIndexName()
-	{
-		return indexName;
+		this.indexName = requireNonNull(indexName);
 	}
 
 	@Override
@@ -35,6 +31,6 @@ public class IndexAlreadyExistsException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, indexName);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }
