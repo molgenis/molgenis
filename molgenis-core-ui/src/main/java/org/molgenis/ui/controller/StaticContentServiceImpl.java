@@ -1,14 +1,12 @@
 package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityTypePermissionException;
+import org.molgenis.data.security.exception.PluginPermissionDeniedException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
-import org.molgenis.ui.settings.StaticContentMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,15 +27,13 @@ public class StaticContentServiceImpl implements StaticContentService
 	private final StaticContentFactory staticContentFactory;
 
 	private final PermissionService permissionService;
-	private final StaticContentMeta staticContentMeta;
 
 	public StaticContentServiceImpl(DataService dataService, StaticContentFactory staticContentFactory,
-			PermissionService permissionService, StaticContentMeta staticContentMeta)
+			PermissionService permissionService)
 	{
 		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);
 		this.staticContentFactory = staticContentFactory;
-		this.staticContentMeta = requireNonNull(staticContentMeta);
 	}
 
 	@Override
@@ -71,8 +67,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return SecurityUtils.currentUserIsAuthenticated() && permissionService.hasPermissionOnPlugin(pluginId,
-				Permission.WRITE);
+		return permissionService.hasPermissionOnPlugin(pluginId, Permission.WRITE);
 	}
 
 	@Override
@@ -83,11 +78,12 @@ public class StaticContentServiceImpl implements StaticContentService
 		return staticContent != null ? staticContent.getContent() : null;
 	}
 
+	@Override
 	public void checkPermissions(String pluginId)
 	{
-		if (!this.isCurrentUserCanEdit(pluginId))
+		if (!isCurrentUserCanEdit(pluginId))
 		{
-			throw new EntityTypePermissionException(Permission.WRITE, staticContentMeta);
+			throw new PluginPermissionDeniedException(pluginId, Permission.WRITE);
 		}
 	}
 }

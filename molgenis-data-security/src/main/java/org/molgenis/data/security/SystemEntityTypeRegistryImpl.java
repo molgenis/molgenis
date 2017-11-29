@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.slf4j.Logger;
