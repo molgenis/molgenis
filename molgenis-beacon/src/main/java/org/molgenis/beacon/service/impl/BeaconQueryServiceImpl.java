@@ -9,7 +9,6 @@ import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -69,12 +68,13 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 	{
 		/* Use a count query to determine if a variation exists */
 		return dataService.count(entityType.getId(),
-				new QueryImpl<>().eq(GenomeBrowserAttributesMetadata.CHROM, referenceName)
+				// FIXME How to use GenomeBrowserAttributes?
+				new QueryImpl<>().eq("#CHROM", referenceName)
 								 .and()
-								 .eq(GenomeBrowserAttributesMetadata.POS, start)
+								 .eq("POS", start)
 								 .and()
-								 .eq(GenomeBrowserAttributesMetadata.REF, referenceBases)
+								 .eq("REF", referenceBases)
 								 .and()
-								 .eq(GenomeBrowserAttributesMetadata.ALT, alternateBases)) > 0;
+								 .eq("ALT", alternateBases)) > 0;
 	}
 }
