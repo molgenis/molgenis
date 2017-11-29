@@ -29,10 +29,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyList;
 import static java.util.Locale.ENGLISH;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -121,14 +125,16 @@ public class NegotiatorControllerTest
 				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
 
 		Entity entity = mock(Entity.class);
-		when(entity.getLabelValue()).thenReturn("Entity One");
+		String entityOneLabel = "Entity One";
+		when(entity.getLabelValue()).thenReturn(entityOneLabel);
 		when(entity.get("enabled")).thenReturn(true);
 
 		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entity));
 		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entity)).thenReturn(TRUE);
 
 		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
-		ExportValidationResponse expected = ExportValidationResponse.create(true, "");
+		List<String> enabledCollections = Collections.singletonList(entityOneLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(true, "", enabledCollections, emptyList());
 
 		assertEquals(actual, expected);
 	}
@@ -173,11 +179,13 @@ public class NegotiatorControllerTest
 				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
 
 		Entity entityEnabled = mock(Entity.class);
-		when(entityEnabled.getLabelValue()).thenReturn("Entity Enabled");
+		String entityOneLabel = "Entity One";
+		String entityDisabledLabel = "Entity Disabled";
+		when(entityEnabled.getLabelValue()).thenReturn(entityOneLabel);
 		when(entityEnabled.get("enabled")).thenReturn(true);
 
 		Entity entityDisabled = mock(Entity.class);
-		when(entityDisabled.getLabelValue()).thenReturn("Entity Disabled");
+		when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
 		when(entityDisabled.get("enabled")).thenReturn(false);
 
 		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entityEnabled, entityDisabled));
@@ -186,7 +194,10 @@ public class NegotiatorControllerTest
 		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
 
 		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
-		ExportValidationResponse expected = ExportValidationResponse.create(true, "Disabled 1");
+		List<String> enabledCollections = Collections.singletonList(entityOneLabel);
+		List<String> disabledCollections = Collections.singletonList(entityDisabledLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(true, "Disabled 1", enabledCollections,
+				disabledCollections);
 
 		assertEquals(actual, expected);
 	}
@@ -198,7 +209,8 @@ public class NegotiatorControllerTest
 				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
 
 		Entity entityDisabled = mock(Entity.class);
-		when(entityDisabled.getLabelValue()).thenReturn("Entity Disabled");
+		String entityDisabledLabel = "Entity Disabled";
+		when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
 		when(entityDisabled.get("enabled")).thenReturn(false);
 
 		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entityDisabled));
@@ -206,7 +218,9 @@ public class NegotiatorControllerTest
 		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
 
 		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
-		ExportValidationResponse expected = ExportValidationResponse.create(false, "No Rows");
+		List<String> disabledCollections = Collections.singletonList(entityDisabledLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(false, "No Rows", emptyList(),
+				disabledCollections);
 
 		assertEquals(actual, expected);
 	}

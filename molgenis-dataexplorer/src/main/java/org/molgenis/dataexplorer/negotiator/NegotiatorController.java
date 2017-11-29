@@ -86,8 +86,8 @@ public class NegotiatorController extends PluginController
 
 		boolean isValidRequest = true;
 		String message = "";
-		List<String> enabledCollectionsLabels = emptyList();
-		List<String> disabledCollectionLabels = emptyList();
+		List<String> enabledCollectionsLabels;
+		List<String> disabledCollectionLabels;
 
 		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
 		if (null != entityConfig)
@@ -96,6 +96,7 @@ public class NegotiatorController extends PluginController
 
 			List<Entity> collectionEntities = getCollectionEntities(request);
 			List<Entity> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
+
 			Function<Entity, String> getLabel = entity -> entity.getLabelValue().toString();
 			disabledCollectionLabels = disabledCollections.stream().map(getLabel).collect(toList());
 			enabledCollectionsLabels = collectionEntities.stream()
