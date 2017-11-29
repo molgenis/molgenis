@@ -45,7 +45,7 @@ public class JsMagmaScriptEvaluator
 	 * @param entity     entity
 	 * @return evaluated expression result, return type depends on the expression.
 	 */
-	public Object eval(String expression, Entity entity)
+	public Object eval(String expression, Entity entity) throws ScriptExecutionException
 	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
@@ -61,7 +61,7 @@ public class JsMagmaScriptEvaluator
 		}
 		catch (Exception e)
 		{
-			return new ScriptExecutionException(e);
+			throw new ScriptExecutionException(e);
 		}
 
 		if (stopwatch != null)

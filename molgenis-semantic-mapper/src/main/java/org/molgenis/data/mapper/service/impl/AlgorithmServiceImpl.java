@@ -225,7 +225,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return convertedValue;
 	}
 
-	LocalDate convertToDate(Object value)
+	private LocalDate convertToDate(Object value)
 	{
 		try
 		{
@@ -235,8 +235,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			LOG.debug("", e);
-			throw new ValueConversionException(value, DATE);
+			throw new ValueConversionException(value, DATE, e);
 		}
 	}
 
@@ -248,8 +247,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			LOG.debug("", e);
-			throw new ValueConversionException(value, DATE_TIME);
+			throw new ValueConversionException(value, DATE_TIME, e);
 		}
 	}
 
@@ -261,8 +259,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			LOG.debug("", e);
-			throw new ValueConversionException(value, DECIMAL);
+			throw new ValueConversionException(value, DECIMAL, e);
 		}
 	}
 
@@ -275,8 +272,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException | ArithmeticException e)
 		{
-			LOG.debug("", e);
-			throw new ValueConversionException(value, INT);
+			throw new ValueConversionException(value, INT, e);
 		}
 		return convertedValue;
 	}
@@ -290,8 +286,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			LOG.debug("", e);
-			throw new ValueConversionException(value, LONG);
+			throw new ValueConversionException(value, LONG, e);
 		}
 		return convertedValue;
 	}

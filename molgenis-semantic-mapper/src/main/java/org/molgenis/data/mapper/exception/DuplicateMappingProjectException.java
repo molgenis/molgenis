@@ -5,6 +5,7 @@ import java.text.MessageFormat;
 import static java.lang.String.format;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class DuplicateMappingProjectException extends MappingServiceException
 {
 	private static final String ERROR_CODE = "M07";

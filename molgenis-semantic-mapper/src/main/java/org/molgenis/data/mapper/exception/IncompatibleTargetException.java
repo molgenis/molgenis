@@ -1,8 +1,9 @@
 package org.molgenis.data.mapper.exception;
 
-public class IncompatibleTargetException extends MappingServiceException
+@SuppressWarnings("squid:MaximumInheritanceDepth")
+public abstract class IncompatibleTargetException extends MappingServiceException
 {
-	protected IncompatibleTargetException(String errorCode)
+	IncompatibleTargetException(String errorCode)
 	{
 		super(errorCode);
 	}

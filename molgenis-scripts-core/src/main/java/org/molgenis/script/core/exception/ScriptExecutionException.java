@@ -5,6 +5,7 @@ import java.text.MessageFormat;
 import static java.lang.String.format;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ScriptExecutionException extends ScriptException
 {
 	private static final String ERROR_CODE = "SC04";

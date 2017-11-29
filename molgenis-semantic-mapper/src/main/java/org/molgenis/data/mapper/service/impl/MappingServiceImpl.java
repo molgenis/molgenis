@@ -304,8 +304,7 @@ public class MappingServiceImpl implements MappingService
 			AttributeType mappingTargetAttributeType = mappingTargetAttribute.getDataType();
 			if (!mappingTargetAttributeType.equals(targetRepositoryAttributeType))
 			{
-				throw new IncompatibleDataTypeException(mappingTargetAttributeName, mappingTargetAttributeType,
-						targetRepositoryAttribute.getName(), targetRepositoryAttributeType);
+				throw new IncompatibleDataTypeException(mappingTargetAttribute, targetRepositoryAttribute);
 			}
 
 			if (isReferenceType(mappingTargetAttribute))
@@ -314,9 +313,7 @@ public class MappingServiceImpl implements MappingService
 				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getId();
 				if (!mappingTargetRefEntityName.equals(targetRepositoryRefEntityName))
 				{
-					throw new IncompatibleReferenceException(mappingTargetAttributeName, mappingTargetAttributeType,
-							mappingTargetRefEntityName, targetRepositoryAttribute.getName(),
-							targetRepositoryAttributeType, targetRepositoryRefEntityName);
+					throw new IncompatibleReferenceException(mappingTargetAttribute, targetRepositoryAttribute);
 				}
 			}
 		}

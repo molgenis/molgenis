@@ -8,6 +8,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ValueConversionException extends MappingServiceException
 {
 	private static final String ERROR_CODE = "M03";
@@ -17,6 +18,13 @@ public class ValueConversionException extends MappingServiceException
 	public ValueConversionException(Object value, AttributeType attributeType)
 	{
 		super(ERROR_CODE);
+		this.value = requireNonNull(value);
+		this.attributeType = requireNonNull(attributeType);
+	}
+
+	public ValueConversionException(Object value, AttributeType attributeType, Throwable cause)
+	{
+		super(ERROR_CODE, cause);
 		this.value = requireNonNull(value);
 		this.attributeType = requireNonNull(attributeType);
 	}

@@ -6,10 +6,11 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MissingAttributeException extends IncompatibleTargetException
 {
 	private static final String ERROR_CODE = "M04";
-	private String attributeName;
+	private final String attributeName;
 
 	public MissingAttributeException(String attributeName)
 	{

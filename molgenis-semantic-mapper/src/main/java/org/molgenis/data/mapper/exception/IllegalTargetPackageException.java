@@ -6,6 +6,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IllegalTargetPackageException extends MappingServiceException
 {
 	private static final String ERROR_CODE = "M02";

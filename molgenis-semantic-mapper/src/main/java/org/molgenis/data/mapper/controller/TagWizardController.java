@@ -83,16 +83,7 @@ public class TagWizardController extends PluginController
 
 		if (StringUtils.isEmpty(target))
 		{
-			Optional<String> findFirst = entityTypeIds.stream().findFirst();
-			if (findFirst.isPresent())
-			{
-				target = findFirst.get();
-			}
-		}
-
-		if (StringUtils.isEmpty(target))
-		{
-			throw new IllegalStateException("There are no entities available!");
+			target = selectFirstEntityTypeAsTarget(entityTypeIds);
 		}
 
 		List<Ontology> ontologies = ontologyService.getOntologies();
@@ -111,6 +102,20 @@ public class TagWizardController extends PluginController
 		model.addAttribute("relations", Relation.values());
 
 		return VIEW_TAG_WIZARD;
+	}
+
+	private String selectFirstEntityTypeAsTarget(List<String> entityTypeIds)
+	{
+		Optional<String> findFirst = entityTypeIds.stream().findFirst();
+
+		if (findFirst.isPresent())
+		{
+			return findFirst.get();
+		}
+		else
+		{
+			throw new IllegalStateException("There are no entities available!");
+		}
 	}
 
 	/**

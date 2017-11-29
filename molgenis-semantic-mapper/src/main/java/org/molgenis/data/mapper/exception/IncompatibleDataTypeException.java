@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.exception;
 
-import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.text.MessageFormat;
 
@@ -8,49 +8,36 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IncompatibleDataTypeException extends IncompatibleTargetException
 {
 	private static final String ERROR_CODE = "M05";
-	private final String mappingTargetAttributeName;
-	private final AttributeType mappingTargetAttributeType;
-	private final String targetRepositoryAttributeName;
-	private final AttributeType targetRepositoryAttributeType;
+	private final transient Attribute mappingTargetAttribute;
+	private final transient Attribute targetRepositoryAttribute;
 
-	public IncompatibleDataTypeException(String mappingTargetAttributeName, AttributeType mappingTargetAttributeType,
-			String targetRepositoryAttributeName, AttributeType targetRepositoryAttributeType)
+	public IncompatibleDataTypeException(Attribute mappingTargetAttribute, Attribute targetRepositoryAttribute)
 	{
 		super(ERROR_CODE);
-		this.mappingTargetAttributeName = requireNonNull(mappingTargetAttributeName);
-		this.mappingTargetAttributeType = requireNonNull(mappingTargetAttributeType);
-		this.targetRepositoryAttributeName = requireNonNull(targetRepositoryAttributeName);
-		this.targetRepositoryAttributeType = requireNonNull(targetRepositoryAttributeType);
+		this.mappingTargetAttribute = requireNonNull(mappingTargetAttribute);
+		this.targetRepositoryAttribute = requireNonNull(targetRepositoryAttribute);
 	}
 
-	public String getMappingTargetAttributeName()
+	public Attribute getMappingTargetAttribute()
 	{
-		return mappingTargetAttributeName;
+		return mappingTargetAttribute;
 	}
 
-	public AttributeType getMappingTargetAttributeType()
+	public Attribute getTargetRepositoryAttribute()
 	{
-		return mappingTargetAttributeType;
-	}
-
-	public String getTargetRepositoryAttributeName()
-	{
-		return targetRepositoryAttributeName;
-	}
-
-	public AttributeType getTargetRepositoryAttributeType()
-	{
-		return targetRepositoryAttributeType;
+		return targetRepositoryAttribute;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return format("name:%s type:%s, targetName:%s targetType:%s", mappingTargetAttributeName,
-				mappingTargetAttributeType, targetRepositoryAttributeName, targetRepositoryAttributeType);
+		return format("name:%s type:%s, targetName:%s targetType:%s", mappingTargetAttribute.getName(),
+				mappingTargetAttribute.getDataType(), targetRepositoryAttribute.getName(),
+				targetRepositoryAttribute.getDataType());
 	}
 
 	@Override
@@ -59,8 +46,10 @@ public class IncompatibleDataTypeException extends IncompatibleTargetException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, mappingTargetAttributeName, mappingTargetAttributeType,
-					targetRepositoryAttributeName, targetRepositoryAttributeType);
+			String language = languageService.getCurrentUserLanguageCode();
+			return MessageFormat.format(format, mappingTargetAttribute.getLabel(language),
+					mappingTargetAttribute.getDataType(), targetRepositoryAttribute.getLabel(language),
+					targetRepositoryAttribute.getDataType());
 		}).orElseGet(super::getLocalizedMessage);
 	}
 }
