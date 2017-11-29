@@ -5,7 +5,9 @@ MOLGENIS Beacon API
 
 ##### What is a MOLGENIS beacon
 A beacon is a gateway to your data. By creating a beacon and pointing at specific data sets within the MOLGENIS database, you allow
-people to query multiple data sets via one entry point.
+people to query multiple data sets via one entry point. 
+
+Read more about beacons [here](https://beacon-network.org/#/about).
 
 The MOLGENIS Beacons are meant to be used with genetic data sets containing at least the following column types:
 * Chromosome
@@ -13,7 +15,6 @@ The MOLGENIS Beacons are meant to be used with genetic data sets containing at l
 * Reference allele(s)
 * Alternative allele(s)
 
-A beacon exposes your data sets to the world, allowing for variant discovery. 
 A MOLGENIS beacon only exposes whether a specific variant **exists**. Nothing more.
 
 ##### What is a MOLGENIS Organization
@@ -112,7 +113,7 @@ When an exception occurs, we return a response containing a BeaconError
   "beaconId": "MyFirstBeacon",
   "error": {
     "errorCode": 1,
-    "message": "Some error occured in EntityType [beacon_set]"
+    "message": "Some error occured when querying [beacon_set]"
   },
   "alleleRequest": {
     "referenceName": "7",
