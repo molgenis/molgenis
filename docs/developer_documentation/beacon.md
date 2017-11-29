@@ -1,9 +1,7 @@
 MOLGENIS Beacon API
 ===================
 
-**
-Create Beacons and Beacon organisations on-top of your genetic data using MOLGENIS Beacons.
-**
+> Create Beacons and Beacon organisations on-top of your genetic data using MOLGENIS Beacons.
 
 ##### What is a MOLGENIS beacon
 A beacon is a gateway to your data. By creating a beacon and pointing at specific data sets within the MOLGENIS database, you allow
@@ -25,6 +23,7 @@ When hooking up your beacon to the global https://beacon-network.org, the organi
 Creating your first beacon
 --------------------------
 When you have uploaded some genetic data sets in the form of an EMX or VCF, you can go to the Dataexplorer to start creating your first beacon.  
+
 The following examples work with [this data](../data/beacon_set.vcf).
 
 Select the *Beacon* table in the dropdown, and add a new row.
@@ -135,7 +134,7 @@ In the dataexplorer, go to the dropdown in the top right, select the *BeaconOrga
 
 And now we can link to this organization by editing the Beacon row we created before
 
-![Adding an Organization to a Beacon ](../images/beacon/create-organization-form.png?raw=true, "beacon/add-organization-to-beacon-form")
+![Adding an Organization to a Beacon ](../images/beacon/add-organization-to-beacon-form.png?raw=true, "beacon/add-organization-to-beacon-form")
  
 And by requesting info on our beacon again  
 `http://localhost:8080/beacon/MyFirstBeacon`
