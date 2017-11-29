@@ -132,7 +132,10 @@ $.when($,
                 negotiatorModal.modal('show')
             }
           } else {
-            molgenis.createAlert([{message: response.message}], 'warning')
+              bootbox.alert({
+                  title: i18n.dataexplorer_directory_export_dialog_warning_title,
+                  message: response.message
+              })
           }
         }
       })
