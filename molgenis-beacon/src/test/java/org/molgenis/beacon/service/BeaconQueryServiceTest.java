@@ -18,7 +18,6 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.*;
 import static org.testng.Assert.assertEquals;
 
 public class BeaconQueryServiceTest
@@ -46,7 +45,7 @@ public class BeaconQueryServiceTest
 		dataset2 = mock(EntityType.class);
 		when(dataset2.getId()).thenReturn("dataset2");
 
-		query = new QueryImpl<>().eq(CHROM, "1").and().eq(POS, 100L).and().eq(REF, "A").and().eq(ALT, "T");
+		query = new QueryImpl<>().eq("#CHROM", "1").and().eq("POS", 100L).and().eq("REF", "A").and().eq("ALT", "T");
 
 		beaconQueryService = new BeaconQueryServiceImpl(dataService);
 	}
