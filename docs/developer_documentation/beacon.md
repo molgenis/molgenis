@@ -78,8 +78,18 @@ Now that we have created a beacon, we can actually already query for variants.
 }
 ```
 
-**Query the beacon for a variant via GET**  
+**Query the beacon for a variant via GET or POST**  
 `http://localhost:8080/beacon/MyFirstBeacon/query?referenceName=7&start=130148888&referenceBases=A&alternateBases=C`
+
+`http://localhost:8080/beacon/MyFirstBeacon/query`  
+```json
+{
+  "referenceName": "7",
+  "start": 130148888,
+  "referenceBases": "A",
+  "alternateBases": "C"
+}
+```
 
 *produces*
 ```json
@@ -95,11 +105,8 @@ Now that we have created a beacon, we can actually already query for variants.
 }
 ```
 
-**Query the beacon for a variant via POST**  
-
-
 **When querying goes wrong**  
-When an exception occured, we return a response containing a BeaconError
+When an exception occurs, we return a response containing a BeaconError
 
 ```json
 {
@@ -117,3 +124,47 @@ When an exception occured, we return a response containing a BeaconError
 }
 ```
 
+Creating an organization
+------------------------
+
+For your beacon to look nice to the world, we will add it to an organization.
+
+In the dataexplorer, go to the dropdown in the top right, select the *BeaconOrganization* table, and add a new row
+
+![Creating a Beacon Organization](../images/beacon/create-organization-form.png?raw=true, "beacon/create-organization-form")
+
+And now we can link to this organization by editing the Beacon row we created before
+
+![Adding an Organization to a Beacon ](../images/beacon/create-organization-form.png?raw=true, "beacon/add-organization-to-beacon-form")
+ 
+And by requesting info on our beacon again  
+`http://localhost:8080/beacon/MyFirstBeacon`
+
+We now get information on our organization
+
+```json
+{
+  "id": "MyFirstBeacon",
+  "name": "My first Beacon",
+  "apiVersion": "v0.3.0",
+  "organization": {
+    "id": "MyFirstBeaconOrganization",
+    "name": "The First Beacon Organization",
+    "description": "The first Beacon organization ever made"
+  },
+  "description": "The first beacon ever made",
+  "version": "v0.0.1",
+  "datasets": [
+    {
+      "id": "BeaconData",
+      "name": "BeaconData"
+    }
+  ]
+}
+```
+
+Specifications
+--------------
+The complete API schema and methods can be found [on this GitHub page](https://github.com/ga4gh/beacon-team/tree/develop/src/main/resources/avro)
+
+Within MOLGENIS we decided on a subset of the API. Due to the dynamic nature of our data, we can not always supply all fields.
