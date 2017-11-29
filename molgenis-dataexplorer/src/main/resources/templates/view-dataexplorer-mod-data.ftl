@@ -31,12 +31,9 @@
                 <div class="pull-right">
                     <a id="download-modal-button" class="btn btn-default" data-toggle="modal"
                        data-target="#downloadModal">Download</a>
-                <#if plugin_settings.data_galaxy_export == true>
-                    <a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal"
-                       data-target="#galaxy-export-modal">Export to Galaxy</a>
-                </#if>
                 <#if showDirectoryButton>
-                    <a id="directory-export-button" class="btn btn-default">${i18n.dataexplorer_directory_export_button?html}</a>
+                    <a id="directory-export-button"
+                       class="btn btn-default">${i18n.dataexplorer_directory_export_button?html}</a>
                 </#if>
                 </div>
             </div>
@@ -108,87 +105,48 @@
 <#-- Entity report modal placeholder -->
 <div id="entityReport"></div>
 
-<#if plugin_settings.data_galaxy_export == true>
-<#-- Galaxy export modal -->
-<form name="galaxy-export-form" class="form-horizontal" action="${context_url?html}/galaxy/export" method="POST">
-    <div class="modal" id="galaxy-export-modal" tabindex="-1" role="dialog" aria-labelledby="galaxy-export-modal-label"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span
-                            aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    <h4 class="modal-title" id="galaxy-export-modal-label">Export data set to Galaxy</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="col-md-3 control-label" for="galaxy-export-url">Galaxy server URL *</label>
-                        <div class="col-md-5">
-                            <input type="text" class="form-control" id="galaxy-export-url" name="galaxyUrl"
-                                   <#if plugin_settings.data_galaxy_url??>value="${plugin_settings.data_galaxy_url?html}" </#if>required><span
-                                class="help-block">e.g. https://usegalaxy.org/</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label" for="galaxy-export-api-key">Galaxy API key *</label>
-                        <div class="col-md-5">
-                            <input type="password" class="form-control" id="galaxy-export-api-key" name="galaxyApiKey"
-                                   <#if plugin_settings.data_galaxy_api_key??>value="${plugin_settings.data_galaxy_api_key?html}" </#if>required><span
-                                class="help-block">See 'Select API Keys' in menu 'User' on e.g. https://usegalaxy.org/</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Export to Galaxy</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
-</#if>
 </div>
 </div>
 <!--[if IE 9]>
 <#-- used to disable the genomebrowser in IE9 -->
-<script>top.molgenis.ie9 = true;</script>
+    <script>top.molgenis.ie9 = true;</script>
 <![endif]-->
 <script>
     <#-- used to disable the genomebrowser in IE10 (which no longer supports conditional comments) -->
     if (Function('/*@cc_on return document.documentMode===10@*/')()) {
-        top.molgenis.ie10 = true;
+        top.molgenis.ie10 = true
     }
     <#-- load js dependencies -->
     $.when(
-            $.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}),
-            $.ajax("<@resource_href "/js/dalliance-all.min.js"/>", {'cache': true}),
-            $.ajax("<@resource_href "/js/dataexplorer-directory.js"/>", {'cache': true}))
+            $.ajax('<@resource_href "/js/dataexplorer-data.js"/>', {'cache': true}),
+            $.ajax('<@resource_href "/js/dalliance-all.min.js"/>', {'cache': true}),
+            $.ajax('<@resource_href "/js/dataexplorer-directory.js"/>', {'cache': true}))
             .done(function () {
             <#-- do *not* js escape values below -->
                 molgenis.dataexplorer.data.setGenomeBrowserSettings({
                 ${plugin_settings.gb_init_location},
                         coordSystem
-                : ${plugin_settings.gb_init_coord_system},
+            : ${plugin_settings.gb_init_coord_system},
                 sources: ${plugin_settings.gb_init_sources},
                 browserLinks: ${plugin_settings.gb_init_browser_links}
                         }
-                )
-                ;
-                molgenis.dataexplorer.data.setGenomeBrowserTracks([<#list genomeTracks as genomeTrack>${genomeTrack},</#list>]);
+            )
+
+                molgenis.dataexplorer.data.setGenomeBrowserTracks([<#list genomeTracks as genomeTrack>${genomeTrack},</#list>])
             <#if pos_attr?? && chrom_attr??>
                 molgenis.dataexplorer.setGenomeAttributes('${pos_attr}', '${chrom_attr}')
-                molgenis.dataexplorer.data.setGenomeBrowserAttributes('${pos_attr}', '${chrom_attr}');
+                molgenis.dataexplorer.data.setGenomeBrowserAttributes('${pos_attr}', '${chrom_attr}')
             </#if>
                 if (molgenis.dataexplorer.data.doShowGenomeBrowser() === true) {
-                    molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${plugin_settings.gb_init_highlight_region?c}});
+                    molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${plugin_settings.gb_init_highlight_region?c}})
                 }
                 else {
-                    $('#genomebrowser').css('display', 'none');
+                    $('#genomebrowser').css('display', 'none')
                 }
 
-                molgenis.dataexplorer.data.createDataTable();
+                molgenis.dataexplorer.data.createDataTable()
             })
             .fail(function () {
-                molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
-            });
+                molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error')
+            })
 </script>
