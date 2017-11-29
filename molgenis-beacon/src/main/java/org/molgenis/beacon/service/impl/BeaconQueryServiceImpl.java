@@ -1,10 +1,11 @@
-package org.molgenis.beacon.service;
+package org.molgenis.beacon.service.impl;
 
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.config.BeaconMetadata;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
 import org.molgenis.beacon.controller.model.BeaconError;
+import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -66,7 +67,7 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 	private boolean queryBeaconDataset(EntityType entityType, String referenceName, Long start, String referenceBases,
 			String alternateBases)
 	{
-		/* Use the count() method to determine if a variation exists */
+		/* Use a count query to determine if a variation exists */
 		return dataService.count(entityType.getId(),
 				new QueryImpl<>().eq(GenomeBrowserAttributesMetadata.CHROM, referenceName)
 								 .and()

@@ -1,7 +1,8 @@
-package org.molgenis.beacon.service;
+package org.molgenis.beacon.service.impl;
 
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconResponse;
+import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.data.DataService;
 import org.springframework.stereotype.Component;
 

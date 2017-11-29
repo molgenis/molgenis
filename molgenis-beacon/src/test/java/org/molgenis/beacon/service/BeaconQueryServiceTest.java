@@ -7,6 +7,7 @@ import org.molgenis.beacon.config.BeaconMetadata;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
 import org.molgenis.beacon.controller.model.BeaconError;
+import org.molgenis.beacon.service.impl.BeaconQueryServiceImpl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;

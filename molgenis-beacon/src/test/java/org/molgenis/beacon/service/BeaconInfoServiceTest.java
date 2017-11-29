@@ -4,6 +4,7 @@ import org.mockito.Mock;
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconDataset;
 import org.molgenis.beacon.controller.model.BeaconResponse;
+import org.molgenis.beacon.service.impl.BeaconInfoServiceImpl;
 import org.molgenis.data.DataService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
