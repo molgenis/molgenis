@@ -26,12 +26,12 @@ public class GalaxyDataExporter
 		this.galaxyInstance = GalaxyInstanceFactory.get(galaxyUrl, galaxyApiKey);
 	}
 
-	public void export(String dataSetName, File tsvFile) throws GalaxyDataExportException
+	public void export(String dataSetName, File tsvFile)
 	{
 		export(dataSetName, tsvFile, MOLGENIS_HISTORY_NAME);
 	}
 
-	public void export(String dataSetName, File tsvFile, String historyName) throws GalaxyDataExportException
+	public void export(String dataSetName, File tsvFile, String historyName) throws RuntimeException
 	{
 		try
 		{
@@ -66,7 +66,7 @@ public class GalaxyDataExporter
 		}
 		catch (RuntimeException e)
 		{
-			throw new GalaxyDataExportException(
+			throw new RuntimeException(
 					"An error occured while communicating with the Galaxy server. Please verify that the Galaxy server URL and API key are correct",
 					e);
 		}

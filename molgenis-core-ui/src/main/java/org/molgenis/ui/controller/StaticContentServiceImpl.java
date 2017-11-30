@@ -1,13 +1,14 @@
 package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisPermissionException;
+import org.molgenis.data.EntityTypePermissionException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
+import org.molgenis.ui.settings.StaticContentMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,15 @@ public class StaticContentServiceImpl implements StaticContentService
 	private final StaticContentFactory staticContentFactory;
 
 	private final PermissionService permissionService;
+	private final StaticContentMeta staticContentMeta;
 
 	public StaticContentServiceImpl(DataService dataService, StaticContentFactory staticContentFactory,
-			PermissionService permissionService)
+			PermissionService permissionService, StaticContentMeta staticContentMeta)
 	{
 		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);
 		this.staticContentFactory = staticContentFactory;
+		this.staticContentMeta = requireNonNull(staticContentMeta);
 	}
 
 	@Override
@@ -84,7 +87,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	{
 		if (!this.isCurrentUserCanEdit(pluginId))
 		{
-			throw new MolgenisPermissionException("No write permissions on static content page");
+			throw new EntityTypePermissionException(Permission.WRITE, staticContentMeta);
 		}
 	}
 }

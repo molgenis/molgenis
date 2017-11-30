@@ -13,6 +13,11 @@ public class UnknownDistributionException extends FairException
 		this.distributionId = requireNonNull(distributionId);
 	}
 
+	public String getDistributionId()
+	{
+		return distributionId;
+	}
+
 	@Override
 	public String getMessage()
 	{

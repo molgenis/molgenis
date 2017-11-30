@@ -20,6 +20,11 @@ public class InvalidExpandException extends RestApiException
 		this.expand = requireNonNull(expand);
 	}
 
+	public Object getExpand()
+	{
+		return expand;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -33,6 +38,6 @@ public class InvalidExpandException extends RestApiException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, expand);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

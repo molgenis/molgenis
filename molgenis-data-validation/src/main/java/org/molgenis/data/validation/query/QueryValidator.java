@@ -228,7 +228,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value);
+				throw new AttributeValueConversionFailedException(attr, value, e);
 			}
 		}
 		else if (value instanceof Number)
@@ -264,7 +264,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value);
+				throw new AttributeValueConversionFailedException(attr, value, e);
 			}
 		}
 		else if (value instanceof Number)
@@ -314,7 +314,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value);
+				throw new AttributeValueConversionFailedException(attr, value, e);
 			}
 		}
 		else if (value instanceof Number)
@@ -351,7 +351,7 @@ public class QueryValidator
 			}
 			catch (DateTimeParseException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value);
+				throw new AttributeValueConversionFailedException(attr, value, e);
 			}
 		}
 		else
@@ -384,7 +384,7 @@ public class QueryValidator
 			}
 			catch (DateTimeParseException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value);
+				throw new AttributeValueConversionFailedException(attr, value, e);
 			}
 		}
 		else

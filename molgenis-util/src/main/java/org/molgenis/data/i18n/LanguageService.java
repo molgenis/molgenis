@@ -2,6 +2,7 @@ package org.molgenis.data.i18n;
 
 import org.springframework.context.support.MessageSourceResourceBundle;
 
+import java.text.MessageFormat;
 import java.util.stream.Stream;
 
 public interface LanguageService
@@ -27,6 +28,8 @@ public interface LanguageService
 	}
 
 	String getString(String key);
+	
+	MessageFormat getMessageFormat(String key);
 
 	MessageSourceResourceBundle getBundle();
 

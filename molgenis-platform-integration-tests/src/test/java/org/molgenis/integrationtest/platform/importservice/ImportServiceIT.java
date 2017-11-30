@@ -7,7 +7,6 @@ import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisPermissionException;
 import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -118,7 +117,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		catch (Exception e)
 		{
 			LOG.error("File name: [{}]", resourceName);
-			throw new MolgenisPermissionException(e);
+			throw new RuntimeException(e);
 		}
 	}
 

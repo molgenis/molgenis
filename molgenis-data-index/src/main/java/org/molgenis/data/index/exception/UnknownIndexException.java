@@ -1,20 +1,37 @@
 package org.molgenis.data.index.exception;
 
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
+import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.data.meta.model.EntityType;
 
-@Deprecated // FIXME extend from CodedRuntimeException
-public class UnknownIndexException extends IndexException
+import java.text.MessageFormat;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
+
+public class UnknownIndexException extends CodedRuntimeException
 {
-	private static final long serialVersionUID = 1L;
+	private final static String ERROR_CODE = "IDX02";
+	private EntityType entityType;
 
-	public UnknownIndexException(String indexName)
+	public UnknownIndexException(EntityType entityType)
 	{
-		super(String.format("Index '%s' not found.", indexName));
+		super(ERROR_CODE);
+		this.entityType = requireNonNull(entityType);
 	}
 
-	public UnknownIndexException(String[] indexNames)
+	@Override
+	public String getMessage()
 	{
-		super(String.format("One or more indexes '%s' not found.", stream(indexNames).collect(joining(", "))));
+		return String.format("entityType:%s", entityType.getId());
+	}
+
+	@Override
+	public String getLocalizedMessage()
+	{
+		return getLanguageService().map(languageService ->
+		{
+			String format = languageService.getString(ERROR_CODE);
+			return MessageFormat.format(format, entityType);
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

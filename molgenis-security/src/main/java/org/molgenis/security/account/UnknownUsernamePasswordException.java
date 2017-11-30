@@ -26,6 +26,6 @@ public class UnknownUsernamePasswordException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return format;
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

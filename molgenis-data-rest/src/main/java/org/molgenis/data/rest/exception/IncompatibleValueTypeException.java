@@ -25,6 +25,21 @@ public class IncompatibleValueTypeException extends RestApiException
 		this.expectedTypes = requireNonNull(expectedTypes);
 	}
 
+	public Attribute getAttribute()
+	{
+		return attribute;
+	}
+
+	public String getType()
+	{
+		return type;
+	}
+
+	public String[] getExpectedTypes()
+	{
+		return expectedTypes;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -39,6 +54,6 @@ public class IncompatibleValueTypeException extends RestApiException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, attribute.getName(), type, String.join(",", expectedTypes));
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }
