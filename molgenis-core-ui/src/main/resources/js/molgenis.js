@@ -63,7 +63,10 @@
         $.each(alerts, function (i, alert) {
             if (i > 0)
                 items.push('<br/>');
-            items.push('<span>' + alert.message + '</span>');
+            var message = '<span>' + alert.message;
+            if (alert.code) message += ' (' + alert.code + ')';
+            message += '</span>';
+            items.push(message)
         });
         items.push('</div>');
 

@@ -6,7 +6,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.MetaDataService;
@@ -119,7 +118,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 			{
 				throw (RuntimeException) exception.getCause();
 			}
-			throw new MolgenisDataException(exception);
+			throw new RuntimeException(exception);
 		}
 	}
 

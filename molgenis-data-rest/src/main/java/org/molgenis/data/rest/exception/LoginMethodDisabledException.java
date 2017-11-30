@@ -30,6 +30,6 @@ public class LoginMethodDisabledException extends RestApiException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, null, null, null);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

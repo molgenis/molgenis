@@ -18,6 +18,16 @@ public class UnknownPackageImportException extends ImporterException
 		this.packageId = packageId;
 	}
 
+	public String getEntityId()
+	{
+		return entityId;
+	}
+
+	public String getPackageId()
+	{
+		return packageId;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -31,6 +41,6 @@ public class UnknownPackageImportException extends ImporterException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, packageId.toString(), entityId.toString());
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

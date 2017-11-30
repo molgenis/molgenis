@@ -2,7 +2,6 @@ package org.molgenis.dataexplorer.negotiator;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
@@ -10,6 +9,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.exception.MissingConfigException;
+import org.molgenis.dataexplorer.exception.MrefNotSupportedException;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
@@ -108,7 +109,7 @@ public class NegotiatorController extends PluginController
 		}
 		else
 		{
-			throw new MolgenisDataException(i18n.getString("dataexplorer_directory_no_config"));
+			throw new MissingConfigException("Negotiator");
 		}
 		return ExportValidationResponse.create(isValidRequest, message);
 	}
@@ -158,11 +159,10 @@ public class NegotiatorController extends PluginController
 
 		if (EntityTypeUtils.isMultipleReferenceType(attribute))
 		{
-			throw new MolgenisDataException(
-					String.format("The %s cannot be a mref of categorical mref", attribute.getName()));
+			throw new MrefNotSupportedException(attribute.getName());
 		}
 
-		//If the configured attr is an xref or categorical we asume the id value should be used
+		//If the configured attr is an xref or categorical we assume the id value should be used
 		if (EntityTypeUtils.isReferenceType(attribute))
 		{
 			stringValue = value != null ? ((Entity) value).getIdValue().toString() : "";

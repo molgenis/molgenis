@@ -4,6 +4,7 @@ import org.molgenis.data.meta.model.Attribute;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class DateParseException extends CodedRuntimeException
@@ -15,8 +16,18 @@ public class DateParseException extends CodedRuntimeException
 	public DateParseException(Attribute attribute, String value)
 	{
 		super(ERROR_CODE);
-		this.attribute = attribute;
-		this.value = value;
+		this.attribute = requireNonNull(attribute);
+		this.value = requireNonNull(value);
+	}
+
+	public Attribute getAttribute()
+	{
+		return attribute;
+	}
+
+	public String getValue()
+	{
+		return value;
 	}
 
 	@Override
@@ -32,6 +43,6 @@ public class DateParseException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, attribute.getName(), value);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

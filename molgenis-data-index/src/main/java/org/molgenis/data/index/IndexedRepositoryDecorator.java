@@ -5,6 +5,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.data.index.exception.UnknownIndexInternalException;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryUtils.*;
@@ -140,7 +140,7 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 	 * @param action the action that gets executed
 	 * @param <R> the result type of the action
 	 * @return the result
-	 * @throws MolgenisDataException if the action still failed when the index was stable, with a translated error message.
+	 * @throws UnknownIndexException if the action still failed when the index was stable, with a translated error message.
 	 */
 	private <R> R tryTwice(Supplier<R> action)
 	{
@@ -148,18 +148,16 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 		{
 			return action.get();
 		}
-		catch (UnknownIndexException e)
+		catch (UnknownIndexInternalException e)
 		{
 			waitForIndexToBeStable();
 			try
 			{
 				return action.get();
 			}
-			catch (UnknownIndexException e1)
+			catch (UnknownIndexInternalException e1)
 			{
-				throw new MolgenisDataException(
-						format("Error executing query, index for entity type '%s' with id '%s' does not exist",
-								getEntityType().getLabel(), getEntityType().getId()));
+				throw new UnknownIndexException(getEntityType());
 			}
 		}
 	}

@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnknownActionException extends CodedRuntimeException
@@ -14,7 +15,12 @@ public class UnknownActionException extends CodedRuntimeException
 	public UnknownActionException(String action)
 	{
 		super(ERROR_CODE);
-		this.action = action;
+		this.action = requireNonNull(action);
+	}
+
+	public String getAction()
+	{
+		return action;
 	}
 
 	@Override
@@ -30,6 +36,6 @@ public class UnknownActionException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, action);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

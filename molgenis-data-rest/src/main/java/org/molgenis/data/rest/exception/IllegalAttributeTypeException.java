@@ -21,6 +21,11 @@ public class IllegalAttributeTypeException extends RestApiException
 		this.attributeType = requireNonNull(attributeType);
 	}
 
+	public AttributeType getAttributeType()
+	{
+		return attributeType;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -34,6 +39,6 @@ public class IllegalAttributeTypeException extends RestApiException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, attributeType.name());
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }
