@@ -1,11 +1,10 @@
 package org.molgenis.data;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 /**
  * TODO discuss: extend from UncategorizedDataAccessException?
  */
-public class UnknownDataAccessException extends DataAccessException
+@SuppressWarnings("squid:S2166")
+public class UnknownDataAccessException extends ErrorCodedDataAccessException
 {
 	private static final String ERROR_CODE = "D99";
 
@@ -21,9 +20,8 @@ public class UnknownDataAccessException extends DataAccessException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .orElse(super.getLocalizedMessage());
+		return new Object[0];
 	}
 }

@@ -1,11 +1,8 @@
 package org.molgenis.data;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-@SuppressWarnings("squid:S1948")
+@SuppressWarnings({ "squid:MaximumInheritanceDepth" })
 public class UnknownPackageException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D07";
@@ -25,13 +22,9 @@ public class UnknownPackageException extends UnknownDataException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, packageId);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { packageId };
 	}
 }
 

@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 public class SystemMetadataAggregationException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "S04";
-	private final EntityType entityType;
+	private final transient EntityType entityType;
 
 	public SystemMetadataAggregationException(EntityType entityType)
 	{

@@ -1,9 +1,6 @@
 package org.molgenis.data.validation;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown to indicate that data values are not unique when updating data.
@@ -32,11 +29,9 @@ public class UniqueConstraintViolationException extends DataIntegrityViolationEx
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(
-				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId,
-						attributeName, valueAsString)).orElse(super.getLocalizedMessage());
+		return new Object[] { entityTypeId, attributeName, valueAsString };
 	}
 }
 

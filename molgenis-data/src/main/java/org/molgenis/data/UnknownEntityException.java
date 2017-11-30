@@ -2,18 +2,15 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.model.EntityType;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-@SuppressWarnings("squid:S1948")
+@SuppressWarnings({ "squid:MaximumInheritanceDepth" })
 public class UnknownEntityException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D02";
 
-	private final EntityType entityType;
-	private final Object entityId;
+	private final transient EntityType entityType;
+	private final transient Object entityId;
 
 	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
@@ -29,14 +26,9 @@ public class UnknownEntityException extends UnknownDataException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(format, entityId.toString(), entityType.getLabel(language));
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { entityType, entityId };
 	}
 }
 

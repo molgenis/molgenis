@@ -1,13 +1,11 @@
 package org.molgenis.data.validation;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown to indicate that existing data contains <tt>null</tt> values when creating a not-null constraint.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class NotNullConstraintCreationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V05";
@@ -29,10 +27,8 @@ public class NotNullConstraintCreationException extends DataIntegrityViolationEx
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(
-				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), attributeName,
-						entityTypeId)).orElse(super.getLocalizedMessage());
+		return new Object[] { attributeName, entityTypeId };
 	}
 }
