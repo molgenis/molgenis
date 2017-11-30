@@ -28,6 +28,7 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.test.MockMvcExceptionalRequestPerformer;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
@@ -686,7 +687,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		MockHttpServletRequestBuilder request = get(RestController.BASE_URI + "/bogus/1");
 		exceptionalRequestPerformer.perform(request);
 	}
-	
+
 	@Test
 	public void retrieveEntityCollectionCsv() throws Exception
 	{

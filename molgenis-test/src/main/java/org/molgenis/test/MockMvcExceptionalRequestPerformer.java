@@ -1,4 +1,4 @@
-package org.molgenis.data.rest;
+package org.molgenis.test;
 
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
