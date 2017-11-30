@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.script.*;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -64,7 +65,7 @@ public class NashornScriptEngine
 			}
 			catch (IOException e)
 			{
-				throw new ScriptExecutionException(e);
+				throw new UncheckedIOException(e);
 			}
 		});
 

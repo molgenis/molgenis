@@ -14,6 +14,7 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -209,7 +210,23 @@ public class NegotiatorController extends PluginController
 
 	private boolean evaluateExpressionOnEntity(String expression, Entity entity)
 	{
-		return expression == null ? true : Boolean.valueOf(jsMagmaScriptEvaluator.eval(expression, entity).toString());
+		if (expression == null)
+		{
+			return true;
+		}
+		else
+		{
+			Object value;
+			try
+			{
+				value = jsMagmaScriptEvaluator.eval(expression, entity);
+			}
+			catch (ScriptExecutionException see)
+			{
+				return false;
+			}
+			return value != null ? Boolean.valueOf(value.toString()) : false;
+		}
 	}
 
 	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(NegotiatorRequest request, NegotiatorConfig config,

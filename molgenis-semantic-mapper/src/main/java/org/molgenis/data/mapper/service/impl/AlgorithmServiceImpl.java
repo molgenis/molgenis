@@ -136,6 +136,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			return null;
 		}
+
 		Object value = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity);
 		return convert(value, attributeMapping.getTargetAttribute());
 	}

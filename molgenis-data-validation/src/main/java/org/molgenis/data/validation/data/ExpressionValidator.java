@@ -3,6 +3,7 @@ package org.molgenis.data.validation.data;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -60,7 +61,17 @@ public class ExpressionValidator
 		List<Boolean> validationResults = new ArrayList<>(expressions.size());
 		for (String expression : expressions)
 		{
-			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
+			Object value;
+			try
+			{
+				value = jsMagmaScriptEvaluator.eval(expression, entity);
+			}
+			catch (ScriptExecutionException see)
+			{
+				validationResults.add(false);
+				continue;
+			}
+
 			validationResults.add(value != null ? Boolean.valueOf(value.toString()) : null);
 		}
 		return validationResults;
