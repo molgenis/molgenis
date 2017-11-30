@@ -8,7 +8,7 @@ import org.molgenis.gson.AutoGson;
  */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconError.class)
-public abstract class BeaconError extends RuntimeException
+public abstract class BeaconError
 {
 	/**
 	 * Numeric error code.
