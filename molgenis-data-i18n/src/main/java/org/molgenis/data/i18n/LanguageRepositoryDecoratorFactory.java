@@ -23,6 +23,6 @@ public class LanguageRepositoryDecoratorFactory
 	@Override
 	public Repository<Language> createDecoratedRepository(Repository<Language> repository)
 	{
-		return new LanguageRepositoryDecorator(repository, languageService);
+		return new LanguageRepositoryDecorator(repository);
 	}
 }

@@ -21,6 +21,6 @@ public class IncompatibleSystemMetadataException extends ImporterException
 	public String getLocalizedMessage()
 	{
 		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .orElse(super.getLocalizedMessage());
+								   .orElseGet(super::getLocalizedMessage);
 	}
 }

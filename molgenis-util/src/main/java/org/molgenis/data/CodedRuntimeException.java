@@ -14,6 +14,12 @@ public class CodedRuntimeException extends RuntimeException implements ErrorCode
 		this.errorCode = requireNonNull(errorCode);
 	}
 
+	protected CodedRuntimeException(String errorCode, Throwable cause)
+	{
+		super(cause);
+		this.errorCode = errorCode;
+	}
+
 	@Override
 	public String getErrorCode()
 	{

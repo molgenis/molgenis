@@ -21,6 +21,16 @@ public class EditSystemEntityTypeException extends CodedRuntimeException
 		this.entityType = requireNonNull(entityType);
 	}
 
+	public String getOperation()
+	{
+		return operation;
+	}
+
+	public EntityType getEntityType()
+	{
+		return entityType;
+	}
+
 	@Override
 	public String getMessage()
 	{
@@ -34,6 +44,6 @@ public class EditSystemEntityTypeException extends CodedRuntimeException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, operation, entityType.getLabel());
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

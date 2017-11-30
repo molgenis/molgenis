@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.Sort;
+import org.molgenis.data.i18n.Labeled;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.support.StaticEntity;
 
@@ -29,7 +30,7 @@ import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
  */
-public class Attribute extends StaticEntity
+public class Attribute extends StaticEntity implements Labeled
 {
 	private transient AttributeType cachedDataType;
 

@@ -1,10 +1,14 @@
 package org.molgenis.data.security.meta;
 
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.exception.SystemMetadataAggregationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -16,7 +20,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.Permission.COUNT;
@@ -217,7 +220,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		}
 		else
 		{
-			throw new MolgenisPermissionException(format("Aggregation on entity [%s] not allowed", getName()));
+			throw new SystemMetadataAggregationException(getEntityType());
 		}
 	}
 

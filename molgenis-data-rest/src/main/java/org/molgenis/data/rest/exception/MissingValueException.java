@@ -18,7 +18,17 @@ public class MissingValueException extends RestApiException
 	{
 		super(ERROR_CODE);
 		this.missing_value = requireNonNull(missing_value, location);
-		this.location = location;
+		this.location = requireNonNull(location);
+	}
+
+	public String getMissing_value()
+	{
+		return missing_value;
+	}
+
+	public String getLocation()
+	{
+		return location;
 	}
 
 	@Override
@@ -34,6 +44,6 @@ public class MissingValueException extends RestApiException
 		{
 			String format = languageService.getString(ERROR_CODE);
 			return MessageFormat.format(format, missing_value, location);
-		}).orElse(super.getLocalizedMessage());
+		}).orElseGet(super::getLocalizedMessage);
 	}
 }

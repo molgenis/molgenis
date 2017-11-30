@@ -13,6 +13,11 @@ class UnknownCatalogException extends FairException
 		this.catalogId = requireNonNull(catalogId);
 	}
 
+	public String getCatalogId()
+	{
+		return catalogId;
+	}
+
 	@Override
 	public String getMessage()
 	{

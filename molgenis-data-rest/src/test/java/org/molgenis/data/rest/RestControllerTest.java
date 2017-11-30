@@ -686,17 +686,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		MockHttpServletRequestBuilder request = get(RestController.BASE_URI + "/bogus/1");
 		exceptionalRequestPerformer.perform(request);
 	}
-
-	//FIXME: message is null???
-	@Test(expectedExceptions = MolgenisPermissionException.class)
-	public void molgenisDataAccessException() throws Throwable
-	{
-		Mockito.when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
-			   .thenThrow(new MolgenisPermissionException());
-		MockHttpServletRequestBuilder request = get(HREF_ENTITY_ID);
-		exceptionalRequestPerformer.perform(request);
-	}
-
+	
 	@Test
 	public void retrieveEntityCollectionCsv() throws Exception
 	{
