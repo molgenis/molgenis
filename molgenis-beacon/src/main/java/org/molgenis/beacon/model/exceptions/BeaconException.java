@@ -3,7 +3,7 @@ package org.molgenis.beacon.model.exceptions;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 
 /**
- * BeaconResponse-specific error representing an unexpected problem.
+ * Beacon exception that can be handled by the {@link BeaconExceptionHandler}
  */
 public class BeaconException extends RuntimeException
 {

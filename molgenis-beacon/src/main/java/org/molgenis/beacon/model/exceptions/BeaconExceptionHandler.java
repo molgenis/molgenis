@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+/**
+ * Handles only the {@link BeaconException} that has to be converted to {@link BeaconAlleleResponse} to conform to Beacon network specifications
+ */
 @ControllerAdvice
 public class BeaconExceptionHandler
 {
