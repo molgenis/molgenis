@@ -213,21 +213,21 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span
                         aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="negotiator-modal-label">There are disabled collections</h4>
+                <h4 class="modal-title" id="negotiator-modal-label">${i18n.dataexplorer_directory_export_dialog_label?html}</h4>
             </div>
 
             <div class="modal-body">
                 <h5 id="negotiator-message"></h5>
 
                 <div class="panel panel-default">
-                    <div class="panel-heading">Enabled collections</div>
+                    <div class="panel-heading">${i18n.dataexplorer_directory_export_dialog_enabled_collections_header?html}</div>
                     <div class="panel-body" style="max-height: 100px; overflow-y: auto">
                         <ul id="enabled-collections-list"></ul>
                     </div>
                 </div>
 
                 <div class="panel panel-default">
-                    <div class="panel-heading">Disabled collections</div>
+                    <div class="panel-heading">${i18n.dataexplorer_directory_export_dialog_disabled_collections_header?html}</div>
                     <div class="panel-body" style="max-height: 100px; overflow-y: auto">
                         <ul id="disabled-collections-list"></ul>
                     </div>
