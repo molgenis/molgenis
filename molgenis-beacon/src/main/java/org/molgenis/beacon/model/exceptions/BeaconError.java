@@ -1,4 +1,4 @@
-package org.molgenis.beacon.controller.model;
+package org.molgenis.beacon.model.exceptions;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
@@ -8,7 +8,7 @@ import org.molgenis.gson.AutoGson;
  */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconError.class)
-public abstract class BeaconError
+public abstract class BeaconError extends RuntimeException
 {
 	/**
 	 * Numeric error code.

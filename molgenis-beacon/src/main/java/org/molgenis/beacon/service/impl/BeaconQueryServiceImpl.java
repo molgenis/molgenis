@@ -4,7 +4,7 @@ import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.config.BeaconMetadata;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
-import org.molgenis.beacon.controller.model.BeaconError;
+import org.molgenis.beacon.model.exceptions.BeaconException;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -42,8 +42,7 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 		}
 		catch (Exception e)
 		{
-			// FIXME What should the error code be?
-			return BeaconAlleleResponse.create(beaconId, null, BeaconError.create(1, e.getMessage()),
+			throw new BeaconException(beaconId, e.getMessage(),
 					BeaconAlleleRequest.create(referenceName, start, referenceBases, alternateBases));
 		}
 	}
