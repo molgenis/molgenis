@@ -4,7 +4,8 @@ import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.config.BeaconMetadata;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
-import org.molgenis.beacon.model.exceptions.BeaconException;
+import org.molgenis.beacon.model.exceptions.NestedBeaconException;
+import org.molgenis.beacon.model.exceptions.UnknownBeaconException;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -40,9 +41,13 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 			return BeaconAlleleResponse.create(beaconId, exists, null,
 					BeaconAlleleRequest.create(referenceName, start, referenceBases, alternateBases));
 		}
+		catch (UnknownBeaconException e)
+		{
+			throw e;
+		}
 		catch (Exception e)
 		{
-			throw new BeaconException(beaconId, e.getMessage(),
+			throw new NestedBeaconException(beaconId,
 					BeaconAlleleRequest.create(referenceName, start, referenceBases, alternateBases));
 		}
 	}
@@ -50,16 +55,21 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 	private boolean searchBeaconForQueryString(String referenceName, Long start, String referenceBases,
 			String alternateBases, String beaconId)
 	{
+		boolean exists = false;
 		Beacon beacon = dataService.findOneById(BeaconMetadata.BEACON, beaconId, Beacon.class);
-		for (EntityType entityType : beacon.getDataSets())
+		if (beacon != null)
 		{
-			boolean exists = queryBeaconDataset(entityType, referenceName, start, referenceBases, alternateBases);
-			if (exists)
+			for (EntityType entityType : beacon.getDataSets())
 			{
-				return true;
+				exists = queryBeaconDataset(entityType, referenceName, start, referenceBases, alternateBases);
 			}
 		}
-		return false;
+		else
+		{
+			throw new UnknownBeaconException(beaconId,
+					BeaconAlleleRequest.create(referenceName, start, referenceBases, alternateBases));
+		}
+		return exists;
 	}
 
 	private boolean queryBeaconDataset(EntityType entityType, String referenceName, Long start, String referenceBases,

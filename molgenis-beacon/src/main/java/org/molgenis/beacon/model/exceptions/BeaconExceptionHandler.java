@@ -17,13 +17,23 @@ public class BeaconExceptionHandler
 {
 	private static final Logger LOG = LoggerFactory.getLogger(BeaconExceptionHandler.class);
 
-	@ExceptionHandler(BeaconException.class)
+	@ExceptionHandler(UnknownBeaconException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public BeaconAlleleResponse handleBeaconException(BeaconException e)
+	public BeaconAlleleResponse handleUnknownBeaconException(UnknownBeaconException e)
 	{
 		LOG.info(e.getMessage(), e);
 		return BeaconAlleleResponse.create(e.getBeaconId(), null,
-				BeaconError.create(HttpStatus.BAD_REQUEST.value(), e.getExceptionMessage()), e.getRequest());
+				BeaconError.create(HttpStatus.BAD_REQUEST.value(), e.getMessage()), e.getRequest());
+	}
+
+	@ExceptionHandler(NestedBeaconException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public BeaconAlleleResponse handleNestedBeaconException(NestedBeaconException e)
+	{
+		LOG.info(e.getMessage(), e);
+		return BeaconAlleleResponse.create(e.getBeaconId(), null,
+				BeaconError.create(HttpStatus.BAD_REQUEST.value(), e.getMessage()), e.getRequest());
 	}
 }
