@@ -114,6 +114,10 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 		catch (ExecutionException exception)
 		{
 			// rethrow unchecked
+			if (exception.getCause() != null && exception.getCause() instanceof RuntimeException)
+			{
+				throw (RuntimeException) exception.getCause();
+			}
 			throw new RuntimeException(exception);
 		}
 	}
