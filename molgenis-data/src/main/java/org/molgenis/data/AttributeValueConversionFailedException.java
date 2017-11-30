@@ -11,8 +11,8 @@ public class AttributeValueConversionFailedException extends CodedRuntimeExcepti
 {
 	private static final String ERROR_CODE = "D10";
 
-	private final Attribute attr;
-	private final Object value;
+	private final transient Attribute attr;
+	private final transient Object value;
 
 	public AttributeValueConversionFailedException(Attribute attr, Object value, Exception exception)
 	{
