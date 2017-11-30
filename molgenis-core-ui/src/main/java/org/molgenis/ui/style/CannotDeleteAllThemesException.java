@@ -1,6 +1,6 @@
 package org.molgenis.ui.style;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class CannotDeleteAllThemesException extends CodedRuntimeException
 {

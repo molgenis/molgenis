@@ -1,7 +1,6 @@
 package org.molgenis.searchall.controller;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
@@ -10,11 +9,13 @@ import org.molgenis.searchall.model.EntityTypeResult;
 import org.molgenis.searchall.model.PackageResult;
 import org.molgenis.searchall.model.Result;
 import org.molgenis.searchall.service.SearchAllService;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
@@ -45,16 +46,13 @@ public class SearchAllServiceTest
 	private Attribute attr4;
 	private Attribute attr5;
 
-	private LanguageService languageService;
-
 	@BeforeClass
 	public void setUp()
 	{
 		dataService = mock(DataService.class);
-		languageService = mock(LanguageService.class);
-		searchAllService = new SearchAllService(dataService, languageService);
+		searchAllService = new SearchAllService(dataService);
 
-		when(languageService.getCurrentUserLanguageCode()).thenReturn("en");
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
 
 		pack1 = mock(Package.class);
 		when(pack1.getLabel()).thenReturn("package test nr 1");

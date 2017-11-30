@@ -1,13 +1,12 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import java.util.Collection;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class ValidationException extends CodedRuntimeException
 {
@@ -39,18 +38,16 @@ public class ValidationException extends CodedRuntimeException
 	@Override
 	public String getLocalizedMessage()
 	{
-		String localizedViolationsMessage = validationMessages.stream()
-															  .map(ValidationMessage::getLocalizedMessage)
-															  .collect(joining("\n"));
-		return getLanguageService().map(
-				languageService -> languageService.getString(ERROR_CODE) + ": " + localizedViolationsMessage)
-								   .orElseGet(super::getLocalizedMessage);
+		//TODO: put the validation messages as argument in the message format
+		return super.getLocalizedMessage() + ": " + validationMessages.stream()
+																	  .map(ValidationMessage::getLocalizedMessage)
+																	  .collect(joining("\n"));
 	}
 
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		throw new UnsupportedOperationException();
+		return new Object[] {};
 	}
 
 	public Stream<ValidationMessage> getValidationMessages()

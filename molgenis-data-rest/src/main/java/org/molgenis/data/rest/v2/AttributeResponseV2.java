@@ -5,12 +5,12 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
@@ -48,15 +48,15 @@ class AttributeResponseV2
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			PermissionService permissionService, DataService dataService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
 
 		this.fieldType = attr.getDataType();
 		this.name = attrName;
-		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
-		this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
+		this.label = attr.getLabel(LanguageService.getCurrentUserLanguageCode());
+		this.description = attr.getDescription(LanguageService.getCurrentUserLanguageCode());
 		this.enumOptions = attr.getDataType() == AttributeType.ENUM ? attr.getEnumOptions() : null;
 		this.maxLength = attr.getDataType().getMaxLength();
 		this.expression = attr.getExpression();
@@ -64,8 +64,7 @@ class AttributeResponseV2
 		EntityType refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
-					languageService);
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService);
 		}
 		else
 		{
@@ -98,14 +97,14 @@ class AttributeResponseV2
 				else if (EntityTypeUtils.isReferenceType(attr1))
 				{
 					subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
-							languageService.getCurrentUserLanguageCode());
+							LanguageService.getCurrentUserLanguageCode());
 				}
 				else
 				{
 					subAttrFetch = null;
 				}
 				return new AttributeResponseV2(entityParentName, entityType, attr1, subAttrFetch, permissionService,
-						dataService, languageService);
+						dataService);
 			}));
 		}
 		else

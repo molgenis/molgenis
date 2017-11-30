@@ -1,6 +1,6 @@
 package org.molgenis.gavin.exception;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class MixedLineTypesException extends CodedRuntimeException
 {

@@ -4,12 +4,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
+import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.LocaleResolver;
 
 @Configuration
 public class UserAccountControllerTestConfig
@@ -24,6 +26,10 @@ public class UserAccountControllerTestConfig
 	private AuthenticationSettings authenticationSettings;
 	@Mock
 	private DataService dataService;
+	@Mock
+	private LocaleResolver localeResolver;
+	@Mock
+	private LanguageMetadata languageMetadata;
 
 	public UserAccountControllerTestConfig()
 	{
@@ -33,7 +39,7 @@ public class UserAccountControllerTestConfig
 	public void resetMocks()
 	{
 		Mockito.reset(userAccountService, recoveryService, twoFactorAuthenticationService, authenticationSettings,
-				dataService);
+				dataService, localeResolver, languageMetadata);
 	}
 
 	@Bean
@@ -67,9 +73,15 @@ public class UserAccountControllerTestConfig
 	}
 
 	@Bean
+	public LocaleResolver localeResolver()
+	{
+		return localeResolver;
+	}
+
+	@Bean
 	public UserAccountController userAccountController()
 	{
 		return new UserAccountController(userAccountService(), recoveryService(), twoFactorAuthenticationService(),
-				authenticationSettings());
+				authenticationSettings(), localeResolver(), languageMetadata);
 	}
 }

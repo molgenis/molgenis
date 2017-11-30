@@ -3,14 +3,13 @@ package org.molgenis.data.validation.meta;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ValidationMessage;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.Collection;
 import java.util.Optional;
 
-import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 import static org.molgenis.data.validation.meta.EntityTypeConstraint.*;
 
 public class EntityTypeMessageGenerator
@@ -100,7 +99,7 @@ public class EntityTypeMessageGenerator
 
 	private static Optional<String> getLocalizedMessage(String errorCode, Object... arguments)
 	{
-		return getLanguageService().map(languageService -> format(languageService.getString(errorCode), arguments));
+		return LanguageService.formatMessage(errorCode, arguments);
 	}
 
 	@SuppressWarnings("SameParameterValue")

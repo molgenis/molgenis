@@ -1,6 +1,6 @@
 package org.molgenis.data.i18n.exception;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class AddLanguageException extends CodedRuntimeException
 {

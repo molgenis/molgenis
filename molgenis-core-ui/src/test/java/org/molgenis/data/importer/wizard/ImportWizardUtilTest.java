@@ -1,9 +1,9 @@
 package org.molgenis.data.importer.wizard;
 
 import org.mockito.Mock;
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.ValidationMessage;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.slf4j.Logger;
 import org.springframework.validation.BindingResult;

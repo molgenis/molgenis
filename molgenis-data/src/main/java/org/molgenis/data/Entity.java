@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
-import org.molgenis.data.i18n.Identifiable;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.Identifiable;
 
 import java.time.Instant;
 import java.time.LocalDate;

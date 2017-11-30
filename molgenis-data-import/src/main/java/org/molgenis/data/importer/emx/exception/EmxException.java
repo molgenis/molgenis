@@ -1,6 +1,6 @@
 package org.molgenis.data.importer.emx.exception;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public abstract class EmxException extends CodedRuntimeException
 {

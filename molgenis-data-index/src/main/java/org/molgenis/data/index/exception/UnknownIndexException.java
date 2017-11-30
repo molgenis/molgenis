@@ -1,14 +1,14 @@
 package org.molgenis.data.index.exception;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 
 public class UnknownIndexException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "IDX02";
-	private final EntityType entityType;
+	private final transient EntityType entityType;
 
 	public UnknownIndexException(EntityType entityType)
 	{

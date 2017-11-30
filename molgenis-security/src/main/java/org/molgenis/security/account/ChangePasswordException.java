@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class ChangePasswordException extends CodedRuntimeException
 {

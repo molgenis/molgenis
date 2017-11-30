@@ -11,12 +11,18 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Locale;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,6 +48,10 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 	{
 		algorithmServiceImpl = new AlgorithmServiceImpl(ontologyTagService, semanticSearhService,
 				algorithmGeneratorService, entityManager, jsMagmaScriptEvaluator);
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
+		messageSource.addMolgenisNamespaces("semantic-mapper");
+		MessageSourceHolder.setMessageSource(messageSource);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -99,7 +109,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 				Lists.newArrayList(entity));
 		AlgorithmEvaluation eval = result.iterator().next();
 
-		Assert.assertEquals(eval.getErrorMessage(), "cause:execution error");
+		Assert.assertEquals(eval.getErrorMessage(), "errorMessage:execution error");
 	}
 
 	private void testApplyConvertException(String algorithmResult, AttributeType attributeType)

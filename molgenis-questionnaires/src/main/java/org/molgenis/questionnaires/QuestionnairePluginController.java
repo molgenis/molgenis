@@ -3,9 +3,8 @@ package org.molgenis.questionnaires;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,16 +37,14 @@ public class QuestionnairePluginController extends PluginController
 
 	private final DataService dataService;
 	private final ThankYouTextService thankYouTextService;
-	private final LanguageService languageService;
 	private final EntityManager entityManager;
 
 	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
-			LanguageServiceImpl languageService, EntityManager entityManager)
+			EntityManager entityManager)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.thankYouTextService = requireNonNull(thankYouTextService);
-		this.languageService = requireNonNull(languageService);
 		this.entityManager = requireNonNull(entityManager);
 	}
 
@@ -145,8 +142,8 @@ public class QuestionnairePluginController extends PluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityType entityType)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
-		return new Questionnaire(entityType.getId(), entityType.getLabel(languageService.getCurrentUserLanguageCode()),
-				status, entityType.getDescription(languageService.getCurrentUserLanguageCode()), entity.getIdValue());
+		return new Questionnaire(entityType.getId(), entityType.getLabel(LanguageService.getCurrentUserLanguageCode()),
+				status, entityType.getDescription(LanguageService.getCurrentUserLanguageCode()), entity.getIdValue());
 	}
 
 	private Entity findQuestionnaireEntity(String name)

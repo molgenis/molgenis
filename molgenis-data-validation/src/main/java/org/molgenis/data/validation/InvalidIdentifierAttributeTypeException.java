@@ -1,6 +1,7 @@
 package org.molgenis.data.validation;
 
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 

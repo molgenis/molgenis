@@ -7,6 +7,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ValidationException;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -26,6 +29,10 @@ public class DefaultValueReferenceValidatorImplTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		MessageFormatFactory messageFormatFactory = new MessageFormatFactory();
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(messageFormatFactory);
+		messageSource.addMolgenisNamespaces("data_validation");
+		MessageSourceHolder.setMessageSource(messageSource);
 		dataService = mock(DataService.class, RETURNS_DEEP_STUBS);
 		entityType = when(mock(EntityType.class).getIdValue()).thenReturn("entityTypeId").getMock();
 		when(entityType.getId()).thenReturn("entityTypeId");

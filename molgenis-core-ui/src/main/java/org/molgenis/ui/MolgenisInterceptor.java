@@ -1,11 +1,13 @@
 package org.molgenis.ui;
 
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -27,21 +29,21 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	private final AuthenticationSettings authenticationSettings;
 	private final AppSettings appSettings;
 	private final String environment;
-	private final LanguageService languageService;
+	private final MessageSource messageSource;
 
-	public final static String ATTRIBUTE_ENVIRONMENT_TYPE = "environmentType";
+	public static final String ATTRIBUTE_ENVIRONMENT_TYPE = "environmentType";
 
 	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry,
 			ThemeFingerprintRegistry themeFingerprintRegistry, AppSettings appSettings,
-			AuthenticationSettings authenticationSettings, LanguageService languageService,
-			@Value("${environment}") String environment)
+			AuthenticationSettings authenticationSettings, @Value("${environment}") String environment,
+			MessageSource messageSource)
 	{
 		this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
 		this.themeFingerprintRegistry = requireNonNull(themeFingerprintRegistry);
 		this.appSettings = requireNonNull(appSettings);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
-		this.languageService = requireNonNull(languageService);
 		this.environment = requireNonNull(environment);
+		this.messageSource = requireNonNull(messageSource);
 	}
 
 	@Override
@@ -55,7 +57,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 			modelAndView.addObject(KEY_APP_SETTINGS, appSettings);
 			modelAndView.addObject(KEY_AUTHENTICATION_SETTINGS, authenticationSettings);
 			modelAndView.addObject(KEY_ENVIRONMENT, getEnvironmentAttributes());
-			modelAndView.addObject(KEY_I18N, languageService.getBundle());
+			modelAndView.addObject(KEY_I18N,
+					new MessageSourceResourceBundle(messageSource, LocaleContextHolder.getLocale()));
 		}
 	}
 

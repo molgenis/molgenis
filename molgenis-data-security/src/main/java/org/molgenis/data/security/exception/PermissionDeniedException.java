@@ -1,9 +1,10 @@
 package org.molgenis.data.security.exception;
 
-import org.molgenis.data.CodedRuntimeException;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.UnexpectedEnumException;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 public abstract class PermissionDeniedException extends CodedRuntimeException
 {
@@ -17,7 +18,7 @@ public abstract class PermissionDeniedException extends CodedRuntimeException
 		super(errorCode, cause);
 	}
 
-	static String getPermissionName(LanguageService languageService, Permission permission)
+	static MessageSourceResolvable getMessageSourceResolvable(Permission permission)
 	{
 		String messageKeyPostfix;
 		switch (permission)
@@ -40,6 +41,6 @@ public abstract class PermissionDeniedException extends CodedRuntimeException
 			default:
 				throw new UnexpectedEnumException(permission);
 		}
-		return languageService.getString("permission_" + messageKeyPostfix);
+		return new DefaultMessageSourceResolvable("permission_" + messageKeyPostfix);
 	}
 }

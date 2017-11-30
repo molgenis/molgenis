@@ -1,7 +1,7 @@
 package org.molgenis.data.importer.wizard.exception;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.security.core.Permission;
 
 import static java.util.Objects.requireNonNull;

@@ -1,6 +1,6 @@
 package org.molgenis.data.vcf.exception;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 

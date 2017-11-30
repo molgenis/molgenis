@@ -1,7 +1,6 @@
 package org.molgenis.data.rest;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.PermissionService;
 
@@ -20,11 +19,10 @@ public class EntityCollectionResponse
 	private final List<Map<String, Object>> items;
 
 	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, String href,
-			EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+			EntityType meta, PermissionService permissionService, DataService dataService)
 	{
 		this.href = href;
-		this.meta = meta != null ? new EntityTypeResponse(meta, permissionService, dataService, languageService) : null;
+		this.meta = meta != null ? new EntityTypeResponse(meta, permissionService, dataService) : null;
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();
