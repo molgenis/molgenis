@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import org.mockito.Mock;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
-import org.molgenis.beacon.controller.model.BeaconDataset;
+import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
@@ -60,7 +60,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getAllBeaconsTest() throws Exception
 	{
-		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		List<BeaconDatasetResponse> beaconDatasets = newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
 		BeaconResponse beaconResponse = BeaconResponse.create("beaconA", "beacon A", "0.3.0", null, "", "", "",
 				beaconDatasets);
 
@@ -77,7 +77,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void infoTest() throws Exception
 	{
-		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		List<BeaconDatasetResponse> beaconDatasets = newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
 		BeaconResponse beaconResponse = BeaconResponse.create("beaconA", "beacon A", "0.3.0", null, "", "", "",
 				beaconDatasets);
 

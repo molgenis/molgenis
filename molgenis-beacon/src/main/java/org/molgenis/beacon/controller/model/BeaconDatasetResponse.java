@@ -9,8 +9,8 @@ import javax.annotation.Nullable;
  * Dataset of a beacon.
  */
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_BeaconDataset.class)
-public abstract class BeaconDataset
+@AutoGson(autoValueClass = AutoValue_BeaconDatasetResponse.class)
+public abstract class BeaconDatasetResponse
 {
 	/**
 	 * Unique identifier of the dataset.
@@ -28,8 +28,8 @@ public abstract class BeaconDataset
 	@Nullable
 	public abstract String getDescription();
 
-	public static BeaconDataset create(String id, String name, String description)
+	public static BeaconDatasetResponse create(String id, String name, String description)
 	{
-		return new AutoValue_BeaconDataset(id, name, description);
+		return new AutoValue_BeaconDatasetResponse(id, name, description);
 	}
 }

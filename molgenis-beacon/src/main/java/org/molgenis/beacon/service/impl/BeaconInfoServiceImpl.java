@@ -15,11 +15,11 @@ import static org.molgenis.beacon.config.BeaconMetadata.BEACON;
 @Component
 public class BeaconInfoServiceImpl implements BeaconInfoService
 {
-	private DataService dataService;
+	private final DataService dataService;
 
-	public BeaconInfoServiceImpl(DataService dataservice)
+	public BeaconInfoServiceImpl(DataService dataService)
 	{
-		this.dataService = Objects.requireNonNull(dataservice);
+		this.dataService = Objects.requireNonNull(dataService);
 	}
 
 	@Override

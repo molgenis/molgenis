@@ -1,6 +1,7 @@
 package org.molgenis.beacon.service.impl;
 
 import org.molgenis.beacon.config.Beacon;
+import org.molgenis.beacon.config.BeaconDataset;
 import org.molgenis.beacon.config.BeaconMetadata;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
@@ -8,7 +9,6 @@ import org.molgenis.beacon.model.exceptions.NestedBeaconException;
 import org.molgenis.beacon.model.exceptions.UnknownBeaconException;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class BeaconQueryServiceImpl implements BeaconQueryService
 {
-	private DataService dataService;
+	private final DataService dataService;
 
 	public BeaconQueryServiceImpl(DataService dataService)
 	{
@@ -59,9 +59,9 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 		Beacon beacon = dataService.findOneById(BeaconMetadata.BEACON, beaconId, Beacon.class);
 		if (beacon != null)
 		{
-			for (EntityType entityType : beacon.getDataSets())
+			for (BeaconDataset beaconDataset : beacon.getDataSets())
 			{
-				exists = queryBeaconDataset(entityType, referenceName, start, referenceBases, alternateBases);
+				exists = queryBeaconDataset(beaconDataset, referenceName, start, referenceBases, alternateBases);
 			}
 		}
 		else
@@ -72,18 +72,31 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 		return exists;
 	}
 
-	private boolean queryBeaconDataset(EntityType entityType, String referenceName, Long start, String referenceBases,
-			String alternateBases)
+	private boolean queryBeaconDataset(BeaconDataset beaconDataset, String referenceName, Long start,
+			String referenceBases, String alternateBases)
 	{
 		/* Use a count query to determine if a variation exists */
-		return dataService.count(entityType.getId(),
-				// FIXME How to use GenomeBrowserAttributes?
-				new QueryImpl<>().eq("#CHROM", referenceName)
+
+		String alt = beaconDataset.getGenomeBrowserAttributes().getAlt();
+		String ref = beaconDataset.getGenomeBrowserAttributes().getRef();
+
+		if (alt == null || alt.isEmpty())
+		{
+			alt = "ALT";
+		}
+
+		if (ref == null || ref.isEmpty())
+		{
+			ref = "REF";
+		}
+
+		return dataService.count(beaconDataset.getEntityType().getId(),
+				new QueryImpl<>().eq(beaconDataset.getGenomeBrowserAttributes().getChrom(), referenceName)
 								 .and()
-								 .eq("POS", start)
+								 .eq(beaconDataset.getGenomeBrowserAttributes().getPos(), start)
 								 .and()
-								 .eq("REF", referenceBases)
+								 .eq(ref, referenceBases)
 								 .and()
-								 .eq("ALT", alternateBases)) > 0;
+								 .eq(alt, alternateBases)) > 0;
 	}
 }

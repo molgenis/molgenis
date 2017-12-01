@@ -1,7 +1,6 @@
 package org.molgenis.beacon.config;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -27,15 +26,15 @@ public class BeaconMetadata extends SystemEntityType
 
 	private final BeaconPackage beaconPackage;
 	private final BeaconOrganizationMetadata beaconOrganizationMetadata;
-	private final EntityTypeMetadata entityTypeMetadata;
+	private final BeaconDatasetMetadata beaconDatasetMetaData;
 
 	public BeaconMetadata(BeaconPackage beaconPackage, BeaconOrganizationMetadata beaconOrganizationMetadata,
-			EntityTypeMetadata entityTypeMetadata)
+			BeaconDatasetMetadata beaconDatasetMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_BEACON);
 		this.beaconPackage = requireNonNull(beaconPackage);
 		this.beaconOrganizationMetadata = requireNonNull(beaconOrganizationMetadata);
-		this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
+		this.beaconDatasetMetaData = requireNonNull(beaconDatasetMetaData);
 	}
 
 	@Override
@@ -75,7 +74,7 @@ public class BeaconMetadata extends SystemEntityType
 								 .setLabel("Welcome URL")
 								 .setDescription("URL to the welcome page for this beacon");
 		addAttribute(DATA_SETS).setDataType(MREF)
-							   .setRefEntity(entityTypeMetadata)
+							   .setRefEntity(beaconDatasetMetaData)
 							   .setNillable(false)
 							   .setLabel("Beacon datasets")
 							   .setDescription("Data sets served by the beacon");
