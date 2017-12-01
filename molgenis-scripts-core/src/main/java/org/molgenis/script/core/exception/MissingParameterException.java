@@ -5,6 +5,9 @@ import java.text.MessageFormat;
 import static java.lang.String.format;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+/**
+ * Thrown when there's a parameter missing when generating a script.
+ */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MissingParameterException extends ScriptGenerationException
 {

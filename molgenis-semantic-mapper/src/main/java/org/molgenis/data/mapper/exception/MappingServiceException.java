@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.exception;
 import org.molgenis.data.CodedRuntimeException;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-abstract class MappingServiceException extends CodedRuntimeException
+public abstract class MappingServiceException extends CodedRuntimeException
 {
 	MappingServiceException(String errorCode)
 	{

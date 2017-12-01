@@ -3,7 +3,7 @@ package org.molgenis.script.core.exception;
 import org.molgenis.data.CodedRuntimeException;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-abstract class ScriptException extends CodedRuntimeException
+public abstract class ScriptException extends CodedRuntimeException
 {
 	ScriptException(String errorCode)
 	{

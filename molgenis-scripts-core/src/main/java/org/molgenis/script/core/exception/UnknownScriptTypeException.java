@@ -6,6 +6,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+/**
+ * Throw when an unknown ScriptType is requested.
+ */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownScriptTypeException extends ScriptException
 {

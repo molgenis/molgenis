@@ -6,6 +6,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
+/**
+ * Thrown when a script template can not be generated because of faulty parameter(s).
+ */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidParameterException extends ScriptGenerationException
 {

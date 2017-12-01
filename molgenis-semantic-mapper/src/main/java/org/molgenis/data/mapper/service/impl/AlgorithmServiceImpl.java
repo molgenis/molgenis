@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
+import org.molgenis.data.mapper.exception.AlgorithmNullValueException;
 import org.molgenis.data.mapper.exception.ValueConversionException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -117,8 +118,15 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			}
 			catch (NullPointerException npe)
 			{
-				return algorithmResult.errorMessage(
-						"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
+				try
+				{
+					throw new AlgorithmNullValueException();
+
+				}
+				catch (AlgorithmNullValueException anve)
+				{
+					return algorithmResult.errorMessage(anve.getLocalizedMessage());
+				}
 			}
 			catch (Exception e)
 			{
