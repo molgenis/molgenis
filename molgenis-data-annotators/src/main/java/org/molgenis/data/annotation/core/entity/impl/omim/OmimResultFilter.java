@@ -3,8 +3,8 @@ package org.molgenis.data.annotation.core.entity.impl.omim;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
+import org.molgenis.data.annotation.core.exception.UpdateNotSupportedException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -38,7 +38,7 @@ public class OmimResultFilter implements ResultFilter
 	{
 		if (updateMode == true)
 		{
-			throw new MolgenisDataException("This annotator/filter does not support updating of values");
+			throw new UpdateNotSupportedException();
 		}
 		Optional<Entity> firstResult = FluentIterable.from(results).first();
 

@@ -3,7 +3,6 @@ package org.molgenis.data.annotation.core.entity.impl.gavin;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
@@ -11,6 +10,9 @@ import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.QueryAnnotatorImpl;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.Impact;
+import org.molgenis.data.annotation.core.exception.InvalidNumberOFGenesException;
+import org.molgenis.data.annotation.core.exception.MultiAllelicNotSupportedException;
+import org.molgenis.data.annotation.core.exception.UpdateNotSupportedException;
 import org.molgenis.data.annotation.core.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
@@ -160,7 +162,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			{
 				if (updateMode)
 				{
-					throw new MolgenisDataException("This annotator/filter does not support updating of values");
+					throw new UpdateNotSupportedException();
 				}
 				String alt = entity.getString(EffectsMetaData.ALT);
 				if (alt == null)
@@ -172,8 +174,7 @@ public class GavinAnnotator implements AnnotatorConfig
 				}
 				if (alt.contains(","))
 				{
-					throw new MolgenisDataException(
-							"The gavin annotator only accepts single allele input ('effect entities').");
+					throw new MultiAllelicNotSupportedException();
 				}
 				int sourceEntitiesSize = Iterables.size(annotationSourceEntities);
 
@@ -215,7 +216,7 @@ public class GavinAnnotator implements AnnotatorConfig
 					String message = "invalid number [" + sourceEntitiesSize
 							+ "] of results for this gene in annotation resource";
 					entity.set(REASON, message);
-					throw new MolgenisDataException(message);
+					throw new InvalidNumberOFGenesException(sourceEntitiesSize);
 				}
 			}
 

@@ -1,14 +1,16 @@
 package org.molgenis.data.annotation.core.exception;
 
+import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 import java.util.Objects;
 
-@Deprecated // FIXME extend from CodedRuntimeException
-public class AnnotationException extends RuntimeException
+public class AnnotationException extends CodedRuntimeException
 {
+	private static final String ERROR_CODE = "AN08";
+
 	private final Integer entityNumber;
 	private final Entity failedEntity;
 	private final String annotatorName;
@@ -16,7 +18,7 @@ public class AnnotationException extends RuntimeException
 
 	public AnnotationException(Entity failedEntity, int lineNumber, List<Attribute> requiredAttributes, String annotatorName, Throwable cause)
 	{
-		super(cause);
+		super(ERROR_CODE, cause);
 		this.failedEntity = failedEntity;
 		this.entityNumber = Objects.requireNonNull(lineNumber);
 		this.requiredAttributes = requiredAttributes;
