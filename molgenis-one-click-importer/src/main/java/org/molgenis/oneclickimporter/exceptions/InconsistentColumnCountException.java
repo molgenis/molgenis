@@ -6,21 +6,21 @@ import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownFileTypeException extends CodedRuntimeException
+public class InconsistentColumnCountException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "OCI06";
-	private String extension;
+	private static final String ERROR_CODE = "OCI03";
+	private String filename;
 
-	public UnknownFileTypeException(String extension)
+	public InconsistentColumnCountException(String filename)
 	{
 		super(ERROR_CODE);
-		this.extension = extension;
+		this.filename = filename;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("extension:%s", extension);
+		return String.format("filename:%s", filename);
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class UnknownFileTypeException extends CodedRuntimeException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, extension);
+			return MessageFormat.format(format, filename);
 		}).orElse(super.getLocalizedMessage());
 	}
 }

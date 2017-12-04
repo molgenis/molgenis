@@ -7,33 +7,33 @@ import java.text.MessageFormat;
 
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class EmptySheetException extends CodedRuntimeException
+public class MissingDataException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "OCI01";
+	private static final String ERROR_CODE = "OCI02";
 	private SheetType sheettype;
-	private String fileName;
+	private String filename;
 
-	public EmptySheetException(SheetType sheettype, String fileName)
+	public MissingDataException(SheetType sheettype, String filename)
 	{
 		super(ERROR_CODE);
 		this.sheettype = sheettype;
-		this.fileName = fileName;
+		this.filename = filename;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("sheettype:%s fileName:%s", sheettype, fileName);
+		return String.format("sheettype:%s filename:%s", sheettype, filename);
 	}
 
 	@Override
 	public String getLocalizedMessage()
 	{
-		String label = sheettype == SheetType.EXCELSHEET ? "Excel sheet" : "CSV file";
 		return getLanguageService().map(languageService ->
 		{
+			String label = sheettype == SheetType.EXCELSHEET ? "Excel sheet" : "CSV file";
 			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, label, fileName);
+			return MessageFormat.format(format, label, filename);
 		}).orElse(super.getLocalizedMessage());
 	}
 }

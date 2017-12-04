@@ -2,25 +2,21 @@ package org.molgenis.oneclickimporter.exceptions;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class UnknownFileTypeException extends CodedRuntimeException
+public class WorkbookCreationException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "OCI06";
-	private String extension;
+	private static final String ERROR_CODE = "OCI04";
 
-	public UnknownFileTypeException(String extension)
+	public WorkbookCreationException()
 	{
 		super(ERROR_CODE);
-		this.extension = extension;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("extension:%s", extension);
+		return "";
 	}
 
 	@Override
@@ -29,7 +25,7 @@ public class UnknownFileTypeException extends CodedRuntimeException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, extension);
+			return format;
 		}).orElse(super.getLocalizedMessage());
 	}
 }

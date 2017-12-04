@@ -2,8 +2,10 @@ package org.molgenis.oneclickimporter.service.impl;
 
 import au.com.bytecode.opencsv.CSVReader;
 import org.apache.commons.io.input.BOMInputStream;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.csv.CsvFileExtensions;
+import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
+import org.molgenis.oneclickimporter.exceptions.InconsistentColumnCountException;
+import org.molgenis.oneclickimporter.exceptions.MissingDataException;
 import org.molgenis.oneclickimporter.service.CsvService;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +13,7 @@ import java.io.*;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.text.MessageFormat.format;
+import static org.molgenis.oneclickimporter.SheetType.CSVFILE;
 
 @Component
 public class CsvServiceImpl implements CsvService
@@ -65,19 +67,19 @@ public class CsvServiceImpl implements CsvService
 	 *
 	 * @param content  content of CSV-file
 	 * @param fileName the name of the file that is validated
-	 * @throws MolgenisDataException if the validation fails
+	 * @throws EmptySheetException,MissingDataException,InconsistentColumnCountException if the validation fails
 	 */
 
 	private void validateCsvFile(List<String[]> content, String fileName)
 	{
 		if (content.isEmpty())
 		{
-			throw new MolgenisDataException(format("CSV-file: [{0}] is empty", fileName));
+			throw new EmptySheetException(CSVFILE, fileName);
 		}
 
 		if (content.size() == 1)
 		{
-			throw new MolgenisDataException(format("Header was found, but no data is present in file [{0}]", fileName));
+			throw new MissingDataException(CSVFILE, fileName);
 		}
 
 		int headerLength = content.get(0).length;
@@ -85,7 +87,7 @@ public class CsvServiceImpl implements CsvService
 		{
 			if (row.length != headerLength)
 			{
-				throw new MolgenisDataException(format("Column count in CSV-file: [{0}] is not consistent", fileName));
+				throw new InconsistentColumnCountException(fileName);
 			}
 		});
 	}

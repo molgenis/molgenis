@@ -85,7 +85,7 @@ public class OneClickImportJob
 				}
 				else
 				{
-					throw new UnknownFileTypeException("Zip file contains files which are not of type CSV");
+					throw new UnknownFileTypeException(fileInZipExtension);
 				}
 			}
 		}
