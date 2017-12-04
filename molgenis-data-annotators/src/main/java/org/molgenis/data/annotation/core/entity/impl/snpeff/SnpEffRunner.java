@@ -93,10 +93,10 @@ public class SnpEffRunner
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
-			try (VcfRepository repo = new VcfRepository(outputVcf, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName(),
-					vcfAttributes, entityTypeFactory, attributeFactory))
-			{
-				PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
+			VcfRepository repo = new VcfRepository(outputVcf, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName(), vcfAttributes,
+					entityTypeFactory, attributeFactory);
+
+			PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
 
 				return new Iterator<Entity>()
 				{
@@ -140,7 +140,6 @@ public class SnpEffRunner
 					}
 
 				};
-			}
 		}
 		catch (IOException e)
 		{
@@ -150,7 +149,6 @@ public class SnpEffRunner
 		{
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	/**

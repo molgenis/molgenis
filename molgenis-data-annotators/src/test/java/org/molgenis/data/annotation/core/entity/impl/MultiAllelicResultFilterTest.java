@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.core.exception.LocationMismatchException;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -364,40 +364,22 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 		assertEquals(result, Optional.absent());
 	}
 
-	@Test
+	@Test(expectedExceptions = LocationMismatchException.class)
 	public void filterResultsMergeMultilineMismatchChrom()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
 				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)), true,
 				vcfAttributes);
-		try
-		{
-			filter.filterResults(Arrays.asList(resultEntity10, entityMismatchChrom), entity10, false);
-			Assert.fail("Should throw exception for mismatching chromosomes");
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getMessage(),
-					"Mismatch in location! Location{chrom=1, pos=100} vs Location{chrom=2, pos=100}");
-		}
+		filter.filterResults(Arrays.asList(resultEntity10, entityMismatchChrom), entity10, false);
 	}
 
-	@Test
+	@Test(expectedExceptions = LocationMismatchException.class)
 	public void filterResultsMergeMultilineMismatchPos()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
 				Collections.singletonList(attributeFactory.create().setName("annotation").setDataType(STRING)), true,
 				vcfAttributes);
-		try
-		{
-			filter.filterResults(Arrays.asList(entityMismatchPos, resultEntity10), entity10, false);
-			Assert.fail("Should throw exception for mismatching positions");
-		}
-		catch (MolgenisDataException actual)
-		{
-			assertEquals(actual.getMessage(),
-					"Mismatch in location! Location{chrom=1, pos=101} vs Location{chrom=1, pos=100}");
-		}
+		filter.filterResults(Arrays.asList(entityMismatchPos, resultEntity10), entity10, false);
 	}
 
 	/*
