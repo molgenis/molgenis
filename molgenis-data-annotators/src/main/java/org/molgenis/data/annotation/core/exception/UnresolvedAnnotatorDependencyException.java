@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnresolvedAnnotatorDependencyException extends CodedRuntimeException
@@ -14,7 +15,7 @@ public class UnresolvedAnnotatorDependencyException extends CodedRuntimeExceptio
 	public UnresolvedAnnotatorDependencyException(String annotatorName)
 	{
 		super(ERROR_CODE);
-		this.annotatorName = annotatorName;
+		this.annotatorName = requireNonNull(annotatorName);
 	}
 
 	@Override

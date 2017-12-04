@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class InvalidNumberOFGenesException extends CodedRuntimeException
@@ -14,7 +15,7 @@ public class InvalidNumberOFGenesException extends CodedRuntimeException
 	public InvalidNumberOFGenesException(int sourceEntitiesSize)
 	{
 		super(ERROR_CODE);
-		this.sourceEntitiesSize = sourceEntitiesSize;
+		this.sourceEntitiesSize = requireNonNull(sourceEntitiesSize);
 	}
 
 	@Override

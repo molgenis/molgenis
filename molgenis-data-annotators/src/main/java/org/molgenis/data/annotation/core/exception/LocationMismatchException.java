@@ -5,6 +5,7 @@ import org.molgenis.data.annotation.core.datastructures.Location;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class LocationMismatchException extends CodedRuntimeException
@@ -16,8 +17,8 @@ public class LocationMismatchException extends CodedRuntimeException
 	public LocationMismatchException(Location location, Location thisLoc)
 	{
 		super(ERROR_CODE);
-		this.location = location;
-		this.thisLoc = thisLoc;
+		this.location = requireNonNull(location);
+		this.thisLoc = requireNonNull(thisLoc);
 
 	}
 

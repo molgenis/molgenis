@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnsupportedQueryException extends CodedRuntimeException
@@ -14,7 +15,7 @@ public class UnsupportedQueryException extends CodedRuntimeException
 	public UnsupportedQueryException(String field)
 	{
 		super(ERROR_CODE);
-		this.field = field;
+		this.field = requireNonNull(field);
 	}
 
 	@Override

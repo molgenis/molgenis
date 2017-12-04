@@ -5,6 +5,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class SecondRunNotSupportedException extends CodedRuntimeException
@@ -15,7 +16,7 @@ public class SecondRunNotSupportedException extends CodedRuntimeException
 	public SecondRunNotSupportedException(RepositoryAnnotator annotator)
 	{
 		super(ERROR_CODE);
-		this.annotator = annotator;
+		this.annotator = requireNonNull(annotator);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MissingValueException extends CodedRuntimeException
@@ -16,8 +17,8 @@ public class MissingValueException extends CodedRuntimeException
 	public MissingValueException(Object key, EntityType entityType)
 	{
 		super(ERROR_CODE);
-		this.key = key;
-		this.entityType = entityType;
+		this.key = requireNonNull(key);
+		this.entityType = requireNonNull(entityType);
 	}
 
 	@Override
