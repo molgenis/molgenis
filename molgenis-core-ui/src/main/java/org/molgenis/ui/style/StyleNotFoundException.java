@@ -2,24 +2,26 @@ package org.molgenis.ui.style;
 
 import org.molgenis.data.CodedRuntimeException;
 
+import java.text.MessageFormat;
+
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class MolgenisStyleException extends CodedRuntimeException
+public class StyleNotFoundException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "C05";
-	private Throwable cause;
+	private final static String ERROR_CODE = "C10";
+	private String styleName;
 
-	public MolgenisStyleException(Throwable cause)
+	public StyleNotFoundException(String styleName)
 	{
-		super(ERROR_CODE, cause);
-		this.cause = requireNonNull(cause);
+		super(ERROR_CODE);
+		this.styleName = requireNonNull(styleName);
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("cause:%s", cause.getMessage());
+		return String.format("styleName:%s", styleName);
 	}
 
 	@Override
@@ -28,7 +30,7 @@ public class MolgenisStyleException extends CodedRuntimeException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			return format;
+			return MessageFormat.format(format, styleName);
 		}).orElseGet(super::getLocalizedMessage);
 	}
 }

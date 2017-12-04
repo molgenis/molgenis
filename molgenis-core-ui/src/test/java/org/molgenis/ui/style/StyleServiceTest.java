@@ -121,7 +121,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(styleService.getSelectedStyle().getName(), THEME_MOLGENIS_NAME);
 	}
 
-	@Test(expectedExceptions = MolgenisStyleException.class)
+	@Test(expectedExceptions = StyleAlreadyExistsException.class)
 	public void addStylesWithExistingId() throws IOException, MolgenisStyleException
 	{
 		String styleId = "style";
@@ -213,7 +213,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		verify(dataService, times(1)).add(FileMetaMetaData.FILE_META, fileMeta);
 	}
 
-	@Test(expectedExceptions = MolgenisStyleException.class)
+	@Test(expectedExceptions = StyleNotFoundException.class)
 	public void getUnknownThemeData() throws MolgenisStyleException
 	{
 		String styleName = "no-body";

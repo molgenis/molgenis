@@ -2,24 +2,21 @@ package org.molgenis.ui.style;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class MolgenisStyleException extends CodedRuntimeException
+public class CannotDeleteAllThemesException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "C05";
-	private Throwable cause;
+	private final static String ERROR_CODE = "C03";
 
-	public MolgenisStyleException(Throwable cause)
+	public CannotDeleteAllThemesException()
 	{
-		super(ERROR_CODE, cause);
-		this.cause = requireNonNull(cause);
+		super(ERROR_CODE);
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("cause:%s", cause.getMessage());
+		return String.format("");
 	}
 
 	@Override

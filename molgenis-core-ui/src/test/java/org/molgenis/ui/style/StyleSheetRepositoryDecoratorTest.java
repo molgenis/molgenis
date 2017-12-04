@@ -1,6 +1,5 @@
 package org.molgenis.ui.style;
 
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.settings.AppSettings;
 import org.testng.annotations.BeforeClass;
@@ -34,7 +33,7 @@ public class StyleSheetRepositoryDecoratorTest
 		verify(delegate).deleteById("1");
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = CannotDeleteCurrentThemeException.class)
 	public void testDeleteByIdCurrent() throws Exception
 	{
 		decorator.deleteById("2");
@@ -50,7 +49,7 @@ public class StyleSheetRepositoryDecoratorTest
 		verify(delegate).delete(sheet);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = CannotDeleteCurrentThemeException.class)
 	public void testDeleteCurrent() throws Exception
 	{
 		StyleSheet sheet = mock(StyleSheet.class);
@@ -59,14 +58,14 @@ public class StyleSheetRepositoryDecoratorTest
 		verifyZeroInteractions(delegate);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = CannotDeleteAllThemesException.class)
 	public void testDeleteAll() throws Exception
 	{
 		decorator.deleteAll();
 		verifyZeroInteractions(delegate);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = CannotDeleteCurrentThemeException.class)
 	public void testDeleteAllStream() throws Exception
 	{
 		decorator.deleteAll(Arrays.<Object>asList("1", "2", "3", "4").stream());

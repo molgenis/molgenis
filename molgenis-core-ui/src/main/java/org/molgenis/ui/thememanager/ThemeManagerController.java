@@ -1,5 +1,6 @@
 package org.molgenis.ui.thememanager;
 
+import org.molgenis.ui.style.MolgenisAddStyleException;
 import org.molgenis.ui.style.MolgenisStyleException;
 import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
@@ -79,7 +80,7 @@ public class ThemeManagerController extends PluginController
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisStyleException("unable to add style: " + styleIdentifier, e);
+			throw new MolgenisAddStyleException(styleIdentifier, e);
 		}
 	}
 }
