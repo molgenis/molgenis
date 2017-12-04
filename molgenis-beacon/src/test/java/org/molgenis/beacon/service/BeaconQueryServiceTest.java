@@ -6,7 +6,8 @@ import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.config.BeaconMetadata;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
-import org.molgenis.beacon.controller.model.BeaconError;
+import org.molgenis.beacon.model.exceptions.BeaconException;
+import org.molgenis.beacon.model.exceptions.NestedBeaconException;
 import org.molgenis.beacon.service.impl.BeaconQueryServiceImpl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -112,13 +113,16 @@ public class BeaconQueryServiceTest
 	{
 		MolgenisDataException exception = new MolgenisDataException("Error test");
 		when(dataService.findOneById(BeaconMetadata.BEACON, BEACON_ID, Beacon.class)).thenThrow(exception);
-
-		BeaconError error = BeaconError.create(1, "Error test");
 		BeaconAlleleRequest request = BeaconAlleleRequest.create("1", 100L, "A", "T");
 
-		BeaconAlleleResponse actualResponse = beaconQueryService.query("beacon", request);
-		BeaconAlleleResponse expectedResponse = BeaconAlleleResponse.create(BEACON_ID, null, error, request);
-
-		assertEquals(actualResponse, expectedResponse);
+		try
+		{
+			beaconQueryService.query("beacon", request);
+		}
+		catch (BeaconException e)
+		{
+			BeaconException beaconException = new NestedBeaconException(BEACON_ID, request);
+			assertEquals(e.getMessage(), beaconException.getMessage());
+		}
 	}
 }

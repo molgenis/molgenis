@@ -19,6 +19,12 @@
 "bootbox.min.js"]>
 
 <@header css js/>
+
+<script>
+    window.hasTrackingId = ${hasTrackingId?c}
+    window.hasMolgenisTrackingId = ${hasMolgenisTrackingId?c}
+</script>
+
 <div class="row">
     <div class="col-md-12">
         <div id="entity-class" class="well well-sm">
@@ -199,4 +205,42 @@
         </div>
     </div>
 </script>
+
+<div id="negotiator-modal" class="modal" tabindex="-1" aria-labelledby="negotiator-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span
+                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="negotiator-modal-label">There are disabled collections</h4>
+            </div>
+
+            <div class="modal-body">
+                <h5 id="negotiator-message"></h5>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">Enabled collections</div>
+                    <div class="panel-body" style="max-height: 100px; overflow-y: auto">
+                        <ul id="enabled-collections-list"></ul>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">Disabled collections</div>
+                    <div class="panel-body" style="max-height: 100px; overflow-y: auto">
+                        <ul id="disabled-collections-list"></ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_directory_export_dialog_no?html}</a>
+                <a href="#" id="negotiator-apply-btn" class="btn btn-primary"
+                   data-dismiss="modal">${i18n.dataexplorer_directory_export_dialog_yes?html}</a>
+            </div>
+        </div>
+    </div>
+</div>
 <@footer/>
