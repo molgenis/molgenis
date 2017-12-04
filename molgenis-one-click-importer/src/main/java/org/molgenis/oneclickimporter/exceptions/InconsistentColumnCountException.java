@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class InconsistentColumnCountException extends CodedRuntimeException
@@ -14,7 +15,7 @@ public class InconsistentColumnCountException extends CodedRuntimeException
 	public InconsistentColumnCountException(String filename)
 	{
 		super(ERROR_CODE);
-		this.filename = filename;
+		this.filename = requireNonNull(filename);
 	}
 
 	@Override

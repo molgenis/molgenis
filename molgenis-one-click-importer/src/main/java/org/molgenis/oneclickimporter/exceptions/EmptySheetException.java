@@ -1,23 +1,23 @@
 package org.molgenis.oneclickimporter.exceptions;
 
 import org.molgenis.data.CodedRuntimeException;
-import org.molgenis.oneclickimporter.SheetType;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EmptySheetException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "OCI01";
-	private SheetType sheettype;
+	private String sheettype;
 	private String fileName;
 
-	public EmptySheetException(SheetType sheettype, String fileName)
+	public EmptySheetException(String sheettype, String fileName)
 	{
 		super(ERROR_CODE);
-		this.sheettype = sheettype;
-		this.fileName = fileName;
+		this.sheettype = requireNonNull(sheettype);
+		this.fileName = requireNonNull(fileName);
 	}
 
 	@Override
@@ -29,11 +29,10 @@ public class EmptySheetException extends CodedRuntimeException
 	@Override
 	public String getLocalizedMessage()
 	{
-		String label = sheettype == SheetType.EXCELSHEET ? "Excel sheet" : "CSV file";
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, label, fileName);
+			return MessageFormat.format(format, sheettype, fileName);
 		}).orElse(super.getLocalizedMessage());
 	}
 }

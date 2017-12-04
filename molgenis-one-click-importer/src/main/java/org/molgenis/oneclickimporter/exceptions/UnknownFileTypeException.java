@@ -4,6 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnknownFileTypeException extends CodedRuntimeException
@@ -14,7 +15,7 @@ public class UnknownFileTypeException extends CodedRuntimeException
 	public UnknownFileTypeException(String extension)
 	{
 		super(ERROR_CODE);
-		this.extension = extension;
+		this.extension = requireNonNull(extension);
 	}
 
 	@Override

@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.oneclickimporter.SheetType.EXCELSHEET;
 
 @Component
 public class ExcelServiceImpl implements ExcelService
@@ -39,11 +38,11 @@ public class ExcelServiceImpl implements ExcelService
 				Sheet sheet = workbook.getSheetAt(index);
 				if (sheet.getPhysicalNumberOfRows() == 0)
 				{
-					throw new EmptySheetException(EXCELSHEET, sheet.getSheetName());
+					throw new EmptySheetException("Excel sheet", sheet.getSheetName());
 				}
 				else if (sheet.getPhysicalNumberOfRows() == 1)
 				{
-					throw new MissingDataException(EXCELSHEET, sheet.getSheetName());
+					throw new MissingDataException("Excel sheet", sheet.getSheetName());
 				}
 				else
 				{

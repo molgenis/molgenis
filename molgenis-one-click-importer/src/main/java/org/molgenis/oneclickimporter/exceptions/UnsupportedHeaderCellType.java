@@ -5,6 +5,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 import java.text.MessageFormat;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnsupportedHeaderCellType extends CodedRuntimeException
@@ -15,7 +16,7 @@ public class UnsupportedHeaderCellType extends CodedRuntimeException
 	public UnsupportedHeaderCellType(CellType cellType)
 	{
 		super(ERROR_CODE);
-		this.cellType = cellType;
+		this.cellType = requireNonNull(cellType);
 	}
 
 	@Override

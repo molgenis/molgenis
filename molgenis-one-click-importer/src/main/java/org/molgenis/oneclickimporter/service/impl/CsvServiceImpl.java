@@ -13,7 +13,6 @@ import java.io.*;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.oneclickimporter.SheetType.CSVFILE;
 
 @Component
 public class CsvServiceImpl implements CsvService
@@ -74,12 +73,12 @@ public class CsvServiceImpl implements CsvService
 	{
 		if (content.isEmpty())
 		{
-			throw new EmptySheetException(CSVFILE, fileName);
+			throw new EmptySheetException("CSV file", fileName);
 		}
 
 		if (content.size() == 1)
 		{
-			throw new MissingDataException(CSVFILE, fileName);
+			throw new MissingDataException("CSV file", fileName);
 		}
 
 		int headerLength = content.get(0).length;
