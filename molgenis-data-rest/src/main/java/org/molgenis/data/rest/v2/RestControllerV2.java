@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.rest.exception.AbstractEntityDeletionException;
 import org.molgenis.data.rest.exception.IdentifierAndValueException;
 import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
@@ -50,7 +51,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
-import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
@@ -99,12 +99,12 @@ public class RestControllerV2
 		return new ValidationException(constraintViolation);
 	}
 
-	private static MissingIdentifierException createMolgenisDataExceptionUnknownIdentifier(int count)
+	private static MissingIdentifierException createUnknownIdentifierException(int count)
 	{
 		return new MissingIdentifierException(count);
 	}
 
-	private static IdentifierAndValueException createMolgenisDataExceptionIdentifierAndValue()
+	private static IdentifierAndValueException createIdentifierAndValueException()
 	{
 		return new IdentifierAndValueException();
 	}
@@ -217,8 +217,7 @@ public class RestControllerV2
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(
-					format("Cannot delete entities because type [%s] is abstract.", entityTypeId));
+			throw new AbstractEntityDeletionException(entityType);
 		}
 		Attribute idAttribute = entityType.getIdAttribute();
 		Stream<Object> typedIds = request.getEntityIds().stream().map(entityId -> getTypedValue(entityId, idAttribute));
@@ -469,7 +468,7 @@ public class RestControllerV2
 												 .collect(toList());
 			if (entities.size() != request.getEntities().size())
 			{
-				throw createMolgenisDataExceptionIdentifierAndValue();
+				throw createIdentifierAndValueException();
 			}
 
 			final List<Entity> updatedEntities = new ArrayList<>();
@@ -571,14 +570,14 @@ public class RestControllerV2
 	}
 
 	/**
-	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
+	 * Get entity id and perform a check, throwing an UnknownIdentifierException when necessary
 	 */
 	private static Object checkForEntityId(Entity entity, int count)
 	{
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
-			throw createMolgenisDataExceptionUnknownIdentifier(count);
+			throw createUnknownIdentifierException(count);
 		}
 		return id;
 	}
