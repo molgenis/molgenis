@@ -164,6 +164,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.antMatchers(GOOGLE_AUTHENTICATION_URL)
 				.permitAll()
 
+				.antMatchers("/beacon/**")
+				.permitAll()
+
 				.antMatchers("/logo/**")
 				.permitAll()
 
@@ -248,8 +251,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.logout()
 				.deleteCookies("JSESSIONID")
-				.addLogoutHandler((req, res, auth) ->
-				{
+				.addLogoutHandler((req, res, auth) -> {
 					if (req.getSession(false) != null
 							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -257,8 +259,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					}
 				})
 
-				.logoutSuccessHandler((req, res, auth) ->
-				{
+				.logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
