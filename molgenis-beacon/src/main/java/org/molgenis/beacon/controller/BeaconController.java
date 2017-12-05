@@ -21,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(URI)
 public class BeaconController
 {
-	static final String URI = "/beacon";
+	public static final String URI = "/beacon";
 
 	private BeaconInfoService beaconInfoService;
 	private BeaconQueryService beaconQueryService;

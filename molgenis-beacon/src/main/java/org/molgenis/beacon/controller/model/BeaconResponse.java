@@ -56,11 +56,13 @@ public abstract class BeaconResponse
 	 * Datasets served by the beacon. Any beacon should specify at least one
 	 * dataset.
 	 */
-	public abstract List<BeaconDataset> getDatasets();
+	public abstract List<BeaconDatasetResponse> getDatasets();
 
-	public static BeaconResponse create(String id, String name, String apiVersion, BeaconOrganizationResponse organization,
-			String description, String version, String welcomeUrl, List<BeaconDataset> datasets)
+	public static BeaconResponse create(String id, String name, String apiVersion,
+			BeaconOrganizationResponse organization, String description, String version, String welcomeUrl,
+			List<BeaconDatasetResponse> datasets)
 	{
-		return new AutoValue_BeaconResponse(id, name, apiVersion, organization, description, version, welcomeUrl, datasets);
+		return new AutoValue_BeaconResponse(id, name, apiVersion, organization, description, version, welcomeUrl,
+				datasets);
 	}
 }

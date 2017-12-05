@@ -2,7 +2,7 @@ package org.molgenis.beacon.service;
 
 import org.mockito.Mock;
 import org.molgenis.beacon.config.Beacon;
-import org.molgenis.beacon.controller.model.BeaconDataset;
+import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.impl.BeaconInfoServiceImpl;
 import org.molgenis.data.DataService;
@@ -36,7 +36,7 @@ public class BeaconInfoServiceTest
 	@Test
 	public void getAvailableBeaconsTest()
 	{
-		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		List<BeaconDatasetResponse> beaconDatasets = newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
 		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "",
 				beaconDatasets);
 
@@ -52,7 +52,7 @@ public class BeaconInfoServiceTest
 	@Test
 	public void infoTest()
 	{
-		List<BeaconDataset> beaconDatasets = newArrayList(BeaconDataset.create("dataset", "DATA", ""));
+		List<BeaconDatasetResponse> beaconDatasets = newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
 		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "",
 				beaconDatasets);
 

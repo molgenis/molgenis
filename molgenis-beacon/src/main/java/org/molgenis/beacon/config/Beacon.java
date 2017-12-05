@@ -1,6 +1,6 @@
 package org.molgenis.beacon.config;
 
-import org.molgenis.beacon.controller.model.BeaconDataset;
+import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.data.Entity;
@@ -69,9 +69,9 @@ public class Beacon extends StaticEntity
 		return getString(WELCOME_URL);
 	}
 
-	public Iterable<EntityType> getDataSets()
+	public Iterable<BeaconDataset> getDataSets()
 	{
-		return getEntities(DATA_SETS, EntityType.class);
+		return getEntities(DATA_SETS, BeaconDataset.class);
 	}
 
 	public BeaconResponse toBeaconResponse()
@@ -90,11 +90,11 @@ public class Beacon extends StaticEntity
 				getVersion(), getWelcomeUrl(), entityTypeToBeaconDataset());
 	}
 
-	private List<BeaconDataset> entityTypeToBeaconDataset()
+	private List<BeaconDatasetResponse> entityTypeToBeaconDataset()
 	{
-		List<BeaconDataset> beaconDatasets = newArrayList();
+		List<BeaconDatasetResponse> beaconDatasets = newArrayList();
 		getDataSets().forEach(dataset -> beaconDatasets.add(
-				BeaconDataset.create(dataset.getId(), dataset.getLabel(), dataset.getDescription())));
+				BeaconDatasetResponse.create(dataset.getId(), dataset.getLabel(), dataset.getDescription())));
 		return beaconDatasets;
 	}
 }
