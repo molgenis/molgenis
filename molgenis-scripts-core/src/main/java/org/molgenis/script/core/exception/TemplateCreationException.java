@@ -1,16 +1,15 @@
 package org.molgenis.script.core.exception;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Wraps exceptions that can occur during the creation of a Template for a script.
  */
-@SuppressWarnings("MaximumInheritanceDepth")
+// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class TemplateCreationException extends ScriptGenerationException
 {
 	private static final String ERROR_CODE = "SC04";
@@ -34,12 +33,8 @@ public class TemplateCreationException extends ScriptGenerationException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, getCause().getLocalizedMessage());
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { getCause().getLocalizedMessage() };
 	}
 }

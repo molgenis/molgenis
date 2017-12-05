@@ -1,12 +1,10 @@
 package org.molgenis.data.mapper.exception;
 
-import java.text.MessageFormat;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class MissingAttributeException extends IncompatibleTargetException
 {
 	private static final String ERROR_CODE = "M04";
@@ -30,12 +28,8 @@ public class MissingAttributeException extends IncompatibleTargetException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attributeName);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { attributeName };
 	}
 }

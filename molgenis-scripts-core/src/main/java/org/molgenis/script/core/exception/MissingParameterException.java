@@ -1,14 +1,12 @@
 package org.molgenis.script.core.exception;
 
-import java.text.MessageFormat;
-
 import static java.lang.String.format;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown when there's a parameter missing when generating a script.
  */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class MissingParameterException extends ScriptGenerationException
 {
 	private static final String ERROR_CODE = "SC03";
@@ -33,12 +31,8 @@ public class MissingParameterException extends ScriptGenerationException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, parameterName);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { parameterName };
 	}
 }

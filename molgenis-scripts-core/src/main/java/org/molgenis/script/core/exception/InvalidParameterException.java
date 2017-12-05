@@ -1,15 +1,13 @@
 package org.molgenis.script.core.exception;
 
-import java.text.MessageFormat;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown when a script template can not be generated because of faulty parameter(s).
  */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class InvalidParameterException extends ScriptGenerationException
 {
 	private static final String ERROR_CODE = "SC02";
@@ -33,12 +31,8 @@ public class InvalidParameterException extends ScriptGenerationException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, name, getCause().getLocalizedMessage());
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { name, getCause().getLocalizedMessage() };
 	}
 }

@@ -1,15 +1,13 @@
 package org.molgenis.script.core.exception;
 
-import java.text.MessageFormat;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Throw when an unknown ScriptType is requested.
  */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class UnknownScriptTypeException extends ScriptException
 {
 	private static final String ERROR_CODE = "SC01";
@@ -34,12 +32,8 @@ public class UnknownScriptTypeException extends ScriptException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, type);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { type };
 	}
 }

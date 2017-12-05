@@ -2,13 +2,11 @@ package org.molgenis.data.mapper.exception;
 
 import org.molgenis.data.meta.model.Attribute;
 
-import java.text.MessageFormat;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class IncompatibleReferenceException extends IncompatibleTargetException
 {
 	private static final String ERROR_CODE = "M06";
@@ -43,19 +41,11 @@ public class IncompatibleReferenceException extends IncompatibleTargetException
 				targetRepositoryAttribute.getDataType(), targetRepositoryAttribute.getRefEntity().getId());
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(format, mappingTargetAttribute.getLabel(language),
-					mappingTargetAttribute.getDataType().name(),
-					mappingTargetAttribute.getRefEntity().getLabel(language),
-					targetRepositoryAttribute.getLabel(language), targetRepositoryAttribute.getDataType().name(),
-					targetRepositoryAttribute.getRefEntity().getLabel(language));
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { mappingTargetAttribute, mappingTargetAttribute.getDataType().name(),
+				mappingTargetAttribute.getRefEntity(), targetRepositoryAttribute,
+				targetRepositoryAttribute.getDataType().name(), targetRepositoryAttribute.getRefEntity() };
 	}
 }
