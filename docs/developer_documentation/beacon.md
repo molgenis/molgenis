@@ -133,9 +133,13 @@ In the dataexplorer, go to the dropdown in the top right, select the *BeaconOrga
 
 ![Creating a Beacon Organization](../images/beacon/create-organization-form.png?raw=true, "beacon/create-organization-form")
 
-And now we can link to this organization by editing the Beacon row we created before
+Configure dataset as Beacon
 
-![Adding an Organization to a Beacon ](../images/beacon/add-organization-to-beacon-form.png?raw=true, "beacon/add-organization-to-beacon-form")
+![Configure dataset as a beacon](../images/beacon/configure-beacon-as-dataset-form.png?raw=true, "beacon/configure-beacon-as-dataset-form")
+
+And now we can link to this organization and dataset by editing the Beacon row we created before
+
+![Adding a Beacon](../images/beacon/add-beacon-form.png?raw=true, "beacon/add-beacon-form")
  
 And by requesting info on our beacon again  
 `http://localhost:8080/beacon/MyFirstBeacon`
