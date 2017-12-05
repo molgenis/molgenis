@@ -32,9 +32,11 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Base64;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
@@ -84,6 +86,8 @@ public class NegotiatorController extends PluginController
 
 		boolean isValidRequest = true;
 		String message = "";
+		List<String> enabledCollectionsLabels;
+		List<String> disabledCollectionLabels;
 
 		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
 		if (null != entityConfig)
@@ -91,12 +95,19 @@ public class NegotiatorController extends PluginController
 			LOG.info("Validating negotiator request\n\n{}", request);
 
 			List<Entity> collectionEntities = getCollectionEntities(request);
-			List<String> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
+			List<Entity> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
+
+			Function<Entity, String> getLabel = entity -> entity.getLabelValue().toString();
+			disabledCollectionLabels = disabledCollections.stream().map(getLabel).collect(toList());
+			enabledCollectionsLabels = collectionEntities.stream()
+														 .filter(e -> !disabledCollections.contains(e))
+														 .map(getLabel)
+														 .collect(toList());
 
 			if (!disabledCollections.isEmpty())
 			{
 				message = String.format(i18n.getString("dataexplorer_directory_disabled"), disabledCollections.size(),
-						String.join(", ", disabledCollections));
+						collectionEntities.size());
 			}
 
 			if (collectionEntities.isEmpty() || (collectionEntities.size() == disabledCollections.size()))
@@ -109,7 +120,7 @@ public class NegotiatorController extends PluginController
 		{
 			throw new MolgenisDataException(i18n.getString("dataexplorer_directory_no_config"));
 		}
-		return ExportValidationResponse.create(isValidRequest, message);
+		return ExportValidationResponse.create(isValidRequest, message, enabledCollectionsLabels , disabledCollectionLabels);
 	}
 
 	@PostMapping("/export")
@@ -197,12 +208,11 @@ public class NegotiatorController extends PluginController
 		return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
 	}
 
-	private List<String> getDisabledCollections(List<Entity> entities, NegotiatorEntityConfig config)
+	private List<Entity> getDisabledCollections(List<Entity> entities, NegotiatorEntityConfig config)
 	{
 		String expression = config.getString(ENABLED_EXPRESSION);
 		return entities.stream()
 					   .filter(entity -> !evaluateExpressionOnEntity(expression, entity))
-					   .map(entity -> entity.getLabelValue().toString())
 					   .collect(Collectors.toList());
 	}
 
