@@ -1,35 +1,28 @@
 package org.molgenis.data.importer.emx.exception;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InconsistentPackageStructureException extends EmxException
 {
-	private final static String ERROR_CODE = "E01";
-	private String package_;
-	private String parent;
+	private static final String ERROR_CODE = "E01";
+	private final String pack;
+	private final String parent;
 
-	public InconsistentPackageStructureException(String package_, String parent)
+	public InconsistentPackageStructureException(String pack, String parent)
 	{
 		super(ERROR_CODE);
-		this.package_ = package_;
+		this.pack = pack;
 		this.parent = parent;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("package:%s parent:%s", package_, parent);
+		return String.format("package:%s parent:%s", pack, parent);
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, package_, parent);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { pack, parent };
 	}
 }

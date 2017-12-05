@@ -1,16 +1,12 @@
 package org.molgenis.data;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
-@SuppressWarnings("squid:S1948")
+@SuppressWarnings({ "squid:MaximumInheritanceDepth" })
 public class UnknownParentException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D08";
 
-	private final Object entityId;
-	private final Object parentEntityId;
+	private final transient Object entityId;
+	private final transient Object parentEntityId;
 
 	public UnknownParentException(Object entityId, Object parentEntityId)
 	{
@@ -26,13 +22,9 @@ public class UnknownParentException extends UnknownDataException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, parentEntityId.toString(), entityId.toString());
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { parentEntityId, entityId };
 	}
 }
 

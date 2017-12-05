@@ -1,13 +1,11 @@
 package org.molgenis.data.validation;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown to indicate that existing data does not correspond to modified enum options.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EnumConstraintModificationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V09";
@@ -27,10 +25,8 @@ public class EnumConstraintModificationException extends DataIntegrityViolationE
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(
-				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId))
-								   .orElse(super.getLocalizedMessage());
+		return new Object[] { entityTypeId };
 	}
 }

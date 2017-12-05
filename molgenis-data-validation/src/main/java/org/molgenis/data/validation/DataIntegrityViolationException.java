@@ -1,13 +1,13 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.DataAccessException;
+import org.molgenis.data.ErrorCodedDataAccessException;
 
 import javax.annotation.Nullable;
 
 /**
  * {@link org.springframework.dao.DataIntegrityViolationException} with error code and without message.
  */
-public abstract class DataIntegrityViolationException extends DataAccessException
+public abstract class DataIntegrityViolationException extends ErrorCodedDataAccessException
 {
 	public DataIntegrityViolationException(String errorCode)
 	{

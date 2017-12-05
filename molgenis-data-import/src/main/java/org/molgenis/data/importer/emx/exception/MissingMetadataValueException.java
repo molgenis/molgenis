@@ -1,16 +1,13 @@
 package org.molgenis.data.importer.emx.exception;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MissingMetadataValueException extends EmxException
 {
-	private final static String ERROR_CODE = "E06";
-	private String attributeAttributeName;
-	private String attributeName;
-	private String sheetName;
-	private int rowIndex;
+	private static final String ERROR_CODE = "E06";
+	private final String attributeAttributeName;
+	private final String attributeName;
+	private final String sheetName;
+	private final int rowIndex;
 
 	public MissingMetadataValueException(String attributeAttributeName, String attributeName, String sheetName,
 			int rowIndex)
@@ -30,12 +27,8 @@ public class MissingMetadataValueException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attributeAttributeName, attributeName, sheetName, rowIndex);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { attributeAttributeName, attributeName, sheetName, rowIndex };
 	}
 }

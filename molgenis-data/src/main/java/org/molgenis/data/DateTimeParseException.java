@@ -2,16 +2,13 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.model.Attribute;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class DateTimeParseException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "D12";
-	private Attribute attribute;
-	private String value;
+	private static final String ERROR_CODE = "D12";
+	private final Attribute attribute;
+	private final String value;
 
 	public DateTimeParseException(Attribute attribute, String value)
 	{
@@ -37,13 +34,8 @@ public class DateTimeParseException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attribute.getName(), value);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { attribute.getName(), value };
 	}
-
 }

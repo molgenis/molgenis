@@ -1,7 +1,6 @@
 package org.molgenis.data.importer.exception;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IncompatibleSystemMetadataException extends ImporterException
 {
 	private static final String ERROR_CODE = "I04";
@@ -14,13 +13,12 @@ public class IncompatibleSystemMetadataException extends ImporterException
 	@Override
 	public String getMessage()
 	{
-		return String.format("Incompatible SystemEntityMetadata");
+		return "";
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService -> languageService.getString(ERROR_CODE))
-								   .orElseGet(super::getLocalizedMessage);
+		return new Object[0];
 	}
 }

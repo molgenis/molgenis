@@ -87,7 +87,6 @@ public class LanguageServiceImplTest extends AbstractMockitoTest
 	public void getCurrentUserLanguageAppSettings()
 	{
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
-		when(user.getLanguageCode()).thenReturn("de");
 		when(queryMock.findOne()).thenReturn(user);
 		when(appSettingsMock.getLanguageCode()).thenReturn("de");
 		Language language = mock(Language.class);

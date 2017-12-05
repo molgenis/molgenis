@@ -1,7 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import com.google.common.collect.ImmutableMap;
-import org.molgenis.data.DataAccessException;
+import org.molgenis.data.ErrorCodedDataAccessException;
 import org.molgenis.data.UnknownDataAccessException;
 import org.molgenis.data.postgresql.identifier.AttributeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeDescription;
@@ -126,7 +126,7 @@ public class PostgreSqlExceptionTranslatorTest
 		throw e;
 	}
 
-	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entity:null")
+	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entityId:null")
 	public void translateNotNullViolation()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
@@ -151,7 +151,7 @@ public class PostgreSqlExceptionTranslatorTest
 		postgreSqlExceptionTranslator.translateNotNullViolation(new PSQLException(serverErrorMessage));
 	}
 
-	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entity:null")
+	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entityId:null")
 	public void translateNotNullViolationNoDoubleQuotes()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
@@ -370,7 +370,7 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getSQLState()).thenReturn("42703");
 		when(serverErrorMessage.getMessage()).thenReturn("Undefined column: 7 ERROR: column \"test\" does not exist");
 		//noinspection ThrowableResultOfMethodCallIgnored
-		DataAccessException e = PostgreSqlExceptionTranslator.translateUndefinedColumnException(
+		ErrorCodedDataAccessException e = PostgreSqlExceptionTranslator.translateUndefinedColumnException(
 				new PSQLException(serverErrorMessage));
 		throw e;
 	}

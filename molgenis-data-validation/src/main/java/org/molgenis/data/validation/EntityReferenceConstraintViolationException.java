@@ -1,12 +1,11 @@
 package org.molgenis.data.validation;
 
-import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown when deleting data that is still referenced by other data.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EntityReferenceConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V11";
@@ -31,10 +30,8 @@ public class EntityReferenceConstraintViolationException extends DataIntegrityVi
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(
-				languageService -> format(languageService.getString(ERROR_CODE), entityTypeId, attributeName,
-						valueAsString)).orElse(super.getLocalizedMessage());
+		return new Object[] { entityTypeId, attributeName, valueAsString };
 	}
 }

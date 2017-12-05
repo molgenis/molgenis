@@ -2,14 +2,13 @@ package org.molgenis.data.rest.exception;
 
 import org.molgenis.data.meta.AttributeType;
 
-import java.text.MessageFormat;
-
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * thrown of a operation is attempted on a attribute type on which this operation is not supported
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IllegalAttributeTypeException extends RestApiException
 {
 	private final static String ERROR_CODE = "R08";
@@ -29,16 +28,12 @@ public class IllegalAttributeTypeException extends RestApiException
 	@Override
 	public String getMessage()
 	{
-		return String.format("attributeType:%s", attributeType.name());
+		return format("attributeType:%s", attributeType.name());
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attributeType.name());
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { attributeType.name() };
 	}
 }
