@@ -3,12 +3,11 @@ package org.molgenis.ui.style;
 import org.molgenis.data.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MolgenisStyleException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "C05";
-	private Throwable cause;
+	private static final String ERROR_CODE = "C05";
+	private final Throwable cause;
 
 	public MolgenisStyleException(Throwable cause)
 	{
@@ -23,12 +22,8 @@ public class MolgenisStyleException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[0];
 	}
 }

@@ -1,7 +1,6 @@
 package org.molgenis.data.vcf.exception;
 
 import org.molgenis.data.CodedRuntimeException;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class InvalidHeaderException extends CodedRuntimeException
 {
@@ -15,16 +14,12 @@ public class InvalidHeaderException extends CodedRuntimeException
 	@Override
 	public String getMessage()
 	{
-		return String.format("");
+		return "";
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElse(super.getLocalizedMessage());
+		return new Object[0];
 	}
 }

@@ -2,14 +2,10 @@ package org.molgenis.data.rsql;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 public class RSQLParseException extends CodedRuntimeException
 {
-	public static String ERROR_CODE = "C02";
-	private String rsql;
+	private static final String ERROR_CODE = "C02";
+	private final String rsql;
 
 	public RSQLParseException(String rsql)
 	{
@@ -24,12 +20,8 @@ public class RSQLParseException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, rsql);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { rsql };
 	}
 }

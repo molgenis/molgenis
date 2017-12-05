@@ -2,15 +2,12 @@ package org.molgenis.data.vcf.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MissingPedigreeInformationException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "VCF04";
-	private String line;
+	private final String line;
 
 	public MissingPedigreeInformationException(String line)
 	{
@@ -25,12 +22,8 @@ public class MissingPedigreeInformationException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, line);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { line };
 	}
 }

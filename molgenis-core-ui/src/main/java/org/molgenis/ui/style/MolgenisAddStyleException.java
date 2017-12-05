@@ -2,16 +2,13 @@ package org.molgenis.ui.style;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MolgenisAddStyleException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "C09";
-	private String identifier;
-	private Throwable cause;
+	private static final String ERROR_CODE = "C09";
+	private final String identifier;
+	private final Throwable cause;
 
 	public MolgenisAddStyleException(String identifier, Throwable cause)
 	{
@@ -27,12 +24,8 @@ public class MolgenisAddStyleException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, identifier);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { identifier };
 	}
 }

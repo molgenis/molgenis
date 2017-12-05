@@ -2,15 +2,12 @@ package org.molgenis.data.annotation.core.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnresolvedAnnotatorDependencyException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "AN07";
-	private String annotatorName;
+	private final String annotatorName;
 
 	public UnresolvedAnnotatorDependencyException(String annotatorName)
 	{
@@ -25,12 +22,8 @@ public class UnresolvedAnnotatorDependencyException extends CodedRuntimeExceptio
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, annotatorName);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { annotatorName };
 	}
 }

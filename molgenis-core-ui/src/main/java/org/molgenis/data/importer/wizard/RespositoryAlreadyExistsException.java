@@ -2,15 +2,12 @@ package org.molgenis.data.importer.wizard;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class RespositoryAlreadyExistsException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "C07";
-	private String name;
+	private final String name;
 
 	public RespositoryAlreadyExistsException(String name)
 	{
@@ -25,12 +22,8 @@ public class RespositoryAlreadyExistsException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, name);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { name };
 	}
 }

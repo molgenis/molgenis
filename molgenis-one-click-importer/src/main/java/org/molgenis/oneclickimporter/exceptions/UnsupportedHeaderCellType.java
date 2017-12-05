@@ -3,15 +3,12 @@ package org.molgenis.oneclickimporter.exceptions;
 import org.apache.poi.ss.usermodel.CellType;
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnsupportedHeaderCellType extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "OCI05";
-	private CellType cellType;
+	private final CellType cellType;
 
 	public UnsupportedHeaderCellType(CellType cellType)
 	{
@@ -26,12 +23,8 @@ public class UnsupportedHeaderCellType extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, cellType.name());
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { cellType.name() };
 	}
 }

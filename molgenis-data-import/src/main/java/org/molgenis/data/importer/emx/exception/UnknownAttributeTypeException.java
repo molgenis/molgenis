@@ -4,12 +4,12 @@ import org.molgenis.data.meta.model.Attribute;
 
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings("squid:MaximumInheritcanceDepth")
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownAttributeTypeException extends EmxException
 {
 	private static final String ERROR_CODE = "E03";
 	private final String emxDataType;
-	private final Attribute attribute;
+	private final transient Attribute attribute;
 	private final int rowIndex;
 
 	public UnknownAttributeTypeException(String emxDataType, Attribute attribute, int rowIndex)

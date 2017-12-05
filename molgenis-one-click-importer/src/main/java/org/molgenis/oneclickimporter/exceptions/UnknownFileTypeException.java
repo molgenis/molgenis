@@ -2,15 +2,12 @@ package org.molgenis.oneclickimporter.exceptions;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnknownFileTypeException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "OCI06";
-	private String extension;
+	private final String extension;
 
 	public UnknownFileTypeException(String extension)
 	{
@@ -25,12 +22,8 @@ public class UnknownFileTypeException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, extension);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { extension };
 	}
 }

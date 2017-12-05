@@ -1,4 +1,4 @@
-package org.molgenis.data.importer.wizard.exception;
+package org.molgenis.ontology.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 

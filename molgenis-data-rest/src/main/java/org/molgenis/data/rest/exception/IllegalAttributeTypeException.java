@@ -11,8 +11,8 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IllegalAttributeTypeException extends RestApiException
 {
-	private final static String ERROR_CODE = "R08";
-	private AttributeType attributeType;
+	private static final String ERROR_CODE = "R08";
+	private final AttributeType attributeType;
 
 	public IllegalAttributeTypeException(AttributeType attributeType)
 	{

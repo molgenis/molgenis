@@ -53,7 +53,6 @@ public class ExcelServiceImpl implements ExcelService
 		}
 		catch (IOException | InvalidFormatException | EncryptedDocumentException ex)
 		{
-			LOG.error(ex.getLocalizedMessage());
 			throw new WorkbookCreationException();
 		}
 		return sheets;

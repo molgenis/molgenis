@@ -3,15 +3,12 @@ package org.molgenis.data.annotation.core.exception;
 import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class SecondRunNotSupportedException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "AN10";
-	private RepositoryAnnotator annotator;
+	private final transient RepositoryAnnotator annotator;
 
 	public SecondRunNotSupportedException(RepositoryAnnotator annotator)
 	{
@@ -26,12 +23,8 @@ public class SecondRunNotSupportedException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, annotator.getFullName());
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { annotator.getFullName() };
 	}
 }

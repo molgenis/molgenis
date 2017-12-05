@@ -17,9 +17,9 @@ public class AnnotationException extends CodedRuntimeException
 	private static final String ERROR_CODE = "AN08";
 
 	private final Integer entityNumber;
-	private final Entity failedEntity;
+	private final transient Entity failedEntity;
 	private final String annotatorName;
-	private final List<Attribute> requiredAttributes;
+	private final transient List<Attribute> requiredAttributes;
 	private final Throwable cause;
 
 	public AnnotationException(Entity failedEntity, int lineNumber, List<Attribute> requiredAttributes, String annotatorName, Throwable cause)
@@ -73,4 +73,11 @@ public class AnnotationException extends CodedRuntimeException
 					StringUtils.join(requiredAttributeNames, ","), annotatorName, cause);
 		}).orElse(super.getLocalizedMessage());
 	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		throw new UnsupportedOperationException();
+	}
+
 }

@@ -5,17 +5,14 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EntityAlreadyReferencedException extends CodedRuntimeException
 {
-	public static String ERROR_CODE = "R11";
-	private Entity refEntity;
-	private Attribute refAttribute;
-	private EntityType entityType;
+	private static final String ERROR_CODE = "R11";
+	private final transient Entity refEntity;
+	private final transient Attribute refAttribute;
+	private final transient EntityType entityType;
 
 	public EntityAlreadyReferencedException(Entity refEntity, Attribute refAttribute, EntityType entityType)
 	{
@@ -32,14 +29,8 @@ public class EntityAlreadyReferencedException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(format, refEntity.getEntityType().getLabel(language),
-					refAttribute.getLabel(language), entityType.getLabel(language));
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { refEntity, refAttribute, entityType };
 	}
 }

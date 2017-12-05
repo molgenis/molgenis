@@ -2,11 +2,9 @@ package org.molgenis.ui.style;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 public class CannotDeleteAllThemesException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "C03";
+	private static final String ERROR_CODE = "C03";
 
 	public CannotDeleteAllThemesException()
 	{
@@ -16,16 +14,12 @@ public class CannotDeleteAllThemesException extends CodedRuntimeException
 	@Override
 	public String getMessage()
 	{
-		return String.format("");
+		return "";
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[0];
 	}
 }

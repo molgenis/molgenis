@@ -2,6 +2,7 @@ package org.molgenis.data.validation;
 
 import static java.util.Objects.requireNonNull;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ReadOnlyConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V02";

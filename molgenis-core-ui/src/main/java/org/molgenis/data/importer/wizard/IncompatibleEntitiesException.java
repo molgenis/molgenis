@@ -2,16 +2,14 @@ package org.molgenis.data.importer.wizard;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class IncompatibleEntitiesException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "C08";
-	private List<String> entitiesNotImportable;
+	private final List<String> entitiesNotImportable;
 
 	public IncompatibleEntitiesException(List<String> entitiesNotImportable)
 	{
@@ -26,12 +24,8 @@ public class IncompatibleEntitiesException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, entitiesNotImportable);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { entitiesNotImportable };
 	}
 }
