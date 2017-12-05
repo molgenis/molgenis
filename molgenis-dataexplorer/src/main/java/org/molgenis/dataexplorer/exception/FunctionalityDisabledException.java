@@ -9,7 +9,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class FunctionalityDisabledException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "G01";
+	private static final String ERROR_CODE = "DE01";
 	private String functionality;
 
 	public FunctionalityDisabledException(String functionality)

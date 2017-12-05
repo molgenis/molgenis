@@ -9,7 +9,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class ExcelMaxSizeExceededException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "G02";
+	private static final String ERROR_CODE = "DE02";
 	private long size;
 
 	public ExcelMaxSizeExceededException(long size)

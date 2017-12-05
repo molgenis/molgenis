@@ -9,7 +9,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MrefNotSupportedException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "G03";
+	private static final String ERROR_CODE = "DE03";
 	private String subject;
 
 	public MrefNotSupportedException(String subject)
