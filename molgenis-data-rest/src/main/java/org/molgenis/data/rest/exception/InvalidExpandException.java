@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 public class InvalidExpandException extends RestApiException
 {
 	private static final String ERROR_CODE = "R03";
-	private final Object expand;
+	private final transient Object expand;
 
 	public InvalidExpandException(String expand)
 	{

@@ -3,10 +3,10 @@ package org.molgenis.data.annotation.core.entity.impl.omim;
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.annotation.core.exception.UnsupportedQueryException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -85,7 +85,7 @@ public class OmimRepository extends AbstractRepository
 
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS))
 		{
-			throw new MolgenisDataException("The only query allowed on this Repository is gene EQUALS");
+			throw new UnsupportedQueryException("gene");
 		}
 
 		String geneSymbol = (String) q.getRules().get(0).getValue();

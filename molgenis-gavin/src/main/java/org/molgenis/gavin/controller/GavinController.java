@@ -2,10 +2,10 @@ package org.molgenis.gavin.controller;
 
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.exception.JobNotFoundException;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
-import org.molgenis.gavin.job.JobNotFoundException;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.AbstractStaticContentController;

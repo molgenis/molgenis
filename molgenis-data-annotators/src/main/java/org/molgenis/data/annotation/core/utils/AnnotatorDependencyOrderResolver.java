@@ -87,7 +87,7 @@ public class AnnotatorDependencyOrderResolver
 		if (annotatorQueue.isEmpty())
 		{
 			// FIXME: what to do for ref entity annotator.
-			throw new UnresolvedAnnotatorDependencyException("unsolved for: " + requestedAnnotator);
+			throw new UnresolvedAnnotatorDependencyException(requestedAnnotator.getFullName());
 		}
 
 	}

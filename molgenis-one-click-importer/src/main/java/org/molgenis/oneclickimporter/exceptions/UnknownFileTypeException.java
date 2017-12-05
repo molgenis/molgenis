@@ -1,10 +1,29 @@
 package org.molgenis.oneclickimporter.exceptions;
 
-@Deprecated // FIXME extend from CodedRuntimeException
-public class UnknownFileTypeException extends Exception
+import org.molgenis.data.CodedRuntimeException;
+
+import static java.util.Objects.requireNonNull;
+
+public class UnknownFileTypeException extends CodedRuntimeException
 {
-	public UnknownFileTypeException(String s)
+	private static final String ERROR_CODE = "OCI06";
+	private final String extension;
+
+	public UnknownFileTypeException(String extension)
 	{
-		super(s);
+		super(ERROR_CODE);
+		this.extension = requireNonNull(extension);
+	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("extension:%s", extension);
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return new Object[] { extension };
 	}
 }

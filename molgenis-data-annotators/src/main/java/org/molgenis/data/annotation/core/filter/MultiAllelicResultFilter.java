@@ -3,9 +3,9 @@ package org.molgenis.data.annotation.core.filter;
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.datastructures.Location;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
+import org.molgenis.data.annotation.core.exception.LocationMismatchException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -254,7 +254,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 			// at least chrom and pos have to be the same, ref may be different
 			if (!location.equals(thisLoc))
 			{
-				throw new MolgenisDataException("Mismatch in location! " + location + " vs " + thisLoc);
+				throw new LocationMismatchException(location, thisLoc);
 			}
 
 			// add to map by ref, so we get [ref -> entities to be merged into one]

@@ -247,7 +247,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		verify(permissionSystemService).giveUserWriteMetaPermissions(sampleEntityType0);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = EntityTypeAlreadyExistsException.class)
 	public void doImportAlreadyExists()
 	{
 		String entityTypeId0 = "entity0";

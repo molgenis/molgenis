@@ -4,10 +4,10 @@ package org.molgenis.data.importer.emx.exception;
 public class InvalidPartOfException extends EmxException
 {
 	private static final String ERROR_CODE = "E05";
-	private String partOfAttributeAttribute;
-	private String attributeName;
-	private String entityTypeId;
-	private int rowIndex;
+	private final String partOfAttributeAttribute;
+	private final String attributeName;
+	private final String entityTypeId;
+	private final int rowIndex;
 
 	public InvalidPartOfException(String partOfAttributeAttribute, String attributeName, String entityTypeId,
 			int rowIndex)

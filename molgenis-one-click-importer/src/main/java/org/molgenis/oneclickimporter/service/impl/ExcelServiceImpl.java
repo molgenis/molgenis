@@ -5,8 +5,9 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
+import org.molgenis.oneclickimporter.exceptions.MissingDataException;
+import org.molgenis.oneclickimporter.exceptions.WorkbookCreationException;
 import org.molgenis.oneclickimporter.service.ExcelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +38,11 @@ public class ExcelServiceImpl implements ExcelService
 				Sheet sheet = workbook.getSheetAt(index);
 				if (sheet.getPhysicalNumberOfRows() == 0)
 				{
-					throw new EmptySheetException("Sheet [" + sheet.getSheetName() + "] is empty");
+					throw new EmptySheetException("Excel sheet", sheet.getSheetName());
 				}
 				else if (sheet.getPhysicalNumberOfRows() == 1)
 				{
-					throw new MolgenisDataException(
-							"Header was found, but no data is present in sheet [" + sheet.getSheetName() + "]");
+					throw new MissingDataException("Excel sheet", sheet.getSheetName());
 				}
 				else
 				{
@@ -53,8 +53,7 @@ public class ExcelServiceImpl implements ExcelService
 		}
 		catch (IOException | InvalidFormatException | EncryptedDocumentException ex)
 		{
-			LOG.error(ex.getLocalizedMessage());
-			throw new MolgenisDataException("Could not create excel workbook from file");
+			throw new WorkbookCreationException();
 		}
 		return sheets;
 

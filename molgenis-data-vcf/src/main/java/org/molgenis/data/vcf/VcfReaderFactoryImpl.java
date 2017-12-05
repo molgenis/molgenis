@@ -2,7 +2,7 @@ package org.molgenis.data.vcf;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.vcf.exception.VcfReaderCreationException;
 import org.molgenis.vcf.VcfReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class VcfReaderFactoryImpl implements VcfReaderFactory
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisDataException("Failed to create VCF Reader for file" + file.getAbsolutePath(), e);
+			throw new VcfReaderCreationException(file.getName());
 		}
 	}
 

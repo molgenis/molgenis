@@ -4,7 +4,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import cz.jirutka.rsql.parser.RSQLParserException;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;
@@ -33,7 +32,6 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -364,29 +362,29 @@ public class RestController
 	@GetMapping(value = "/csv/{entityTypeId}", produces = "text/csv")
 	@ResponseBody
 	public EntityCollection retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
-			@RequestParam(value = "attributes", required = false) String[] attributes, HttpServletRequest req,
+			@RequestParam(value = "attributes", required = false) String[] attributes,
+			@RequestParam(value = "num", required = false) Integer num,
+			@RequestParam(value = "start", required = false) Integer start,
+			@RequestParam(value = "q", required = false) String q,
+			@RequestParam(value = "sortOrder", required = false) String sortOrder,
+			@RequestParam(value = "sortColumn", required = false) String sortColumn,
 			HttpServletResponse resp) throws IOException
 	{
 		final Set<String> attributesSet = toAttributeSet(attributes);
 
 		EntityType meta;
 		Iterable<Entity> entities;
-		try
-		{
-			meta = dataService.getEntityType(entityTypeId);
-			Query<Entity> q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
 
-			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
-			if (sortAttributeArray != null && sortAttributeArray.length == 1 && StringUtils.isNotEmpty(
-					sortAttributeArray[0]))
+			meta = dataService.getEntityType(entityTypeId);
+		Query<Entity> query = new QueryStringParser(meta, molgenisRSQL).createQuery(num, start, q);
+
+		if (sortColumn != null)
 			{
-				String sortAttribute = sortAttributeArray[0];
-				String sortOrderArray[] = req.getParameterMap().get("sortOrder");
+				String sortAttribute = sortColumn;
 				Sort.Direction order = Sort.Direction.ASC;
 
-				if (sortOrderArray != null && sortOrderArray.length == 1 && StringUtils.isNotEmpty(sortOrderArray[0]))
+				if (sortOrder != null)
 				{
-					String sortOrder = sortOrderArray[0];
 					switch (sortOrder)
 					{
 						case "ASC":
@@ -399,28 +397,23 @@ public class RestController
 							throw new InvalidSortOrderException();
 					}
 				}
-				q.sort().on(sortAttribute, order);
+				query.sort().on(sortAttribute, order);
 			}
 
-			if (q.getPageSize() == 0)
+		if (query.getPageSize() == 0)
 			{
-				q.pageSize(EntityCollectionRequest.DEFAULT_ROW_COUNT);
+				query.pageSize(EntityCollectionRequest.DEFAULT_ROW_COUNT);
 			}
 
-			if (q.getPageSize() > EntityCollectionRequest.MAX_ROWS)
+		if (query.getPageSize() > EntityCollectionRequest.MAX_ROWS)
 			{
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
 						"Num exceeded the maximum of " + EntityCollectionRequest.MAX_ROWS + " rows");
 				return null;
 			}
 
-			entities = () -> dataService.findAll(entityTypeId, q).iterator();
-		}
-		catch (ConversionFailedException | RSQLParserException | IllegalArgumentException | UnsupportedOperationException e)
-		{
-			//FIXME: how to handle those
-			throw new MolgenisDataException(e);
-		}
+		entities = () -> dataService.findAll(entityTypeId, query).iterator();
+
 
 		// Check attribute names
 		Iterable<String> attributesIterable = Iterables.transform(meta.getAtomicAttributes(),

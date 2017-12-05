@@ -1,6 +1,9 @@
 package org.molgenis.data.index.admin;
 
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,7 +57,7 @@ public class IndexManagerServiceImpl implements IndexManagerService
 		Repository<Entity> repository = dataService.getRepository(entityTypeId);
 		if (!repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 		{
-			throw new MolgenisDataException("Repository [" + entityTypeId + "] is not an indexed repository");
+			throw new RepositoryNotIndexedException(repository.getEntityType());
 		}
 		indexService.rebuildIndex(repository);
 	}

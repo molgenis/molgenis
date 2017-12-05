@@ -1,15 +1,15 @@
 package org.molgenis.data.excel;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.LocaleUtil;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.excel.exception.CodedFileNotFoundException;
+import org.molgenis.data.excel.exception.UnsupportedCellTypeException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -109,11 +109,11 @@ public class ExcelUtils
 						value = null;
 						break;
 					default:
-						throw new MolgenisDataException("unsupported cell type: " + cellValue.getCellTypeEnum());
+						throw new UnsupportedCellTypeException(cellValue.getCellTypeEnum());
 				}
 				break;
 			default:
-				throw new MolgenisDataException("unsupported cell type: " + cell.getCellTypeEnum());
+				throw new UnsupportedCellTypeException(cell.getCellTypeEnum());
 		}
 
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
@@ -127,9 +127,17 @@ public class ExcelUtils
 			workbook.write(new FileOutputStream(file));
 
 		}
-		catch (Exception e)
+		catch (InvalidFormatException e)
 		{
-			throw new MolgenisDataException(e);
+			throw new RuntimeException(e);
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new CodedFileNotFoundException(file.getName());
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
 		}
 
 	}
@@ -141,9 +149,17 @@ public class ExcelUtils
 		{
 			return workbook.getNumberOfSheets();
 		}
-		catch (Exception e)
+		catch (InvalidFormatException e)
 		{
-			throw new MolgenisDataException(e);
+			throw new RuntimeException(e);
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new CodedFileNotFoundException(file.getName());
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
 		}
 	}
 

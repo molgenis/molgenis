@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.core.entity.impl.omim;
 
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.core.exception.UnsupportedQueryException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -139,7 +139,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 		assertTrue(EntityUtils.equals(it.next(), entity2));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "The only query allowed on this Repository is gene EQUALS")
+	@Test(expectedExceptions = UnsupportedQueryException.class)
 	public void findAllWithBadQuery()
 	{
 		repo.findAll(new QueryImpl<>().like(OmimRepository.OMIM_PHENOTYPE_COL_NAME, "test_phenotype"));

@@ -3,12 +3,12 @@ package org.molgenis.data.importer.emx.exception;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidAttributeValueException extends EmxException
 {
-	private final static String ERROR_CODE = "E13";
-	private String attribute;
-	private String value;
-	private String sheetName;
-	private String[] allowedTypes;
-	private int rowIndex;
+	private static final String ERROR_CODE = "E13";
+	private final String attribute;
+	private final String value;
+	private final String sheetName;
+	private final String[] allowedTypes;
+	private final int rowIndex;
 
 	public InvalidAttributeValueException(String attribute, String value, String sheetName, String[] allowedTypes,
 			int rowIndex)

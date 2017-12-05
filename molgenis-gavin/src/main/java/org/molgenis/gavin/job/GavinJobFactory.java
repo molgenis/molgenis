@@ -6,6 +6,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.exception.JobNotFoundException;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -96,7 +97,7 @@ public class GavinJobFactory
 		if (result == null)
 		{
 
-			throw new JobNotFoundException("Job not found.");
+			throw new JobNotFoundException();
 		}
 		return result;
 	}

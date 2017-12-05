@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 /**
  * {@link org.springframework.dao.DataIntegrityViolationException} with error code and without message.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public abstract class DataIntegrityViolationException extends ErrorCodedDataAccessException
 {
 	public DataIntegrityViolationException(String errorCode)

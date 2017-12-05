@@ -6,8 +6,9 @@ import static java.util.Objects.requireNonNull;
 
 public class FunctionalityDisabledException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "G01";
 	private final String functionality;
+	private static final String ERROR_CODE = "DE01";
+
 
 	public FunctionalityDisabledException(String functionality)
 	{

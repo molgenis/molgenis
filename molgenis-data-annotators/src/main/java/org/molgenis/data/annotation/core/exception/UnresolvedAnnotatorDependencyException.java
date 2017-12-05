@@ -1,24 +1,29 @@
 package org.molgenis.data.annotation.core.exception;
 
-@Deprecated // FIXME extend from CodedRuntimeException
-public class UnresolvedAnnotatorDependencyException extends RuntimeException
+import org.molgenis.data.CodedRuntimeException;
+
+import static java.util.Objects.requireNonNull;
+
+public class UnresolvedAnnotatorDependencyException extends CodedRuntimeException
 {
-	public UnresolvedAnnotatorDependencyException()
+	private static final String ERROR_CODE = "AN07";
+	private final String annotatorName;
+
+	public UnresolvedAnnotatorDependencyException(String annotatorName)
 	{
+		super(ERROR_CODE);
+		this.annotatorName = requireNonNull(annotatorName);
 	}
 
-	public UnresolvedAnnotatorDependencyException(String msg)
+	@Override
+	public String getMessage()
 	{
-		super(msg);
+		return String.format("annotatorName:%s", annotatorName);
 	}
 
-	public UnresolvedAnnotatorDependencyException(Throwable t)
+	@Override
+	protected Object[] getLocalizedMessageArguments()
 	{
-		super(t);
-	}
-
-	public UnresolvedAnnotatorDependencyException(String msg, Throwable t)
-	{
-		super(msg, t);
+		return new Object[] { annotatorName };
 	}
 }

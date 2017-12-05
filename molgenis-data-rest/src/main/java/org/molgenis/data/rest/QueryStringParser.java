@@ -24,7 +24,7 @@ import java.util.Map;
  * num: the number of results to return, default 100, max 100000
  * <p>
  * <p>
- * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
+ * Example: /api/v1/csv/sys_sec_Token?q=description==Piet&attributes=description,creationDate&start=10&num=100
  */
 public class QueryStringParser
 {
@@ -68,5 +68,29 @@ public class QueryStringParser
 		}
 
 		return q;
+	}
+
+	public Query<Entity> createQuery(Integer num, Integer start, String queryString)
+	{
+		QueryImpl<Entity> query = new QueryImpl<>();
+
+		if (num != null)
+		{
+			query.pageSize(num);
+		}
+		if (start != null)
+		{
+			query.offset(start);
+		}
+		if (queryString != null)
+		{
+			Query<Entity> q = molgenisRSQL.createQuery(queryString, entityType);
+			for (QueryRule rule : q.getRules())
+			{
+				query.addRule(rule);
+			}
+		}
+
+		return query;
 	}
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
@@ -75,7 +74,7 @@ public class SnpEffRunner
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisDataException("Exception making temporary VCF file", e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -99,48 +98,48 @@ public class SnpEffRunner
 
 			PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
 
-			return new Iterator<Entity>()
-			{
-				final LinkedList<Entity> effects = Lists.newLinkedList();
-
-				@Override
-				public boolean hasNext()
+				return new Iterator<Entity>()
 				{
-					return (peekingSourceIterator.hasNext() || !effects.isEmpty());
-				}
+					final LinkedList<Entity> effects = Lists.newLinkedList();
 
-				@Override
-				public Entity next()
-				{
-					if (effects.isEmpty())
+					@Override
+					public boolean hasNext()
 					{
-						// go to next source entity and get effects
-						Entity sourceEntity = peekingSourceIterator.next();
-						String chromosome = sourceEntity.getString(VcfAttributes.CHROM);
-						Integer position = sourceEntity.getInt(VcfAttributes.POS);
+						return (peekingSourceIterator.hasNext() || !effects.isEmpty());
+					}
 
-						if (chromosome != null && position != null)
+					@Override
+					public Entity next()
+					{
+						if (effects.isEmpty())
 						{
-							Entity snpEffEntity = getSnpEffEntity(snpEffResultIterator, chromosome, position);
-							if (snpEffEntity != null)
+							// go to next source entity and get effects
+							Entity sourceEntity = peekingSourceIterator.next();
+							String chromosome = sourceEntity.getString(VcfAttributes.CHROM);
+							Integer position = sourceEntity.getInt(VcfAttributes.POS);
+
+							if (chromosome != null && position != null)
 							{
-								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
-										getTargetEntityType(sourceEMD)));
+								Entity snpEffEntity = getSnpEffEntity(snpEffResultIterator, chromosome, position);
+								if (snpEffEntity != null)
+								{
+									effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
+											getTargetEntityType(sourceEMD)));
+								}
+								else
+								{
+									effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityType(sourceEMD)));
+								}
 							}
 							else
 							{
 								effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityType(sourceEMD)));
 							}
 						}
-						else
-						{
-							effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityType(sourceEMD)));
-						}
+						return effects.removeFirst();
 					}
-					return effects.removeFirst();
-				}
 
-			};
+				};
 		}
 		catch (IOException e)
 		{
@@ -148,7 +147,7 @@ public class SnpEffRunner
 		}
 		catch (InterruptedException e)
 		{
-			throw new MolgenisDataException("Exception running SnpEff", e);
+			throw new RuntimeException(e);
 		}
 	}
 

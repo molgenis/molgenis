@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 public class IncompatibleValueTypeException extends RestApiException
 {
 	private static final String ERROR_CODE = "R01";
-	private final Attribute attribute;
+	private final transient Attribute attribute;
 	private final String type;
 	private final String[] expectedTypes;
 

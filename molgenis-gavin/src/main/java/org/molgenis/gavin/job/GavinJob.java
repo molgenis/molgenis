@@ -1,11 +1,13 @@
 package org.molgenis.gavin.job;
 
 import com.google.common.collect.Multiset;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.TransactionalJob;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.exception.InputSizeException;
+import org.molgenis.gavin.exception.InvalidVariantsException;
+import org.molgenis.gavin.exception.MixedLineTypesException;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -94,18 +96,16 @@ public class GavinJob extends TransactionalJob<Void>
 		gavinJobExecution.setLineTypes(lineTypes);
 		if (lineTypes.contains(SKIPPED))
 		{
-			throw new MolgenisDataException(
-					format("Input file contains too many lines. Maximum is {0}.", Parser.MAX_LINES));
+			throw new InputSizeException(Parser.MAX_LINES);
 		}
 		if (lineTypes.containsAll(Arrays.asList(CADD, VCF)))
 		{
-			throw new MolgenisDataException(
-					"Input file contains mixed line types. Please use one type only, either VCF or CADD.");
+			throw new MixedLineTypesException();
 		}
 
 		if (!lineTypes.contains(CADD) && !lineTypes.contains(VCF))
 		{
-			throw new MolgenisDataException("Not a single valid variant line found.");
+			throw new InvalidVariantsException();
 		}
 
 		File exacInputFile = processedInputFile;
@@ -131,10 +131,7 @@ public class GavinJob extends TransactionalJob<Void>
 
 		progress.progress(5, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
-		//TODO Filter
-		//TODO write to database
-		//TODO result -> GeneNetwork
-		//TODO VCF pipe aware import
+
 		progress.setResultUrl(format("{0}/result/{1}", path, jobIdentifier));
 
 		return null;
