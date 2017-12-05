@@ -126,7 +126,7 @@ public class PostgreSqlExceptionTranslatorTest
 		throw e;
 	}
 
-	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entity:null")
+	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entityId:null")
 	public void translateNotNullViolation()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
@@ -151,7 +151,7 @@ public class PostgreSqlExceptionTranslatorTest
 		postgreSqlExceptionTranslator.translateNotNullViolation(new PSQLException(serverErrorMessage));
 	}
 
-	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entity:null")
+	@Test(expectedExceptions = NotNullConstraintViolationException.class, expectedExceptionsMessageRegExp = "type:myEntity attribute:myAttr entityId:null")
 	public void translateNotNullViolationNoDoubleQuotes()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
