@@ -43,6 +43,7 @@ public class BeaconQueryServiceTest
 
 		dataset1 = mock(BeaconDataset.class, RETURNS_DEEP_STUBS);
 		when(dataset1.getId()).thenReturn("dataset1");
+		when(dataset1.getDatasetEntityType().getId()).thenReturn("dataset1");
 		when(dataset1.getGenomeBrowserAttributes().getChrom()).thenReturn("#CHROM");
 		when(dataset1.getGenomeBrowserAttributes().getPos()).thenReturn("POS");
 		when(dataset1.getGenomeBrowserAttributes().getRef()).thenReturn("REF");
@@ -50,6 +51,7 @@ public class BeaconQueryServiceTest
 
 		dataset2 = mock(BeaconDataset.class, RETURNS_DEEP_STUBS);
 		when(dataset2.getId()).thenReturn("dataset2");
+		when(dataset2.getDatasetEntityType().getId()).thenReturn("dataset2");
 		when(dataset2.getGenomeBrowserAttributes().getChrom()).thenReturn("#CHROM");
 		when(dataset2.getGenomeBrowserAttributes().getPos()).thenReturn("POS");
 		when(dataset2.getGenomeBrowserAttributes().getRef()).thenReturn("REF");

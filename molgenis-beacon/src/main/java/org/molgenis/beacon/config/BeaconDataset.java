@@ -7,8 +7,6 @@ import org.molgenis.data.support.StaticEntity;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 
 import static org.molgenis.beacon.config.BeaconDatasetMetadata.*;
-import static org.molgenis.beacon.config.BeaconMetadata.DESCRIPTION;
-import static org.molgenis.beacon.config.BeaconMetadata.ID;
 
 public class BeaconDataset extends StaticEntity
 {
@@ -42,9 +40,13 @@ public class BeaconDataset extends StaticEntity
 		return getString(DESCRIPTION);
 	}
 
-	public EntityType getEntityType()
+	/**
+	 * When referencing an EntityType, never call the method 'getEntityType()'.
+	 * It will override the StaticEntity method.
+	 */
+	public EntityType getDatasetEntityType()
 	{
-		return getEntity(ENTITY_TYPE, EntityType.class);
+		return getEntity(DATA_SET_ENTITY_TYPE, EntityType.class);
 	}
 
 	public GenomeBrowserAttributes getGenomeBrowserAttributes()

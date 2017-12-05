@@ -21,8 +21,8 @@ public class BeaconDatasetMetadata extends SystemEntityType
 	public static final String ID = "id";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
-	public static final String ENTITY_TYPE = "entitytype";
-	public static final String GENOME_BROWSER_ATTRIBUTES = "genomebrowserattributes";
+	public static final String DATA_SET_ENTITY_TYPE = "data_set_entity_type";
+	public static final String GENOME_BROWSER_ATTRIBUTES = "genome_browser_attributes";
 
 	private final BeaconPackage beaconPackage;
 	private final EntityTypeMetadata entityTypeMetadata;
@@ -55,17 +55,16 @@ public class BeaconDatasetMetadata extends SystemEntityType
 								 .setNillable(true)
 								 .setLabel("Beacon dataset description")
 								 .setDescription("Description of beacon dataset");
-		addAttribute(ENTITY_TYPE).setDataType(XREF)
-								 .setNillable(true)
-								 .setLabel("Beacon dataset entityType")
-								 .setRefEntity(entityTypeMetadata)
-								 .setDescription("Beacon dataset entityType");
+		addAttribute(DATA_SET_ENTITY_TYPE).setDataType(XREF)
+										  .setNillable(false)
+										  .setLabel("Beacon dataset entityType")
+										  .setRefEntity(entityTypeMetadata)
+										  .setDescription("Beacon dataset entityType");
 		addAttribute(GENOME_BROWSER_ATTRIBUTES).setDataType(XREF)
-											   .setNillable(true)
+											   .setNillable(false)
 											   .setRefEntity(genomeBrowserAttributesMetadata)
 											   .setLabel("GenomeBrowser attributes")
 											   .setDescription("GenomeBrowser attributes for the beacon dataset");
-
 	}
 
 }

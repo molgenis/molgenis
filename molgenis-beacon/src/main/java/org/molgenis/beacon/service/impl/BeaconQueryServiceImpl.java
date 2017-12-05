@@ -90,7 +90,7 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 			ref = "REF";
 		}
 
-		return dataService.count(beaconDataset.getEntityType().getId(),
+		return dataService.count(beaconDataset.getDatasetEntityType().getId(),
 				new QueryImpl<>().eq(beaconDataset.getGenomeBrowserAttributes().getChrom(), referenceName)
 								 .and()
 								 .eq(beaconDataset.getGenomeBrowserAttributes().getPos(), start)
