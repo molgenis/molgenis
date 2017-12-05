@@ -2,18 +2,15 @@ package org.molgenis.data.vcf.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-public class VCFMetadataException extends CodedRuntimeException
+public class VcfMetadataException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "VCF02";
 
-	public VCFMetadataException(String filename)
+	public VcfMetadataException(Throwable cause)
 	{
-		super(ERROR_CODE);
+		super(ERROR_CODE, cause);
 	}
 
 	@Override

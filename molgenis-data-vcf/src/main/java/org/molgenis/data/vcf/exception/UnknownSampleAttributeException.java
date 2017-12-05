@@ -1,7 +1,6 @@
 package org.molgenis.data.vcf.exception;
 
 import org.molgenis.data.CodedRuntimeException;
-import org.molgenis.data.meta.model.Attribute;
 
 import java.text.MessageFormat;
 
@@ -11,18 +10,18 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 public class UnknownSampleAttributeException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "VCF03";
-	private Attribute attribute;
+	private String sampleAttribute;
 
-	public UnknownSampleAttributeException(Attribute attribute)
+	public UnknownSampleAttributeException(String sampleAttribute)
 	{
 		super(ERROR_CODE);
-		this.attribute = requireNonNull(attribute);
+		this.sampleAttribute = requireNonNull(sampleAttribute);
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("attribute:%s", attribute.getName());
+		return String.format("sampleAttribute:%s", sampleAttribute);
 	}
 
 	@Override
@@ -31,8 +30,7 @@ public class UnknownSampleAttributeException extends CodedRuntimeException
 		return getLanguageService().map(languageService ->
 		{
 			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(format, attribute.getLabel(language));
+			return MessageFormat.format(format, sampleAttribute);
 		}).orElse(super.getLocalizedMessage());
 	}
 }

@@ -4,11 +4,12 @@ import com.google.common.collect.Lists;
 import net.sf.samtools.util.BlockCompressedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.exception.InvalidHeaderException;
+import org.molgenis.data.vcf.exception.MissingFormatException;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.io.*;
@@ -75,8 +76,7 @@ public class VcfWriterUtils
 		{
 			outputVCFWriter.close();
 			inputVcfFileScanner.close();
-			throw new MolgenisInvalidFormatException(
-					"Did not find ## on the first line, are you sure it is a VCF file?");
+			throw new InvalidHeaderException();
 		}
 
 		inputVcfFileScanner.close();
@@ -154,8 +154,7 @@ public class VcfWriterUtils
 		{
 			outputVCFWriter.close();
 			inputVcfFileScanner.close();
-			throw new MolgenisInvalidFormatException(
-					"Header does not start with #CHROM, are you sure it is a VCF file?");
+			throw new InvalidHeaderException();
 		}
 	}
 
@@ -529,7 +528,7 @@ public class VcfWriterUtils
 		}
 		else
 		{
-			throw new MolgenisDataException("Missing FORMAT information while trying to print first sample");
+			throw new MissingFormatException();
 		}
 	}
 

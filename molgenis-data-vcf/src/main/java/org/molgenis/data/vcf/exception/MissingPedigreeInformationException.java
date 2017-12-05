@@ -10,9 +10,9 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 public class MissingPedigreeInformationException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "VCF04";
-	private int line;
+	private String line;
 
-	public MissingPedigreeInformationException(int line)
+	public MissingPedigreeInformationException(String line)
 	{
 		super(ERROR_CODE);
 		this.line = requireNonNull(line);

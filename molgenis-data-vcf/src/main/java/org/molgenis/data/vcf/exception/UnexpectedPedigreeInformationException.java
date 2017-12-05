@@ -11,9 +11,9 @@ public class UnexpectedPedigreeInformationException extends CodedRuntimeExceptio
 {
 	private static final String ERROR_CODE = "VCF06";
 	private String value;
-	private int line;
+	private String line;
 
-	public UnexpectedPedigreeInformationException(String value, int line)
+	public UnexpectedPedigreeInformationException(String value, String line)
 	{
 		super(ERROR_CODE);
 		this.value = requireNonNull(value);
@@ -23,7 +23,7 @@ public class UnexpectedPedigreeInformationException extends CodedRuntimeExceptio
 	@Override
 	public String getMessage()
 	{
-		return String.format("value:%s line:%d", value, line);
+		return String.format("value:%s line:%s", value, line);
 	}
 
 	@Override

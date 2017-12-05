@@ -5,12 +5,12 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.vcf.exception.VcfMetadataException;
 import org.molgenis.data.vcf.format.VcfToEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.vcf.VcfReader;
@@ -75,7 +75,7 @@ public class VcfRepository extends AbstractRepository
 		}
 		catch (IOException | RuntimeException e)
 		{
-			throw new MolgenisDataException("Failed to read VCF Metadata from file", e);
+			throw new VcfMetadataException(e);
 		}
 		finally
 		{
