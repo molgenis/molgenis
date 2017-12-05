@@ -1,4 +1,4 @@
-package org.molgenis.beacon.model.exceptions;
+package org.molgenis.beacon.controller.model.exceptions;
 
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 
