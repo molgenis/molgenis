@@ -14,7 +14,6 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 * Optional: [Python 3.6.2](https://www.python.org/downloads/) (enables Python scripting feature)
 * [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
-
 Deploy Apache Tomcat, and place the molgenis-app WAR as the ROOT.war in your apache-tomcat/webapps folder. If you are unfamiliar with Apache Tomcat, follow one of their [Apache Tomcat installation guides](https://tomcat.apache.org/tomcat-7.0-doc/deployer-howto.html).
 
 Now that your Apache Tomcat is running and MOLGENIS is deployed, you will notice it will not work yet. This is because your database needs to be configured, and a single properties file needs to be set.
@@ -79,3 +78,8 @@ If you open up a web browser and navigate to where your apache-tomcat applicatio
 ![](../images//molgenis_home_logged_out.png?raw=true, "molgenis home page")  
 
 Congratulations! You now have your MOLGENIS application up and running. Remember the admin.password you set in the molgenis-server.properties file? Use that password to login as the admin user. The next section will take you through the different modules MOLGENIS has to offer.
+
+**Deployment**  
+In general, we have no constraints when it comes to deploying MOLGENIS. We do want to mention that you **must** deploy it as the root app, and that we already included the jdbc postgres driver.
+
+When using a proxy in front of tomcat, we use [AJP protocols](http://httpd.apache.org/docs/2.4/mod/mod_proxy_ajp.html). But you are free to use what you like e.g. nginx, or jBoss.
