@@ -29,7 +29,7 @@ The following examples work with [this data](../data/beacon_set.vcf).
 
 Select the *Beacon* table in the dropdown, and add a new row.
 
-![Creating a Beacon](../images/beacon/create-beacon-form.png?raw=true, "beacon/create-beacon-form")
+![Creating a Beacon](../images/beacon/add-beacon-form.png?raw=true, "beacon/add-beacon-form")
 
 The beacon created here has only one data set, namely *beacon_set*.  
 Note that the Organization is still empty, we will come back to that later.
@@ -42,19 +42,17 @@ Now that we have created a beacon, we can actually already query for variants.
 *produces*  
 ```json
 [
-  {
-    "id": "MyFirstBeacon",
-    "name": "My first Beacon",
-    "apiVersion": "v0.3.0",
-    "description": "The first beacon ever made",
-    "version": "v0.0.1",
-    "datasets": [
-      {
-        "id": "beacon_set",
-        "name": "beacon_set"
-      }
-    ]
-  }
+ {
+   "id": "MyFirstBeacon",
+   "name": "My First Beacon",
+   "apiVersion": "v0.3.0",
+   "datasets": [
+     {
+       "id": "beacondataset",
+       "name": "My First Beacon dataset"
+     }
+   ]
+ }
 ]
 ```
 
@@ -64,17 +62,15 @@ Now that we have created a beacon, we can actually already query for variants.
 *produces*  
 ```json
 {
-  "id": "MyFirstBeacon",
-  "name": "My first Beacon",
-  "apiVersion": "v0.3.0",
-  "description": "The first beacon ever made",
-  "version": "v0.0.1",
-  "datasets": [
-    {
-      "id": "beacon_set",
-      "name": "beacon_set"
-    }
-  ]
+   "id": "MyFirstBeacon",
+   "name": "My First Beacon",
+   "apiVersion": "v0.3.0",
+   "datasets": [
+     {
+       "id": "beacondataset",
+       "name": "My First Beacon dataset"
+     }
+   ]
 }
 ```
 
@@ -112,14 +108,14 @@ When an exception occurs, we return a response containing a BeaconError
 {
   "beaconId": "MyFirstBeacon",
   "error": {
-    "errorCode": 1,
-    "message": "Some error occured when querying [beacon_set]"
+    "errorCode": 400,
+    "message": "Unknown beacon [MyFirstBeacon]"
   },
   "alleleRequest": {
     "referenceName": "7",
     "start": 130148888,
-    "referenceBases": "A",
-    "alternateBases": "C"
+    "referenceBases": "C",
+    "alternateBases": "A"
   }
 }
 ```
@@ -149,19 +145,17 @@ We now get information on our organization
 ```json
 {
   "id": "MyFirstBeacon",
-  "name": "My first Beacon",
+  "name": "My First Beacon",
   "apiVersion": "v0.3.0",
   "organization": {
-    "id": "MyFirstBeaconOrganization",
-    "name": "The First Beacon Organization",
-    "description": "The first Beacon organization ever made"
+    "id": "beaconorg",
+    "name": "Beacon organization",
+    "description": "Beacon organizational unit"
   },
-  "description": "The first beacon ever made",
-  "version": "v0.0.1",
   "datasets": [
     {
-      "id": "BeaconData",
-      "name": "BeaconData"
+      "id": "beacondataset",
+      "name": "My First Beacon dataset"
     }
   ]
 }
