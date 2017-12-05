@@ -8,11 +8,23 @@ import static java.util.Objects.requireNonNull;
 public class UnsupportedCellTypeException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "XLS04";
-	private CellType cellTypeEnum;
+	private final CellType cellTypeEnum;
 
 	public UnsupportedCellTypeException(CellType cellTypeEnum)
 	{
 		super(ERROR_CODE);
 		this.cellTypeEnum = requireNonNull(cellTypeEnum);
+	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("cellTypeEnum:%s", cellTypeEnum.name());
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return new Object[] { cellTypeEnum.name() };
 	}
 }

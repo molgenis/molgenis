@@ -133,7 +133,7 @@ public class ExcelUtils
 		}
 		catch (FileNotFoundException e)
 		{
-			throw new CodedFileNotFoundException();
+			throw new CodedFileNotFoundException(file.getName());
 		}
 		catch (IOException e)
 		{
