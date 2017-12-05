@@ -428,7 +428,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		try
 		{
-			auth.userDetailsService(userDetailsServiceBean());
 			DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
 			authenticationProvider.setPasswordEncoder(passwordEncoder());
 			authenticationProvider.setUserDetailsService(userDetailsServiceBean());
