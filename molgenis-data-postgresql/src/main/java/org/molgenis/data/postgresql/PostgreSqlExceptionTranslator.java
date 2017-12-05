@@ -1,6 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.data.DataAccessException;
+import org.molgenis.data.ErrorCodedDataAccessException;
 import org.molgenis.data.UnknownDataAccessException;
 import org.molgenis.data.postgresql.identifier.AttributeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeDescription;
@@ -52,7 +52,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		return doTranslate(dataAccessException);
 	}
 
-	private DataAccessException doTranslate(org.springframework.dao.DataAccessException dataAccessException)
+	private ErrorCodedDataAccessException doTranslate(org.springframework.dao.DataAccessException dataAccessException)
 	{
 		Throwable cause = dataAccessException.getCause();
 		if (!(cause instanceof PSQLException))
@@ -61,7 +61,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 
 		PSQLException pSqlException = (PSQLException) cause;
-		DataAccessException molgenisDataException = doTranslate(pSqlException);
+		ErrorCodedDataAccessException molgenisDataException = doTranslate(pSqlException);
 		if (molgenisDataException == null)
 		{
 			molgenisDataException = new UnknownDataAccessException(dataAccessException);
@@ -69,7 +69,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		return molgenisDataException;
 	}
 
-	private DataAccessException doTranslate(SQLException sqlException)
+	private ErrorCodedDataAccessException doTranslate(SQLException sqlException)
 	{
 		if (sqlException instanceof BatchUpdateException)
 		{
@@ -82,7 +82,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		}
 
 		PSQLException pSqlException = (PSQLException) sqlException;
-		DataAccessException molgenisDataException = doTranslate(pSqlException);
+		ErrorCodedDataAccessException molgenisDataException = doTranslate(pSqlException);
 		if (molgenisDataException == null)
 		{
 			molgenisDataException = new UnknownDataAccessException(sqlException);
@@ -90,7 +90,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		return molgenisDataException;
 	}
 
-	private DataAccessException doTranslate(PSQLException pSqlException)
+	private ErrorCodedDataAccessException doTranslate(PSQLException pSqlException)
 	{
 		switch (pSqlException.getSQLState())
 		{
@@ -405,14 +405,14 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 * @param pSqlException PostgreSQL exception
 	 * @return DataIntegrityViolationException
 	 */
-	static DataAccessException translateUndefinedColumnException(PSQLException pSqlException)
+	static ErrorCodedDataAccessException translateUndefinedColumnException(PSQLException pSqlException)
 	{
 		// PSQL exception contains column name, but not the table name so we can't determine the attribute name
 		return new UnknownDataAccessException(pSqlException);
 	}
 
 	@Override
-	public DataAccessException doTranslate(TransactionException transactionException)
+	public ErrorCodedDataAccessException doTranslate(TransactionException transactionException)
 	{
 		Throwable cause = transactionException.getCause();
 		if (!(cause instanceof PSQLException))

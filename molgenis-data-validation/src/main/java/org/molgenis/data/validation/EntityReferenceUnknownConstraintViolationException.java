@@ -1,13 +1,11 @@
 package org.molgenis.data.validation;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown when updating data that references unexisting data.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EntityReferenceUnknownConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V01";
@@ -32,10 +30,8 @@ public class EntityReferenceUnknownConstraintViolationException extends DataInte
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(
-				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), valueAsString,
-						attributeName, entityTypeId)).orElse(super.getLocalizedMessage());
+		return new Object[] { valueAsString, attributeName, entityTypeId };
 	}
 }

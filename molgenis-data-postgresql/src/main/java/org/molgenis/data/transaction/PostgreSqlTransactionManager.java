@@ -1,7 +1,7 @@
 package org.molgenis.data.transaction;
 
 import org.apache.commons.logging.LogFactory;
-import org.molgenis.data.DataAccessException;
+import org.molgenis.data.ErrorCodedDataAccessException;
 import org.molgenis.data.populate.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,11 +188,11 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager i
 		super.doResume(molgenisTransaction.getDataSourceTransaction(), suspendedResources);
 	}
 
-	private DataAccessException translateTransactionException(TransactionException transactionException)
+	private ErrorCodedDataAccessException translateTransactionException(TransactionException transactionException)
 	{
 		for (TransactionExceptionTranslator transactionExceptionTranslator : transactionExceptionTranslatorRegistry.getTransactionExceptionTranslators())
 		{
-			DataAccessException molgenisDataAccessException = transactionExceptionTranslator.doTranslate(
+			ErrorCodedDataAccessException molgenisDataAccessException = transactionExceptionTranslator.doTranslate(
 					transactionException);
 			if (molgenisDataAccessException != null)
 			{

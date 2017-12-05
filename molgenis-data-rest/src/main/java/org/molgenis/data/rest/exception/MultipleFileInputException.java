@@ -1,13 +1,12 @@
 package org.molgenis.data.rest.exception;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 /**
  * Exception to be thrown if an entity is created via a form and more than one file was submitted via this form
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MultipleFileInputException extends RestApiException
 {
-	private final static String ERROR_CODE = "R07";
+	private static final String ERROR_CODE = "R07";
 
 	public MultipleFileInputException()
 	{
@@ -21,12 +20,8 @@ public class MultipleFileInputException extends RestApiException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[0];
 	}
 }

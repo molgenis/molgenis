@@ -10,7 +10,7 @@ package org.molgenis.data;
  * @see UnknownRepositoryException
  * @see UnknownRepositoryCollectionException
  */
-public abstract class UnknownDataException extends DataAccessException
+public abstract class UnknownDataException extends ErrorCodedDataAccessException
 {
 	public UnknownDataException(String errorCode)
 	{

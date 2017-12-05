@@ -3,16 +3,13 @@ package org.molgenis.data.security.meta;
 import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.Attribute;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class EditSystemAttributeException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "S02";
-	private String operation;
-	private Attribute attr;
+	private final String operation;
+	private final Attribute attr;
 
 	public EditSystemAttributeException(String operation, Attribute attr)
 	{
@@ -38,12 +35,8 @@ public class EditSystemAttributeException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, operation, attr.getLabel());
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { operation, attr };
 	}
 }

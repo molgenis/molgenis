@@ -2,15 +2,12 @@ package org.molgenis.dataexplorer.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class MissingConfigException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "DE03";
-	private String configName;
+	private final String configName;
 
 	public MissingConfigException(String configName)
 	{
@@ -30,13 +27,8 @@ public class MissingConfigException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(format, configName);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { configName };
 	}
 }

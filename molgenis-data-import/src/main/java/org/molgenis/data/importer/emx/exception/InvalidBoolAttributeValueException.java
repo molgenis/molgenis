@@ -1,9 +1,6 @@
 package org.molgenis.data.importer.emx.exception;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidBoolAttributeValueException extends EmxException
 {
 	private final static String ERROR_CODE = "E02";
@@ -30,12 +27,8 @@ public class InvalidBoolAttributeValueException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attributeAttributeName, booleanString, sheetName, rowIndex);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { attributeAttributeName, booleanString, sheetName, rowIndex };
 	}
 }

@@ -2,20 +2,15 @@ package org.molgenis.dataexplorer.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 public class ExcelMaxSizeExceededException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "DE02";
-	private long size;
+	private final long size;
 
 	public ExcelMaxSizeExceededException(long size)
 	{
 		super(ERROR_CODE);
-		this.size = requireNonNull(size);
+		this.size = size;
 	}
 
 	public long getSize()
@@ -30,12 +25,8 @@ public class ExcelMaxSizeExceededException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, size);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { size };
 	}
 }

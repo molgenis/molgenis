@@ -1,7 +1,7 @@
 package org.molgenis.util;
 
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.Permission;
 
 import static java.lang.String.format;

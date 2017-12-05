@@ -102,7 +102,7 @@ public class DataConverterTest
 		assertEquals(DataConverter.toIntList(Arrays.asList(entity0, entity1)), Arrays.asList(id0, id1));
 	}
 
-	@Test(expectedExceptions = AttributeValueConversionFailedException.class, expectedExceptionsMessageRegExp = "type:test attribute:id expected:INT actual:java.lang.String value:test, cause:java.lang.NumberFormatException: For input string: \"test\"")
+	@Test(expectedExceptions = AttributeValueConversionFailedException.class, expectedExceptionsMessageRegExp = "type:test attribute:id expected:INT actual:java.lang.String value:test")
 	public void testWrapExceptionOnInvalidConversion()
 	{
 		EntityType entityType = mock(EntityType.class);

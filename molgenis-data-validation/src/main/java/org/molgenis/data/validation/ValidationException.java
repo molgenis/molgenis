@@ -47,6 +47,12 @@ public class ValidationException extends CodedRuntimeException
 								   .orElseGet(super::getLocalizedMessage);
 	}
 
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		throw new UnsupportedOperationException();
+	}
+
 	public Stream<ValidationMessage> getValidationMessages()
 	{
 		return validationMessages.stream();

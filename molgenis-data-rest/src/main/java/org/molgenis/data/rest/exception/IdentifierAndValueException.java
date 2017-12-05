@@ -1,13 +1,12 @@
 package org.molgenis.data.rest.exception;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 /**
  * thrown where we do expect a key value pair (an identifier and a value) but got more than 2 arguments
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IdentifierAndValueException extends RestApiException
 {
-	private final static String ERROR_CODE = "R10";
+	private static final String ERROR_CODE = "R10";
 
 	public IdentifierAndValueException()
 	{
@@ -21,12 +20,8 @@ public class IdentifierAndValueException extends RestApiException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[0];
 	}
 }

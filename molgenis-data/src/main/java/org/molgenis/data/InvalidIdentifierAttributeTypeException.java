@@ -2,10 +2,7 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.AttributeType;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class InvalidIdentifierAttributeTypeException extends CodedRuntimeException
 {
@@ -26,16 +23,12 @@ public class InvalidIdentifierAttributeTypeException extends CodedRuntimeExcepti
 	@Override
 	public String getMessage()
 	{
-		return String.format("attributeType: ", type.name());
+		return String.format("attributeType:%s", type.name());
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, type.name());
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { type.name() };
 	}
 }
