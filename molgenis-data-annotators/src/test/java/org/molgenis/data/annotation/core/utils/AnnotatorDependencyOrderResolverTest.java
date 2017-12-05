@@ -87,6 +87,11 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		when(annotator3.getSimpleName()).thenReturn("annotator3");
 		when(annotator4.getSimpleName()).thenReturn("annotator4");
 		when(annotator5.getSimpleName()).thenReturn("annotator5");
+		when(annotator1.getFullName()).thenReturn("annotator1");
+		when(annotator2.getFullName()).thenReturn("annotator2");
+		when(annotator3.getFullName()).thenReturn("annotator3");
+		when(annotator4.getFullName()).thenReturn("annotator4");
+		when(annotator5.getFullName()).thenReturn("annotator5");
 
 		when(annotator1.getRequiredAttributes()).thenReturn(Arrays.asList(attrd, attrh, attri));
 		when(annotator1info.getOutputAttributes()).thenReturn(Arrays.asList(attre, attrc));
