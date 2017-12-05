@@ -223,7 +223,7 @@ public class OneClickImportJobTest
 		verify(entityService).createEntityType(dataCollection4, "simple_valid");
 	}
 
-	@Test(expectedExceptions = UnknownFileTypeException.class, expectedExceptionsMessageRegExp = "Zip file contains files which are not of type CSV")
+	@Test(expectedExceptions = UnknownFileTypeException.class)
 	public void testInvalidZipContent()
 			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
 			EmptySheetException
@@ -240,7 +240,7 @@ public class OneClickImportJobTest
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
 
-	@Test(expectedExceptions = UnknownFileTypeException.class, expectedExceptionsMessageRegExp = "Zip file contains files which are not of type CSV")
+	@Test(expectedExceptions = UnknownFileTypeException.class)
 	public void testInvalidZipContentWithImage()
 			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
 			EmptySheetException
@@ -257,7 +257,7 @@ public class OneClickImportJobTest
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
 
-	@Test(expectedExceptions = UnknownFileTypeException.class, expectedExceptionsMessageRegExp = "File \\[unsupported-file-type.nft\\] does not have a valid extension, supported: \\[csv, xlsx, zip, xls\\]")
+	@Test(expectedExceptions = UnknownFileTypeException.class)
 	public void testInvalidFileType()
 			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
 			EmptySheetException

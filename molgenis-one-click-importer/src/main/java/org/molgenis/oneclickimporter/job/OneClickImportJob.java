@@ -56,9 +56,7 @@ public class OneClickImportJob
 		List<DataCollection> dataCollections = newArrayList();
 		if (fileExtension == null)
 		{
-			throw new UnknownFileTypeException(
-					String.format("File [%s] does not have a valid extension, supported: [csv, xlsx, zip, xls]",
-							filename));
+			throw new UnknownFileTypeException();
 		}
 		else if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{
@@ -85,7 +83,7 @@ public class OneClickImportJob
 				}
 				else
 				{
-					throw new UnknownFileTypeException(fileInZipExtension);
+					throw new UnknownFileTypeException();
 				}
 			}
 		}
