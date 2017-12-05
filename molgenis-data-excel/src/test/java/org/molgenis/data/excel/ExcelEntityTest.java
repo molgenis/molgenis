@@ -5,7 +5,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.excel.exception.UnsupportedCellTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
@@ -118,7 +118,7 @@ public class ExcelEntityTest
 		assertEquals(val, "true");
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = UnsupportedCellTypeException.class)
 	public void getErrorType()
 	{
 		when(cell.getCellTypeEnum()).thenReturn(ERROR);
