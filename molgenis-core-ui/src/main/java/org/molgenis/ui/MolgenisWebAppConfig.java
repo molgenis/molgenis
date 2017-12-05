@@ -23,8 +23,6 @@ import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.ui.menu.MenuReaderServiceImpl;
-import org.molgenis.ui.menumanager.MenuManagerService;
-import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.ui.style.StyleService;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
@@ -336,12 +334,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MenuReaderService menuReaderService()
 	{
 		return new MenuReaderServiceImpl(appSettings);
-	}
-
-	@Bean
-	public MenuManagerService menuManagerService()
-	{
-		return new MenuManagerServiceImpl(menuReaderService(), appSettings, dataService);
 	}
 
 	@Bean

@@ -15,6 +15,7 @@ import org.molgenis.ui.menu.MenuItem;
 import org.molgenis.ui.menu.MenuItemType;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+@Component
 public class MenuManagerServiceImpl implements MenuManagerService
 {
 	private final MenuReaderService menuReaderService;
