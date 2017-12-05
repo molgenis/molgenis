@@ -106,7 +106,8 @@ public class NegotiatorController extends PluginController
 
 			if (!disabledCollections.isEmpty())
 			{
-				message = String.format(i18n.getString("dataexplorer_directory_disabled"), disabledCollections.size());
+				message = String.format(i18n.getString("dataexplorer_directory_disabled"), disabledCollections.size(),
+						collectionEntities.size());
 			}
 
 			if (collectionEntities.isEmpty() || (collectionEntities.size() == disabledCollections.size()))
