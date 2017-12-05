@@ -68,6 +68,111 @@ Build, Make project should work fine now and spew out no errors, only warnings.
 Open Settings, Editor, Code Style, and import it as the molgenis profile.
 Select it for the molgenis project.
 
+## Use MOLGENIS file-templates
+
+* Make sure that your .idea project folder lives inside your molgenis git project root! Only then will we be able to auto-share templates.
+* Goto 'New / Edit file templates' and switch from 'Default' to 'Project'-scope.
+* Restart IntelliJ after setting the .idea directory and changing the settings
+
+### Usage
+Adds two file templates for creating Package and EntityType classes. The templates can be accessed from the 'New' menu, when right-clicking a java package:
+
+![Pick file template](../images/intellij/pick-file-template.png?raw=true, "pick-file-template")
+
+When choosing EntityType and filling out the form...
+
+![Set filename in  template](../images/intellij/set-filename-in-template.png?raw=true, "set-file-name-in-template")
+
+... a file is created with the necessary boilerplate:
+
+
+```java
+package org.molgenis.test;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.StaticEntity;
+import org.springframework.stereotype.Component;
+import org.molgenis.data.AbstractSystemEntityFactory;
+import org.molgenis.data.populate.EntityPopulator;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.test.PigeonEncounterMetadata.ID;
+import static org.molgenis.test.InterestingDataPackage.PACKAGE_INTERESTING_DATA;
+
+@Component
+public class PigeonEncounterMetadata extends SystemEntityType
+{
+	private static final String SIMPLE_NAME = "PigeonEncounter";
+	public static final String PIGEON_ENCOUNTER = PACKAGE_INTERESTING_DATA + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
+	public static final String ID = "id";
+
+	private final InterestingDataPackage interestingDataPackage;
+
+	public PigeonEncounterMetadata(InterestingDataPackage interestingDataPackage)
+	{
+		super(SIMPLE_NAME, PACKAGE_INTERESTING_DATA);
+		this.interestingDataPackage = requireNonNull(interestingDataPackage);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(interestingDataPackage);
+
+		setLabel("Pigeon Encounter");
+		//TODO setDescription("");
+
+		addAttribute(ID, ROLE_ID).setLabel("Identifier");
+	}
+}
+
+public class PigeonEncounter extends StaticEntity
+{
+	public PigeonEncounter(Entity entity)
+	{
+		super(entity);
+	}
+
+	public PigeonEncounter(EntityType entityType)
+	{
+		super(entityType);
+	}
+
+	public PigeonEncounter(String id, EntityType entityType)
+	{
+		super(entityType);
+		setId(id);
+	}
+
+	public void setId(String id)
+	{
+		set(ID, id);
+	}
+
+	public String getId()
+	{
+		return getString(ID);
+	}
+}
+
+@Component
+public class PigeonEncounterFactory extends AbstractSystemEntityFactory<PigeonEncounter, PigeonEncounterMetadata, String>
+{
+	PigeonEncounterFactory(PigeonEncounterMetadata pigeonEncounterMetadata, EntityPopulator entityPopulator)
+	{
+		super(PigeonEncounter.class, pigeonEncounterMetadata, entityPopulator);
+	}
+}
+```
+
+Sadly, it's not possible to generate multiple files from one template, so the Metadata and Factory classes have to be manually moved to separate files. (Tip: Set your cursor to the class name and use Refactor > Move... or press F6)
+
+
 ## Deploy / Run in Tomcat server
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
