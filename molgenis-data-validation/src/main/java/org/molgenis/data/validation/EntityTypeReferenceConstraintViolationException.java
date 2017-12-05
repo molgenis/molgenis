@@ -1,13 +1,11 @@
 package org.molgenis.data.validation;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown when deleting entity types that are still referenced by other entity types.
@@ -37,15 +35,13 @@ public class EntityTypeReferenceConstraintViolationException extends DataIntegri
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
 		String entityTypesAsString = entityTypeMap.keySet().stream().collect(joining(","));
 		String entityTypeDependeniesAsString = entityTypeMap.values()
 															.stream()
 															.flatMap(Collection::stream)
 															.collect(joining(","));
-		return getLanguageService().map(
-				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypesAsString,
-						entityTypeDependeniesAsString)).orElse(super.getLocalizedMessage());
+		return new Object[] { entityTypesAsString, entityTypeDependeniesAsString };
 	}
 }

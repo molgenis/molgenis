@@ -5,12 +5,16 @@ import freemarker.template.Template;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.controller.NavigatorLink;
@@ -232,7 +236,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
 	}
 
-	@Test(expectedExceptions = EntityTypePermissionException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void getAnnotatorModuleFail() throws Exception
 	{
 		MetaDataService metaDataService = mock(MetaDataService.class);

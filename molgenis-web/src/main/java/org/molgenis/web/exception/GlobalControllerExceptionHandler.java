@@ -1,7 +1,7 @@
 package org.molgenis.web.exception;
 
 import org.molgenis.data.UnknownDataException;
-import org.molgenis.data.security.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.validation.DataIntegrityViolationException;
 import org.molgenis.data.validation.ValidationException;
 import org.slf4j.Logger;

@@ -2,16 +2,13 @@ package org.molgenis.data.importer.emx.exception;
 
 import org.molgenis.data.meta.model.Attribute;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownMappedByException extends EmxException
 {
-	private final static String ERROR_CODE = "E08";
-	private Attribute attribute;
-	private String mappedByAttributeName;
-	private int rowIndex;
+	private static final String ERROR_CODE = "E08";
+	private final Attribute attribute;
+	private final String mappedByAttributeName;
+	private final int rowIndex;
 
 	public UnknownMappedByException(Attribute attribute, String mappedByAttributeName, int rowIndex)
 	{
@@ -30,12 +27,8 @@ public class UnknownMappedByException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, mappedByAttributeName, attribute.getName(), rowIndex);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { mappedByAttributeName, attribute.getName(), rowIndex };
 	}
 }

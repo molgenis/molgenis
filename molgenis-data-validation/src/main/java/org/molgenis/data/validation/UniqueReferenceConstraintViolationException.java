@@ -1,14 +1,11 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.i18n.LanguageServiceHolder;
-
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
 
 /**
  * Thrown to indicate that referenced data values are not unique when updating data.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UniqueReferenceConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V07";
@@ -36,12 +33,9 @@ public class UniqueReferenceConstraintViolationException extends DataIntegrityVi
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return LanguageServiceHolder.getLanguageService()
-									.map(languageService -> MessageFormat.format(languageService.getString(ERROR_CODE),
-											entityTypeId, attributeName, entityIdAsString, valueAsString))
-									.orElse(super.getLocalizedMessage());
+		return new Object[] { entityTypeId, attributeName, entityIdAsString, valueAsString };
 	}
 }
 

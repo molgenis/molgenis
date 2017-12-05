@@ -1,10 +1,9 @@
 package org.molgenis.data.importer.emx.exception;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MissingRootPackageException extends EmxException
 {
-	private final static String ERROR_CODE = "E11";
+	private static final String ERROR_CODE = "E11";
 
 	public MissingRootPackageException()
 	{
@@ -18,12 +17,8 @@ public class MissingRootPackageException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElse(super.getLocalizedMessage());
+		return new Object[0];
 	}
 }

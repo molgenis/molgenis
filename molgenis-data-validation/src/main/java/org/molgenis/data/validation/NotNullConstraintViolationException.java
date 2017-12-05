@@ -1,14 +1,14 @@
 package org.molgenis.data.validation;
 
 import javax.annotation.Nullable;
-import java.text.MessageFormat;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * TODO discuss: split in two exceptions?
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class NotNullConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V04";
@@ -46,25 +46,20 @@ public class NotNullConstraintViolationException extends DataIntegrityViolationE
 	@Override
 	public String getMessage()
 	{
-		return String.format("type:%s attribute:%s entity:%s", entityTypeId, attributeName, entityId);
+		return String.format("type:%s attribute:%s entityId:%s", entityTypeId, attributeName, entityId);
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	public String getErrorCode()
 	{
-		String localizedMessage;
-		if (entityId != null)
-		{
-			localizedMessage = getLanguageService().map(
-					languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY), entityTypeId,
-							attributeName, entityId)).orElse(super.getLocalizedMessage());
-		}
-		else
-		{
-			localizedMessage = getLanguageService().map(
-					languageService -> MessageFormat.format(languageService.getString(MESSAGE_ID_ENTITY_UNKNOWN),
-							entityTypeId, attributeName)).orElse(super.getLocalizedMessage());
-		}
-		return localizedMessage;
+		return entityId == null ? MESSAGE_ID_ENTITY : MESSAGE_ID_ENTITY_UNKNOWN;
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return Optional.ofNullable(entityId)
+					   .map(id -> new Object[] { entityTypeId, attributeName, id })
+					   .orElse(new Object[] { entityTypeId, attributeName });
 	}
 }

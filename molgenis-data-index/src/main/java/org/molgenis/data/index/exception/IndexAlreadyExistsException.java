@@ -2,15 +2,12 @@ package org.molgenis.data.index.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class IndexAlreadyExistsException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "IDX01";
-	private String indexName;
+	private static final String ERROR_CODE = "IDX01";
+	private final String indexName;
 
 	public IndexAlreadyExistsException(String indexName)
 	{
@@ -25,12 +22,8 @@ public class IndexAlreadyExistsException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, indexName);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { indexName };
 	}
 }

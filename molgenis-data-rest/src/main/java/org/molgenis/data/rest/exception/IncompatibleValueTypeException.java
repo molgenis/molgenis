@@ -2,20 +2,18 @@ package org.molgenis.data.rest.exception;
 
 import org.molgenis.data.meta.model.Attribute;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * thrown if a conversion form one attribute type to another was attempted but there was a value that was not suitable for the new type
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IncompatibleValueTypeException extends RestApiException
 {
-	private final static String ERROR_CODE = "R01";
-	private Attribute attribute;
-	private String type;
-	private String[] expectedTypes;
+	private static final String ERROR_CODE = "R01";
+	private final Attribute attribute;
+	private final String type;
+	private final String[] expectedTypes;
 
 	public IncompatibleValueTypeException(Attribute attribute, String type, String[] expectedTypes)
 	{
@@ -48,12 +46,8 @@ public class IncompatibleValueTypeException extends RestApiException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attribute.getName(), type, String.join(",", expectedTypes));
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { attribute.getName(), type, String.join(",", expectedTypes) };
 	}
 }

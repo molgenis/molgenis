@@ -4,7 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;

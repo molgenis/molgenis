@@ -1,13 +1,11 @@
 package org.molgenis.data.validation;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * Thrown to indicate that data values are not unique when creating a unique constraint.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UniqueConstraintCreationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V08";
@@ -32,11 +30,9 @@ public class UniqueConstraintCreationException extends DataIntegrityViolationExc
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(
-				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), entityTypeId,
-						attributeName, valueAsString)).orElse(super.getLocalizedMessage());
+		return new Object[] { entityTypeId, attributeName, valueAsString };
 	}
 }
 
