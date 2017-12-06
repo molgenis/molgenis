@@ -1,18 +1,21 @@
 package org.molgenis.data;
 
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 import static java.util.Objects.requireNonNull;
 
 public class DateParseException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "D11";
+	private static final String ERROR_CODE_DATE = "D11a";
+	private static final String ERROR_CODE_DATE_TIME = "D11b";
+
 	private final Attribute attribute;
 	private final String value;
 
 	public DateParseException(Attribute attribute, String value)
 	{
-		super(ERROR_CODE);
+		super(attribute.getDataType() == AttributeType.DATE ? ERROR_CODE_DATE : ERROR_CODE_DATE_TIME);
 		this.attribute = requireNonNull(attribute);
 		this.value = requireNonNull(value);
 	}

@@ -99,7 +99,7 @@ public class EntityUtils
 				catch (java.time.format.DateTimeParseException e)
 				{
 
-					throw new DateTimeParseException(attr, valueStr);
+					throw new DateParseException(attr, valueStr);
 				}
 			case DECIMAL:
 				return Double.valueOf(valueStr);

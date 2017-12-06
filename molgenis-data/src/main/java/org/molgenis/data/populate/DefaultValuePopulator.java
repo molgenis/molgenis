@@ -1,6 +1,6 @@
 package org.molgenis.data.populate;
 
-import org.molgenis.data.DateTimeParseException;
+import org.molgenis.data.DateParseException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
@@ -122,7 +122,7 @@ public class DefaultValuePopulator
 		}
 		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new DateTimeParseException(attr, valueAsString);
+			throw new DateParseException(attr, valueAsString);
 		}
 	}
 
@@ -134,7 +134,7 @@ public class DefaultValuePopulator
 		}
 		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new DateTimeParseException(attr, valueAsString);
+			throw new DateParseException(attr, valueAsString);
 		}
 	}
 
