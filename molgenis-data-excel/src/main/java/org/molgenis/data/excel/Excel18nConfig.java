@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class Excel18nConfig
 {
 
-	public static final String NAMESPACE = "gavin";
+	public static final String NAMESPACE = "excel";
 
 	@Bean
 	public PropertiesMessageSource searchallMessageSource()

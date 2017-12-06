@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class CoreUi18nConfig
 {
 
-	public static final String NAMESPACE = "excel";
+	public static final String NAMESPACE = "core_ui";
 
 	@Bean
 	public PropertiesMessageSource searchallMessageSource()
