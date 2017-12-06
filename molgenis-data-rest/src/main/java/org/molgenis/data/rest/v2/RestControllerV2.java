@@ -86,32 +86,11 @@ public class RestControllerV2
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	private static RepositoryCollectionCapabilityException createNoWriteCapabilitiesOnEntityException(
-			String entityTypeId, RepositoryCapability capability)
-	{
-		return new RepositoryCollectionCapabilityException(entityTypeId, capability);
-	}
-
 	private static ValidationException createUpdateReadOnlyAttributeException(AttributeValue attributeValue)
 	{
 		AttributeValueValidationResult constraintViolation = new AttributeValueValidationResult(READ_ONLY,
 				attributeValue);
 		return new ValidationException(constraintViolation);
-	}
-
-	private static MissingIdentifierException createUnknownIdentifierException(int count)
-	{
-		return new MissingIdentifierException(count);
-	}
-
-	private static IdentifierAndValueException createIdentifierAndValueException()
-	{
-		return new IdentifierAndValueException();
-	}
-
-	private static UnknownEntityTypeException createUnknownEntityExceptionNotValidId(Object id)
-	{
-		return new UnknownEntityTypeException(id.toString());
 	}
 
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
@@ -372,7 +351,7 @@ public class RestControllerV2
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
 												  .contains(RepositoryCapability.WRITABLE);
 		if (!writableCapabilities)
-			throw createNoWriteCapabilitiesOnEntityException(entityTypeId, RepositoryCapability.WRITABLE);
+			throw new RepositoryCollectionCapabilityException(entityTypeId, RepositoryCapability.WRITABLE);
 
 		// Copy
 		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
@@ -468,7 +447,7 @@ public class RestControllerV2
 												 .collect(toList());
 			if (entities.size() != request.getEntities().size())
 			{
-				throw createIdentifierAndValueException();
+				throw new IdentifierAndValueException();
 			}
 
 			final List<Entity> updatedEntities = new ArrayList<>();
@@ -480,7 +459,7 @@ public class RestControllerV2
 				Entity originalEntity = dataService.findOneById(entityTypeId, id);
 				if (originalEntity == null)
 				{
-					throw createUnknownEntityExceptionNotValidId(id);
+					throw new UnknownEntityTypeException(id.toString());
 				}
 
 				Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
@@ -577,7 +556,7 @@ public class RestControllerV2
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
-			throw createUnknownIdentifierException(count);
+			throw new MissingIdentifierException(count);
 		}
 		return id;
 	}
