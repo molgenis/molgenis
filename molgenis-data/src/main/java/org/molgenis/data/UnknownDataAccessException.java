@@ -3,7 +3,7 @@ package org.molgenis.data;
 /**
  * TODO discuss: extend from UncategorizedDataAccessException?
  */
-@SuppressWarnings("squid:S2166")
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownDataAccessException extends ErrorCodedDataAccessException
 {
 	private static final String ERROR_CODE = "D99";

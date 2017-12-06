@@ -1,12 +1,13 @@
-package org.molgenis.data;
+package org.molgenis.data.validation;
 
 import org.molgenis.data.meta.AttributeType;
 
 import static java.util.Objects.requireNonNull;
 
-public class InvalidIdentifierAttributeTypeException extends CodedRuntimeException
+@SuppressWarnings("squid:MaximumInheritanceDepth")
+public class InvalidIdentifierAttributeTypeException extends DataIntegrityViolationException
 {
-	private static final String ERROR_CODE = "D09";
+	private static final String ERROR_CODE = "V23";
 	private final AttributeType type;
 
 	public InvalidIdentifierAttributeTypeException(AttributeType type)

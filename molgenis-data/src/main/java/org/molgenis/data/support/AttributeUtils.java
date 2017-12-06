@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import org.molgenis.data.DateParseException;
-import org.molgenis.data.DateTimeParseException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
@@ -151,7 +150,7 @@ public class AttributeUtils
 		}
 		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new DateTimeParseException(attribute, valueAsString);
+			throw new DateParseException(attribute, valueAsString);
 		}
 	}
 

@@ -24,6 +24,7 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.validation.CompositeValidationResult;
+import org.molgenis.data.validation.InvalidIdentifierAttributeTypeException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.meta.*;
 import org.molgenis.util.EntityUtils;
@@ -676,7 +677,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 					if (extendsEntityType == null)
 					{
-						throw new UnknownParentException(emxEntityName, emxEntityExtends);
+						throw new UnknownEntityTypeParentException(emxEntityName, emxEntityExtends);
 					}
 
 					entityType.setExtends(extendsEntityType);

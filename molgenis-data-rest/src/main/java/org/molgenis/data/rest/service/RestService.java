@@ -336,7 +336,7 @@ public class RestService
 				}
 				catch (java.time.format.DateTimeParseException e)
 				{
-					throw new DateTimeParseException(attr, paramStrValue);
+					throw new DateParseException(attr, paramStrValue);
 				}
 			}
 			else
