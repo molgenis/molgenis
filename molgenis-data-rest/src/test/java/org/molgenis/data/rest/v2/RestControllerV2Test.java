@@ -820,7 +820,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	@Test(expectedExceptions = AbstractEntityDeletionException.class, expectedExceptionsMessageRegExp = "entityType:MyEntityType")
-	public void testDeleteEntityCollectionExceptionAbstractEntity() throws Exception
+	public void testDeleteEntityCollectionExceptionAbstractEntity() throws Throwable
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.isAbstract()).thenReturn(true);

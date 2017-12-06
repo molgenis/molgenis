@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.test.AbstractMockitoTest;
