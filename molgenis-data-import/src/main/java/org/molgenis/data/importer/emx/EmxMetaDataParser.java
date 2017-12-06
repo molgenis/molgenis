@@ -676,7 +676,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 					if (extendsEntityType == null)
 					{
-						throw new UnknownParentException(emxEntityName, emxEntityExtends);
+						throw new UnknownEntityTypeParentException(emxEntityName, emxEntityExtends);
 					}
 
 					entityType.setExtends(extendsEntityType);
