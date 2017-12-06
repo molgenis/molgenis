@@ -206,8 +206,8 @@ public class QueryValidatorTest
 		return queries.iterator();
 	}
 
-	@Test(dataProvider = "validateInvalidProvider", expectedExceptions = {
-			AttributeValueConversionFailedException.class, MolgenisValidationException.class })
+	@Test(dataProvider = "validateInvalidProvider", expectedExceptions = { AttributeValueConversionException.class,
+			MolgenisValidationException.class })
 	public void testValidateInvalid(Query<Entity> query, EntityType entityType)
 	{
 		queryValidator.validate(query, entityType);

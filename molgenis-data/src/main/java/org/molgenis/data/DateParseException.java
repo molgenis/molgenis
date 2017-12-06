@@ -5,7 +5,8 @@ import org.molgenis.data.meta.model.Attribute;
 
 import static java.util.Objects.requireNonNull;
 
-public class DateParseException extends CodedRuntimeException
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
+public class DateParseException extends DataConversionException
 {
 	private static final String ERROR_CODE_DATE = "D11a";
 	private static final String ERROR_CODE_DATE_TIME = "D11b";
