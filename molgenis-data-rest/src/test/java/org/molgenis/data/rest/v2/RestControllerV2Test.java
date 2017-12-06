@@ -25,6 +25,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.RepositoryCollectionCapabilityException;
 import org.molgenis.file.FileStore;

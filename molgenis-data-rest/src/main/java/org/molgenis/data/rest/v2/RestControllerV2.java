@@ -19,6 +19,7 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
+import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.validation.RepositoryCollectionCapabilityException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.data.AttributeValueValidationResult;
