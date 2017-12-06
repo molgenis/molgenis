@@ -485,7 +485,7 @@ public class ImportWizardController extends AbstractWizardController
 		DatabaseAction databaseAction = getDatabaseAction(file, action);
 		if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName())))
 		{
-			throw new RespositoryAlreadyExistsException(getBaseName(file.getName()));
+			throw new RepositoryAlreadyExistsException(getBaseName(file.getName()));
 		}
 		ImportService importService = importServiceFactory.getImportService(file.getName());
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(

@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.exception.InvalidHeaderException;
+import org.molgenis.data.vcf.exception.InvalidHeaderLineException;
 import org.molgenis.data.vcf.exception.MissingFormatException;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
@@ -154,7 +155,7 @@ public class VcfWriterUtils
 		{
 			outputVCFWriter.close();
 			inputVcfFileScanner.close();
-			throw new InvalidHeaderException();
+			throw new InvalidHeaderLineException();
 		}
 	}
 

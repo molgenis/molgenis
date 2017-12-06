@@ -929,7 +929,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	/**
-	 * createUnknownIdentifierException
+	 * createMissingIdentifierException
 	 */
 	@Test(expectedExceptions = MissingIdentifierException.class, expectedExceptionsMessageRegExp = "index:0")
 	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception

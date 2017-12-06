@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNull;
 public class MrefNotSupportedException extends CodedRuntimeException
 {
 	private final String subject;
-	private static final String ERROR_CODE = "DE03";
+	private static final String ERROR_CODE = "DE04";
 
 	public MrefNotSupportedException(String subject)
 	{
