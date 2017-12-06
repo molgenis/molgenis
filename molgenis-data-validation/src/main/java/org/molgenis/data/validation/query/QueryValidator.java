@@ -45,7 +45,7 @@ public class QueryValidator
 	 *
 	 * @param query      query
 	 * @param entityType entity type
-	 * @throws AttributeValueConversionFailedException if query is invalid
+	 * @throws AttributeValueConversionException if query is invalid
 	 */
 	public void validate(Query<? extends Entity> query, EntityType entityType)
 	{
@@ -194,7 +194,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new AttributeValueConversionFailedException(attr, value);
+			throw new AttributeValueConversionException(attr, value);
 		}
 
 		if (!attr.getEnumOptions().contains(stringValue))
@@ -228,7 +228,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value, e);
+				throw new AttributeValueConversionException(attr, value, e);
 			}
 		}
 		else if (value instanceof Number)
@@ -237,7 +237,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new AttributeValueConversionFailedException(attr, value);
+			throw new AttributeValueConversionException(attr, value);
 		}
 		return longValue;
 	}
@@ -264,7 +264,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value, e);
+				throw new AttributeValueConversionException(attr, value, e);
 			}
 		}
 		else if (value instanceof Number)
@@ -273,7 +273,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new AttributeValueConversionFailedException(attr, value);
+			throw new AttributeValueConversionException(attr, value);
 		}
 		return integerValue;
 	}
@@ -287,7 +287,7 @@ public class QueryValidator
 		}
 		if (!(entity instanceof FileMeta))
 		{
-			throw new AttributeValueConversionFailedException(attr, paramValue);
+			throw new AttributeValueConversionException(attr, paramValue);
 		}
 		return (FileMeta) entity;
 	}
@@ -314,7 +314,7 @@ public class QueryValidator
 			}
 			catch (NumberFormatException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value, e);
+				throw new AttributeValueConversionException(attr, value, e);
 			}
 		}
 		else if (value instanceof Number)
@@ -323,7 +323,7 @@ public class QueryValidator
 		}
 		else
 		{
-			throw new AttributeValueConversionFailedException(attr, value);
+			throw new AttributeValueConversionException(attr, value);
 		}
 		return doubleValue;
 	}
@@ -351,12 +351,12 @@ public class QueryValidator
 			}
 			catch (DateTimeParseException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value, e);
+				throw new AttributeValueConversionException(attr, value, e);
 			}
 		}
 		else
 		{
-			throw new AttributeValueConversionFailedException(attr, value);
+			throw new AttributeValueConversionException(attr, value);
 		}
 		return dateValue;
 	}
@@ -384,12 +384,12 @@ public class QueryValidator
 			}
 			catch (DateTimeParseException e)
 			{
-				throw new AttributeValueConversionFailedException(attr, value, e);
+				throw new AttributeValueConversionException(attr, value, e);
 			}
 		}
 		else
 		{
-			throw new AttributeValueConversionFailedException(attr, value);
+			throw new AttributeValueConversionException(attr, value);
 		}
 		return dateValue;
 	}
@@ -452,12 +452,12 @@ public class QueryValidator
 			}
 			else
 			{
-				throw new AttributeValueConversionFailedException(attr, value);
+				throw new AttributeValueConversionException(attr, value);
 			}
 		}
 		else
 		{
-			throw new AttributeValueConversionFailedException(attr, value);
+			throw new AttributeValueConversionException(attr, value);
 		}
 		return booleanValue;
 	}

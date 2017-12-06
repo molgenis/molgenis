@@ -96,7 +96,7 @@ public class DataConverter
 		}
 		catch (ConversionFailedException cfe)
 		{
-			throw new AttributeValueConversionFailedException(attr, source, cfe);
+			throw new AttributeValueConversionException(attr, source, cfe);
 		}
 	}
 

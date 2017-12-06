@@ -7,21 +7,22 @@ import static java.util.Objects.requireNonNull;
 /**
  * Thrown on mismatch between value type and attribute type.
  */
-public class AttributeValueConversionFailedException extends CodedRuntimeException
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
+public class AttributeValueConversionException extends DataConversionException
 {
 	private static final String ERROR_CODE = "D10";
 
 	private final transient Attribute attr;
 	private final transient Object value;
 
-	public AttributeValueConversionFailedException(Attribute attr, Object value, Exception exception)
+	public AttributeValueConversionException(Attribute attr, Object value, Exception exception)
 	{
 		super(ERROR_CODE, exception);
 		this.attr = requireNonNull(attr);
 		this.value = requireNonNull(value);
 	}
 
-	public AttributeValueConversionFailedException(Attribute attr, Object value)
+	public AttributeValueConversionException(Attribute attr, Object value)
 	{
 		super(ERROR_CODE);
 		this.attr = requireNonNull(attr);

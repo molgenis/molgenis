@@ -1,6 +1,6 @@
 package org.molgenis.data.rsql;
 
-import org.molgenis.data.DateTimeParseException;
+import org.molgenis.data.DateParseException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
@@ -72,7 +72,7 @@ public class RSQLValueParser
 		}
 		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new DateTimeParseException(attr, paramValue);
+			throw new DateParseException(attr, paramValue);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class RSQLValueParser
 		}
 		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new DateTimeParseException(attr, paramValue);
+			throw new DateParseException(attr, paramValue);
 		}
 	}
 

@@ -1,10 +1,11 @@
-package org.molgenis.data;
+package org.molgenis.data.validation;
 
 import static java.util.Objects.requireNonNull;
 
-public class EntityTypeAlreadyExistsException extends CodedRuntimeException
+@SuppressWarnings("squid:MaximumInheritanceDepth")
+public class EntityTypeAlreadyExistsException extends DataIntegrityViolationException
 {
-	private static final String ERROR_CODE = "D03";
+	private static final String ERROR_CODE = "V21";
 
 	private final String entityTypeId;
 

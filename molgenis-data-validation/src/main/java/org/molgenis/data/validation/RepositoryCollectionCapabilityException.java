@@ -1,11 +1,13 @@
-package org.molgenis.data;
+package org.molgenis.data.validation;
+
+import org.molgenis.data.RepositoryCapability;
 
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class RepositoryCollectionCapabilityException extends UnknownDataException
+public class RepositoryCollectionCapabilityException extends DataIntegrityViolationException
 {
-	private static final String ERROR_CODE = "D13";
+	private static final String ERROR_CODE = "V22";
 
 	private final String repositoryCollectionId;
 	private final RepositoryCapability capability;
