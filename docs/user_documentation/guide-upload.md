@@ -34,7 +34,7 @@ The upload module is the place in MOLGENIS where you can upload your data into t
 
 ![Upload menu item](../images/upload/upload-menu-item.png?raw=true, "upload menu item")
 
-The different pages will be explained by uploading the<a name="advanced-data-example"></a> "Advanced data example" ([download](/data/advanced_data_example_v20151104.xlsx)) example data set.
+The different pages will be explained by uploading the<a name="advanced-data-example"></a> "Advanced data example" ([download](/data/advanced_data_example_v20171206.xlsx)) example data set.
 
 The steps are: 
 
