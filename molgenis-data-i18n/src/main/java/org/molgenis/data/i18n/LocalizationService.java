@@ -2,7 +2,6 @@ package org.molgenis.data.i18n;
 
 import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityTypePermissionException;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
@@ -163,15 +162,8 @@ public class LocalizationService
 											   .map(key -> l10nStringFactory.create()
 																			.setMessageID(key)
 																			.setNamespace(namespace));
-			try
-			{
-				dataService.add(L10N_STRING, entities);
-				LOG.debug("Added message IDs to namespace '{}' : {}.", namespace, messageIDs);
-			}
-			catch (EntityTypePermissionException ex)
-			{
-				LOG.info("No permission to add message IDs to namespace '{}' : {}.", namespace, messageIDs, ex);
-			}
+			dataService.add(L10N_STRING, entities);
+			LOG.debug("Added message IDs to namespace '{}' : {}.", namespace, messageIDs);
 		}
 	}
 

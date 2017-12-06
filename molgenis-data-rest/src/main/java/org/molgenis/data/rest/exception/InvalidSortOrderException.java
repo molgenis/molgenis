@@ -1,15 +1,12 @@
-package org.molgenis.security.account;
-
-import org.molgenis.data.rest.exception.RestApiException;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
+package org.molgenis.data.rest.exception;
 
 /**
  * thrown if SORT order is specified but not "ASC" or "DESC"
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidSortOrderException extends RestApiException
 {
-	private final static String ERROR_CODE = "R06";
+	private static final String ERROR_CODE = "R06";
 
 	public InvalidSortOrderException()
 	{
@@ -19,16 +16,12 @@ public class InvalidSortOrderException extends RestApiException
 	@Override
 	public String getMessage()
 	{
-		return String.format("");
+		return "";
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[0];
 	}
 }

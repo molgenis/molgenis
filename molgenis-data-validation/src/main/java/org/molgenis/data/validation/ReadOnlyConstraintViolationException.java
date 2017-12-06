@@ -1,9 +1,6 @@
 package org.molgenis.data.validation;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class ReadOnlyConstraintViolationException extends DataIntegrityViolationException
 {
@@ -29,10 +26,8 @@ public class ReadOnlyConstraintViolationException extends DataIntegrityViolation
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(
-				languageService -> MessageFormat.format(languageService.getString(ERROR_CODE), valueAsString,
-						attributeName, entityTypeId)).orElse(super.getLocalizedMessage());
+		return new Object[] { valueAsString, attributeName, entityTypeId };
 	}
 }

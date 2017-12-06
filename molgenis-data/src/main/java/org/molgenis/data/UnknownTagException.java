@@ -1,16 +1,13 @@
 package org.molgenis.data;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
-@SuppressWarnings("squid:S1948")
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownTagException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D10";
 
-	private final Object tagId;
+	private final transient Object tagId;
 
 	public UnknownTagException(Object tagId)
 	{
@@ -25,13 +22,9 @@ public class UnknownTagException extends UnknownDataException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, tagId.toString());
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { tagId };
 	}
 }
 

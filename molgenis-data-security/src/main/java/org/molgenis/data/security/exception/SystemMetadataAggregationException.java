@@ -3,15 +3,12 @@ package org.molgenis.data.security.exception;
 import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class SystemMetadataAggregationException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "S04";
-	private EntityType entityType;
+	private final transient EntityType entityType;
 
 	public SystemMetadataAggregationException(EntityType entityType)
 	{
@@ -31,13 +28,8 @@ public class SystemMetadataAggregationException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			return MessageFormat.format(format, entityType.getLabel(language));
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { entityType };
 	}
 }

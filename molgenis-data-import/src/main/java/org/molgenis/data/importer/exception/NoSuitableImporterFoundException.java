@@ -1,11 +1,9 @@
 package org.molgenis.data.importer.exception;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 //FIXME: reasonable name, or rewrite code that throws this to actually determine what is going on
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class NoSuitableImporterFoundException extends ImporterException
 {
 	private static final String ERROR_CODE = "I03";
@@ -29,12 +27,8 @@ public class NoSuitableImporterFoundException extends ImporterException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, fileName);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { fileName };
 	}
 }

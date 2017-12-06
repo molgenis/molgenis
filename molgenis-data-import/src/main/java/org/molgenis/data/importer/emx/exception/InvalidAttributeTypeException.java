@@ -2,18 +2,15 @@ package org.molgenis.data.importer.emx.exception;
 
 import org.molgenis.data.meta.AttributeType;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidAttributeTypeException extends EmxException
 {
-	private final static String ERROR_CODE = "E10";
-	private String attributeAttribute;
-	private AttributeType attributeType;
-	private String attribute;
-	private String[] validOptions;
-	private int rowIndex;
+	private static final String ERROR_CODE = "E10";
+	private final String attributeAttribute;
+	private final AttributeType attributeType;
+	private final String attribute;
+	private final String[] validOptions;
+	private final int rowIndex;
 
 	public InvalidAttributeTypeException(String attributeAttribute, AttributeType attributeType, String attribute,
 			String[] validOptions, int rowIndex)
@@ -34,12 +31,8 @@ public class InvalidAttributeTypeException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, attributeAttribute, attributeType, attribute, validOptions, rowIndex);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { attributeAttribute, attributeType, attribute, validOptions, rowIndex };
 	}
 }

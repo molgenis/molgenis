@@ -1,9 +1,6 @@
 package org.molgenis.data.importer.emx.exception;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownColumnException extends EmxException
 {
 	private final static String ERROR_CODE = "E07";
@@ -24,12 +21,8 @@ public class UnknownColumnException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, columnName, sheetName);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { columnName, sheetName };
 	}
 }

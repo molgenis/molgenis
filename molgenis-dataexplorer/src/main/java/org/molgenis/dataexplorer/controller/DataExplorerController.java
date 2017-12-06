@@ -11,6 +11,7 @@ import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
@@ -233,7 +234,7 @@ public class DataExplorerController extends PluginController
 				// self-explanatory
 				if (!permissionService.hasPermissionOnEntityType(entityTypeId, Permission.WRITEMETA))
 				{
-					throw new EntityTypePermissionException(Permission.WRITEMETA, selectedEntityType);
+					throw new EntityTypePermissionDeniedException(selectedEntityType, Permission.WRITEMETA);
 				}
 				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
 						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)

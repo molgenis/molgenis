@@ -2,14 +2,10 @@ package org.molgenis.file.ingest.execution;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 public class UnknownLoaderException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "F01";
-	private String loader;
+	private static final String ERROR_CODE = "F01";
+	private final String loader;
 
 	public UnknownLoaderException(String loader)
 	{
@@ -29,12 +25,8 @@ public class UnknownLoaderException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, loader);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { loader };
 	}
 }

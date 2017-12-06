@@ -2,22 +2,21 @@ package org.molgenis.data.importer.emx.exception;
 
 import org.molgenis.data.meta.model.Attribute;
 
-import java.text.MessageFormat;
+import static java.util.Objects.requireNonNull;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritcanceDepth")
 public class UnknownAttributeTypeException extends EmxException
 {
-	private final static String ERROR_CODE = "E03";
-	private String emxDataType;
-	private Attribute attribute;
-	private int rowIndex;
+	private static final String ERROR_CODE = "E03";
+	private final String emxDataType;
+	private final Attribute attribute;
+	private final int rowIndex;
 
 	public UnknownAttributeTypeException(String emxDataType, Attribute attribute, int rowIndex)
 	{
 		super(ERROR_CODE);
-		this.emxDataType = emxDataType;
-		this.attribute = attribute;
+		this.emxDataType = requireNonNull(emxDataType);
+		this.attribute = requireNonNull(attribute);
 		this.rowIndex = rowIndex;
 	}
 
@@ -28,12 +27,8 @@ public class UnknownAttributeTypeException extends EmxException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, emxDataType, attribute.getName(), rowIndex);
-		}).orElse(super.getLocalizedMessage());
+		return new Object[] { emxDataType, attribute.getName(), rowIndex };
 	}
 }

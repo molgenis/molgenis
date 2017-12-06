@@ -2,10 +2,7 @@ package org.molgenis.data.importer.exception;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class UnknownActionException extends CodedRuntimeException
 {
@@ -30,12 +27,8 @@ public class UnknownActionException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, action);
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { action };
 	}
 }

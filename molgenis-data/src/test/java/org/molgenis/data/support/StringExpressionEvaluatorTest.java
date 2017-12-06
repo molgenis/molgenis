@@ -138,7 +138,7 @@ public class StringExpressionEvaluatorTest
 		assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
 	}
 
-	@Test(expectedExceptions = AttributeValueConversionFailedException.class, expectedExceptionsMessageRegExp = "type:test attribute:id expected:LONG actual:java.lang.String value:Hello World!, cause:java.lang.NumberFormatException: For input string: \"HelloWorld!\"")
+	@Test(expectedExceptions = AttributeValueConversionFailedException.class, expectedExceptionsMessageRegExp = "type:test attribute:id expected:LONG actual:java.lang.String value:Hello World!")
 	public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails()
 	{
 		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();

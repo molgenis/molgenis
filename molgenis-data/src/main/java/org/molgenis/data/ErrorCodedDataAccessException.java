@@ -1,33 +1,28 @@
 package org.molgenis.data;
 
+import javax.annotation.Nullable;
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
- * {@link RuntimeException} with error code.
+ * {@link org.springframework.dao.DataAccessException} with error code and without message.
  */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
-public abstract class CodedRuntimeException extends RuntimeException implements ErrorCoded
+public abstract class ErrorCodedDataAccessException extends org.springframework.dao.DataAccessException
+		implements ErrorCoded
 {
 	private final String errorCode;
 
-	protected CodedRuntimeException(String errorCode)
+	public ErrorCodedDataAccessException(String errorCode)
 	{
+		this(errorCode, null);
+	}
+
+	public ErrorCodedDataAccessException(String errorCode, @Nullable Throwable cause)
+	{
+		super("", cause);
 		this.errorCode = requireNonNull(errorCode);
-	}
-
-	protected CodedRuntimeException(String errorCode, Throwable cause)
-	{
-		super(cause);
-		this.errorCode = errorCode;
-	}
-
-	@Override
-	public String getErrorCode()
-	{
-		return errorCode;
 	}
 
 	@Override
@@ -35,7 +30,7 @@ public abstract class CodedRuntimeException extends RuntimeException implements 
 	{
 		try
 		{
-			return getLanguageService().map(languageService -> languageService.getMessageFormat(errorCode))
+			return getLanguageService().map(languageService -> languageService.getMessageFormat(getErrorCode()))
 									   .map(format -> format.format(getLocalizedMessageArguments()))
 									   .orElseGet(super::getLocalizedMessage);
 		}
@@ -46,8 +41,11 @@ public abstract class CodedRuntimeException extends RuntimeException implements 
 		}
 	}
 
-	/**
-	 * @return the arguments for both the message format and the localized message to use
-	 */
 	protected abstract Object[] getLocalizedMessageArguments();
+
+	@Override
+	public String getErrorCode()
+	{
+		return errorCode;
+	}
 }

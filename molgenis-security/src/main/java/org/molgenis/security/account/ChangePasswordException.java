@@ -2,11 +2,9 @@ package org.molgenis.security.account;
 
 import org.molgenis.data.CodedRuntimeException;
 
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 public class ChangePasswordException extends CodedRuntimeException
 {
-	private final static String ERROR_CODE = "A01";
+	private static final String ERROR_CODE = "A01";
 
 	public ChangePasswordException()
 	{
@@ -20,12 +18,8 @@ public class ChangePasswordException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return format;
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[0];
 	}
 }

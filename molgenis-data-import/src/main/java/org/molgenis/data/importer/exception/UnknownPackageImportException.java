@@ -1,9 +1,6 @@
 package org.molgenis.data.importer.exception;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownPackageImportException extends ImporterException
 {
 	private static final String ERROR_CODE = "I01";
@@ -35,12 +32,8 @@ public class UnknownPackageImportException extends ImporterException
 	}
 
 	@Override
-	public String getLocalizedMessage()
+	protected Object[] getLocalizedMessageArguments()
 	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			return MessageFormat.format(format, packageId.toString(), entityId.toString());
-		}).orElseGet(super::getLocalizedMessage);
+		return new Object[] { packageId, entityId };
 	}
 }
