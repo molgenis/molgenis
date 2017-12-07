@@ -76,11 +76,14 @@ public class MappingConfig
 	@Autowired
 	SystemPackageRegistry systemPackageRegistry;
 
+	@Autowired
+	MappingProjectMetaData mappingProjectMetaData;
+
 	@Bean
 	public MappingService mappingService()
 	{
 		return new MappingServiceImpl(dataService, algorithmServiceImpl(), mappingProjectRepository(),
-				permissionSystemService, attrMetaFactory, defaultPackage);
+				permissionSystemService, attrMetaFactory, defaultPackage, mappingProjectMetaData);
 	}
 
 	@Bean

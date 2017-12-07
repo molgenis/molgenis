@@ -8,10 +8,10 @@ import org.mockito.quality.Strictness;
 import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.mapper.exception.IllegalTargetPackageException;
-import org.molgenis.data.mapper.exception.UnknownMappingProjectException;
 import org.molgenis.data.mapper.job.MappingJobExecution;
 import org.molgenis.data.mapper.job.MappingJobExecutionFactory;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -353,7 +353,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(actual3, "");
 	}
 
-	@Test(expectedExceptions = UnknownMappingProjectException.class, expectedExceptionsMessageRegExp = "id:mappingProjectId")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "id:mappingProjectId")
 	public void testScheduleMappingJobUnknownMappingProjectId() throws Throwable
 	{
 		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")

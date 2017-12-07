@@ -8,8 +8,8 @@ import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.exception.IncompatibleDataTypeException;
 import org.molgenis.data.mapper.exception.IncompatibleReferenceException;
 import org.molgenis.data.mapper.exception.MissingAttributeException;
@@ -718,7 +718,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import(UserTestConfig.class)
+	@Import({ MapperTestConfig.class })
 	static class Config
 	{
 

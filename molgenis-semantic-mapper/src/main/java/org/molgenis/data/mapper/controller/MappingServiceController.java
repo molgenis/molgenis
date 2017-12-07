@@ -10,11 +10,11 @@ import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.exception.IllegalTargetPackageException;
-import org.molgenis.data.mapper.exception.UnknownMappingProjectException;
 import org.molgenis.data.mapper.job.MappingJobExecution;
 import org.molgenis.data.mapper.job.MappingJobExecutionFactory;
 import org.molgenis.data.mapper.mapping.model.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
+import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
@@ -114,6 +114,9 @@ public class MappingServiceController extends PluginController
 
 	@Autowired
 	private JobsController jobsController;
+
+	@Autowired
+	private MappingProjectMetaData mappingProjectMetaData;
 
 	public MappingServiceController()
 	{
@@ -581,7 +584,7 @@ public class MappingServiceController extends PluginController
 		validateEntityName(targetEntityTypeId);
 		if (mappingService.getMappingProject(mappingProjectId) == null)
 		{
-			throw new UnknownMappingProjectException(mappingProjectId);
+			throw new UnknownEntityException(mappingProjectMetaData, mappingProjectId);
 		}
 		if (packageId != null)
 		{

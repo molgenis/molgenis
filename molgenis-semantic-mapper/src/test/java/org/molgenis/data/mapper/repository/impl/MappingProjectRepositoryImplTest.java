@@ -3,13 +3,9 @@ package org.molgenis.data.mapper.repository.impl;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
-import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.exception.DuplicateMappingProjectException;
-import org.molgenis.data.mapper.exception.UnknownMappingProjectException;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
@@ -175,7 +171,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		assertEquals(result, singletonList(mappingProject));
 	}
 
-	@Test(expectedExceptions = UnknownMappingProjectException.class, expectedExceptionsMessageRegExp = "id:mappingProjectID")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "id:mappingProjectID")
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");

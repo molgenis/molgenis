@@ -5,8 +5,8 @@ import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.exception.DuplicateMappingProjectException;
-import org.molgenis.data.mapper.exception.UnknownMappingProjectException;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
@@ -56,7 +56,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		MappingProject existing = getMappingProject(mappingProject.getIdentifier());
 		if (existing == null)
 		{
-			throw new UnknownMappingProjectException(mappingProject.getIdentifier());
+			throw new UnknownEntityException(mappingProjectMeta, mappingProject.getIdentifier());
 		}
 		Entity mappingProjectEntity = toEntity(mappingProject);
 		dataService.update(MAPPING_PROJECT, mappingProjectEntity);

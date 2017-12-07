@@ -1,16 +1,17 @@
 package org.molgenis.data.mapper.service.impl;
 
 import org.molgenis.auth.User;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.mapper.exception.*;
+import org.molgenis.data.mapper.exception.IncompatibleDataTypeException;
+import org.molgenis.data.mapper.exception.IncompatibleReferenceException;
+import org.molgenis.data.mapper.exception.IncompatibleTargetException;
+import org.molgenis.data.mapper.exception.MissingAttributeException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
@@ -55,10 +56,12 @@ public class MappingServiceImpl implements MappingService
 	private final PermissionSystemService permissionSystemService;
 	private final AttributeFactory attrMetaFactory;
 	private final DefaultPackage defaultPackage;
+	private final MappingProjectMetaData mappingProjectMetaData;
 
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
-			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage)
+			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage,
+			MappingProjectMetaData mappingProjectMetaData)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
@@ -66,6 +69,7 @@ public class MappingServiceImpl implements MappingService
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.defaultPackage = requireNonNull(defaultPackage);
+		this.mappingProjectMetaData = requireNonNull(mappingProjectMetaData);
 	}
 
 	@Override
@@ -95,7 +99,7 @@ public class MappingServiceImpl implements MappingService
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
 		{
-			throw new UnknownMappingProjectException(mappingProjectId);
+			throw new UnknownEntityException(mappingProjectMetaData, mappingProjectId);
 		}
 		String mappingProjectName = mappingProject.getName();
 
@@ -130,7 +134,7 @@ public class MappingServiceImpl implements MappingService
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
 		{
-			throw new UnknownMappingProjectException(mappingProjectId);
+			throw new UnknownEntityException(mappingProjectMetaData, mappingProjectId);
 		}
 
 		return cloneMappingProject(mappingProject, clonedMappingProjectName);
