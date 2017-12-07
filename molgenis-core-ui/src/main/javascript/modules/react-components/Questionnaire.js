@@ -7,6 +7,7 @@ import FormFactory from "./Form";
 import Spinner from "./Spinner";
 import Button from "./Button";
 import _ from "underscore";
+import moment from "moment";
 
 var div = React.DOM.div;
 
@@ -109,6 +110,12 @@ var Questionnaire = React.createClass({
                         break;
                     case 'COMPOUND':
                         //nothing, no value
+                        break;
+                    case 'DATE':
+                        values[attr.name] = moment(value, 'YYYY-MM-DD', true);
+                        break;
+                    case 'DATE_TIME':
+                        values[attr.name] = moment(value, moment.ISO_8601, true);
                         break;
                     default:
                         values[attr.name] = value;
