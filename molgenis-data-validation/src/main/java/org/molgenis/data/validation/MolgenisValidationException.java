@@ -11,7 +11,7 @@ import java.util.Set;
 public class MolgenisValidationException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;
-	private Set<ConstraintViolation> violations;
+	private final Set<ConstraintViolation> violations;
 
 	public MolgenisValidationException(ConstraintViolation violation)
 	{
@@ -41,6 +41,6 @@ public class MolgenisValidationException extends MolgenisDataException
 	 */
 	public void renumberViolationRowIndices(List<Integer> actualIndices)
 	{
-		violations.stream().forEach(v -> v.renumberRowIndex(actualIndices));
+		violations.forEach(v -> v.renumberRowIndex(actualIndices));
 	}
 }

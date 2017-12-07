@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import org.mockito.ArgumentCaptor;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LocalizationService;
@@ -138,6 +139,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private String attrCompoundAttrCompoundName;
 	private String attrCompoundAttrCompoundAttr0Name;
 	private EntityType entityType;
+
+	public RestControllerV2Test()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod() throws ParseException

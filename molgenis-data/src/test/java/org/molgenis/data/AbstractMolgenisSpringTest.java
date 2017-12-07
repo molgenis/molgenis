@@ -1,6 +1,8 @@
 package org.molgenis.data;
 
 import org.mockito.Mock;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -14,12 +16,15 @@ import org.springframework.security.test.context.support.WithSecurityContextTest
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.reset;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -29,6 +34,20 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 {
 	@Autowired
 	private Config config;
+
+	private final Strictness strictness;
+
+	private MockitoSession mockitoSession;
+
+	public AbstractMolgenisSpringTest()
+	{
+		this(Strictness.STRICT_STUBS);
+	}
+
+	public AbstractMolgenisSpringTest(Strictness strictness)
+	{
+		this.strictness = requireNonNull(strictness);
+	}
 
 	// long method name, because if a method annotated with @BeforeClass and the same method name exists in a subclass then this method is ignored.
 	@BeforeClass
@@ -47,8 +66,14 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 	@BeforeMethod
 	public void abstractMolgenisSpringTestBeforeMethod() throws Exception
 	{
-		initMocks(this);
+		mockitoSession = mockitoSession().initMocks(this).strictness(strictness).startMocking();
 		config.resetMocks();
+	}
+
+	@AfterMethod
+	public void abstractMolgenisSpringTestAfterMethod()
+	{
+		mockitoSession.finishMocking();
 	}
 
 	@Configuration

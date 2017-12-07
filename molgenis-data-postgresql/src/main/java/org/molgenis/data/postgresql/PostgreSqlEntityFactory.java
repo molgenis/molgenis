@@ -6,6 +6,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
@@ -169,8 +170,7 @@ class PostgreSqlEntityFactory
 						value = resultSet.wasNull() ? null : longValue;
 						break;
 					default:
-						throw new RuntimeException(
-								format("Unknown attribute type [%s]", attr.getDataType().toString()));
+						throw new UnexpectedEnumException(attr.getDataType());
 				}
 				return value;
 			}
@@ -300,7 +300,7 @@ class PostgreSqlEntityFactory
 					case ONE_TO_MANY:
 						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 					default:
-						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+						throw new UnexpectedEnumException(attrType);
 				}
 			}
 		}

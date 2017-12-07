@@ -1,0 +1,6 @@
+Name;Synonym_1
+Height;standing height
+Weight;Body weight
+Cardio-vascular disease;CVD
+Weight_Height;BMI
+Standing_height;Body length

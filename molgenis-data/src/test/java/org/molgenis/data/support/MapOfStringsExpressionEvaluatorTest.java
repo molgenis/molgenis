@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -30,6 +31,11 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
 	private EntityTypeFactory entityTypeFactory;
 	@Autowired
 	private AttributeFactory attributeFactory;
+
+	public MapOfStringsExpressionEvaluatorTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	private EntityType createDynamicLocationMetaData()
 	{

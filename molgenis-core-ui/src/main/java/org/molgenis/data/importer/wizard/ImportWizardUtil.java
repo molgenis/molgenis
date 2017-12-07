@@ -9,6 +9,8 @@ import org.springframework.validation.ObjectError;
 import java.io.File;
 import java.util.Optional;
 
+import static java.lang.String.format;
+
 public class ImportWizardUtil
 {
 	private ImportWizardUtil()
@@ -47,8 +49,8 @@ public class ImportWizardUtil
 
 		if (logger.isWarnEnabled())
 		{
-			logger.warn("Import of file [{}] failed for action [{}]",
-					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), entityImportOption, e);
+			logger.warn(format("Import of file [%s] failed for action [%s]",
+					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), entityImportOption), e);
 		}
 
 		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));

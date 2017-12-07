@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -127,7 +128,7 @@ public class VcfUtils
 			case FILE:
 				throw new RuntimeException("invalid vcf data type " + dataType);
 			default:
-				throw new RuntimeException("unsupported vcf data type " + dataType);
+				throw new UnexpectedEnumException(dataType);
 		}
 	}
 

@@ -4,6 +4,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -108,6 +109,11 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
 
+	public DataExplorerControllerTest()
+	{
+		super(Strictness.WARN);
+	}
+
 	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
@@ -179,6 +185,41 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 																   Function.identity())));
 
 		verify(model).addAttribute("entitiesMeta", expected);
+	}
+
+	@Test
+	public void initTrackingIdPresent()
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId = "selectedEntityId";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		when(appSettings.getGoogleAnalyticsTrackingId()).thenReturn("id");
+		when(appSettings.getGoogleAnalyticsTrackingIdMolgenis()).thenReturn("id");
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model).addAttribute("hasTrackingId", true);
+		verify(model).addAttribute("hasMolgenisTrackingId", true);
+	}
+
+	@Test
+	public void initTrackingIdNotPresent()
+	{
+		String selectedEntityname = "selectedEntityname";
+		String selectedEntityId = "selectedEntityId";
+
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+
+		controller.init(selectedEntityname, selectedEntityId, model);
+
+		verify(model).addAttribute("hasTrackingId", false);
+		verify(model).addAttribute("hasMolgenisTrackingId", false);
 	}
 
 	@Test

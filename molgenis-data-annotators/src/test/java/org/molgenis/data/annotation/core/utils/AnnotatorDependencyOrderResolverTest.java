@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.core.utils;
 
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -50,6 +51,11 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 
 	@Mock
 	Repository<Entity> repo;
+
+	public AnnotatorDependencyOrderResolverTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

@@ -6,6 +6,7 @@ import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -26,8 +27,6 @@ import static java.util.stream.StreamSupport.stream;
  */
 public class DynamicEntity implements Entity
 {
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * Entity meta data
 	 */
@@ -304,7 +303,7 @@ public class DynamicEntity implements Entity
 				}
 				break;
 			default:
-				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
+				throw new UnexpectedEnumException(dataType);
 		}
 	}
 

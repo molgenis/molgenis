@@ -9,8 +9,6 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -46,25 +44,19 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String MOD = "mods";
 		public static final String MOD_AGGREGATES = "mod_aggregates";
 		public static final String MOD_ANNOTATORS = "mod_annotators";
-		public static final String MOD_CHARTS = "mod_charts";
 		public static final String MOD_DATA = "mod_data";
 		public static final String MOD_REPORTS = "mod_reports";
 		public static final String MOD_STANDALONE_REPORTS = "mod_standalone_reports";
 
 		private static final boolean DEFAULT_MOD_AGGREGATES = true;
 		private static final boolean DEFAULT_MOD_ANNOTATORS = true;
-		private static final boolean DEFAULT_MOD_CHARTS = true;
 		private static final boolean DEFAULT_MOD_DATA = true;
 		private static final boolean DEFAULT_MOD_REPORT = true;
 		private static final boolean DEFAULT_MOD_STANDALONE_REPORT = false;
 
 		public static final String DATA = "data";
-		public static final String DATA_GALAXY_EXPORT = "data_galaxy_export";
-		public static final String DATA_GALAXY_URL = "data_galaxy_url";
-		public static final String DATA_GALAXY_API_KEY = "data_galaxy_api_key";
 		public static final String DATA_GENOME_BROWSER = "data_genome_browser";
 
-		private static final boolean DEFAULT_DATA_GALAXY_EXPORT = true;
 		private static final boolean DEFAULT_DATA_GENOME_BROWSER = true;
 
 		public static final String GENOMEBROWSER = "genomebrowser";
@@ -136,7 +128,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												.setNillable(true)
 												.setDefaultValue(String.valueOf(DEFAULT_SHOW_NAVIGATOR_LINK))
 												.setLabel(
-													  "Show a link to the navigator for the package of the selected entity");
+														"Show a link to the navigator for the package of the selected entity");
 		}
 
 		private void addModulesSettings()
@@ -154,11 +146,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 										.setNillable(false)
 										.setDefaultValue(String.valueOf(DEFAULT_MOD_ANNOTATORS))
 										.setLabel("Annotators");
-			addAttribute(MOD_CHARTS).setParent(modAttr)
-									.setDataType(BOOL)
-									.setNillable(false)
-									.setDefaultValue(String.valueOf(DEFAULT_MOD_CHARTS))
-									.setLabel("Charts");
 			addAttribute(MOD_DATA).setParent(modAttr)
 								  .setDataType(BOOL)
 								  .setNillable(false)
@@ -184,21 +171,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												   .setDataType(COMPOUND)
 												   .setLabel("Data")
 												   .setVisibleExpression("$('" + MOD_DATA + "').eq(true).value()");
-
-			addAttribute(DATA_GALAXY_EXPORT).setParent(dataAttr)
-											.setDataType(BOOL)
-											.setNillable(false)
-											.setDefaultValue(String.valueOf(DEFAULT_DATA_GALAXY_EXPORT))
-											.setLabel("Galaxy export");
-			addAttribute(DATA_GALAXY_URL).setParent(dataAttr)
-										 .setDataType(HYPERLINK)
-										 .setNillable(true)
-										 .setLabel("Galaxy URL")
-										 .setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
-			addAttribute(DATA_GALAXY_API_KEY).setParent(dataAttr)
-											 .setNillable(true)
-											 .setLabel("Galaxy API key")
-											 .setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 
 			// genome browser
 			Attribute genomeBrowserAttr = addAttribute(GENOMEBROWSER).setParent(dataAttr)
@@ -304,17 +276,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		set(Meta.MOD_ANNOTATORS, modAnnotators);
 	}
 
-	public boolean getModCharts()
-	{
-		Boolean value = getBoolean(Meta.MOD_CHARTS);
-		return value != null ? value : false;
-	}
-
-	public void setModCharts(boolean modCharts)
-	{
-		set(Meta.MOD_CHARTS, modCharts);
-	}
-
 	public boolean getModData()
 	{
 		Boolean value = getBoolean(Meta.MOD_DATA);
@@ -346,16 +307,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public void setModStandaloneReports(boolean modStandaloneReports)
 	{
 		set(Meta.MOD_STANDALONE_REPORTS, modStandaloneReports);
-	}
-
-	public Boolean getGalaxyExport()
-	{
-		return getBoolean(Meta.DATA_GALAXY_EXPORT);
-	}
-
-	public void setGalaxyExport(boolean galaxyExport)
-	{
-		set(Meta.DATA_GALAXY_EXPORT, galaxyExport);
 	}
 
 	public Map<String, String> getAggregatesDistinctOverrides()
@@ -414,32 +365,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public void setHeaderAbbreviate(int headerAbbreviate)
 	{
 		set(Meta.GENERAL_HEADER_ABBREVIATE, headerAbbreviate);
-	}
-
-	@Nullable
-	public URI getGalaxyUrl()
-	{
-		String galaxyUrl = getString(Meta.DATA_GALAXY_URL);
-		if (galaxyUrl != null)
-		{
-			try
-			{
-				return new URI(galaxyUrl);
-			}
-			catch (URISyntaxException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	public void setGalaxyUrl(URI galaxyUrl)
-	{
-		set(Meta.DATA_GALAXY_URL, galaxyUrl.toString());
 	}
 
 	public boolean getGenomeBrowser()

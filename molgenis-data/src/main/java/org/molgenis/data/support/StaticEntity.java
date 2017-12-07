@@ -13,8 +13,6 @@ import static java.util.Objects.requireNonNull;
  */
 public abstract class StaticEntity implements Entity
 {
-	private static final long serialVersionUID = 1L;
-
 	private Entity entity;
 
 	public StaticEntity(Entity entity)

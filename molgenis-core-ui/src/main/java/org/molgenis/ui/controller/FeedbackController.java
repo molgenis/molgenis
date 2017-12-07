@@ -42,7 +42,6 @@ public class FeedbackController extends AbstractStaticContentController
 
 	public static final String ID = "feedback";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
-	private static final String MESSAGING_EXCEPTION_MESSAGE = "Unfortunately, we were unable to create an email message for the feedback you specified.";
 	private static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback. Please contact the administrator.";
 	private static final String MAIL_SEND_EXCEPTION_MESSAGE = MAIL_AUTHENTICATION_EXCEPTION_MESSAGE;
 

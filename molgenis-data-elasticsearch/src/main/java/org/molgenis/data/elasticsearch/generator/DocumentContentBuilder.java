@@ -8,6 +8,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.generator.model.Document;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -201,7 +202,7 @@ class DocumentContentBuilder
 			case COMPOUND:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 

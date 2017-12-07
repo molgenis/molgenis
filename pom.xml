@@ -49,6 +49,7 @@
 
         <!-- plugin versions -->
         <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+        <skip.js>false</skip.js>
 
         <!-- dependency versions -->
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
@@ -74,7 +75,7 @@
         <jackson-databind.version>2.8.8.1</jackson-databind.version>
         <javax-servlet-api.version>3.0.1</javax-servlet-api.version>
         <freemarker.version>2.3.23</freemarker.version>
-        <node.version>v6.11.0</node.version>
+        <node.version>v8.9.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
 
         <!-- test-dependency versions -->
@@ -178,6 +179,12 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>skip-js-compile</id>
+            <properties>
+                <skip.js>true</skip.js>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
@@ -263,6 +270,11 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.kongchen</groupId>
+                    <artifactId>swagger-maven-plugin</artifactId>
+                    <version>3.1.5</version>
                 </plugin>
                 <!-- specify plugin version -->
                 <plugin>
@@ -883,6 +895,11 @@
                 <artifactId>awaitility</artifactId>
                 <version>${awaitility.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>1.5.16</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -904,8 +921,6 @@
         <module>molgenis-app</module>
         <module>molgenis-apps</module>
         <module>molgenis-bootstrap</module>
-        <module>molgenis-catalogue</module>
-        <module>molgenis-charts</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
         <module>molgenis-data-annotators</module>
@@ -914,7 +929,6 @@
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-excel</module>
         <module>molgenis-data-file</module>
-        <module>molgenis-data-googlespreadsheet</module>
         <module>molgenis-data-i18n</module>
         <module>molgenis-data-import</module>
         <module>molgenis-data-index</module>
@@ -936,12 +950,10 @@
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>
         <module>molgenis-metadata-manager</module>
-        <module>molgenis-model-registry</module>
         <module>molgenis-navigator</module>
         <module>molgenis-one-click-importer</module>
         <module>molgenis-ontology-core</module>
         <module>molgenis-ontology</module>
-        <module>molgenis-pathways</module>
         <module>molgenis-platform-integration-tests</module>
         <module>molgenis-python</module>
         <module>molgenis-questionnaires</module>
@@ -958,5 +970,6 @@
         <module>molgenis-test</module>
         <module>molgenis-util</module>
         <module>molgenis-web</module>
+        <module>molgenis-beacon</module>
     </modules>
 </project>

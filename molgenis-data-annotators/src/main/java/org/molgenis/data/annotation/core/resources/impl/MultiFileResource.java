@@ -7,8 +7,6 @@ import org.molgenis.data.annotation.core.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.ResourceConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +20,6 @@ public abstract class MultiFileResource implements Resource
 	private final String name;
 	private final Map<String, ResourceImpl> resources = new HashMap<>();
 	private final MultiResourceConfig config;
-	private static final Logger LOG = LoggerFactory.getLogger(MultiFileResource.class);
 
 	public MultiFileResource(String name, MultiResourceConfig config)
 	{

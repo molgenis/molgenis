@@ -114,7 +114,7 @@ public class QueryImpl<E extends Entity> implements Query<E>
 		if (this.rules.size() > 1)
 			throw new MolgenisDataException("Nested query not closed, use unnest() or unnestAll()");
 
-		if (this.rules.size() > 0)
+		if (!this.rules.isEmpty())
 		{
 			List<QueryRule> rules = this.rules.get(this.rules.size() - 1);
 

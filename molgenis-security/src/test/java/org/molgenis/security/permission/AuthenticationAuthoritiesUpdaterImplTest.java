@@ -5,6 +5,7 @@ import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationToken;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationToken;
 import org.springframework.security.access.intercept.RunAsUserToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -117,6 +118,19 @@ public class AuthenticationAuthoritiesUpdaterImplTest
 				updatedAuthorities);
 		assertEquals(updatedAuthentication,
 				new RunAsUserToken(key, principal, credentials, updatedAuthorities, originalAuthentication));
+	}
+
+	@Test
+	public void testUpdateAuthenticationAnonymousAuthenticationToken()
+	{
+		String key = "key";
+		Object principal = mock(Object.class);
+		AnonymousAuthenticationToken anonymousAuthenticationToken = new AnonymousAuthenticationToken(key, principal,
+				singletonList(mock(GrantedAuthority.class)));
+
+		Authentication updatedAuthentication = authenticationAuthoritiesUpdaterImpl.updateAuthentication(
+				anonymousAuthenticationToken, updatedAuthorities);
+		assertEquals(updatedAuthentication, new AnonymousAuthenticationToken(key, principal, updatedAuthorities));
 	}
 
 	@Test(expectedExceptions = SessionAuthenticationException.class, expectedExceptionsMessageRegExp = "Unknown authentication type '.*?'")

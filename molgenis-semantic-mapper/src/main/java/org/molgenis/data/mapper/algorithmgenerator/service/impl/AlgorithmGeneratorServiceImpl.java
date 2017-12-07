@@ -50,7 +50,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes, EntityType targetEntityType,
 			EntityType sourceEntityType)
 	{
-		if (sourceAttributes.size() > 0)
+		if (!sourceAttributes.isEmpty())
 		{
 			for (AlgorithmGenerator generator : generators)
 			{

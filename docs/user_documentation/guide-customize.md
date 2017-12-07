@@ -39,7 +39,7 @@ A complete list of all the Query strings available at the Data Explorer:
 |-------------|--------|----|--------|
 | ***entity*** | All existing entities |Using this query string you can open the data explorer with the specified entity selected. |entity=test_data|
 | ***hideselect*** | true, false|Hide the drop down for selecting data sets. Use this if you want users to focus on only one data set. Combined with the ***entity*** query string, you can create a Data Explorer that only shows one 	data set to users.|entity=test_data&hideselect=true|
-| ***mod***|data, aggregates, charts, annotators|Select a Data Explorer tab to show|entity=test_data&hideselect=true&mod=data|
+| ***mod***|data, aggregates, annotators|Select a Data Explorer tab to show|entity=test_data&hideselect=true&mod=data|
 
 **Creating redirects to URLs outside MOLGENIS**  
 Using the redirect plugin as a menu item, you are able to create a link to an outside source. To show how this works, we will create a menu item that links to Wikipedia.
@@ -66,7 +66,7 @@ To get the feel of how certain styles look, you can select it in the dropdown me
 For an overview of all the different themes offered, visit the [Bootswatch](https://bootswatch.com/) website. 
 
 ### Adding a new theme
-It is possible to submit your own CSS sheets to update the styling. By selecting the 'Add theme' option a new theme file may be added. As molgenis currently uses both bootstrap version 3 and bootstrap version 4 classes for styling the interface, theme's for both versions may be added. It is mandatory to add a bootstrap version 3 theme file. Adding a bootstrap version 4 theme file is optional (but recommended). If a theme is selected for which no bootstrap 4 theme file was set, the 'default' bootstrap 4 theme will be used.
+It is possible to submit your own CSS sheets to update the styling. By selecting the 'Add theme' option a new theme file may be added. As molgenis currently uses both bootstrap version 3 and bootstrap version 4 (alpha) classes for styling the interface, theme's for both versions may be added. It is mandatory to add a bootstrap version 3 theme file. Adding a bootstrap version 4 theme file is optional (but recommended). If a theme is selected for which no bootstrap 4 theme file was set, the 'default' bootstrap 4 theme will be used.
 
 # Homepage
 The home page is one of the most important part of your MOLGENIS application. It is a doorway to the rest of your application, and as it is such, it should look nice! When you are logged in as administrator, the home page contains an *edit* button. Clicking this button will open up an editor. 

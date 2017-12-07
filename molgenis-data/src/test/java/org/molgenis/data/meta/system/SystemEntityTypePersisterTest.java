@@ -4,6 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
@@ -51,6 +52,11 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 
 	@Captor
 	private ArgumentCaptor<Stream<Object>> objectIdCaptor;
+
+	public SystemEntityTypePersisterTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

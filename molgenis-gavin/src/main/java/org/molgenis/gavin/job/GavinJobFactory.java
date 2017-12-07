@@ -9,8 +9,6 @@ import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,8 +26,6 @@ import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EX
 @Component
 public class GavinJobFactory
 {
-	private static final Logger LOG = LoggerFactory.getLogger(GavinJobFactory.class);
-
 	private final Parser parser;
 	private DataService dataService;
 	private PlatformTransactionManager transactionManager;

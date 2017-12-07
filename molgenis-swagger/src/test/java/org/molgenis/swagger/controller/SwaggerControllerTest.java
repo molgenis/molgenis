@@ -62,7 +62,8 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
 
 		when(tokenService.generateAndStoreToken("user", "For Swagger UI")).thenReturn("ABCDEFG");
 		assertEquals("view-swagger-ui", swaggerController.init(model));
-		verify(model).addAttribute("url", "http://localhost/plugin/swagger/swagger.yml");
+		verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
+		verify(model).addAttribute("baseUrl", "http://localhost");
 		verify(model).addAttribute("token", "ABCDEFG");
 		verifyNoMoreInteractions(model);
 	}
@@ -74,7 +75,8 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
 		assertEquals("view-swagger-ui", swaggerController.init(model));
-		verify(model).addAttribute("url", "http://localhost/plugin/swagger/swagger.yml");
+		verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
+		verify(model).addAttribute("baseUrl", "http://localhost");
 		verifyNoMoreInteractions(model);
 	}
 

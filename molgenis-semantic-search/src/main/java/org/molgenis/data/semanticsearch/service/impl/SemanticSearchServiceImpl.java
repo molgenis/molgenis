@@ -132,10 +132,10 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		ontologyTermQueries.removeAll(queryTerms);
 
-		if (queryTerms.size() > 0 && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token)))
+		if (!queryTerms.isEmpty() && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token)))
 			return true;
 
-		if (ontologyTermQueries.size() > 0 && ontologyTermQueries.stream()
+		if (!ontologyTermQueries.isEmpty() && ontologyTermQueries.stream()
 																 .allMatch(token -> isGoodMatch(matchedTags, token)))
 			return true;
 
@@ -176,7 +176,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyService.getAllOntologiesIds(),
 					escapedSearchTerms, MAX_NUM_TAGS);
 		}
-		else if (null == ontologyTerms || ontologyTerms.size() == 0)
+		else if (null == ontologyTerms || ontologyTerms.isEmpty())
 		{
 			List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
 			Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
@@ -208,7 +208,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			queryTerms.addAll(searchTerms);
 		}
 
-		if (queryTerms.size() == 0)
+		if (queryTerms.isEmpty())
 		{
 			if (StringUtils.isNotBlank(targetAttribute.getLabel()))
 			{
@@ -337,7 +337,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		for (String synonym : ontologyTermSynonyms)
 		{
 			Set<String> splitIntoTerms = splitIntoTerms(Stemmer.stemAndJoin(splitIntoTerms(synonym)));
-			if (splitIntoTerms.size() != 0 && keywordsFromAttribute.containsAll(splitIntoTerms)) return true;
+			if (!splitIntoTerms.isEmpty() && keywordsFromAttribute.containsAll(splitIntoTerms)) return true;
 		}
 
 		return false;

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.util.UnexpectedEnumException;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -619,7 +620,7 @@ public class EntityType extends StaticEntity
 						attr.setLookupAttributeIndex(0); // FIXME assign unique lookup attribute index
 						break;
 					default:
-						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+						throw new UnexpectedEnumException(attrType);
 				}
 			}
 		}

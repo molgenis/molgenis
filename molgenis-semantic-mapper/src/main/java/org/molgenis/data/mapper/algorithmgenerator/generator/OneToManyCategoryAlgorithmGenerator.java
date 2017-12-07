@@ -63,7 +63,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 	String createAlgorithmElseBlock(Attribute targetAttribute, List<Attribute> sourceAttributes)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		if (sourceAttributes.size() > 0)
+		if (!sourceAttributes.isEmpty())
 		{
 			stringBuilder.append("else{\n").append("\tSUM_WEIGHT = new newValue(0);\n");
 			for (Attribute sourceAttribute : sourceAttributes)
@@ -84,7 +84,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 	String createAlgorithmNullCheckIfStatement(List<Attribute> sourceAttributes)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		if (sourceAttributes.size() > 0)
+		if (!sourceAttributes.isEmpty())
 		{
 			stringBuilder.append("var SUM_WEIGHT;\n").append("if(");
 			sourceAttributes.stream()

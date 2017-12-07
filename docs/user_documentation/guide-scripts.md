@@ -125,6 +125,7 @@ max <- max(samples$Ref_Counts, samples$Alt_Counts)
 
 plot(samples$Ref_Counts, samples$Alt_Counts, xlim = c(0, max), ylim = c(0, max), xlab='Reference Allele', ylab='Alternative Allele', main = 'Allele-Specific Expression for ${snp_id}')
 lines(c(0,max), c(0, max))
+dev.off()
 ```
 Note: If you are running this on localhost you might have to install the following packages through Rstudio/R command line;
 * install.packages('rjson');

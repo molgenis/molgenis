@@ -13,6 +13,8 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 public class PropertyType extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Property";
+
+	@SuppressWarnings("unused")
 	private static final String PROPERTY_TYPE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String KEY = "key";

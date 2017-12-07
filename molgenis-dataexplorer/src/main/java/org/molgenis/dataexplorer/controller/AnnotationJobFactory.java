@@ -13,8 +13,6 @@ import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
@@ -36,8 +34,6 @@ import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaDa
 @Component
 public class AnnotationJobFactory
 {
-	private static final Logger LOG = LoggerFactory.getLogger(AnnotationJobFactory.class);
-
 	@Autowired
 	CrudRepositoryAnnotator crudRepositoryAnnotator;
 

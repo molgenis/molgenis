@@ -3,6 +3,7 @@ package org.molgenis.data.excel;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -36,6 +37,11 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 
 	private Workbook workbook;
 	private InputStream is;
+
+	public ExcelRepositoryTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod() throws InvalidFormatException, IOException

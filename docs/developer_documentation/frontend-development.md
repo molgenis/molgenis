@@ -2,7 +2,7 @@
 
 ## Tools and compiling
 When developing client code, you will need to following tools:
- - Node v6.11.0 (LTS version) and included NPM version
+ - Node v8.9.0 (LTS version) and included NPM version
  - Yarn v0.24.5 or greater
 
 All client code and the corresponding package.json file should be located in a `<molgenis-module>/src/main/frontend` directory.

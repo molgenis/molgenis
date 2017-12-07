@@ -6,6 +6,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -155,7 +156,7 @@ public class QueryGenerator
 			case NOT:
 				throw new MolgenisQueryException(format("Unexpected query operator [%s]", queryOperator.toString()));
 			default:
-				throw new MolgenisQueryException(format("Unknown query operator [%s]", queryOperator.toString()));
+				throw new UnexpectedEnumException(queryOperator);
 		}
 	}
 
@@ -239,7 +240,7 @@ public class QueryGenerator
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -287,7 +288,7 @@ public class QueryGenerator
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -342,7 +343,7 @@ public class QueryGenerator
 							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.FUZZY_MATCH
 									+ "]");
 				default:
-					throw new RuntimeException("Unknown data type [" + dataType + "]");
+					throw new UnexpectedEnumException(dataType);
 			}
 		}
 		return queryBuilder;
@@ -392,7 +393,7 @@ public class QueryGenerator
 							QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"), ScoreMode.Max);
 					break;
 				default:
-					throw new RuntimeException("Unknown data type [" + dataType + "]");
+					throw new UnexpectedEnumException(dataType);
 			}
 		}
 		return queryBuilder;
@@ -468,7 +469,7 @@ public class QueryGenerator
 				throw new MolgenisQueryException(
 						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.IN + "]");
 			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+				throw new UnexpectedEnumException(dataType);
 		}
 		return QueryBuilders.constantScoreQuery(queryBuilder);
 	}
@@ -510,7 +511,7 @@ public class QueryGenerator
 				throw new UnsupportedOperationException(
 						format("Unsupported data type [%s] for operator [%s]", attrType, LIKE));
 			default:
-				throw new RuntimeException("Unknown data type [" + attrType + "]");
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -593,7 +594,7 @@ public class QueryGenerator
 			case SHOULD:
 				throw new MolgenisQueryException(format("Illegal query rule operator [%s]", operator.toString()));
 			default:
-				throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
+				throw new UnexpectedEnumException(operator);
 		}
 
 		return QueryBuilders.constantScoreQuery(nestedQueryBuilder(attributePath, filterBuilder));
@@ -662,7 +663,7 @@ public class QueryGenerator
 				throw new MolgenisQueryException(
 						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.SEARCH + "]");
 			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+				throw new UnexpectedEnumException(dataType);
 		}
 	}
 
@@ -706,7 +707,7 @@ public class QueryGenerator
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -739,7 +740,7 @@ public class QueryGenerator
 			case XREF:
 				throw new MolgenisQueryException("Range query not allowed for type [" + dataType + "]");
 			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+				throw new UnexpectedEnumException(dataType);
 		}
 	}
 
@@ -856,7 +857,7 @@ public class QueryGenerator
 			case COMPOUND:
 				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 }

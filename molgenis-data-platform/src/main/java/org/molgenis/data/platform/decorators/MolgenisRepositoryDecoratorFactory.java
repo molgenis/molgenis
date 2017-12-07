@@ -34,7 +34,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final AggregateAnonymizer aggregateAnonymizer;
 	private final AppSettings appSettings;
 	private final DataService dataService;
-	private final ExpressionValidator expressionValidator;
 	private final SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory;
@@ -49,7 +48,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
-			AppSettings appSettings, DataService dataService, ExpressionValidator expressionValidator,
+			AppSettings appSettings, DataService dataService,
 			SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			IndexActionRegisterService indexActionRegisterService,
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
@@ -63,7 +62,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.aggregateAnonymizer = requireNonNull(aggregateAnonymizer);
 		this.appSettings = requireNonNull(appSettings);
 		this.dataService = requireNonNull(dataService);
-		this.expressionValidator = requireNonNull(expressionValidator);
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
 		this.indexedRepositoryDecoratorFactory = requireNonNull(indexedRepositoryDecoratorFactory);

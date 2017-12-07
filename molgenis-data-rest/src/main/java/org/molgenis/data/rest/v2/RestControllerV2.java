@@ -21,6 +21,7 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -861,7 +862,7 @@ public class RestControllerV2
 						responseData.put(attrName, entity.getLong(attrName));
 						break;
 					default:
-						throw new RuntimeException("Unknown data type [" + dataType + "]");
+						throw new UnexpectedEnumException(dataType);
 				}
 			}
 		}

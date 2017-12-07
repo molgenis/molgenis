@@ -3,6 +3,7 @@ package org.molgenis.data.cache.l3;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -55,6 +56,11 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private AttributeFactory attributeFactory;
+
+	public L3CacheTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeClass
 	public void beforeClass()

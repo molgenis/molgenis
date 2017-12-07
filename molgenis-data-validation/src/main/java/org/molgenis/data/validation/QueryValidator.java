@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.util.MolgenisDateFormat;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -110,7 +111,7 @@ public class QueryValidator
 				queryRule.getNestedRules().forEach(nestedQueryRule -> validateQueryRule(nestedQueryRule, entityType));
 				break;
 			default:
-				throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
+				throw new UnexpectedEnumException(operator);
 		}
 	}
 
@@ -175,7 +176,7 @@ public class QueryValidator
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Attribute [%s] type [%s] is not allowed", attr.getName(), attrType.toString())));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 		return value;
 	}

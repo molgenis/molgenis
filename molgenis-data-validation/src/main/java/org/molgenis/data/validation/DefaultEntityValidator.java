@@ -49,7 +49,7 @@ public class DefaultEntityValidator implements EntityValidator
 			Set<ConstraintViolation> entityViolations = entityAttributesValidator.validate(entity, meta);
 			for (ConstraintViolation entityViolation : entityViolations)
 			{
-				entityViolation.setRownr(rownr);
+				entityViolation.setRowNr(rownr);
 				violations.add(entityViolation);
 			}
 		}
@@ -69,16 +69,16 @@ public class DefaultEntityValidator implements EntityValidator
 		{
 			if (!attr.isNillable() && !attr.equals(meta.getIdAttribute()) && !attr.isAuto())
 			{
-				long rownr = 0;
+				long rowNr = 0;
 				for (Entity entity : entities)
 				{
-					rownr++;
+					rowNr++;
 					if (mustDoNotNullCheck(meta, attr, entity) && entity.get(attr.getName()) == null)
 					{
 						String message = String.format(
 								"The attribute '%s' of entity '%s' with key '%s' can not be null.", attr.getName(),
 								meta.getId(), entity.getString(meta.getLabelAttribute().getName()));
-						violations.add(new ConstraintViolation(message, null, entity, attr, meta, rownr));
+						violations.add(new ConstraintViolation(message, rowNr));
 					}
 				}
 			}
@@ -146,7 +146,7 @@ public class DefaultEntityValidator implements EntityValidator
 											"The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
 											attr.getName(), meta.getId(),
 											entity.getString(meta.getLabelAttribute().getName()), value);
-									violations.add(new ConstraintViolation(message, value, entity, attr, meta, null));
+									violations.add(new ConstraintViolation(message));
 								}
 
 								found++;

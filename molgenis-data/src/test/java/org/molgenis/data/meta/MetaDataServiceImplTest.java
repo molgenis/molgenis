@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -50,6 +51,11 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 	private PackagePersister packagePersister;
 
 	private MetaDataServiceImpl metaDataServiceImpl;
+
+	public MetaDataServiceImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

@@ -11,6 +11,7 @@ import org.molgenis.data.elasticsearch.AggregateUtils;
 import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -263,7 +264,7 @@ class AggregationGenerator
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+				throw new UnexpectedEnumException(dataType);
 		}
 	}
 }

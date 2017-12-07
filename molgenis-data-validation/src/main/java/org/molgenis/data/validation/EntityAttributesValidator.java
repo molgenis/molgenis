@@ -8,6 +8,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -111,7 +112,7 @@ public class EntityAttributesValidator
 					// no op
 					break;
 				default:
-					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+					throw new UnexpectedEnumException(attrType);
 			}
 
 			if (violation != null)
@@ -448,7 +449,7 @@ public class EntityAttributesValidator
 			message += format("Value must be less than or equal to %d characters", maxLength);
 		}
 
-		return new ConstraintViolation(message, entity.get(attribute.getName()), entity, attribute, entityType, null);
+		return new ConstraintViolation(message);
 	}
 
 	private ConstraintViolation createConstraintViolation(Entity entity, Attribute attribute, EntityType entityType,
@@ -461,7 +462,7 @@ public class EntityAttributesValidator
 				entity.getLabelValue(), entityType.getId());
 		fullMessage += " " + message;
 
-		return new ConstraintViolation(fullMessage, dataValue, entity, attribute, entityType, null);
+		return new ConstraintViolation(fullMessage);
 	}
 
 	private Object getDataValuesForType(Entity entity, Attribute attribute)

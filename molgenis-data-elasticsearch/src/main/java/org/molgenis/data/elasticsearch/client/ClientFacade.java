@@ -40,6 +40,7 @@ import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.exception.IndexAlreadyExistsException;
 import org.molgenis.data.index.exception.IndexException;
 import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -684,7 +685,7 @@ public class ClientFacade implements Closeable
 				docWriteRequest = Requests.deleteRequest(indexName).type(indexName).id(documentId);
 				break;
 			default:
-				throw new RuntimeException(format("Unknown document operation '%s'", documentAction.getOperation()));
+				throw new UnexpectedEnumException(documentAction.getOperation());
 		}
 		return docWriteRequest;
 	}

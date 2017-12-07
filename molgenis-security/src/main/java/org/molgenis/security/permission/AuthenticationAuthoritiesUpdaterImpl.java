@@ -5,6 +5,7 @@ import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationToken;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationToken;
 import org.springframework.security.access.intercept.RunAsUserToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,12 +56,48 @@ public class AuthenticationAuthoritiesUpdaterImpl implements AuthenticationAutho
 			RunAsUserToken runAsUserToken = (RunAsUserToken) authentication;
 			newAuthentication = new RunAsUserTokenDecorator(runAsUserToken, updatedAuthorities);
 		}
+		else if (authentication instanceof AnonymousAuthenticationToken)
+		{
+			AnonymousAuthenticationToken anonymousAuthenticationToken = (AnonymousAuthenticationToken) authentication;
+			newAuthentication = new AnonymousAuthenticationTokenDecorator(anonymousAuthenticationToken,
+					updatedAuthorities);
+		}
 		else
 		{
 			throw new SessionAuthenticationException(
 					format("Unknown authentication type '%s'", authentication.getClass().getSimpleName()));
 		}
 		return newAuthentication;
+	}
+
+	private static final class AnonymousAuthenticationTokenDecorator extends AnonymousAuthenticationToken
+	{
+		private final AnonymousAuthenticationToken anonymousAuthenticationToken;
+
+		private AnonymousAuthenticationTokenDecorator(AnonymousAuthenticationToken anonymousAuthenticationToken,
+				List<GrantedAuthority> authorities)
+		{
+			super("dummyKey", anonymousAuthenticationToken.getPrincipal(), authorities);
+			this.anonymousAuthenticationToken = anonymousAuthenticationToken;
+		}
+
+		@Override
+		public int getKeyHash()
+		{
+			return anonymousAuthenticationToken.getKeyHash();
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			return super.equals(obj);
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return super.hashCode();
+		}
 	}
 
 	private static final class RunAsUserTokenDecorator extends RunAsUserToken

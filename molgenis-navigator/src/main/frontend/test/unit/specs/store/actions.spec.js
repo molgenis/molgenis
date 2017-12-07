@@ -106,8 +106,7 @@ describe('actions', () => {
           'id': '1',
           'type': 'entity',
           'label': 'test',
-          'description': 'test',
-          'isRoot': true
+          'description': 'test'
         }
       ]
 
@@ -148,16 +147,14 @@ describe('actions', () => {
         'id': '1',
         'type': 'entity',
         'label': 'test',
-        'description': 'test',
-        'isRoot': true
+        'description': 'test'
       }
 
       const entity2 = {
         'id': '2',
         'type': 'entity',
         'label': 'test',
-        'description': 'test',
-        'isRoot': true
+        'description': 'test'
       }
 
       const response = {
@@ -210,11 +207,6 @@ describe('actions', () => {
           {
             id: '2',
             name: 'package2'
-          },
-          {
-            id: '3',
-            name: 'package3',
-            parent: '1'
           }
         ]
       }
@@ -224,20 +216,13 @@ describe('actions', () => {
           {
             id: '1',
             label: 'entity1'
-          },
-          {
-            id: '2',
-            label: 'entity2',
-            package: {
-              id: '123'
-            }
           }
         ]
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(packageResponse)
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false')).thenResolve(entityResponse)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""')).thenResolve(packageResponse)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""')).thenResolve(entityResponse)
       td.replace(api, 'get', get)
 
       const packages = [
@@ -265,22 +250,14 @@ describe('actions', () => {
       const error = 'failed to get'
 
       const entityResponse = {
-        items: [
-          {
-            id: '1',
-            label: 'entity1',
-            package: {
-              id: 123
-            }
-          }
-        ]
+        items: []
       }
 
       const entities = []
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenReject(error)
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false')).thenResolve(entityResponse)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""')).thenReject(error)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""')).thenResolve(entityResponse)
       td.replace(api, 'get', get)
 
       const options = {

@@ -4,6 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.quality.Strictness;
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
@@ -68,6 +69,11 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 
 	@Autowired
 	private AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater;
+
+	public PermissionSystemServiceImplTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

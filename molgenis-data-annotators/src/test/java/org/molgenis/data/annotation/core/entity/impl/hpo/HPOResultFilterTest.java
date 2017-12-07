@@ -46,7 +46,7 @@ public class HPOResultFilterTest extends AbstractMolgenisSpringTest
 	@Test
 	public void filterResults()
 	{
-		HpoResultFilter filter = new HpoResultFilter(entityTypeFactory, attributeFactory, hpoAnnotator);
+		HpoResultFilter filter = new HpoResultFilter(entityTypeFactory, hpoAnnotator);
 
 		EntityType resultEntityType = entityTypeFactory.create("result");
 		resultEntityType.addAttribute(hpoAnnotator.getIdsAttr());

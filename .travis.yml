@@ -5,9 +5,9 @@ dist: trusty
 # Caches downloaded libraries between builds
 cache:
   directories:
-    - node_modules
     - '$HOME/.m2/repository'
     - '$HOME/.sonar/cache'
+    - '$HOME/Library/Caches/Yarn'
 services:
   - postgresql
 addons:

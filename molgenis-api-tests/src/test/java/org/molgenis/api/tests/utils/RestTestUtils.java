@@ -5,14 +5,16 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.molgenis.auth.GroupMemberMetaData;
+import org.molgenis.auth.GroupMetaData;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +29,10 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.auth.GroupMemberMetaData.USER;
+import static org.molgenis.auth.GroupMetaData.NAME;
+import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -102,7 +108,24 @@ public class RestTestUtils
 				   .body(createTestUserBody.toJSONString())
 				   .when()
 				   .post("api/v1/sys_sec_User");
+
+			addToAllUsersGroup(adminToken, userName);
 		}
+	}
+
+	private static void addToAllUsersGroup(String adminToken, String userName)
+	{
+
+		JSONObject groupMembership = new JSONObject();
+		groupMembership.put(USER, getUserId(adminToken, userName));
+		groupMembership.put(GroupMemberMetaData.GROUP,
+				getEntityTypeId(adminToken, NAME, ALL_USER_GROUP, GroupMetaData.GROUP));
+
+		given().header(X_MOLGENIS_TOKEN, adminToken)
+			   .contentType(APPLICATION_JSON)
+			   .body(groupMembership.toJSONString())
+			   .when()
+			   .post("api/v1/" + GROUP_MEMBER);
 	}
 
 	/**
@@ -129,6 +152,47 @@ public class RestTestUtils
 		String importJobURLString = given().multiPart(file)
 										   .param("file")
 										   .param("action", "ADD_UPDATE_EXISTING")
+										   .header(X_MOLGENIS_TOKEN, adminToken)
+										   .post("plugin/importwizard/importFile")
+										   .then()
+										   .extract()
+										   .asString();
+
+		// Remove the leading '/' character and leading and trailing '"' characters
+		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
+
+		LOG.info("############ " + importJobURL);
+		await().pollDelay(500, MILLISECONDS)
+			   .atMost(5, MINUTES)
+			   .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
+		LOG.info("Import completed");
+	}
+
+	/**
+	 * Import emx file using add/update.
+	 * <p>
+	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 *
+	 * @param adminToken to use for login
+	 * @param fileName   the file to upload
+	 */
+	public static void uploadVCF(String adminToken, String fileName, String entityName)
+	{
+		URL resourceUrl = Resources.getResource(RestTestUtils.class, fileName);
+		File file = null;
+		try
+		{
+			file = new File(new URI(resourceUrl.toString()).getPath());
+		}
+		catch (URISyntaxException e)
+		{
+			LOG.error(e.getMessage());
+		}
+
+		String importJobURLString = given().multiPart(file)
+										   .param("file")
+										   .param("action", "ADD")
+										   .param("entityName", entityName)
 										   .header(X_MOLGENIS_TOKEN, adminToken)
 										   .post("plugin/importwizard/importFile")
 										   .then()
@@ -192,10 +256,10 @@ public class RestTestUtils
 		try
 		{
 			jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(
-					new FileReader(Resources.getResource(RestTestUtils.class, fileName).getFile()));
+					new InputStreamReader(RestTestUtils.class.getResourceAsStream(fileName), Charset.forName("UTF-8")));
 
 		}
-		catch (ParseException | FileNotFoundException e)
+		catch (ParseException e)
 		{
 			LOG.error("Unable to readJsonFile(" + fileName + ")");
 			LOG.error(e.getMessage());
@@ -231,7 +295,7 @@ public class RestTestUtils
 				singletonList(of("field", attribute, "operator", "EQUALS", "value", value)));
 		JSONObject body = new JSONObject(query);
 
-		return given().header("x-molgenis-token", adminToken)
+		return given().header(X_MOLGENIS_TOKEN, adminToken)
 					  .contentType(APPLICATION_JSON)
 					  .queryParam("_method", "GET")
 					  .body(body.toJSONString())
@@ -255,7 +319,7 @@ public class RestTestUtils
 		String right = "ROLE_PLUGIN_READ_" + plugin;
 		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
 
-		given().header("x-molgenis-token", adminToken)
+		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(body.toJSONString())
 			   .when()
@@ -290,7 +354,7 @@ public class RestTestUtils
 			String right = "ROLE_ENTITY_" + permission + "_" + entity;
 			JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
 
-			given().header("x-molgenis-token", adminToken)
+			given().header(X_MOLGENIS_TOKEN, adminToken)
 				   .contentType(APPLICATION_JSON)
 				   .body(body.toJSONString())
 				   .when()
@@ -307,7 +371,7 @@ public class RestTestUtils
 	{
 		if (adminToken != null && packageName != null)
 		{
-			given().header("x-molgenis-token", adminToken)
+			given().header(X_MOLGENIS_TOKEN, adminToken)
 				   .contentType(APPLICATION_JSON)
 				   .delete("api/v1/sys_md_Package/" + packageName);
 		}
@@ -322,9 +386,19 @@ public class RestTestUtils
 	{
 		if (adminToken != null && entityId != null)
 		{
-			given().header("x-molgenis-token", adminToken)
+			given().header(X_MOLGENIS_TOKEN, adminToken)
 				   .contentType(APPLICATION_JSON)
 				   .delete("api/v1/" + entityId + "/meta");
+		}
+	}
+
+	public static void removeEntityFromTable(String adminToken, String entityTypeId, String entityId)
+	{
+		if (adminToken != null && entityTypeId != null && entityId != null)
+		{
+			given().header(X_MOLGENIS_TOKEN, adminToken)
+				   .contentType(APPLICATION_JSON)
+				   .delete("api/v1/" + entityTypeId + "/" + entityId);
 		}
 	}
 
@@ -337,7 +411,7 @@ public class RestTestUtils
 	{
 		if (adminToken != null && jobId != null)
 		{
-			given().header("x-molgenis-token", adminToken)
+			given().header(X_MOLGENIS_TOKEN, adminToken)
 				   .contentType(APPLICATION_JSON)
 				   .delete("api/v2/sys_job_OneClickImportJobExecution/" + jobId);
 		}

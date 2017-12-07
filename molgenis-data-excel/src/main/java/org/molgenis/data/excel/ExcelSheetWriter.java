@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,6 +92,8 @@ public class ExcelSheetWriter extends AbstractWritable
 					case ATTRIBUTE_NAMES:
 						cell.setCellValue(AbstractCellProcessor.processCell(attribute.getName(), true, cellProcessors));
 						break;
+					default:
+						throw new UnexpectedEnumException(attributeWriteMode);
 				}
 			}
 
@@ -126,7 +129,7 @@ public class ExcelSheetWriter extends AbstractWritable
 						value = labelValue != null ? labelValue.toString() : null;
 						break;
 					default:
-						throw new RuntimeException("Unknown write mode [" + getEntityWriteMode() + "]");
+						throw new UnexpectedEnumException(getEntityWriteMode());
 				}
 			}
 			else

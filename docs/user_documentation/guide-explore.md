@@ -33,6 +33,9 @@ This is a popup screen that allows you to add filters for different attributes i
 
 ![Dataexplorer filter wizard](../images/dataexplorer/filterwizard.png?raw=true, "dataexplorer/filterwizard")
 
+Any filters you use are stored in the URL as an RSQL query. This allows you to bookmark pages with certain columns and filters selected inside a specific table.
+For more information on RSQL operators, you can take a look at our [RSQL operator](../developer_documentation/ref-RSQL.md) documentation.
+
 # Different views
     
 ![Dataexplorer tabs](../images/dataexplorer/dataexplorer_tabs.png?raw=true, "dataexplorer/dataexplorer_tabs")
@@ -55,255 +58,7 @@ Same as the add row button, but with prefilled inputs to allow you to edit a row
 - Inspect row:
 This button will open a form with a custom made report for this row. With the right permissions, different reports can be created using the FreemarkerTemplate entity.
 - Delete row:
-This button can be used to remove a row from the entity.
-
-# Metadata editing (Since MOLGENIS 2.0)
-
-A new feature of MOLGENIS 2.0 is the "Metadata editing capabilities". All data, including metadata, can be created, read, updated and deleted, with certain restrictions. The metadata editing capabilities will be discussed in this part of the documentation.
-
-## Metadata main entities
-
-There are three main metadata entities. These entities contain all info about the entities, attributes and packages in MOLGENIS, respectively EntityType, Attribute and Package.
-
-###EntityType
-
-EntityType contains all data about the entities in MOLGENIS. Each row in this table represents an entity in MOLGENIS.
-
-####Editing capabilities
-* Create:
-  * Yes, when metadata is configured correctly in the EMX and is loaded via the data uploader.
-  * An entity cannot be created via the forms. 
-* Read: 
-  * Yes 
-* Update:
-  * Updatable fields:
-    * Label
-    * Description
-    * Abstract 
-    * Tags
-    * i18n fields
-* Delete: 
-  * Possible for non-system entities.
-
-###Attribute
-
-Attribute contains all data about the attributes in MOLGENIS. Each row in this table represents one attribute of one MOLGENIS entity.
-
-####Editing capabilities
-* Create: 
-  * Yes, for non-system entities.
-  * NOTE: When creating an attribute for an existing enitity, the option Nillable cannot be set to true.
-* Read: 
-  * Yes 
-* Update:
-  * Yes, for non-system entities:
-  * Updatable fields:
-    * Sequence number
-    * Data type (See "conversion list of data types")
-    * ID attribute 
-    * Label attribute
-    * Lookup attribute index
-    * Attribute parent
-    * Attribute parts
-    * Referenced entity
-    * Order by
-    * Expression
-    * Nillable
-    * Auto
-    * Visible
-    * Label
-    * Description
-    * Aggregateable
-    * Enum values
-    * Range min
-    * Range max
-    * Read-only
-    * Unique
-    * Tags
-    * Visible expression
-    * Validation expression 
-    * Default value
-    * i18n fields
-* Delete: 
-  * Yes, for non-system entities
-
-####Conversion list of data types
-This list describes the allowed conversion of data types in the metadata edit, and also some extra info and motivation.
-
-#####BOOL
-* Allowed: 
-  * STRING
-  * TEXT
-  * INT
-
-#####DATE
-* Allowed: 
-  * STRING
-  * TEXT
-  * DATE_TIME
-* Tip: 
-  * If you want to do something with your dates, convert them to STRING first and later to another data type. 
-
-#####DATE_TIME
-* Allowed: 
-  * STRING 
-  * TEXT
-  * DATE
-
-#####INT
-* Allowed: 
-  * STRING
-  * TEXT
-  * DECIMAL
-  * LONG
-  * BOOL
-  * ENUM
-  * XREF
-  * CATEGORICAL
-* Tip:
-  * Conversion to SCRIPT or HTML can be done using the STRING route.
-
-#####LONG
-* Allowed: 
-  * STRING
-  * TEXT
-  * INT
-  * DECIMAL
-  * ENUM
-  * XREF
-  * CATEGORICAL
-* Tip:
-  * Conversion to SCRIPT or HTML can be done using the STRING route.
-
-#####DECIMAL
-* Allowed: 
-  * STRING
-  * TEXT
-  * INT
-  * LONG
-  * ENUM
-* Tip: 
-  * Conversion to SCRIPT or HTML can be done using the STRING route.
-
-#####EMAIL
-* Allowed: 
-  * STRING
-  * TEXT
-  * XREF
-  * CATEGORICAL
-* Tip: 
-  * EMAIL format can never be numeric or a date. 
-  * XREF or CATEGORICAL are a far better alternative for ENUMs.
-
-#####HYPERLINK
-* Allowed: 
-  * STRING
-  * TEXT
-  * XREF
-  * CATEGORICAL
-* Tip: 
-  * HYPERLINK format can never be numeric or a date. 
-  * XREF or CATEGORICAL are a far better alternative for ENUMs.
-
-#####HTML
-* Allowed: 
-  * STRING
-  * TEXT
-  * SCRIPT
-* Tip: 
-  * If HTML is properly used, you won't be able to convert it to anything else but text or script.
-
-#####CATEGORICAL
-* Allowed:
-  * STRING
-  * INT
-  * LONG
-  * XREF
-* Tip: 
-  * IDs can only be of type STRING, INT, LONG, EMAIL and HYPERLINK. 
-
-#####XREF 
-* Allowed: 
-  * STRING
-  * INT
-  * LONG
-  * CATEGORICAL
-* Tip: 
-  * IDs can only be of type STRING, INT, LONG, EMAIL and HYPERLINK. 
-
-#####MREF
-* Allowed: 
-  * CATEGORICAL_MREF
-
-#####CATEGORICAL_MREF
-* Allowed: 
-  * MREF
-
-#####SCRIPT
-* Allowed: 
-  * STRING
-  * TEXT
-
-#####STRING
-* Allowed: 
-  * BOOL
-  * DATE
-  * DATE_TIME
-  * DECIMAL
-  * INT
-  * LONG
-  * HTML
-  * SCRIPT
-  * TEXT
-  * ENUM
-  * COMPOUND
-
-#####TEXT
-* Allowed: 
-  * BOOL
-  * DATE
-  * DATE_TIME
-  * DECIMAL
-  * INT
-  * LONG
-  * HTML
-  * SCRIPT
-  * STRING
-  * ENUM
-  * COMPOUND
-
-#####ENUM
-* Allowed: 
-  * STRING
-  * INT
-  * LONG
-  * TEXT
-
-#####COMPOUND
-* Allowed: 
-  * STRING
-
-#####FILE
-* Allowed: NONE
-
-#####ONE_TO_MANY
-* Allowed: NONE
-
-###Package
-
-Package contains all data about the packages in MOLGENIS. Each row in this table represents a package in MOLGENIS.
-
-####Editing capabilities
-* Create: Yes
-* Read: Yes 
-* Update: Yes, for non-system entities
-  * Label
-  * Description
-  * Tags
-* Delete: 
-  * Yes, for non-system entities
-  * `Important!` Deleting a package will result in deleting all children (packages entities and attributes).
- 
+This button can be used to remove a row from the entity. 
 
 ### System packages, system entities and system attributes
 
@@ -313,9 +68,6 @@ System packages, system entities and system attributes are available in MOLGENIS
 
 At the bottom right of each table, there is a download button. This button allows you to save the data to a CSV or XLSX file. The XLSX download is limited to 500000 values to prevent performance issues. 
 Depending on the purpose of the download, identifiers or labels can be used as column headers.
-Another button, next to the download button, will allow you to send your data to a [galaxy](https://galaxyproject.org/ "Galaxy") server.
-
-![Dataexplorer download](../images/dataexplorer/download_export.png?raw=true, "dataexplorer/download_export")
 
 # Genome browser
   
@@ -326,7 +78,7 @@ MOLGENIS provides genome browsing using the[Dalliance](https://www.biodalliance.
 If the genome browser should be shown at all in a MOLGENIS instance, the browser can be configured via the data explorer settings.
 
 By default entities containing attribute combinations specified in the "GenomeBrowser Attributes" table are shown.
-It is possible to add/remove or update those entities to change which entites should show the genome browser.
+It is possible to add/remove or update those entities to change which entities should show the genome browser.
 
 It is also possible to add specific configuration for an entity by adding a row in the "GenomeBrowser Settings" table:
 
@@ -378,7 +130,7 @@ Click any column header in the table to sort the data based on that column, clic
 Click one of the lines in the table to zoom to the position of this variant in the genome browser.
 Click the symbol in front of the "SAMPLES" column header to show the columns belonging to the samples.
 
-Click the magnifying glass in front of the dataline, to show a report for that line. The default report just shows all attribute values in a structured way. However, as stated above, all kinds of reports can be added at runtime.
+Click the magnifying glass in front of the data line, to show a report for that line. The default report just shows all attribute values in a structured way. However, as stated above, all kinds of reports can be added at runtime.
 
 # Inline editing
 
@@ -430,28 +182,6 @@ You now get a table representing the amount of samples in both biobanks per type
 Finally, select "patientid" in the third dropdown, the distinct attribute. 
 The table will update to show you how many patients with at least one sample of a specific type are available in a biobank.
 
-# Charts
-For the chart capabilities of MOLGENIS we use the [Highcharts](http://www.highcharts.com "Highcharts") library.
-
-MOLGENIS currently offers two types of plots for your data, the scatter plot and the box plot.
-
-![Dataexplorer charts](../images/dataexplorer/charts.png?raw=true, "dataexplorer/charts")
-
-## scatter plot [Scatter_plot](https://en.wikipedia.org/wiki/Scatter_plot "Scatter plot")
-![Dataexplorer charts create scatterplot](../images/dataexplorer/create scatter plot.png?raw=true, "dataexplorer/scatterplot")
-
-For the scatterplot, 2 attributes are selected to make the plot. Optionally, a third attribute can be selected to split the dots in groups, using different shapes and colours per group. You can also provide a title for your plot.
-
-![Dataexplorer charts scatterplot](../images/dataexplorer/scatter plot.png?raw=true, "dataexplorer/scatterplot")
-
-## box plot [Box_plot](https://en.wikipedia.org/wiki/Box_plot "Box plot")
-
-![Dataexplorer aggregate create box plot](../images/dataexplorer/create box plot.png?raw=true, "dataexplorer/createboxplot")
-
-For the box plot, 1 attribute (feature) is to be selected to make the plot. Optionally, a second attribute can be selected to split the dots in groups. You can also provide a title for your plot.
-
-![Dataexplorer charts box plot](../images/dataexplorer/boxplot.png?raw=true, "dataexplorer/boxplot")
-
 # Reports
 The reports functionality is made for overriding the default instance view or to add an instances tab in the Data-explorer. Overriding the views or adding a tab is possible by creating a new `FreemarkerTemplate` entity with the right name convention. This short tutorial will show you how to achieve this.
 
@@ -462,7 +192,7 @@ There are two ways to create your own reports:
 
 You will need:
 
-1. A data set: "Advanced data example" ([download](/data/advanced_data_example_v20151104.xlsx)). Upload this dataset into your MOLGENIS instance, see the [Upload guide](guide-upload).
+1. A data set: "Advanced data example" ([download](/data/advanced_data_example_v20171206.xlsx)). Upload this dataset into your MOLGENIS instance, see the [Upload guide](guide-upload).
 
 ###### Override the entity view
 
@@ -528,31 +258,3 @@ Value:
 	![Entities report settings](../images/reports/entities-report-correct-settings.png?raw=true, "Entities report settings")
 4. Refresh the page and repeat step 1.
 5. The result:![Custom entities report](../images/reports/custom-entities-report.png?raw=true, "Custom entities report")
-
-
-# Model registry
-The model registry is a module that can display the entire meta data model of a data set. This means that you do not look at the actual data, but you can see how the data is modelled. This is useful for detecting errors in your model, or if you want to base your own model on something that already exists.
-
-![Model registry screen 1](../images/model_registry_screen1.png?raw=true, "model registry screen 1")
-
-The following paragraphs will explain how the model registry works, but it is more fun to learn how it works with some actual models. So for this part, you can go to [The BioMedBridges](https://molgenis08.target.rug.nl/menu/main/standardsregistry) website, and navigate to the model registry module. You do not even have to log in!
-
-Now that we have some actual models on our screen, let's get started by finding some models. I know! Why don't we search for the EMX model? You should be familiar with it since you probably imported your own data already. In the main model registry screen, search for EMX. You should get one model back, namely emx (Entity Model eXtensible). As you can see, there are a few links mentioned as well. These are *Tags*, if you do not know the term, I suggest you look at the [Upload guide](guide-upload) again. The label beneath the Tags tells you why this model was returned for your search.
-
-This part is not telling us much about the content of the EMX model yet, so let's see what it holds! Click the *View Model Details* button to get to the details page.
-
-![Model registry screen 2](../images/model_registry_screen2.png?raw=true, "model registry screen 2")
-
-Here, you can see a tree on the left and a large middle section containing all the meta data. You can also view an UML diagram of your entire package, and even print out a document containing the overview of your model.
-
-**The tree**  
-The tree is a simplified overview of all the tables, or entities, inside a package. Clicking on the Molgenis Field Types entity for example, will take you to the detailed description of that entity. You can also expand an entity, to see all its attributes. Clicking an attribute will take you to the description of that attribute.
-
-**The details**  
-The details for every entity and attribute is an overview of data types, constraints, default values, and descriptions. 
-
-**UML**
-Navigate to the UML tab to see a UML representation of your model. You can zoom in and out using the + and - buttons. You can also drag around the different boxes to rearrange the diagram.
-
-**Printing**
-You can print your model to review it on paper, by pressing the print button at the top right of the screen.

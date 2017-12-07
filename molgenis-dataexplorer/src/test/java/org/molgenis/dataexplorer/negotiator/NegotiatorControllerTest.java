@@ -5,6 +5,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
@@ -16,38 +17,37 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.test.AbstractMockitoTest;
-import org.molgenis.util.GsonConfig;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.collections.Lists;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
+import java.util.stream.Stream;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyList;
+import static java.util.Locale.ENGLISH;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.*;
 import static org.testng.Assert.*;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = { GsonConfig.class })
-public class NegotiatorControllerTest extends AbstractMockitoTest
+public class NegotiatorControllerTest
 {
-	private NegotiatorController controller;
+	private NegotiatorController negotiatorController;
+
 	@Mock
 	private RestTemplate restTemplate;
 	@Mock
@@ -69,13 +69,13 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 	@Mock
 	private Attribute biobackAttr;
 	@Mock
-	private Attribute enabledAttr;
-	@Mock
 	private Query<Entity> molgenisQuery;
 	@Mock
 	private LanguageService languageService;
 	@Mock
 	private MessageSource messageSource;
+	@Mock
+	private JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	@Captor
 	private ArgumentCaptor<HttpEntity<NegotiatorQuery>> queryCaptor;
@@ -83,149 +83,179 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		initMocks(this);
 
-		controller = new NegotiatorController(restTemplate, permissionService, dataService, rsqlQueryConverter,
-				languageService);
-		Query<NegotiatorEntityConfig> query = new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMeta.ENTITY, "blah");
-
-		when(dataService.getEntityType("blah")).thenReturn(entityType);
+		/* Negotiator config mock */
+		Query<NegotiatorEntityConfig> query = new QueryImpl<NegotiatorEntityConfig>().eq(
+				NegotiatorEntityConfigMeta.ENTITY, "molgenis_id_1");
 		when(dataService.findOne(NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query,
 				NegotiatorEntityConfig.class)).thenReturn(negotiatorEntityConfig);
-		when(negotiatorEntityConfig.getNegotiatorConfig()).thenReturn(negotiatorConfig);
-		when(rsqlQueryConverter.convert("*=q=MOLGENIS")).thenReturn(queryRsql);
-		when(queryRsql.createQuery(entityType)).thenReturn(molgenisQuery);
-		when(negotiatorEntityConfig.getEntity(NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class)).thenReturn(
-				collectionAttr);
+
 		when(collectionAttr.getName()).thenReturn("collectionAttr");
 		when(collectionAttr.getDataType()).thenReturn(AttributeType.STRING);
-		when(negotiatorEntityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class)).thenReturn(
-				biobackAttr);
+		doReturn(collectionAttr).when(negotiatorEntityConfig).getEntity(COLLECTION_ID, Attribute.class);
+
 		when(biobackAttr.getName()).thenReturn("biobackAttr");
 		when(biobackAttr.getDataType()).thenReturn(AttributeType.STRING);
-		when(negotiatorEntityConfig.getEntity(NegotiatorEntityConfigMeta.ENABLED_ATTR, Attribute.class)).thenReturn(
-				enabledAttr);
-		when(enabledAttr.getName()).thenReturn("enabledAttr");
-		when(languageService.getBundle()).thenReturn(new MessageSourceResourceBundle(messageSource, Locale.ENGLISH));
-		when(messageSource.getMessage("dataexplorer_directory_no_rows", null, Locale.ENGLISH)).thenReturn("No Rows");
-		when(messageSource.getMessage("dataexplorer_directory_disabled", null, Locale.ENGLISH)).thenReturn(
-				"Disabled %s");
-		when(messageSource.getMessage("dataexplorer_directory_no_config", null, Locale.ENGLISH)).thenReturn(
-				"No Config");
+		doReturn(biobackAttr).when(negotiatorEntityConfig).getEntity(BIOBANK_ID, Attribute.class);
 
-		when(entityType.getLabelAttribute()).thenReturn(collectionAttr);
+		when(negotiatorEntityConfig.getString(ENABLED_EXPRESSION)).thenReturn("$(enabled).value()");
+		when(negotiatorEntityConfig.getNegotiatorConfig()).thenReturn(negotiatorConfig);
+
+		/* get EntityCollection mock */
+		when(entityType.getId()).thenReturn("molgenis_id_1");
+		when(dataService.getEntityType("molgenis_id_1")).thenReturn(entityType);
+		when(queryRsql.createQuery(entityType)).thenReturn(molgenisQuery);
+		when(rsqlQueryConverter.convert("*=q=MOLGENIS")).thenReturn(queryRsql);
+
+		/* Localization mock */
+		when(messageSource.getMessage("dataexplorer_directory_no_rows", null, ENGLISH)).thenReturn("No Rows");
+		when(messageSource.getMessage("dataexplorer_directory_disabled", null, ENGLISH)).thenReturn("Disabled %s");
+		when(messageSource.getMessage("dataexplorer_directory_no_config", null, ENGLISH)).thenReturn("No Config");
+		when(languageService.getBundle()).thenReturn(new MessageSourceResourceBundle(messageSource, ENGLISH));
+
+		negotiatorController = new NegotiatorController(restTemplate, permissionService, dataService,
+				rsqlQueryConverter, languageService, jsMagmaScriptEvaluator);
 	}
 
 	@Test
-	public void testExportToNegotiatorNoCollections() throws Exception
+	public void testValidateNegotiatorExport()
 	{
-		NegotiatorRequest negotiatorRequest = NegotiatorRequest.create("http://tester.test.tst", "blah", "*=q=MOLGENIS",
-				"human", "token");
-		NegotiatorQuery query = NegotiatorQuery.create("http://molgenis.org/controller/callback",
-				Lists.newArrayList(Collection.create("collId1", "biobankId1")), "Name contains Blah", "nToken");
+		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",
+				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+		Entity entity = mock(Entity.class);
+		String entityOneLabel = "Entity One";
+		when(entity.getLabelValue()).thenReturn(entityOneLabel);
+		when(entity.get("enabled")).thenReturn(true);
+
+		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entity));
+		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entity)).thenReturn(TRUE);
+
+		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
+		List<String> enabledCollections = Collections.singletonList(entityOneLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(true, "", enabledCollections, emptyList());
+
+		assertEquals(actual, expected);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No Config")
+	public void testValidateNegotiatorExportNoConfig()
+	{
+		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",
+				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+		Query<NegotiatorEntityConfig> query = new QueryImpl<NegotiatorEntityConfig>().eq(
+				NegotiatorEntityConfigMeta.ENTITY, "molgenis_id_1");
+
+		when(dataService.findOne(NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query,
+				NegotiatorEntityConfig.class)).thenReturn(null);
+
+		negotiatorController.validateNegotiatorExport(request);
+	}
+
+	@Test
+	public void testValidateNegotiatorExportEmptyCollections()
+	{
+		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",
+				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+		Entity entity = mock(Entity.class);
+		when(entity.getLabelValue()).thenReturn("Entity One");
+		when(entity.get("enabled")).thenReturn(true);
+
+		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.empty());
+
+		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
+		ExportValidationResponse expected = ExportValidationResponse.create(false, "No Rows");
+
+		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testValidateNegotiatorExportContainsDisabledCollections()
+	{
+		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",
+				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+		Entity entityEnabled = mock(Entity.class);
+		String entityOneLabel = "Entity One";
+		String entityDisabledLabel = "Entity Disabled";
+		when(entityEnabled.getLabelValue()).thenReturn(entityOneLabel);
+		when(entityEnabled.get("enabled")).thenReturn(true);
+
+		Entity entityDisabled = mock(Entity.class);
+		when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
+		when(entityDisabled.get("enabled")).thenReturn(false);
+
+		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entityEnabled, entityDisabled));
+
+		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityEnabled)).thenReturn(TRUE);
+		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
+
+		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
+		List<String> enabledCollections = Collections.singletonList(entityOneLabel);
+		List<String> disabledCollections = Collections.singletonList(entityDisabledLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(true, "Disabled 1", enabledCollections,
+				disabledCollections);
+
+		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testValidateNegotiatorExportAllCollectionsAreDisabled()
+	{
+		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",
+				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+		Entity entityDisabled = mock(Entity.class);
+		String entityDisabledLabel = "Entity Disabled";
+		when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
+		when(entityDisabled.get("enabled")).thenReturn(false);
+
+		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entityDisabled));
+
+		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
+
+		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
+		List<String> disabledCollections = Collections.singletonList(entityDisabledLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(false, "No Rows", emptyList(),
+				disabledCollections);
+
+		assertEquals(actual, expected);
+	}
+
+	@Test
+	public void testExportToNegotiator()
+	{
+		NegotiatorRequest request = NegotiatorRequest.create("http://molgenis.org", "molgenis_id_1", "*=q=MOLGENIS",
+				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
 
 		when(negotiatorConfig.getUsername()).thenReturn("username");
 		when(negotiatorConfig.getPassword()).thenReturn("password");
-		when(negotiatorConfig.getNegotiatorURL()).thenReturn("http://directory.com/postHere");
+		when(negotiatorConfig.getNegotiatorURL()).thenReturn("http://directory.com");
 
-		when(restTemplate.postForLocation(eq("http://directory.com/postHere"), queryCaptor.capture())).thenReturn(
+		when(restTemplate.postForLocation(eq("http://directory.com"), queryCaptor.capture())).thenReturn(
 				URI.create("http://directory.com/request/1280"));
-		ExportResponse expected = ExportResponse.create(false, "No Rows", "");
 
-		assertEquals(controller.exportToNegotiator(negotiatorRequest), expected);
-	}
+		String actual = negotiatorController.exportToNegotiator(request);
+		String expected = "http://directory.com/request/1280";
 
-	@Test
-	public void testExportToNegotiatorDisabledCollections() throws Exception
-	{
-		Entity entity1 = mock(Entity.class);
-		when(entity1.get("enabledAttr")).thenReturn("true");
-		when(entity1.getLabelValue()).thenReturn("label1");
-		when(entity1.get("collectionAttr")).thenReturn("coll1");
-		when(entity1.get("biobackAttr")).thenReturn("bio1");
-		when(entity1.get("enabledAttr")).thenReturn("true");
-		Entity entity2 = mock(Entity.class);
-		when(entity2.get("enabledAttr")).thenReturn(new Boolean(true));
-		when(entity2.getLabelValue()).thenReturn("label2");
-		when(entity2.get("collectionAttr")).thenReturn("coll2");
-		when(entity2.get("biobackAttr")).thenReturn("bio2");
-		when(entity2.get("enabledAttr")).thenReturn("false");
-
-		when(dataService.getEntityType("blah")).thenReturn(entityType);
-		List collections = new ArrayList();
-		collections.add(entity1);
-		collections.add(entity2);
-		when(entityType.getId()).thenReturn("blah");
-		when(dataService.findAll("blah", molgenisQuery)).thenReturn(collections.stream());
-
-		NegotiatorRequest negotiatorRequest = NegotiatorRequest.create("http://tester.test.tst", "blah", "*=q=MOLGENIS",
-				"human", "token");
-
-		when(negotiatorConfig.getUsername()).thenReturn("username");
-		when(negotiatorConfig.getPassword()).thenReturn("password");
-		when(negotiatorConfig.getNegotiatorURL()).thenReturn("http://directory.com/postHere");
-
-		ExportResponse expected = ExportResponse.create(false, "Disabled label2", "");
-
-		assertEquals(controller.exportToNegotiator(negotiatorRequest), expected);
-	}
-
-	@Test
-	public void testExportToNegotiator() throws Exception
-	{
-		Entity entity1 = mock(Entity.class);
-		when(entity1.get("enabledAttr")).thenReturn("true");
-		when(entity1.getLabelValue()).thenReturn("label1");
-		when(entity1.get("collectionAttr")).thenReturn("coll1");
-		when(entity1.get("biobackAttr")).thenReturn("bio1");
-		when(entity1.get("enabledAttr")).thenReturn(true);
-
-		Entity entity2 = mock(Entity.class);
-		when(entity2.get("enabledAttr")).thenReturn(new Boolean(true));
-		when(entity2.getLabelValue()).thenReturn("label2");
-		when(entity2.get("collectionAttr")).thenReturn("coll2");
-		when(entity2.get("biobackAttr")).thenReturn("bio2");
-		when(entity2.get("enabledAttr")).thenReturn("true");
-		when(dataService.getEntityType("blah")).thenReturn(entityType);
-		List collections = new ArrayList();
-		collections.add(entity1);
-		collections.add(entity2);
-		when(entityType.getId()).thenReturn("blah");
-		when(dataService.findAll("blah", molgenisQuery)).thenReturn(collections.stream());
-
-		NegotiatorRequest negotiatorRequest = NegotiatorRequest.create("http://tester.test.tst", "blah", "*=q=MOLGENIS",
-				"human", "token");
-
-		when(negotiatorConfig.getUsername()).thenReturn("username");
-		when(negotiatorConfig.getPassword()).thenReturn("password");
-		when(negotiatorConfig.getNegotiatorURL()).thenReturn("http://directory.com/postHere");
-
-		when(restTemplate.postForLocation(eq("http://directory.com/postHere"), queryCaptor.capture())).thenReturn(
-				URI.create("http://directory.com/request/1280"));
-		ExportResponse expected = ExportResponse.create(true, "", "http://directory.com/request/1280");
-
-		assertEquals(controller.exportToNegotiator(negotiatorRequest), expected);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
-		HttpEntity<NegotiatorQuery> posted = new HttpEntity<>(NegotiatorQuery.create("http://tester.test.tst",
-				Arrays.asList(Collection.create("coll1", "bio1"), Collection.create("coll2", "bio2")), "human",
-				"token"), headers);
-		assertEquals(queryCaptor.getValue(), posted);
+		assertEquals(actual, expected);
 	}
 
 	@Test
 	public void testShowButtonNoPermissionsOnPlugin()
 	{
 		when(permissionService.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
-		assertFalse(controller.showDirectoryButton("blah"));
+		assertFalse(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
 	public void testShowButton()
 	{
 		when(permissionService.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(true);
-		assertTrue(controller.showDirectoryButton("blah"));
+		assertTrue(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
@@ -234,7 +264,6 @@ public class NegotiatorControllerTest extends AbstractMockitoTest
 		when(permissionService.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
 		when(entityType.getId()).thenReturn("blah2");
 
-		assertFalse(controller.showDirectoryButton("blah2"));
+		assertFalse(negotiatorController.showDirectoryButton("blah2"));
 	}
-
 }

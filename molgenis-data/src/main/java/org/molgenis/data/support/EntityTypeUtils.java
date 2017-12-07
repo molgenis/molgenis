@@ -6,8 +6,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.util.EntityUtils;
+import org.molgenis.util.UnexpectedEnumException;
 
-import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -51,7 +51,7 @@ public class EntityTypeUtils
 			case TEXT:
 				return false;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -89,7 +89,7 @@ public class EntityTypeUtils
 			case XREF:
 				return false;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -137,7 +137,7 @@ public class EntityTypeUtils
 			case TEXT:
 				return false;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -175,7 +175,7 @@ public class EntityTypeUtils
 			case XREF:
 				return false;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -213,7 +213,7 @@ public class EntityTypeUtils
 			case XREF:
 				return false;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -250,7 +250,7 @@ public class EntityTypeUtils
 			case XREF:
 				return false;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 
@@ -287,7 +287,7 @@ public class EntityTypeUtils
 			case XREF:
 				return false;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 	}
 

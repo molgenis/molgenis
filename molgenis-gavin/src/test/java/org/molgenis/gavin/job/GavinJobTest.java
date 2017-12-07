@@ -2,6 +2,7 @@ package org.molgenis.gavin.job;
 
 import com.google.common.collect.ImmutableMultiset;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -92,6 +93,11 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 	private AnnotatorRunner annotatorRunner;
 	@Mock
 	private GavinJobExecution gavinJobExecution;
+
+	public GavinJobTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()

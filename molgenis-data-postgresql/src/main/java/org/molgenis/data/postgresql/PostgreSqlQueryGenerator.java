@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.text.MessageFormat;
 import java.time.Instant;
@@ -22,8 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -42,7 +43,7 @@ class PostgreSqlQueryGenerator
 {
 	private static final String UNSPECIFIED_ATTRIBUTE_MSG = "Can't use %s without specifying an attribute";
 
-	final static String ERR_CODE_READONLY_VIOLATION = "23506";
+	static final String ERR_CODE_READONLY_VIOLATION = "23506";
 
 	private PostgreSqlQueryGenerator()
 	{
@@ -424,7 +425,7 @@ class PostgreSqlQueryGenerator
 
 		return "SELECT " + idColName + "," + getJunctionTableOrderColumnName() + "," + refIdColName + " FROM "
 				+ getJunctionTableName(entityType, attr) + " WHERE " + idColName + " in (" + range(0,
-				numOfIds).mapToObj((x) -> "?").collect(joining(", ")) + ") ORDER BY " + idColName + ","
+				numOfIds).mapToObj(x -> "?").collect(joining(", ")) + ") ORDER BY " + idColName + ","
 				+ getJunctionTableOrderColumnName();
 	}
 
@@ -665,7 +666,7 @@ class PostgreSqlQueryGenerator
 			case MREF:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				throw new UnexpectedEnumException(attrType);
 		}
 
 		String sqlColumnConstraints = getSqlColumnConstraints(entityType, attr, columnMode);
@@ -778,7 +779,7 @@ class PostgreSqlQueryGenerator
 			case ONE_TO_MANY:
 				throw new RuntimeException(format("Illegal attribute type [%s]", attributeType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attributeType.toString()));
+				throw new UnexpectedEnumException(attributeType);
 		}
 
 		return sqlDefaultValue;
@@ -1072,7 +1073,7 @@ class PostgreSqlQueryGenerator
 					throw new UnsupportedOperationException(
 							format("Query operator [%s] not supported by PostgreSQL repository", operator.toString()));
 				default:
-					throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
+					throw new UnexpectedEnumException(operator);
 			}
 		}
 
@@ -1087,14 +1088,7 @@ class PostgreSqlQueryGenerator
 			for (Sort.Order o : q.getSort())
 			{
 				Attribute attr = entityType.getAttribute(o.getAttr());
-				if (isPersistedInOtherTable(attr))
-				{
-					sortSql.append(", ").append(getColumnName(attr));
-				}
-				else
-				{
-					sortSql.append(", ").append(getColumnName(attr));
-				}
+				sortSql.append(", ").append(getColumnName(attr));
 				if (o.getDirection().equals(Sort.Direction.DESC))
 				{
 					sortSql.append(" DESC");
@@ -1226,7 +1220,7 @@ class PostgreSqlQueryGenerator
 				case COMPOUND:
 					throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 				default:
-					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+					throw new UnexpectedEnumException(attrType);
 			}
 		}
 	}

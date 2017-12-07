@@ -95,7 +95,7 @@ public class OntologyTermRepository
 		List<QueryRule> rules = new ArrayList<>();
 		for (String term : terms)
 		{
-			if (rules.size() > 0)
+			if (!rules.isEmpty())
 			{
 				rules.add(new QueryRule(Operator.OR));
 			}

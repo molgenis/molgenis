@@ -130,7 +130,7 @@ public class SortaServiceImpl implements SortaService
 							inputEntity.getString(attributeName));
 
 					// ((name=OMIM Operator.AND value=124325) Operator.OR (name=HPO Operator.AND value=hp12435))
-					if (rulesForOtherFields.size() > 0) rulesForOtherFields.add(new QueryRule(OR));
+					if (!rulesForOtherFields.isEmpty()) rulesForOtherFields.add(new QueryRule(OR));
 					rulesForOtherFields.add(new QueryRule(
 							Arrays.asList(queryAnnotationName, new QueryRule(AND), queryAnnotationValue)));
 				}
@@ -138,20 +138,20 @@ public class SortaServiceImpl implements SortaService
 		}
 
 		// Find the ontology terms that have the same annotations as the input ontology annotations
-		if (rulesForOtherFields.size() > 0)
+		if (!rulesForOtherFields.isEmpty())
 		{
 			annotationMatchOntologyTerms(inputEntity, ontologyEntity, relevantEntities, rulesForOtherFields);
 		}
 
 		// Find the ontology terms based on the lexical similarities
-		if (rulesForOntologyTermFields.size() > 0)
+		if (!rulesForOntologyTermFields.isEmpty())
 		{
 			int pageSize = MAX_NUMBER_MATCHES - relevantEntities.size();
 			lexicalMatchOntologyTerms(ontologyIri, inputEntity, ontologyEntity, pageSize, rulesForOntologyTermFields,
 					relevantEntities);
 		}
 
-		if (rulesForOntologyTermFieldsNGram.size() > 0)
+		if (!rulesForOntologyTermFieldsNGram.isEmpty())
 		{
 			lexicalMatchOntologyTerms(ontologyIri, inputEntity, ontologyEntity, NUMBER_NGRAM_MATCHES,
 					rulesForOntologyTermFieldsNGram, relevantEntities);
@@ -169,7 +169,7 @@ public class SortaServiceImpl implements SortaService
 		List<Entity> ontologyTermAnnotationEntities = dataService.findAll(ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 				new QueryImpl<>(rulesForOtherFields).pageSize(Integer.MAX_VALUE)).collect(Collectors.toList());
 
-		if (ontologyTermAnnotationEntities.size() > 0)
+		if (!ontologyTermAnnotationEntities.isEmpty())
 		{
 			List<QueryRule> rules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontologyEntity),
 					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, IN,
@@ -199,7 +199,8 @@ public class SortaServiceImpl implements SortaService
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
 				new QueryImpl<>(finalQueryRules).pageSize(pageSize))
 																	   .map(ontologyTerm -> addLexicalScoreToMatchedEntity(
-																			   inputEntity, ontologyTerm, ontologyIri));
+																			   inputEntity, ontologyTerm,
+																			   ontologyIri)); // TODO use findAll(ONTOLOGY_TERM, ..., OntologyTerm.class)
 
 		lexicalMatchedOntologyTermEntities.forEach(matchedEntity ->
 		{
@@ -210,7 +211,8 @@ public class SortaServiceImpl implements SortaService
 		});
 	}
 
-	Entity addLexicalScoreToMatchedEntity(Entity inputEntity, Entity ontologyTerm, String ontologyIri)
+	Entity addLexicalScoreToMatchedEntity(Entity inputEntity, Entity ontologyTerm,
+			String ontologyIri) // TODO Change 'Entity ontologyTerm' to 'OntologyTerm ontologyTerm'
 	{
 		double maxNgramScore = 0;
 		double maxNgramIDFScore = 0;

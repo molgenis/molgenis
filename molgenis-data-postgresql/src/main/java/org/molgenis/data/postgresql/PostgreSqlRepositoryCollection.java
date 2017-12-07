@@ -34,6 +34,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.BATCH_SIZE;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.createJunctionTableRowData;
 import static org.molgenis.data.support.EntityTypeUtils.*;
+import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
 
 public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 {
@@ -76,8 +77,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
-		PostgreSqlRepository repository = createPostgreSqlRepository();
-		repository.setEntityType(entityType);
+		PostgreSqlRepository repository = createPostgreSqlRepository(entityType);
 		if (!isTableExists(entityType))
 		{
 			createTable(entityType);
@@ -118,9 +118,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public Repository<Entity> getRepository(EntityType entityType)
 	{
-		PostgreSqlRepository repository = createPostgreSqlRepository();
-		repository.setEntityType(entityType);
-		return repository;
+		return createPostgreSqlRepository(entityType);
 	}
 
 	@Override
@@ -298,8 +296,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	{
 		int nrRefEntities = Iterables.size(defaultRefEntities);
 
-		PostgreSqlRepository postgreSqlRepository = createPostgreSqlRepository();
-		postgreSqlRepository.setEntityType(entityType);
+		PostgreSqlRepository postgreSqlRepository = createPostgreSqlRepository(entityType);
 
 		Attribute idAttribute = entityType.getIdAttribute();
 		String idAttributeName = idAttribute.getName();
@@ -563,9 +560,9 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	/**
 	 * Return a new PostgreSQL repository
 	 */
-	private PostgreSqlRepository createPostgreSqlRepository()
+	private PostgreSqlRepository createPostgreSqlRepository(EntityType entityType)
 	{
-		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource);
+		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, entityType);
 	}
 
 	private boolean isTableExists(EntityType entityType)
@@ -591,18 +588,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		finally
 		{
-			try
-			{
-				if (conn != null)
-				{
-					conn.close();
-				}
-			}
-			catch (Exception e)
-			{
-				//noinspection ThrowFromFinallyBlock
-				throw new RuntimeException(e);
-			}
+			closeConnection(conn);
 		}
 	}
 

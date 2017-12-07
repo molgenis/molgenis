@@ -1,5 +1,6 @@
 package org.molgenis.data.semanticsearch.repository;
 
+import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -39,6 +40,11 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 	private IdGenerator idGenerator;
 
 	private final UUID uuid = UUID.randomUUID();
+
+	public TagRepositoryTest()
+	{
+		super(Strictness.WARN);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()
