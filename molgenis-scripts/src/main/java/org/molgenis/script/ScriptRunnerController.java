@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.script.core.exception.MissingParameterException;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.jobs.JobsController;
 import org.springframework.stereotype.Controller;
@@ -85,6 +86,7 @@ public class ScriptRunnerController
 	 * @throws IOException               if something goes wrong when redirecting or writing the result
 	 * @throws UnknownEntityException    if the script name is unknown
 	 * @throws MissingParameterException if one of the script parameters is missing
+	 * @throws ScriptExecutionException  if an error occured while executing the script
 	 */
 	@RequestMapping("/scripts/{name}/run")
 	public void runScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
