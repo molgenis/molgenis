@@ -18,6 +18,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -64,7 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = GsonConfig.class)
+@ContextConfiguration(classes = { GsonConfig.class })
 public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
@@ -72,6 +73,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private AttributeFactory attrMetaFactory;
+
+	@Mock
+	private MappingProjectMetaData mappingProjectMetaData;
 
 	@InjectMocks
 	private MappingServiceController controller = new MappingServiceController();
@@ -353,7 +357,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(actual3, "");
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "id:mappingProjectId")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:null id:mappingProjectId")
 	public void testScheduleMappingJobUnknownMappingProjectId() throws Throwable
 	{
 		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")
