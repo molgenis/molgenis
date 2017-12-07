@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -92,13 +93,13 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		String algorithm = "algorithm";
 		Entity entity = mock(Entity.class);
 
-		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new NullPointerException());
+		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new ScriptExecutionException("execution error"));
 
 		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl.applyAlgorithm(attribute, algorithm,
 				Lists.newArrayList(entity));
 		AlgorithmEvaluation eval = result.iterator().next();
 
-		Assert.assertEquals(eval.getErrorMessage(), "null");
+		Assert.assertEquals(eval.getErrorMessage(), "cause:execution error");
 	}
 
 	private void testApplyConvertException(String algorithmResult, AttributeType attributeType)

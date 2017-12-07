@@ -6,7 +6,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
-import org.molgenis.data.mapper.exception.AlgorithmNullValueException;
 import org.molgenis.data.mapper.exception.ValueConversionException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -20,6 +19,7 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
@@ -116,20 +116,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity);
 				derivedValue = convert(result, targetAttribute);
 			}
-			catch (NullPointerException npe)
+			catch (ScriptExecutionException e)
 			{
-				try
-				{
-					throw new AlgorithmNullValueException();
-
-				}
-				catch (AlgorithmNullValueException anve)
-				{
-					return algorithmResult.errorMessage(anve.getLocalizedMessage());
-				}
-			}
-			catch (Exception e)
-			{
+				LOG.warn("", e);
 				return algorithmResult.errorMessage(e.getLocalizedMessage());
 			}
 			return algorithmResult.value(derivedValue);
