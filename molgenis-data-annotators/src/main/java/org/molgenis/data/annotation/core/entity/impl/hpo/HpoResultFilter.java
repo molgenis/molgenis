@@ -2,8 +2,8 @@ package org.molgenis.data.annotation.core.entity.impl.hpo;
 
 import com.google.common.base.Optional;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
+import org.molgenis.data.annotation.core.exception.UpdateNotSupportedException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -40,7 +40,7 @@ public class HpoResultFilter implements ResultFilter
 	{
 		if (updateMode == true)
 		{
-			throw new MolgenisDataException("This annotator/filter does not support updating of values");
+			throw new UpdateNotSupportedException();
 		}
 
 		StringBuilder ids = new StringBuilder();

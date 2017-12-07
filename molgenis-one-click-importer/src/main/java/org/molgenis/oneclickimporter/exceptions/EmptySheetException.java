@@ -1,10 +1,31 @@
 package org.molgenis.oneclickimporter.exceptions;
 
-@Deprecated // FIXME extend from CodedRuntimeException
-public class EmptySheetException extends Exception
+import org.molgenis.data.CodedRuntimeException;
+
+import static java.util.Objects.requireNonNull;
+
+public class EmptySheetException extends CodedRuntimeException
 {
-	public EmptySheetException(String s)
+	private static final String ERROR_CODE = "OCI01";
+	private final String sheettype;
+	private final String fileName;
+
+	public EmptySheetException(String sheettype, String fileName)
 	{
-		super(s);
+		super(ERROR_CODE);
+		this.sheettype = requireNonNull(sheettype);
+		this.fileName = requireNonNull(fileName);
+	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("sheettype:%s fileName:%s", sheettype, fileName);
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return new Object[] { sheettype, fileName };
 	}
 }

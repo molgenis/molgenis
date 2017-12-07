@@ -3,11 +3,11 @@ package org.molgenis.data.importer.emx.exception;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidBoolAttributeValueException extends EmxException
 {
-	private final static String ERROR_CODE = "E02";
-	private String attributeAttributeName;
-	private String booleanString;
-	private String sheetName;
-	private int rowIndex;
+	private static final String ERROR_CODE = "E02";
+	private final String attributeAttributeName;
+	private final String booleanString;
+	private final String sheetName;
+	private final int rowIndex;
 
 	public InvalidBoolAttributeValueException(String attributeAttributeName, String booleanString, String sheetName,
 			int rowIndex)

@@ -578,19 +578,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), ArgumentMatchers.any(Entity.class));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "")
-	public void updateInternalRepoNotUpdateable() throws Throwable
-	{
-		@SuppressWarnings("unchecked")
-		Repository<Entity> repo = Mockito.mock(Repository.class);
-		Mockito.when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
-		Mockito.doThrow(new MolgenisDataException())
-			   .when(dataService)
-			   .update(ArgumentMatchers.anyString(), ArgumentMatchers.any(Entity.class));
-		MockHttpServletRequestBuilder request = put(HREF_ENTITY_ID).content("{name:Klaas}")
-																   .contentType(MediaType.APPLICATION_JSON);
-		exceptionalRequestPerformer.perform(request);
-	}
 
 	@Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "constraint:MISSING_ID_ATTR entityType:null")
 	public void updateInternalRepoIdAttributeIsNull() throws Throwable

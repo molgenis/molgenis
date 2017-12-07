@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.rest.exception.AbstractEntityDeletionException;
 import org.molgenis.data.rest.exception.IdentifierAndValueException;
 import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
@@ -52,7 +53,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
-import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
@@ -88,32 +88,11 @@ public class RestControllerV2
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	private static RepositoryCollectionCapabilityException createNoWriteCapabilitiesOnEntityException(
-			String entityTypeId, RepositoryCapability capability)
-	{
-		return new RepositoryCollectionCapabilityException(entityTypeId, capability);
-	}
-
 	private static ValidationException createUpdateReadOnlyAttributeException(AttributeValue attributeValue)
 	{
 		AttributeValueValidationResult constraintViolation = new AttributeValueValidationResult(READ_ONLY,
 				attributeValue);
 		return new ValidationException(constraintViolation);
-	}
-
-	private static MissingIdentifierException createMolgenisDataExceptionUnknownIdentifier(int count)
-	{
-		return new MissingIdentifierException(count);
-	}
-
-	private static IdentifierAndValueException createMolgenisDataExceptionIdentifierAndValue()
-	{
-		return new IdentifierAndValueException();
-	}
-
-	private static UnknownEntityTypeException createUnknownEntityExceptionNotValidId(Object id)
-	{
-		return new UnknownEntityTypeException(id.toString());
 	}
 
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
@@ -219,8 +198,7 @@ public class RestControllerV2
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(
-					format("Cannot delete entities because type [%s] is abstract.", entityTypeId));
+			throw new AbstractEntityDeletionException(entityType);
 		}
 		Attribute idAttribute = entityType.getIdAttribute();
 		Stream<Object> typedIds = request.getEntityIds().stream().map(entityId -> getTypedValue(entityId, idAttribute));
@@ -375,7 +353,7 @@ public class RestControllerV2
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
 												  .contains(RepositoryCapability.WRITABLE);
 		if (!writableCapabilities)
-			throw createNoWriteCapabilitiesOnEntityException(entityTypeId, RepositoryCapability.WRITABLE);
+			throw new RepositoryCollectionCapabilityException(entityTypeId, RepositoryCapability.WRITABLE);
 
 		// Copy
 		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
@@ -471,7 +449,7 @@ public class RestControllerV2
 												 .collect(toList());
 			if (entities.size() != request.getEntities().size())
 			{
-				throw createMolgenisDataExceptionIdentifierAndValue();
+				throw new IdentifierAndValueException();
 			}
 
 			final List<Entity> updatedEntities = new ArrayList<>();
@@ -483,7 +461,7 @@ public class RestControllerV2
 				Entity originalEntity = dataService.findOneById(entityTypeId, id);
 				if (originalEntity == null)
 				{
-					throw createUnknownEntityExceptionNotValidId(id);
+					throw new UnknownEntityTypeException(id.toString());
 				}
 
 				Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
@@ -573,14 +551,14 @@ public class RestControllerV2
 	}
 
 	/**
-	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
+	 * Get entity id and perform a check, throwing an UnknownIdentifierException when necessary
 	 */
 	private static Object checkForEntityId(Entity entity, int count)
 	{
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
-			throw createMolgenisDataExceptionUnknownIdentifier(count);
+			throw new MissingIdentifierException(count);
 		}
 		return id;
 	}

@@ -2,7 +2,6 @@ package org.molgenis.data.annotation.core.entity.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.*;
@@ -219,7 +218,8 @@ public class CGDAnnotator implements AnnotatorConfig
 			}
 
 			String sourceName = CGDAttributeName.getCgdName(attr.getName());
-			if (sourceName == null) throw new MolgenisDataException("Unknown attribute [" + attr.getName() + "]");
+			if (sourceName == null)
+				throw new IllegalArgumentException(String.format("%s not present in CGD data", attr.getName()));
 
 			return sourceEntity.get(sourceName);
 		}

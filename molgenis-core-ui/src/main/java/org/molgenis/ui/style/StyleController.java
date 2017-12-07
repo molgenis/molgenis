@@ -47,7 +47,7 @@ public class StyleController
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisStyleException("Unable to return theme data", e);
+			throw new MolgenisStyleException(e.getCause());
 		}
 
 		return new ResponseEntity(HttpStatus.OK);

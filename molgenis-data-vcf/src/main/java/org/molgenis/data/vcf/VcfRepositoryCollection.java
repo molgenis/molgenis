@@ -2,8 +2,8 @@ package org.molgenis.data.vcf;
 
 import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -78,7 +78,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public Repository<Entity> getRepository(String name)
 	{
-		if (!entityTypeId.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
+		if (!entityTypeId.equals(name)) throw new UnknownEntityTypeException(name);
 		return new VcfRepository(file, name, vcfAttributes, entityTypeFactory, attrMetaFactory);
 	}
 

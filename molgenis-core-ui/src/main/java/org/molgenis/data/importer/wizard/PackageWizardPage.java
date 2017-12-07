@@ -1,6 +1,9 @@
 package org.molgenis.data.importer.wizard;
 
-import org.molgenis.data.*;
+import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.exception.UnknownActionException;
@@ -98,9 +101,7 @@ public class PackageWizardPage extends AbstractWizardPage
 
 					if (!entitiesNotImportable.isEmpty())
 					{
-						throw new MolgenisDataException(
-								"You are trying to upload entities that are not compatible with the already existing entities: "
-										+ entitiesNotImportable.toString());
+						throw new IncompatibleEntitiesException(entitiesNotImportable);
 					}
 				}
 

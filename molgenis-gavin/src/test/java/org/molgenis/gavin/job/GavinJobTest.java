@@ -5,7 +5,6 @@ import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.utils.EffectStructureConverter;
 import org.molgenis.data.jobs.Progress;
@@ -14,6 +13,9 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.exception.InputSizeException;
+import org.molgenis.gavin.exception.InvalidVariantsException;
+import org.molgenis.gavin.exception.MixedLineTypesException;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.ui.menu.Menu;
@@ -188,8 +190,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
 	}
 
-	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains too many lines\\. Maximum is 100,000\\.")
+	@Test(expectedExceptions = { InputSizeException.class }, expectedExceptionsMessageRegExp = "max_lines:100000")
 	public void testSkippedThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(
@@ -198,8 +199,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		job.call(progress);
 	}
 
-	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Not a single valid variant line found\\.")
+	@Test(expectedExceptions = { InvalidVariantsException.class })
 	public void testNoValidLinesThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(ImmutableMultiset.of());
@@ -207,8 +207,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		job.call(progress);
 	}
 
-	@Test(expectedExceptions = {
-			MolgenisDataException.class }, expectedExceptionsMessageRegExp = "Input file contains mixed line types\\. Please use one type only, either VCF or CADD.")
+	@Test(expectedExceptions = { MixedLineTypesException.class })
 	public void testMixedInputsThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(

@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Thrown to indicate that data values are not unique when updating data.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UniqueConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V06";

@@ -1,19 +1,29 @@
 package org.molgenis.ui.style;
 
-import org.molgenis.data.MolgenisException;
+import org.molgenis.data.CodedRuntimeException;
 
-import java.io.IOException;
+import static java.util.Objects.requireNonNull;
 
-@Deprecated // FIXME extend from CodedRuntimeException
-public class MolgenisStyleException extends MolgenisException
+public class MolgenisStyleException extends CodedRuntimeException
 {
-	public MolgenisStyleException(String s)
+	private static final String ERROR_CODE = "C05";
+	private final Throwable cause;
+
+	public MolgenisStyleException(Throwable cause)
 	{
-		super(s);
+		super(ERROR_CODE, cause);
+		this.cause = requireNonNull(cause);
 	}
 
-	public MolgenisStyleException(String s, IOException e)
+	@Override
+	public String getMessage()
 	{
-		super(s, e);
+		return String.format("cause:%s", cause.getMessage());
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return new Object[0];
 	}
 }

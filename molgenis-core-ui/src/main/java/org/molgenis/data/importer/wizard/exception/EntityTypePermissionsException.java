@@ -10,7 +10,7 @@ public class EntityTypePermissionsException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "C01";
 	private final Permission permission;
-	private final EntityType entityType;
+	private final transient EntityType entityType;
 
 	public EntityTypePermissionsException(EntityType entityType, Permission permission)
 	{

@@ -9,6 +9,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 /**
  * {@link org.springframework.dao.DataAccessException} with error code and without message.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public abstract class ErrorCodedDataAccessException extends org.springframework.dao.DataAccessException
 		implements ErrorCoded
 {

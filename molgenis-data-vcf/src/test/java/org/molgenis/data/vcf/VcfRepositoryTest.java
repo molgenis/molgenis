@@ -3,12 +3,12 @@ package org.molgenis.data.vcf;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.config.VcfTestConfig;
+import org.molgenis.data.vcf.exception.VcfMetadataException;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.vcf.VcfReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6528
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file")
+	@Test(expectedExceptions = VcfMetadataException.class)
 	public void testGetEntityType() throws IOException
 	{
 		VcfReaderFactory vcfReaderFactory = mock(VcfReaderFactory.class);

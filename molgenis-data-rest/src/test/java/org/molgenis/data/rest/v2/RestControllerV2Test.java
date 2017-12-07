@@ -15,6 +15,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.rest.exception.AbstractEntityDeletionException;
 import org.molgenis.data.rest.exception.IdentifierAndValueException;
 import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
@@ -715,22 +716,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				"Number of entities cannot be more than 1000.");
 	}
 
-	/**
-	 * createMolgenisDataExceptionUnknownIdentifier
-	 */
-	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Check if this exception is not swallowed by the system")
-	public void testCreateEntitiesSystemException() throws Throwable
-	{
-		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
-		doThrow(e).when(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
-
-		String content = "{entities:[{id:'p1', name:'Example data'}]}";
-		MockHttpServletRequestBuilder request = post(HREF_ENTITY_COLLECTION).content(content)
-																			.contentType(APPLICATION_JSON);
-		exceptionalRequestPerformer.perform(request);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testUpdateEntities() throws Exception
@@ -740,19 +725,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			   .andExpect(status().isOk());
 
 		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Check if this exception is not swallowed by the system")
-	public void testUpdateEntitiesMolgenisDataException() throws Throwable
-	{
-		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
-		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
-
-		String content = "{entities:[{id:'p1', name:'Example data'}]}";
-		MockHttpServletRequestBuilder request = put(HREF_ENTITY_COLLECTION).content(content)
-																		   .contentType(APPLICATION_JSON);
-		exceptionalRequestPerformer.perform(request);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -847,10 +819,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		assertEquals(captor.getValue().collect(toList()), expectedIds);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Cannot delete entities because type \\[MyEntityType\\] is abstract.")
+	@Test(expectedExceptions = AbstractEntityDeletionException.class, expectedExceptionsMessageRegExp = "entityType:MyEntityType")
 	public void testDeleteEntityCollectionExceptionAbstractEntity() throws Throwable
 	{
-		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.isAbstract()).thenReturn(true);
+		when(entityType.getId()).thenReturn("MyEntityType");
 		when(dataService.getEntityType("MyEntityType")).thenReturn(entityType);
 
 		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
@@ -929,7 +903,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	/**
-	 * createMolgenisDataExceptionIdentifierAndValue
+	 * createIdentifierAndValueException
 	 */
 	@Test(expectedExceptions = IdentifierAndValueException.class, expectedExceptionsMessageRegExp = "")
 	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Throwable
@@ -940,7 +914,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	/**
-	 * createMolgenisDataExceptionUnknownIdentifier
+	 * createMissingIdentifierException
 	 */
 	@Test(expectedExceptions = MissingIdentifierException.class, expectedExceptionsMessageRegExp = "index:0")
 	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Throwable

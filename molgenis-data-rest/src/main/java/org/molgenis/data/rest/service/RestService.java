@@ -1,11 +1,15 @@
 package org.molgenis.data.rest.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DateParseException;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.rest.exception.EntityAlreadyReferencedException;
 import org.molgenis.data.rest.exception.FileAttributeUpdateWithoutFileException;
 import org.molgenis.data.rest.exception.IllegalAttributeTypeException;
 import org.molgenis.data.rest.exception.IncompatibleValueTypeException;
@@ -24,6 +28,7 @@ import org.springframework.web.util.UriComponents;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -32,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -265,7 +269,7 @@ public class RestService
 				}
 				catch (IOException e)
 				{
-					throw new MolgenisDataException(e);
+					throw new UncheckedIOException(e);
 				}
 
 				FileMeta fileEntity = fileMetaFactory.create(id);
@@ -541,10 +545,7 @@ public class RestService
 		{
 			if (refEntity.getEntity(refAttr.getName()) != null)
 			{
-				throw new MolgenisDataException(
-						format("Updating [%s] with id [%s] not allowed: [%s] is already referred to by another [%s]",
-								attr.getRefEntity().getId(), refEntity.getIdValue().toString(), refAttr.getName(),
-								entity.getEntityType().getId()));
+				throw new EntityAlreadyReferencedException(attr.getRefEntity(), refAttr, entity.getEntityType());
 			}
 
 			refEntity.set(refAttr.getName(), entity);

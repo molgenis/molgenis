@@ -4,7 +4,7 @@ import org.molgenis.data.CodedRuntimeException;
 
 public class ExcelMaxSizeExceededException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "G02";
+	private static final String ERROR_CODE = "DE02";
 	private final long size;
 
 	public ExcelMaxSizeExceededException(long size)

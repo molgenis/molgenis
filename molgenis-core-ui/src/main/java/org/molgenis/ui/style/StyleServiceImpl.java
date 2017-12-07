@@ -64,8 +64,7 @@ public class StyleServiceImpl implements StyleService
 	{
 		if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null)
 		{
-			throw new MolgenisStyleException(
-					String.format("A style with the same identifier (%s) already exists", styleId));
+			throw new StyleAlreadyExistsException(styleId);
 		}
 
 		StyleSheet styleSheet = styleSheetFactory.create(styleId);
@@ -95,7 +94,7 @@ public class StyleServiceImpl implements StyleService
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisStyleException("Unable to save style file with name : " + fileName, e);
+			throw new SavingStyleFailedException(fileName, e);
 		}
 
 		FileMeta fileMeta = fileMetaFactory.create(fileId);
@@ -162,7 +161,7 @@ public class StyleServiceImpl implements StyleService
 
 		if (styleSheet == null)
 		{
-			throw new MolgenisStyleException("No theme found for with name: " + styleName);
+			throw new StyleNotFoundException(styleName);
 		}
 
 		// Fetch the theme file from the store.

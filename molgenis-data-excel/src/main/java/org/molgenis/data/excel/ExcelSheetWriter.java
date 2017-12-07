@@ -5,7 +5,6 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
@@ -50,9 +49,10 @@ public class ExcelSheetWriter extends AbstractWritable
 	@Override
 	public void add(Entity entity)
 	{
+		//This should not occur, both are probably the result of a programming error, therefor: no coded exception
 		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
 		if (cachedAttributes == null)
-			throw new MolgenisDataException("The attribute names are not defined, call writeAttributeNames first");
+			throw new IllegalStateException("The attribute names are not defined, call writeAttributeNames first");
 
 		int i = 0;
 		Row poiRow = sheet.createRow(row++);

@@ -4,8 +4,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
+import org.molgenis.data.excel.exception.ExcelWriteException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.processor.CellProcessor;
@@ -78,7 +78,7 @@ public class ExcelWriter implements WritableFactory
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisDataException("Exception writing to excel file", e);
+			throw new ExcelWriteException(e);
 		}
 		os.close();
 	}

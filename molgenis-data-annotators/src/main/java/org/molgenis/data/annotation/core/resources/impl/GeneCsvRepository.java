@@ -1,10 +1,11 @@
 package org.molgenis.data.annotation.core.resources.impl;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.annotation.core.exception.MissingValueException;
+import org.molgenis.data.annotation.core.exception.UnsupportedQueryException;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -58,8 +59,7 @@ public class GeneCsvRepository extends AbstractRepository
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS) || !targetAttributeName
 				.equals(q.getRules().get(0).getField()))
 		{
-			throw new MolgenisDataException(
-					"The only query allowed on this Repository is '" + targetAttributeName + " EQUALS'");
+			throw new UnsupportedQueryException(targetAttributeName);
 		}
 
 		Entity result = getIndex().get(q.getRules().get(0).getValue());
@@ -73,8 +73,8 @@ public class GeneCsvRepository extends AbstractRepository
 			forEach(e ->
 			{
 				Object key = e.get(sourceAttributeName);
-				if (key == null) throw new MolgenisDataException(
-						"Missing value for attribute [" + sourceAttributeName + "] in entity [" + e + "]");
+				if (key == null) throw new MissingValueException(key, e.getEntityType());
+
 				index.put(key, e);
 			});
 		}

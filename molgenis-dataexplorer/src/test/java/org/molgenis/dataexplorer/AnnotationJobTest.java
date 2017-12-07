@@ -88,7 +88,7 @@ public class AnnotationJobTest extends AbstractMockitoTest
 		when(exac.getSimpleName()).thenReturn("exac");
 		when(cadd.getSimpleName()).thenReturn("cadd");
 
-		AnnotationException exception = new AnnotationException(mock(AnnotationException.class));
+		AnnotationException exception = mock(AnnotationException.class);
 		doThrow(exception).when(crudRepositoryAnnotator).annotate(exac, repository);
 		try
 		{

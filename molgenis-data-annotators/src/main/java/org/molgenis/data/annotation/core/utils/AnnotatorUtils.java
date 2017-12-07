@@ -1,12 +1,10 @@
 package org.molgenis.data.annotation.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +58,7 @@ public class AnnotatorUtils
 		}
 		else
 		{
-			throw new MolgenisDataException(VcfAttributes.ALT + " differs in length from the provided annotations.");
+			throw new IllegalStateException("Number of ALT alleles differs in length from the provided annotations.");
 		}
 		return result;
 	}

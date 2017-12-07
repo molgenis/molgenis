@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException;
  * @deprecated see {@link ErrorCodedDataAccessException}
  */
 @Deprecated
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MolgenisDataAccessException extends DataAccessException
 {
 	public MolgenisDataAccessException()

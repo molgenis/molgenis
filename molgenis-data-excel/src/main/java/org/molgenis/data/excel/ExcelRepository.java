@@ -7,8 +7,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.excel.exception.MergedRegionsNotSupportedException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -19,7 +19,6 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.*;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
@@ -60,8 +59,7 @@ public class ExcelRepository extends AbstractRepository
 		this.sheet = requireNonNull(sheet);
 		if (sheet.getNumMergedRegions() > 0)
 		{
-			throw new MolgenisDataException(
-					format("Sheet [%s] contains merged regions which is not supported", sheet.getSheetName()));
+			throw new MergedRegionsNotSupportedException(sheet);
 		}
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);

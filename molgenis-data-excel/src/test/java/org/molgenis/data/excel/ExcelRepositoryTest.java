@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.excel.exception.MergedRegionsNotSupportedException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -59,7 +59,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	@SuppressWarnings("resource")
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MergedRegionsNotSupportedException.class)
 	public void ExcelRepository()
 	{
 		new ExcelRepository("test.xls", workbook.getSheet("test_mergedcells"), entityTypeFactory, attrMetaFactory);

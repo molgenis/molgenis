@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.joining;
 /**
  * Thrown when deleting entity types that are still referenced by other entity types.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EntityTypeReferenceConstraintViolationException extends DataIntegrityViolationException
 {
 	private static final String ERROR_CODE = "V10";
