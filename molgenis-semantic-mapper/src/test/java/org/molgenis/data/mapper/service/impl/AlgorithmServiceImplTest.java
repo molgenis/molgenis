@@ -5,7 +5,7 @@ import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
-import org.molgenis.data.mapper.exception.ValueConversionException;
+import org.molgenis.data.mapper.exception.AlgorithmValueConversionException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -50,37 +50,37 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		new AlgorithmServiceImpl(null, null, null, null, null);
 	}
 
-	@Test(expectedExceptions = ValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDate type:DATE")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDate type:DATE")
 	public void testApplyConvertDateNumberFormatException()
 	{
 		testApplyConvertException("invalidDate", DATE);
 	}
 
-	@Test(expectedExceptions = ValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDateTime type:DATE_TIME")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDateTime type:DATE_TIME")
 	public void testApplyConvertDateTimeNumberFormatException()
 	{
 		testApplyConvertException("invalidDateTime", DATE_TIME);
 	}
 
-	@Test(expectedExceptions = ValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDouble type:DECIMAL")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDouble type:DECIMAL")
 	public void testApplyConvertDoubleNumberFormatException()
 	{
 		testApplyConvertException("invalidDouble", DECIMAL);
 	}
 
-	@Test(expectedExceptions = ValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidInt type:INT")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidInt type:INT")
 	public void testApplyConvertIntNumberFormatException()
 	{
 		testApplyConvertException("invalidInt", INT);
 	}
 
-	@Test(expectedExceptions = ValueConversionException.class, expectedExceptionsMessageRegExp = "value:9007199254740991 type:INT")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:9007199254740991 type:INT")
 	public void testApplyConvertIntArithmeticException()
 	{
 		testApplyConvertException("9007199254740991", INT);
 	}
 
-	@Test(expectedExceptions = ValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidLong type:LONG")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidLong type:LONG")
 	public void testApplyConvertLongNumberFormatException()
 	{
 		testApplyConvertException("invalidLong", LONG);

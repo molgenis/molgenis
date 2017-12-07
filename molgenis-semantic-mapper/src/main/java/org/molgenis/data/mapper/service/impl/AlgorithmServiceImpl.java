@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
-import org.molgenis.data.mapper.exception.ValueConversionException;
+import org.molgenis.data.mapper.exception.AlgorithmValueConversionException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
@@ -233,7 +233,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			throw new ValueConversionException(value, DATE, e);
+			throw new AlgorithmValueConversionException(value, DATE, e);
 		}
 	}
 
@@ -245,7 +245,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			throw new ValueConversionException(value, DATE_TIME, e);
+			throw new AlgorithmValueConversionException(value, DATE_TIME, e);
 		}
 	}
 
@@ -257,7 +257,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			throw new ValueConversionException(value, DECIMAL, e);
+			throw new AlgorithmValueConversionException(value, DECIMAL, e);
 		}
 	}
 
@@ -270,7 +270,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException | ArithmeticException e)
 		{
-			throw new ValueConversionException(value, INT, e);
+			throw new AlgorithmValueConversionException(value, INT, e);
 		}
 		return convertedValue;
 	}
@@ -284,7 +284,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (NumberFormatException e)
 		{
-			throw new ValueConversionException(value, LONG, e);
+			throw new AlgorithmValueConversionException(value, LONG, e);
 		}
 		return convertedValue;
 	}
