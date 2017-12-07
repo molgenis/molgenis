@@ -98,8 +98,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 				Lists.newArrayList(entity));
 		AlgorithmEvaluation eval = result.iterator().next();
 
-		Assert.assertEquals(eval.getErrorMessage(),
-				"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
+		Assert.assertEquals(eval.getErrorMessage(), "null");
 	}
 
 	private void testApplyConvertException(String algorithmResult, AttributeType attributeType)
