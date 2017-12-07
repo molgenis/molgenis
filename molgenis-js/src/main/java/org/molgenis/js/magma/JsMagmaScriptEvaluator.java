@@ -44,8 +44,9 @@ public class JsMagmaScriptEvaluator
 	 * @param expression JavaScript expression
 	 * @param entity     entity
 	 * @return evaluated expression result, return type depends on the expression.
+	 * @throws ScriptExecutionException if an error occured executing the script
 	 */
-	public Object eval(String expression, Entity entity) throws ScriptExecutionException
+	public Object eval(String expression, Entity entity)
 	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
