@@ -2,7 +2,6 @@ package org.molgenis.js.magma;
 
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
-import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -17,11 +16,11 @@ public class JsMagmaScriptRunner implements ScriptRunner
 {
 	public static final String NAME = "JavaScript (Magma)";
 
-	private final JsMagmaScriptExecutor jsScriptExecutor;
+	private final JsMagmaScriptExecutor jsMagmaScriptExecutor;
 
 	public JsMagmaScriptRunner(JsMagmaScriptExecutor jsMagmaScriptExecutor)
 	{
-		this.jsScriptExecutor = requireNonNull(jsMagmaScriptExecutor);
+		this.jsMagmaScriptExecutor = requireNonNull(jsMagmaScriptExecutor);
 	}
 
 	@Override
@@ -34,18 +33,7 @@ public class JsMagmaScriptRunner implements ScriptRunner
 	public String runScript(Script script, Map<String, Object> parameters)
 	{
 		String jsScript = script.getContent();
-
-		Object scriptResult;
-		try
-		{
-			scriptResult = jsScriptExecutor.executeScript(jsScript, parameters);
-
-		}
-		catch (ScriptExecutionException see)
-		{
-			scriptResult = see.getLocalizedMessage();
-		}
-
+		Object scriptResult = jsMagmaScriptExecutor.executeScript(jsScript, parameters);
 		return scriptResult != null ? scriptResult.toString() : null;
 	}
 }
