@@ -1,18 +1,13 @@
 package org.molgenis.data.validation.data;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.script.core.exception.ScriptExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -21,27 +16,11 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class ExpressionValidator
 {
-	@SuppressWarnings("unused")
-	private static final Logger LOG = LoggerFactory.getLogger(ExpressionValidator.class);
-
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	public ExpressionValidator(JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
 	{
 		this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
-	}
-
-	/**
-	 * Resolves a boolean expression (validation or visible expression)
-	 *
-	 * @param expression JavaScript expression
-	 * @param entity     entity used during expression evaluation
-	 * @return <code>true</code> or <code>false</code>
-	 * @throws MolgenisDataException if the script resolves to null or to a non boolean
-	 */
-	boolean resolveBooleanExpression(String expression, Entity entity)
-	{
-		return resolveBooleanExpressions(singletonList(expression), entity).get(0);
 	}
 
 	/**
@@ -61,17 +40,7 @@ public class ExpressionValidator
 		List<Boolean> validationResults = new ArrayList<>(expressions.size());
 		for (String expression : expressions)
 		{
-			Object value;
-			try
-			{
-				value = jsMagmaScriptEvaluator.eval(expression, entity);
-			}
-			catch (ScriptExecutionException see)
-			{
-				validationResults.add(false);
-				continue;
-			}
-
+			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
 			validationResults.add(value != null ? Boolean.valueOf(value.toString()) : null);
 		}
 		return validationResults;
