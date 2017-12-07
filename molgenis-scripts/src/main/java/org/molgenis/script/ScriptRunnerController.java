@@ -58,7 +58,8 @@ public class ScriptRunnerController
 	 *
 	 * @param scriptName name of the Script to start
 	 * @param parameters parameter values for the script
-	 * @throws IOException if an input or output exception occurs when redirecting
+	 * @throws IOException              if an input or output exception occurs when redirecting
+	 * @throws ScriptExecutionException if something went wrong while running the script
 	 */
 	@RequestMapping(value = "/scripts/{name}/start")
 	public void startScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,

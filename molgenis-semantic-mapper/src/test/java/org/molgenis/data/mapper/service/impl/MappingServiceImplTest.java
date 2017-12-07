@@ -12,7 +12,7 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.exception.IncompatibleDataTypeException;
 import org.molgenis.data.mapper.exception.IncompatibleReferenceException;
-import org.molgenis.data.mapper.exception.MissingAttributeException;
+import org.molgenis.data.mapper.exception.MissingTargetAttributeException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -495,7 +495,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		verifyNoMoreInteractions(progress);
 	}
 
-	@Test(expectedExceptions = MissingAttributeException.class, expectedExceptionsMessageRegExp = "name:COUNTRY_1")
+	@Test(expectedExceptions = MissingTargetAttributeException.class, expectedExceptionsMessageRegExp = "name:COUNTRY_1")
 	public void testIncompatibleMetaDataUnknownAttribute()
 	{
 		String targetRepositoryName = "targetRepository";

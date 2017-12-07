@@ -5,6 +5,9 @@ import org.molgenis.data.meta.model.Attribute;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Throw when the data types of two attributes aren't the same when comparing the metadata of two EntityTypes.
+ */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
 @SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class IncompatibleDataTypeException extends IncompatibleTargetException

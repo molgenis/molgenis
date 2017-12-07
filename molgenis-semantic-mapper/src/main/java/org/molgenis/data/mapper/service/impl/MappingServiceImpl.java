@@ -6,7 +6,7 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mapper.exception.IncompatibleDataTypeException;
 import org.molgenis.data.mapper.exception.IncompatibleReferenceException;
 import org.molgenis.data.mapper.exception.IncompatibleTargetException;
-import org.molgenis.data.mapper.exception.MissingAttributeException;
+import org.molgenis.data.mapper.exception.MissingTargetAttributeException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -301,7 +301,7 @@ public class MappingServiceImpl implements MappingService
 			Attribute targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
 			if (targetRepositoryAttribute == null)
 			{
-				throw new MissingAttributeException(mappingTargetAttributeName);
+				throw new MissingTargetAttributeException(mappingTargetAttributeName);
 			}
 
 			AttributeType targetRepositoryAttributeType = targetRepositoryAttribute.getDataType();
