@@ -15,7 +15,6 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -216,15 +215,7 @@ public class NegotiatorController extends PluginController
 		}
 		else
 		{
-			Object value;
-			try
-			{
-				value = jsMagmaScriptEvaluator.eval(expression, entity);
-			}
-			catch (ScriptExecutionException see)
-			{
-				return false;
-			}
+			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
 			return value != null ? Boolean.valueOf(value.toString()) : false;
 		}
 	}
