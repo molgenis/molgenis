@@ -25,7 +25,7 @@ public abstract class AttributeUpdateValidationResult implements ValidationResul
 	public static AttributeUpdateValidationResult create(Attribute attribute, Attribute updatedAttribute,
 			Set<AttributeUpdateConstraint> newConstraints)
 	{
-		return null;//new AutoValue_AttributeValidationResult(attribute, newConstraints);
+		return new AutoValue_AttributeUpdateValidationResult(attribute, updatedAttribute, newConstraints);
 	}
 
 	@Override
