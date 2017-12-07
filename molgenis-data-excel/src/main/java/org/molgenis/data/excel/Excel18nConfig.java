@@ -11,7 +11,7 @@ public class Excel18nConfig
 	public static final String NAMESPACE = "excel";
 
 	@Bean
-	public PropertiesMessageSource searchallMessageSource()
+	public PropertiesMessageSource excelMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

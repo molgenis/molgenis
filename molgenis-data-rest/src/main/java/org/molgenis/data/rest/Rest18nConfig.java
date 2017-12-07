@@ -11,7 +11,7 @@ public class Rest18nConfig
 	public static final String NAMESPACE = "rest";
 
 	@Bean
-	public PropertiesMessageSource searchallMessageSource()
+	public PropertiesMessageSource restMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

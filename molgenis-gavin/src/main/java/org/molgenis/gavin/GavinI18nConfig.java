@@ -11,7 +11,7 @@ public class GavinI18nConfig
 	public static final String NAMESPACE = "gavin";
 
 	@Bean
-	public PropertiesMessageSource searchallMessageSource()
+	public PropertiesMessageSource gavinMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

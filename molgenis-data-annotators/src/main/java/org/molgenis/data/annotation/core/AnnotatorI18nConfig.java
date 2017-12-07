@@ -11,7 +11,7 @@ public class AnnotatorI18nConfig
 	public static final String NAMESPACE = "annotators";
 
 	@Bean
-	public PropertiesMessageSource searchallMessageSource()
+	public PropertiesMessageSource annotatorMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

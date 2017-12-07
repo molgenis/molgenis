@@ -11,7 +11,7 @@ public class Vcf18nConfig
 	public static final String NAMESPACE = "vcf";
 
 	@Bean
-	public PropertiesMessageSource searchallMessageSource()
+	public PropertiesMessageSource vcfMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

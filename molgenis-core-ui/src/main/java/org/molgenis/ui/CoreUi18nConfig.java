@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 public class CoreUi18nConfig
 {
 
-	public static final String NAMESPACE = "core_ui";
+	public static final String NAMESPACE = "core-ui";
 
 	@Bean
-	public PropertiesMessageSource searchallMessageSource()
+	public PropertiesMessageSource coreUiMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}
