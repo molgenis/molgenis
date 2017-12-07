@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSortedSet.of;
 import static com.google.common.collect.Lists.newArrayList;
@@ -106,16 +105,9 @@ public class TagWizardController extends PluginController
 
 	private String selectFirstEntityTypeAsTarget(List<String> entityTypeIds)
 	{
-		Optional<String> findFirst = entityTypeIds.stream().findFirst();
-
-		if (findFirst.isPresent())
-		{
-			return findFirst.get();
-		}
-		else
-		{
-			throw new IllegalStateException("There are no entities available!");
-		}
+		return entityTypeIds.stream()
+							.findFirst()
+							.orElseThrow(() -> new IllegalStateException("There are no entities available!"));
 	}
 
 	/**
