@@ -13,7 +13,7 @@ import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 @SuppressWarnings("MaximumInheritanceDepth")
 public class TemplateCreationException extends ScriptGenerationException
 {
-	private static final String ERROR_CODE = "SC04";
+	private static final String ERROR_CODE = "SC05";
 	private final String name;
 
 	public TemplateCreationException(String name, IOException cause)
