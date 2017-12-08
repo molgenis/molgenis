@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class TemplateCreationException extends ScriptGenerationException
 {
-	private static final String ERROR_CODE = "SC04";
+	private static final String ERROR_CODE = "SC05";
 	private final String name;
 
 	public TemplateCreationException(String name, IOException cause)
