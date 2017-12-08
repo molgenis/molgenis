@@ -73,34 +73,28 @@
                         </#if>
                     </#list>
                 </#if>
-                <#if feedbackRow.success>
-                    <#if feedbackRow.value??>
-                        <#if targetAttribute.dataType == 'DATE'> <!-- its a date -->
-                            <td>${feedbackRow.value.format('MMM d, yyyy')}</td>
-                        <#elseif targetAttribute.dataType == 'DATE_TIME'> <!-- its a date_time -->
-                            <td>${feedbackRow.value.format('MMM d, yyyy HH:mm:SS a')}</td>
-                        <#elseif feedbackRow.value?is_hash> <!-- its an entity -->
-                            <td>${feedbackRow.value.getLabelValue()?html}</td>
-                        <#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
-                            <td>
-                                <#list feedbackRow.value as row>
-                                    <#if row?has_content>${row.labelValue?html}<#if row?has_next>, </#if></#if>
-                                </#list>
-                            </td>
-                        <#elseif feedbackRow.value?is_boolean> <!-- its a boolean -->
-                            <td>${feedbackRow.value?c}</td>
-                        <#else> <!-- its string or int value -->
-                            <td>${feedbackRow.value?html}</td>
-                        </#if>
-                    <#else>
-                        <td><i>null</i></td>
+                <#if feedbackRow.value??>
+                    <#if targetAttribute.dataType == 'DATE'> <!-- its a date -->
+                        <td>${feedbackRow.value.format('MMM d, yyyy')}</td>
+                    <#elseif targetAttribute.dataType == 'DATE_TIME'> <!-- its a date_time -->
+                        <td>${feedbackRow.value.format('MMM d, yyyy HH:mm:SS a')}</td>
+                    <#elseif feedbackRow.value?is_hash> <!-- its an entity -->
+                        <td>${feedbackRow.value.getLabelValue()?html}</td>
+                    <#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
+                        <td>
+                            <#list feedbackRow.value as row>
+                                <#if row?has_content>${row.labelValue?html}<#if row?has_next>, </#if></#if>
+                            </#list>
+                        </td>
+                    <#elseif feedbackRow.value?is_boolean> <!-- its a boolean -->
+                        <td>${feedbackRow.value?c}</td>
+                    <#else> <!-- its string or int value -->
+                        <td>${feedbackRow.value?html}</td>
                     </#if>
+                <#elseif feedbackRow.exception??>
+                        <td>${feedbackRow.exception.message?html}</td>
                 <#else>
-                    <td>
-    							<span class="label label-danger">
-    								Invalid script
-    							</span>
-                    </td>
+                    <td><i>null</i></td>
                 </#if>
             </tr>
             </#list>
