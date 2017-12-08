@@ -171,7 +171,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		assertEquals(result, singletonList(mappingProject));
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "id:mappingProjectID")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_map_MappingProject id:mappingProjectID")
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");
