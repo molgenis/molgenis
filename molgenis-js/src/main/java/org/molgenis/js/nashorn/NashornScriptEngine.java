@@ -3,6 +3,7 @@ package org.molgenis.js.nashorn;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.script.*;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -63,7 +65,7 @@ public class NashornScriptEngine
 			}
 			catch (IOException e)
 			{
-				throw new RuntimeException("", e);
+				throw new UncheckedIOException(e);
 			}
 		});
 
@@ -75,7 +77,7 @@ public class NashornScriptEngine
 		}
 		catch (ScriptException e)
 		{
-			throw new RuntimeException("", e);
+			throw new ScriptExecutionException(e);
 		}
 
 		// create bindings per thread resulting in a JavaScript global per thread
@@ -89,7 +91,7 @@ public class NashornScriptEngine
 			}
 			catch (ScriptException e)
 			{
-				throw new RuntimeException("", e);
+				throw new ScriptExecutionException(e);
 			}
 			return bindings;
 		});
@@ -122,7 +124,7 @@ public class NashornScriptEngine
 				}
 				else
 				{
-					throw new RuntimeException("Unable to convert [ScriptObjectMirror]");
+					throw new ScriptExecutionException("Unable to convert [ScriptObjectMirror]");
 				}
 			}
 		}

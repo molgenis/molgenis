@@ -209,7 +209,15 @@ public class NegotiatorController extends PluginController
 
 	private boolean evaluateExpressionOnEntity(String expression, Entity entity)
 	{
-		return expression == null ? true : Boolean.valueOf(jsMagmaScriptEvaluator.eval(expression, entity).toString());
+		if (expression == null)
+		{
+			return true;
+		}
+		else
+		{
+			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
+			return value != null ? Boolean.valueOf(value.toString()) : false;
+		}
 	}
 
 	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(NegotiatorRequest request, NegotiatorConfig config,

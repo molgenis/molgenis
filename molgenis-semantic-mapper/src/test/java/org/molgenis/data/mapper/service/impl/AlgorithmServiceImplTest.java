@@ -5,12 +5,14 @@ import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
+import org.molgenis.data.mapper.exception.AlgorithmValueConversionException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -48,37 +50,37 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		new AlgorithmServiceImpl(null, null, null, null, null);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidDate' can't be converted to type 'DATE'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDate type:DATE")
 	public void testApplyConvertDateNumberFormatException()
 	{
 		testApplyConvertException("invalidDate", DATE);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidDateTime' can't be converted to type 'DATE_TIME'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDateTime type:DATE_TIME")
 	public void testApplyConvertDateTimeNumberFormatException()
 	{
 		testApplyConvertException("invalidDateTime", DATE_TIME);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidDouble' can't be converted to type 'DECIMAL'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDouble type:DECIMAL")
 	public void testApplyConvertDoubleNumberFormatException()
 	{
 		testApplyConvertException("invalidDouble", DECIMAL);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidInt' can't be converted to type 'INT'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidInt type:INT")
 	public void testApplyConvertIntNumberFormatException()
 	{
 		testApplyConvertException("invalidInt", INT);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'9007199254740991' is larger than the maximum allowed value for type 'INT'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:9007199254740991 type:INT")
 	public void testApplyConvertIntArithmeticException()
 	{
 		testApplyConvertException("9007199254740991", INT);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidLong' can't be converted to type 'LONG'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidLong type:LONG")
 	public void testApplyConvertLongNumberFormatException()
 	{
 		testApplyConvertException("invalidLong", LONG);
@@ -91,14 +93,13 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		String algorithm = "algorithm";
 		Entity entity = mock(Entity.class);
 
-		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new NullPointerException());
+		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new ScriptExecutionException("execution error"));
 
 		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl.applyAlgorithm(attribute, algorithm,
 				Lists.newArrayList(entity));
 		AlgorithmEvaluation eval = result.iterator().next();
 
-		Assert.assertEquals(eval.getErrorMessage(),
-				"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
+		Assert.assertEquals(eval.getErrorMessage(), "cause:execution error");
 	}
 
 	private void testApplyConvertException(String algorithmResult, AttributeType attributeType)

@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.js.nashorn.NashornScriptEngine;
-import org.molgenis.script.ScriptException;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +44,7 @@ public class JsMagmaScriptEvaluator
 	 * @param expression JavaScript expression
 	 * @param entity     entity
 	 * @return evaluated expression result, return type depends on the expression.
+	 * @throws ScriptExecutionException if an error occured executing the script
 	 */
 	public Object eval(String expression, Entity entity)
 	{
@@ -59,9 +60,9 @@ public class JsMagmaScriptEvaluator
 		{
 			value = jsScriptEngine.invokeFunction("evalScript", expression, scriptEngineValueMap);
 		}
-		catch (Throwable t)
+		catch (Exception e)
 		{
-			return new ScriptException(t);
+			throw new ScriptExecutionException(e);
 		}
 
 		if (stopwatch != null)
@@ -141,7 +142,7 @@ public class JsMagmaScriptEvaluator
 				value = entity.getLong(attrName);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalStateException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
