@@ -176,6 +176,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		entityTypeDynamic = metaDataService.getEntityType(entityTypeDynamic.getId());
+	}
+
 	@AfterClass
 	public void tearDown()
 	{
