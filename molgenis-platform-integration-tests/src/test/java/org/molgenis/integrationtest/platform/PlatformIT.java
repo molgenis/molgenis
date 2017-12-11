@@ -164,8 +164,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Create a self refer entity
 		selfXrefEntityType = entitySelfXrefTestHarness.createDynamicEntityType();
 
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			addDefaultLanguages();
 			metaDataService.addEntityType(refEntityTypeDynamic);
 			metaDataService.addEntityType(entityTypeDynamic);
@@ -223,8 +222,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@AfterMethod
 	public void afterMethod()
 	{
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.deleteAll(entityTypeStatic.getId());
 			dataService.deleteAll(refEntityTypeStatic.getId());
 			dataService.deleteAll(entityTypeDynamic.getId());
@@ -310,8 +308,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
 		List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
 			dataService.add(entityTypeDynamic.getId(), entities.stream());
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
@@ -395,8 +392,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		try
 		{
-			runAsSystem(() ->
-			{
+			runAsSystem(() -> {
 				dataService.update(entityTypeDynamic.getId(), entity);
 				dataService.deleteById(refEntityTypeDynamic.getId(), refEntity.getIdValue());
 			});
@@ -447,8 +443,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testDeletePackage()
 	{
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			MetaDataService metadataService = dataService.getMeta();
 
 			Package parentPackage = packageFactory.create("parent").setLabel("parent");
@@ -477,8 +472,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testDeletePackageWithOneToMany()
 	{
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			MetaDataService metadataService = dataService.getMeta();
 
 			Package package_ = packageFactory.create("package_onetomany").setLabel("package");
@@ -514,8 +508,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testReindexOnEntityTypeUpdate()
 	{
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			EntityType entityType = testHarness.createDynamicSelfReferencingTestEntityType();
 			dataService.getMeta().addEntityType(entityType);
 
@@ -824,8 +817,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		Query<Entity> q3 = new QueryImpl<>().eq(ATTR_DECIMAL, 1.123);
 
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			for (int i = 0; i < 100000; i++)
 			{
 				dataService.findAll(entityTypeDynamic.getId(), q1);
@@ -942,8 +934,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
 		List<Entity> testEntities = testHarness.createTestEntities(entityTypeDynamic, 10, testRefEntities)
 											   .collect(toList());
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.add(refEntityTypeDynamic.getId(), testRefEntities.stream());
 			dataService.add(entityTypeDynamic.getId(), testEntities.stream());
 		});
@@ -1354,8 +1345,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic,
 				EntityTestHarness.ATTR_HYPERLINK, searchService, metaDataService, indexService);
+	}
 
-		IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic,
+	@Test(singleThreaded = true)
+	public void testIndexUpdateMetaDataRemoveCompoundAttribute()
+	{
+		IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataRemoveCompoundAttribute(entityTypeDynamic.getId(),
 				EntityTestHarness.ATTR_COMPOUND, searchService, metaDataService, indexService);
 	}
 
@@ -1365,8 +1360,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
 		List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
 			dataService.add(entityTypeDynamic.getId(), entities.stream());
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
@@ -1391,8 +1385,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(count2, 1L);
 
 		refEntities.get(0).set(ATTR_REF_STRING, "searchTestBatchUpdate");
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.update(refEntityTypeDynamic.getId(), refEntities.stream());
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 		});
@@ -1431,8 +1424,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getId());
 		newAttr.setEntity(entityType);
 
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.getMeta().addAttribute(newAttr);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
@@ -1455,8 +1447,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		q0.pageSize(10); // L3 only caches queries with a page size
 		q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			List expected = dataService.findAll(entityTypeDynamic.getId(), q0)
 									   .map(Entity::getIdValue)
 									   .collect(toList());
@@ -1468,8 +1459,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		});
 
 		// verify attribute is deleted by adding and removing it again
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			// Add attribute
 			dataService.getMeta().addAttribute(newAttr);
 
@@ -1490,8 +1480,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getId());
 		newAttr.setEntity(entityType);
 
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.getMeta().addAttributes(entityType.getId(), Stream.of(newAttr));
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 
@@ -1526,8 +1515,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		newAttr.setEntity(entityType);
 
 		// Add attribute
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.getMeta().addAttribute(newAttr);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
@@ -1560,8 +1548,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		newAttr.setDescription("test");
 
 		// Update attribute
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			// Update added attribute
 			dataService.update(ATTRIBUTE_META_DATA, newAttr);
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
@@ -1575,8 +1562,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(attr.getDescription(), "test");
 
 		// Delete attribute
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			// Remove added attribute
 			dataService.getMeta().deleteAttributeById(newAttr.getIdValue());
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
@@ -1598,8 +1584,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		assertEquals(newAttr.getSequenceNumber(), Integer.valueOf(2)); // Test if sequence number is 2
 
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType)); // Adds the column to the table
 			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
 
@@ -1623,8 +1608,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		q0.pageSize(10); // L3 only caches queries with a page size
 		q0.sort(new Sort().on(NEW_ATTRIBUTE));
 
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			List expected = dataService.findAll(entityTypeDynamic.getId(), q0)
 									   .map(Entity::getIdValue)
 									   .collect(toList());
@@ -1638,8 +1622,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		});
 
 		// verify attribute is deleted by adding and removing it again
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			entityType.addAttribute(newAttr);
 			dataService.update(ENTITY_TYPE_META_DATA, Stream.of(entityType));
 			dataService.add(ATTRIBUTE_META_DATA, Stream.of(newAttr));
@@ -1658,8 +1641,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
 		List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities).collect(toList());
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.add(refEntityTypeDynamic.getId(), refEntities.stream());
 			dataService.add(entityTypeDynamic.getId(), entities.stream());
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
