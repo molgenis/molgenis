@@ -108,8 +108,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 
 		// Reset context
 		toUpdateAttribute.setDataType(EMAIL);
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			metaDataService.deleteEntityType(entityTypeDynamic.getId());
 			metaDataService.addEntityType(entityTypeDynamic);
 		});
@@ -144,8 +143,9 @@ public class IndexMetadataCUDOperationsPlatformIT
 		assertEquals(searchService.count(emdActual, q2), 0);
 
 		// Reset context
-		emd.addAttribute(toRemoveAttribute);
-		runAsSystem(() -> metaDataService.updateEntityType(emd));
+		EntityType updatedEntityType = metaDataService.getEntityType(emd.getId());
+		updatedEntityType.addAttribute(toRemoveAttribute);
+		runAsSystem(() -> metaDataService.updateEntityType(updatedEntityType));
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 }
