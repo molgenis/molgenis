@@ -1356,8 +1356,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(singleThreaded = true)
 	public void testIndexUpdateMetaDataRemoveCompoundAttribute()
 	{
-		IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataRemoveCompoundAttribute(entityTypeDynamic.getId(),
-				EntityTestHarness.ATTR_COMPOUND, searchService, metaDataService, indexService);
+		IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataRemoveCompoundAttribute(entityTypeDynamic,
+				attributeFactory, searchService, metaDataService, indexService);
 	}
 
 	// Derived from fix: https://github.com/molgenis/molgenis/issues/5227

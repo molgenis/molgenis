@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -8,19 +7,15 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetadata;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -152,36 +147,46 @@ public class IndexMetadataCUDOperationsPlatformIT
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
-	public static void testIndexUpdateMetaDataRemoveCompoundAttribute(String entityTypeId, String attributeName,
-			ElasticsearchService searchService, MetaDataService metaDataService, IndexJobScheduler indexService)
+	public static void testIndexUpdateMetaDataRemoveCompoundAttribute(EntityType entityType,
+			AttributeFactory attributeFactory, ElasticsearchService searchService, MetaDataService metaDataService,
+			IndexJobScheduler indexService)
 	{
-		// 1. Get local copy of EntityType
-		EntityType entityType = metaDataService.getEntityType(entityTypeId);
+		// 1. Create new compound to test delete
+		Attribute compound = attributeFactory.create();
+		compound.setName("test_compound");
+		compound.setDataType(AttributeType.COMPOUND);
 
-		// 2. Get compound and children, and remove compound
-		Attribute compound = entityType.getAttribute(attributeName);
-		List<Attribute> compoundChildren = Lists.newArrayList(compound.getChildren());
+		Attribute compoundChild = attributeFactory.create();
+		compoundChild.setName("test_compound_child");
+		compoundChild.setParent(compound);
 
-		entityType.removeAttribute(compound);
-
-		// 3. Perform update
+		entityType.addAttributes(newArrayList(compound, compoundChild));
 		runAsSystem(() -> metaDataService.updateEntityType(entityType));
 		waitForWorkToBeFinished(indexService, LOG);
 		assertTrue(searchService.hasIndex(entityType));
 
-		// 4. Verify that compound + children were removed
-		EntityType afterUpdateEntityType = metaDataService.getEntityType(entityTypeId);
-		assertEquals(afterUpdateEntityType.getAttribute(compound.getName()), null);
+		// 2. Verify compound and child got added
+		EntityType afterAddEntityType = metaDataService.getEntityType(entityType.getId());
+		assertNotNull(afterAddEntityType.getAttribute("test_compound"));
+		assertNotNull(afterAddEntityType.getAttribute("test_compound_child"));
+
+		// 3. Delete compound
+		afterAddEntityType.removeAttribute(compound);
+		runAsSystem(() -> metaDataService.updateEntityType(afterAddEntityType));
+		waitForWorkToBeFinished(indexService, LOG);
+		assertTrue(searchService.hasIndex(afterAddEntityType));
+
+		// 4. Verify that compound + child was removed
+		EntityType afterRemoveEntityType = metaDataService.getEntityType(entityType.getId());
+		assertNull(afterRemoveEntityType.getAttribute(compound.getName()));
+		assertNull(afterRemoveEntityType.getAttribute(compoundChild.getName()));
 
 		EntityType attributeMetadata = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
-		Query<Entity> childQuery = new QueryImpl<>().in(AttributeMetadata.ID,
-				compoundChildren.stream().map(child -> child.getIdValue().toString()).collect(Collectors.toList()));
-		assertEquals(searchService.count(attributeMetadata, childQuery), 0);
 
-		// 5. Reset context
-		afterUpdateEntityType.addAttribute(compound);
-		runAsSystem(() -> metaDataService.updateEntityType(afterUpdateEntityType));
-		waitForWorkToBeFinished(indexService, LOG);
-		assertTrue(searchService.hasIndex(entityType));
+		Query<Entity> compoundQuery = new QueryImpl<>().eq(AttributeMetadata.ID, compound.getIdValue());
+		Query<Entity> childQuery = new QueryImpl<>().eq(AttributeMetadata.ID, compoundChild.getIdValue());
+
+		assertEquals(searchService.count(attributeMetadata, compoundQuery), 0);
+		assertEquals(searchService.count(attributeMetadata, childQuery), 0);
 	}
 }
