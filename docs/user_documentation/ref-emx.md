@@ -254,7 +254,7 @@ free text description of the entity
 description for specified language (can be multiple languages, example: description-nl)
 
 ### backend
-the backend (database) to store the entities in (currently only PostGreSQL)
+the backend (database) to store the entities in (currently only PostgreSQL)
 
 ### tags 
 ability to tag the data referring to the tags sections, described below
