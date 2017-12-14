@@ -17,7 +17,6 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
-import org.molgenis.dataexplorer.exception.FunctionalityDisabledException
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
@@ -31,7 +30,6 @@ import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -435,7 +433,7 @@ public class DataExplorerController extends PluginController
 	 * Builds a model containing one entity and returns standalone report ftl view
 	 *
 	 * @return standalone report view
-	 * @throws Exception                   if an entity name or id is not found
+	 * @throws Exception                  if an entity name or id is not found
 	 * @throws UnknownEntityTypeException if an EntityType does not exist
 	 */
 	@GetMapping("/details/{entityTypeId}/{entityId}")
