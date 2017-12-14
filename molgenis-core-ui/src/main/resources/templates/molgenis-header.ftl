@@ -62,6 +62,11 @@
     <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
     <script src="<@resource_href "/js/molgenis.js"/>"></script>
     <script src="<@resource_href "/js/script-evaluator.js"/>"></script>
+    <#if version?? && version gt 1>
+        <script src="<@resource_href "/js/bootstrap4/popper.min.js"/>"></script>
+        <script src="<@resource_href "/js/bootstrap4/bootstrap.min.js"/>"></script>
+    </#if>
+
     <#if googleSignIn>
         <#if authenticated?? && authenticated>
         <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
