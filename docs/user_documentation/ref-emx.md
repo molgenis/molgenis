@@ -103,8 +103,7 @@ Packages:
 For all technical names in the EMX format, the following rules apply:
 - No special characters, except for; '_' and '#', only letters, numbers are allowed.
 - No names starting with digits. 
-- Maximum length for names is 30 chars.
-- Keywords used by programming languages (e.g. java, javascript, postgresql) are not allowed.
+- The keywords: "login", "logout", "csv", "base", "exist", "meta", are not allowed.
 
 These rules only apply to the technical names, labels are not limited by these rules.
 
@@ -158,10 +157,10 @@ Free text documentation describing the attribute
 Description for specified language (can be multiple languages, example: description-nl)
 
 ### rangeMin 
-Used to set range in case of int attributes
+Used to set range in case of int or long attributes
 
 ### rangeMax 
-Used to set range in case of int attributes
+Used to set range in case of int or long attributes
 
 ### lookupAttribute 
 true/false, default false
@@ -191,7 +190,7 @@ true/false to indicate a readOnly attribute
 ability to tag the data referring to the tags sections, described below
 
 ### validationExpression 
-javascript validation expression that must return a bool. Must return true if valid and false if invalid. See the [Expressions](ref-expressions) section for a syntax description.
+javascript validation expression that must return a bool. Must return true if valid and false if invalid. See the [Expressions](ref-expressions.md) section for a syntax description.
 
 ### defaultValue
 value that will be filled in in the forms when a new entity instance is created. Not yet supported for mref and xref values. For categorical_mref, should be a comma separated list of ids. For xref should be the of the refEntity. For bool should be true or false. For datetime should be a string in the format YYYY-MM-DDTHH:mm:ssZZ. For date should be a string in the format YYYY-MM-DD.
@@ -255,7 +254,7 @@ free text description of the entity
 description for specified language (can be multiple languages, example: description-nl)
 
 ### backend
-the backend (database) to store the entities in (currently PostGreSQL or ElasticSearch)
+the backend (database) to store the entities in (currently only PostGreSQL)
 
 ### tags 
 ability to tag the data referring to the tags sections, described below
