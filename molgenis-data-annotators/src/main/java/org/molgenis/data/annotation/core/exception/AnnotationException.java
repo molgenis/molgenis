@@ -60,7 +60,6 @@ public class AnnotationException extends CodedRuntimeException
 	protected Object[] getLocalizedMessageArguments()
 	{
 		String languageCode = LocaleContextHolder.getLocale().getLanguage();
-		// Annotation with annotator:''{3}'' failed for entity:''{0,label}'' on row: {1}, required attributes for this annotator:''{2}''
 		String requiredAttributeNames = requiredAttributes.stream()
 														  .map(attr -> attr.getLabel(languageCode))
 														  .collect(Collectors.joining(","));

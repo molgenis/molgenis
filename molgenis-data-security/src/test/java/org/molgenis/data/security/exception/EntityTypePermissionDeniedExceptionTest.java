@@ -2,6 +2,7 @@ package org.molgenis.data.security.exception;
 
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.molgenis.security.core.Permission;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -9,7 +10,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-public class EntityTypePermissionDeniedExceptionTest extends org.molgenis.i18n.test.exception.ExceptionMessageTest
+public class EntityTypePermissionDeniedExceptionTest extends ExceptionMessageTest
 {
 	@Mock
 	private EntityType entityType;

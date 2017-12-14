@@ -7,10 +7,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import static java.util.Locale.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.molgenis.i18n.LanguageService.DEFAULT_LOCALE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -20,6 +21,8 @@ public class LocalizationMessageSourceTest extends AbstractMockitoTest
 	private MessageResolution messageRepository;
 	@Mock
 	private Labeled labeled;
+	@Mock
+	private Supplier<Locale> fallbackLocaleSupplier;
 
 	private LocalizationMessageSource messageSource;
 	private MessageFormatFactory messageFormatFactory = new MessageFormatFactory();
@@ -27,7 +30,7 @@ public class LocalizationMessageSourceTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUp()
 	{
-		messageSource = new LocalizationMessageSource(messageFormatFactory, messageRepository, () -> new Locale("nl"));
+		messageSource = new LocalizationMessageSource(messageFormatFactory, messageRepository, fallbackLocaleSupplier);
 	}
 
 	@Test
@@ -47,6 +50,7 @@ public class LocalizationMessageSourceTest extends AbstractMockitoTest
 	@Test
 	public void testResolveCodeWithoutArgumentsMessageFoundForAppDefaultLanguage()
 	{
+		doReturn(new Locale("nl")).when(fallbackLocaleSupplier).get();
 		doReturn(null).when(messageRepository).resolveCodeWithoutArguments("TEST_MESSAGE_NL", GERMAN);
 		doReturn("Nederlands bericht").when(messageRepository)
 									  .resolveCodeWithoutArguments("TEST_MESSAGE_NL", new Locale("nl"));
@@ -82,6 +86,7 @@ public class LocalizationMessageSourceTest extends AbstractMockitoTest
 	@Test
 	public void testResolveCodeFallbackIsIndependentOfArgumentFallback()
 	{
+		doReturn(new Locale("nl")).when(fallbackLocaleSupplier).get();
 		// The message lookup is done with fallback but independently of the lookup by the formatter which in MOLGENIS
 		// has its own standard fallback mechanism.
 		doReturn(null).when(messageRepository).resolveCodeWithoutArguments("TEST_MESSAGE_EN", new Locale("ko"));
@@ -90,5 +95,15 @@ public class LocalizationMessageSourceTest extends AbstractMockitoTest
 											 .resolveCodeWithoutArguments("TEST_MESSAGE_EN", new Locale("nl"));
 		assertEquals(messageSource.resolveCode("TEST_MESSAGE_EN", KOREAN).format(new Object[] { labeled }),
 				"Het label: 'The Label (ko)'");
+	}
+
+	@Test
+	public void testResolveCodeWithoutArgumentsSupplierFails()
+	{
+		doThrow(new RuntimeException()).when(fallbackLocaleSupplier).get();
+		doReturn("test").when(messageRepository).resolveCodeWithoutArguments("TEST", DEFAULT_LOCALE);
+
+		assertEquals(messageSource.resolveCodeWithoutArguments("TEST", null), "test");
+
 	}
 }

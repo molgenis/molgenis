@@ -1,7 +1,5 @@
 package org.molgenis.i18n;
 
-import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
-
 /**
  * If you want localization messages for a namespace to be picked up by the populator,
  * you need to create a {@link PropertiesMessageSource} bean for that namespace and add it to the context.
@@ -21,10 +19,5 @@ public class PropertiesMessageSource
 	public String getNamespace()
 	{
 		return namespace;
-	}
-
-	public String getBasename()
-	{
-		return CLASSPATH_URL_PREFIX + "l10n/" + namespace;
 	}
 }

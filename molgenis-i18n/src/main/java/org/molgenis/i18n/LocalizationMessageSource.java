@@ -4,6 +4,7 @@ import org.molgenis.i18n.format.MessageFormatFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractMessageSource;
 
+import javax.annotation.Nullable;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Objects;
@@ -72,19 +73,33 @@ public class LocalizationMessageSource extends AbstractMessageSource
 	/**
 	 * Looks up a code in the {@link MessageResolution}.
 	 * <p>
-	 * First tries the given locale, then the getDefaultLanguageCode provided and finally the default language.
+	 * First tries the given locale if it is nonnull, then the fallbackLocale and finally the default locale.
 	 *
 	 * @param code   the messageID to look up.
-	 * @param locale the Locale whose language code should be tried first.
+	 * @param locale the Locale whose language code should be tried first, may be null
 	 * @return The message, or null if none found.
 	 */
 	@Override
-	protected String resolveCodeWithoutArguments(String code, Locale locale)
+	protected String resolveCodeWithoutArguments(String code, @Nullable Locale locale)
 	{
-		Stream<Locale> candidates = Stream.of(locale, fallbackLocaleSupplier.get(), DEFAULT_LOCALE);
-		return candidates.map(candidate -> messageRepository.resolveCodeWithoutArguments(code, candidate))
+		Stream<Locale> candidates = Stream.of(locale, tryGetFallbackLocale(), DEFAULT_LOCALE);
+		return candidates.filter(Objects::nonNull)
+						 .map(candidate -> messageRepository.resolveCodeWithoutArguments(code, candidate))
 						 .filter(Objects::nonNull)
 						 .findFirst()
 						 .orElse(null);
+	}
+
+	private Locale tryGetFallbackLocale()
+	{
+		Locale fallbackLocale = null;
+		try
+		{
+			fallbackLocale = fallbackLocaleSupplier.get();
+		}
+		catch (RuntimeException ignore)
+		{
+		}
+		return fallbackLocale;
 	}
 }

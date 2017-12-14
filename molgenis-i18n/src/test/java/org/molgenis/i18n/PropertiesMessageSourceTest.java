@@ -9,12 +9,6 @@ public class PropertiesMessageSourceTest
 	PropertiesMessageSource propertiesMessageSource = new PropertiesMessageSource(" naMespace\t");
 
 	@Test
-	public void testGetBasename()
-	{
-		assertEquals(propertiesMessageSource.getBasename(), "classpath:l10n/namespace");
-	}
-
-	@Test
 	public void testGetNamespace()
 	{
 		assertEquals(propertiesMessageSource.getNamespace(), "namespace");
