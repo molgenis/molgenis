@@ -6,7 +6,7 @@ Collection of integration tests to run against a live server. Tests use a java h
 
 ##### Maven properties:
 
-`REST_TEST_HOST=[url_of_live_molgenis_to_test_agains]` // defaults http://localhost:8080  
+`REST_TEST_HOST=[url_of_live_molgenis_to_test_against]` // default http://localhost:8080  
 `REST_TEST_ADMIN_NAME=[name_of_admin_user]` // user name of user that acts as 'admin' user, this user is used to for test setup and teardown  
 `REST_TEST_ADMIN_PW=[password_for_admin_users]`
 
@@ -31,3 +31,9 @@ All of the above mentioned maven properties + the following environment variable
 
 set environment variables   
 `mvn test -Dtest=ImportPublicDataIT -DREST_TEST_ADMIN_NAME="[admin_name]" -DREST_TEST_ADMIN_PW="[admin_pw]"` 
+
+##### Running on a CI-server
+
+We run separate builds for each individual customer. To add a job for a new customer please check the existing builds. You can copy a job and update the configuration.
+
+Check CI-jobs: [![Import public data job](https://molgenis50.gcc.rug.nl/jenkins/buildStatus/icon?job=Nightly%20live%20API%20Tests)]()
