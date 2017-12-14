@@ -8,14 +8,12 @@
 
     <span class="input-group-btn">
       <button @click="submitQuery()" class="btn btn-primary" :disabled="!query"
-              type="button"> {{'search-button-label' | i18n}}
-      </button>
+              type="button">{{'search-button-label' | i18n}}</button>
     </span>
 
     <span class="input-group-btn">
       <button @click="clearQuery()" class="btn btn-light" :disabled="!query"
-              type="button"> {{'clear-button-label' | i18n}}
-      </button>
+              type="button">{{'clear-button-label' | i18n}}</button>
     </span>
   </div>
 </template>
