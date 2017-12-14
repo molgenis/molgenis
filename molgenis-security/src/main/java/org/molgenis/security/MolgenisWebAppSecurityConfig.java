@@ -29,8 +29,6 @@ import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.security.user.UserService;
-import org.molgenis.web.exception.BadRequestController;
-import org.molgenis.web.exception.InternalServerErrorController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -155,104 +153,105 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
-		expressionInterceptUrlRegistry.antMatchers(BadRequestController.URI, InternalServerErrorController.URI)
-									  .permitAll()
+		expressionInterceptUrlRegistry
 
-									  .antMatchers(MolgenisLoginController.URI)
-									  .permitAll()
+				.antMatchers(MolgenisLoginController.URI)
+				.permitAll()
 
-									  .antMatchers(TwoFactorAuthenticationController.URI + "/**")
-									  .permitAll()
+				.antMatchers(TwoFactorAuthenticationController.URI + "/**")
+				.permitAll()
 
-									  .antMatchers(GOOGLE_AUTHENTICATION_URL)
-									  .permitAll()
+				.antMatchers(GOOGLE_AUTHENTICATION_URL)
+				.permitAll()
 
-									  .antMatchers("/logo/**")
-									  .permitAll()
+				.antMatchers("/beacon/**")
+				.permitAll()
 
-									  .antMatchers("/molgenis.py")
-									  .permitAll()
+				.antMatchers("/logo/**")
+				.permitAll()
 
-									  .antMatchers("/molgenis.R")
-									  .permitAll()
+				.antMatchers("/molgenis.py")
+				.permitAll()
 
-									  .antMatchers(AccountController.CHANGE_PASSWORD_URI)
-									  .authenticated()
+				.antMatchers("/molgenis.R")
+				.permitAll()
 
-									  .antMatchers("/account/**")
-									  .permitAll()
+				.antMatchers(AccountController.CHANGE_PASSWORD_URI)
+				.authenticated()
 
-									  .antMatchers(PATTERN_SWAGGER)
-									  .permitAll()
+				.antMatchers("/account/**")
+				.permitAll()
 
-									  .antMatchers(PATTERN_CSS)
-									  .permitAll()
+				.antMatchers(PATTERN_SWAGGER)
+				.permitAll()
 
-									  .antMatchers(PATTERN_IMG)
-									  .permitAll()
+				.antMatchers(PATTERN_CSS)
+				.permitAll()
 
-									  .antMatchers(PATTERN_JS)
-									  .permitAll()
+				.antMatchers(PATTERN_IMG)
+				.permitAll()
 
-									  .antMatchers(PATTERN_FONTS)
-									  .permitAll()
+				.antMatchers(PATTERN_JS)
+				.permitAll()
 
-									  .antMatchers("/html/**")
-									  .permitAll()
+				.antMatchers(PATTERN_FONTS)
+				.permitAll()
 
-									  .antMatchers("/plugin/void/**")
-									  .permitAll()
+				.antMatchers("/html/**")
+				.permitAll()
 
-									  .antMatchers("/api/**")
-									  .permitAll()
+				.antMatchers("/plugin/void/**")
+				.permitAll()
 
-									  .antMatchers("/webjars/**")
-									  .permitAll()
+				.antMatchers("/api/**")
+				.permitAll()
 
-									  .antMatchers("/search")
-									  .permitAll()
+				.antMatchers("/webjars/**")
+				.permitAll()
 
-									  .antMatchers("/captcha")
-									  .permitAll()
+				.antMatchers("/search")
+				.permitAll()
 
-									  .antMatchers("/dataindexerstatus")
-									  .authenticated()
+				.antMatchers("/captcha")
+				.permitAll()
 
-									  .antMatchers("/permission/**/read/**")
-									  .permitAll()
+				.antMatchers("/dataindexerstatus")
+				.authenticated()
 
-									  .antMatchers("/permission/**/write/**")
-									  .permitAll()
+				.antMatchers("/permission/**/read/**")
+				.permitAll()
 
-									  .antMatchers("/scripts/**/run")
-									  .authenticated()
+				.antMatchers("/permission/**/write/**")
+				.permitAll()
 
-									  .antMatchers("/scripts/**/start")
-									  .authenticated()
+				.antMatchers("/scripts/**/run")
+				.authenticated()
 
-									  .antMatchers("/files/**")
-									  .permitAll()
+				.antMatchers("/scripts/**/start")
+				.authenticated()
 
-									  .antMatchers('/' + PATH_SEGMENT_APPS + "/**")
-									  .permitAll()
+				.antMatchers("/files/**")
+				.permitAll()
 
-									  .anyRequest()
-									  .denyAll()
-									  .and()
+				.antMatchers('/' + PATH_SEGMENT_APPS + "/**")
+				.permitAll()
 
-									  .httpBasic()
-									  .authenticationEntryPoint(authenticationEntryPoint())
-									  .and()
+				.anyRequest()
+				.denyAll()
+				.and()
 
-									  .formLogin()
-									  .loginPage(MolgenisLoginController.URI)
-									  .failureUrl(MolgenisLoginController.URI + "?error")
-									  .and()
+				.httpBasic()
+				.authenticationEntryPoint(authenticationEntryPoint())
+				.and()
 
-									  .logout()
-									  .deleteCookies("JSESSIONID")
-									  .addLogoutHandler((req, res, auth) ->
-				{
+				.formLogin()
+				.loginPage(MolgenisLoginController.URI)
+				.failureUrl(MolgenisLoginController.URI + "?error")
+				.and()
+
+				.logout()
+				.deleteCookies("JSESSIONID")
+				.addLogoutHandler((req, res, auth) -> {
 					if (req.getSession(false) != null
 							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -260,8 +259,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					}
 				})
 
-									  .logoutSuccessHandler((req, res, auth) ->
-				{
+				.logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -271,10 +269,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
 					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
 				})
-									  .and()
+				.and()
 
-									  .csrf()
-									  .disable();
+				.csrf()
+				.disable();
 
 	}
 
@@ -431,7 +429,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		try
 		{
-			auth.userDetailsService(userDetailsServiceBean());
 			DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
 			authenticationProvider.setPasswordEncoder(passwordEncoder());
 			authenticationProvider.setUserDetailsService(userDetailsServiceBean());

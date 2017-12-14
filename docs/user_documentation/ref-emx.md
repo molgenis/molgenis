@@ -28,7 +28,7 @@ Then you must provide a model of your 'patients' via Excel with sheet named 'att
 You can first upload the 'model' and then the 'data'. Or you can put the both into one file and upload in one go. What you prefer :-) [todo: provide example files for download]
 
 # Advanced example 
-([download](../data/advanced_data_example_v20151104.xlsx))
+([download](../data/advanced_data_example_v20171206.xlsx))
 
 Lets assume we want to upload multiple data sheets, with relations between them:
 
@@ -43,7 +43,7 @@ Patients:
 
 | displayName | firstName | lastName | birthdate  | birthplace | children           | disease |
 |-------------|-----------|----------|------------|------------|--------------------|---------|
-| john_doe    | john      | doe      | 1976-13-03 | new_york   |                    | none    |
+| john_doe    | john      | doe      | 1976-03-13 | new_york   |                    | none    |
 | jane_doe    | jane      | doe      |            | metropolis |                    | none    |
 | papa_doe    | papa      | doe      |            | new_york   | john_doe, jane_doe | cardio  |
 

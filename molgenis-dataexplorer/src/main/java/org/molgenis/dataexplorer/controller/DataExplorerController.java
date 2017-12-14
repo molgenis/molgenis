@@ -17,9 +17,6 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
-import org.molgenis.dataexplorer.exception.FunctionalityDisabledException;
-import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
-import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
@@ -33,7 +30,6 @@ import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -41,9 +37,6 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
@@ -53,7 +46,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
@@ -64,7 +57,6 @@ import static org.molgenis.util.EntityUtils.getTypedValue;
  */
 @Controller
 @RequestMapping(URI)
-@SessionAttributes({ ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
 public class DataExplorerController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataExplorerController.class);
@@ -72,8 +64,6 @@ public class DataExplorerController extends PluginController
 	public static final String ID = "dataexplorer";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	static final String ATTR_GALAXY_URL = "galaxyUrl";
-	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
 	public static final String MOD_ANNOTATORS = "annotators";
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
@@ -414,41 +404,6 @@ public class DataExplorerController extends PluginController
 		return String.format("%s_%s.%s", entityTypeId, timestamp, downloadType == DOWNLOAD_TYPE_CSV ? "csv" : "xlsx");
 	}
 
-	@PostMapping("/galaxy/export")
-	@ResponseStatus(HttpStatus.OK)
-	public void exportToGalaxy(@Valid @RequestBody GalaxyDataExportRequest galaxyDataExportRequest, Model model)
-			throws IOException
-	{
-		boolean galaxyEnabled = dataExplorerSettings.getGalaxyExport();
-		if (!galaxyEnabled) throw new FunctionalityDisabledException("Galaxy export");
-
-		DataExplorerDownloadHandler download = new DataExplorerDownloadHandler(dataService, attrMetaFactory);
-
-		String galaxyUrl = galaxyDataExportRequest.getGalaxyUrl();
-		String galaxyApiKey = galaxyDataExportRequest.getGalaxyApiKey();
-		GalaxyDataExporter galaxyDataSetExporter = new GalaxyDataExporter(galaxyUrl, galaxyApiKey);
-
-		DataRequest dataRequest = galaxyDataExportRequest.getDataRequest();
-
-		File csvFile = File.createTempFile("galaxydata_" + System.currentTimeMillis(), ".tsv");
-		try
-		{
-			download.writeToCsv(dataRequest, new FileOutputStream(csvFile), '\t', true);
-			galaxyDataSetExporter.export(dataRequest.getEntityName(), csvFile);
-		}
-		finally
-		{
-			if (!csvFile.delete())
-			{
-				LOG.warn("Failed to delete temporary file '{}'", csvFile.getName());
-			}
-		}
-
-		// store url and api key in session for subsequent galaxy export requests
-		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
-		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
-	}
-
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
 	 *
@@ -478,7 +433,7 @@ public class DataExplorerController extends PluginController
 	 * Builds a model containing one entity and returns standalone report ftl view
 	 *
 	 * @return standalone report view
-	 * @throws Exception                   if an entity name or id is not found
+	 * @throws Exception                  if an entity name or id is not found
 	 * @throws UnknownEntityTypeException if an EntityType does not exist
 	 */
 	@GetMapping("/details/{entityTypeId}/{entityId}")
