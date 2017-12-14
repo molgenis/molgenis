@@ -61,6 +61,8 @@ GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val
 GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val;q=attr1=ge=5
 ```
 
+See the [MOLGENIS RSQL documentation](./ref-RSQL.md) for all supported operators in MOLGENIS and matching examples.
+
 ## Aggregation
 
 We also support aggregation of the result query:

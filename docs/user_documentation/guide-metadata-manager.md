@@ -162,7 +162,33 @@ You can select existing EntityTypes in the dropdown at the top of the screen
 
 On select, all the fields that were visible for creating a new EntityType are available to you.
 After you are done changing things, you can hit the save all changes button.
- 
+
+### Conversion list of data types
+This list describes the allowed conversion of data types in the metadata edit, and also some extra info and motivation.
+
+| Origin Attribute Type | Allowed conversions |
+|-----------------------|---------------------|
+| BOOL                  | STRING, TEXT, INT   |
+| CATEGORICAL           | STRING, INT, LONG, XREF |
+| CATEGORICAL_MREF      | MREF                |
+| COMPOUND              | STRING              |
+| DATE                  | STRING, TEXT, DATE_TIME |
+| DATE_TIME             | STRING, TEXT, DATE  |
+| DECIMAL               | STRING, TEXT, INT, LONG, ENUM |
+| EMAIL                 | STRING, TEXT, XREF, CATEGORICAL |
+| ENUM                  | STRING, INT, LONG, TEXT |
+| FILE                  | NONE                |
+| HTML                  | STIRNG, TEXT, SCRIPT |
+| HYPERLINK             | STRING, TEXT, XREF, CATEGORICAL |
+| INT                   | STRING, TEXT, DECIMAL, LONG, BOOL, ENUM, XREF, CATEGORICAL |
+| LONG                  | STRING, TEXT, INT, DECIMAL, ENUM, XREF, CATEGORICAL |
+| MREF                  | CATEGORICAL_MREF    |
+| ONE_TO_MANY           | NONE                |
+| SCRIPT                | STRING, TEXT        |
+| STRING                | ALL                 |
+| TEXT                  | ALL                 |
+| XREF                  | STRING, INT, LONG, CATEGORICAL |
+
 ## Deleting existing EntityTypes
 If you want to remove an EntityType because you want to start over or had some experiments that are no longer necessary, you can go and
 select that EntityType and hit the big 'Delete entity' button
