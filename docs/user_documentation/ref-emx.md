@@ -157,10 +157,10 @@ Free text documentation describing the attribute
 Description for specified language (can be multiple languages, example: description-nl)
 
 ### rangeMin 
-Used to set range in case of int, decimal or long attributes
+Used to set range in case of int or long attributes
 
 ### rangeMax 
-Used to set range in case of int, decimal or long attributes
+Used to set range in case of int or long attributes
 
 ### lookupAttribute 
 true/false, default false
