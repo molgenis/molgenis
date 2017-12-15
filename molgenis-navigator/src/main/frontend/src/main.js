@@ -1,19 +1,16 @@
-import 'es6-promise/auto'
 import Vue from 'vue'
 import App from './App'
-import { sync } from 'vuex-router-sync'
 import store from './store'
 import router from './router'
-// You can use both the components found @https://bootstrap-vue.github.io/
-import BootstrapVue from 'bootstrap-vue/dist/bootstrap-vue.esm'
+import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 
+import { sync } from 'vuex-router-sync'
+import { INITIAL_STATE } from './store/state'
+
+import BootstrapVue from 'bootstrap-vue'
 import 'font-awesome/css/font-awesome.min.css'
 
-import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
-import { INITIAL_STATE } from './store/state'
-// Keeps the router and the store in sync @https://github.com/vuejs/vuex-router-sync
 sync(store, router)
-
 Vue.use(BootstrapVue)
 
 Vue.use(i18n, {
