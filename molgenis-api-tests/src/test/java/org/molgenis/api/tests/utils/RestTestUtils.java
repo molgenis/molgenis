@@ -132,34 +132,35 @@ public class RestTestUtils
 	 * Import emx file using add/update.
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 *
 	 * @param adminToken to use for login
 	 * @param fileName   the file to upload
+	 * @return String indicating state of completed job
+	 *
 	 */
-	public static void uploadEMX(String adminToken, String fileName)
+	public static String uploadEMX(String adminToken, String fileName)
 	{
 		File file = getResourceFile(fileName);
 
-		uploadEMXFile(adminToken, file);
+		return uploadEMXFile(adminToken, file);
 	}
 
 	/**
 	 * Import emx file using add/update.
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 *
 	 * @param adminToken to use for login
-	 * @param pathToFileFolder
+	 * @param pathToFileFolder path to folder to look for emx file to import
 	 * @param fileName name of the file to upload
+	 * @return String indicating state of completed job
 	 */
-	public static void uploadEMX(String adminToken, String pathToFileFolder, String fileName)
+	public static String uploadEMX(String adminToken, String pathToFileFolder, String fileName)
 	{
 		File file = new File(pathToFileFolder + File.separator + fileName);
 
-		uploadEMXFile(adminToken, file);
+		return uploadEMXFile(adminToken, file);
 	}
 
-	private static void uploadEMXFile(String adminToken, File file)
+	private static String uploadEMXFile(String adminToken, File file)
 	{
 		String importJobURLString = given().multiPart(file)
 										   .param("file")
@@ -170,14 +171,7 @@ public class RestTestUtils
 										   .extract()
 										   .asString();
 
-		// Remove the leading '/' character and leading and trailing '"' characters
-		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
-
-		LOG.info("############ " + importJobURL);
-		await().pollDelay(500, MILLISECONDS)
-			   .atMost(5, MINUTES)
-			   .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
-		LOG.info("Import completed");
+		return monitorImportJob(adminToken, importJobURLString);
 	}
 
 	private static File getResourceFile(String fileName)
@@ -196,14 +190,14 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Import emx file using add/update.
+	 * Import vcf file using add
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 *
 	 * @param adminToken to use for login
 	 * @param fileName   the file to upload
+	 * @return String indicating state of completed job
 	 */
-	public static void uploadVCF(String adminToken, String fileName, String entityName)
+	public static String uploadVCFToEntity(String adminToken, String fileName, String entityName)
 	{
 		File file = getResourceFile(fileName);
 
@@ -216,7 +210,39 @@ public class RestTestUtils
 										   .then()
 										   .extract()
 										   .asString();
+		return monitorImportJob(adminToken, importJobURLString);
+	}
 
+	/**
+	 * Import vcf file using add
+	 * <p>
+	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 * @param adminToken to use for login
+	 * @param pathToFileFolder path to folder to look for emx file to import
+	 * @param fileName   the file to upload
+	 * @return String indicating state of completed job
+	 */
+	public static String uploadVCF(String adminToken, String pathToFileFolder, String fileName)
+	{
+		File file = new File(pathToFileFolder + File.separator + fileName);
+
+		String importJobURLString = given().multiPart(file)
+										   .param("file")
+										   .param("action", "ADD")
+										   .header(X_MOLGENIS_TOKEN, adminToken)
+										   .post("plugin/importwizard/importFile")
+										   .then()
+										   .extract()
+										   .asString();
+		return monitorImportJob(adminToken, importJobURLString);
+	}
+
+
+	/**
+	 * Given the job uri and token, wait until the job is done and report back the status.
+	 */
+	private static String monitorImportJob(String adminToken, String importJobURLString)
+	{
 		// Remove the leading '/' character and leading and trailing '"' characters
 		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
 
@@ -225,6 +251,7 @@ public class RestTestUtils
 			   .atMost(5, MINUTES)
 			   .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
 		LOG.info("Import completed");
+		return pollForStatus(adminToken, importJobURL);
 	}
 
 	private static String pollForStatus(String adminToken, String importJobURL)
