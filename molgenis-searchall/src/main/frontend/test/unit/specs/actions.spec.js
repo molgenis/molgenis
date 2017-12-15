@@ -3,7 +3,7 @@ import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 
 import actions from 'store/actions'
-import { SET_ERRORS, SET_RESULTS } from 'store/mutations'
+import { SET_ERRORS, SET_LOADING, SET_RESULTS } from 'store/mutations'
 
 describe('actions', () => {
   afterEach(() => td.reset())
@@ -58,7 +58,9 @@ describe('actions', () => {
       const options = {
         payload: 'test',
         expectedMutations: [
-          {type: SET_RESULTS, payload: response}
+          {type: SET_LOADING, payload: true},
+          {type: SET_RESULTS, payload: {query: 'test', response: response}},
+          {type: SET_LOADING, payload: false}
         ]
       }
 
@@ -73,7 +75,9 @@ describe('actions', () => {
       const options = {
         payload: 'test',
         expectedMutations: [
-          {type: SET_ERRORS, payload: 'ERRORRRRR'}
+          {type: SET_LOADING, payload: true},
+          {type: SET_ERRORS, payload: 'ERRORRRRR'},
+          {type: SET_LOADING, payload: false}
         ]
       }
 

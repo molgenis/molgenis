@@ -2,22 +2,28 @@
 export const searchall = window.searchall || {}
 
 export type State = {
-  query: ?string,
   result: ?Result,
   error: ?string,
-  submitted: ?boolean
+  loading: boolean
 }
 
 const state: State = {
-  query: '',
-  result: null,
+  result: {
+    query: '',
+    response: null
+  },
   error: '',
-  submitted: false
+  loading: false
+}
+
+export type ApiResponse = {
+  packages: Array<Package>,
+  entityTypes: Array<EntityType>,
 }
 
 export type Result = {
-  packages: Array<Package>,
-  entityTypes: Array<EntityType>,
+  query: ?string,
+  response: ?ApiResponse
 }
 
 export type EntityType = {
