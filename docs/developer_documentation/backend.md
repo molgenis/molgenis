@@ -23,7 +23,6 @@ MOLGENIS currently has the following backend implementations:
 * [Microsoft Excel](https://github.com/molgenis/molgenis/tree/master/molgenis-data-excel/src/main/java/org/molgenis/data/excel)
 * [Comma Seperated Values](https://github.com/molgenis/molgenis/tree/master/molgenis-data-csv/src/main/java/org/molgenis/data/csv) 
 * [Variant Calling Format, VCF](https://github.com/molgenis/molgenis/tree/master/molgenis-data-vcf/src/main/java/org/molgenis/data/vcf)
-* [Google spreadsheet](https://github.com/molgenis/molgenis/tree/master/molgenis-data-googlespreadsheet/src/main/java/org/molgenis/googlespreadsheet)
 * [Java Persistency API, JPA](https://github.com/molgenis/molgenis/tree/master/molgenis-data-jpa/src/main/java/org/molgenis/data/jpa)
 
 # How to create a new backend

@@ -1,10 +1,13 @@
 package org.molgenis.data;
 
+import org.molgenis.i18n.ErrorCoded;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.springframework.context.i18n.LocaleContextHolder;
+
 import javax.annotation.Nullable;
 import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 /**
  * {@link org.springframework.dao.DataAccessException} with error code and without message.
@@ -31,9 +34,9 @@ public abstract class ErrorCodedDataAccessException extends org.springframework.
 	{
 		try
 		{
-			return getLanguageService().map(languageService -> languageService.getMessageFormat(getErrorCode()))
-									   .map(format -> format.format(getLocalizedMessageArguments()))
-									   .orElseGet(super::getLocalizedMessage);
+			return MessageSourceHolder.getMessageSource()
+									  .getMessage(getErrorCode(), getLocalizedMessageArguments(),
+											  super.getLocalizedMessage(), LocaleContextHolder.getLocale());
 		}
 		catch (RuntimeException ex)
 		{

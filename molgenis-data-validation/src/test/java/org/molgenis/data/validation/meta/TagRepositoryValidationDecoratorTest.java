@@ -4,6 +4,9 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.validation.ValidationException;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -26,6 +29,10 @@ public class TagRepositoryValidationDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		MessageFormatFactory messageFormatFactory = new MessageFormatFactory();
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(messageFormatFactory);
+		messageSource.addMolgenisNamespaces("data_validation");
+		MessageSourceHolder.setMessageSource(messageSource);
 		delegateRepository = mock(Repository.class);
 		tagValidator = mock(TagValidator.class);
 		tagRepositoryValidationDecorator = new TagRepositoryValidationDecorator(delegateRepository, tagValidator);

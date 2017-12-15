@@ -3,15 +3,20 @@ package org.molgenis.fair.controller;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -22,37 +27,47 @@ import java.time.Month;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static java.util.stream.Collectors.toList;
+import static org.eclipse.rdf4j.model.vocabulary.RDF.TYPE;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
-public class EntityModelWriterTest
+public class EntityModelWriterTest extends AbstractMockitoTest
 {
-	private SimpleValueFactory valueFactory;
+	@Mock
 	private TagService<LabeledResource, LabeledResource> tagService;
+	@Mock
+	private Entity objectEntity;
+	@Mock
+	private Entity refEntity;
+	@Mock
+	private EntityType entityType;
+	@Mock
+	private EntityType refEntityType;
+	@Mock
+	private Attribute attribute;
+	@Mock
+	private Attribute attr1;
+	@Mock
+	private Attribute attr2;
+	@Mock
+	private Attribute attr3;
 	private EntityModelWriter writer;
+	private SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
-	public void beforeTest() throws DatatypeConfigurationException
+	public void beforeMethod() throws DatatypeConfigurationException
 	{
-		valueFactory = SimpleValueFactory.getInstance();
-		tagService = mock(TagService.class);
 		writer = new EntityModelWriter(tagService, valueFactory);
 	}
 
 	@Test
 	public void testCreateRfdModelStringAttribute()
 	{
-		//public Model createRdfModel(String subjectIRI, Entity objectEntity)
-		Entity objectEntity = mock(Entity.class);
-		EntityType entityType = mock(EntityType.class);
-
-		Attribute attr1 = mock(Attribute.class);
-
 		List<Attribute> attributeList = singletonList(attr1);
 
 		when(objectEntity.getEntityType()).thenReturn(entityType);
@@ -79,11 +94,6 @@ public class EntityModelWriterTest
 	@Test
 	public void testCreateRfdModelIntAttribute()
 	{
-		Entity objectEntity = mock(Entity.class);
-		EntityType entityType = mock(EntityType.class);
-
-		Attribute attr2 = mock(Attribute.class);
-
 		List<Attribute> attributeList = singletonList(attr2);
 
 		when(objectEntity.getEntityType()).thenReturn(entityType);
@@ -110,12 +120,6 @@ public class EntityModelWriterTest
 	@Test
 	public void testCreateRfdModelXREF()
 	{
-		Entity objectEntity = mock(Entity.class);
-		Entity refEntity = mock(Entity.class);
-		EntityType entityType = mock(EntityType.class);
-		EntityType refEntityType = mock(EntityType.class);
-
-		Attribute attr3 = mock(Attribute.class);
 		List<Attribute> attributeList = singletonList(attr3);
 		List<String> refAttributeList = singletonList("refAttr");
 
@@ -147,21 +151,12 @@ public class EntityModelWriterTest
 	@Test
 	public void testCreateRfdModelMREF()
 	{
-		Entity objectEntity = mock(Entity.class);
-		Entity refEntity = mock(Entity.class);
-		EntityType entityType = mock(EntityType.class);
-		EntityType refEntityType = mock(EntityType.class);
-
-		Attribute attribute = mock(Attribute.class);
 		List<Attribute> attributeList = singletonList(attribute);
-		List<String> refAttributeList = singletonList("refAttr");
 
 		when(objectEntity.getEntityType()).thenReturn(entityType);
 		when(objectEntity.get("attributeName")).thenReturn(refEntity);
 		when(objectEntity.getEntities("attributeName")).thenReturn(singletonList(refEntity));
 
-		when(refEntity.getEntityType()).thenReturn(refEntityType);
-		when(refEntityType.getAttributeNames()).thenReturn(refAttributeList);
 		when(refEntity.getIdValue()).thenReturn("refID");
 
 		when(entityType.getAtomicAttributes()).thenReturn(attributeList);
@@ -184,7 +179,6 @@ public class EntityModelWriterTest
 	@Test
 	public void testCreateRfdModelBOOL()
 	{
-		//public Model createRdfModel(String subjectIRI, Entity objectEntity)
 		Entity objectEntity = mock(Entity.class);
 		EntityType entityType = mock(EntityType.class);
 
@@ -366,7 +360,7 @@ public class EntityModelWriterTest
 		Model result = writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
 		assertEquals(result.size(), 3);
-		List<String> statements = result.stream().map(Statement::toString).collect(Collectors.toList());
+		List<String> statements = result.stream().map(Statement::toString).collect(toList());
 		assertEquals(statements, Arrays.asList(
 				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"molgenis\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
 				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"genetics\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
@@ -389,23 +383,18 @@ public class EntityModelWriterTest
 		when(objectEntity.get("attribute1Name")).thenReturn(null);
 
 		String value = "http://molgenis.org/index.html";
-		when(objectEntity.get("attribute2Name")).thenReturn(value);
+		doReturn(value).when(objectEntity).get("attribute2Name");
 		when(objectEntity.getString("attribute2Name")).thenReturn(value);
 
 		when(entityType.getAtomicAttributes()).thenReturn(attributeList);
 		when(attribute1.getName()).thenReturn("attribute1Name");
 		when(attribute2.getName()).thenReturn("attribute2Name");
 
-		when(attribute1.getDataType()).thenReturn(AttributeType.STRING);
 		when(attribute2.getDataType()).thenReturn(AttributeType.HYPERLINK);
-
-		LabeledResource tag1 = new LabeledResource("http://IRI1.nl", "tag1 label");
-		Multimap<Relation, LabeledResource> tags1 = ImmutableMultimap.of(Relation.isAssociatedWith, tag1);
-		when(tagService.getTagsForAttribute(entityType, attribute1)).thenReturn(tags1);
 
 		LabeledResource tag2 = new LabeledResource("http://IRI1.nl", "tag1 label");
 		Multimap<Relation, LabeledResource> tags2 = ImmutableMultimap.of(Relation.isAssociatedWith, tag2);
-		when(tagService.getTagsForAttribute(entityType, attribute2)).thenReturn(tags2);
+		doReturn(tags2).when(tagService).getTagsForAttribute(entityType, attribute2);
 
 		Model result = writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
@@ -413,5 +402,25 @@ public class EntityModelWriterTest
 		Iterator results = result.iterator();
 		assertEquals(results.next().toString(),
 				"(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, http://molgenis.org/index.html) [null]");
+	}
+
+	@Test
+	public void testAddStatementsForEntityType()
+	{
+		Model model = new LinkedHashModel();
+		Resource subject = valueFactory.createIRI("http://example.org/subject");
+		LabeledResource object = new LabeledResource( "http://example.org/object", "object");
+		LabeledResource codeSystem = new LabeledResource( "ex:object");
+
+		SemanticTag<EntityType, LabeledResource, LabeledResource> tag =
+				new SemanticTag<>("tagId", entityType, Relation.isAssociatedWith, object, codeSystem);
+
+		when(tagService.getTagsForEntity(entityType)).thenReturn(singletonList(tag));
+
+
+		writer.addStatementsForEntityTags(model, subject, entityType);
+
+		Statement statement = valueFactory.createStatement(subject, TYPE, valueFactory.createIRI("http://example.org/object"));
+		assertEquals(newArrayList(model), singletonList(statement));
 	}
 }

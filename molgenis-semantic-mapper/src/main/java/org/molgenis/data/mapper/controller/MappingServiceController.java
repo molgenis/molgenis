@@ -9,10 +9,12 @@ import org.molgenis.data.importer.wizard.ImportWizardController;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
+import org.molgenis.data.mapper.exception.IllegalTargetPackageException;
 import org.molgenis.data.mapper.job.MappingJobExecution;
 import org.molgenis.data.mapper.job.MappingJobExecutionFactory;
 import org.molgenis.data.mapper.mapping.model.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
+import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
@@ -112,6 +114,9 @@ public class MappingServiceController extends PluginController
 
 	@Autowired
 	private JobsController jobsController;
+
+	@Autowired
+	private MappingProjectMetaData mappingProjectMetaData;
 
 	public MappingServiceController()
 	{
@@ -576,29 +581,22 @@ public class MappingServiceController extends PluginController
 		label = trim(label);
 		packageId = trim(packageId);
 
-		try
+		validateEntityName(targetEntityTypeId);
+		if (mappingService.getMappingProject(mappingProjectId) == null)
 		{
-			validateEntityName(targetEntityTypeId);
-			if (mappingService.getMappingProject(mappingProjectId) == null)
-			{
-				throw new MolgenisDataException("No mapping project found with ID " + mappingProjectId);
-			}
-			if (packageId != null)
-			{
-				Package package_ = dataService.getMeta().getPackage(packageId);
-				if (package_ == null)
-				{
-					throw new MolgenisDataException("No package found with ID " + packageId);
-				}
-				if (isSystemPackage(package_))
-				{
-					throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
-				}
-			}
+			throw new UnknownEntityException(mappingProjectMetaData, mappingProjectId);
 		}
-		catch (MolgenisDataException mde)
+		if (packageId != null)
 		{
-			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(mde.getMessage());
+			Package pack = dataService.getMeta().getPackage(packageId);
+			if (pack == null)
+			{
+				throw new UnknownPackageException(packageId);
+			}
+			if (isSystemPackage(pack))
+			{
+				throw new IllegalTargetPackageException(packageId);
+			}
 		}
 
 		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
@@ -699,22 +697,15 @@ public class MappingServiceController extends PluginController
 			algorithmTest.setAlgorithm(algorithm);
 		}
 
-		try
+		Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
+		if (!sourceAttributeNames.isEmpty())
 		{
-			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
-			if (!sourceAttributeNames.isEmpty())
-			{
-				List<Attribute> sourceAttributes = sourceAttributeNames.stream()
-																	   .map(attributeName -> entityMapping.getSourceEntityType()
-																										  .getAttribute(
-																												  attributeName))
-																	   .collect(Collectors.toList());
-				model.addAttribute("sourceAttributes", sourceAttributes);
-			}
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
+			List<Attribute> sourceAttributes = sourceAttributeNames.stream()
+																   .map(attributeName -> entityMapping.getSourceEntityType()
+																									  .getAttribute(
+																											  attributeName))
+																   .collect(Collectors.toList());
+			model.addAttribute("sourceAttributes", sourceAttributes);
 		}
 
 		model.addAttribute("mappingProjectId", mappingProjectId);

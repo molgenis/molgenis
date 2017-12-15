@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.data.i18n.model.Language;
@@ -27,6 +26,7 @@ import org.molgenis.data.validation.CompositeValidationResult;
 import org.molgenis.data.validation.InvalidIdentifierAttributeTypeException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.meta.*;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.EntityUtils;
 
 import java.util.*;
@@ -42,8 +42,6 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataConverter.toList;
-import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
-import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
@@ -56,6 +54,8 @@ import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.i18n.I18nUtils.getLanguageCode;
+import static org.molgenis.i18n.I18nUtils.isI18n;
 
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
@@ -1146,8 +1146,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						refEntityType = dataService.getEntityType(refEntityName);
 						if (refEntityType == null)
 						{
-							throw new UnknownReferenceEntityException(attribute, refEntityName,
-									rowIndex);
+							throw new UnknownReferenceEntityException(attribute, refEntityName, rowIndex);
 						}
 					}
 					attribute.setRefEntity(refEntityType);

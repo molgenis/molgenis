@@ -114,7 +114,7 @@
             <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
             <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>
             <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
-            , authenticated: '${authenticated?c}'
+            , authenticated: ${authenticated?c}
             , loginHref: '/login'
             <#if googleSignIn>, logoutFunction: function () {
                 var auth2 = gapi.auth2.getAuthInstance()

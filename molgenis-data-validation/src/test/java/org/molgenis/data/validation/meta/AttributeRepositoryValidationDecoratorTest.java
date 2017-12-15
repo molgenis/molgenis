@@ -6,6 +6,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -26,6 +29,10 @@ public class AttributeRepositoryValidationDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		MessageFormatFactory messageFormatFactory = new MessageFormatFactory();
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(messageFormatFactory);
+		messageSource.addMolgenisNamespaces("data_validation");
+		MessageSourceHolder.setMessageSource(messageSource);
 		delegateRepository = mock(Repository.class);
 		attributeValidator = mock(AttributeValidator.class);
 		attributeUpdateValidator = mock(AttributeUpdateValidator.class);

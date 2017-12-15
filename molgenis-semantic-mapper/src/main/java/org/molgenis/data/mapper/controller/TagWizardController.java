@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisRuntimeException;
 import org.molgenis.data.mapper.data.request.AddTagRequest;
 import org.molgenis.data.mapper.data.request.AutoTagRequest;
 import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSortedSet.of;
 import static com.google.common.collect.Lists.newArrayList;
@@ -84,17 +82,7 @@ public class TagWizardController extends PluginController
 
 		if (StringUtils.isEmpty(target))
 		{
-			Optional<String> findFirst = entityTypeIds.stream().findFirst();
-			if (findFirst.isPresent())
-			{
-				target = findFirst.get();
-			}
-		}
-
-		if (StringUtils.isEmpty(target))
-		{
-			// FIXME throw new Missing/UndefinedEntityException (see FIXME in RestController)
-			throw new MolgenisRuntimeException("There are no entities available!");
+			target = selectFirstEntityTypeAsTarget(entityTypeIds);
 		}
 
 		List<Ontology> ontologies = ontologyService.getOntologies();
@@ -113,6 +101,13 @@ public class TagWizardController extends PluginController
 		model.addAttribute("relations", Relation.values());
 
 		return VIEW_TAG_WIZARD;
+	}
+
+	private String selectFirstEntityTypeAsTarget(List<String> entityTypeIds)
+	{
+		return entityTypeIds.stream()
+							.findFirst()
+							.orElseThrow(() -> new IllegalStateException("There are no entities available!"));
 	}
 
 	/**

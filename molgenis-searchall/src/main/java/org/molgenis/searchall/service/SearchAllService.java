@@ -1,7 +1,6 @@
 package org.molgenis.searchall.service;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -22,22 +21,21 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 @Component
 public class SearchAllService
 {
 	private final DataService dataService;
-	private final LanguageService languageService;
 
-	public SearchAllService(DataService dataService, LanguageService languageService)
+	public SearchAllService(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.languageService = requireNonNull(languageService);
 	}
 
 	public Result searchAll(final String searchTerm)
 	{
-		final String lang = languageService.getCurrentUserLanguageCode();
+		final String lang = getLocale().getLanguage();
 		return Result.builder()
 					 .setEntityTypes(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
 												.filter(not(EntityUtils::isSystemEntity))

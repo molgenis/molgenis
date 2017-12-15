@@ -2,10 +2,6 @@ package org.molgenis.data.security.exception;
 
 import org.molgenis.security.core.Permission;
 
-import java.text.MessageFormat;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
-
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
 @SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
 public class PluginPermissionDeniedException extends PermissionDeniedException
@@ -36,19 +32,8 @@ public class PluginPermissionDeniedException extends PermissionDeniedException
 	}
 
 	@Override
-	public String getLocalizedMessage()
-	{
-		return getLanguageService().map(languageService ->
-		{
-			String permissionName = getPermissionName(languageService, permission);
-			MessageFormat format = languageService.getMessageFormat(ERROR_CODE);
-			return format.format(new Object[] { permissionName, pluginId });
-		}).orElseGet(super::getLocalizedMessage);
-	}
-
-	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		throw new UnsupportedOperationException();
+		return new Object[] { getMessageSourceResolvable(permission), pluginId };
 	}
 }

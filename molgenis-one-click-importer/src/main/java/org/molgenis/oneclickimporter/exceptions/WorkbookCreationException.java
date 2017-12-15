@@ -1,6 +1,6 @@
 package org.molgenis.oneclickimporter.exceptions;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class WorkbookCreationException extends CodedRuntimeException
 {

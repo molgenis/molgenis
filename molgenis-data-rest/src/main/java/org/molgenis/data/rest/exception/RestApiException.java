@@ -1,6 +1,6 @@
 package org.molgenis.data.rest.exception;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 /**
  * abstract exception to group Rest Exceptions.

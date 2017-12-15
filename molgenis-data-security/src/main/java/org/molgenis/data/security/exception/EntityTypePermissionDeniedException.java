@@ -3,10 +3,7 @@ package org.molgenis.data.security.exception;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 
-import java.text.MessageFormat;
-
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
 @SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
@@ -41,20 +38,9 @@ public class EntityTypePermissionDeniedException extends PermissionDeniedExcepti
 	}
 
 	@Override
-	public String getLocalizedMessage()
-	{
-		return getLanguageService().map(languageService ->
-		{
-			String permissionName = getPermissionName(languageService, permission);
-			MessageFormat format = languageService.getMessageFormat(ERROR_CODE);
-			return format.format(new Object[] { permissionName, entityType });
-		}).orElseGet(super::getLocalizedMessage);
-	}
-
-	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		throw new UnsupportedOperationException();
+		return new Object[] { getMessageSourceResolvable(permission), entityType };
 	}
 
 }

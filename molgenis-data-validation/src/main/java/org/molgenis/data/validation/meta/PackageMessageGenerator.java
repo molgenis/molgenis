@@ -2,14 +2,13 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.ValidationMessage;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.List;
 import java.util.Optional;
 
-import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 import static org.molgenis.data.validation.meta.PackageConstraint.NAME;
 import static org.molgenis.data.validation.meta.PackageConstraint.SYSTEM_PACKAGE_READ_ONLY;
 
@@ -53,7 +52,7 @@ public class PackageMessageGenerator
 
 	private static Optional<String> getLocalizedMessage(String errorCode, Object... arguments)
 	{
-		return getLanguageService().map(languageService -> format(languageService.getString(errorCode), arguments));
+		return LanguageService.formatMessage(errorCode, arguments);
 	}
 
 	@SuppressWarnings("SameParameterValue")

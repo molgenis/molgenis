@@ -5,6 +5,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.exception.AddLanguageException;
 import org.molgenis.data.i18n.exception.DeleteLanguageException;
 import org.molgenis.data.i18n.model.Language;
+import org.molgenis.i18n.LanguageService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;

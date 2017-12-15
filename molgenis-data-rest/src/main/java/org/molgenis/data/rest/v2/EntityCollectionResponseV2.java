@@ -2,7 +2,6 @@ package org.molgenis.data.rest.v2;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.security.core.PermissionService;
@@ -36,11 +35,11 @@ class EntityCollectionResponseV2
 	}
 
 	public EntityCollectionResponseV2(EntityPager entityPager, List<Map<String, Object>> items, Fetch fetch,
-			String href, EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService, String prevHref, String nextHref)
+			String href, EntityType meta, PermissionService permissionService, DataService dataService, String prevHref,
+			String nextHref)
 	{
 		this.href = href;
-		this.meta = new EntityTypeResponseV2(meta, fetch, permissionService, dataService, languageService);
+		this.meta = new EntityTypeResponseV2(meta, fetch, permissionService, dataService);
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();

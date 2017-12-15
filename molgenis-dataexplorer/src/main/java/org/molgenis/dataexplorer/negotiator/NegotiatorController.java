@@ -3,7 +3,6 @@ package org.molgenis.dataexplorer.negotiator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
@@ -21,6 +20,7 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
@@ -33,7 +33,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -41,6 +41,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.ENABLED_EXPRESSION;
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Controller
@@ -55,20 +56,20 @@ public class NegotiatorController extends PluginController
 	private final PermissionService permissions;
 	private final DataService dataService;
 	private final QueryRsqlConverter rsqlQueryConverter;
-	private final LanguageService languageService;
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
+	private final MessageSource messageSource;
 
 	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
-			QueryRsqlConverter rsqlQueryConverter, LanguageService languageService,
-			JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
+			QueryRsqlConverter rsqlQueryConverter, JsMagmaScriptEvaluator jsMagmaScriptEvaluator,
+			MessageSource messageSource)
 	{
 		super(URI);
 		this.restTemplate = requireNonNull(restTemplate);
 		this.permissions = requireNonNull(permissions);
 		this.dataService = requireNonNull(dataService);
 		this.rsqlQueryConverter = requireNonNull(rsqlQueryConverter);
-		this.languageService = requireNonNull(languageService);
 		this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
+		this.messageSource = requireNonNull(messageSource);
 	}
 
 	@RunAsSystem
@@ -82,10 +83,10 @@ public class NegotiatorController extends PluginController
 	@ResponseBody
 	public ExportValidationResponse validateNegotiatorExport(@RequestBody NegotiatorRequest request)
 	{
-		ResourceBundle i18n = languageService.getBundle();
-
 		boolean isValidRequest = true;
 		String message = "";
+		List<String> enabledCollectionsLabels;
+		List<String> disabledCollectionLabels;
 
 		NegotiatorEntityConfig entityConfig = getNegotiatorEntityConfig(request.getEntityId());
 		if (null != entityConfig)
@@ -93,25 +94,32 @@ public class NegotiatorController extends PluginController
 			LOG.info("Validating negotiator request\n\n{}", request);
 
 			List<Entity> collectionEntities = getCollectionEntities(request);
-			List<String> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
+			List<Entity> disabledCollections = getDisabledCollections(collectionEntities, entityConfig);
+
+			Function<Entity, String> getLabel = entity -> entity.getLabelValue().toString();
+			disabledCollectionLabels = disabledCollections.stream().map(getLabel).collect(toList());
+			enabledCollectionsLabels = collectionEntities.stream()
+														 .filter(e -> !disabledCollections.contains(e))
+														 .map(getLabel)
+														 .collect(toList());
 
 			if (!disabledCollections.isEmpty())
 			{
-				message = String.format(i18n.getString("dataexplorer_directory_disabled"), disabledCollections.size(),
-						String.join(", ", disabledCollections));
+				message = messageSource.getMessage("dataexplorer_directory_disabled",
+						new Object[] { disabledCollections.size(), collectionEntities.size() }, getLocale());
 			}
 
 			if (collectionEntities.isEmpty() || (collectionEntities.size() == disabledCollections.size()))
 			{
 				isValidRequest = false;
-				message = i18n.getString("dataexplorer_directory_no_rows");
+				message = messageSource.getMessage("dataexplorer_directory_no_rows", new Object[] {}, getLocale());
 			}
 		}
 		else
 		{
 			throw new MissingConfigException("Negotiator");
 		}
-		return ExportValidationResponse.create(isValidRequest, message);
+		return ExportValidationResponse.create(isValidRequest, message, enabledCollectionsLabels , disabledCollectionLabels);
 	}
 
 	@PostMapping("/export")
@@ -198,18 +206,25 @@ public class NegotiatorController extends PluginController
 		return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
 	}
 
-	private List<String> getDisabledCollections(List<Entity> entities, NegotiatorEntityConfig config)
+	private List<Entity> getDisabledCollections(List<Entity> entities, NegotiatorEntityConfig config)
 	{
 		String expression = config.getString(ENABLED_EXPRESSION);
 		return entities.stream()
 					   .filter(entity -> !evaluateExpressionOnEntity(expression, entity))
-					   .map(entity -> entity.getLabelValue().toString())
 					   .collect(Collectors.toList());
 	}
 
 	private boolean evaluateExpressionOnEntity(String expression, Entity entity)
 	{
-		return expression == null ? true : Boolean.valueOf(jsMagmaScriptEvaluator.eval(expression, entity).toString());
+		if (expression == null)
+		{
+			return true;
+		}
+		else
+		{
+			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
+			return value != null ? Boolean.valueOf(value.toString()) : false;
+		}
 	}
 
 	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(NegotiatorRequest request, NegotiatorConfig config,

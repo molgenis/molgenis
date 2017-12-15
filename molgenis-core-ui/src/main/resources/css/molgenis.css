@@ -23,7 +23,7 @@
 
 body>.container-fluid {
 	padding-top: 55px;
-	margin-bottom: 3em;
+	margin-bottom: 6rem; /* #footer-container.height + 1rem for spacing */
 }
 
 /* Application CSS - end */
@@ -43,7 +43,7 @@ body {
 	bottom: 0;
 	width: 100%;
 	/* Set the fixed height of the footer here */
-	height: 60px;
+	height: 5rem;
 }
 
 /* Sticky footer - end */

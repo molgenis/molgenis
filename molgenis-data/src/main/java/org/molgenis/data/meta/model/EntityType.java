@@ -3,8 +3,8 @@ package org.molgenis.data.meta.model;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.i18n.Labeled;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.i18n.Labeled;
 import org.molgenis.util.UnexpectedEnumException;
 
 import javax.annotation.Nullable;

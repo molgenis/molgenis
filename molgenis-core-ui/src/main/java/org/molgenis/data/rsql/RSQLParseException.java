@@ -1,6 +1,6 @@
 package org.molgenis.data.rsql;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class RSQLParseException extends CodedRuntimeException
 {

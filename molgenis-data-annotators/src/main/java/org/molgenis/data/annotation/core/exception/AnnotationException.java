@@ -1,16 +1,13 @@
 package org.molgenis.data.annotation.core.exception;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.i18n.CodedRuntimeException;
+import org.springframework.context.i18n.LocaleContextHolder;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 
 public class AnnotationException extends CodedRuntimeException
 {
@@ -60,24 +57,12 @@ public class AnnotationException extends CodedRuntimeException
 	}
 
 	@Override
-	public String getLocalizedMessage()
-	{
-		return getLanguageService().map(languageService ->
-		{
-			String format = languageService.getString(ERROR_CODE);
-			String language = languageService.getCurrentUserLanguageCode();
-			List<String> requiredAttributeNames = requiredAttributes.stream()
-																	.map(attr -> attr.getLabel(language))
-																	.collect(Collectors.toList());
-			return MessageFormat.format(format, failedEntity.getIdValue(), entityNumber,
-					StringUtils.join(requiredAttributeNames, ","), annotatorName, cause);
-		}).orElse(super.getLocalizedMessage());
-	}
-
-	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		throw new UnsupportedOperationException();
+		String languageCode = LocaleContextHolder.getLocale().getLanguage();
+		String requiredAttributeNames = requiredAttributes.stream()
+														  .map(attr -> attr.getLabel(languageCode))
+														  .collect(Collectors.joining(","));
+		return new Object[] { failedEntity, entityNumber, requiredAttributeNames, annotatorName, cause };
 	}
-
 }

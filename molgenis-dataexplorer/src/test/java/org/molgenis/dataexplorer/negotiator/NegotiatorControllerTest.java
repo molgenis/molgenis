@@ -6,7 +6,6 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -17,11 +16,11 @@ import org.molgenis.dataexplorer.exception.MissingConfigException;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
+import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceResourceBundle;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
@@ -29,11 +28,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static java.util.Locale.ENGLISH;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.*;
@@ -66,10 +68,6 @@ public class NegotiatorControllerTest
 	private Attribute biobackAttr;
 	@Mock
 	private Query<Entity> molgenisQuery;
-	@Mock
-	private LanguageService languageService;
-	@Mock
-	private MessageSource messageSource;
 	@Mock
 	private JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
@@ -104,14 +102,12 @@ public class NegotiatorControllerTest
 		when(queryRsql.createQuery(entityType)).thenReturn(molgenisQuery);
 		when(rsqlQueryConverter.convert("*=q=MOLGENIS")).thenReturn(queryRsql);
 
-		/* Localization mock */
-		when(messageSource.getMessage("dataexplorer_directory_no_rows", null, ENGLISH)).thenReturn("No Rows");
-		when(messageSource.getMessage("dataexplorer_directory_disabled", null, ENGLISH)).thenReturn("Disabled %s");
-		when(messageSource.getMessage("dataexplorer_directory_no_config", null, ENGLISH)).thenReturn("No Config");
-		when(languageService.getBundle()).thenReturn(new MessageSourceResourceBundle(messageSource, ENGLISH));
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		AllPropertiesMessageSource messageSource = new AllPropertiesMessageSource();
+		messageSource.addMolgenisNamespaces("dataexplorer");
 
 		negotiatorController = new NegotiatorController(restTemplate, permissionService, dataService,
-				rsqlQueryConverter, languageService, jsMagmaScriptEvaluator);
+				rsqlQueryConverter, jsMagmaScriptEvaluator, messageSource);
 	}
 
 	@Test
@@ -121,14 +117,16 @@ public class NegotiatorControllerTest
 				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
 
 		Entity entity = mock(Entity.class);
-		when(entity.getLabelValue()).thenReturn("Entity One");
+		String entityOneLabel = "Entity One";
+		when(entity.getLabelValue()).thenReturn(entityOneLabel);
 		when(entity.get("enabled")).thenReturn(true);
 
 		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entity));
 		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entity)).thenReturn(TRUE);
 
 		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
-		ExportValidationResponse expected = ExportValidationResponse.create(true, "");
+		List<String> enabledCollections = Collections.singletonList(entityOneLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(true, "", enabledCollections, emptyList());
 
 		assertEquals(actual, expected);
 	}
@@ -161,7 +159,8 @@ public class NegotiatorControllerTest
 		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.empty());
 
 		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
-		ExportValidationResponse expected = ExportValidationResponse.create(false, "No Rows");
+		ExportValidationResponse expected = ExportValidationResponse.create(false,
+				"Please make sure your selection contains at least 1 row that supports the negotiator.");
 
 		assertEquals(actual, expected);
 	}
@@ -173,11 +172,13 @@ public class NegotiatorControllerTest
 				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
 
 		Entity entityEnabled = mock(Entity.class);
-		when(entityEnabled.getLabelValue()).thenReturn("Entity Enabled");
+		String entityOneLabel = "Entity One";
+		String entityDisabledLabel = "Entity Disabled";
+		when(entityEnabled.getLabelValue()).thenReturn(entityOneLabel);
 		when(entityEnabled.get("enabled")).thenReturn(true);
 
 		Entity entityDisabled = mock(Entity.class);
-		when(entityDisabled.getLabelValue()).thenReturn("Entity Disabled");
+		when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
 		when(entityDisabled.get("enabled")).thenReturn(false);
 
 		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entityEnabled, entityDisabled));
@@ -186,7 +187,11 @@ public class NegotiatorControllerTest
 		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
 
 		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
-		ExportValidationResponse expected = ExportValidationResponse.create(true, "Disabled 1");
+		List<String> enabledCollections = Collections.singletonList(entityOneLabel);
+		List<String> disabledCollections = Collections.singletonList(entityDisabledLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(true,
+				"1 of 2 collections do not support this functionality. Do you want to continue?", enabledCollections,
+				disabledCollections);
 
 		assertEquals(actual, expected);
 	}
@@ -198,7 +203,8 @@ public class NegotiatorControllerTest
 				"a nice molgenis query", "Sjfg03Msmdp92Md82103FNskas9H735F");
 
 		Entity entityDisabled = mock(Entity.class);
-		when(entityDisabled.getLabelValue()).thenReturn("Entity Disabled");
+		String entityDisabledLabel = "Entity Disabled";
+		when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
 		when(entityDisabled.get("enabled")).thenReturn(false);
 
 		when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entityDisabled));
@@ -206,7 +212,10 @@ public class NegotiatorControllerTest
 		when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
 
 		ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
-		ExportValidationResponse expected = ExportValidationResponse.create(false, "No Rows");
+		List<String> disabledCollections = Collections.singletonList(entityDisabledLabel);
+		ExportValidationResponse expected = ExportValidationResponse.create(false,
+				"Please make sure your selection contains at least 1 row that supports the negotiator.", emptyList(),
+				disabledCollections);
 
 		assertEquals(actual, expected);
 	}

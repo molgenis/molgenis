@@ -1,6 +1,7 @@
 package org.molgenis.js;
 
 import org.molgenis.js.nashorn.NashornScriptEngine;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
@@ -35,7 +36,7 @@ class JsScriptExecutor
 		}
 		catch (ScriptException e)
 		{
-			throw new org.molgenis.script.ScriptException(e);
+			throw new ScriptExecutionException(e);
 		}
 	}
 }

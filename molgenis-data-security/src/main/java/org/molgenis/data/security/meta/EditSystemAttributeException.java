@@ -1,7 +1,7 @@
 package org.molgenis.data.security.meta;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,7 +9,7 @@ public class EditSystemAttributeException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "S02";
 	private final String operation;
-	private final Attribute attr;
+	private final transient Attribute attr;
 
 	public EditSystemAttributeException(String operation, Attribute attr)
 	{
