@@ -1,11 +1,10 @@
 <template>
-      <div id="app" class="col app-container">
+      <div id="app" class="app-container">
         <router-view></router-view>
       </div>
 </template>
 
 <style>
-
   .app-container {
     padding-top: 40px
   }
