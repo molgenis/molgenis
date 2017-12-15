@@ -1,6 +1,5 @@
 package org.molgenis.oneclickimporter.controller;
 
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -35,11 +34,11 @@ public class OneClickImporterController extends VuePluginController
 	private OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory;
 	private JobExecutor jobExecutor;
 
-	public OneClickImporterController(MenuReaderService menuReaderService, LanguageService languageService,
+	public OneClickImporterController(MenuReaderService menuReaderService,
 			AppSettings appSettings, UserAccountService userAccountService, FileStore fileStore,
 			OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory, JobExecutor jobExecutor)
 	{
-		super(URI, menuReaderService, languageService, appSettings, userAccountService);
+		super(URI, menuReaderService, appSettings, userAccountService);
 		this.fileStore = requireNonNull(fileStore);
 		this.oneClickImportJobExecutionFactory = requireNonNull(oneClickImportJobExecutionFactory);
 		this.jobExecutor = requireNonNull(jobExecutor);

@@ -1,6 +1,6 @@
 package org.molgenis.data.importer.wizard;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import java.util.List;
 

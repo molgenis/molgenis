@@ -2,14 +2,13 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.validation.ValidationMessage;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.List;
 import java.util.Optional;
 
-import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.i18n.LanguageServiceHolder.getLanguageService;
 import static org.molgenis.data.validation.meta.TagConstraint.UNKNOWN_RELATION_IRI;
 
 public class TagMessageGenerator
@@ -49,7 +48,7 @@ public class TagMessageGenerator
 
 	private static Optional<String> getLocalizedMessage(String errorCode, Object... arguments)
 	{
-		return getLanguageService().map(languageService -> format(languageService.getString(errorCode), arguments));
+		return LanguageService.formatMessage(errorCode, arguments);
 	}
 
 	@SuppressWarnings("SameParameterValue")

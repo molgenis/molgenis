@@ -1,6 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class UnknownLoaderException extends CodedRuntimeException
 {

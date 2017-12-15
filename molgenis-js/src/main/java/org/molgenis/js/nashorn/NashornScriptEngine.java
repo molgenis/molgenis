@@ -4,6 +4,7 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.molgenis.script.core.exception.ScriptExecutionException;
+import org.molgenis.script.core.exception.ScriptResultConversionException;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +125,7 @@ public class NashornScriptEngine
 				}
 				else
 				{
-					throw new ScriptExecutionException("Unable to convert [ScriptObjectMirror]");
+					throw new ScriptResultConversionException(scriptObjectMirror);
 				}
 			}
 		}

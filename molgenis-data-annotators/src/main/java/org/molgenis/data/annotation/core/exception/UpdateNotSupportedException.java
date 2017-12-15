@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core.exception;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 public class UpdateNotSupportedException extends CodedRuntimeException
 {

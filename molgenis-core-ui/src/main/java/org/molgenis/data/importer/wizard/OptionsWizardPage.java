@@ -1,7 +1,6 @@
 package org.molgenis.data.importer.wizard;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
@@ -10,6 +9,7 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.meta.NameValidator;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileExtensionUtils;

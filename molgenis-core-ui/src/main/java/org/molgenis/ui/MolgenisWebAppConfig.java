@@ -6,11 +6,10 @@ import freemarker.template.TemplateException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
+import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.PermissionService;
@@ -34,6 +33,7 @@ import org.molgenis.web.PluginInterceptor;
 import org.molgenis.web.Ui;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -89,10 +89,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private RdfConverter rdfConverter;
 
 	@Autowired
-	private LanguageService languageService;
+	private StyleService styleService;
 
 	@Autowired
-	private StyleService styleService;
+	private MessageSource messageSource;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -205,7 +205,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisInterceptor molgenisInterceptor()
 	{
 		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(), appSettings,
-				authenticationSettings, languageService, environment);
+				authenticationSettings, environment, messageSource);
 	}
 
 	@Bean

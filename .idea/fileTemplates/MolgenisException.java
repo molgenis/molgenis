@@ -2,7 +2,7 @@
 
 package $PACKAGE_NAME;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;

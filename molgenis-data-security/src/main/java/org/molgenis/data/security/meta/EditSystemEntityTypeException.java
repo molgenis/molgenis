@@ -1,7 +1,7 @@
 package org.molgenis.data.security.meta;
 
-import org.molgenis.data.CodedRuntimeException;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,7 +9,7 @@ public class EditSystemEntityTypeException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "S03";
 	private final String operation;
-	private final EntityType entityType;
+	private final transient EntityType entityType;
 
 	public EditSystemEntityTypeException(String operation, EntityType entityType)
 	{

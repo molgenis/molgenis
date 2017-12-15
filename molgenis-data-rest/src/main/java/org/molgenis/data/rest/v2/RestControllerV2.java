@@ -3,8 +3,6 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.LanguageServiceImpl;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -25,6 +23,7 @@ import org.molgenis.data.validation.RepositoryCollectionCapabilityException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.data.AttributeValueValidationResult;
 import org.molgenis.data.validation.meta.NameValidator;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -58,7 +58,6 @@ import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.i18n.LocalizationService.NAMESPACE_ALL;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
@@ -84,7 +83,6 @@ public class RestControllerV2
 	private final RestService restService;
 	private final PermissionService permissionService;
 	private final PermissionSystemService permissionSystemService;
-	private final LanguageService languageService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
@@ -96,16 +94,15 @@ public class RestControllerV2
 	}
 
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
-			LanguageServiceImpl languageService, PermissionSystemService permissionSystemService,
-			RepositoryCopier repoCopier, LocalizationService localizationService)
+			LocalizationService localizationService, PermissionSystemService permissionSystemService,
+			RepositoryCopier repoCopier)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
-		this.languageService = requireNonNull(languageService);
+		this.localizationService = requireNonNull(localizationService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.repoCopier = requireNonNull(repoCopier);
-		this.localizationService = requireNonNull(localizationService);
 	}
 
 	@Autowired
@@ -158,7 +155,7 @@ public class RestControllerV2
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
 		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityType,
-				languageService.getCurrentUserLanguageCode());
+				LanguageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityTypeId, id, fetch);
 		if (entity == null)
@@ -490,8 +487,8 @@ public class RestControllerV2
 	{
 		Map<String, String> translations = new HashMap<>();
 
-		ResourceBundle bundle = languageService.getBundle();
-		for (String key : localizationService.getMessageIDs(NAMESPACE_ALL))
+		ResourceBundle bundle = LanguageService.getBundle();
+		for (String key : localizationService.getAllMessageIds())
 		{
 			translations.put(key, bundle.getString(key));
 		}
@@ -507,7 +504,7 @@ public class RestControllerV2
 	@ResponseBody
 	public Map<String, String> getL10nStrings(@PathVariable String namespace, @PathVariable String language)
 	{
-		return localizationService.getMessages(namespace, language);
+		return localizationService.getMessages(namespace, new Locale(language));
 	}
 
 	/**
@@ -519,7 +516,8 @@ public class RestControllerV2
 	{
 		language = language.toLowerCase();
 		Properties translations = new Properties();
-		translations.putAll(localizationService.getMessages(namespace, language));
+		Locale locale = new Locale(language);
+		translations.putAll(localizationService.getMessages(namespace, locale));
 		StringWriter sw = new StringWriter();
 		translations.store(sw, String.format("%s_%s.properties", namespace, language));
 		return sw.toString();
@@ -540,14 +538,14 @@ public class RestControllerV2
 										.map(Map.Entry::getKey)
 										.filter(id -> !id.equals(TIME_PARAM_NAME))
 										.collect(toSet());
-		localizationService.addMissingMessageIDs(namespace, messageIDs);
+		localizationService.addMissingMessageIds(namespace, messageIDs);
 	}
 
 	@DeleteMapping("/i18n/{namespace}")
 	@ResponseStatus(NO_CONTENT)
 	public void deleteNamespace(@PathVariable String namespace)
 	{
-		localizationService.deleteNameSpace(namespace);
+		localizationService.deleteNamespace(namespace);
 	}
 
 	/**
@@ -595,8 +593,7 @@ public class RestControllerV2
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeResponseV2(entityTypeId, entity, attribute, null, permissionService, dataService,
-				languageService);
+		return new AttributeResponseV2(entityTypeId, entity, attribute, null, permissionService, dataService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityTypeId,
@@ -611,7 +608,7 @@ public class RestControllerV2
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
 		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta,
-				languageService.getCurrentUserLanguageCode());
+				LocaleContextHolder.getLocale().getLanguage());
 		if (fetch != null)
 		{
 			q.fetch(fetch);
@@ -630,10 +627,10 @@ public class RestControllerV2
 			AggregateResult aggs = dataService.aggregate(entityTypeId, aggsQ);
 			AttributeResponseV2 xAttrResponse =
 					xAttr != null ? new AttributeResponseV2(entityTypeId, meta, xAttr, fetch, permissionService,
-							dataService, languageService) : null;
+							dataService) : null;
 			AttributeResponseV2 yAttrResponse =
 					yAttr != null ? new AttributeResponseV2(entityTypeId, meta, yAttr, fetch, permissionService,
-							dataService, languageService) : null;
+							dataService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityTypeId);
 		}
 		else
@@ -675,7 +672,7 @@ public class RestControllerV2
 			}
 
 			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityTypeId, meta,
-					permissionService, dataService, languageService, prevHref, nextHref);
+					permissionService, dataService, prevHref, nextHref);
 		}
 	}
 
@@ -707,8 +704,7 @@ public class RestControllerV2
 
 	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData)
 	{
-		responseData.put("_meta",
-				new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, languageService));
+		responseData.put("_meta", new EntityTypeResponseV2(entityType, fetch, permissionService, dataService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
@@ -741,7 +737,7 @@ public class RestControllerV2
 						{
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attr) : createDefaultAttributeFetch(attr,
-											languageService.getCurrentUserLanguageCode());
+											LanguageService.getCurrentUserLanguageCode());
 							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
@@ -760,7 +756,7 @@ public class RestControllerV2
 							refEntityResponses = new ArrayList<>();
 							Fetch refAttrFetch =
 									fetch != null ? fetch.getFetch(attrName) : createDefaultAttributeFetch(attr,
-											languageService.getCurrentUserLanguageCode());
+											LanguageService.getCurrentUserLanguageCode());
 							for (Entity refEntitiesEntity : refEntities)
 							{
 								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));

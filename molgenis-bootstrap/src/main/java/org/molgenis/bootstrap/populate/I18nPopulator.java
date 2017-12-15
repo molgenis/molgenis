@@ -1,10 +1,11 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageServiceImpl;
-import org.molgenis.data.i18n.LocalizationService;
-import org.molgenis.data.i18n.PropertiesMessageSource;
+import org.molgenis.data.i18n.LocalizationPopulator;
 import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.i18n.LanguageService;
+import org.molgenis.i18n.PropertiesMessageSource;
+import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,16 +25,16 @@ public class I18nPopulator
 {
 	private final DataService dataService;
 	private final LanguageFactory languageFactory;
+	private final LocalizationPopulator localizationPopulator;
 	private final List<PropertiesMessageSource> localizationMessageSources;
-	private final LocalizationService localizationService;
 
 	public I18nPopulator(DataService dataService, LanguageFactory languageFactory,
-			List<PropertiesMessageSource> localizationMessageSources, LocalizationService localizationService)
+			LocalizationPopulator localizationPopulator, List<PropertiesMessageSource> localizationMessageSources)
 	{
 		this.languageFactory = requireNonNull(languageFactory);
 		this.dataService = requireNonNull(dataService);
+		this.localizationPopulator = requireNonNull(localizationPopulator);
 		this.localizationMessageSources = requireNonNull(localizationMessageSources);
-		this.localizationService = requireNonNull(localizationService);
 	}
 
 	/**
@@ -44,7 +45,11 @@ public class I18nPopulator
 	 */
 	public void populateL10nStrings()
 	{
-		localizationMessageSources.forEach(localizationService::populateLocalizationStrings);
+		AllPropertiesMessageSource allPropertiesMessageSource = new AllPropertiesMessageSource();
+		String[] namespaces = localizationMessageSources.stream().map(PropertiesMessageSource::getNamespace)
+														.toArray(String[]::new);
+		allPropertiesMessageSource.addMolgenisNamespaces(namespaces);
+		localizationPopulator.populateLocalizationStrings(allPropertiesMessageSource);
 	}
 
 	/**
@@ -52,8 +57,8 @@ public class I18nPopulator
 	 */
 	public void populateLanguages()
 	{
-		dataService.add(LANGUAGE, languageFactory.create(LanguageServiceImpl.DEFAULT_LANGUAGE_CODE,
-				LanguageServiceImpl.DEFAULT_LANGUAGE_NAME,
+		dataService.add(LANGUAGE,
+				languageFactory.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME,
 						true));
 		dataService.add(LANGUAGE,
 				languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));

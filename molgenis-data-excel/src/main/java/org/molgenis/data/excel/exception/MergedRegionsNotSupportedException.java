@@ -1,7 +1,7 @@
 package org.molgenis.data.excel.exception;
 
 import org.apache.poi.ss.usermodel.Sheet;
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 

@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.Sort;
-import org.molgenis.data.i18n.Labeled;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.i18n.Labeled;
 
 import javax.annotation.Nullable;
 import java.util.List;

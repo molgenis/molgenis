@@ -1,6 +1,6 @@
 package org.molgenis.script.core.exception;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
 @SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })

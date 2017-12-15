@@ -49,8 +49,8 @@ public class JsMagmaScriptRunnerTest extends AbstractMockitoTest
 		Script script = mock(Script.class);
 		when(script.getContent()).thenReturn("scriptContent");
 		Map<String, Object> parameters = emptyMap();
-		doThrow(new ScriptExecutionException("execution error")).when(jsMagmaScriptExecutor)
-																.executeScript("scriptContent", parameters);
+		ScriptExecutionException exception = new ScriptExecutionException(new IllegalStateException("blah"));
+		doThrow(exception).when(jsMagmaScriptExecutor).executeScript("scriptContent", parameters);
 		jsMagmaScriptRunner.runScript(script, parameters);
 	}
 }

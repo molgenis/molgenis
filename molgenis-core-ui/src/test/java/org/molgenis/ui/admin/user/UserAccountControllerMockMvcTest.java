@@ -20,8 +20,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.LocaleResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Locale;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -45,6 +48,8 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 	private UserAccountController userAccountController;
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
+	@Autowired
+	private LocaleResolver localeResolver;
 	@Mock
 	private Model model;
 	@Mock
@@ -69,18 +74,16 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 	@Test
 	public void changeLanguageOk() throws Exception
 	{
-		when(userAccountService.getCurrentUser()).thenReturn(user);
 		mockMvc.perform(post("/plugin/useraccount/language/update").param("languageCode", "nl"))
 			   .andExpect(status().isNoContent());
-		verify(user).setLanguageCode("nl");
-		verify(userAccountService).updateCurrentUser(user);
+		verify(localeResolver).setLocale(any(), any(), eq(new Locale("nl")));
 	}
 
 	@Test
 	public void changeLanguageForbidden() throws Exception
 	{
-		when(userAccountService.getCurrentUser()).thenReturn(user);
-		doThrow(new AccessDeniedException("Access denied.")).when(userAccountService).updateCurrentUser(user);
+		doThrow(new AccessDeniedException("Access denied.")).when(localeResolver)
+															.setLocale(any(), any(), eq(new Locale("nl")));
 		//FIXME: update expected status after specific exceptions are implemented
 		mockMvc.perform(post("/plugin/useraccount/language/update").param("languageCode", "nl"))
 			   .andExpect(status().isInternalServerError());
@@ -89,14 +92,14 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 	@Test
 	public void changeLanguageUnknownLanguage() throws Exception
 	{
-		//FIXME: update expected status after specific exceptions are implemented
 		mockMvc.perform(post("/plugin/useraccount/language/update").param("languageCode", "swahili"))
-			   .andExpect(status().isInternalServerError());
+			   .andExpect(status().isBadRequest());
 	}
 
 	@Test
 	public void changeLanguageNPE() throws Exception
 	{
+		doThrow(new NullPointerException()).when(localeResolver).setLocale(any(), any(), any());
 		mockMvc.perform(post("/plugin/useraccount/language/update").param("languageCode", "nl"))
 			   .andExpect(status().isInternalServerError());
 	}

@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.molgenis.i18n.CodedRuntimeException;
+
 /**
  *
  */

@@ -1,6 +1,6 @@
 package org.molgenis.oneclickimporter.exceptions;
 
-import org.molgenis.data.CodedRuntimeException;
+import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 
