@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AnnotatorI18nConfig
 {
-
 	public static final String NAMESPACE = "annotators";
 
 	@Bean

@@ -5,7 +5,7 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.importer.exception.UnknownActionException;
+import org.molgenis.data.importer.exception.UnknownImportModeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.ui.wizard.AbstractWizardPage;
@@ -68,7 +68,7 @@ public class PackageWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null)
 				{
-					throw new UnknownActionException(entityImportOption);
+					throw new UnknownImportModeException(entityImportOption);
 				}
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(

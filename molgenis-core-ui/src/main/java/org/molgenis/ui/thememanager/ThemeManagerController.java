@@ -1,7 +1,7 @@
 package org.molgenis.ui.thememanager;
 
 import org.molgenis.ui.style.MolgenisAddStyleException;
-import org.molgenis.ui.style.MolgenisStyleException;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
 import org.molgenis.web.PluginController;
@@ -63,7 +63,7 @@ public class ThemeManagerController extends PluginController
 	public @ResponseBody
 	Style addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
 			@RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style)
-			throws MolgenisStyleException
+			throws MolgenisThemeException
 	{
 		String styleIdentifier = bootstrap3Style.getOriginalFilename();
 		try

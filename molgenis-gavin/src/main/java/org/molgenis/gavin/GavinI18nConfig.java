@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GavinI18nConfig
 {
-
 	public static final String NAMESPACE = "gavin";
 
 	@Bean

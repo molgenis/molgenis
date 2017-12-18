@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
-import org.molgenis.data.annotation.core.exception.UpdateNotSupportedException;
+import org.molgenis.data.annotation.core.exception.AnnotatorUpdateNotSupportedException;
 import org.molgenis.data.meta.model.Attribute;
 
 import java.util.Collection;
@@ -27,7 +27,7 @@ public class FirstResultFilter implements ResultFilter
 	{
 		if (updateMode == true)
 		{
-			throw new UpdateNotSupportedException();
+			throw new AnnotatorUpdateNotSupportedException();
 		}
 		return FluentIterable.from(results).first();
 	}

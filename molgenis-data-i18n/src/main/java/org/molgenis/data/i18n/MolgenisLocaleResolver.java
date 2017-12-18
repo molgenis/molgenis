@@ -1,6 +1,7 @@
 package org.molgenis.data.i18n;
 
 import org.molgenis.auth.User;
+import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.i18n.LanguageService;
 import org.springframework.web.servlet.LocaleResolver;
@@ -51,8 +52,8 @@ public class MolgenisLocaleResolver implements LocaleResolver
 	{
 		Optional<String> currentUserName = Optional.ofNullable(getCurrentUsername())
 												   .filter(username -> !ANONYMOUS_USERNAME.equals(username));
-		return runAsSystem(() -> currentUserName.flatMap(
-				name -> Optional.ofNullable(dataService.query(USER, User.class).eq("username", name).findOne())));
+		return runAsSystem(() -> currentUserName.flatMap(name -> Optional.ofNullable(
+				dataService.query(USER, User.class).eq(UserMetaData.USERNAME, name).findOne())));
 	}
 
 	@Override

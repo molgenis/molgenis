@@ -219,8 +219,9 @@ public class CGDAnnotator implements AnnotatorConfig
 
 			String sourceName = CGDAttributeName.getCgdName(attr.getName());
 			if (sourceName == null)
+			{
 				throw new IllegalArgumentException(String.format("%s not present in CGD data", attr.getName()));
-
+			}
 			return sourceEntity.get(sourceName);
 		}
 

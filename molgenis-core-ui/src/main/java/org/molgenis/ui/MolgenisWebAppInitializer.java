@@ -56,6 +56,7 @@ public class MolgenisWebAppInitializer
 			dispatcherServlet.setMultipartConfig(
 					new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
+			// instead of throwing a 404 when a handler is not found allow for custom handling
 			dispatcherServlet.setInitParameter("throwExceptionIfNoHandlerFound", "true");
 
 		}

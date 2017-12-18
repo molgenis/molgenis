@@ -28,7 +28,7 @@ public class StyleController
 
 	@GetMapping("/css/bootstrap-{bootstrap-version}/{theme}")
 	public ResponseEntity getThemeCss(@PathVariable("bootstrap-version") String bootstrapVersion,
-			@PathVariable("theme") String theme, HttpServletResponse response) throws MolgenisStyleException
+			@PathVariable("theme") String theme, HttpServletResponse response) throws MolgenisThemeException
 	{
 		response.setHeader("Content-Type", "text/css");
 		response.setHeader("Cache-Control", "max-age=31536000");
@@ -47,7 +47,7 @@ public class StyleController
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisStyleException(e.getCause());
+			throw new MolgenisThemeException(e.getCause());
 		}
 
 		return new ResponseEntity(HttpStatus.OK);

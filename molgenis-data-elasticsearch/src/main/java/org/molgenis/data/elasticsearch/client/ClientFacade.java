@@ -87,7 +87,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public void createIndex(Index index, IndexSettings indexSettings, Stream<Mapping> mappingStream)
 	{
@@ -276,7 +277,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public long getCount(Index index)
 	{
@@ -289,7 +291,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public long getCount(QueryBuilder query, Index index)
 	{
@@ -357,7 +360,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public SearchHits search(QueryBuilder query, int from, int size, List<Index> indexes)
 	{
@@ -365,7 +369,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public SearchHits search(QueryBuilder query, int from, int size, Sort sort, Index index)
 	{
@@ -483,7 +488,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public Aggregations aggregate(List<AggregationBuilder> aggregations, QueryBuilder query, Index index)
 	{
@@ -635,7 +641,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public void deleteById(Index index, Document document)
 	{

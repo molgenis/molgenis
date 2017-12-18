@@ -25,7 +25,7 @@ public class ThemeFingerprintRegistryTest
 	}
 
 	@Test
-	public void getFingerprint() throws IOException, MolgenisStyleException
+	public void getFingerprint() throws IOException, MolgenisThemeException
 	{
 		String theme = "bootstrap-theme-name.min.css";
 		String version = "bootstrap-3";

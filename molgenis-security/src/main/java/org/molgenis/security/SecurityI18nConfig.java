@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SecurityI18nConfig
 {
-
 	public static final String NAMESPACE = "security";
 
 	@Bean

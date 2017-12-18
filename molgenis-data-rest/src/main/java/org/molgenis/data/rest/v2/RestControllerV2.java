@@ -350,7 +350,9 @@ public class RestControllerV2
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
 												  .contains(RepositoryCapability.WRITABLE);
 		if (!writableCapabilities)
+		{
 			throw new RepositoryCollectionCapabilityException(entityTypeId, RepositoryCapability.WRITABLE);
+		}
 
 		// Copy
 		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),

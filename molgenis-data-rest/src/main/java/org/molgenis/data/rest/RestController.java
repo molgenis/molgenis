@@ -494,11 +494,6 @@ public class RestController
 	public void create(@PathVariable("entityTypeId") String entityTypeId, @RequestBody Map<String, Object> entityMap,
 			HttpServletResponse response)
 	{
-		if (entityMap == null)
-		{
-			throw new MissingValueException("entity", "body");
-		}
-
 		createInternal(entityTypeId, entityMap, response);
 	}
 
@@ -731,10 +726,6 @@ public class RestController
 	@ResponseBody
 	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
 	{
-		if (login == null)
-		{
-			throw new MissingValueException("login", "request");
-		}
 		if (isUser2fa())
 		{
 			throw new LoginMethodDisabledException();
@@ -1005,9 +996,9 @@ public class RestController
 	private Map<String, Object> getEntityAsMap(Entity entity, EntityType meta, Set<String> attributesSet,
 			Map<String, Set<String>> attributeExpandsSet)
 	{
-		if (null == entity) throw new RuntimeException("entity");
+		if (null == entity) throw new NullPointerException("entity is null");
 
-		if (null == meta) throw new RuntimeException("entityType");
+		if (null == meta) throw new NullPointerException("entityType is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<>();
 		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getId(), entity.getIdValue()));
