@@ -21,6 +21,7 @@ public class MockMvcExceptionalRequestPerformer
 		this.mockMvc = mockMvc;
 	}
 
+	@SuppressWarnings("squid:S00108") // The empty code block is part of a lambda and should be empty
 	public void perform(MockHttpServletRequestBuilder request) throws Throwable
 	{
 		perform(request, () ->
@@ -28,6 +29,7 @@ public class MockMvcExceptionalRequestPerformer
 		});
 	}
 
+	@SuppressWarnings("squid:S00112") // Using the generic Throwable is exactly what we want to do here
 	public void perform(MockHttpServletRequestBuilder request, Runnable verification) throws Throwable
 	{
 		MvcResult result;
@@ -47,6 +49,7 @@ public class MockMvcExceptionalRequestPerformer
 		throwUnwrappedException(result);
 	}
 
+	@SuppressWarnings("squid:S00112") // Using a generic Exception is exactly what we want to do here
 	private void throwUnwrappedException(MvcResult result) throws Exception
 	{
 		if (result.getResolvedException() != null)

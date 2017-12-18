@@ -48,15 +48,17 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private final OntologyService ontologyService;
 	private final IdGenerator idGenerator;
 	private final TagMetadata tagMetadata;
+	private final PackageMetadata packageMetadata;
 
 	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
-			IdGenerator idGenerator, TagMetadata tagMetadata)
+			IdGenerator idGenerator, TagMetadata tagMetadata, PackageMetadata packageMetadata)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tagRepository = requireNonNull(tagRepository);
 		this.ontologyService = requireNonNull(ontologyService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.tagMetadata = requireNonNull(tagMetadata);
+		this.packageMetadata = requireNonNull(packageMetadata);
 	}
 
 	@Override
@@ -114,7 +116,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException(dataService.getEntityType(PACKAGE), package_.getId());
+			throw new UnknownEntityException(packageMetadata, package_.getId());
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();

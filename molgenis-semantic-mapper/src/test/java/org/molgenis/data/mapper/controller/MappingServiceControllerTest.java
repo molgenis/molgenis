@@ -26,6 +26,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.test.MockMvcExceptionalRequestPerformer;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -45,7 +46,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
-import org.springframework.web.util.NestedServletException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -74,6 +74,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private AttributeFactory attrMetaFactory;
 
+	@SuppressWarnings("unused") // needed for UnknownEntityException
 	@Mock
 	private MappingProjectMetaData mappingProjectMetaData;
 
@@ -132,6 +133,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private Attribute dobAttr;
 
 	private MockMvc mockMvc;
+	private MockMvcExceptionalRequestPerformer exceptionalRequestPerformer;
 
 	public MappingServiceControllerTest()
 	{
@@ -168,6 +170,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setMessageConverters(gsonHttpMessageConverter, new StringHttpMessageConverter())
 								 .build();
+
+		exceptionalRequestPerformer = new MockMvcExceptionalRequestPerformer(mockMvc);
 	}
 
 	@Test
@@ -365,7 +369,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 															   .param("label", "label")
 															   .param("package", "package")
 															   .accept("text/plain");
-		performExceptionalRequest(post);
+		exceptionalRequestPerformer.perform(post);
 	}
 
 	@Test(expectedExceptions = UnknownPackageException.class, expectedExceptionsMessageRegExp = "id:sys")
@@ -378,7 +382,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 															   .param("label", "label")
 															   .param("package", "sys")
 															   .accept("text/plain");
-		performExceptionalRequest(post);
+		exceptionalRequestPerformer.perform(post);
 	}
 
 	@Test(expectedExceptions = IllegalTargetPackageException.class, expectedExceptionsMessageRegExp = "id:sys")
@@ -395,19 +399,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 															   .param("package", "sys")
 															   .accept("text/plain");
 
-		performExceptionalRequest(post);
-	}
-
-	private void performExceptionalRequest(MockHttpServletRequestBuilder post) throws Throwable
-	{
-		try
-		{
-			mockMvc.perform(post);
-		}
-		catch (NestedServletException exception)
-		{
-			throw exception.getCause();
-		}
+		exceptionalRequestPerformer.perform(post);
 	}
 
 	@Test
