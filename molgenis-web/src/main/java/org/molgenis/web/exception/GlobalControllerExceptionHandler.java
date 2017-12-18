@@ -1,21 +1,28 @@
 package org.molgenis.web.exception;
 
+import com.google.common.collect.Lists;
 import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.validation.DataIntegrityViolationException;
 import org.molgenis.data.validation.ValidationException;
+import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static org.molgenis.web.exception.ExceptionHandlerUtils.handleTypedException;
 import static org.molgenis.web.exception.ExceptionHandlerUtils.isHtmlRequest;
@@ -79,5 +86,29 @@ public class GlobalControllerExceptionHandler
 		LOG.info(e.getErrorCode(), e);
 		return handleTypedException(isHtmlRequest(handlerMethod), BadRequestController.URI, e.getLocalizedMessage(),
 				FORBIDDEN, e.getErrorCode()); // FIXME NotFoundController.URI is not what we want here (?)
+	}
+
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
+	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getLocalizedMessage()));
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
+	{
+		LOG.debug("", e);
+		List<ErrorMessageResponse.ErrorMessage> messages = Lists.newArrayList();
+		for (ObjectError error : e.getBindingResult().getAllErrors())
+		{
+			messages.add(new ErrorMessageResponse.ErrorMessage(error.getDefaultMessage()));
+		}
+
+		return new ErrorMessageResponse(messages);
 	}
 }

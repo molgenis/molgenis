@@ -1,5 +1,8 @@
 package org.molgenis.data.rest;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import cz.jirutka.rsql.parser.RSQLParser;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
@@ -717,6 +720,41 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			   .andExpect(MockMvcResultMatchers.content()
 											   .string(CSV_HEADER
 													   + "\"Klaas\",\"p2\",,\"2\"\n\"Piet\",\"p1\",\"enum1\",\"1\"\n"));
+	}
+
+	@Test
+	public void testMessageInvalidJson() throws Exception
+	{
+		String expectedJson = new Gson().toJson(ImmutableMap.of("errors", ImmutableList.of(ImmutableMap.of("message",
+				"Could not read JSON: java.io.EOFException: End of input at line 1 column 12; nested exception is com.google.gson.JsonSyntaxException: java.io.EOFException: End of input at line 1 column 12"))));
+
+		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "PUT")
+											.content("{name:Klaas")
+											.contentType(MediaType.APPLICATION_JSON))
+			   .andExpect(MockMvcResultMatchers.status().isBadRequest())
+			   .andExpect(MockMvcResultMatchers.content().json(expectedJson));
+	}
+
+	@Test
+	public void testInvalidRequestContentType() throws Exception
+	{
+		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET").contentType("text/plain"))
+			   .andExpect(MockMvcResultMatchers.status().isUnsupportedMediaType());
+	}
+
+	@Test
+	public void testInvalidRequestBody() throws Exception
+	{
+		String content = new Gson().toJson(ImmutableMap.of("num", 1000000, "start", -1));
+		String expectedErrors = new Gson().toJson(ImmutableMap.of("errors",
+				ImmutableList.of(ImmutableMap.of("message", "No more than 10000 rows can be requested"),
+						ImmutableMap.of("message", "must be greater than or equal to 0"))));
+		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET")
+										 .contentType("application/json")
+										 .accept("application/json")
+										 .content(content))
+			   .andExpect(MockMvcResultMatchers.status().isBadRequest())
+			   .andExpect(MockMvcResultMatchers.content().string(expectedErrors));
 	}
 
 	@Configuration
