@@ -48,6 +48,6 @@ public class IncompatibleValueTypeException extends RestApiException
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new Object[] { attribute.getName(), type, String.join("or", expectedTypes) };
+		return new Object[] { attribute.getName(), type, String.join(",", expectedTypes) };
 	}
 }
