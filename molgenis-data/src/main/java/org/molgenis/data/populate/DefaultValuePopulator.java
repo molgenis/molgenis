@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static java.lang.Boolean.FALSE;
@@ -120,7 +121,7 @@ public class DefaultValuePopulator
 		{
 			return parseLocalDate(valueAsString);
 		}
-		catch (java.time.format.DateTimeParseException e)
+		catch (DateTimeParseException e)
 		{
 			throw new DateParseException(attr, valueAsString);
 		}
@@ -132,7 +133,7 @@ public class DefaultValuePopulator
 		{
 			return parseInstant(valueAsString);
 		}
-		catch (java.time.format.DateTimeParseException e)
+		catch (DateTimeParseException e)
 		{
 			throw new DateParseException(attr, valueAsString);
 		}

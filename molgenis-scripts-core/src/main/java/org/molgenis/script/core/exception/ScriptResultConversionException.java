@@ -19,7 +19,7 @@ public class ScriptResultConversionException extends CodedRuntimeException
 	public ScriptResultConversionException(Object value)
 	{
 		super(ERROR_CODE);
-		this.value = value;
+		this.value = requireNonNull(value);
 	}
 
 	public ScriptResultConversionException(Object value, Throwable cause)

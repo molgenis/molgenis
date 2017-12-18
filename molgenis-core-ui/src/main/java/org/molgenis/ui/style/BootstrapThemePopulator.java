@@ -76,7 +76,7 @@ public class BootstrapThemePopulator
 						bootstrap4Data);
 			}
 		}
-		catch (MolgenisStyleException | IOException e)
+		catch (MolgenisThemeException | IOException e)
 		{
 			LOG.error("error populating bootstrap themes", e);
 		}

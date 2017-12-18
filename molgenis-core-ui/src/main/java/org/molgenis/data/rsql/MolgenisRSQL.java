@@ -36,7 +36,7 @@ public class MolgenisRSQL
 		}
 		catch (RSQLParserException e)
 		{
-			throw new RSQLParseException(rsql);
+			throw new RSQLParseException(rsql, e);
 		}
 		MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(entityType);
 

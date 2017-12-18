@@ -9,6 +9,7 @@ import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.validation.*;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionException;
@@ -42,7 +43,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	}
 
 	@Override
-	protected org.springframework.dao.DataAccessException doTranslate(String task, String sql, SQLException ex)
+	protected DataAccessException doTranslate(String task, String sql, SQLException ex)
 	{
 		org.springframework.dao.DataAccessException dataAccessException = super.doTranslate(task, sql, ex);
 		if (dataAccessException == null)
@@ -52,7 +53,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		return doTranslate(dataAccessException);
 	}
 
-	private ErrorCodedDataAccessException doTranslate(org.springframework.dao.DataAccessException dataAccessException)
+	private ErrorCodedDataAccessException doTranslate(DataAccessException dataAccessException)
 	{
 		Throwable cause = dataAccessException.getCause();
 		if (!(cause instanceof PSQLException))

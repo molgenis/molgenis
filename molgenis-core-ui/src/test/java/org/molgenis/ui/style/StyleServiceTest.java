@@ -122,7 +122,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = StyleAlreadyExistsException.class)
-	public void addStylesWithExistingId() throws IOException, MolgenisStyleException
+	public void addStylesWithExistingId() throws IOException, MolgenisThemeException
 	{
 		String styleId = "style";
 		String bs3FileName = "any";
@@ -138,7 +138,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void addBootstrap3And4Styles() throws IOException, MolgenisStyleException
+	public void addBootstrap3And4Styles() throws IOException, MolgenisThemeException
 	{
 		// setup
 		String styleId = "my-style.min.css";
@@ -178,7 +178,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void addBootstrap3StyleOnly() throws IOException, MolgenisStyleException
+	public void addBootstrap3StyleOnly() throws IOException, MolgenisThemeException
 	{
 		// setup
 		String styleId = "my-style.min.css";
@@ -214,7 +214,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = StyleNotFoundException.class)
-	public void getUnknownThemeData() throws MolgenisStyleException
+	public void getUnknownThemeData() throws MolgenisThemeException
 	{
 		String styleName = "no-body";
 		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
@@ -225,7 +225,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getBootstrap3ThemeData() throws MolgenisStyleException
+	public void getBootstrap3ThemeData() throws MolgenisThemeException
 	{
 		String styleName = "my-style";
 		StyleSheet styleSheet = mock(StyleSheet.class);
@@ -248,7 +248,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getBootstrap4ThemeData() throws MolgenisStyleException
+	public void getBootstrap4ThemeData() throws MolgenisThemeException
 	{
 		String styleName = "my-style";
 		StyleSheet styleSheet = mock(StyleSheet.class);
@@ -271,7 +271,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getBootstrap4FallBackThemeData() throws MolgenisStyleException
+	public void getBootstrap4FallBackThemeData() throws MolgenisThemeException
 	{
 		String styleName = "my-style";
 		StyleSheet styleSheet = mock(StyleSheet.class);

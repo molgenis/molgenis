@@ -7,7 +7,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.importer.exception.UnknownActionException;
+import org.molgenis.data.importer.exception.UnknownImportModeException;
 import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -77,7 +77,10 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 			{
 				// convert input to database action
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
-				if (entityDbAction == null) throw new UnknownActionException(entityImportOption);
+				if (entityDbAction == null)
+				{
+					throw new UnknownImportModeException(entityImportOption);
+				}
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 						importWizard.getFile());

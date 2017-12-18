@@ -1,5 +1,8 @@
 package org.molgenis.data.importer.emx.exception;
 
+/**
+ * Thrown if the name of a package does not start with the fully qualified name of its parent
+ */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InconsistentPackageStructureException extends EmxException
 {

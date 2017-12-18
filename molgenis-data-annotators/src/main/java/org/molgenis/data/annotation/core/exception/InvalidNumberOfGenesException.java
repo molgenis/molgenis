@@ -4,12 +4,12 @@ import org.molgenis.i18n.CodedRuntimeException;
 
 import static java.util.Objects.requireNonNull;
 
-public class InvalidNumberOFGenesException extends CodedRuntimeException
+public class InvalidNumberOfGenesException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "AN03";
 	private final int sourceEntitiesSize;
 
-	public InvalidNumberOFGenesException(int sourceEntitiesSize)
+	public InvalidNumberOfGenesException(int sourceEntitiesSize)
 	{
 		super(ERROR_CODE);
 		this.sourceEntitiesSize = requireNonNull(sourceEntitiesSize);

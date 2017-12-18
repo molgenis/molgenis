@@ -3,7 +3,7 @@ package org.molgenis.data.rest.exception;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Exception to be thrown if a vlue expected in the request was missing
+ * Exception to be thrown if a value expected in the request was missing
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MissingValueException extends RestApiException

@@ -24,7 +24,7 @@ public interface StyleService
 	 * @param bootstrap4StyleData the bootstrap 4 style data, this is optional
 	 */
 	Style addStyle(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
-			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException;
+			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisThemeException;
 
 	/**
 	 * Set the runtime property that controls the css style with a selected style
@@ -53,7 +53,7 @@ public interface StyleService
 	 * @return The theme data, as setting the bootstrap 4 theme is optional the fallback bootstrap 4 theme data is
 	 * returned in case there is not theme data for the bootstrap 4 version.
 	 */
-	FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion) throws MolgenisStyleException;
+	FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion) throws MolgenisThemeException;
 
 	/**
 	 * Find the styleSheet for a given theme name

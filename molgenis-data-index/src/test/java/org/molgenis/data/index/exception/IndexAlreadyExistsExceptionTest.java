@@ -25,14 +25,14 @@ public class IndexAlreadyExistsExceptionTest extends ExceptionMessageTest
 	public void testGetLocalizedMessageEn()
 	{
 		LocaleContextHolder.setLocale(ENGLISH);
-		assertEquals(exception.getLocalizedMessage(), "Index 'molgenis' already exists");
+		assertEquals(exception.getLocalizedMessage(), "Index 'molgenis' already exists.");
 	}
 
 	@Test
 	public void testGetLocalizedMessageNl()
 	{
 		LocaleContextHolder.setLocale(new Locale("nl"));
-		assertEquals(exception.getLocalizedMessage(), "Index 'molgenis' bestaat al");
+		assertEquals(exception.getLocalizedMessage(), "Index 'molgenis' bestaat al.");
 	}
 
 	@Test

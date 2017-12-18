@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.core;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.core.exception.UpdateNotSupportedException;
+import org.molgenis.data.annotation.core.exception.AnnotatorUpdateNotSupportedException;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -26,7 +26,7 @@ public interface RepositoryAnnotator
 	{
 		if (updateMode == true)
 		{
-			throw new UpdateNotSupportedException();
+			throw new AnnotatorUpdateNotSupportedException();
 		}
 		return this.annotate(source);
 	}

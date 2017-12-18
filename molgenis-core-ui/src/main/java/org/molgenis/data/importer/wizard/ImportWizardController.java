@@ -251,7 +251,10 @@ public class ImportWizardController extends AbstractWizardController
 				{
 					throw new UnknownEntityTypeException(entityClassId);
 				}
-				if (value != null) throw new EntityTypePermissionsException(entityType, WRITE);
+				if (value != null)
+				{
+					throw new EntityTypePermissionsException(entityType, WRITE);
+				}
 			}
 		});
 	}
@@ -483,9 +486,10 @@ public class ImportWizardController extends AbstractWizardController
 		ImportRun importRun;
 		String fileExtension = getExtension(file.getName());
 		DatabaseAction databaseAction = getDatabaseAction(file, action);
-		if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName())))
+		String baseName = getBaseName(file.getName());
+		if (fileExtension.contains("vcf") && dataService.hasRepository(baseName))
 		{
-			throw new RepositoryAlreadyExistsException(getBaseName(file.getName()));
+			throw new RepositoryAlreadyExistsException(baseName);
 		}
 		ImportService importService = importServiceFactory.getImportService(file.getName());
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(

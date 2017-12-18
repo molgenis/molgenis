@@ -1,6 +1,7 @@
 package org.molgenis.script.core.exception;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Thrown when there's a parameter missing when generating a script.
@@ -16,7 +17,7 @@ public class MissingParameterException extends ScriptGenerationException
 	public MissingParameterException(String parameterName)
 	{
 		super(ERROR_CODE);
-		this.parameterName = parameterName;
+		this.parameterName = requireNonNull(parameterName);
 	}
 
 	public String getParameterName()

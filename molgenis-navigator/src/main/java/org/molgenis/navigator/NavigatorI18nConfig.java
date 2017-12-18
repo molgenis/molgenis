@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class NavigatorI18nConfig
 {
-
 	public static final String NAMESPACE = "navigator";
 
 	@Bean

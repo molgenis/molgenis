@@ -307,7 +307,10 @@ public class QueryGenerator
 		else
 		{
 			Attribute attr = entityType.getAttribute(queryField);
-			if (attr == null) throw new UnknownAttributeException(entityType, queryField);
+			if (attr == null)
+			{
+				throw new UnknownAttributeException(entityType, queryField);
+			}
 			// construct query part
 			AttributeType dataType = attr.getDataType();
 			switch (dataType)
@@ -364,7 +367,10 @@ public class QueryGenerator
 		else
 		{
 			Attribute attr = entityType.getAttribute(queryField);
-			if (attr == null) throw new UnknownAttributeException(entityType, queryField);
+			if (attr == null)
+			{
+				throw new UnknownAttributeException(entityType, queryField);
+			}
 			// construct query part
 			AttributeType dataType = attr.getDataType();
 			switch (dataType)

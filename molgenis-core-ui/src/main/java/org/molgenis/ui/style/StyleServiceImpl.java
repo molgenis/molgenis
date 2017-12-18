@@ -60,7 +60,7 @@ public class StyleServiceImpl implements StyleService
 
 	@Override
 	public Style addStyle(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
-			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisStyleException
+			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisThemeException
 	{
 		if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null)
 		{
@@ -85,7 +85,7 @@ public class StyleServiceImpl implements StyleService
 		return Style.createLocal(styleSheet.getName());
 	}
 
-	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data) throws MolgenisStyleException
+	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data) throws MolgenisThemeException
 	{
 		String fileId = idGenerator.generateId();
 		try
@@ -155,7 +155,7 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	@RunAsSystem
 	public FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-			throws MolgenisStyleException
+			throws MolgenisThemeException
 	{
 		StyleSheet styleSheet = findThemeByName(styleName);
 

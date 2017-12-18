@@ -36,7 +36,7 @@ public class ViewTestConfig
 	}
 
 	@Bean
-	public ThemeFingerprintRegistry themeFingerprintRegistry() throws IOException, MolgenisStyleException
+	public ThemeFingerprintRegistry themeFingerprintRegistry() throws IOException, MolgenisThemeException
 	{
 		ThemeFingerprintRegistry themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
 		when(themeFingerprintRegistry.getFingerprint(anyString())).thenReturn("");

@@ -1,5 +1,8 @@
 package org.molgenis.data.importer.exception;
 
+/**
+ * Thrown if "addEntity" was never called before the getAttribute, and hence the list of entities to import is empty
+ */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EmptyImportException extends ImporterException
 {

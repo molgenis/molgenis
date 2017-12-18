@@ -73,7 +73,10 @@ public class GeneCsvRepository extends AbstractRepository
 			forEach(e ->
 			{
 				Object key = e.get(sourceAttributeName);
-				if (key == null) throw new MissingValueException(key, e.getEntityType());
+				if (key == null)
+				{
+					throw new MissingValueException(key, e.getEntityType());
+				}
 
 				index.put(key, e);
 			});

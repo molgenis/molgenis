@@ -2,11 +2,11 @@ package org.molgenis.data.annotation.core.exception;
 
 import org.molgenis.i18n.CodedRuntimeException;
 
-public class UpdateNotSupportedException extends CodedRuntimeException
+public class AnnotatorUpdateNotSupportedException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "AN01";
 
-	public UpdateNotSupportedException()
+	public AnnotatorUpdateNotSupportedException()
 	{
 		super(ERROR_CODE);
 	}

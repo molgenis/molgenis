@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CoreUi18nConfig
 {
-
 	public static final String NAMESPACE = "core-ui";
 
 	@Bean

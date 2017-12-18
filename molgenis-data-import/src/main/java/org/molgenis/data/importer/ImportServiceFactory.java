@@ -51,7 +51,10 @@ public class ImportServiceFactory
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
-		if (importService == null) throw new NoSuitableImporterFoundException(file.getName());
+		if (importService == null)
+		{
+			throw new NoSuitableImporterFoundException(file.getName());
+		}
 
 		return importService;
 	}
@@ -72,7 +75,10 @@ public class ImportServiceFactory
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
-		if (importService == null) throw new NoSuitableImporterFoundException(fileName);
+		if (importService == null)
+		{
+			throw new NoSuitableImporterFoundException(fileName);
+		}
 
 		return importService;
 	}

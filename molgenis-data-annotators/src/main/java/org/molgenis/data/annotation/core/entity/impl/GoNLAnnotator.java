@@ -8,7 +8,7 @@ import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.QueryAnnotatorImpl;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
-import org.molgenis.data.annotation.core.exception.UpdateNotSupportedException;
+import org.molgenis.data.annotation.core.exception.AnnotatorUpdateNotSupportedException;
 import org.molgenis.data.annotation.core.query.LocusQueryCreator;
 import org.molgenis.data.annotation.core.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.core.resources.Resource;
@@ -116,7 +116,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 			{
 				if (updateMode)
 				{
-					throw new UpdateNotSupportedException();
+					throw new AnnotatorUpdateNotSupportedException();
 				}
 
 				List<Entity> refMatches = determineRefMatches(entity, annotationSourceEntities);

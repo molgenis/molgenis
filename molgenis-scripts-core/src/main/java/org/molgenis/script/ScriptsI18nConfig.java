@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ScriptsI18nConfig
 {
-
 	public static final String NAMESPACE = "scripts";
 
 	@Bean
