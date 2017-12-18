@@ -5,7 +5,6 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.settings.StaticContent;
 import org.molgenis.ui.settings.StaticContentFactory;
 import org.slf4j.Logger;
@@ -68,8 +67,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return SecurityUtils.currentUserIsAuthenticated() && permissionService.hasPermissionOnPlugin(pluginId,
-				Permission.WRITE);
+		return permissionService.hasPermissionOnPlugin(pluginId, Permission.WRITE)
+				&& permissionService.hasPermissionOnEntityType(STATIC_CONTENT, Permission.WRITE);
 	}
 
 	@Override
@@ -82,9 +81,13 @@ public class StaticContentServiceImpl implements StaticContentService
 
 	public void checkPermissions(String pluginId)
 	{
-		if (!this.isCurrentUserCanEdit(pluginId))
+		if (!permissionService.hasPermissionOnPlugin(pluginId, Permission.WRITE))
 		{
-			throw new MolgenisDataAccessException("No write permissions on static content page");
+			throw new MolgenisDataAccessException("No write permissions on " + pluginId + " plugin.");
+		}
+		if (!permissionService.hasPermissionOnEntityType(STATIC_CONTENT, Permission.WRITE))
+		{
+			throw new MolgenisDataAccessException("No write permission on static content entity type.");
 		}
 	}
 }
