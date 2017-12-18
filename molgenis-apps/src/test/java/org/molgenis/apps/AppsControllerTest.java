@@ -11,24 +11,20 @@ import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.MockMvcExceptionalRequestPerformer;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.Iterator;
@@ -43,7 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = { GsonConfig.class, AppsControllerTest.Config.class })
+@ContextConfiguration(classes = { GsonConfig.class })
 public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 {
 	@Mock
@@ -57,8 +53,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-	@Autowired
-	private Config.TestExceptionHandler testExceptionHandler;
+	private MockMvcExceptionalRequestPerformer exceptionalRequestPerformer;
 
 	public AppsControllerTest()
 	{
@@ -71,8 +66,8 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		AppsController appsController = new AppsController(dataService, permissionService);
 		mockMvc = MockMvcBuilders.standaloneSetup(appsController)
 								 .setMessageConverters(gsonHttpMessageConverter)
-								 .setControllerAdvice(testExceptionHandler)
 								 .build();
+		exceptionalRequestPerformer = new MockMvcExceptionalRequestPerformer(mockMvc);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -196,23 +191,21 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
-	public void testActivateAppUnknownApp() throws Exception
+	public void testActivateAppUnknownApp() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
-		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/activate")).andReturn();
-
-		throw result.getResolvedException();
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/activate");
+		exceptionalRequestPerformer.perform(request);
 	}
 
 	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already activated")
-	public void testActivateAppAlreadyActivated() throws Exception
+	public void testActivateAppAlreadyActivated() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/activate")).andReturn();
-
-		throw result.getResolvedException();
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/activate");
+		exceptionalRequestPerformer.perform(request);
 	}
 
 	@Test
@@ -226,38 +219,21 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
-	public void testDeactivateAppUnknownApp() throws Exception
+	public void testDeactivateAppUnknownApp() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
-		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andReturn();
-
-		throw result.getResolvedException();
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/deactivate");
+		exceptionalRequestPerformer.perform(request);
 	}
 
 	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already deactivated")
-	public void testDeActivateAppAlreadyDeactivated() throws Exception
+	public void testDeActivateAppAlreadyDeactivated() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		MvcResult result = mockMvc.perform(post(AppsController.URI + "/id/deactivate")).andReturn();
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/deactivate");
 
-		throw result.getResolvedException();
-	}
-
-	@Configuration
-	public static class Config extends WebMvcConfigurerAdapter
-	{
-		@ControllerAdvice
-		class TestExceptionHandler
-		{
-			@org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
-			@ResponseBody
-			public String handleNestedServletException(Exception e, HttpServletRequest httpServletRequest)
-					throws Exception
-			{
-				return e.getMessage();
-			}
-		}
+		exceptionalRequestPerformer.perform(request);
 	}
 }
