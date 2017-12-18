@@ -35,11 +35,13 @@ public class JobScheduler
 
 	private final Scheduler quartzScheduler;
 	private final DataService dataService;
+	private final ScheduledJobMetadata scheduledJobMetadata;
 
-	JobScheduler(Scheduler quartzScheduler, DataService dataService)
+	JobScheduler(Scheduler quartzScheduler, DataService dataService, ScheduledJobMetadata scheduledJobMetadata)
 	{
 		this.quartzScheduler = requireNonNull(quartzScheduler);
 		this.dataService = requireNonNull(dataService);
+		this.scheduledJobMetadata = requireNonNull(scheduledJobMetadata);
 	}
 
 	/**
@@ -78,7 +80,7 @@ public class JobScheduler
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		if (scheduledJob == null)
 		{
-			throw new UnknownEntityException(dataService.getEntityType(SCHEDULED_JOB), scheduledJobId);
+			throw new UnknownEntityException(scheduledJobMetadata, scheduledJobId);
 		}
 		return scheduledJob;
 	}

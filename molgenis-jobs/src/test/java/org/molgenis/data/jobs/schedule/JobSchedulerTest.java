@@ -177,6 +177,9 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		@Mock
 		private Scheduler quartzScheduler;
 
+		@Mock
+		private ScheduledJobMetadata scheduledJobMetadata;
+
 		public Config()
 		{
 			initMocks(this);
@@ -190,7 +193,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public JobScheduler jobScheduler()
 		{
-			return new JobScheduler(quartzScheduler(), dataService);
+			return new JobScheduler(quartzScheduler(), dataService, scheduledJobMetadata);
 		}
 
 		@Bean

@@ -3,6 +3,7 @@ package org.molgenis.data.semanticsearch.config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.populate.IdGenerator;
@@ -51,6 +52,9 @@ public class SemanticSearchConfig
 	@Autowired
 	ElasticsearchService elasticsearchService;
 
+	@Autowired
+	PackageMetadata packageMetadata;
+
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()
 	{
@@ -60,7 +64,8 @@ public class SemanticSearchConfig
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetadata);
+		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetadata,
+				packageMetadata);
 	}
 
 	@Bean
