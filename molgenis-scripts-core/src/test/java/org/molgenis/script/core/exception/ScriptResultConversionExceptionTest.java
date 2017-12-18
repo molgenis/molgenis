@@ -18,6 +18,6 @@ public class ScriptResultConversionExceptionTest extends ExceptionMessageTest
 	public void testGetLocalizedMessage()
 	{
 		assertEquals(new ScriptResultConversionException(Long.MAX_VALUE).getLocalizedMessage(),
-				"Script result '9,223,372,036,854,775,807' cannot be converted to the appropriate type");
+				"Script result '9,223,372,036,854,775,807' cannot be converted to the appropriate type.");
 	}
 }
