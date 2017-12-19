@@ -1,8 +1,6 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.data.AbstractRepositoryCollectionDecorator;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -21,8 +19,8 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	private final EntityTypeCopier entityTypeCopier;
 	private final AttributeCopier attributeCopier;
 
-	PostgreSqlRepositoryCollectionDecorator(RepositoryCollection delegateRepositoryCollection, EntityTypeRegistry entityTypeRegistry,
-			EntityTypeCopier entityTypeCopier, AttributeCopier attributeCopier)
+	PostgreSqlRepositoryCollectionDecorator(RepositoryCollection delegateRepositoryCollection,
+			EntityTypeRegistry entityTypeRegistry, EntityTypeCopier entityTypeCopier, AttributeCopier attributeCopier)
 	{
 		super(delegateRepositoryCollection);
 		this.entityTypeRegistry = requireNonNull(entityTypeRegistry);
@@ -31,11 +29,10 @@ public class PostgreSqlRepositoryCollectionDecorator extends AbstractRepositoryC
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityType entityType)
+	public void createRepository(EntityType entityType)
 	{
-		Repository<Entity> repo = delegate().createRepository(entityType);
+		delegate().createRepository(entityType);
 		entityTypeRegistry.registerEntityType(entityType);
-		return repo;
 	}
 
 	@Override

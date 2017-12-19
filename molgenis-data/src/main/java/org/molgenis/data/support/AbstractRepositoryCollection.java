@@ -25,7 +25,7 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityType entityType)
+	public void createRepository(EntityType entityType)
 	{
 		throw new UnsupportedOperationException();
 	}

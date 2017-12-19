@@ -1,7 +1,6 @@
 package org.molgenis.data.index;
 
 import org.molgenis.data.AbstractRepositoryCollectionDecorator;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
@@ -60,9 +59,9 @@ public class IndexActionRepositoryCollectionDecorator extends AbstractRepository
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityType entityType)
+	public void createRepository(EntityType entityType)
 	{
 		this.indexActionRegisterService.register(entityType, null);
-		return delegate().createRepository(entityType);
+		delegate().createRepository(entityType);
 	}
 }

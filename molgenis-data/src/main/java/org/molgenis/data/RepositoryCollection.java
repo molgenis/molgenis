@@ -36,10 +36,9 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	 * Creates a new {@link Repository} within this repository collection for the given entity meta data.
 	 *
 	 * @param entityType entity meta data
-	 * @return the created repository
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#WRITABLE}
 	 */
-	Repository<Entity> createRepository(EntityType entityType);
+	void createRepository(EntityType entityType);
 
 	/**
 	 * Get ids of all the entity types in this source
