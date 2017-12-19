@@ -3,14 +3,15 @@ package org.molgenis.data.decorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.decorator.meta.DecoratorConfiguration;
+import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
 import org.molgenis.data.decorator.meta.DynamicDecorator;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -23,10 +24,15 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 {
 	private final Map<String, DynamicRepositoryDecoratorFactory> factories = new HashMap<>();
 	private final DataService dataService;
+	private RepositoryCollection repositoryCollection;
+	private DecoratorConfigurationMetadata decoratorConfigurationMetadata;
 
-	public DynamicRepositoryDecoratorRegistryImpl(DataService dataService)
+	public DynamicRepositoryDecoratorRegistryImpl(DataService dataService, RepositoryCollection repositoryCollection,
+			DecoratorConfigurationMetadata decoratorConfigurationMetadata)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.repositoryCollection = requireNonNull(repositoryCollection);
+		this.decoratorConfigurationMetadata = requireNonNull(decoratorConfigurationMetadata);
 	}
 
 	@Override
@@ -47,33 +53,19 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	{
 		String entityTypeId = repository.getEntityType().getId();
 
-		if (!entityTypeId.equals(DECORATOR_CONFIGURATION))
+		if (!entityTypeId.equals(DECORATOR_CONFIGURATION) && repositoryCollection.hasRepository(
+				decoratorConfigurationMetadata))
 		{
-			Optional<DecoratorConfiguration> configuration = getConfiguration(entityTypeId);
+			DecoratorConfiguration configuration = dataService.query(DECORATOR_CONFIGURATION,
+					DecoratorConfiguration.class).eq(ENTITY_TYPE_ID, entityTypeId).findOne();
 
-			if (configuration.isPresent())
+			if (configuration != null)
 			{
-				repository = decorateRepository(repository, configuration.get());
+				repository = decorateRepository(repository, configuration);
 			}
 		}
 
 		return repository;
-	}
-
-	private Optional<DecoratorConfiguration> getConfiguration(String entityTypeId)
-	{
-		Optional<DecoratorConfiguration> configuration;
-		try
-		{
-			configuration = Optional.ofNullable(dataService.query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
-														   .eq(ENTITY_TYPE_ID, entityTypeId)
-														   .findOne());
-		}
-		catch (Exception e)
-		{
-			configuration = Optional.empty();
-		}
-		return configuration;
 	}
 
 	@SuppressWarnings("unchecked")
