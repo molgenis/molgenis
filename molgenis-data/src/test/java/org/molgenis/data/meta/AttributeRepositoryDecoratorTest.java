@@ -112,20 +112,7 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 		repo.delete(compound);
 
 		//Test
-		verify(child).setParent(null);
 		verify(delegateRepository).delete(compound);
-	}
-
-	@Test
-	public void deleteStream()
-	{
-		AttributeRepositoryDecorator repoSpy = spy(repo);
-		doNothing().when(repoSpy).delete(any(Attribute.class));
-		Attribute attr0 = mock(Attribute.class);
-		Attribute attr1 = mock(Attribute.class);
-		repoSpy.delete(Stream.of(attr0, attr1));
-		verify(repoSpy).delete(attr0);
-		verify(repoSpy).delete(attr1);
 	}
 
 	@Test

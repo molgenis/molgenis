@@ -137,7 +137,7 @@
                                 <location>org.molgenis.ui.admin.user</location>
                                 <location>org.molgenis.ui.admin.usermanager</location>
                             </locations>
-                            <swaggerDirectory>${build.directory}/generated-resources/swagger</swaggerDirectory>
+                            <swaggerDirectory>${project.build.directory}/generated-resources/swagger</swaggerDirectory>
                             <swaggerFileName>${project.name}-swagger</swaggerFileName>
                         </apiSource>
                     </apiSources>

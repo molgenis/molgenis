@@ -68,9 +68,6 @@ System packages, system entities and system attributes are available in MOLGENIS
 
 At the bottom right of each table, there is a download button. This button allows you to save the data to a CSV or XLSX file. The XLSX download is limited to 500000 values to prevent performance issues. 
 Depending on the purpose of the download, identifiers or labels can be used as column headers.
-Another button, next to the download button, will allow you to send your data to a [galaxy](https://galaxyproject.org/ "Galaxy") server.
-
-![Dataexplorer download](../images/dataexplorer/download_export.png?raw=true, "dataexplorer/download_export")
 
 # Genome browser
   
@@ -195,7 +192,7 @@ There are two ways to create your own reports:
 
 You will need:
 
-1. A data set: "Advanced data example" ([download](/data/advanced_data_example_v20151104.xlsx)). Upload this dataset into your MOLGENIS instance, see the [Upload guide](guide-upload).
+1. A data set: "Advanced data example" ([download](/data/advanced_data_example_v20171206.xlsx)). Upload this dataset into your MOLGENIS instance, see the [Upload guide](guide-upload).
 
 ###### Override the entity view
 

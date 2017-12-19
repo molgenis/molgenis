@@ -2,7 +2,6 @@ target/
 .settings/
 .project
 .classpath
-.idea
 *.iml
 *.ipr
 *.iws
@@ -22,6 +21,10 @@ derby.log
 .metadata/
 .RData
 .RHistory
+
+.idea/*
+.idea/fileTemplates/*/
+!.idea/fileTemplates/
 
 **/npm-debug.log
 
