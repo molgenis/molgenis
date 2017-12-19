@@ -15,7 +15,6 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
@@ -48,7 +47,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
 	private final DefaultValueReferenceValidator defaultValueReferenceValidator;
-	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
@@ -59,8 +57,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			L3Cache l3Cache, PlatformTransactionManager transactionManager, QueryValidator queryValidator,
-			DefaultValueReferenceValidator defaultValueReferenceValidator,
-			SystemEntityTypeRegistry systemEntityTypeRegistry)
+			DefaultValueReferenceValidator defaultValueReferenceValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -80,7 +77,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.transactionManager = requireNonNull(transactionManager);
 		this.queryValidator = requireNonNull(queryValidator);
 		this.defaultValueReferenceValidator = requireNonNull(defaultValueReferenceValidator);
-		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 	}
 
 	@Override
@@ -88,30 +84,26 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repository;
 
-		// 14. Query the L2 cache before querying the database
+		// 15. Query the L2 cache before querying the database
 		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
-		// 13. Query the L1 cache before querying the database
+		// 14. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
-		// 12. Route specific queries to the index
+		// 13. Route specific queries to the index
 		decoratedRepository = indexedRepositoryDecoratorFactory.create(decoratedRepository);
 
-		// 11. Query the L3 cache before querying the index
+		// 12. Query the L3 cache before querying the index
 		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
-		// 10. Register the cud action needed to index indexed repositories
+		// 11. Register the cud action needed to index indexed repositories
 		decoratedRepository = new IndexActionRepositoryDecorator(decoratedRepository, indexActionRegisterService);
 
-		// 9. Custom & dynamic decorators
-		if (systemEntityTypeRegistry.hasSystemEntityType(repository.getEntityType().getId()))
-		{
-			decoratedRepository = systemRepositoryDecoratorRegistry.decorate(decoratedRepository);
-		}
-		else
-		{
-			decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
-		}
+		// 10. Dynamic decorators
+		decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
+
+		// 9. Custom decorators for system entity types
+		decoratedRepository = systemRepositoryDecoratorRegistry.decorate(decoratedRepository);
 
 		// 8. Perform cascading deletes
 		decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);

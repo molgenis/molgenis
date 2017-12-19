@@ -4,19 +4,19 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.decorator.meta.DecoratorConfiguration;
-import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
 import org.molgenis.data.decorator.meta.DynamicDecorator;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
 
 @Component
 public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepositoryDecoratorRegistry
@@ -49,17 +49,31 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 
 		if (!entityTypeId.equals(DECORATOR_CONFIGURATION))
 		{
-			DecoratorConfiguration configuration = dataService.findOne(DECORATOR_CONFIGURATION,
-					new QueryImpl<DecoratorConfiguration>().eq(DecoratorConfigurationMetadata.ENTITY_TYPE_ID,
-							entityTypeId), DecoratorConfiguration.class);
+			Optional<DecoratorConfiguration> configuration = getConfiguration(entityTypeId);
 
-			if (configuration != null)
+			if (configuration.isPresent())
 			{
-				repository = decorateRepository(repository, configuration);
+				repository = decorateRepository(repository, configuration.get());
 			}
 		}
 
 		return repository;
+	}
+
+	private Optional<DecoratorConfiguration> getConfiguration(String entityTypeId)
+	{
+		Optional<DecoratorConfiguration> configuration;
+		try
+		{
+			configuration = Optional.ofNullable(dataService.query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
+														   .eq(ENTITY_TYPE_ID, entityTypeId)
+														   .findOne());
+		}
+		catch (Exception e)
+		{
+			configuration = Optional.empty();
+		}
+		return configuration;
 	}
 
 	@SuppressWarnings("unchecked")
