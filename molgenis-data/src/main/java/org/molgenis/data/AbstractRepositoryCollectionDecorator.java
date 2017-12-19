@@ -41,9 +41,9 @@ public abstract class AbstractRepositoryCollectionDecorator extends ForwardingOb
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityType entityType)
+	public void createRepository(EntityType entityType)
 	{
-		return delegate().createRepository(entityType);
+		delegate().createRepository(entityType);
 	}
 
 	@Override

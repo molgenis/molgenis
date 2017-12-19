@@ -32,9 +32,9 @@ class RepositoryCollectionDecorator extends AbstractRepositoryCollectionDecorato
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityType entityType)
+	public void createRepository(EntityType entityType)
 	{
-		return repositoryDecoratorFactory.createDecoratedRepository(delegate().createRepository(entityType));
+		delegate().createRepository(entityType);
 	}
 
 	@Override
