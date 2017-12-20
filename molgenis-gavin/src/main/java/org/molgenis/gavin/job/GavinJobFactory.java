@@ -1,12 +1,12 @@
 package org.molgenis.gavin.job;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.file.FileStore;
-import org.molgenis.gavin.exception.JobNotFoundException;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -88,18 +88,16 @@ public class GavinJobFactory
 	 *
 	 * @param jobIdentifier the identifier of the {@link GavinJobExecution}
 	 * @return GavinJobExecution with the specified identifier, if it exists
-	 * @throws JobNotFoundException if no GavinJobExecution with the specified identifier exists.
+	 * @throws UnknownEntityException if no GavinJobExecution with the specified identifier exists.
 	 */
 	@RunAsSystem
-	public GavinJobExecution findGavinJobExecution(String jobIdentifier) throws JobNotFoundException
+	public GavinJobExecution findGavinJobExecution(String jobIdentifier)
 	{
 		GavinJobExecution result = dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
 		if (result == null)
 		{
-
-			throw new JobNotFoundException();
+			throw new UnknownEntityException(dataService.getEntityType(GAVIN_JOB_EXECUTION), jobIdentifier);
 		}
 		return result;
 	}
-
 }
