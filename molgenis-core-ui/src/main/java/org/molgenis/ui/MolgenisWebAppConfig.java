@@ -31,6 +31,7 @@ import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
 import org.molgenis.web.Ui;
+import org.molgenis.web.i18n.MolgenisLocaleResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -47,6 +48,7 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -57,6 +59,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -347,6 +350,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public CorsInterceptor corsInterceptor()
 	{
 		return new CorsInterceptor();
+	}
+
+	@Bean
+	public LocaleResolver localeResolver()
+	{
+		return new MolgenisLocaleResolver(dataService, () -> new Locale(appSettings.getLanguageCode()));
 	}
 
 	@PostConstruct
