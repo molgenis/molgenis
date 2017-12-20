@@ -292,7 +292,6 @@ public class EmxMetaDataParser implements MetaDataParser
 		CompositeValidationResult compositeValidationResult = new CompositeValidationResult();
 		metaDataMap.values().forEach(entityType ->
 		{
-			// TODO collect all constraint violations
 			EntityTypeValidationResult validationResult = entityTypeValidator.validate(entityType);
 			compositeValidationResult.addValidationResult(validationResult);
 		});
