@@ -74,11 +74,11 @@ public class RegistryBootstrapper
 		LOG.trace("Registered entity factories");
 
 		LOG.trace("Registering repository decorator factories ...");
-		systemRepositoryDecoratorFactoryRegistrar.register(event);
+		systemRepositoryDecoratorFactoryRegistrar.register(event.getApplicationContext());
 		LOG.trace("Registered repository decorator factories");
 
 		LOG.trace("Registering dynamic decorator factories ...");
-		dynamicRepositoryDecoratorFactoryRegistrar.register(event);
+		dynamicRepositoryDecoratorFactoryRegistrar.register(event.getApplicationContext());
 		LOG.trace("Registered dynamic repository decorator factories");
 
 		LOG.trace("Registering importers ...");

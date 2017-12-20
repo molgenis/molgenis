@@ -1,7 +1,6 @@
 package org.molgenis.data.decorator.meta;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
 import org.springframework.stereotype.Component;
 
@@ -47,32 +46,38 @@ public class DynamicDecoratorPopulator
 
 	private void removeNonExistingDecorators()
 	{
-		Set<Object> nonExistingDecorators = getNonExistingDecorators();
+		Set<String> nonExistingDecorators = getNonExistingDecorators();
 		updateDecoratorConfigurations(nonExistingDecorators);
-		dataService.deleteAll(DYNAMIC_DECORATOR, nonExistingDecorators.stream());
+		dataService.deleteAll(DYNAMIC_DECORATOR, nonExistingDecorators.stream().map(id -> (Object) id));
 	}
 
-	private Set<Object> getNonExistingDecorators()
+	private Set<String> getNonExistingDecorators()
 	{
-		Set<Object> decorators = dataService.findAll(DYNAMIC_DECORATOR).map(Entity::getIdValue).collect(toSet());
+		Set<String> decorators = dataService.findAll(DYNAMIC_DECORATOR, DynamicDecorator.class)
+											.map(DynamicDecorator::getId)
+											.collect(toSet());
+
 		decorators.removeAll(registry.getFactoryIds().collect(toSet()));
 		return decorators;
 	}
 
-	private void updateDecoratorConfigurations(Set<Object> nonExistingDecorators)
+	private void updateDecoratorConfigurations(Set<String> nonExistingDecorators)
 	{
-		Stream<Entity> updatedEntities = dataService.findAll(DECORATOR_CONFIGURATION)
-													.map(entity -> removeReferences(nonExistingDecorators, entity));
+		Stream<DecoratorConfiguration> updatedEntities = dataService.findAll(DECORATOR_CONFIGURATION,
+				DecoratorConfiguration.class).map(config -> removeReferences(nonExistingDecorators, config));
 		dataService.update(DECORATOR_CONFIGURATION, updatedEntities);
 	}
 
-	private Entity removeReferences(Set<Object> nonExistingDecorators, Entity entity)
+	private DecoratorConfiguration removeReferences(Set<String> nonExistingDecorators,
+			DecoratorConfiguration configuration)
 	{
-		List<Entity> decorators = StreamSupport.stream(entity.getEntities(DYNAMIC_DECORATORS).spliterator(), false)
-											   .filter(e -> !nonExistingDecorators.contains(e.getIdValue()))
-											   .collect(toList());
-		entity.set(DYNAMIC_DECORATORS, decorators);
-		return entity;
+		List<DynamicDecorator> decorators = StreamSupport.stream(
+				configuration.getEntities(DYNAMIC_DECORATORS, DynamicDecorator.class).spliterator(), false)
+														 .filter(e -> !nonExistingDecorators.contains(e.getId()))
+														 .collect(toList());
+
+		configuration.set(DYNAMIC_DECORATORS, decorators);
+		return configuration;
 	}
 
 	private boolean notPersisted(String id)
@@ -85,4 +90,3 @@ public class DynamicDecoratorPopulator
 		return dynamicDecoratorFactory.create(id);
 	}
 }
-

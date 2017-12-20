@@ -24,8 +24,8 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 {
 	private final Map<String, DynamicRepositoryDecoratorFactory> factories = new HashMap<>();
 	private final DataService dataService;
-	private RepositoryCollection repositoryCollection;
-	private DecoratorConfigurationMetadata decoratorConfigurationMetadata;
+	private final RepositoryCollection repositoryCollection;
+	private final DecoratorConfigurationMetadata decoratorConfigurationMetadata;
 
 	public DynamicRepositoryDecoratorRegistryImpl(DataService dataService, RepositoryCollection repositoryCollection,
 			DecoratorConfigurationMetadata decoratorConfigurationMetadata)
