@@ -10,7 +10,7 @@ public class RestI18nConfig
 	public static final String NAMESPACE = "rest";
 
 	@Bean
-	public PropertiesMessageSource importerMessageSource()
+	public PropertiesMessageSource restMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}
