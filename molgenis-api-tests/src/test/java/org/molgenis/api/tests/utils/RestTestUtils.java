@@ -138,17 +138,29 @@ public class RestTestUtils
 	 */
 	public static void uploadEMX(String adminToken, String fileName)
 	{
-		URL resourceUrl = Resources.getResource(RestTestUtils.class, fileName);
-		File file = null;
-		try
-		{
-			file = new File(new URI(resourceUrl.toString()).getPath());
-		}
-		catch (URISyntaxException e)
-		{
-			LOG.error(e.getMessage());
-		}
+		File file = getResourceFile(fileName);
 
+		uploadEMXFile(adminToken, file);
+	}
+
+	/**
+	 * Import emx file using add/update.
+	 * <p>
+	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 *
+	 * @param adminToken to use for login
+	 * @param pathToFileFolder
+	 * @param fileName name of the file to upload
+	 */
+	public static void uploadEMX(String adminToken, String pathToFileFolder, String fileName)
+	{
+		File file = new File(pathToFileFolder + File.separator + fileName);
+
+		uploadEMXFile(adminToken, file);
+	}
+
+	private static void uploadEMXFile(String adminToken, File file)
+	{
 		String importJobURLString = given().multiPart(file)
 										   .param("file")
 										   .param("action", "ADD_UPDATE_EXISTING")
@@ -168,15 +180,7 @@ public class RestTestUtils
 		LOG.info("Import completed");
 	}
 
-	/**
-	 * Import emx file using add/update.
-	 * <p>
-	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 *
-	 * @param adminToken to use for login
-	 * @param fileName   the file to upload
-	 */
-	public static void uploadVCF(String adminToken, String fileName, String entityName)
+	private static File getResourceFile(String fileName)
 	{
 		URL resourceUrl = Resources.getResource(RestTestUtils.class, fileName);
 		File file = null;
@@ -188,6 +192,20 @@ public class RestTestUtils
 		{
 			LOG.error(e.getMessage());
 		}
+		return file;
+	}
+
+	/**
+	 * Import emx file using add/update.
+	 * <p>
+	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 *
+	 * @param adminToken to use for login
+	 * @param fileName   the file to upload
+	 */
+	public static void uploadVCF(String adminToken, String fileName, String entityName)
+	{
+		File file = getResourceFile(fileName);
 
 		String importJobURLString = given().multiPart(file)
 										   .param("file")

@@ -112,7 +112,8 @@ public class AttributeMetadata extends SystemEntityType
 							  .setRefEntity(this)
 							  .setMappedBy(parentAttr)
 							  .setOrderBy(new Sort(SEQUENCE_NR))
-							  .setLabel("Attribute parts");
+							  .setLabel("Attribute parts")
+							  .setCascadeDelete(true);
 		addAttribute(REF_ENTITY_TYPE).setDataType(XREF)
 									 .setRefEntity(entityTypeMeta)
 									 .setLabel("Referenced entity")
@@ -223,11 +224,6 @@ public class AttributeMetadata extends SystemEntityType
 
 	private static String getCascadeDeleteValidationExpression()
 	{
-		String regex = "/^(" + Arrays.stream(AttributeType.values())
-									 .filter(EntityTypeUtils::isReferenceType)
-									 .map(AttributeType::getValueString)
-									 .collect(Collectors.joining("|")) + ")$/";
-
 		return "$('" + IS_CASCADE_DELETE + "').isNull().or(" + "$('" + REF_ENTITY_TYPE + "').isNull().not()).value()";
 	}
 
