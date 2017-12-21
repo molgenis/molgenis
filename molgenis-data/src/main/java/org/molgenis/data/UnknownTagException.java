@@ -9,5 +9,11 @@ public class UnknownTagException extends UnknownEntityException
 	{
 		super(tagMetadata, tagId);
 	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("id:%s", getEntityId().toString());
+	}
 }
 
