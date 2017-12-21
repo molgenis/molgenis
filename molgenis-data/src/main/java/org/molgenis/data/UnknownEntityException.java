@@ -10,6 +10,7 @@ public class UnknownEntityException extends UnknownDataException
 	private static final String ERROR_CODE = "D02";
 
 	private final transient EntityType entityType;
+
 	private final transient Object entityId;
 
 	public UnknownEntityException(EntityType entityType, Object entityId)
@@ -17,6 +18,11 @@ public class UnknownEntityException extends UnknownDataException
 		super(ERROR_CODE);
 		this.entityType = requireNonNull(entityType);
 		this.entityId = requireNonNull(entityId);
+	}
+
+	public Object getEntityId()
+	{
+		return entityId;
 	}
 
 	@Override

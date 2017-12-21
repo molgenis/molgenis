@@ -157,7 +157,7 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 			}
 			catch (UnknownIndexInternalException e1)
 			{
-				throw new UnknownIndexException(getEntityType());
+				throw new UnknownIndexException(getEntityType(), e);
 			}
 		}
 	}

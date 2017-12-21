@@ -19,11 +19,6 @@ public class InvalidParameterException extends ScriptGenerationException
 		this.name = requireNonNull(name);
 	}
 
-	public String getName()
-	{
-		return name;
-	}
-
 	@Override
 	public String getMessage()
 	{

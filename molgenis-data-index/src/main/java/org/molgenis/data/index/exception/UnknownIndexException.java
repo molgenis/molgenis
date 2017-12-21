@@ -10,9 +10,9 @@ public class UnknownIndexException extends CodedRuntimeException
 	private static final String ERROR_CODE = "IDX02";
 	private final transient EntityType entityType;
 
-	public UnknownIndexException(EntityType entityType)
+	public UnknownIndexException(EntityType entityType, Throwable cause)
 	{
-		super(ERROR_CODE);
+		super(ERROR_CODE, cause);
 		this.entityType = requireNonNull(entityType);
 	}
 
