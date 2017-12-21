@@ -506,7 +506,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	/**
 	 * Convert tag identifiers to tags
 	 */
-	private static List<Tag> toTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers)
+	private List<Tag> toTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers)
 	{
 		if (tagIdentifiers.isEmpty())
 		{
@@ -519,7 +519,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Tag tag = intermediateResults.getTag(tagIdentifier);
 			if (tag == null)
 			{
-				throw new UnknownTagException(tagIdentifier);
+				throw new UnknownTagException(tagFactory.getEntityType(), tagIdentifier);
 			}
 			tags.add(tag);
 		}

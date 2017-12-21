@@ -1,30 +1,13 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.data.meta.model.TagMetadata;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class UnknownTagException extends UnknownDataException
+public class UnknownTagException extends UnknownEntityException
 {
-	private static final String ERROR_CODE = "D10";
-
-	private final transient Object tagId;
-
-	public UnknownTagException(Object tagId)
+	public UnknownTagException(TagMetadata tagMetadata, String tagId)
 	{
-		super(ERROR_CODE);
-		this.tagId = requireNonNull(tagId);
-	}
-
-	@Override
-	public String getMessage()
-	{
-		return String.format("id:%s", tagId.toString());
-	}
-
-	@Override
-	protected Object[] getLocalizedMessageArguments()
-	{
-		return new Object[] { tagId };
+		super(tagMetadata, tagId);
 	}
 }
 
