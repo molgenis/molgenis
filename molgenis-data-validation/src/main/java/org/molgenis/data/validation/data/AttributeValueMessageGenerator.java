@@ -1,6 +1,7 @@
 package org.molgenis.data.validation.data;
 
 import org.molgenis.data.AttributeValue;
+import org.molgenis.data.Range;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.validation.ValidationMessage;
 import org.molgenis.i18n.LanguageService;
@@ -44,7 +45,10 @@ public class AttributeValueMessageGenerator
 				constraintViolationMessage = createMessageNotNull("V76", constraintViolation);
 				break;
 			case RANGE:
-				constraintViolationMessage = createMessageRange("V77", constraintViolation);
+				Range range = constraintViolation.getAttributeValue().getAttribute().getRange();
+				String errorCode = range.getMin() != null && range.getMax() != null ? "V77a" : (
+						range.getMin() != null ? "V77b" : "V77c");
+				constraintViolationMessage = createMessageRange(errorCode, constraintViolation);
 				break;
 			case READ_ONLY:
 				constraintViolationMessage = createMessageReadOnly("V78", constraintViolation);
