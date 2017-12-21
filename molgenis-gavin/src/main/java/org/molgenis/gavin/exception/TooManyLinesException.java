@@ -2,12 +2,15 @@ package org.molgenis.gavin.exception;
 
 import org.molgenis.i18n.CodedRuntimeException;
 
-public class InputSizeException extends CodedRuntimeException
+/**
+ * Thrown when input file contains too many lines.
+ */
+public class TooManyLinesException extends CodedRuntimeException
 {
 	private static final String ERROR_CODE = "G01";
 	private final int maxLines;
 
-	public InputSizeException(int maxLines)
+	public TooManyLinesException(int maxLines)
 	{
 		super(ERROR_CODE);
 
