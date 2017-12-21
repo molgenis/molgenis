@@ -8,6 +8,7 @@ import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
+import org.molgenis.gavin.job.meta.GavinJobExecutionMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.mail.MailSender;
@@ -28,24 +29,25 @@ import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EX
 public class GavinJobFactory
 {
 	private final Parser parser;
-	private DataService dataService;
-	private PlatformTransactionManager transactionManager;
-	private UserDetailsService userDetailsService;
-	private JobExecutionUpdater jobExecutionUpdater;
-	private MailSender mailSender;
-	private FileStore fileStore;
-	private RepositoryAnnotator cadd;
-	private RepositoryAnnotator exac;
-	private RepositoryAnnotator snpEff;
-	private EffectBasedAnnotator gavin;
-	private MenuReaderService menuReaderService;
-	private AnnotatorRunner annotatorRunner;
+	private final DataService dataService;
+	private final PlatformTransactionManager transactionManager;
+	private final UserDetailsService userDetailsService;
+	private final JobExecutionUpdater jobExecutionUpdater;
+	private final MailSender mailSender;
+	private final FileStore fileStore;
+	private final RepositoryAnnotator cadd;
+	private final RepositoryAnnotator exac;
+	private final RepositoryAnnotator snpEff;
+	private final EffectBasedAnnotator gavin;
+	private final MenuReaderService menuReaderService;
+	private final AnnotatorRunner annotatorRunner;
+	private final GavinJobExecutionMetaData gavinJobExecutionMetaData;
 
 	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
 			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,
 			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser,
-			AnnotatorRunner annotatorRunner)
+			AnnotatorRunner annotatorRunner, GavinJobExecutionMetaData gavinJobExecutionMetaData)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.transactionManager = requireNonNull(transactionManager);
@@ -60,6 +62,7 @@ public class GavinJobFactory
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.parser = requireNonNull(parser);
 		this.annotatorRunner = requireNonNull(annotatorRunner);
+		this.gavinJobExecutionMetaData = requireNonNull(gavinJobExecutionMetaData);
 	}
 
 	@RunAsSystem
@@ -96,7 +99,7 @@ public class GavinJobFactory
 		GavinJobExecution result = dataService.findOneById(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
 		if (result == null)
 		{
-			throw new UnknownEntityException(dataService.getEntityType(GAVIN_JOB_EXECUTION), jobIdentifier);
+			throw new UnknownEntityException(gavinJobExecutionMetaData, jobIdentifier);
 		}
 		return result;
 	}
