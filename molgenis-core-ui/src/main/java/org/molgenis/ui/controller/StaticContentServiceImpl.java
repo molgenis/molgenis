@@ -1,8 +1,8 @@
 package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.exception.PluginPermissionDeniedException;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.ui.settings.StaticContent;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
 
 /**
@@ -67,7 +68,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return permissionService.hasPermissionOnPlugin(pluginId, Permission.WRITE);
+		return permissionService.hasPermissionOnPlugin(pluginId, WRITE) && permissionService.hasPermissionOnEntityType(
+				STATIC_CONTENT, WRITE);
 	}
 
 	@Override
@@ -81,9 +83,13 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public void checkPermissions(String pluginId)
 	{
-		if (!isCurrentUserCanEdit(pluginId))
+		if (!permissionService.hasPermissionOnPlugin(pluginId, WRITE))
 		{
-			throw new PluginPermissionDeniedException(pluginId, Permission.WRITE);
+			throw new PluginPermissionDeniedException(pluginId, WRITE);
+		}
+		if (!permissionService.hasPermissionOnEntityType(STATIC_CONTENT, WRITE))
+		{
+			throw new EntityTypePermissionDeniedException(staticContentFactory.getEntityType(), WRITE);
 		}
 	}
 }

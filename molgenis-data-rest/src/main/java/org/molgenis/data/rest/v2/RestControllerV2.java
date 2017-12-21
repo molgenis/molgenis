@@ -28,16 +28,12 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.UnexpectedEnumException;
-import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -52,7 +48,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.transform;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
@@ -68,7 +63,7 @@ import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
-@Controller
+@RestController
 @RequestMapping(BASE_URI)
 public class RestControllerV2
 {
@@ -100,7 +95,6 @@ public class RestControllerV2
 
 	@Autowired
 	@GetMapping("/version")
-	@ResponseBody
 	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
 			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
 	{
@@ -121,7 +115,6 @@ public class RestControllerV2
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
 	 */
 	@GetMapping("/{entityTypeId}/{id:.+}")
-	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
@@ -133,7 +126,6 @@ public class RestControllerV2
 	 * Tunnel retrieveEntity through a POST request
 	 */
 	@PostMapping(value = "/{entityTypeId}/{id:.+}", params = "_method=GET")
-	@ResponseBody
 	public Map<String, Object> retrieveEntityPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
@@ -199,7 +191,6 @@ public class RestControllerV2
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
 	 */
 	@GetMapping("/{entityTypeId}")
-	@ResponseBody
 	public EntityCollectionResponseV2 retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
@@ -207,7 +198,6 @@ public class RestControllerV2
 	}
 
 	@PostMapping(value = "/{entityTypeId}", params = "_method=GET")
-	@ResponseBody
 	public EntityCollectionResponseV2 retrieveEntityCollectionPost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
@@ -218,7 +208,6 @@ public class RestControllerV2
 	 * Retrieve attribute meta data
 	 */
 	@GetMapping(value = "/{entityTypeId}/meta/{attributeName}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public AttributeResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName)
 	{
@@ -226,7 +215,6 @@ public class RestControllerV2
 	}
 
 	@PostMapping(value = "/{entityTypeId}/meta/{attributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public AttributeResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName)
 	{
@@ -243,7 +231,6 @@ public class RestControllerV2
 	 */
 	@Transactional
 	@PostMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
@@ -308,7 +295,6 @@ public class RestControllerV2
 	 */
 	@Transactional
 	@PostMapping(value = "copy/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String copyEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestBody @Valid CopyEntityRequestV2 request, HttpServletResponse response) throws Exception
 	{
@@ -478,7 +464,6 @@ public class RestControllerV2
 	 * Get all l10n resource strings in the language of the current user
 	 */
 	@GetMapping(value = "/i18n", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Map<String, String> getL10nStrings()
 	{
 		Map<String, String> translations = new HashMap<>();
@@ -497,7 +482,6 @@ public class RestControllerV2
 	 * Will *not* provide fallback values if the specified language is not available.
 	 */
 	@GetMapping(value = "/i18n/{namespace}/{language}", produces = APPLICATION_JSON_VALUE + ";charset=UTF-8")
-	@ResponseBody
 	public Map<String, String> getL10nStrings(@PathVariable String namespace, @PathVariable String language)
 	{
 		return localizationService.getMessages(namespace, new Locale(language));
@@ -507,7 +491,6 @@ public class RestControllerV2
 	 * Get a properties file to put on your classpath.
 	 */
 	@GetMapping(value = "/i18n/{namespace}_{language}.properties", produces = TEXT_PLAIN_VALUE + ";charset=UTF-8 ")
-	@ResponseBody
 	public String getL10nProperties(@PathVariable String namespace, @PathVariable String language) throws IOException
 	{
 		language = language.toLowerCase();
@@ -555,24 +538,6 @@ public class RestControllerV2
 			throw new MissingIdentifierException(count);
 		}
 		return id;
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
-	{
-		LOG.info("Invalid method arguments.", exception);
-		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
-				error -> new ErrorMessageResponse.ErrorMessage(error.getDefaultMessage())));
-	}
-
-	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException exception)
-	{
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(exception.getMessage()));
 	}
 
 	private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName)

@@ -35,6 +35,7 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.MockMvcExceptionalRequestPerformer;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -223,7 +224,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.when(localeResolver.resolveLocale(any())).thenReturn(ENGLISH);
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
-								 .setControllerAdvice(new GlobalControllerExceptionHandler())
+								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
+										 new FallbackExceptionHandler())
 								 .setLocaleResolver(localeResolver)
 								 .build();
 
