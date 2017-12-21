@@ -12,7 +12,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.exception.EntityAlreadyReferencedException;
 import org.molgenis.data.rest.exception.FileAttributeUpdateWithoutFileException;
 import org.molgenis.data.rest.exception.IllegalAttributeTypeException;
-import org.molgenis.data.rest.exception.IncompatibleValueTypeException;
+import org.molgenis.data.rest.exception.ValueTypeConversionException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.meta.AttributeValidationResult;
 import org.molgenis.file.FileDownloadController;
@@ -186,7 +186,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName(), Number.class.getSimpleName() });
 			}
 		}
@@ -213,7 +213,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName(), Number.class.getSimpleName() });
 			}
 		}
@@ -254,7 +254,7 @@ public class RestService
 				}
 				else
 				{
-					throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+					throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 							new String[] { MultipartFile.class.getSimpleName() });
 				}
 			}
@@ -309,7 +309,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName(), Number.class.getSimpleName() });
 			}
 		}
@@ -344,7 +344,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName(), Instant.class.getSimpleName() });
 			}
 		}
@@ -378,7 +378,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName(), LocalDate.class.getSimpleName() });
 			}
 		}
@@ -405,7 +405,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName(), List.class.getSimpleName() });
 			}
 
@@ -449,7 +449,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName() });
 			}
 		}
@@ -475,7 +475,7 @@ public class RestService
 			}
 			else
 			{
-				throw new IncompatibleValueTypeException(attr, paramValue.getClass().getSimpleName(),
+				throw new ValueTypeConversionException(attr, paramValue.getClass().getSimpleName(),
 						new String[] { String.class.getSimpleName(), Boolean.class.getSimpleName() });
 			}
 		}
