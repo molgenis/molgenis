@@ -21,6 +21,7 @@ import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -117,6 +118,9 @@ public class MappingServiceController extends PluginController
 
 	@Autowired
 	private MappingProjectMetaData mappingProjectMetaData;
+
+	@Autowired
+	private PackageMetadata packageMetadata;
 
 	public MappingServiceController()
 	{
@@ -591,7 +595,7 @@ public class MappingServiceController extends PluginController
 			Package pack = dataService.getMeta().getPackage(packageId);
 			if (pack == null)
 			{
-				throw new UnknownPackageException(packageId);
+				throw new UnknownPackageException(packageMetadata, packageId);
 			}
 			if (isSystemPackage(pack))
 			{

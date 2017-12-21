@@ -78,6 +78,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Mock
 	private MappingProjectMetaData mappingProjectMetaData;
 
+	@Mock
+	private PackageMetadata packageMetadata;
+
 	@InjectMocks
 	private MappingServiceController controller = new MappingServiceController();
 
@@ -375,6 +378,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = UnknownPackageException.class, expectedExceptionsMessageRegExp = "id:sys")
 	public void testScheduleMappingJobUnknownPackage() throws Throwable
 	{
+		when(packageMetadata.getId()).thenReturn("sys_Package");
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
 		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")

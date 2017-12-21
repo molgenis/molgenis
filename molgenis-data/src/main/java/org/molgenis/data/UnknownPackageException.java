@@ -1,30 +1,19 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.data.meta.model.PackageMetadata;
 
 @SuppressWarnings({ "squid:MaximumInheritanceDepth" })
-public class UnknownPackageException extends UnknownDataException
+public class UnknownPackageException extends UnknownEntityException
 {
-	private static final String ERROR_CODE = "D07";
-
-	private final String packageId;
-
-	public UnknownPackageException(String packageId)
+	public UnknownPackageException(PackageMetadata packageMetadata, String packageId)
 	{
-		super(ERROR_CODE);
-		this.packageId = requireNonNull(packageId);
+		super(packageMetadata, packageId);
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("id:%s", packageId);
-	}
-
-	@Override
-	protected Object[] getLocalizedMessageArguments()
-	{
-		return new Object[] { packageId };
+		return String.format("id:%s", getEntityId().toString());
 	}
 }
 

@@ -10,6 +10,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -46,6 +47,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	private SecurityContext securityContext;
 	@Mock
 	private RepositoryCollection repositoryCollection;
+	@Mock
+	private PackageMetadata packageMetadata;
 
 	@Captor
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
@@ -59,7 +62,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService,
-				defaultPackage);
+				defaultPackage, packageMetadata);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		SecurityContextHolder.setContext(securityContext);
 		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);

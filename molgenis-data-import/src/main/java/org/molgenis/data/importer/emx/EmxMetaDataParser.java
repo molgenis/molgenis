@@ -1186,7 +1186,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		Package p = getPackage(intermediateResults, defaultPackageId);
 		if (p == null && dataService != null)
 		{
-			throw new UnknownPackageException(defaultPackageId);
+			throw new UnknownPackageException(packageFactory.getEntityType(), defaultPackageId);
 		}
 
 		List<EntityType> entities = newArrayList();

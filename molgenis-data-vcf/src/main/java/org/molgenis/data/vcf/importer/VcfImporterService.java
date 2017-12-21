@@ -11,6 +11,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.vcf.VcfFileExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -40,15 +41,17 @@ public class VcfImporterService implements ImportService
 	private final PermissionSystemService permissionSystemService;
 	private final MetaDataService metaDataService;
 	private final DefaultPackage defaultPackage;
+	private final PackageMetadata packageMetadata;
 
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
-			MetaDataService metaDataService, DefaultPackage defaultPackage)
+			MetaDataService metaDataService, DefaultPackage defaultPackage, PackageMetadata packageMetadata)
 
 	{
 		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.defaultPackage = requireNonNull(defaultPackage);
+		this.packageMetadata = requireNonNull(packageMetadata);
 	}
 
 	@Transactional
@@ -252,7 +255,10 @@ public class VcfImporterService implements ImportService
 		if (packageId != null)
 		{
 			targetPackage = dataService.getMeta().getPackage(packageId);
-			if (targetPackage == null) throw new UnknownPackageException(packageId);
+			if (targetPackage == null)
+			{
+				throw new UnknownPackageException(packageMetadata, packageId);
+			}
 			entityType.setPackage(targetPackage);
 		}
 		else
