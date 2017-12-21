@@ -9,7 +9,6 @@ import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.mapper.exception.IllegalTargetPackageException;
 import org.molgenis.data.mapper.job.MappingJobExecution;
@@ -375,10 +374,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		exceptionalRequestPerformer.perform(post);
 	}
 
-	@Test(expectedExceptions = UnknownPackageException.class, expectedExceptionsMessageRegExp = "id:sys")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_md_Package id:sys")
 	public void testScheduleMappingJobUnknownPackage() throws Throwable
 	{
-		when(packageMetadata.getId()).thenReturn("sys_Package");
+		when(packageMetadata.getId()).thenReturn("sys_md_Package");
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
 		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")

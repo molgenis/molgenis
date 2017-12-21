@@ -257,7 +257,7 @@ public class VcfImporterService implements ImportService
 			targetPackage = dataService.getMeta().getPackage(packageId);
 			if (targetPackage == null)
 			{
-				throw new UnknownPackageException(packageMetadata, packageId);
+				throw new UnknownEntityException(packageMetadata, packageId);
 			}
 			entityType.setPackage(targetPackage);
 		}

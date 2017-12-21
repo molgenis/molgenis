@@ -519,7 +519,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Tag tag = intermediateResults.getTag(tagIdentifier);
 			if (tag == null)
 			{
-				throw new UnknownTagException(tagFactory.getEntityType(), tagIdentifier);
+				throw new UnknownEntityException(tagFactory.getEntityType(), tagIdentifier);
 			}
 			tags.add(tag);
 		}
@@ -1186,7 +1186,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		Package p = getPackage(intermediateResults, defaultPackageId);
 		if (p == null && dataService != null)
 		{
-			throw new UnknownPackageException(packageFactory.getEntityType(), defaultPackageId);
+			throw new UnknownEntityException(packageFactory.getEntityType(), defaultPackageId);
 		}
 
 		List<EntityType> entities = newArrayList();

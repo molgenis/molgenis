@@ -595,7 +595,7 @@ public class MappingServiceController extends PluginController
 			Package pack = dataService.getMeta().getPackage(packageId);
 			if (pack == null)
 			{
-				throw new UnknownPackageException(packageMetadata, packageId);
+				throw new UnknownEntityException(packageMetadata, packageId);
 			}
 			if (isSystemPackage(pack))
 			{
