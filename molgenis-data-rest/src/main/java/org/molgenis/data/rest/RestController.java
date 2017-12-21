@@ -1,7 +1,6 @@
 package org.molgenis.data.rest;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import org.apache.commons.lang3.StringUtils;
@@ -28,19 +27,14 @@ import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -67,7 +61,8 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -81,7 +76,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @author erwin
  */
-@Controller
+@org.springframework.web.bind.annotation.RestController
 @RequestMapping(BASE_URI)
 public class RestController
 {
@@ -117,7 +112,6 @@ public class RestController
 	 * Checks if an entity exists.
 	 */
 	@GetMapping(value = "/{entityTypeId}/exist", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public boolean entityExists(@PathVariable("entityTypeId") String entityTypeId)
 	{
 		try
@@ -139,7 +133,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@GetMapping(value = "/{entityTypeId}/meta", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityTypeResponse retrieveEntityType(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
@@ -159,7 +152,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@PostMapping(value = "/{entityTypeId}/meta", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityTypeResponse retrieveEntityTypePost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid @RequestBody EntityTypeRequest request)
 	{
@@ -176,7 +168,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@GetMapping(value = "/{entityTypeId}/meta/{attributeName}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public AttributeResponse retrieveEntityAttributeMeta(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
@@ -194,7 +185,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@PostMapping(value = "/{entityTypeId}/meta/{attributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public AttributeResponse retrieveEntityAttributeMetaPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName, @Valid @RequestBody EntityTypeRequest request)
 	{
@@ -212,7 +202,6 @@ public class RestController
 	 * /api/v1/person/99 Retrieves a person with id 99
 	 */
 	@GetMapping(value = "/{entityTypeId}/{id:.+}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
@@ -240,7 +229,6 @@ public class RestController
 	 * Same as retrieveEntity (GET) only tunneled through POST.
 	 */
 	@PostMapping(value = "/{entityTypeId}/{id:.+}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @Valid @RequestBody EntityTypeRequest request)
 	{
@@ -267,7 +255,6 @@ public class RestController
 	 * /api/v1/person/99/address
 	 */
 	@GetMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Object retrieveEntityAttribute(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid EntityCollectionRequest request,
@@ -289,7 +276,6 @@ public class RestController
 	 * /api/v1/person/99/address
 	 */
 	@PostMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Object retrieveEntityAttributePost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid @RequestBody EntityCollectionRequest request)
@@ -307,7 +293,6 @@ public class RestController
 	 * Returns json
 	 */
 	@GetMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequest request,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
@@ -327,7 +312,6 @@ public class RestController
 	 * Returns json
 	 */
 	@PostMapping(value = "/{entityTypeId}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
@@ -354,7 +338,6 @@ public class RestController
 	 * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
 	 */
 	@GetMapping(value = "/csv/{entityTypeId}", produces = "text/csv")
-	@ResponseBody
 	public EntityCollection retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "num", required = false) Integer num,
@@ -723,7 +706,6 @@ public class RestController
 	 * Response: {token: b4fd94dc-eae6-4d9a-a1b7-dd4525f2f75d}
 	 */
 	@PostMapping(value = "/login", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
 	{
 		if (isUser2fa())
