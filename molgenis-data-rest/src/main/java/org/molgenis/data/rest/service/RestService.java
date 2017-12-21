@@ -163,7 +163,7 @@ public class RestService
 				value = convertLong(attr, paramValue);
 				break;
 			case COMPOUND:
-				throw new IllegalAttributeTypeException(attrType);
+				throw new IllegalAttributeTypeException(attr, attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
