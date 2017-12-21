@@ -81,13 +81,6 @@ public class RestControllerV2
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	private static ValidationException createUpdateReadOnlyAttributeException(AttributeValue attributeValue)
-	{
-		AttributeValueValidationResult constraintViolation = new AttributeValueValidationResult(READ_ONLY,
-				attributeValue);
-		return new ValidationException(constraintViolation);
-	}
-
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
 			LocalizationService localizationService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier)
@@ -424,7 +417,8 @@ public class RestControllerV2
 
 			if (attr.isReadOnly())
 			{
-				throw createUpdateReadOnlyAttributeException(AttributeValue.create(attr, ""));
+				throw new ValidationException(
+						new AttributeValueValidationResult(READ_ONLY, AttributeValue.create(attr, "")));
 			}
 
 			final List<Entity> entities = request.getEntities()

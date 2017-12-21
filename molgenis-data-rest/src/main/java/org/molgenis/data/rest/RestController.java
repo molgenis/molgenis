@@ -728,7 +728,7 @@ public class RestController
 	{
 		if (isUser2fa())
 		{
-			throw new LoginMethodDisabledException();
+			throw new LoginDisabledTwoFactorAuthenticationException();
 		}
 
 		return runAsSystem(() ->

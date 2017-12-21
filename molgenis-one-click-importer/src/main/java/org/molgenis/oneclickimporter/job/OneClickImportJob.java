@@ -5,8 +5,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.FileStore;
-import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
-import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
+import org.molgenis.oneclickimporter.exceptions.UnsupportedFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;
 import org.springframework.stereotype.Component;
@@ -15,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -46,17 +46,17 @@ public class OneClickImportJob
 	}
 
 	@Transactional
-	public List<EntityType> getEntityType(Progress progress, String filename)
-			throws UnknownFileTypeException, IOException, InvalidFormatException, EmptySheetException
+	public List<EntityType> getEntityType(Progress progress, String filename) throws IOException, InvalidFormatException
 	{
 		File file = fileStore.getFile(filename);
-		String fileExtension = findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
+		Set<String> supportedFileExtensions = newHashSet("csv", "xlsx", "zip", "xls");
+		String fileExtension = findExtensionFromPossibilities(filename, supportedFileExtensions);
 
 		progress.status("Preparing import");
 		List<DataCollection> dataCollections = newArrayList();
 		if (fileExtension == null)
 		{
-			throw new UnknownFileTypeException();
+			throw new UnsupportedFileTypeException(file, supportedFileExtensions);
 		}
 		else if (fileExtension.equals("xls") || fileExtension.equals("xlsx"))
 		{
@@ -74,7 +74,9 @@ public class OneClickImportJob
 			List<File> filesInZip = unzip(file);
 			for (File fileInZip : filesInZip)
 			{
-				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), newHashSet("csv"));
+				Set<String> supportedZipFileExtensions = newHashSet("csv");
+				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(),
+						supportedZipFileExtensions);
 				if (fileInZipExtension != null)
 				{
 					List<String[]> lines = csvService.buildLinesFromFile(fileInZip);
@@ -83,7 +85,7 @@ public class OneClickImportJob
 				}
 				else
 				{
-					throw new UnknownFileTypeException();
+					throw new UnsupportedFileTypeException(fileInZip, supportedZipFileExtensions);
 				}
 			}
 		}

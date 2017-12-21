@@ -3,8 +3,7 @@ package org.molgenis.data.i18n;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.Repository;
-import org.molgenis.data.i18n.exception.AddLanguageException;
-import org.molgenis.data.i18n.exception.DeleteLanguageException;
+import org.molgenis.data.RepositoryCapabilityException;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -32,6 +31,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
+		when(delegateRepository.getName()).thenReturn("Language");
 		languageRepositoryDecorator = new LanguageRepositoryDecorator(delegateRepository);
 	}
 
@@ -43,7 +43,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(language);
 	}
 
-	@Test(expectedExceptions = AddLanguageException.class)
+	@Test(expectedExceptions = RepositoryCapabilityException.class, expectedExceptionsMessageRegExp = "repository:Language capability:WRITABLE")
 	public void testAddUnknownLanguage()
 	{
 		Language language = getMockLanguage("unknownLanguage");
@@ -61,7 +61,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(language1);
 	}
 
-	@Test(expectedExceptions = AddLanguageException.class)
+	@Test(expectedExceptions = RepositoryCapabilityException.class, expectedExceptionsMessageRegExp = "repository:Language capability:WRITABLE")
 	public void testAddStreamUnknownLanguage()
 	{
 		Language language = mock(Language.class);
@@ -69,13 +69,13 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		languageRepositoryDecorator.add(Stream.of(language));
 	}
 
-	@Test(expectedExceptions = DeleteLanguageException.class)
+	@Test(expectedExceptions = RepositoryCapabilityException.class, expectedExceptionsMessageRegExp = "repository:Language capability:WRITABLE")
 	public void testDelete()
 	{
 		languageRepositoryDecorator.delete(getMockLanguage(LANGUAGE_CODE_NL));
 	}
 
-	@Test(expectedExceptions = DeleteLanguageException.class)
+	@Test(expectedExceptions = RepositoryCapabilityException.class, expectedExceptionsMessageRegExp = "repository:Language capability:WRITABLE")
 	public void testDeleteById()
 	{
 		Language language = getMockLanguage(LANGUAGE_CODE_NL);
@@ -83,7 +83,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		languageRepositoryDecorator.deleteById(LANGUAGE_CODE_NL);
 	}
 
-	@Test(expectedExceptions = DeleteLanguageException.class)
+	@Test(expectedExceptions = RepositoryCapabilityException.class, expectedExceptionsMessageRegExp = "repository:Language capability:WRITABLE")
 	public void testDeleteStream()
 	{
 		languageRepositoryDecorator.delete(Stream.of(getMockLanguage(LANGUAGE_CODE_NL)));

@@ -8,14 +8,14 @@ import static java.util.Objects.requireNonNull;
  * thrown if a conversion form one attribute type to another was attempted but there was a value that was not suitable for the new type
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class IncompatibleValueTypeException extends RestApiException
+public class ValueTypeConversionException extends RestApiException
 {
 	private static final String ERROR_CODE = "R01";
 	private final transient Attribute attribute;
 	private final String type;
 	private final String[] expectedTypes;
 
-	public IncompatibleValueTypeException(Attribute attribute, String type, String[] expectedTypes)
+	public ValueTypeConversionException(Attribute attribute, String type, String[] expectedTypes)
 	{
 		super(ERROR_CODE);
 		this.attribute = requireNonNull(attribute);

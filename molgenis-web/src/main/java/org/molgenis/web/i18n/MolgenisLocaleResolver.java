@@ -1,4 +1,4 @@
-package org.molgenis.data.i18n;
+package org.molgenis.web.i18n;
 
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserMetaData;

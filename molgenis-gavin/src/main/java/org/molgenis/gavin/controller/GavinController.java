@@ -2,7 +2,6 @@ package org.molgenis.gavin.controller;
 
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
-import org.molgenis.gavin.exception.JobNotFoundException;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
@@ -145,7 +144,6 @@ public class GavinController extends AbstractStaticContentController
 	@GetMapping(value = "/job/{jobIdentifier}", produces = APPLICATION_JSON_VALUE)
 	public @ResponseBody
 	GavinJobExecution getGavinJobExecution(@PathVariable(value = "jobIdentifier") String jobIdentifier)
-			throws JobNotFoundException
 	{
 		return gavinJobFactory.findGavinJobExecution(jobIdentifier);
 	}
@@ -158,7 +156,7 @@ public class GavinController extends AbstractStaticContentController
 	 */
 	@GetMapping("/result/{jobIdentifier}")
 	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model,
-			HttpServletRequest request) throws JobNotFoundException
+			HttpServletRequest request)
 	{
 		model.addAttribute("jobExecution", gavinJobFactory.findGavinJobExecution(jobIdentifier));
 		model.addAttribute("downloadFileExists", getDownloadFileForJob(jobIdentifier).exists());
@@ -192,8 +190,7 @@ public class GavinController extends AbstractStaticContentController
 	@GetMapping(value = "/download/{jobIdentifier}", produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public FileSystemResource download(HttpServletResponse response,
-			@PathVariable(value = "jobIdentifier") String jobIdentifier)
-			throws FileNotFoundException, JobNotFoundException
+			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
 		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
 		File file = getDownloadFileForJob(jobIdentifier);
@@ -227,8 +224,7 @@ public class GavinController extends AbstractStaticContentController
 	@GetMapping(value = "/error/{jobIdentifier}", produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public Resource downloadErrorReport(HttpServletResponse response,
-			@PathVariable(value = "jobIdentifier") String jobIdentifier)
-			throws FileNotFoundException, JobNotFoundException
+			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
 		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
 		response.setHeader("Content-Disposition",

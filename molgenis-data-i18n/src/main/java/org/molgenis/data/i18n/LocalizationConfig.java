@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.Locale;
 
@@ -28,12 +27,6 @@ public class LocalizationConfig
 
 	@Autowired
 	private MessageFormatFactory messageFormatFactory;
-
-	@Bean
-	public LocaleResolver localeResolver()
-	{
-		return new MolgenisLocaleResolver(dataService, () -> new Locale(appSettings.getLanguageCode()));
-	}
 
 	@Bean
 	public LocalizationPopulator localizationPopulator()

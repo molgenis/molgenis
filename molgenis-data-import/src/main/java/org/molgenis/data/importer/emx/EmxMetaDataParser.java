@@ -292,7 +292,6 @@ public class EmxMetaDataParser implements MetaDataParser
 		CompositeValidationResult compositeValidationResult = new CompositeValidationResult();
 		metaDataMap.values().forEach(entityType ->
 		{
-			// TODO collect all constraint violations
 			EntityTypeValidationResult validationResult = entityTypeValidator.validate(entityType);
 			compositeValidationResult.addValidationResult(validationResult);
 		});
@@ -507,7 +506,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	/**
 	 * Convert tag identifiers to tags
 	 */
-	private static List<Tag> toTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers)
+	private List<Tag> toTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers)
 	{
 		if (tagIdentifiers.isEmpty())
 		{
@@ -520,7 +519,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Tag tag = intermediateResults.getTag(tagIdentifier);
 			if (tag == null)
 			{
-				throw new UnknownTagException(tagIdentifier);
+				throw new UnknownEntityException(tagFactory.getEntityType(), tagIdentifier);
 			}
 			tags.add(tag);
 		}
@@ -1187,7 +1186,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		Package p = getPackage(intermediateResults, defaultPackageId);
 		if (p == null && dataService != null)
 		{
-			throw new UnknownPackageException(defaultPackageId);
+			throw new UnknownEntityException(packageFactory.getEntityType(), defaultPackageId);
 		}
 
 		List<EntityType> entities = newArrayList();

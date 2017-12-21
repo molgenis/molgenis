@@ -7,7 +7,7 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.FileStore;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
-import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
+import org.molgenis.oneclickimporter.exceptions.UnsupportedFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;
 import org.testng.annotations.BeforeClass;
@@ -54,7 +54,7 @@ public class OneClickImportJobTest
 
 	@Test
 	public void testGetEntityTypeWithExcel()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
+			throws InvalidFormatException, IOException, URISyntaxException, UnsupportedFileTypeException,
 			EmptySheetException
 	{
 		Progress progress = mock(Progress.class);
@@ -89,7 +89,7 @@ public class OneClickImportJobTest
 
 	@Test
 	public void testGetEntityTypeWithCsv()
-			throws UnknownFileTypeException, InvalidFormatException, IOException, URISyntaxException,
+			throws UnsupportedFileTypeException, InvalidFormatException, IOException, URISyntaxException,
 			EmptySheetException
 	{
 		Progress progress = mock(Progress.class);
@@ -125,7 +125,7 @@ public class OneClickImportJobTest
 
 	@Test
 	public void testGetEntityTypeWithZip()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
+			throws InvalidFormatException, IOException, URISyntaxException, UnsupportedFileTypeException,
 			EmptySheetException
 	{
 		Progress progress = mock(Progress.class);
@@ -223,9 +223,9 @@ public class OneClickImportJobTest
 		verify(entityService).createEntityType(dataCollection4, "simple_valid");
 	}
 
-	@Test(expectedExceptions = UnknownFileTypeException.class)
+	@Test(expectedExceptions = UnsupportedFileTypeException.class)
 	public void testInvalidZipContent()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
+			throws InvalidFormatException, IOException, URISyntaxException, UnsupportedFileTypeException,
 			EmptySheetException
 	{
 		Progress progress = mock(Progress.class);
@@ -240,9 +240,9 @@ public class OneClickImportJobTest
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
 
-	@Test(expectedExceptions = UnknownFileTypeException.class)
+	@Test(expectedExceptions = UnsupportedFileTypeException.class)
 	public void testInvalidZipContentWithImage()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
+			throws InvalidFormatException, IOException, URISyntaxException, UnsupportedFileTypeException,
 			EmptySheetException
 	{
 		Progress progress = mock(Progress.class);
@@ -257,9 +257,9 @@ public class OneClickImportJobTest
 		oneClickImporterJob.getEntityType(progress, filename);
 	}
 
-	@Test(expectedExceptions = UnknownFileTypeException.class)
+	@Test(expectedExceptions = UnsupportedFileTypeException.class)
 	public void testInvalidFileType()
-			throws InvalidFormatException, IOException, URISyntaxException, UnknownFileTypeException,
+			throws InvalidFormatException, IOException, URISyntaxException, UnsupportedFileTypeException,
 			EmptySheetException
 	{
 		Progress progress = mock(Progress.class);
