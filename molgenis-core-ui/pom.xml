@@ -66,6 +66,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
+                            <skip>${skip.js}</skip>
                             <arguments>test</arguments>
                         </configuration>
                     </execution>
