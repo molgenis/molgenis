@@ -788,30 +788,6 @@ public class RestController
 		}
 	}
 
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
-	{
-		LOG.debug("", e);
-		List<ErrorMessageResponse.ErrorMessage> messages = Lists.newArrayList();
-		for (ObjectError error : e.getBindingResult().getAllErrors())
-		{
-			messages.add(new ErrorMessageResponse.ErrorMessage(error.getDefaultMessage()));
-		}
-
-		return new ErrorMessageResponse(messages);
-	}
-
 	private void updateInternal(String entityTypeId, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
