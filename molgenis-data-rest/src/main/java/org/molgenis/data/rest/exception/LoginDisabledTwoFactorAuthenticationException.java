@@ -5,11 +5,11 @@ package org.molgenis.data.rest.exception;
  * for example: the api/v1/login is disabled when 2fa is active on a server
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class LoginMethodDisabledException extends RestApiException
+public class LoginDisabledTwoFactorAuthenticationException extends RestApiException
 {
 	private static final String ERROR_CODE = "R04";
 
-	public LoginMethodDisabledException()
+	public LoginDisabledTwoFactorAuthenticationException()
 	{
 		super(ERROR_CODE);
 	}
