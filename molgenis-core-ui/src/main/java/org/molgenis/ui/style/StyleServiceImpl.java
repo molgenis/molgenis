@@ -2,6 +2,7 @@ package org.molgenis.ui.style;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
@@ -20,6 +21,7 @@ import org.springframework.web.util.UriComponents;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,7 +62,7 @@ public class StyleServiceImpl implements StyleService
 
 	@Override
 	public Style addStyle(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
-			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisThemeException
+			String bootstrap4FileName, InputStream bootstrap4StyleData)
 	{
 		if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null)
 		{
@@ -85,7 +87,7 @@ public class StyleServiceImpl implements StyleService
 		return Style.createLocal(styleSheet.getName());
 	}
 
-	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data) throws MolgenisThemeException
+	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data)
 	{
 		String fileId = idGenerator.generateId();
 		try
@@ -94,7 +96,7 @@ public class StyleServiceImpl implements StyleService
 		}
 		catch (IOException e)
 		{
-			throw new SavingStyleFailedException(fileName, e);
+			throw new UncheckedIOException(e);
 		}
 
 		FileMeta fileMeta = fileMetaFactory.create(fileId);
@@ -155,13 +157,12 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	@RunAsSystem
 	public FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-			throws MolgenisThemeException
 	{
 		StyleSheet styleSheet = findThemeByName(styleName);
 
 		if (styleSheet == null)
 		{
-			throw new StyleNotFoundException(styleName);
+			throw new UnknownEntityException(styleSheetFactory.getEntityType(), styleName);
 		}
 
 		// Fetch the theme file from the store.

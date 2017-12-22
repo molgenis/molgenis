@@ -1,7 +1,5 @@
 package org.molgenis.ui.thememanager;
 
-import org.molgenis.ui.style.MolgenisAddStyleException;
-import org.molgenis.ui.style.MolgenisThemeException;
 import org.molgenis.ui.style.Style;
 import org.molgenis.ui.style.StyleService;
 import org.molgenis.web.PluginController;
@@ -63,24 +61,18 @@ public class ThemeManagerController extends PluginController
 	public @ResponseBody
 	Style addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
 			@RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style)
-			throws MolgenisThemeException
+			throws IOException
 	{
 		String styleIdentifier = bootstrap3Style.getOriginalFilename();
-		try
+
+		String bs4FileName = null;
+		InputStream bs4InputStream = null;
+		if (bootstrap4Style != null)
 		{
-			String bs4FileName = null;
-			InputStream bs4InputStream = null;
-			if (bootstrap4Style != null)
-			{
-				bs4FileName = bootstrap4Style.getOriginalFilename();
-				bs4InputStream = bootstrap4Style.getInputStream();
-			}
-			return styleService.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(),
-					bootstrap3Style.getInputStream(), bs4FileName, bs4InputStream);
+			bs4FileName = bootstrap4Style.getOriginalFilename();
+			bs4InputStream = bootstrap4Style.getInputStream();
 		}
-		catch (IOException e)
-		{
-			throw new MolgenisAddStyleException(styleIdentifier, e);
-		}
+		return styleService.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(),
+				bootstrap3Style.getInputStream(), bs4FileName, bs4InputStream);
 	}
 }
