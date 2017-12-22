@@ -12,6 +12,8 @@ import java.lang.annotation.*;
  * ...
  * }
  * </pre>
+ * The token may be provided both as a header and as a request param so this way you can easily pick it up no matter
+ * where it was specified and also specify that the token is required.
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
