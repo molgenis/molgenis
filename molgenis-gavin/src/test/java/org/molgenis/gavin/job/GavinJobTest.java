@@ -13,9 +13,9 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.file.FileStore;
-import org.molgenis.gavin.exception.InputSizeException;
-import org.molgenis.gavin.exception.InvalidVariantsException;
+import org.molgenis.gavin.exception.TooManyLinesException;
 import org.molgenis.gavin.exception.MixedLineTypesException;
+import org.molgenis.gavin.exception.NoValidVariantsException;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.ui.menu.Menu;
@@ -190,7 +190,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
 	}
 
-	@Test(expectedExceptions = { InputSizeException.class }, expectedExceptionsMessageRegExp = "max_lines:100000")
+	@Test(expectedExceptions = { TooManyLinesException.class }, expectedExceptionsMessageRegExp = "max_lines:100000")
 	public void testSkippedThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(
@@ -199,7 +199,7 @@ public class GavinJobTest extends AbstractMolgenisSpringTest
 		job.call(progress);
 	}
 
-	@Test(expectedExceptions = { InvalidVariantsException.class })
+	@Test(expectedExceptions = { NoValidVariantsException.class })
 	public void testNoValidLinesThrowsException() throws Exception
 	{
 		when(parser.tryTransform(inputFile, processedInputFile, errorFile)).thenReturn(ImmutableMultiset.of());
