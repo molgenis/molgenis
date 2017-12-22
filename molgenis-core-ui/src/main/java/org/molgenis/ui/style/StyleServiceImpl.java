@@ -60,7 +60,7 @@ public class StyleServiceImpl implements StyleService
 
 	@Override
 	public Style addStyle(String styleId, String bootstrap3FileName, InputStream bootstrap3StyleData,
-			String bootstrap4FileName, InputStream bootstrap4StyleData) throws MolgenisThemeException
+			String bootstrap4FileName, InputStream bootstrap4StyleData)
 	{
 		if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null)
 		{
