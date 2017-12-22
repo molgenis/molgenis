@@ -31,6 +31,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.MockMvcExceptionalRequestPerformer;
 import org.molgenis.util.GsonConfig;
@@ -50,6 +51,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
@@ -110,6 +112,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
+	@Autowired
+	private TokenService tokenService;
+
 	private MockMvc mockMvc;
 
 	private MockMvcExceptionalRequestPerformer exceptionalRequestPerformer;
@@ -124,9 +129,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		Mockito.reset(permissionService);
-		Mockito.reset(dataService);
-		Mockito.reset(metaDataService);
+		Mockito.reset(permissionService, dataService, metaDataService, tokenService);
 
 		MessageSourceHolder.setMessageSource(messageSource);
 		Mockito.when(dataService.getMeta()).thenReturn(metaDataService);
@@ -224,6 +227,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.when(localeResolver.resolveLocale(any())).thenReturn(ENGLISH);
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
+								 .setCustomArgumentResolvers(new TokenExtractor())
 								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
 										 new FallbackExceptionHandler())
 								 .setLocaleResolver(localeResolver)
@@ -254,6 +258,33 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				format("{username: '%s', password: '%s'}", username, password)).contentType(MediaType.APPLICATION_JSON);
 
 		exceptionalRequestPerformer.perform(request);
+	}
+
+	@Test
+	public void testLogoutTokenInHeader() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/logout")
+											  .header(TokenExtractor.TOKEN_HEADER, "abcde")
+											  .content("")).andExpect(MockMvcResultMatchers.status().isOk());
+
+		Mockito.verify(tokenService).removeToken("abcde");
+	}
+
+	@Test
+	public void testLogoutTokenInParam() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/logout")
+											  .param(TokenExtractor.TOKEN_PARAMETER, "abcde")
+											  .content("")).andExpect(MockMvcResultMatchers.status().isOk());
+		Mockito.verify(tokenService).removeToken("abcde");
+	}
+
+	@Test
+	public void testLogoutNoToken() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/logout").content(""))
+			   .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+		Mockito.verifyZeroInteractions(tokenService);
 	}
 
 	@Test
