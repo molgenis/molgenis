@@ -5,9 +5,9 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.TransactionalJob;
 import org.molgenis.file.FileStore;
-import org.molgenis.gavin.exception.InputSizeException;
-import org.molgenis.gavin.exception.InvalidVariantsException;
 import org.molgenis.gavin.exception.MixedLineTypesException;
+import org.molgenis.gavin.exception.NoValidVariantsException;
+import org.molgenis.gavin.exception.TooManyLinesException;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.gavin.job.input.model.LineType;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -96,7 +96,7 @@ public class GavinJob extends TransactionalJob<Void>
 		gavinJobExecution.setLineTypes(lineTypes);
 		if (lineTypes.contains(SKIPPED))
 		{
-			throw new InputSizeException(Parser.MAX_LINES);
+			throw new TooManyLinesException(Parser.MAX_LINES);
 		}
 		if (lineTypes.containsAll(Arrays.asList(CADD, VCF)))
 		{
@@ -105,7 +105,7 @@ public class GavinJob extends TransactionalJob<Void>
 
 		if (!lineTypes.contains(CADD) && !lineTypes.contains(VCF))
 		{
-			throw new InvalidVariantsException();
+			throw new NoValidVariantsException();
 		}
 
 		File exacInputFile = processedInputFile;
