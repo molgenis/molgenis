@@ -2,7 +2,6 @@ package org.molgenis.security.token;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -16,7 +15,6 @@ import java.util.stream.Stream;
 /**
  * Gets the molgenis authentication token from a HttpServletRequest
  */
-@Component
 public class TokenExtractor implements HandlerMethodArgumentResolver
 {
 	public static final String TOKEN_HEADER = "x-molgenis-token";
