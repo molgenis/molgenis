@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
@@ -35,8 +36,8 @@ import static org.molgenis.ui.style.StyleSheetMetadata.STYLE_SHEET;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = StyleServiceTest.Config.class)
-public class StyleServiceTest extends AbstractTestNGSpringContextTests
+@ContextConfiguration(classes = StyleServiceImplTest.Config.class)
+public class StyleServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	private static final String THEME_MOLGENIS_NAME = "molgenis";
 	private static final String THEME_MOLGENIS = "bootstrap-" + THEME_MOLGENIS_NAME + ".min.css";
@@ -213,9 +214,12 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		verify(dataService, times(1)).add(FileMetaMetaData.FILE_META, fileMeta);
 	}
 
-	@Test(expectedExceptions = StyleNotFoundException.class)
-	public void getUnknownThemeData() throws MolgenisThemeException
+	@Test(expectedExceptions = UnknownEntityException.class)
+	public void getUnknownThemeData()
 	{
+		StyleSheetMetadata styleSheetMetadata = mock(StyleSheetMetadata.class);
+		when(styleSheetFactory.getEntityType()).thenReturn(styleSheetMetadata);
+
 		String styleName = "no-body";
 		Query<StyleSheet> expectedQuery = new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
 		when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(null);
@@ -225,7 +229,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getBootstrap3ThemeData() throws MolgenisThemeException
+	public void getBootstrap3ThemeData()
 	{
 		String styleName = "my-style";
 		StyleSheet styleSheet = mock(StyleSheet.class);
@@ -248,7 +252,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getBootstrap4ThemeData() throws MolgenisThemeException
+	public void getBootstrap4ThemeData()
 	{
 		String styleName = "my-style";
 		StyleSheet styleSheet = mock(StyleSheet.class);
@@ -271,7 +275,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getBootstrap4FallBackThemeData() throws MolgenisThemeException
+	public void getBootstrap4FallBackThemeData()
 	{
 		String styleName = "my-style";
 		StyleSheet styleSheet = mock(StyleSheet.class);

@@ -2,6 +2,7 @@ package org.molgenis.ui.style;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
@@ -156,13 +157,12 @@ public class StyleServiceImpl implements StyleService
 	@Override
 	@RunAsSystem
 	public FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-			throws MolgenisThemeException
 	{
 		StyleSheet styleSheet = findThemeByName(styleName);
 
 		if (styleSheet == null)
 		{
-			throw new StyleNotFoundException(styleName);
+			throw new UnknownEntityException(styleSheetFactory.getEntityType(), styleName);
 		}
 
 		// Fetch the theme file from the store.
