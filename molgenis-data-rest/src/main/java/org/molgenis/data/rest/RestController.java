@@ -24,7 +24,7 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.token.TokenParam;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -798,14 +798,8 @@ public class RestController
 
 	@PostMapping("/logout")
 	@ResponseStatus(OK)
-	public void logout(HttpServletRequest request)
+	public void logout(@TokenParam(required = true) String token, HttpServletRequest request)
 	{
-		String token = TokenExtractor.getToken(request);
-		if (token == null)
-		{
-			throw new HttpMessageNotReadableException("Missing token in header");
-		}
-
 		tokenService.removeToken(token);
 		SecurityContextHolder.getContext().setAuthentication(null);
 
