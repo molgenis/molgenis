@@ -182,7 +182,8 @@ public class ClientFacade implements Closeable
 	}
 
 	/**
-	 * @throws IndexInternalException UnknownIndexInternalException
+	 * @throws IndexInternalException
+	 * @throws UnknownIndexInternalException
 	 */
 	public void deleteIndex(Index index)
 	{
