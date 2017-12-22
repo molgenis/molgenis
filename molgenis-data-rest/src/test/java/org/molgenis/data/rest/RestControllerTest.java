@@ -25,6 +25,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -95,14 +96,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
+	@Autowired
+	private TokenService tokenService;
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Mockito.reset(permissionService);
-		Mockito.reset(dataService);
-		Mockito.reset(metaDataService);
+		Mockito.reset(permissionService, dataService, metaDataService, tokenService);
 		Mockito.when(dataService.getMeta()).thenReturn(metaDataService);
 
 		@SuppressWarnings("unchecked")
@@ -197,6 +199,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
+								 .setCustomArgumentResolvers(new TokenExtractor())
 								 .build();
 	}
 
@@ -223,6 +226,33 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 													  password))
 											  .contentType(MediaType.APPLICATION_JSON))
 			   .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+	}
+
+	@Test
+	public void testLogoutTokenInHeader() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/logout")
+											  .header(TokenExtractor.TOKEN_HEADER, "abcde")
+											  .content("")).andExpect(MockMvcResultMatchers.status().isOk());
+
+		Mockito.verify(tokenService).removeToken("abcde");
+	}
+
+	@Test
+	public void testLogoutTokenInParam() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/logout")
+											  .param(TokenExtractor.TOKEN_PARAMETER, "abcde")
+											  .content("")).andExpect(MockMvcResultMatchers.status().isOk());
+		Mockito.verify(tokenService).removeToken("abcde");
+	}
+
+	@Test
+	public void testLogoutNoToken() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/logout").content(""))
+			   .andExpect(MockMvcResultMatchers.status().isBadRequest());
+		Mockito.verifyZeroInteractions(tokenService);
 	}
 
 	@Test
