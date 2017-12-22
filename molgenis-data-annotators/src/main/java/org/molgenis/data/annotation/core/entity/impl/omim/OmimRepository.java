@@ -85,7 +85,7 @@ public class OmimRepository extends AbstractRepository
 
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS))
 		{
-			throw new UnsupportedQueryException("gene");
+			throw new UnsupportedQueryException(q.getRules());
 		}
 
 		String geneSymbol = (String) q.getRules().get(0).getValue();

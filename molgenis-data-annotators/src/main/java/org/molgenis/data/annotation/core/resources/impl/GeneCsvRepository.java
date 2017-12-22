@@ -59,7 +59,7 @@ public class GeneCsvRepository extends AbstractRepository
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS) || !targetAttributeName
 				.equals(q.getRules().get(0).getField()))
 		{
-			throw new UnsupportedQueryException(targetAttributeName);
+			throw new UnsupportedQueryException(q.getRules());
 		}
 
 		Entity result = getIndex().get(q.getRules().get(0).getValue());
