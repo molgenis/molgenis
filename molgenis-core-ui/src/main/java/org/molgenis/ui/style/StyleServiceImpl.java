@@ -20,6 +20,7 @@ import org.springframework.web.util.UriComponents;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,7 +86,7 @@ public class StyleServiceImpl implements StyleService
 		return Style.createLocal(styleSheet.getName());
 	}
 
-	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data) throws MolgenisThemeException
+	private FileMeta createStyleSheetFileMeta(String fileName, InputStream data)
 	{
 		String fileId = idGenerator.generateId();
 		try
@@ -94,7 +95,7 @@ public class StyleServiceImpl implements StyleService
 		}
 		catch (IOException e)
 		{
-			throw new SavingStyleFailedException(fileName, e);
+			throw new UncheckedIOException(e);
 		}
 
 		FileMeta fileMeta = fileMetaFactory.create(fileId);
