@@ -15,6 +15,7 @@
   "dependencies": {
     "@molgenis/molgenis-api-client": "^2.1.0",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
+    "@molgenis/molgenis-ui-form": "^0.0.3",
     "babel-plugin-syntax-flow": "^6.18.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
