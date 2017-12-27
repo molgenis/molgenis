@@ -971,5 +971,6 @@
         <module>molgenis-util</module>
         <module>molgenis-web</module>
         <module>molgenis-beacon</module>
+        <module>molgenis-ui-settings</module>
     </modules>
 </project>
