@@ -1002,5 +1002,6 @@
         <module>molgenis-web</module>
         <module>molgenis-i18n</module>
         <module>molgenis-beacon</module>
+        <module>molgenis-ui-settings</module>
     </modules>
 </project>
