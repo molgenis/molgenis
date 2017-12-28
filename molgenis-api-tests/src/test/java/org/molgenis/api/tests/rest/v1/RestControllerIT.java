@@ -182,8 +182,7 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(BAD_REQUEST)
 			   .log()
-			   .all()
-			   .body("errors.message[0]", Matchers.equalTo("Missing token in header"));
+			   .all();
 	}
 
 	@Test
