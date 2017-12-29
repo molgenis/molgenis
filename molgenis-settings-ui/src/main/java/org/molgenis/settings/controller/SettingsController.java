@@ -20,7 +20,7 @@ public class SettingsController extends VuePluginController
 	public static final String ID = "settings";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final String VIEW_TEMPLATE = "view-settings";
+	public static final String VIEW_TEMPLATE = "view-settings";
 
 	public SettingsController(MenuReaderService menuReaderService, LanguageService languageService,
 			AppSettings appSettings, UserAccountService userAccountService)
