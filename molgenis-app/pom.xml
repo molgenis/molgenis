@@ -239,7 +239,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-ui-settings</artifactId>
+            <artifactId>molgenis-settings-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
