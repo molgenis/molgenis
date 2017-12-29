@@ -7,7 +7,6 @@ export const SET_ERROR = '__SET_ERROR__'
 export default {
   [SET_RAW_SETTINGS] (state, response) {
     state.rawSettings = response
-    console.log('rawSettings are:' + state.rawSettings)
   },
   [SET_SETTINGS] (state, settings) {
     state.settings = settings

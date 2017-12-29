@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <h1>Settings</h1>
-    <form-component id="settings-form" :schema="schema"></form-component>
-  </div>
+    <div>
+        <h1>Settings</h1>
+        <form-component id="settings-form" :schema="schema"></form-component>
+    </div>
 </template>
 
 <script>
