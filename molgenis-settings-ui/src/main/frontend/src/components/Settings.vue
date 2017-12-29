@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>Settings</h1>
+        <h1>{{ 'plugin-title' | i18n }}</h1>
         <form-component id="settings-form" :schema="schema"></form-component>
     </div>
 </template>
