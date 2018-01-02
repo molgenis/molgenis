@@ -1,33 +1,18 @@
 import mutations from '@/store/mutations'
 
 describe('mutations', () => {
-  describe('SET_RAW_SETTINGS', () => {
+  describe('SET_FORM_FIELDS', () => {
     it('should set setting the response in the state', () => {
       const state = {
-        rawSettings: []
+        formFields: []
       }
 
-      const rawSettings = [
+      const formFields = [
         {id: 's1'}
       ]
 
-      mutations.__SET_RAW_SETTINGS__(state, rawSettings)
-      expect(state.rawSettings).to.deep.equal(rawSettings)
-    })
-  })
-
-  describe('SET_SETTINGS', () => {
-    it('should set the parsed settings', () => {
-      const state = {
-        settings: []
-      }
-
-      const settings = [
-        {id: 's1'}
-      ]
-
-      mutations.__SET_SETTINGS__(state, settings)
-      expect(state.settings).to.deep.equal(settings)
+      mutations.__SET_FORM_FIELDS__(state, formFields)
+      expect(state.formFields).to.deep.equal(formFields)
     })
   })
 

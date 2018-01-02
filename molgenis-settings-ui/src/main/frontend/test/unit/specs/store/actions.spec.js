@@ -1,7 +1,7 @@
 import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
 import actions from '@/store/actions'
-import { SET_RAW_SETTINGS } from '@/store/mutations'
+import { SET_FORM_FIELDS } from '@/store/mutations'
 import utils from '@molgenis/molgenis-vue-test-utils'
 
 describe('actions', () => {
@@ -20,7 +20,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: SET_RAW_SETTINGS, payload: {items: [setSysAppEntity]}}
+          {type: SET_FORM_FIELDS, payload: {items: [setSysAppEntity]}}
         ]
       }
 
