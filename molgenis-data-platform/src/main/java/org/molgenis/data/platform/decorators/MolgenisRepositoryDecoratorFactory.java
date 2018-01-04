@@ -9,6 +9,7 @@ import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.cache.l2.L2CacheRepositoryDecorator;
 import org.molgenis.data.cache.l3.L3Cache;
 import org.molgenis.data.cache.l3.L3CacheRepositoryDecorator;
+import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
@@ -34,7 +35,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final AggregateAnonymizer aggregateAnonymizer;
 	private final AppSettings appSettings;
 	private final DataService dataService;
-	private final SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry;
+	private final SystemRepositoryDecoratorRegistry systemRepositoryDecoratorRegistry;
+	private final DynamicRepositoryDecoratorRegistry dynamicRepositoryDecoratorRegistry;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory;
 	private final L1Cache l1Cache;
@@ -50,6 +52,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
 			AppSettings appSettings, DataService dataService,
 			SystemRepositoryDecoratorRegistry repositoryDecoratorRegistry,
+			DynamicRepositoryDecoratorRegistry dynamicRepositoryDecoratorRegistry,
 			IndexActionRegisterService indexActionRegisterService,
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
@@ -62,7 +65,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.aggregateAnonymizer = requireNonNull(aggregateAnonymizer);
 		this.appSettings = requireNonNull(appSettings);
 		this.dataService = requireNonNull(dataService);
-		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
+		this.systemRepositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
+		this.dynamicRepositoryDecoratorRegistry = requireNonNull(dynamicRepositoryDecoratorRegistry);
 		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
 		this.indexedRepositoryDecoratorFactory = requireNonNull(indexedRepositoryDecoratorFactory);
 		this.l1Cache = requireNonNull(l1Cache);
@@ -80,23 +84,26 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repository;
 
-		// 14. Query the L2 cache before querying the database
+		// 15. Query the L2 cache before querying the database
 		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
-		// 13. Query the L1 cache before querying the database
+		// 14. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
-		// 12. Route specific queries to the index
+		// 13. Route specific queries to the index
 		decoratedRepository = indexedRepositoryDecoratorFactory.create(decoratedRepository);
 
-		// 11. Query the L3 cache before querying the index
+		// 12. Query the L3 cache before querying the index
 		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
-		// 10. Register the cud action needed to index indexed repositories
+		// 11. Register the cud action needed to index indexed repositories
 		decoratedRepository = new IndexActionRepositoryDecorator(decoratedRepository, indexActionRegisterService);
 
-		// 9. Custom decorators
-		decoratedRepository = repositoryDecoratorRegistry.decorate(decoratedRepository);
+		// 10. Dynamic decorators
+		decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
+
+		// 9. Custom decorators for system entity types
+		decoratedRepository = systemRepositoryDecoratorRegistry.decorate(decoratedRepository);
 
 		// 8. Perform cascading deletes
 		decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
