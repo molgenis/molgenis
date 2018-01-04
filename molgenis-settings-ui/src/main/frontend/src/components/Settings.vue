@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>{{ 'plugin-title' | i18n }}</h1>
-    <form-component id="settings-form" :schema="schema"></form-component>
+    <form-component id="settings-form" :schema="schema" :data="data"></form-component>
   </div>
 </template>
 
@@ -22,6 +22,9 @@
         return {
           fields: this.$store.state.formFields
         }
+      },
+      data () {
+        return this.$store.state.formData
       }
     }
   }

@@ -5,14 +5,21 @@ describe('mutations', () => {
     it('should set setting the response in the state', () => {
       const state = {
         formFields: []
+        formData: {}
       }
 
       const formFields = [
         {id: 's1'}
       ]
 
+      const formData = {
+        $1: 'test 1'
+      }
+
       mutations.__SET_FORM_FIELDS__(state, formFields)
+      mutations.__SET_FORM_DATA__(state, formData)
       expect(state.formFields).to.deep.equal(formFields)
+      expect(state.formData).to.deep.equal(formData)
     })
   })
 
