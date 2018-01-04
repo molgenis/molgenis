@@ -8,7 +8,6 @@
 <script>
   import { FormComponent } from '@molgenis/molgenis-ui-form'
   import { GET_SETTINGS } from '../store/actions'
-  import { mapState } from 'vuex'
 
   export default {
     name: 'Settings',
