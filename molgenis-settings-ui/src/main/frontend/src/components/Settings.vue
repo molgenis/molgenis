@@ -19,10 +19,9 @@
       this.$store.dispatch(GET_SETTINGS)
     },
     computed: {
-      ...mapState(['formFields']),
       schema () {
         return {
-          fields: this.formFields
+          fields: this.$store.state.formFields
         }
       }
     }
