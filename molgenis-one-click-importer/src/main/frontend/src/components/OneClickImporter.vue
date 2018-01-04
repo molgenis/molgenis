@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <div class="row">
       <div class="col-md-12">
         <form id="upload-form" v-on:submit.prevent class="form">
