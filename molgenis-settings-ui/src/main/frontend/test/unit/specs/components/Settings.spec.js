@@ -21,11 +21,15 @@ describe('Settings.vue', () => {
     td.verify(mockDispatch(GET_SETTINGS))
   })
   it('should contains computed-method content', () => {
-    let state = {
+    const actions = {
+      '__GET_SETTINGS__': function () {}
+    }
+    const state = {
       formFields: ['field1']
     }
-    let store = new Vuex.Store({
-      state
+    const store = new Vuex.Store({
+      state,
+      actions
     })
     const wrapper = shallow(Settings, {store, localVue})
     expect(wrapper.vm.schema).to.deep.equal({fields: ['field1']})
