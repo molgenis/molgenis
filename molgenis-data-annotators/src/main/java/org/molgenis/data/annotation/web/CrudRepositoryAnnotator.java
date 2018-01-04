@@ -103,6 +103,28 @@ public class CrudRepositoryAnnotator
 	private void iterateOverEntitiesAndAnnotate(Repository<Entity> repository, RepositoryAnnotator annotator,
 			DatabaseAction action)
 	{
-		throw new RuntimeException("");
+		Iterator<Entity> it = annotator.annotate(repository);
+
+		String entityTypeId;
+		if (annotator instanceof EffectCreatingAnnotator)
+		{
+			entityTypeId = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType())
+																.getId();
+		}
+		else
+		{
+			entityTypeId = repository.getName();
+		}
+		switch (action)
+		{
+			case UPDATE:
+				dataService.update(entityTypeId, stream(spliteratorUnknownSize(it, ORDERED), false));
+				break;
+			case ADD:
+				dataService.add(entityTypeId, stream(spliteratorUnknownSize(it, ORDERED), false));
+				break;
+			default:
+				throw new UnsupportedOperationException();
+		}
 	}
 }
