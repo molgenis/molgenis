@@ -89,33 +89,11 @@ public class CrudRepositoryAnnotator
 		}
 		catch (CodedRuntimeException crte)
 		{
-			deleteResultEntity(annotator, targetMetaData);
 			throw crte;
 		}
 		catch (Exception e)
 		{
-			deleteResultEntity(annotator, targetMetaData);
 			throw new RuntimeException(e);
-		}
-	}
-
-	private void deleteResultEntity(RepositoryAnnotator annotator, EntityType targetMetaData)
-	{
-		try
-		{
-			if (annotator instanceof EffectCreatingAnnotator && targetMetaData != null)
-			{
-				runAsSystem(() ->
-				{
-					dataService.deleteAll(targetMetaData.getId());
-					dataService.getMeta().deleteEntityType(targetMetaData.getId());
-				});
-			}
-		}
-		catch (Exception ex)
-		{
-			// log the problem but throw the original exception
-			LOG.error("Failed to remove result entity: %s", targetMetaData.getId());
 		}
 	}
 
@@ -125,28 +103,6 @@ public class CrudRepositoryAnnotator
 	private void iterateOverEntitiesAndAnnotate(Repository<Entity> repository, RepositoryAnnotator annotator,
 			DatabaseAction action)
 	{
-		Iterator<Entity> it = annotator.annotate(repository);
-
-		String entityTypeId;
-		if (annotator instanceof EffectCreatingAnnotator)
-		{
-			entityTypeId = ((EffectCreatingAnnotator) annotator).getTargetEntityType(repository.getEntityType())
-																.getId();
-		}
-		else
-		{
-			entityTypeId = repository.getName();
-		}
-		switch (action)
-		{
-			case UPDATE:
-				dataService.update(entityTypeId, stream(spliteratorUnknownSize(it, ORDERED), false));
-				break;
-			case ADD:
-				dataService.add(entityTypeId, stream(spliteratorUnknownSize(it, ORDERED), false));
-				break;
-			default:
-				throw new UnsupportedOperationException();
-		}
+		throw new RuntimeException("");
 	}
 }
