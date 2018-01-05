@@ -72,10 +72,11 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.0.3.tgz#df8de4d4e6124b0d67e3b92b61c30ae1a917e378"
+"@molgenis/molgenis-ui-form@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.1.0.tgz#dadd6bb947d7126aa8c8cc1d2c860cb42468ca69"
   dependencies:
+    "@molgenis/molgenis-api-client" "^2.1.0"
     vue-form "^4.7.0"
 
 "@molgenis/molgenis-vue-test-utils@^1.0.0":
