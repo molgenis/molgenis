@@ -10,29 +10,27 @@ public class InvalidAttributeTypeException extends EmxException
 	private final AttributeType attributeType;
 	private final String attribute;
 	private final String[] validOptions;
-	private final int rowIndex;
 
 	public InvalidAttributeTypeException(String attributeAttribute, AttributeType attributeType, String attribute,
-			String[] validOptions, int rowIndex)
+			String[] validOptions)
 	{
 		super(ERROR_CODE);
 		this.attributeAttribute = attributeAttribute;
 		this.attributeType = attributeType;
 		this.attribute = attribute;
 		this.validOptions = validOptions;
-		this.rowIndex = rowIndex;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("attributeAttribute:%s attributeType:%s attribute:%s validOptions:%s rowIndex:%d",
-				attributeType, attributeAttribute, attribute, String.join(",", validOptions), rowIndex);
+		return String.format("attributeAttribute:%s attributeType:%s attribute:%s validOptions:%s", attributeType,
+				attributeAttribute, attribute, String.join(",", validOptions));
 	}
 
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new Object[] { attributeAttribute, attributeType, attribute, validOptions, rowIndex };
+		return new Object[] { attributeAttribute, attributeType, attribute, validOptions };
 	}
 }
