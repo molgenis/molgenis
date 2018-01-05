@@ -11,6 +11,8 @@ export default {
     const uri = '/api/v2/sys_set_app'
     try {
       api.get(uri).then(response => {
+        // TODO: We don't have compounds yet, so we have this workaround for now
+        response.meta.attributes = response.meta.attributes.filter(attribute => attribute.fieldType !== 'COMPOUND')
         const formFields = EntityToStateMapper.generateFormFields(response.meta)
         commit(SET_FORM_FIELDS, formFields)
         commit(SET_FORM_DATA, EntityToStateMapper.generateFormData(formFields, response.items[0]))
