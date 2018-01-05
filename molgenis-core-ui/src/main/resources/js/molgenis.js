@@ -63,7 +63,7 @@
         $.each(alerts, function (i, alert) {
             if (i > 0)
                 items.push('<br/>');
-            var message = '<span>' + htmlEscape(alert.message);
+            var message = '<span>' + alert.message;
             if (alert.code) message += ' (' + alert.code + ')';
             message += '</span>';
             items.push(message)
