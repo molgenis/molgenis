@@ -4,7 +4,7 @@ describe('mutations', () => {
   describe('SET_FORM_FIELDS', () => {
     it('should set setting the response in the state', () => {
       const state = {
-        formFields: []
+        formFields: [],
         formData: {}
       }
 
