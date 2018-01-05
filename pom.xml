@@ -966,6 +966,7 @@
         <module>molgenis-semantic-mapper</module>
         <module>molgenis-semantic-search</module>
         <module>molgenis-settings</module>
+        <module>molgenis-settings-ui</module>
         <module>molgenis-swagger</module>
         <module>molgenis-test</module>
         <module>molgenis-util</module>
