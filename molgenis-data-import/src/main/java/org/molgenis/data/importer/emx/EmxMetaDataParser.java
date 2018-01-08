@@ -468,8 +468,8 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			// Package name is required
 			String name = packageEntity.getString(EMX_PACKAGE_NAME);
-			if (name == null)
-				throw new MissingMetadataValueException(EMX_PACKAGE_NAME, "package", EMX_PACKAGES, rowIndex);
+			if (name == null) throw new RowNumberedEmxException(rowIndex,
+					new MissingMetadataValueException(EMX_PACKAGE_NAME, "package", EMX_PACKAGES));
 
 			Package package_ = packageFactory.create(name);
 			package_.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
@@ -577,8 +577,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				// required
 				if (emxEntityName == null)
 				{
-					throw new MissingMetadataValueException(EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_ENTITY, EMX_ENTITIES,
-							i);
+					throw new RowNumberedEmxException(i,
+							new MissingMetadataValueException(EMX_ATTRIBUTES_NAME, EMX_ATTRIBUTES_ENTITY,
+									EMX_ENTITIES));
 				}
 
 				String entityTypeId;
@@ -780,12 +781,12 @@ public class EmxMetaDataParser implements MetaDataParser
 			rowIndex++;
 
 			String attributeName = attributeEntity.getString(EMX_ATTRIBUTES_NAME);
-			if (attributeName == null)
-				throw new MissingMetadataValueException(EMX_ATTRIBUTES_NAME, attributeName, EMX_ATTRIBUTES, rowIndex);
+			if (attributeName == null) throw new RowNumberedEmxException(rowIndex,
+					new MissingMetadataValueException(EMX_ATTRIBUTES_NAME, attributeName, EMX_ATTRIBUTES));
 
 			String entityTypeId = attributeEntity.getString(EMX_ATTRIBUTES_ENTITY);
-			if (entityTypeId == null)
-				throw new MissingMetadataValueException(EMX_ATTRIBUTES_ENTITY, EMX_ATTRIBUTES, attributeName, rowIndex);
+			if (entityTypeId == null) throw new RowNumberedEmxException(rowIndex,
+					new MissingMetadataValueException(EMX_ATTRIBUTES_ENTITY, EMX_ATTRIBUTES, attributeName));
 
 			// create attribute
 			Attribute attribute = attrMetaFactory.create().setName(attributeName);
@@ -825,7 +826,8 @@ public class EmxMetaDataParser implements MetaDataParser
 				AttributeType type = toEnum(emxDataType);
 				if (type == null)
 				{
-					throw new UnknownAttributeTypeException(emxDataType, attr, rowIndex);
+					UnknownAttributeTypeException exception = new UnknownAttributeTypeException(emxDataType, attr);
+					throw new RowNumberedEmxException(rowIndex, exception);
 				}
 				attr.setDataType(type);
 			}
@@ -869,9 +871,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (!emxIdAttrValue.equalsIgnoreCase("true") && !emxIdAttrValue.equalsIgnoreCase("false")
 						&& !emxIdAttrValue.equalsIgnoreCase(AUTO))
 				{
-					throw new InvalidAttributeValueException(EMX_ATTRIBUTES_ID_ATTRIBUTE, emxIdAttrValue,
-							EMX_ATTRIBUTES,
-							new String[] { "TRUE", "FALSE", "AUTO" }, rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new InvalidAttributeValueException(EMX_ATTRIBUTES_ID_ATTRIBUTE, emxIdAttrValue,
+							EMX_ATTRIBUTES, new String[] { "TRUE", "FALSE", "AUTO" }));
 				}
 				if (emxIdAttrValue.equalsIgnoreCase("true"))
 				{
@@ -889,8 +891,9 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			if (attr.isAuto() && !isStringType(attr))
 			{
-				throw new InvalidAttributeTypeException("auto", attr.getDataType(), attr.getName(),
-						new String[] { "string" }, rowIndex);
+				throw new RowNumberedEmxException(rowIndex,
+						new InvalidAttributeTypeException("auto", attr.getDataType(), attr.getName(),
+								new String[] { "string" }));
 			}
 			if (emxAttrVisible != null)
 			{
@@ -921,9 +924,9 @@ public class EmxMetaDataParser implements MetaDataParser
 					List<String> validOptions = getSimpleAttributeTypes().stream()
 																		 .map(type -> type.name())
 																		 .collect(Collectors.toList());
-					throw new InvalidAttributeTypeException(EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE, attr.getDataType(),
-							attr.getName(),
-							validOptions.toArray(new String[0]), rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new InvalidAttributeTypeException(EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE, attr.getDataType(),
+							attr.getName(), validOptions.toArray(new String[0])));
 				}
 
 				emxAttr.setLookupAttr(isLookAttr);
@@ -938,9 +941,9 @@ public class EmxMetaDataParser implements MetaDataParser
 					List<String> validOptions = getSimpleAttributeTypes().stream()
 																		 .map(type -> type.name())
 																		 .collect(Collectors.toList());
-					throw new InvalidAttributeTypeException(EMX_ATTRIBUTES_LABEL_ATTRIBUTE, attr.getDataType(),
-							attr.getName(),
-							validOptions.toArray(new String[0]), rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new InvalidAttributeTypeException(EMX_ATTRIBUTES_LABEL_ATTRIBUTE, attr.getDataType(),
+							attr.getName(), validOptions.toArray(new String[0])));
 				}
 
 				emxAttr.setLabelAttr(isLabelAttr);
@@ -980,8 +983,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				List<String> enumOptions = DataConverter.toList(emxAttrEntity.get(EMX_ATTRIBUTES_ENUM_OPTIONS));
 				if (enumOptions == null || enumOptions.isEmpty())
 				{
-					throw new MissingMetadataValueException(EMX_ATTRIBUTES_ENUM_OPTIONS, attr.getName(), emxEntityName,
-							rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new MissingMetadataValueException(EMX_ATTRIBUTES_ENUM_OPTIONS, attr.getName(),
+									emxEntityName));
 				}
 				attr.setEnumOptions(enumOptions);
 			}
@@ -991,8 +995,8 @@ public class EmxMetaDataParser implements MetaDataParser
 				// Only if an attribute is not of type file we apply the normal reference rules
 				if (isReferenceType(attr) && StringUtils.isEmpty(emxRefEntity))
 				{
-					throw new MissingMetadataValueException(EMX_ATTRIBUTES_REF_ENTITY, attr.getName(), "attributes",
-							rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new MissingMetadataValueException(EMX_ATTRIBUTES_REF_ENTITY, attr.getName(), "attributes"));
 				}
 			}
 
@@ -1001,8 +1005,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				List<String> validOptions = getSimpleAttributeTypes().stream()
 																	 .map(type -> type.name())
 																	 .collect(Collectors.toList());
-				throw new InvalidAttributeTypeException("isAggregatable nillable", attr.getDataType(), attr.getName(),
-						validOptions.toArray(new String[0]), rowIndex);
+				throw new RowNumberedEmxException(rowIndex,
+						new InvalidAttributeTypeException("isAggregatable nillable", attr.getDataType(), attr.getName(),
+								validOptions.toArray(new String[0])));
 			}
 
 			String emxRangeMin = emxAttrEntity.getString(EMX_ATTRIBUTES_RANGE_MIN);
@@ -1015,9 +1020,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 				catch (NumberFormatException e)
 				{
-					throw new InvalidAttributeTypeException(EMX_ATTRIBUTES_RANGE_MIN, attr.getDataType(),
-							attr.getName(),
-							new String[] { "long" }, rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new InvalidAttributeTypeException(EMX_ATTRIBUTES_RANGE_MIN, attr.getDataType(),
+							attr.getName(), new String[] { "long" }));
 				}
 			}
 			else
@@ -1035,9 +1040,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 				catch (NumberFormatException e)
 				{
-					throw new InvalidAttributeTypeException(EMX_ATTRIBUTES_RANGE_MIN, attr.getDataType(),
-							attr.getName(),
-							new String[] { "long" }, rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new InvalidAttributeTypeException(EMX_ATTRIBUTES_RANGE_MIN, attr.getDataType(),
+							attr.getName(), new String[] { "long" }));
 				}
 			}
 			else
@@ -1072,13 +1077,15 @@ public class EmxMetaDataParser implements MetaDataParser
 				EmxAttribute emxCompoundAttribute = entityMap.get(partOfAttribute);
 				if (emxCompoundAttribute == null)
 				{
-					throw new InvalidPartOfException(partOfAttribute, attributeName, entityTypeId, rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new InvalidPartOfException(partOfAttribute, attributeName, entityTypeId));
 				}
 				Attribute compoundAttribute = emxCompoundAttribute.getAttr();
 
 				if (compoundAttribute.getDataType() != COMPOUND)
 				{
-					throw new InvalidPartOfException(partOfAttribute, attributeName, entityTypeId, rowIndex);
+					throw new RowNumberedEmxException(rowIndex,
+							new InvalidPartOfException(partOfAttribute, attributeName, entityTypeId));
 				}
 
 				attribute.setParent(compoundAttribute);
@@ -1154,7 +1161,8 @@ public class EmxMetaDataParser implements MetaDataParser
 						refEntityType = dataService.getEntityType(refEntityName);
 						if (refEntityType == null)
 						{
-							throw new UnknownReferenceEntityException(attribute, refEntityName, rowIndex);
+							throw new RowNumberedEmxException(rowIndex,
+									new UnknownReferenceEntityException(attribute, refEntityName));
 						}
 					}
 					attribute.setRefEntity(refEntityType);
@@ -1164,7 +1172,8 @@ public class EmxMetaDataParser implements MetaDataParser
 						Attribute mappedByAttr = refEntityType.getAttribute(mappedByAttrName);
 						if (mappedByAttr == null)
 						{
-							throw new UnknownMappedByAttributeException(attribute, mappedByAttrName, rowIndex);
+							throw new RowNumberedEmxException(rowIndex,
+									new UnknownMappedByAttributeException(attribute, mappedByAttrName));
 						}
 						attribute.setMappedBy(mappedByAttr);
 					}
@@ -1260,7 +1269,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		if (booleanString.equalsIgnoreCase(TRUE.toString())) return true;
 		else if (booleanString.equalsIgnoreCase(FALSE.toString())) return false;
-		else throw new InvalidBoolAttributeValueException(columnName, booleanString, sheet, rowIndex);
+		else throw new RowNumberedEmxException(rowIndex,
+					new InvalidBoolAttributeValueException(columnName, booleanString, sheet));
 	}
 
 	private void parseLanguages(Repository<Entity> emxLanguageRepo, IntermediateParseResults intermediateParseResults)

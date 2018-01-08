@@ -8,4 +8,9 @@ public abstract class EmxException extends CodedRuntimeException
 	{
 		super(errorCode);
 	}
+
+	protected EmxException(String errorCode, Exception cause)
+	{
+		super(errorCode, cause);
+	}
 }

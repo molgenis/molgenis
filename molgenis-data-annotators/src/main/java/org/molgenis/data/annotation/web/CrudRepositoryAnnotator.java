@@ -89,33 +89,11 @@ public class CrudRepositoryAnnotator
 		}
 		catch (CodedRuntimeException crte)
 		{
-			deleteResultEntity(annotator, targetMetaData);
 			throw crte;
 		}
 		catch (Exception e)
 		{
-			deleteResultEntity(annotator, targetMetaData);
 			throw new RuntimeException(e);
-		}
-	}
-
-	private void deleteResultEntity(RepositoryAnnotator annotator, EntityType targetMetaData)
-	{
-		try
-		{
-			if (annotator instanceof EffectCreatingAnnotator && targetMetaData != null)
-			{
-				runAsSystem(() ->
-				{
-					dataService.deleteAll(targetMetaData.getId());
-					dataService.getMeta().deleteEntityType(targetMetaData.getId());
-				});
-			}
-		}
-		catch (Exception ex)
-		{
-			// log the problem but throw the original exception
-			LOG.error("Failed to remove result entity: %s", targetMetaData.getId());
 		}
 	}
 

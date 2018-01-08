@@ -10,7 +10,7 @@ public class SemanticMapperI18nConfig
 	public static final String NAMESPACE = "semantic-mapper";
 
 	@Bean
-	public PropertiesMessageSource importerMessageSource()
+	public PropertiesMessageSource semanticMapperMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

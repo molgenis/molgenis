@@ -10,25 +10,23 @@ public class UnknownAttributeTypeException extends EmxException
 	private static final String ERROR_CODE = "E03";
 	private final String emxDataType;
 	private final transient Attribute attribute;
-	private final int rowIndex;
 
-	public UnknownAttributeTypeException(String emxDataType, Attribute attribute, int rowIndex)
+	public UnknownAttributeTypeException(String emxDataType, Attribute attribute)
 	{
 		super(ERROR_CODE);
 		this.emxDataType = requireNonNull(emxDataType);
 		this.attribute = requireNonNull(attribute);
-		this.rowIndex = rowIndex;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("dataType:%s attribute:%s rowIndex:%d", emxDataType, attribute.getName(), rowIndex);
+		return String.format("dataType:%s attribute:%s", emxDataType, attribute.getName());
 	}
 
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new Object[] { emxDataType, attribute.getName(), rowIndex };
+		return new Object[] { emxDataType, attribute.getName() };
 	}
 }

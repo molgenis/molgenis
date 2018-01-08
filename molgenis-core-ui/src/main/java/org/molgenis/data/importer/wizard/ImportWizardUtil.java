@@ -69,8 +69,19 @@ class ImportWizardUtil
 		else
 		{
 			message = e.getLocalizedMessage();
+			message = getCauseMessage(e.getCause(), message);
 		}
 		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + message));
+	}
+
+	private static String getCauseMessage(Throwable e, String message)
+	{
+		if (e instanceof CodedRuntimeException)
+		{
+			message += "<br />" + e.getLocalizedMessage();
+			getCauseMessage(e.getCause(), message);
+		}
+		return message;
 	}
 
 	static void validateImportWizard(Wizard wizard)
