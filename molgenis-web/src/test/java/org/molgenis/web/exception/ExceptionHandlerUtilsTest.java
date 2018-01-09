@@ -9,11 +9,13 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.web.exception.ExceptionHandlerUtils.DEVELOPMENT;
 import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -29,9 +31,33 @@ public class ExceptionHandlerUtilsTest
 		when(handlerMethod.getBeanType()).thenReturn(beanType);
 		HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-		Map<String, ?> expectedModel = of("errorMessageResponse", ErrorMessageResponse.create("message"));
+		Map<String, Object> expectedModel = new HashMap<>();
+		expectedModel.put("errorMessageResponse", ErrorMessageResponse.create("message"));
+		expectedModel.put("httpStatusCode", 500);
 		ModelAndView expectedModelAndView = new ModelAndView("view-exception", expectedModel, httpStatus);
 		Object modelAndView = handleException(new Exception("message"), handlerMethod, httpStatus);
+		assertTrue(EqualsBuilder.reflectionEquals(modelAndView, expectedModelAndView));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testHandleExceptionHtmlRequestDev()
+	{
+		HandlerMethod handlerMethod = mock(HandlerMethod.class);
+		Class beanType = ExceptionHandlerUtils.class;
+		when(handlerMethod.getBeanType()).thenReturn(beanType);
+		HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+		Exception ex = mock(Exception.class);
+		StackTraceElement[] stack = new StackTraceElement[] { new StackTraceElement("class", "method", "file", 1) };
+		when(ex.getStackTrace()).thenReturn(stack);
+		when(ex.getLocalizedMessage()).thenReturn("message");
+
+		Map<String, Object> expectedModel = new HashMap<>();
+		expectedModel.put("errorMessageResponse", ErrorMessageResponse.create("message"));
+		expectedModel.put("httpStatusCode", 404);
+		expectedModel.put("stackTrace", stack);
+		ModelAndView expectedModelAndView = new ModelAndView("view-exception", expectedModel, httpStatus);
+		Object modelAndView = handleException(ex, handlerMethod, httpStatus, DEVELOPMENT);
 		assertTrue(EqualsBuilder.reflectionEquals(modelAndView, expectedModelAndView));
 	}
 
