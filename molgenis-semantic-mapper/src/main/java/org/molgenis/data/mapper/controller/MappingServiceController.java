@@ -33,7 +33,7 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserService;
 import org.molgenis.ui.jobs.JobsController;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -927,16 +927,6 @@ public class MappingServiceController extends PluginController
 				Iterables.transform(algorithmEvaluations, AlgorithmEvaluation::getValue));
 
 		return ImmutableMap.of("results", calculatedValues, "totalCount", Iterables.size(sourceRepo));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
 	/**

@@ -10,7 +10,7 @@ import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
