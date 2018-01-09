@@ -7,28 +7,25 @@ public class InvalidPartOfException extends EmxException
 	private final String partOfAttributeAttribute;
 	private final String attributeName;
 	private final String entityTypeId;
-	private final int rowIndex;
 
-	public InvalidPartOfException(String partOfAttributeAttribute, String attributeName, String entityTypeId,
-			int rowIndex)
+	public InvalidPartOfException(String partOfAttributeAttribute, String attributeName, String entityTypeId)
 	{
 		super(ERROR_CODE);
 		this.partOfAttributeAttribute = partOfAttributeAttribute;
 		this.attributeName = attributeName;
 		this.entityTypeId = entityTypeId;
-		this.rowIndex = rowIndex;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("partOfAttributeAttribute:%s attribute:%s entityTypeId: %s rowIndex:%d",
-				partOfAttributeAttribute, attributeName, entityTypeId, rowIndex);
+		return String.format("partOfAttributeAttribute:%s attribute:%s entityTypeId:%s", partOfAttributeAttribute,
+				attributeName, entityTypeId);
 	}
 
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new Object[] { partOfAttributeAttribute, attributeName, entityTypeId, rowIndex };
+		return new Object[] { partOfAttributeAttribute, attributeName, entityTypeId };
 	}
 }

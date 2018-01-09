@@ -8,27 +8,23 @@ public class UnknownMappedByAttributeException extends EmxException
 	private static final String ERROR_CODE = "E08";
 	private final Attribute attribute;
 	private final String mappedByAttributeName;
-	private final int rowIndex;
 
-	public UnknownMappedByAttributeException(Attribute attribute, String mappedByAttributeName, int rowIndex)
+	public UnknownMappedByAttributeException(Attribute attribute, String mappedByAttributeName)
 	{
 		super(ERROR_CODE);
 		this.attribute = attribute;
 		this.mappedByAttributeName = mappedByAttributeName;
-		this.rowIndex = rowIndex;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("attributeName:%s referenceName:%s, rowIndex:%d", attribute.getName(),
-				mappedByAttributeName,
-				rowIndex);
+		return String.format("attributeName:%s referenceName:%s", attribute.getName(), mappedByAttributeName);
 	}
 
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new Object[] { mappedByAttributeName, attribute.getName(), rowIndex };
+		return new Object[] { mappedByAttributeName, attribute.getName() };
 	}
 }

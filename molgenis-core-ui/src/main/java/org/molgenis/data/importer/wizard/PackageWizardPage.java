@@ -101,7 +101,7 @@ public class PackageWizardPage extends AbstractWizardPage
 
 					if (!entitiesNotImportable.isEmpty())
 					{
-						throw new IncompatibleEntitiesException(entitiesNotImportable);
+						throw new EntityTypeNotImportableException(entitiesNotImportable);
 					}
 				}
 

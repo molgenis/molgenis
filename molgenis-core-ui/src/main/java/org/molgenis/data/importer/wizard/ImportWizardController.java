@@ -3,9 +3,9 @@ package org.molgenis.data.importer.wizard;
 import org.molgenis.auth.*;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.importer.wizard.exception.EntityTypePermissionsException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -253,7 +253,7 @@ public class ImportWizardController extends AbstractWizardController
 				}
 				if (value != null)
 				{
-					throw new EntityTypePermissionsException(entityType, WRITE);
+					throw new EntityTypePermissionDeniedException(entityType, WRITE);
 				}
 			}
 		});

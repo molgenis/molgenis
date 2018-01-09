@@ -8,26 +8,23 @@ public class UnknownReferenceEntityException extends EmxException
 	private static final String ERROR_CODE = "E12";
 	private final Attribute attribute;
 	private final String refEntityName;
-	private final int rowIndex;
 
-	public UnknownReferenceEntityException(Attribute attribute, String refEntityName, int rowIndex)
+	public UnknownReferenceEntityException(Attribute attribute, String refEntityName)
 	{
 		super(ERROR_CODE);
 		this.attribute = attribute;
 		this.refEntityName = refEntityName;
-		this.rowIndex = rowIndex;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("attributeName:%s referenceName:%s, rowIndex:%d", attribute.getName(), refEntityName,
-				rowIndex);
+		return String.format("attributeName:%s referenceName:%s", attribute.getName(), refEntityName);
 	}
 
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new Object[] { refEntityName, attribute.getName(), rowIndex };
+		return new Object[] { refEntityName, attribute.getName() };
 	}
 }

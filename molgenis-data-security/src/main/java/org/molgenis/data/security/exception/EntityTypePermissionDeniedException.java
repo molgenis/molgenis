@@ -21,16 +21,6 @@ public class EntityTypePermissionDeniedException extends PermissionDeniedExcepti
 		this.permission = requireNonNull(permission);
 	}
 
-	public EntityType getEntityType()
-	{
-		return entityType;
-	}
-
-	public Permission getPermission()
-	{
-		return permission;
-	}
-
 	@Override
 	public String getMessage()
 	{

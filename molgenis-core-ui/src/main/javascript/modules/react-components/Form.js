@@ -672,7 +672,7 @@ var Form = React.createClass({
             if(attr.nullableExpression) {
               entityInstance[attr.name] = value;
               var isNillable = this._resolveBoolExpression(attr.nullableExpression, entityInstance)
-                if (!isNillable && this._isValueNotSet(type, value)) {
+              if (!isNillable && this._isValueNotSet(type, value)) {
                 errorMessage = 'Field is required, please enter a value';
               }
             }

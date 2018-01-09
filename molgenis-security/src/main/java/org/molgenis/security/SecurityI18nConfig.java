@@ -10,7 +10,7 @@ public class SecurityI18nConfig
 	public static final String NAMESPACE = "security";
 
 	@Bean
-	public PropertiesMessageSource importerMessageSource()
+	public PropertiesMessageSource securityMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

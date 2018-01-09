@@ -7,28 +7,25 @@ public class MissingMetadataValueException extends EmxException
 	private final String attributeAttributeName;
 	private final String attributeName;
 	private final String sheetName;
-	private final int rowIndex;
 
-	public MissingMetadataValueException(String attributeAttributeName, String attributeName, String sheetName,
-			int rowIndex)
+	public MissingMetadataValueException(String attributeAttributeName, String attributeName, String sheetName)
 	{
 		super(ERROR_CODE);
 		this.attributeAttributeName = attributeAttributeName;
 		this.attributeName = attributeName;
 		this.sheetName = sheetName;
-		this.rowIndex = rowIndex;
 	}
 
 	@Override
 	public String getMessage()
 	{
-		return String.format("attributeAttribute:%s attribute:%s sheetName: %s rowIndex:%d", attributeAttributeName,
-				attributeName, sheetName, rowIndex);
+		return String.format("attributeAttribute:%s attribute:%s sheetName:%s", attributeAttributeName, attributeName,
+				sheetName);
 	}
 
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new Object[] { attributeAttributeName, attributeName, sheetName, rowIndex };
+		return new Object[] { attributeAttributeName, attributeName, sheetName };
 	}
 }

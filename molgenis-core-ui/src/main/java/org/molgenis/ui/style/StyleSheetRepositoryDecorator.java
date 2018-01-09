@@ -55,9 +55,10 @@ public class StyleSheetRepositoryDecorator extends AbstractRepositoryDecorator<S
 
 	private void checkAndUpdateAppSettings(Object id)
 	{
-		if (appSettings.getBootstrapTheme().equals(id))
+		String currentBootstrapThemeId = appSettings.getBootstrapTheme();
+		if (currentBootstrapThemeId.equals(id))
 		{
-			throw new CannotDeleteCurrentThemeException();
+			throw new CannotDeleteCurrentThemeException(currentBootstrapThemeId);
 		}
 	}
 }
