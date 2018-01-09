@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -24,13 +23,15 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
-import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -90,7 +91,7 @@ public class DataExplorerController extends PluginController
 	private Gson gson;
 
 	@Autowired
-	private LanguageService languageService;
+	private MessageSource messageSource;
 
 	@Autowired
 	private AttributeFactory attrMetaFactory;
@@ -275,8 +276,8 @@ public class DataExplorerController extends PluginController
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
-		ResourceBundle i18n = languageService.getBundle();
-		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
+		String aggregatesTitle = messageSource.getMessage("dataexplorer_aggregates_title", new Object[] {},
+				LocaleContextHolder.getLocale());
 
 		if (pluginPermission != null)
 		{

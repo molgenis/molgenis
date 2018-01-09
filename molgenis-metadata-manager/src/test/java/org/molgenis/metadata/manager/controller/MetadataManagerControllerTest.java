@@ -2,8 +2,9 @@ package org.molgenis.metadata.manager.controller;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.*;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
@@ -21,11 +22,13 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Locale;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.*;
@@ -45,9 +48,6 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	private MenuReaderService menuReaderService;
 
 	@Autowired
-	private LanguageService languageService;
-
-	@Autowired
 	private AppSettings appSettings;
 
 	@Autowired
@@ -56,11 +56,15 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	@Autowired
 	private UserAccountService userAccountService;
 
+	@Mock
+	private LocaleResolver localeResolver;
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		MockitoAnnotations.initMocks(this);
 		FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
 		freeMarkerViewResolver.setSuffix(".ftl");
 
@@ -68,16 +72,15 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		when(menu.findMenuItemPath(MetadataManagerController.METADATA_MANAGER)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 
-		when(languageService.getCurrentUserLanguageCode()).thenReturn("en");
 		when(appSettings.getLanguageCode()).thenReturn("nl");
 		User user = mock(User.class);
 		when(user.isSuperuser()).thenReturn(false);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		MetadataManagerController metadataEditorController = new MetadataManagerController(menuReaderService,
-				languageService, appSettings, metadataManagerService, userAccountService);
+				appSettings, metadataManagerService, userAccountService);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(metadataEditorController)
+		mockMvc = MockMvcBuilders.standaloneSetup(metadataEditorController).setLocaleResolver(localeResolver)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
 								 .build();
 	}
@@ -85,11 +88,11 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testInit() throws Exception
 	{
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.GERMAN);
 		mockMvc.perform(get("/plugin/metadata-manager"))
 			   .andExpect(status().isOk())
 			   .andExpect(view().name("view-metadata-manager"))
-			   .andExpect(model().attribute("baseUrl", "/test/path"))
-			   .andExpect(model().attribute("lng", "en"))
+			   .andExpect(model().attribute("baseUrl", "/test/path")).andExpect(model().attribute("lng", "de"))
 			   .andExpect(model().attribute("fallbackLng", "nl"));
 	}
 
@@ -200,12 +203,6 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		public MenuReaderService menuReaderService()
 		{
 			return mock(MenuReaderService.class);
-		}
-
-		@Bean
-		public LanguageService languageService()
-		{
-			return mock(LanguageService.class);
 		}
 
 		@Bean

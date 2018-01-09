@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
+import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 /**
  * This {@link org.springframework.context.MessageSource} reads localization messages from properties files on the classpath.

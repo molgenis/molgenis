@@ -4,7 +4,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.*;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.job.IndexJobScheduler;
@@ -21,6 +20,7 @@ import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +92,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private MetaDataServiceImpl metaDataService;
 	@Autowired
 	private EntityListenersService entityListenersService;
-	@Autowired
-	private LanguageService languageService;
 	@Autowired
 	private L10nStringMetaData l10nStringMetaData;
 	@Autowired
@@ -278,7 +276,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				"label");
 		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(), "label");
 
-		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
+		assertEquals(LanguageService.getCurrentUserLanguageCode(), "en");
 		assertEqualsNoOrder(LanguageService.getLanguageCodes().toArray(),
 				new String[] { "en", "nl", "de", "es", "it", "pt", "fr", "xx" });
 
@@ -302,11 +300,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		car.set("nl", "auto");
 		car.setNamespace("platform-it");
 		dataService.add(L10nStringMetaData.L10N_STRING, car);
-		assertEquals(languageService.getBundle("en").getString("car"), "car");
-		assertEquals(languageService.getBundle("nl").getString("car"), "auto");
 
 		// Test default value
-		assertEquals(languageService.getBundle().getString("car"), "car");
+		assertEquals(LanguageService.getBundle().getString("car"), "car");
 	}
 
 	@Test(singleThreaded = true)

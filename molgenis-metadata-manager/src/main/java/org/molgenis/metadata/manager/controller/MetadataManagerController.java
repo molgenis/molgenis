@@ -1,7 +1,6 @@
 package org.molgenis.metadata.manager.controller;
 
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.EditorAttributeResponse;
 import org.molgenis.metadata.manager.model.EditorEntityType;
@@ -36,11 +35,10 @@ public class MetadataManagerController extends VuePluginController
 
 	private MetadataManagerService metadataManagerService;
 
-	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings, MetadataManagerService metadataManagerService,
-			UserAccountService userAccountService)
+	public MetadataManagerController(MenuReaderService menuReaderService, AppSettings appSettings,
+			MetadataManagerService metadataManagerService, UserAccountService userAccountService)
 	{
-		super(URI, menuReaderService, languageService, appSettings, userAccountService);
+		super(URI, menuReaderService, appSettings, userAccountService);
 		this.metadataManagerService = requireNonNull(metadataManagerService);
 
 	}

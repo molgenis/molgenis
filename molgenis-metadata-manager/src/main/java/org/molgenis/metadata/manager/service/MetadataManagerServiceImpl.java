@@ -18,7 +18,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
+import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 @Component
 public class MetadataManagerServiceImpl implements MetadataManagerService
