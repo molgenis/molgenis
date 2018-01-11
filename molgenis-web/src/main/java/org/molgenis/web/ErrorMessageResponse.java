@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class ErrorMessageResponse
 {
@@ -81,57 +82,45 @@ public class ErrorMessageResponse
 		}
 
 		@Override
-		public int hashCode()
+		public boolean equals(Object o)
 		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((code == null) ? 0 : code.hashCode());
-			result = prime * result + ((message == null) ? 0 : message.hashCode());
-			return result;
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			ErrorMessage that = (ErrorMessage) o;
+			return Objects.equals(message, that.message) && Objects.equals(code, that.code);
 		}
 
 		@Override
-		public boolean equals(Object obj)
+		public int hashCode()
 		{
-			if (this == obj) return true;
-			if (obj == null) return false;
-			if (getClass() != obj.getClass()) return false;
-			ErrorMessage other = (ErrorMessage) obj;
-			if (code == null)
-			{
-				if (other.code != null) return false;
-			}
-			else if (!code.equals(other.code)) return false;
-			if (message == null)
-			{
-				if (other.message != null) return false;
-			}
-			else if (!message.equals(other.message)) return false;
-			return true;
+			return Objects.hash(message, code);
 		}
+
+		@Override
+		public String toString()
+		{
+			return "ErrorMessage{" + "message='" + message + '\'' + ", code='" + code + '\'' + '}';
+		}
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ErrorMessageResponse that = (ErrorMessageResponse) o;
+		return Objects.equals(errors, that.errors);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((errors == null) ? 0 : errors.hashCode());
-		return result;
+		return Objects.hash(errors);
 	}
 
 	@Override
-	public boolean equals(Object obj)
+	public String toString()
 	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		ErrorMessageResponse other = (ErrorMessageResponse) obj;
-		if (errors == null)
-		{
-			if (other.errors != null) return false;
-		}
-		else if (!errors.equals(other.errors)) return false;
-		return true;
+		return "ErrorMessageResponse{" + "errors=" + errors + '}';
 	}
 }

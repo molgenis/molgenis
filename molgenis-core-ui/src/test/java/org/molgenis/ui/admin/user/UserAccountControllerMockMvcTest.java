@@ -65,6 +65,7 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 		config.resetMocks();
 		MockitoAnnotations.initMocks(this);
 		mockMvc = MockMvcBuilders.standaloneSetup(userAccountController)
+								 .setLocaleResolver(localeResolver)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
 										 new FallbackExceptionHandler())

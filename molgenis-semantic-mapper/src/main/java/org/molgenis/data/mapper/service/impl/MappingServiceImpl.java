@@ -20,7 +20,6 @@ import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -38,6 +37,7 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
@@ -56,11 +56,12 @@ public class MappingServiceImpl implements MappingService
 	private final PermissionSystemService permissionSystemService;
 	private final AttributeFactory attrMetaFactory;
 	private final DefaultPackage defaultPackage;
+	private final EntityManager entityManager;
 	private final MappingProjectMetaData mappingProjectMetaData;
 
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
-			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage,
+			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage, EntityManager entityManager,
 			MappingProjectMetaData mappingProjectMetaData)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -69,6 +70,7 @@ public class MappingServiceImpl implements MappingService
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.defaultPackage = requireNonNull(defaultPackage);
+		this.entityManager = requireNonNull(entityManager);
 		this.mappingProjectMetaData = requireNonNull(mappingProjectMetaData);
 	}
 
@@ -370,9 +372,12 @@ public class MappingServiceImpl implements MappingService
 					   .collect(toList());
 	}
 
-	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)
+	/**
+	 * Package-private for testablility
+	 */
+	Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData)
 	{
-		Entity target = new DynamicEntity(targetMetaData);
+		Entity target = entityManager.create(targetMetaData, POPULATE);
 
 		if (targetMetaData.getAttribute(SOURCE) != null)
 		{

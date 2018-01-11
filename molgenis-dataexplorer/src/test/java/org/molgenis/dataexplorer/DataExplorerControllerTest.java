@@ -140,6 +140,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
 		metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 

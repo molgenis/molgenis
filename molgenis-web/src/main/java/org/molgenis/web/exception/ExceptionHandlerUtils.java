@@ -3,47 +3,49 @@ package org.molgenis.web.exception;
 import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.util.matcher.ELRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ExceptionHandlerUtils
+class ExceptionHandlerUtils
 {
-	private static final RequestMatcher requestMatcher = new ELRequestMatcher(
-			"hasHeader('X-Requested-With','XMLHttpRequest')");
-	public static final String OPTIONS = "OPTIONS";
+	private static final String VIEW_EXCEPTION = "view-exception";
+	private static final String KEY_ERROR_MESSAGE_RESPONSE = "errorMessageResponse";
+	public static final String DEVELOPMENT = "development";
+	public static final String PRODUCTION = "production";
+	public static final String STACK_TRACE = "stackTrace";
+	public static final String HTTP_STATUS_CODE = "httpStatusCode";
 
-	public static Object handleTypedException(boolean isHtmlRequest, String forwardUri, String message, HttpStatus code)
+	private ExceptionHandlerUtils()
 	{
-		return handleTypedException(isHtmlRequest, forwardUri, message, code, null);
 	}
 
-	public static Object handleTypedException(boolean isHtmlRequest, String forwardUri, String message, HttpStatus code,
-			@Nullable String errorCode)
+	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus, String errorCode, String environment)
 	{
-		if (isHtmlRequest)
+		ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage(), errorCode);
+		if (isHtmlRequest(handlerMethod))
 		{
-			return "forward:" + forwardUri;
+			Map<String, Object> model = new HashMap<>();
+			model.put(KEY_ERROR_MESSAGE_RESPONSE, errorMessageResponse);
+			model.put(HTTP_STATUS_CODE, httpStatus.value());
+			if (environment.equals(DEVELOPMENT))
+			{
+				model.put(STACK_TRACE, e.getStackTrace());
+			}
+			return new ModelAndView(VIEW_EXCEPTION, model, httpStatus);
 		}
 		else
 		{
-			ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(message, errorCode);
-			return new ResponseEntity<>(errorMessageResponse, code);
+			return new ResponseEntity<>(errorMessageResponse, httpStatus);
 		}
 	}
 
-	public static boolean isHtmlRequest(HttpServletRequest httpServletRequest)
-	{
-		return !(OPTIONS.equals(httpServletRequest.getMethod()) || requestMatcher.matches(httpServletRequest));
-	}
-
-	public static boolean isHtmlRequest(HandlerMethod handlerMethod)
+	private static boolean isHtmlRequest(HandlerMethod handlerMethod)
 	{
 		return !(handlerMethod.hasMethodAnnotation(ResponseBody.class) || handlerMethod.hasMethodAnnotation(
 				ResponseStatus.class) || handlerMethod.getBeanType().isAnnotationPresent(ResponseBody.class)

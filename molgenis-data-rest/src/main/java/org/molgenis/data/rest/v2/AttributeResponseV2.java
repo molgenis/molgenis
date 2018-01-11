@@ -10,12 +10,12 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
 
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
 class AttributeResponseV2
 {
@@ -55,8 +55,8 @@ class AttributeResponseV2
 
 		this.fieldType = attr.getDataType();
 		this.name = attrName;
-		this.label = attr.getLabel(LanguageService.getCurrentUserLanguageCode());
-		this.description = attr.getDescription(LanguageService.getCurrentUserLanguageCode());
+		this.label = attr.getLabel(getCurrentUserLanguageCode());
+		this.description = attr.getDescription(getCurrentUserLanguageCode());
 		this.enumOptions = attr.getDataType() == AttributeType.ENUM ? attr.getEnumOptions() : null;
 		this.maxLength = attr.getDataType().getMaxLength();
 		this.expression = attr.getExpression();
@@ -97,7 +97,7 @@ class AttributeResponseV2
 				else if (EntityTypeUtils.isReferenceType(attr1))
 				{
 					subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
-							LanguageService.getCurrentUserLanguageCode());
+							getCurrentUserLanguageCode());
 				}
 				else
 				{

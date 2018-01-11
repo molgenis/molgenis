@@ -9,6 +9,7 @@
     <artifactId>molgenis-i18n</artifactId>
 
     <name>i18n</name>
+    <description>Internationalization and localization classes that are independent of the data service.</description>
 
     <build>
         <plugins>

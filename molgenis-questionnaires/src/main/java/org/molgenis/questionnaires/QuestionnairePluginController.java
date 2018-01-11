@@ -4,7 +4,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.support.QueryImpl.EQ;
+import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 import static org.molgenis.questionnaires.QuestionnaireMetaData.ATTR_STATUS;
 import static org.molgenis.questionnaires.QuestionnaireStatus.NOT_STARTED;
 import static org.molgenis.questionnaires.QuestionnaireStatus.OPEN;
@@ -142,8 +142,8 @@ public class QuestionnairePluginController extends PluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityType entityType)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
-		return new Questionnaire(entityType.getId(), entityType.getLabel(LanguageService.getCurrentUserLanguageCode()),
-				status, entityType.getDescription(LanguageService.getCurrentUserLanguageCode()), entity.getIdValue());
+		return new Questionnaire(entityType.getId(), entityType.getLabel(getCurrentUserLanguageCode()),
+				status, entityType.getDescription(getCurrentUserLanguageCode()), entity.getIdValue());
 	}
 
 	private Entity findQuestionnaireEntity(String name)
