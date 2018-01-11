@@ -568,7 +568,27 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
-	public void getSqlSortOnUnselectedMref() throws Exception
+	public void getSqlSortOffsetPageSizeNoSort()
+	{
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getIdentifier()).thenReturn("idAttrId");
+		when(idAttr.getDataType()).thenReturn(STRING);
+
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+		when(entityType.getId()).thenReturn("entityTypeId");
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute("idAttr")).thenReturn(idAttr);
+
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
+		when(q.getOffset()).thenReturn(10);
+		when(q.getPageSize()).thenReturn(5);
+		assertEquals(PostgreSqlQueryGenerator.getSqlSort(entityType, q), "ORDER BY \"idAttr\" ASC");
+	}
+
+	@Test
+	public void getSqlSortOnUnselectedMref()
 	{
 		Package package_ = when(mock(Package.class).getId()).thenReturn("org_molgenis").getMock();
 
