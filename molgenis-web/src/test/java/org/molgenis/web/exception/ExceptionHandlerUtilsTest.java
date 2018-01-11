@@ -12,10 +12,10 @@ import org.testng.annotations.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.collect.ImmutableMap.of;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.web.exception.ExceptionHandlerUtils.DEVELOPMENT;
+import static org.molgenis.web.exception.ExceptionHandlerUtils.PRODUCTION;
 import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -35,7 +35,8 @@ public class ExceptionHandlerUtilsTest
 		expectedModel.put("errorMessageResponse", ErrorMessageResponse.create("message"));
 		expectedModel.put("httpStatusCode", 500);
 		ModelAndView expectedModelAndView = new ModelAndView("view-exception", expectedModel, httpStatus);
-		Object modelAndView = handleException(new Exception("message"), handlerMethod, httpStatus);
+		Object modelAndView = handleException(new Exception("message"), handlerMethod, httpStatus, null,
+				PRODUCTION);
 		assertTrue(EqualsBuilder.reflectionEquals(modelAndView, expectedModelAndView));
 	}
 
@@ -57,7 +58,7 @@ public class ExceptionHandlerUtilsTest
 		expectedModel.put("httpStatusCode", 404);
 		expectedModel.put("stackTrace", stack);
 		ModelAndView expectedModelAndView = new ModelAndView("view-exception", expectedModel, httpStatus);
-		Object modelAndView = handleException(ex, handlerMethod, httpStatus, DEVELOPMENT);
+		Object modelAndView = handleException(ex, handlerMethod, httpStatus, null, DEVELOPMENT);
 		assertTrue(EqualsBuilder.reflectionEquals(modelAndView, expectedModelAndView));
 	}
 
@@ -68,7 +69,7 @@ public class ExceptionHandlerUtilsTest
 		when(handlerMethod.hasMethodAnnotation(ResponseBody.class)).thenReturn(true);
 		HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-		assertEquals(handleException(new Exception("message"), handlerMethod, httpStatus),
+		assertEquals(handleException(new Exception("message"), handlerMethod, httpStatus, null, PRODUCTION),
 				new ResponseEntity<>(ErrorMessageResponse.create("message"), httpStatus));
 	}
 }

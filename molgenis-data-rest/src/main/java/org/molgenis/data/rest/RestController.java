@@ -123,7 +123,7 @@ public class RestController
 			dataService.getRepository(entityTypeId);
 			return true;
 		}
-		catch (UnknownEntityException e)
+		catch (UnknownEntityTypeException e)
 		{
 			return false;
 		}
@@ -145,6 +145,10 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		return new EntityTypeResponse(meta, attributeSet, attributeExpandSet, permissionService, dataService);
 	}
 
@@ -163,6 +167,10 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		return new EntityTypeResponse(meta, attributesSet, attributeExpandSet, permissionService, dataService);
 	}
 
@@ -217,7 +225,7 @@ public class RestController
 		EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 		Entity entity = dataService.findOneById(entityTypeId, id);
@@ -548,7 +556,7 @@ public class RestController
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
@@ -893,14 +901,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	@ExceptionHandler(MolgenisReferencedEntityException.class)
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
@@ -971,7 +971,7 @@ public class RestController
 		}
 		else
 		{
-			throw new UnknownAttributeException(attributeName);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 	}
 
@@ -979,6 +979,10 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandSet)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
 		// Check if the entity has an attribute with name refAttributeName
@@ -1051,6 +1055,10 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		Repository<Entity> repository = dataService.getRepository(entityTypeId);
 
 		// convert sort

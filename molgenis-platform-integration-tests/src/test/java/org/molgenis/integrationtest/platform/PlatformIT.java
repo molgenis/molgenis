@@ -1060,7 +1060,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(repo.getName(), entityTypeDynamic.getId());
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = UnknownEntityException.class)
+	@Test(singleThreaded = true, expectedExceptions = UnknownEntityTypeException.class)
 	public void testGetUnknownRepository()
 	{
 		dataService.getRepository("bogus");
@@ -1088,19 +1088,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 								.anyMatch(e -> repo.getName().equals(e.getName())));
 	}
 
-	@Test(singleThreaded = true)
+	@Test(singleThreaded = true, expectedExceptions = UnknownEntityTypeException.class)
 	public void testQuery()
 	{
 		assertNotNull(dataService.query(entityTypeDynamic.getId()));
-		try
-		{
-			dataService.query("bogus");
-			fail("Should have thrown UnknownEntityException");
-		}
-		catch (UnknownEntityException e)
-		{
-			// Expected
-		}
+		dataService.query("bogus");
 	}
 
 	@Test(singleThreaded = true)
