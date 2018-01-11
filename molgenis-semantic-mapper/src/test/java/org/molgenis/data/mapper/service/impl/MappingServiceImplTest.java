@@ -347,6 +347,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
 
+		Entity mappedEntity = mock(Entity.class);
+		when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE)).thenReturn(mappedEntity);
+
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, true, "packageId", "label", progress), 4);
 
@@ -406,6 +409,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
+
+		when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE)).thenAnswer(invocation -> new DynamicEntity(targetMeta));
 
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, false, "packageId", "label", progress), 4);
