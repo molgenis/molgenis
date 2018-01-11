@@ -6,11 +6,10 @@ import freemarker.template.TemplateException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.i18n.PropertiesMessageSource;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
+import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.PermissionService;
@@ -33,8 +32,10 @@ import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
 import org.molgenis.web.Ui;
+import org.molgenis.web.i18n.MolgenisLocaleResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -49,6 +50,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -59,6 +61,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -91,10 +94,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private RdfConverter rdfConverter;
 
 	@Autowired
-	private LanguageService languageService;
+	private StyleService styleService;
 
 	@Autowired
-	private StyleService styleService;
+	private MessageSource messageSource;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -213,7 +216,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisInterceptor molgenisInterceptor()
 	{
 		return new MolgenisInterceptor(resourceFingerprintRegistry(), themeFingerprintRegistry(), appSettings,
-				authenticationSettings, languageService, environment);
+				authenticationSettings, environment, messageSource);
 	}
 
 	@Bean
@@ -355,6 +358,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public CorsInterceptor corsInterceptor()
 	{
 		return new CorsInterceptor();
+	}
+
+	@Bean
+	public LocaleResolver localeResolver()
+	{
+		return new MolgenisLocaleResolver(dataService, () -> new Locale(appSettings.getLanguageCode()));
 	}
 
 	@PostConstruct

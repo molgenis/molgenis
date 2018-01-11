@@ -4,7 +4,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -15,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
 public class AttributeResponse
 {
@@ -44,9 +45,9 @@ public class AttributeResponse
 	private String validationExpression;
 
 	public AttributeResponse(String entityParentName, EntityType entityType, Attribute attr,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			PermissionService permissionService, DataService dataService)
 	{
-		this(entityParentName, entityType, attr, null, null, permissionService, dataService, languageService);
+		this(entityParentName, entityType, attr, null, null, permissionService, dataService);
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class AttributeResponse
 	 */
 	public AttributeResponse(final String entityParentName, EntityType entityType, Attribute attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			PermissionService permissionService, DataService dataService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -74,13 +75,13 @@ public class AttributeResponse
 
 		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
-			this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
+			this.label = attr.getLabel(getCurrentUserLanguageCode());
 		}
 		else this.label = null;
 
 		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
-			this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
+			this.description = attr.getDescription(getCurrentUserLanguageCode());
 		}
 		else this.description = null;
 
@@ -109,8 +110,8 @@ public class AttributeResponse
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
 				this.refEntity = refEntity != null ? new EntityTypeResponse(refEntity, subAttributesSet,
-						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService,
-						languageService) : null;
+						Collections.singletonMap("attributes".toLowerCase(), null), permissionService,
+						dataService) : null;
 			}
 			else
 			{
@@ -136,7 +137,7 @@ public class AttributeResponse
 							Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 							return new AttributeResponse(entityParentName, entityType, attribute, subAttributesSet,
 									Collections.singletonMap("refEntity".toLowerCase(), null), permissionService,
-									dataService, languageService);
+									dataService);
 						}
 						else
 						{

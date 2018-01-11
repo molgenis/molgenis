@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
@@ -33,13 +33,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.LocaleResolver;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.text.MessageFormat.format;
@@ -64,16 +64,18 @@ public class UserAccountController extends PluginController
 	private final RecoveryService recoveryService;
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private final AuthenticationSettings authenticationSettings;
+	private final LocaleResolver localeResolver;
 
 	public UserAccountController(UserAccountService userAccountService, RecoveryService recoveryService,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
-			AuthenticationSettings authenticationSettings)
+			AuthenticationSettings authenticationSettings, LocaleResolver localeResolver)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.recoveryService = requireNonNull(recoveryService);
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
+		this.localeResolver = requireNonNull(localeResolver);
 	}
 
 	@ApiOperation("Show account")
@@ -101,15 +103,14 @@ public class UserAccountController extends PluginController
 			@ApiResponse(code = 400, message = "Bad request. You need to provide a valid language code", response = ErrorMessageResponse.class) })
 	@PostMapping(value = "/language/update", produces = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateUserLanguage(@RequestParam("languageCode") String languageCode)
+	public void updateUserLanguage(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("languageCode") String languageCode)
 	{
 		if (!LanguageService.hasLanguageCode(languageCode))
 		{
 			throw new MolgenisUserException(format("Unknown language code ''{0}''", languageCode));
 		}
-		User user = userAccountService.getCurrentUser();
-		user.setLanguageCode(languageCode);
-		userAccountService.updateCurrentUser(user);
+		localeResolver.setLocale(request, response, new Locale(languageCode));
 	}
 
 	@ApiOperation("Updated the useraccount")

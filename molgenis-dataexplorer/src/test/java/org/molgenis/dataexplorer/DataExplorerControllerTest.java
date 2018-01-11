@@ -9,7 +9,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -32,6 +31,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -39,10 +39,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -92,11 +89,11 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Mock
 	MenuManagerService menuManager;
 	@Mock
-	LanguageService languageService;
-	@Mock
 	PermissionService permissionService = mock(PermissionService.class);
 	@Mock
 	MenuReaderService menuReaderService;
+	@Mock
+	LocaleResolver localeResolver;
 
 	@Mock
 	Menu menu;
@@ -141,6 +138,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
 

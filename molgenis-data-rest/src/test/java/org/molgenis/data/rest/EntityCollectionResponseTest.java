@@ -2,7 +2,6 @@ package org.molgenis.data.rest;
 
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.PermissionService;
 import org.testng.annotations.BeforeMethod;
@@ -20,7 +19,6 @@ public class EntityCollectionResponseTest
 	private EntityType entityType;
 	private PermissionService permissionService;
 	private DataService dataService;
-	private LanguageService languageService;
 
 	@BeforeMethod
 	public void setUp()
@@ -29,7 +27,6 @@ public class EntityCollectionResponseTest
 		when(entityType.getAttributes()).thenReturn(Collections.emptyList());
 		permissionService = mock(PermissionService.class);
 		dataService = mock(DataService.class);
-		languageService = mock(LanguageService.class);
 	}
 
 	@Test
@@ -37,17 +34,15 @@ public class EntityCollectionResponseTest
 	{
 		EntityPager pager = new EntityPager(0, 10, 25L, null);
 		EntityCollectionResponse response = new EntityCollectionResponse(pager, null, "/test", entityType,
-				permissionService, dataService, languageService);
+				permissionService, dataService);
 		assertEquals(response.getNextHref(), "/test?start=10&num=10");
 
 		pager = new EntityPager(10, 10, 25L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService);
 		assertEquals(response.getNextHref(), "/test?start=20&num=10");
 
 		pager = new EntityPager(0, 25, 25L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService);
 		assertNull(response.getNextHref());
 	}
 
@@ -56,17 +51,15 @@ public class EntityCollectionResponseTest
 	{
 		EntityPager pager = new EntityPager(0, 15, 30L, null);
 		EntityCollectionResponse response = new EntityCollectionResponse(pager, null, "/test", entityType,
-				permissionService, dataService, languageService);
+				permissionService, dataService);
 		assertNull(response.getPrevHref());
 
 		pager = new EntityPager(15, 15, 30L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService);
 		assertEquals(response.getPrevHref(), "/test?start=0&num=15");
 
 		pager = new EntityPager(30, 15, 30L, null);
-		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService,
-				languageService);
+		response = new EntityCollectionResponse(pager, null, "/test", entityType, permissionService, dataService);
 		assertEquals(response.getPrevHref(), "/test?start=15&num=15");
 	}
 }

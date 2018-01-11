@@ -22,7 +22,6 @@ import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
@@ -76,11 +75,13 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 @ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
 		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.data.platform",
 		"org.molgenis.data.meta.model", "org.molgenis.data.meta.util", "org.molgenis.data.system.model",
-		"org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
+		"org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.i18n", "org.molgenis.data.postgresql",
+		"org.molgenis.file.model",
 		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
 		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
 		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
-@Import({ TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class,
+@Import({ TestAppSettings.class, TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class,
+		ElasticsearchConfig.class,
 		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class,
 		PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class,
@@ -144,12 +145,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 		when(adminUserDetails.getAuthorities()).thenReturn(authorities);
 		when(userDetailsService.loadUserByUsername("admin")).thenReturn(adminUserDetails);
 		return userDetailsService;
-	}
-
-	@Bean
-	public AppSettings appSettings()
-	{
-		return new TestAppSettings();
 	}
 
 	@Bean

@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -44,6 +43,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -61,7 +61,6 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.i18n.LanguageService.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
@@ -101,9 +100,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private AttributeFactory attributeFactory;
 
 	@Autowired
-	private LanguageService languageService;
-
-	@Autowired
 	private RestControllerV2 restControllerV2;
 
 	@Autowired
@@ -129,6 +125,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private LocaleResolver localeResolver;
 
 	private MockMvc mockMvc;
 	private String attrBoolName;
@@ -370,8 +369,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		when(entityManager.create(entityType, POPULATE)).thenAnswer(invocation -> new DynamicEntity(entityType));
 
-		when(languageService.getCurrentUserLanguageCode()).thenReturn(DEFAULT_LANGUAGE_CODE);
-		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2)
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
+
+		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2).setLocaleResolver(localeResolver)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .setConversionService(conversionService)
 								 .build();
@@ -674,6 +674,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
 
 		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn("entityTypeId");
 		when(repositoryToCopy.getEntityType()).thenReturn(entityType);
 		when(entityType.getPackage()).thenReturn(pack);
 
@@ -1136,9 +1137,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public LanguageService languageService()
+		public LocaleResolver localeResolver()
 		{
-			return mock(LanguageService.class);
+			return mock(LocaleResolver.class);
 		}
 
 		@Bean
@@ -1170,8 +1171,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		{
 			return new RestControllerV2(dataService(), permissionService(),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
-							servletUriComponentsBuilderFactory()), languageService(), permissionSystemService(),
-					repositoryCopier(), localizationService());
+							servletUriComponentsBuilderFactory()), localizationService(), permissionSystemService(),
+					repositoryCopier());
 		}
 
 	}
